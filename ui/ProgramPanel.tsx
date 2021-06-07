@@ -1,20 +1,23 @@
 import * as React from 'react';
 
+import { ProgramPanelInfo } from './ProjectStore';
+
 export function evalProgramPanel(
-  page: any,
-  panelId: string,
+  panel: ProgramPanelInfo,
   panelValues: Array<{ value?: Array<any> }>
 ) {
-  const panel = page.panels[panelId];
-  const program = panel.program || { type: 'javascript' };
+  const program = panel.program;
+  const anyWindow = window as any;
+
   // TODO: better deep copy
-  window.DM_getPanel = (panelId: number) =>
+  anyWindow.DM_getPanel = (panelId: number) =>
     JSON.parse(JSON.stringify((panelValues[panelId] || {}).value));
+
   switch (program.type) {
     case 'javascript':
       // TODO: sandbox
       return new Promise((resolve, reject) => {
-        window.DM_setPanel = resolve;
+        anyWindow.DM_setPanel = resolve;
         try {
           eval(panel.content);
         } catch (e) {
@@ -24,12 +27,12 @@ export function evalProgramPanel(
     case 'python':
       // TODO: sandbox
       return new Promise((resolve, reject) => {
-        window.DM_setPanel = resolve;
+        anyWindow.DM_setPanel = resolve;
         try {
           const program =
             'from browser import window\nDM_getPanel = window.DM_getPanel\nDM_setPanel = window.DM_setPanel\n' +
             panel.content;
-          eval(__BRYTHON__.python_to_js(program));
+          eval(anyWindow.__BRYTHON__.python_to_js(program));
         } catch (e) {
           reject(e);
         }
@@ -37,13 +40,6 @@ export function evalProgramPanel(
   }
 
   throw new Error(`Unknown program type: '${program.type}'`);
-}
-
-interface ProgramPanelInfo {
-  content: string;
-  program: {
-    type: 'javascript' | 'python';
-  };
 }
 
 export function ProgramPanelDetails({

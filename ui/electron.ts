@@ -16,7 +16,7 @@ app.whenReady().then(() => {
   }
   win.loadFile('index.html');
 
-  const store = new DesktopStore();
+  const store = new DesktopStore(ipcMain);
   store.register();
 });
 

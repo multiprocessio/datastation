@@ -1,20 +1,7 @@
 import * as React from 'react';
 import Chart from 'chart.js/auto';
 
-interface GraphY {
-  field: string;
-  label: string;
-}
-
-interface GraphPanelInfo {
-  content: string;
-  graph: {
-    panelSource: number;
-    y: GraphY;
-    x: string;
-    type: 'bar';
-  };
-}
+import { GraphPanelInfo } from './ProjectStore';
 
 export function GraphPanel({
   panel,
@@ -32,20 +19,20 @@ export function GraphPanel({
 
     const ctx = ref.current.getContext('2d');
     const chart = new Chart(ctx, {
-      type,
+      type: panel.graph.type,
       data: {
-        labels: value.map((d) => d[x]),
+        labels: value.map((d) => d[panel.graph.x]),
         datasets: [
           {
-            label: y.label,
-            data: value.map((d) => d[y.field]),
+            label: panel.graph.y.label,
+            data: value.map((d) => d[panel.graph.y.field]),
           },
         ],
       },
     });
 
     return () => chart.destroy();
-  }, [ref.current, data, x, y, type]);
+  }, [ref.current, data, panel.graph.x, panel.graph.y, panel.graph.type]);
   return <canvas ref={ref} />;
 }
 

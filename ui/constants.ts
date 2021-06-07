@@ -12,7 +12,7 @@ export const DEBUG = true;
 
 export const DEFAULT_PROJECT = {
   projectName: 'Untitled project',
-  datasources: [],
+  datasources: [] as any[],
   pages: [
     {
       name: 'Untitled page',
@@ -30,6 +30,7 @@ export const DEFAULT_PROJECT = {
           type: 'graph',
           graph: {
             panelSource: 0,
+            type: 'bar',
             x: 'name',
             y: {
               field: 'age',

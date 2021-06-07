@@ -2,10 +2,21 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
 import { APP_NAME, IS_DESKTOP_APP, MODE } from './constants';
-import { evalPanel, Panel, PanelResult } from './Panel';
-import { ProjectStore, ProjectState } from './ProjectStore';
+import { evalPanel, Panel } from './Panel';
+import {
+  makeStore,
+  ProjectPage,
+  ProjectStore,
+  ProjectState,
+  PanelInfo,
+  PanelResult,
+  LiteralPanelInfo,
+} from './ProjectStore';
 
-function useProjectState(projectId: string, store: ProjectStore): [ProjectState, (d: ProjectState) => void] {
+function useProjectState(
+  projectId: string,
+  store: ProjectStore
+): [ProjectState, (d: ProjectState) => void] {
   const [state, setProjectState] = React.useState<ProjectState>(null);
 
   function setState(newState: ProjectState) {
@@ -30,7 +41,12 @@ function useProjectState(projectId: string, store: ProjectStore): [ProjectState,
       return;
     }
 
-    setProjectState(store.get(projectId));
+    async function fetch() {
+      const state = await store.get(projectId);
+      setProjectState(state);
+    }
+
+    fetch();
   }, [projectId, ready]);
 
   return [state, setState];
@@ -40,7 +56,7 @@ function App() {
   // TODO: projectId needs to come from opened project.
   const [projectId, setProjectId] = React.useState('default');
 
-  const store = ProjectStore.make(MODE);
+  const store = makeStore(MODE);
   const [state, setState] = useProjectState(projectId, store);
 
   const [rows, setRows] = React.useState<Array<PanelResult>>([]);
@@ -73,9 +89,9 @@ function App() {
     setState({ ...state });
   }
 
-  function updatePanel(panelIndex: number) {
-    return (panel) => {
-      page.panels[panelIndex][page.panels[panelIndex].type] = panel;
+  function updatePanel(page: ProjectPage, panelIndex: number) {
+    return (panel: PanelInfo) => {
+      page.panels[panelIndex] = panel;
       setState({ ...state });
     };
   }
@@ -85,14 +101,13 @@ function App() {
       {!IS_DESKTOP_APP && (
         <header>
           <span className="logo">{APP_NAME}</span>
-          <span
+          <input
             contentEditable="true"
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               setState({ ...state, projectName: e.target.value });
             }}
-          >
-            {state.projectName}
-          </span>
+            value={state.projectName}
+          />
         </header>
       )}
       <main>
@@ -101,16 +116,14 @@ function App() {
           {state.datasources.map((datasource: any) => (
             <div className="datasource">
               <span className="datasource-type">{datasource.type}</span>
-              <span
+              <input
                 className="datasource-name"
-                contentEditable="true"
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   datasource.name = e.target.value;
                   setState({ ...state });
                 }}
-              >
-                {datasource.name}
-              </span>
+                value={datasource.name}
+              />
             </div>
           ))}
           <button
@@ -126,16 +139,14 @@ function App() {
         </div>
         <div className="section panels">
           <div className="section-title">
-            <span
-              contentEditable="true"
+            <input
               className="page-name page-name--current"
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 page.name = e.target.value;
                 setState({ ...state });
               }}
-            >
-              {page.name}
-            </span>
+              value={page.name}
+            />
             {state.pages.map((page: ProjectPage, i: number) =>
               i === state.currentPage ? undefined : (
                 <button
@@ -162,7 +173,7 @@ function App() {
             {page.panels.map((panel, panelIndex) => (
               <Panel
                 panel={panel}
-                updatePanel={updatePanel(panelIndex)}
+                updatePanel={updatePanel(page, panelIndex)}
                 rows={rows}
                 reevalPanel={reevalPanel}
                 panelIndex={panelIndex}
@@ -176,11 +187,7 @@ function App() {
             type="button"
             className="button button--primary"
             onClick={() => {
-              page.panels.push({
-                name: 'Untitled panel',
-                type: 'literal',
-                literal: {},
-              });
+              page.panels.push(new LiteralPanelInfo('Untitled panel'));
               setState({ ...state });
             }}
           >

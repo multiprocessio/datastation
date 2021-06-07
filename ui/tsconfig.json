@@ -4,7 +4,9 @@
 	"noEmit": true,
 	"jsx": "react",
 	"target": "esnext",
-	"module": "esnext"
+	"module": "commonjs",
+	"skipLibCheck": true,
+	"esModuleInterop": true
     },
     "exclude": ["node_modules", "*.js", "build"]
 }

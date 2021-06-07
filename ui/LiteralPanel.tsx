@@ -1,9 +1,9 @@
 import * as React from 'react';
 
+import { LiteralPanelInfo, ProjectPage } from './ProjectStore';
 import { parseCSV } from './HTTPPanel';
 
-export function evalLiteralPanel(page, panelId) {
-  const panel = page.panels[panelId];
+export function evalLiteralPanel(panel: LiteralPanelInfo) {
   const literal = panel.literal;
   switch (literal.type) {
     case 'csv':
@@ -13,13 +13,6 @@ export function evalLiteralPanel(page, panelId) {
   }
 
   throw new Error(`Unknown literal type: '${literal.type}'`);
-}
-
-interface LiteralPanelInfo {
-  content: string;
-  literal: {
-    type: 'csv' | 'json';
-  };
 }
 
 export function LiteralPanelDetails({
@@ -35,7 +28,17 @@ export function LiteralPanelDetails({
         <select
           value={panel.literal.type}
           onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-            panel.literal.type = e.target.value;
+            switch (e.target.value) {
+              case 'json':
+                panel.literal.type = 'json';
+                break;
+              case 'csv':
+                panel.literal.type = 'csv';
+                break;
+              default:
+                throw new Error(`Unknown literal type: ${e.target.value}`);
+            }
+            updatePanel(panel);
             updatePanel(panel);
           }}
         >

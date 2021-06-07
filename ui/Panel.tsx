@@ -1,16 +1,20 @@
 import * as React from 'react';
 
-import { PanelInfo } from './ProjectStore';
+import {
+  ProjectPage,
+  PanelInfo,
+  PanelResult,
+  GraphPanelInfo,
+  HTTPPanelInfo,
+  ProgramPanelInfo,
+  TablePanelInfo,
+  LiteralPanelInfo,
+} from './ProjectStore';
 import { GraphPanel, GraphPanelDetails } from './GraphPanel';
 import { evalHTTPPanel, HTTPPanelDetails } from './HTTPPanel';
 import { evalProgramPanel, ProgramPanelDetails } from './ProgramPanel';
 import { TablePanel, TablePanelDetails } from './TablePanel';
 import { evalLiteralPanel, LiteralPanelDetails } from './LiteralPanel';
-
-export interface PanelResult {
-  exception?: string;
-  value?: Array<any>;
-}
 
 export const PANEL_TYPE_ICON = {
   literal: 'format_quote',
@@ -20,55 +24,25 @@ export const PANEL_TYPE_ICON = {
   http: 'http',
 };
 
-export const PANEL_DEFAULTS = {
-  literal: {
-    type: 'csv',
-  },
-  program: {
-    type: 'javascript',
-  },
-  file: {},
-  table: {
-    panelSource: 0,
-    columns: [],
-  },
-  graph: {
-    panelSource: 0,
-    x: '',
-    y: {
-      field: '',
-      label: '',
-    },
-  },
-  data: {},
-  http: {
-    type: 'json',
-  },
-};
-
-export function evalDataPanel(page, panelId) {
-  return [];
-}
-
 export async function evalPanel(
-  page: { panels: Array<PanelInfo> },
+  page: ProjectPage,
   panelId: number,
   panelValues: Array<PanelResult>
 ) {
   const panel = page.panels[panelId];
   switch (panel.type) {
     case 'program':
-      return await evalProgramPanel(page, panelId, panelValues);
+      return await evalProgramPanel(panel as ProgramPanelInfo, panelValues);
     case 'literal':
-      return evalLiteralPanel(page, panelId);
-    case 'data':
-      return evalDataPanel(page, panelId);
+      return evalLiteralPanel(panel as LiteralPanelInfo);
     case 'graph':
-      return (panelValues[panel.graph.panelSource] || {}).value;
+      return (panelValues[(panel as GraphPanelInfo).graph.panelSource] || {})
+        .value;
     case 'table':
-      return (panelValues[panel.table.panelSource] || {}).value;
+      return (panelValues[(panel as TablePanelInfo).table.panelSource] || {})
+        .value;
     case 'http':
-      return await evalHTTPPanel(page, panelId);
+      return await evalHTTPPanel(panel as HTTPPanelInfo);
   }
 }
 
@@ -94,9 +68,17 @@ export function Panel({
   let body = null;
   const exception = rows[panelIndex] && rows[panelIndex].exception;
   if (!exception && panel.type === 'table') {
-    body = <TablePanel panel={panel} rows={rows} />;
+    body = (
+      <TablePanel
+        panel={panel as TablePanelInfo}
+        rows={rows}
+        panelIndex={panelIndex}
+      />
+    );
   } else if (!exception && panel.type === 'graph') {
-    body = <GraphPanel panel={panel} data={rows[panelIndex]} />;
+    body = (
+      <GraphPanel panel={panel as GraphPanelInfo} data={rows[panelIndex]} />
+    );
   }
 
   return (
@@ -124,16 +106,14 @@ export function Panel({
           >
             {PANEL_TYPE_ICON[panel.type]}
           </button>
-          <span
+          <input
             className="panel-name"
-            contentEditable="true"
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               panel.name = e.target.value;
               updatePanel(panel);
             }}
-          >
-            {panel.name}
-          </span>
+            value={panel.name}
+          />
           <span className="panel-controls flex-right">
             <span className="last-run">
               {(rows[panelIndex] || {}).lastRun
@@ -173,43 +153,67 @@ export function Panel({
               <select
                 value={panel.type}
                 onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                  panel.type = e.target.value;
-                  panel[e.target.value] = PANEL_DEFAULTS[e.target.value];
-                  updatePanel(panel);
+                  let newPanel;
+                  switch (e.target.value) {
+                    case 'literal':
+                      newPanel = new LiteralPanelInfo(panel.name);
+                      break;
+                    case 'program':
+                      newPanel = new ProgramPanelInfo(panel.name);
+                      break;
+                    case 'table':
+                      newPanel = new TablePanelInfo(panel.name);
+                      break;
+                    case 'graph':
+                      newPanel = new GraphPanelInfo(panel.name);
+                      break;
+                    case 'http':
+                      newPanel = new HTTPPanelInfo(panel.name);
+                      break;
+                    default:
+                      throw new Error(`Invalid panel type: ${e.target.value}`);
+                  }
+
+                  newPanel.content = panel.content;
+                  updatePanel(newPanel);
                 }}
               >
                 <option value="literal">Literal</option>
                 <option value="program">Code</option>
-                <option value="file">File</option>
                 <option value="table">Table</option>
                 <option value="graph">Graph</option>
-                <option value="data">Datasource</option>
                 <option value="http">HTTP Request</option>W
               </select>
             </div>
             {panel.type === 'table' && (
               <TablePanelDetails
-                panel={panel}
+                panel={panel as TablePanelInfo}
                 updatePanel={updatePanel}
                 panelCount={panelCount}
               />
             )}
             {panel.type === 'literal' && (
-              <LiteralPanelDetails panel={panel} updatePanel={updatePanel} />
+              <LiteralPanelDetails
+                panel={panel as LiteralPanelInfo}
+                updatePanel={updatePanel}
+              />
             )}
             {panel.type === 'http' && (
-              <HTTPPanelDetails panel={panel} updatePanel={updatePanel} />
+              <HTTPPanelDetails
+                panel={panel as HTTPPanelInfo}
+                updatePanel={updatePanel}
+              />
             )}
             {panel.type === 'graph' && (
               <GraphPanelDetails
-                panel={panel}
+                panel={panel as GraphPanelInfo}
                 updatePanel={updatePanel}
                 panelCount={panelCount}
               />
             )}
             {panel.type === 'program' && (
               <ProgramPanelDetails
-                panel={panel}
+                panel={panel as ProgramPanelInfo}
                 updatePanel={updatePanel}
                 panelIndex={panelIndex}
               />
@@ -225,7 +229,7 @@ export function Panel({
             <textarea
               spellCheck="false"
               value={panel.content}
-              onChange={async (e: React.ChangeEvent<HTMLInputElement>) => {
+              onChange={async (e: React.ChangeEvent<HTMLTextAreaElement>) => {
                 panel.content = e.target.value;
                 updatePanel(panel);
               }}

@@ -1,17 +1,5 @@
 import * as React from 'react';
-
-interface TableColumn {
-  label: string;
-  field: string;
-}
-
-interface TablePanelInfo {
-  content: string;
-  table: {
-    columns: Array<TableColumn>;
-    panelSource: number;
-  };
-}
+import { PanelResult, TablePanelInfo, TableColumn } from './ProjectStore';
 
 export function TablePanelDetails({
   panel,
@@ -80,7 +68,7 @@ export function TablePanel({
 }: {
   panel: TablePanelInfo;
   panelIndex: number;
-  rows: Array<{ value: Array<any> }>;
+  rows: Array<PanelResult>;
 }) {
   return (
     <table>
