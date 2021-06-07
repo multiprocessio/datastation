@@ -1,0 +1,190 @@
+body {
+    font-family: sans-serif;
+    padding: 0;
+    margin: 0;
+}
+
+main {
+    display: flex;
+}
+
+header {
+    background: #9f04ff;
+    color: white;
+}
+
+.logo {
+    padding-right: 15px;
+    text-transform: uppercase;
+    font-weight: bolder;
+    font-size: 12px;
+}
+
+[contenteditable="true"] {
+    border-bottom: 1px dashed #4eb5ff;
+}
+
+[contenteditable="true"]:focus {
+    outline: none;
+    border-bottom-style: solid;
+    font-style: italic;
+}
+
+.editor {
+    width: 100%;
+    border: 0;
+    font-family: monospace;
+    font-size: 1.1rem;
+    height: 200px;
+    resize: vertical;
+}
+
+.editor:focus {
+    outline: 0;
+}
+
+.button {
+    outline: 0;
+    border: 1px solid #9f04ff;
+    background: white;
+    padding: 5px;
+    cursor: pointer;
+    cursor: hand;
+}
+
+.button:hover {
+    background: #f2deff;
+}
+
+.button--primary {
+    border: 0;
+    background: #9f04ff;
+    color: white;
+}
+
+.button--primary:hover {
+    background: #56008c;
+}
+
+.button.material-icons {
+    border: 0;
+    background: white;
+    color: #9f04ff;
+    font-size: 20px;
+    padding: 0;
+}
+
+.button.material-icons:hover {
+    color: #56008c;
+}
+
+.flex-right {
+    margin-left: auto;
+}
+
+.section, header {
+    padding: 15px;
+}
+
+.title {
+    text-transform: uppercase;
+    font-size: .9rem;
+    color: #777;
+    padding-bottom: 15px;
+}
+
+.panels .section-title {
+    font-size: 1.5rem;
+    padding-bottom: 15px;
+}
+
+.datasource {
+    margin-bottom: 15px;
+}
+
+.panels {
+    flex: 1;
+}
+
+.panels .section-title {
+    display: flex;
+    align-items: flex-end;
+}
+
+.panels .page-name--current {
+    margin-right: 5px;
+}
+
+.panels .page-name.button {
+    margin: 0 5px;
+    border-left: 0;
+    border-top: 0;
+    border-right: 0;
+}
+
+.panel {
+    border: 1px solid #9f04ff;
+    margin-bottom: 15px;
+}
+
+.panel--hidden {
+    border-color: #ccc;
+}
+
+.panel--hidden .panel-head {
+    border-bottom: 0;
+}
+
+.panel-type, .datasource-type {
+    color: #777;
+    padding-right: 15px;
+}
+
+.panel-head {
+    border-bottom: 1px solid #9f04ff;
+    padding: 15px;
+    margin-bottom: 15px;
+}
+
+.panel-header {
+    display: flex;
+    align-items: center;
+}
+
+.panel-controls {
+    display: flex;
+    align-items: center;
+}
+
+.panel-controls .button {
+    margin-left: 15px;
+}
+
+.panel-details {
+    margin-top: 15px;
+}
+
+.panel-body {
+    padding: 15px;
+}
+
+.panel-order {
+    width: 30px;
+    margin-right: 15px;
+    margin-left: 5px;
+}
+
+.last-run {
+    font-size: .9rem;
+    color: #777;
+}
+
+.alert {
+    margin-top: 15px;
+    padding: 15px 5px;
+}
+
+.alert-info {
+    background: #ffe7e7;
+    border: 1px solid #ffc0c0;
+}

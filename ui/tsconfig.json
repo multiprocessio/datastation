@@ -1,0 +1,10 @@
+{
+    "compilerOptions": {
+	"noImplicitAny": true,
+	"noEmit": true,
+	"jsx": "react",
+	"target": "esnext",
+	"module": "esnext"
+    },
+    "exclude": ["node_modules", "*.js", "build"]
+}
