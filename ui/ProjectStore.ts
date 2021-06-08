@@ -1,7 +1,5 @@
 import { IpcRenderer } from 'electron';
 
-import { DEFAULT_PROJECT } from './constants';
-
 export interface PanelResult {
   exception?: string;
   value?: Array<any>;
@@ -140,8 +138,6 @@ export interface ProjectState {
 }
 
 class LocalStorageStore {
-  async init() {}
-
   #makeKey(projectId: string) {
     return `projectState:${projectId}`;
   }
@@ -151,60 +147,43 @@ class LocalStorageStore {
       this.#makeKey(projectId),
       JSON.stringify(newState)
     );
+    return Promise.resolve();
   }
 
   get(projectId: string) {
-    try {
-      const state = JSON.parse(
-        window.localStorage.getItem(this.#makeKey(projectId))
-      );
-      if (!state) {
-        return DEFAULT_PROJECT;
-      }
-
-      return state;
-    } catch (e) {
-      console.error(e);
-      return DEFAULT_PROJECT;
-    }
+    return JSON.parse(window.localStorage.getItem(this.#makeKey(projectId)));
   }
 }
 
 class DesktopIPCStore {
-  ipcRenderer: IpcRenderer;
+  async asyncRpc<T>(
+    resource: string,
+    projectId: string,
+    body?: ProjectState
+  ): Promise<T> {
+    const rsp = await ((window as any).asyncRpc as any)(
+      resource,
+      projectId,
+      body
+    );
+    if (rsp.isError) {
+      throw rsp.body;
+    }
 
-  async init() {
-    // TODO: maybe there's a simpler way to exclude this from the UI build?
-    this.ipcRenderer = (await import('electron')).ipcRenderer;
+    return rsp.body;
   }
 
   update(projectId: string, newState: ProjectState) {
-    this.ipcRenderer.send('updateProjectState', projectId, newState);
+    return this.asyncRpc<void>('updateProjectState', projectId, newState);
   }
 
-  async get(projectId: string): Promise<ProjectState> {
-    return new Promise((resolve, reject) => {
-      try {
-        this.ipcRenderer.send('getProjectState', projectId);
-        this.ipcRenderer.once(
-          'receiveProjectState',
-          (e: Event, messages: Array<ProjectState>) => {
-            resolve(messages[0]);
-          }
-        );
-      } catch (e) {
-        reject(e);
-      }
-    });
+  get(projectId: string) {
+    return this.asyncRpc<ProjectState>('getProjectState', projectId);
   }
 }
 
 class HostedStore {
-  async init() {
-    throw new Error('Unsupported store manager');
-  }
-
-  update(projectId: string, state: ProjectState) {
+  async update(projectId: string, state: ProjectState) {
     throw new Error('Unsupported store manager');
   }
 
@@ -214,8 +193,7 @@ class HostedStore {
 }
 
 export interface ProjectStore {
-  init: () => Promise<void>;
-  update: (projectId: string, state: ProjectState) => void;
+  update: (projectId: string, state: ProjectState) => Promise<void>;
   get: (projectId: string) => Promise<ProjectState>;
 }
 
@@ -227,3 +205,26 @@ export function makeStore(mode: string) {
   }[mode];
   return new store();
 }
+
+export const DEFAULT_PROJECT: ProjectState = {
+  projectName: 'Untitled project',
+  datasources: [],
+  pages: [
+    {
+      name: 'Untitled page',
+      panels: [
+        new LiteralPanelInfo(
+          'Raw CSV Text',
+          'csv',
+          'name,age\nPhil,12\nJames,17'
+        ),
+        (() => {
+          const panel = new GraphPanelInfo('Display');
+          panel.graph.y = { field: 'age', label: 'Age' };
+          return panel;
+        })(),
+      ],
+    },
+  ],
+  currentPage: 0,
+};

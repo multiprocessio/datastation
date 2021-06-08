@@ -10,36 +10,5 @@ export const MODE = IS_DESKTOP_APP ? 'desktop' : 'demo';
 
 export const DEBUG = true;
 
-export const DEFAULT_PROJECT = {
-  projectName: 'Untitled project',
-  datasources: [] as any[],
-  pages: [
-    {
-      name: 'Untitled page',
-      panels: [
-        {
-          name: 'Raw Text',
-          type: 'literal',
-          content: 'name,age\nPhil,12\nJames,17',
-          literal: {
-            type: 'csv',
-          },
-        },
-        {
-          name: 'Display',
-          type: 'graph',
-          graph: {
-            panelSource: 0,
-            type: 'bar',
-            x: 'name',
-            y: {
-              field: 'age',
-              label: 'Age',
-            },
-          },
-        },
-      ],
-    },
-  ],
-  currentPage: 0,
-};
+export const RPC_ASYNC_REQUEST = 'rpcAsyncRequest';
+export const RPC_ASYNC_RESPONSE = 'rpcAsyncResponse';

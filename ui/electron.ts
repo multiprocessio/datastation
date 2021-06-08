@@ -1,13 +1,19 @@
+import * as path from 'path';
+
 import { app, BrowserWindow, ipcMain } from 'electron';
 
 import { APP_NAME, DEBUG } from './constants';
 import { DesktopStore } from './DesktopStore';
 
 app.whenReady().then(() => {
+  const preload = path.join(__dirname, 'preload.js');
   const win = new BrowserWindow({
     width: 1200,
     height: 800,
     title: APP_NAME,
+    webPreferences: {
+      preload,
+    },
   });
 
   if (!DEBUG) {
@@ -17,7 +23,7 @@ app.whenReady().then(() => {
   win.loadFile('index.html');
 
   const store = new DesktopStore(ipcMain);
-  store.register();
+  store.registerRPCHandlers();
 });
 
 app.on('window-all-closed', function () {

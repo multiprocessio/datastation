@@ -4,6 +4,7 @@ import * as ReactDOM from 'react-dom';
 import { APP_NAME, IS_DESKTOP_APP, MODE } from './constants';
 import { evalPanel, Panel } from './Panel';
 import {
+  DEFAULT_PROJECT,
   makeStore,
   ProjectPage,
   ProjectStore,
@@ -24,30 +25,22 @@ function useProjectState(
     setProjectState(newState);
   }
 
-  let [ready, setReady] = React.useState(false);
-  // Run init once
-  React.useEffect(() => {
-    async function init() {
-      await store.init();
-      setReady(true);
-    }
-
-    init();
-  });
-
   // Re-read state when projectId changes
   React.useEffect(() => {
-    if (!ready) {
-      return;
-    }
-
     async function fetch() {
-      const state = await store.get(projectId);
+      let state;
+      try {
+        state = await store.get(projectId);
+      } catch (e) {
+        console.error(e);
+        state = DEFAULT_PROJECT;
+        await store.update(projectId, state);
+      }
       setProjectState(state);
     }
 
     fetch();
-  }, [projectId, ready]);
+  }, [projectId]);
 
   return [state, setState];
 }
@@ -62,9 +55,10 @@ function App() {
   const [rows, setRows] = React.useState<Array<PanelResult>>([]);
   if (!state) {
     // Loading
-    return null;
+    return <span>Loading</span>;
   }
 
+  console.log(state);
   const page = state.pages[state.currentPage];
   async function reevalPanel(panelIndex: number) {
     try {

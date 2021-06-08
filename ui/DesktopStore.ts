@@ -1,8 +1,15 @@
 import { IpcMain, IpcMainEvent } from 'electron';
 import fs from 'fs/promises';
 
-import { DEFAULT_PROJECT } from './constants';
+import { RPC_ASYNC_REQUEST, RPC_ASYNC_RESPONSE } from './constants';
 import { ProjectState } from './ProjectStore';
+
+interface RPCPayload {
+  messageNumber: number;
+  resource: string;
+  body: any;
+  args: any;
+}
 
 export class DesktopStore {
   ipcMain: IpcMain;
@@ -11,30 +18,49 @@ export class DesktopStore {
     this.ipcMain = ipcMain;
   }
 
-  register() {
-    this.ipcMain.on(
-      'updateProjectState',
-      async (
-        e: IpcMainEvent,
-        [projectId, newState]: [e0: string, e1: ProjectState]
-      ) => {
-        const name = this.getFile(projectId);
-        try {
-          await fs.writeFile(name, JSON.stringify(newState));
-          e.sender.send('updateProjectStateResponse', null);
-        } catch (e) {
-          console.error(e);
-          e.sender.send('updateProjectStateResponse', e);
-        }
-      }
-    );
+  registerRPCHandlers() {
+    const handlers = [
+      {
+        resource: 'getProjectState',
+        handler: async (projectId: string) => {
+          const f = await fs.readFile(this.getFile(projectId));
+          return JSON.parse(f.toString());
+        },
+      },
+      {
+        resource: 'updateProjectState',
+        handler: (projectId: string, newState: ProjectState) => {
+          return fs.writeFile(
+            this.getFile(projectId),
+            JSON.stringify(newState)
+          );
+        },
+      },
+    ];
 
     this.ipcMain.on(
-      'getProjectState',
-      async (e: IpcMainEvent, [projectId]: [e0: string]) => {
-        const name = this.getFile(projectId);
-        const file = await fs.readFile(name);
-        e.sender.send('getProjectStateResponse', JSON.parse(file.toString()));
+      RPC_ASYNC_REQUEST,
+      async function (event: IpcMainEvent, payload: RPCPayload) {
+        const responseChannel = `${RPC_ASYNC_RESPONSE}:${payload.messageNumber}`;
+        try {
+          const handler = handlers.filter(
+            (h) => h.resource === payload.resource
+          )[0];
+          if (!handler) {
+            throw new Error(`No RPC handler for resource: ${payload.resource}`);
+          }
+
+          const rsp = await handler.handler(payload.args, payload.body);
+          event.sender.send(responseChannel, {
+            body: rsp,
+          });
+        } catch (e) {
+          console.error(e);
+          event.sender.send(responseChannel, {
+            isError: true,
+            body: e,
+          });
+        }
       }
     );
   }

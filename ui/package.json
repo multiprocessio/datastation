@@ -4,16 +4,15 @@
     "license": "MIT",
     "scripts": {
         "typecheck": "yarn tsc",
-        "build-electron": "yarn esbuild electron.ts --bundle --platform=node --sourcemap --external:electron --target=node10.4 --outfile=build/electron.js",
-        "build-web": "yarn esbuild app.tsx --loader:.ts=tsx --loader:.js=jsx --bundle --sourcemap --external:electron --outfile=build/web.js && cp index.html style.css build",
-        "start-electron": "yarn build-web && yarn build-electron && yarn electron build/electron.js",
+        "build-electron": "yarn esbuild preload.ts --external:electron --sourcemap --bundle --outfile=build/preload.js && yarn esbuild electron.ts --bundle --platform=node --sourcemap --external:electron --target=node10.4 --outfile=build/electron.js",
+        "build-web": "yarn esbuild app.tsx --loader:.ts=tsx --loader:.js=jsx --bundle --sourcemap --outfile=build/web.js && cp index.html style.css build",
+        "start-electron": "yarn build-web && yarn build-electron && yarn electron --trace-warnings build/electron.js",
         "start": "yarn build-web && python3 -m http.server --directory build 8080",
         "format": "yarn prettier --write *.ts *.tsx"
     },
     "dependencies": {
         "chart.js": "^3.3.2",
         "electron": "^13.0.1",
-        "esbuild": "^0.12.5",
         "papaparse": "^5.3.1",
         "react": "^17.0.2",
         "react-dom": "^17.0.2"
@@ -23,6 +22,7 @@
         "@types/papaparse": "^5.2.5",
         "@types/react": "^17.0.9",
         "@types/react-dom": "^17.0.6",
+        "esbuild": "^0.12.7",
         "prettier": "^2.3.0",
         "typescript": "^4.3.2"
     }
