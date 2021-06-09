@@ -10,7 +10,8 @@ export function GraphPanel({
   panel: GraphPanelInfo;
   data?: { value?: Array<any> };
 }) {
-  const value = (data || {}).value || [];
+    const value = (data || {}).value || [];
+    console.log(value.map((d) => d[panel.graph.y.field]));
   const ref = React.useRef(null);
   React.useEffect(() => {
     if (!ref) {

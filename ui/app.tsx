@@ -58,7 +58,6 @@ function App() {
     return <span>Loading</span>;
   }
 
-  console.log(state);
   const page = state.pages[state.currentPage];
   async function reevalPanel(panelIndex: number) {
     try {

@@ -1,0 +1,2 @@
+yarn esbuild preload.ts --external:electron --sourcemap --bundle --outfile=build/preload.js
+yarn esbuild electron.ts --bundle --platform=node --sourcemap --external:electron --target=node10.4 --outfile=build/electron.js

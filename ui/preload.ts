@@ -16,7 +16,6 @@ contextBridge.exposeInMainWorld('asyncRpc', function <
     args,
     body,
   };
-  console.log('BUT HEREEEE');
   ipcRenderer.send(RPC_ASYNC_REQUEST, payload);
 
   return new Promise((resolve, reject) => {
