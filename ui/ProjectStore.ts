@@ -130,11 +130,44 @@ export interface ProjectPage {
   name: string;
 }
 
+export type DataConnectorInfoType = 'sql';
+
+export class DataConnectorInfo {
+  name: string;
+  type: DataConnectorInfoType;
+
+  constructor(name?: string, type?: DataConnectorInfoType) {
+    this.name = name || 'Untitled Data Connector';
+    this.type = type || 'sql';
+  }
+}
+
+export class SQLDataConnectorInfo extends DataConnectorInfo {
+  database: string;
+  username: string;
+  password: string;
+  address: string;
+
+  constructor(
+    name?: string,
+    database?: string,
+    username?: string,
+    password?: string,
+    address?: string
+  ) {
+    super(name, 'sql');
+    this.database = database;
+    this.username = username;
+    this.password = password;
+    this.address = address;
+  }
+}
+
 export interface ProjectState {
   pages: Array<ProjectPage>;
   projectName: string;
   currentPage: number;
-  datasources: Array<any>;
+  dataConnectors: Array<DataConnectorInfo>;
 }
 
 class LocalStorageStore {
@@ -157,12 +190,12 @@ class LocalStorageStore {
 
 class DesktopIPCStore {
   async asyncRpc<T>(
-    resource: string,
+    reconnector: string,
     projectId: string,
     body?: ProjectState
   ): Promise<T> {
     const rsp = await ((window as any).asyncRpc as any)(
-      resource,
+      reconnector,
       projectId,
       body
     );
@@ -208,7 +241,7 @@ export function makeStore(mode: string) {
 
 export const DEFAULT_PROJECT: ProjectState = {
   projectName: 'Untitled project',
-  datasources: [],
+  dataConnectors: [],
   pages: [
     {
       name: 'Untitled page',

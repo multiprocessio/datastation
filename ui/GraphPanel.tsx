@@ -2,6 +2,7 @@ import * as React from 'react';
 import Chart from 'chart.js/auto';
 
 import { GraphPanelInfo } from './ProjectStore';
+import { Input } from './component-library/Input';
 
 export function GraphPanel({
   panel,
@@ -10,8 +11,7 @@ export function GraphPanel({
   panel: GraphPanelInfo;
   data?: { value?: Array<any> };
 }) {
-    const value = (data || {}).value || [];
-    console.log(value.map((d) => d[panel.graph.y.field]));
+  const value = (data || {}).value || [];
   const ref = React.useRef(null);
   React.useEffect(() => {
     if (!ref) {
@@ -50,23 +50,23 @@ export function GraphPanelDetails({
     <React.Fragment>
       <div>
         <span>Panel Source:</span>
-        <input
+        <Input
           type="number"
           min={0}
           max={panelCount - 1}
-          value={panel.graph.panelSource}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-            panel.graph.panelSource = +e.target.value;
+          value={panel.graph.panelSource.toString()}
+          onChange={(value: string) => {
+            panel.graph.panelSource = +value;
             updatePanel(panel);
           }}
         />
       </div>
       <div>
         <span>X-Axis Field:</span>
-        <input
+        <Input
           value={panel.graph.x}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-            panel.graph.x = e.target.value;
+          onChange={(value: string) => {
+            panel.graph.x = value;
             updatePanel(panel);
           }}
         />
@@ -75,18 +75,18 @@ export function GraphPanelDetails({
         <span>Y-Axis Field and Label</span>
         <div>
           Field:
-          <input
+          <Input
             value={panel.graph.y.field}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              panel.graph.y.field = e.target.value;
+            onChange={(value: string) => {
+              panel.graph.y.field = value;
               updatePanel(panel);
             }}
           />
           Label:
-          <input
+          <Input
             value={panel.graph.y.label}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              panel.graph.y.label = e.target.value;
+            onChange={(value: string) => {
+              panel.graph.y.label = value;
               updatePanel(panel);
             }}
           />

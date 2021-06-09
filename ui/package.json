@@ -8,7 +8,7 @@
         "build-web": "python ./scripts/build.py ./scripts/web.build",
         "start-electron": "yarn build-web && yarn build-electron && yarn electron --trace-warnings build/electron.js",
         "start": "yarn build-web && python3 -m http.server --directory build 8080",
-        "format": "yarn prettier --write *.ts *.tsx"
+        "format": "yarn prettier --write '**/*.ts' '**/*.tsx'"
     },
     "dependencies": {
         "chart.js": "^3.3.2",

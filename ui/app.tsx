@@ -2,17 +2,17 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
 import { APP_NAME, IS_DESKTOP_APP, MODE } from './constants';
-import { evalPanel, Panel } from './Panel';
+import { Pages } from './Pages';
+import { DataConnectors } from './DataConnectors';
 import {
   DEFAULT_PROJECT,
   makeStore,
   ProjectPage,
   ProjectStore,
   ProjectState,
-  PanelInfo,
-  PanelResult,
-  LiteralPanelInfo,
+  DataConnectorInfo,
 } from './ProjectStore';
+import { Input } from './component-library/Input';
 
 function useProjectState(
   projectId: string,
@@ -50,43 +50,37 @@ function App() {
   const [projectId, setProjectId] = React.useState('default');
 
   const store = makeStore(MODE);
-  const [state, setState] = useProjectState(projectId, store);
-
-  const [rows, setRows] = React.useState<Array<PanelResult>>([]);
+  const [state, updateProjectState] = useProjectState(projectId, store);
   if (!state) {
     // Loading
     return <span>Loading</span>;
   }
 
-  const page = state.pages[state.currentPage];
-  async function reevalPanel(panelIndex: number) {
-    try {
-      const r = await evalPanel(page, panelIndex, rows);
-      rows[panelIndex] = { lastRun: new Date(), value: r };
-    } catch (e) {
-      rows[panelIndex] = { lastRun: new Date(), exception: e.stack };
-    } finally {
-      setRows({ ...rows });
+  function updatePage(page: ProjectPage) {
+    state.pages[state.currentPage] = page;
+    updateProjectState({ ...state });
+  }
+
+  function addPage(page: ProjectPage) {
+    state.pages.push(page);
+    updateProjectState({ ...state });
+  }
+
+  function setCurrentPage(pageIndex: number) {
+    updateProjectState({ ...state, currentPage: pageIndex });
+  }
+
+  function updateDataConnector(dcIndex: number, dc: DataConnectorInfo) {
+    state.dataConnectors[dcIndex] = dc;
+    updateProjectState({ ...state });
+  }
+
+  function addDataConnector(dc: DataConnectorInfo) {
+    if (!state.dataConnectors) {
+      state.dataConnectors = [];
     }
-  }
-
-  function movePanel(from: number, to: number) {
-    const panel = page.panels[from];
-    page.panels.splice(from, 1);
-    page.panels.splice(to, 0, panel);
-    setState({ ...state });
-  }
-
-  function removePanel(at: number) {
-    page.panels.splice(at, 1);
-    setState({ ...state });
-  }
-
-  function updatePanel(page: ProjectPage, panelIndex: number) {
-    return (panel: PanelInfo) => {
-      page.panels[panelIndex] = panel;
-      setState({ ...state });
-    };
+    state.dataConnectors.push(dc);
+    updateProjectState({ ...state });
   }
 
   return (
@@ -94,99 +88,26 @@ function App() {
       {!IS_DESKTOP_APP && (
         <header>
           <span className="logo">{APP_NAME}</span>
-          <input
-            contentEditable="true"
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              setState({ ...state, projectName: e.target.value });
+          <Input
+            onChange={(value: string) => {
+              updateProjectState({ ...state, projectName: value });
             }}
             value={state.projectName}
           />
         </header>
       )}
       <main>
-        <div className="section datasources">
-          <div className="title">Datasources</div>
-          {state.datasources.map((datasource: any) => (
-            <div className="datasource">
-              <span className="datasource-type">{datasource.type}</span>
-              <input
-                className="datasource-name"
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  datasource.name = e.target.value;
-                  setState({ ...state });
-                }}
-                value={datasource.name}
-              />
-            </div>
-          ))}
-          <button
-            type="button"
-            className="button button--primary"
-            onClick={() => {
-              state.datasources.push({ name: 'Untitled datasource' });
-              setState({ ...state, currentPage: state.pages.length - 1 });
-            }}
-          >
-            New Datasource
-          </button>
-        </div>
-        <div className="section panels">
-          <div className="section-title">
-            <input
-              className="page-name page-name--current"
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                page.name = e.target.value;
-                setState({ ...state });
-              }}
-              value={page.name}
-            />
-            {state.pages.map((page: ProjectPage, i: number) =>
-              i === state.currentPage ? undefined : (
-                <button
-                  className="button page-name"
-                  type="button"
-                  onClick={() => setState({ ...state, currentPage: i })}
-                >
-                  {page.name}
-                </button>
-              )
-            )}
-            <button
-              type="button"
-              className="button button--primary flex-right"
-              onClick={() => {
-                state.pages.push({ name: 'Untitled page', panels: [] });
-                setState({ ...state, currentPage: state.pages.length - 1 });
-              }}
-            >
-              New Page
-            </button>
-          </div>
-          <div>
-            {page.panels.map((panel, panelIndex) => (
-              <Panel
-                panel={panel}
-                updatePanel={updatePanel(page, panelIndex)}
-                rows={rows}
-                reevalPanel={reevalPanel}
-                panelIndex={panelIndex}
-                movePanel={movePanel}
-                removePanel={removePanel}
-                panelCount={page.panels.length}
-              />
-            ))}
-          </div>
-          <button
-            type="button"
-            className="button button--primary"
-            onClick={() => {
-              page.panels.push(new LiteralPanelInfo('Untitled panel'));
-              setState({ ...state });
-            }}
-          >
-            New Panel
-          </button>
-        </div>
+        <DataConnectors
+          state={state}
+          updateDataConnector={updateDataConnector}
+          addDataConnector={addDataConnector}
+        />
+        <Pages
+          state={state}
+          updatePage={updatePage}
+          addPage={addPage}
+          setCurrentPage={setCurrentPage}
+        />
       </main>
     </div>
   );

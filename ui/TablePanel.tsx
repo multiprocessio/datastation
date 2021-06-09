@@ -1,5 +1,8 @@
 import * as React from 'react';
+
 import { PanelResult, TablePanelInfo, TableColumn } from './ProjectStore';
+import { Button } from './component-library/Button';
+import { Input } from './component-library/Input';
 
 export function TablePanelDetails({
   panel,
@@ -14,13 +17,13 @@ export function TablePanelDetails({
     <React.Fragment>
       <div>
         <span>Panel Source:</span>
-        <input
+        <Input
           type="number"
           min={0}
           max={panelCount - 1}
-          value={panel.table.panelSource}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-            panel.table.panelSource = +e.target.value;
+          value={panel.table.panelSource.toString()}
+          onChange={(value: string) => {
+            panel.table.panelSource = +value;
             updatePanel(panel);
           }}
         />
@@ -30,32 +33,31 @@ export function TablePanelDetails({
         {panel.table.columns.map((c) => (
           <div>
             Field:
-            <input
+            <Input
               value={c.field}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                c.field = e.target.value;
+              onChange={(value: string) => {
+                c.field = value;
                 updatePanel(panel);
               }}
             />
             Label:
-            <input
+            <Input
               value={c.label}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                c.label = e.target.value;
+              onChange={(value: string) => {
+                c.label = value;
                 updatePanel(panel);
               }}
             />
           </div>
         ))}
-        <button
-          type="button"
+        <Button
           onClick={() => {
             panel.table.columns.push({ label: '', field: '' });
             updatePanel(panel);
           }}
         >
           Add Column
-        </button>
+        </Button>
       </div>
     </React.Fragment>
   );
@@ -64,11 +66,11 @@ export function TablePanelDetails({
 export function TablePanel({
   panel,
   panelIndex,
-  rows,
+  panelResults,
 }: {
   panel: TablePanelInfo;
   panelIndex: number;
-  rows: Array<PanelResult>;
+  panelResults: Array<PanelResult>;
 }) {
   return (
     <table>
@@ -80,13 +82,15 @@ export function TablePanel({
         </tr>
       </thead>
       <tbody>
-        {((rows[panelIndex] || {}).value || []).map((row: any, i: number) => (
-          <tr key={i}>
-            {panel.table.columns.map((column: TableColumn) => (
-              <td key={column.field}>{row[column.field]}</td>
-            ))}
-          </tr>
-        ))}
+        {((panelResults[panelIndex] || {}).value || []).map(
+          (row: any, i: number) => (
+            <tr key={i}>
+              {panel.table.columns.map((column: TableColumn) => (
+                <td key={column.field}>{row[column.field]}</td>
+              ))}
+            </tr>
+          )
+        )}
       </tbody>
     </table>
   );

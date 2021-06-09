@@ -2,6 +2,7 @@ import * as CSV from 'papaparse';
 import * as React from 'react';
 
 import { HTTPPanelInfo } from './ProjectStore';
+import { Select } from './component-library/Select';
 
 export function parseCSV(csvString: string) {
   const csv = CSV.parse(csvString).data;
@@ -48,10 +49,10 @@ export function HTTPPanelDetails({
   return (
     <React.Fragment>
       <div>
-        <select
+        <Select
           value={panel.http.type}
-          onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-            switch (e.target.value) {
+          onChange={(value: string) => {
+            switch (value) {
               case 'json':
                 panel.http.type = 'json';
                 break;
@@ -59,14 +60,14 @@ export function HTTPPanelDetails({
                 panel.http.type = 'csv';
                 break;
               default:
-                throw new Error(`Unknown HTTP type: ${e.target.value}`);
+                throw new Error(`Unknown HTTP type: ${value}`);
             }
             updatePanel(panel);
           }}
         >
           <option value="csv">CSV</option>
           <option value="json">JSON</option>
-        </select>
+        </Select>
       </div>
     </React.Fragment>
   );

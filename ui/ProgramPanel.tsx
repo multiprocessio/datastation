@@ -1,17 +1,18 @@
 import * as React from 'react';
 
 import { ProgramPanelInfo } from './ProjectStore';
+import { Select } from './component-library/Select';
 
 export function evalProgramPanel(
   panel: ProgramPanelInfo,
-  panelValues: Array<{ value?: Array<any> }>
+  panelResults: Array<{ value?: Array<any> }>
 ) {
   const program = panel.program;
   const anyWindow = window as any;
 
   // TODO: better deep copy
   anyWindow.DM_getPanel = (panelId: number) =>
-    JSON.parse(JSON.stringify((panelValues[panelId] || {}).value));
+    JSON.parse(JSON.stringify((panelResults[panelId] || {}).value));
 
   switch (program.type) {
     case 'javascript':
@@ -54,10 +55,10 @@ export function ProgramPanelDetails({
   return (
     <React.Fragment>
       <div>
-        <select
+        <Select
           value={panel.program.type}
-          onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-            panel.program.type = e.target.value as 'javascript' | 'python';
+          onChange={(value: string) => {
+            panel.program.type = value as 'javascript' | 'python';
             if (panel.content === '') {
               switch (panel.program.type) {
                 case 'javascript':
@@ -86,7 +87,7 @@ export function ProgramPanelDetails({
         >
           <option value="javascript">JavaScript</option>
           <option value="python">Python</option>
-        </select>
+        </Select>
       </div>
     </React.Fragment>
   );

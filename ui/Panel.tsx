@@ -15,6 +15,10 @@ import { evalHTTPPanel, HTTPPanelDetails } from './HTTPPanel';
 import { evalProgramPanel, ProgramPanelDetails } from './ProgramPanel';
 import { TablePanel, TablePanelDetails } from './TablePanel';
 import { evalLiteralPanel, LiteralPanelDetails } from './LiteralPanel';
+import { Button } from './component-library/Button';
+import { Input } from './component-library/Input';
+import { Select } from './component-library/Select';
+import { Textarea } from './component-library/Textarea';
 
 export const PANEL_TYPE_ICON = {
   literal: 'format_quote',
@@ -27,19 +31,19 @@ export const PANEL_TYPE_ICON = {
 export async function evalPanel(
   page: ProjectPage,
   panelId: number,
-  panelValues: Array<PanelResult>
+  panelResults: Array<PanelResult>
 ) {
   const panel = page.panels[panelId];
   switch (panel.type) {
     case 'program':
-      return await evalProgramPanel(panel as ProgramPanelInfo, panelValues);
+      return await evalProgramPanel(panel as ProgramPanelInfo, panelResults);
     case 'literal':
       return evalLiteralPanel(panel as LiteralPanelInfo);
     case 'graph':
-      return (panelValues[(panel as GraphPanelInfo).graph.panelSource] || {})
+      return (panelResults[(panel as GraphPanelInfo).graph.panelSource] || {})
         .value;
     case 'table':
-      return (panelValues[(panel as TablePanelInfo).table.panelSource] || {})
+      return (panelResults[(panel as TablePanelInfo).table.panelSource] || {})
         .value;
     case 'http':
       return await evalHTTPPanel(panel as HTTPPanelInfo);
@@ -49,7 +53,7 @@ export async function evalPanel(
 export function Panel({
   panel,
   updatePanel,
-  rows = [],
+  panelResults = [],
   reevalPanel,
   panelIndex,
   removePanel,
@@ -58,7 +62,7 @@ export function Panel({
 }: {
   panel: PanelInfo;
   updatePanel: (d: PanelInfo) => void;
-  rows: Array<PanelResult>;
+  panelResults: Array<PanelResult>;
   reevalPanel: (i: number) => void;
   panelIndex: number;
   removePanel: (i: number) => void;
@@ -66,18 +70,22 @@ export function Panel({
   panelCount: number;
 }) {
   let body = null;
-  const exception = rows[panelIndex] && rows[panelIndex].exception;
+  const exception =
+    panelResults[panelIndex] && panelResults[panelIndex].exception;
   if (!exception && panel.type === 'table') {
     body = (
       <TablePanel
         panel={panel as TablePanelInfo}
-        rows={rows}
+        panelResults={panelResults}
         panelIndex={panelIndex}
       />
     );
   } else if (!exception && panel.type === 'graph') {
     body = (
-      <GraphPanel panel={panel as GraphPanelInfo} data={rows[panelIndex]} />
+      <GraphPanel
+        panel={panel as GraphPanelInfo}
+        data={panelResults[panelIndex]}
+      />
     );
   }
 
@@ -85,76 +93,73 @@ export function Panel({
     <div className={`panel ${panel.collapsed ? 'panel--hidden' : ''}`}>
       <div className="panel-head">
         <div className="panel-header">
-          #
-          <input
-            className="panel-order"
-            type="number"
-            min={0}
-            max={panelCount - 1}
-            value={panelIndex}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              movePanel(panelIndex, +e.target.value)
-            }
-          />
-          <button
-            className="button panel-type material-icons"
-            type="button"
+          <Button
+            icon
+            disabled={panelIndex === 0}
+            onClick={() => {
+              movePanel(panelIndex, panelIndex - 1);
+            }}
+          >
+            keyboard_arrow_up
+          </Button>
+          <Button
+            icon
+            disabled={panelIndex === panelCount - 1}
+            onClick={() => {
+              movePanel(panelIndex, panelIndex + 1);
+            }}
+          >
+            keyboard_arrow_down
+          </Button>
+          <Button
+            icon
             onClick={() => {
               panel.details = !panel.details;
               updatePanel(panel);
             }}
           >
             {PANEL_TYPE_ICON[panel.type]}
-          </button>
-          <input
+          </Button>
+          <Input
             className="panel-name"
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              panel.name = e.target.value;
+            onChange={(value: string) => {
+              panel.name = value;
               updatePanel(panel);
             }}
             value={panel.name}
           />
           <span className="panel-controls flex-right">
             <span className="last-run">
-              {(rows[panelIndex] || {}).lastRun
-                ? 'Last run ' + rows[panelIndex].lastRun
+              {(panelResults[panelIndex] || {}).lastRun
+                ? 'Last run ' + panelResults[panelIndex].lastRun
                 : 'Not run'}
             </span>
-            <button
-              className="button material-icons"
-              type="button"
-              onClick={() => reevalPanel(panelIndex)}
-            >
+            <Button icon onClick={() => reevalPanel(panelIndex)}>
               play_arrow
-            </button>
-            <button
-              className="button material-icons"
-              type="button"
+            </Button>
+            <Button
+              icon
               onClick={() => {
                 panel.collapsed = !panel.collapsed;
                 updatePanel(panel);
               }}
             >
               {panel.collapsed ? 'visibility_off' : 'visibility'}
-            </button>
-            <button
-              className="button material-icons"
-              type="button"
-              onClick={() => removePanel(panelIndex)}
-            >
+            </Button>
+            <Button icon onClick={() => removePanel(panelIndex)}>
               delete
-            </button>
+            </Button>
           </span>
         </div>
         {panel.details && (
           <div className="panel-details">
             <div>
               <span>Type:</span>
-              <select
+              <Select
                 value={panel.type}
-                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                onChange={(value: string) => {
                   let newPanel;
-                  switch (e.target.value) {
+                  switch (value) {
                     case 'literal':
                       newPanel = new LiteralPanelInfo(panel.name);
                       break;
@@ -171,7 +176,7 @@ export function Panel({
                       newPanel = new HTTPPanelInfo(panel.name);
                       break;
                     default:
-                      throw new Error(`Invalid panel type: ${e.target.value}`);
+                      throw new Error(`Invalid panel type: ${value}`);
                   }
 
                   newPanel.content = panel.content;
@@ -182,8 +187,8 @@ export function Panel({
                 <option value="program">Code</option>
                 <option value="table">Table</option>
                 <option value="graph">Graph</option>
-                <option value="http">HTTP Request</option>W
-              </select>
+                <option value="http">HTTP Request</option>
+              </Select>
             </div>
             {panel.type === 'table' && (
               <TablePanelDetails
@@ -226,11 +231,11 @@ export function Panel({
           {body ? (
             body
           ) : (
-            <textarea
+            <Textarea
               spellCheck="false"
               value={panel.content}
-              onChange={async (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-                panel.content = e.target.value;
+              onChange={(value: string) => {
+                panel.content = value;
                 updatePanel(panel);
               }}
               className="editor"
