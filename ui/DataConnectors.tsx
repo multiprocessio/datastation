@@ -6,6 +6,7 @@ import {
   SQLDataConnectorInfo,
 } from './ProjectStore';
 import { DataConnector } from './DataConnector';
+import { Button } from './component-library/Button';
 
 export function DataConnectors({
   state,
@@ -16,9 +17,27 @@ export function DataConnectors({
   addDataConnector: (dc: DataConnectorInfo) => void;
   updateDataConnector: (n: number, dc: DataConnectorInfo) => void;
 }) {
+  const [expanded, setExpanded] = React.useState(true);
+  if (!expanded) {
+    <div className="section dataConnectors dataConnectors--collapsed">
+      <div className="title">
+        <span className="material-icons-outlined">manage_search</span>
+      </div>
+      <Button icon onClick={() => setExpanded(true)}>
+        keyboard_arrow_left
+      </Button>
+    </div>;
+  }
+
   return (
     <div className="section dataConnectors">
-      <div className="title">Data Connectors</div>
+      <div className="title">
+        Data Connectors
+        <span className="material-icons-outlined">manage_search</span>
+      </div>
+      <Button icon onClick={() => setExpanded(false)}>
+        keyboard_arrow_right
+      </Button>
       {state.dataConnectors?.map((dc: DataConnectorInfo, i: number) => (
         <DataConnector
           dataConnector={dc}

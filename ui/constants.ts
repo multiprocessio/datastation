@@ -1,12 +1,17 @@
 export const APP_NAME = 'datathing';
 
-export let IS_DESKTOP_APP = false;
+let IS_DESKTOP_APP = false;
 try {
   IS_DESKTOP_APP = navigator.userAgent.toLowerCase().includes('electron');
 } catch (e) {}
 
 // TODO: handle hosted/saas mode
 export const MODE = IS_DESKTOP_APP ? 'desktop' : 'demo';
+
+export const MODE_FEATURES = {
+  appHeader: MODE === 'desktop',
+  dataConnectors: MODE !== 'demo',
+};
 
 export const DEBUG = true;
 

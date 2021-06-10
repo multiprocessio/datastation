@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
-import { APP_NAME, IS_DESKTOP_APP, MODE } from './constants';
+import { APP_NAME, MODE, MODE_FEATURES } from './constants';
 import { Pages } from './Pages';
 import { DataConnectors } from './DataConnectors';
 import {
@@ -85,7 +85,7 @@ function App() {
 
   return (
     <div>
-      {!IS_DESKTOP_APP && (
+      {MODE_FEATURES.appHeader && (
         <header>
           <span className="logo">{APP_NAME}</span>
           <Input
@@ -97,11 +97,13 @@ function App() {
         </header>
       )}
       <main>
-        <DataConnectors
-          state={state}
-          updateDataConnector={updateDataConnector}
-          addDataConnector={addDataConnector}
-        />
+        {MODE_FEATURES.dataConnectors && (
+          <DataConnectors
+            state={state}
+            updateDataConnector={updateDataConnector}
+            addDataConnector={addDataConnector}
+          />
+        )}
         <Pages
           state={state}
           updatePage={updatePage}
