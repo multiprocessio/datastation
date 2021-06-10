@@ -12,7 +12,11 @@ with open(sys.argv[1]) as f:
     script = f.read().split('\n')
 
 for line in script:
+    if IS_WINDOWS:
+        line = line.replace('/', '\\')
+
     line = line.split(' ')
+
     if line[0] == 'cp' and IS_WINDOWS:
         line[0] = 'copy'
     line = ' '.join(line)
