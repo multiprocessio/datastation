@@ -9,8 +9,8 @@ try {
 export const MODE = IS_DESKTOP_APP ? 'desktop' : 'demo';
 
 export const MODE_FEATURES = {
-  appHeader: MODE === 'desktop',
-  dataConnectors: MODE !== 'demo',
+  appHeader: MODE === 'demo',
+  connectors: MODE !== 'demo',
 };
 
 export const DEBUG = true;

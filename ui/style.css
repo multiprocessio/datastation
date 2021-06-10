@@ -47,13 +47,13 @@ input.input, label.input input {
     padding: 5px;
 }
 
-.block {
-    display: block;
+.vertical-align-center {
+    display: flex;
+    align-items: center;
 }
 
-.clickable {
-    cursor: pointer;
-    cursor: hand;
+.block {
+    display: block;
 }
 
 .button {
@@ -108,8 +108,6 @@ input.input, label.input input {
     font-size: .9rem;
     color: #777;
     padding-bottom: 15px;
-    display: flex;
-    align-items: center;
     white-space: nowrap;
 }
 
@@ -118,11 +116,11 @@ input.input, label.input input {
     padding-bottom: 15px;
 }
 
-.dataConnectors {
+.connectors {
     border-right: 1px solid #ccc;
 }
 
-.dataConnector {
+.connector {
     margin-bottom: 15px;
 }
 
@@ -159,7 +157,7 @@ input.input, label.input input {
     border-bottom: 0;
 }
 
-.panel-type, .dataConnector-type {
+.panel-type, .connector-type {
     color: #777;
     padding-right: 15px;
 }
@@ -168,16 +166,6 @@ input.input, label.input input {
     border-bottom: 1px solid #9f04ff;
     padding: 15px;
     margin-bottom: 15px;
-}
-
-.panel-header {
-    display: flex;
-    align-items: center;
-}
-
-.panel-controls {
-    display: flex;
-    align-items: center;
 }
 
 .panel-controls .button {

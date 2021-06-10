@@ -1,11 +1,11 @@
 import * as React from 'react';
 
-import { ProgramPanelInfo } from './ProjectStore';
+import { ProgramPanelInfo, PanelResult } from './ProjectStore';
 import { Select } from './component-library/Select';
 
 export function evalProgramPanel(
   panel: ProgramPanelInfo,
-  panelResults: Array<{ value?: Array<any> }>
+  panelResults: Array<PanelResult>
 ) {
   const program = panel.program;
   const anyWindow = window as any;

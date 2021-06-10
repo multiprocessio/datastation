@@ -6,6 +6,7 @@ import {
   PanelResult,
   GraphPanelInfo,
   HTTPPanelInfo,
+  SQLPanelInfo,
   ProgramPanelInfo,
   TablePanelInfo,
   LiteralPanelInfo,
@@ -15,6 +16,7 @@ import { evalHTTPPanel, HTTPPanelDetails } from './HTTPPanel';
 import { evalProgramPanel, ProgramPanelDetails } from './ProgramPanel';
 import { TablePanel, TablePanelDetails } from './TablePanel';
 import { evalLiteralPanel, LiteralPanelDetails } from './LiteralPanel';
+import { evalSQLPanel, SQLPanelDetails } from './SQLPanel';
 import { Button } from './component-library/Button';
 import { Input } from './component-library/Input';
 import { Select } from './component-library/Select';
@@ -26,6 +28,7 @@ export const PANEL_TYPE_ICON = {
   table: 'table_chart',
   graph: 'bar_chart',
   http: 'http',
+  sql: 'table_rows',
 };
 
 export async function evalPanel(
@@ -39,6 +42,8 @@ export async function evalPanel(
       return await evalProgramPanel(panel as ProgramPanelInfo, panelResults);
     case 'literal':
       return evalLiteralPanel(panel as LiteralPanelInfo);
+    case 'sql':
+      return evalSQLPanel(panel as SQLPanelInfo, panelResults);
     case 'graph':
       return (panelResults[(panel as GraphPanelInfo).graph.panelSource] || {})
         .value;
@@ -69,6 +74,9 @@ export function Panel({
   movePanel: (from: number, to: number) => void;
   panelCount: number;
 }) {
+  const [details, setDetails] = React.useState(false);
+  const [hidden, setHidden] = React.useState(false);
+
   let body = null;
   const exception =
     panelResults[panelIndex] && panelResults[panelIndex].exception;
@@ -90,9 +98,9 @@ export function Panel({
   }
 
   return (
-    <div className={`panel ${panel.collapsed ? 'panel--hidden' : ''}`}>
+    <div className={`panel ${hidden ? 'panel--hidden' : ''}`}>
       <div className="panel-head">
-        <div className="panel-header">
+        <div className="panel-header vertical-align-center">
           <Button
             icon
             disabled={panelIndex === 0}
@@ -111,15 +119,7 @@ export function Panel({
           >
             keyboard_arrow_down
           </Button>
-          <Button
-            icon
-            onClick={() => {
-              panel.details = !panel.details;
-              updatePanel(panel);
-            }}
-          >
-            {PANEL_TYPE_ICON[panel.type]}
-          </Button>
+          <span className="material-icons">{PANEL_TYPE_ICON[panel.type]}</span>
           <Input
             className="panel-name"
             onChange={(value: string) => {
@@ -128,7 +128,10 @@ export function Panel({
             }}
             value={panel.name}
           />
-          <span className="panel-controls flex-right">
+          <Button icon onClick={() => setDetails(!details)}>
+            {details ? 'unfold_less' : 'unfold_more'}
+          </Button>
+          <span className="panel-controls vertical-align-center flex-right">
             <span className="last-run">
               {(panelResults[panelIndex] || {}).lastRun
                 ? 'Last run ' + panelResults[panelIndex].lastRun
@@ -137,21 +140,15 @@ export function Panel({
             <Button icon onClick={() => reevalPanel(panelIndex)}>
               play_arrow
             </Button>
-            <Button
-              icon
-              onClick={() => {
-                panel.collapsed = !panel.collapsed;
-                updatePanel(panel);
-              }}
-            >
-              {panel.collapsed ? 'visibility_off' : 'visibility'}
+            <Button icon onClick={() => setHidden(!hidden)}>
+              {hidden ? 'visibility' : 'visibility_off'}
             </Button>
             <Button icon onClick={() => removePanel(panelIndex)}>
               delete
             </Button>
           </span>
         </div>
-        {panel.details && (
+        {details && (
           <div className="panel-details">
             <div>
               <span>Type:</span>
@@ -160,6 +157,9 @@ export function Panel({
                 onChange={(value: string) => {
                   let newPanel;
                   switch (value) {
+                    case 'sql':
+                      newPanel = new SQLPanelInfo(panel.name);
+                      break;
                     case 'literal':
                       newPanel = new LiteralPanelInfo(panel.name);
                       break;
@@ -183,11 +183,12 @@ export function Panel({
                   updatePanel(newPanel);
                 }}
               >
-                <option value="literal">Literal</option>
+                <option value="literal">SQL</option>
                 <option value="program">Code</option>
+                <option value="http">HTTP Request</option>
                 <option value="table">Table</option>
                 <option value="graph">Graph</option>
-                <option value="http">HTTP Request</option>
+                <option value="literal">Literal</option>
               </Select>
             </div>
             {panel.type === 'table' && (
@@ -195,6 +196,12 @@ export function Panel({
                 panel={panel as TablePanelInfo}
                 updatePanel={updatePanel}
                 panelCount={panelCount}
+              />
+            )}
+            {panel.type === 'sql' && (
+              <SQLPanelDetails
+                panel={panel as SQLPanelInfo}
+                updatePanel={updatePanel}
               />
             )}
             {panel.type === 'literal' && (
@@ -226,7 +233,7 @@ export function Panel({
           </div>
         )}
       </div>
-      {!panel.collapsed && (
+      {!hidden && (
         <div className="panel-body">
           {body ? (
             body
@@ -254,6 +261,13 @@ export function Panel({
               Use builtin functions, <code>DM_setPanel($some_array_data)</code>
               and <code>DM_getPanel($panel_number)</code>, to interact with
               other panels.
+            </div>
+          )}
+          {panel.type === 'sql' && (
+            <div className="alert alert-info">
+              Use builtin
+              <code>DM_getPanel($panel_number)[$panel_column]</code>
+              to interact with columns from other panels.
             </div>
           )}
         </div>

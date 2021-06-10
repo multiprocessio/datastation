@@ -11,6 +11,7 @@ import {
   ProjectStore,
   ProjectState,
   ConnectorInfo,
+  ProjectContext,
 } from './ProjectStore';
 import { Input } from './component-library/Input';
 
@@ -71,47 +72,49 @@ function App() {
   }
 
   function updateConnector(dcIndex: number, dc: ConnectorInfo) {
-    state.dataConnectors[dcIndex] = dc;
+    state.connectors[dcIndex] = dc;
     updateProjectState({ ...state });
   }
 
   function addConnector(dc: ConnectorInfo) {
-    if (!state.dataConnectors) {
-      state.dataConnectors = [];
+    if (!state.connectors) {
+      state.connectors = [];
     }
-    state.dataConnectors.push(dc);
+    state.connectors.push(dc);
     updateProjectState({ ...state });
   }
 
   return (
-    <div>
-      {MODE_FEATURES.appHeader && (
-        <header>
-          <span className="logo">{APP_NAME}</span>
-          <Input
-            onChange={(value: string) => {
-              updateProjectState({ ...state, projectName: value });
-            }}
-            value={state.projectName}
-          />
-        </header>
-      )}
-      <main>
-        {MODE_FEATURES.dataConnectors && (
-          <Connectors
-            state={state}
-            updateConnector={updateConnector}
-            addConnector={addConnector}
-          />
+    <ProjectContext.Provider value={state}>
+      <div>
+        {MODE_FEATURES.appHeader && (
+          <header>
+            <span className="logo">{APP_NAME}</span>
+            <Input
+              onChange={(value: string) => {
+                updateProjectState({ ...state, projectName: value });
+              }}
+              value={state.projectName}
+            />
+          </header>
         )}
-        <Pages
-          state={state}
-          updatePage={updatePage}
-          addPage={addPage}
-          setCurrentPage={setCurrentPage}
-        />
-      </main>
-    </div>
+        <main>
+          {MODE_FEATURES.connectors && (
+            <Connectors
+              state={state}
+              updateConnector={updateConnector}
+              addConnector={addConnector}
+            />
+          )}
+          <Pages
+            state={state}
+            updatePage={updatePage}
+            addPage={addPage}
+            setCurrentPage={setCurrentPage}
+          />
+        </main>
+      </div>
+    </ProjectContext.Provider>
   );
 }
 

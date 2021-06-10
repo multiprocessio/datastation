@@ -2,41 +2,44 @@ import * as React from 'react';
 
 import { ConnectorInfo, SQLConnectorInfo } from './ProjectStore';
 import { SQLConnector } from './SQLConnector';
+import { Button } from './component-library/Button';
 import { Input } from './component-library/Input';
 
 export function Connector({
-  dataConnector,
+  connector,
   updateConnector,
 }: {
-  dataConnector: ConnectorInfo;
+  connector: ConnectorInfo;
   updateConnector: (dc: ConnectorInfo) => void;
 }) {
   const [expanded, setExpanded] = React.useState(false);
 
   return (
-    <div
-      className="dataConnector clickable"
-      onClick={() => setExpanded(!expanded)}
-    >
-      <span className="dataConnector-type">{dataConnector.type}</span>
-      <span className="dataConnector-name">
-        {expanded ? (
-          <Input
-            className="dataConnector-name"
-            onChange={(value: string) =>
-              updateConnector({ ...dataConnector, name: value })
-            }
-            value={dataConnector.name}
-          />
-        ) : (
-          dataConnector.name
-        )}
-      </span>
+    <div className="connector">
+      <div className="connector-header vertical-align-center">
+        <span className="connector-type">{connector.type}</span>
+        <span className="connector-name">
+          {expanded ? (
+            <Input
+              className="connector-name"
+              onChange={(value: string) =>
+                updateConnector({ ...connector, name: value })
+              }
+              value={connector.name}
+            />
+          ) : (
+            connector.name
+          )}
+        </span>
+        <Button icon onClick={() => setExpanded(!expanded)}>
+          {expanded ? 'unfold_less' : 'unfold_more'}
+        </Button>
+      </div>
       {expanded && (
         <React.Fragment>
-          {dataConnector.type === 'sql' && (
+          {connector.type === 'sql' && (
             <SQLConnector
-              dataConnector={dataConnector as SQLConnectorInfo}
+              connector={connector as SQLConnectorInfo}
               updateConnector={updateConnector}
             />
           )}

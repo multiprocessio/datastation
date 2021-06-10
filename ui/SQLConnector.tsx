@@ -4,17 +4,18 @@ import { SQLConnectorInfo } from './ProjectStore';
 import { Input } from './component-library/Input';
 
 export function SQLConnector({
-  dataConnector,
+  connector,
   updateConnector,
 }: {
-  dataConnector: SQLConnectorInfo;
+  connector: SQLConnectorInfo;
   updateConnector: (dc: SQLConnectorInfo) => void;
 }) {
   // Don't try to show initial password
   const [password, setPassword] = React.useState('');
   React.useEffect(() => {
     // Sync typed password to state
-    updateConnector({ ...dataConnector, password });
+    connector.sql.password = password;
+    updateConnector(connector);
   }, [password]);
 
   return (
@@ -22,26 +23,29 @@ export function SQLConnector({
       <Input
         className="block"
         label="Address"
-        value={dataConnector.address}
-        onChange={(value: string) =>
-          updateConnector({ ...dataConnector, address: value })
-        }
+        value={connector.sql.address}
+        onChange={(value: string) => {
+          connector.sql.address = value;
+          updateConnector(connector);
+        }}
       />
       <Input
         className="block"
         label="Database"
-        value={dataConnector.database}
-        onChange={(value: string) =>
-          updateConnector({ ...dataConnector, database: value })
-        }
+        value={connector.sql.database}
+        onChange={(value: string) => {
+          connector.sql.database = value;
+          updateConnector(connector);
+        }}
       />
       <Input
         className="block"
         label="Username"
-        value={dataConnector.username}
-        onChange={(value: string) =>
-          updateConnector({ ...dataConnector, username: value })
-        }
+        value={connector.sql.username}
+        onChange={(value: string) => {
+          connector.sql.username = value;
+          updateConnector(connector);
+        }}
       />
       <Input
         className="block"

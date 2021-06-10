@@ -1,4 +1,5 @@
 import { IpcRenderer } from 'electron';
+import * as React from 'react';
 
 export interface PanelResult {
   exception?: string;
@@ -6,14 +7,60 @@ export interface PanelResult {
   lastRun: Date;
 }
 
-export type PanelInfoType = 'table' | 'http' | 'graph' | 'program' | 'literal';
+export type ConnectorInfoType = 'sql';
+
+export class ConnectorInfo {
+  name: string;
+  type: ConnectorInfoType;
+
+  constructor(name?: string, type?: ConnectorInfoType) {
+    this.name = name || 'Untitled Connector';
+    this.type = type || 'sql';
+  }
+}
+
+export type SQLConnectorInfoType = 'postgres';
+
+export class SQLConnectorInfo extends ConnectorInfo {
+  sql: {
+    type: SQLConnectorInfoType;
+    database: string;
+    username: string;
+    password: string;
+    address: string;
+  };
+
+  constructor(
+    name?: string,
+    type?: SQLConnectorInfoType,
+    database?: string,
+    username?: string,
+    password?: string,
+    address?: string
+  ) {
+    super(name, 'sql');
+    this.sql = {
+      type: type || 'postgres',
+      database: database || '',
+      username: username || '',
+      password: password || '',
+      address: address || '',
+    };
+  }
+}
+
+export type PanelInfoType =
+  | 'table'
+  | 'http'
+  | 'graph'
+  | 'program'
+  | 'literal'
+  | 'sql';
 
 export class PanelInfo {
   content: string;
   type: PanelInfoType;
   name: string;
-  collapsed: boolean = false;
-  details: boolean = false;
 
   constructor(name: string, type: PanelInfoType, content?: string) {
     this.content = content || '';
@@ -67,6 +114,15 @@ export class GraphPanelInfo extends PanelInfo {
       y: y || { field: '', label: '' },
       type: type || 'bar',
     };
+  }
+}
+
+export class SQLPanelInfo extends PanelInfo {
+  sql: SQLConnectorInfo;
+
+  constructor(name: string, sql?: SQLConnectorInfo, content?: string) {
+    super(name, 'sql', content);
+    this.sql = new SQLConnectorInfo();
   }
 }
 
@@ -130,44 +186,11 @@ export interface ProjectPage {
   name: string;
 }
 
-export type ConnectorInfoType = 'sql';
-
-export class ConnectorInfo {
-  name: string;
-  type: ConnectorInfoType;
-
-  constructor(name?: string, type?: ConnectorInfoType) {
-    this.name = name || 'Untitled Connector';
-    this.type = type || 'sql';
-  }
-}
-
-export class SQLConnectorInfo extends ConnectorInfo {
-  database: string;
-  username: string;
-  password: string;
-  address: string;
-
-  constructor(
-    name?: string,
-    database?: string,
-    username?: string,
-    password?: string,
-    address?: string
-  ) {
-    super(name, 'sql');
-    this.database = database;
-    this.username = username;
-    this.password = password;
-    this.address = address;
-  }
-}
-
 export interface ProjectState {
   pages: Array<ProjectPage>;
   projectName: string;
   currentPage: number;
-  dataConnectors: Array<ConnectorInfo>;
+  connectors: Array<ConnectorInfo>;
 }
 
 class LocalStorageStore {
@@ -241,7 +264,7 @@ export function makeStore(mode: string) {
 
 export const DEFAULT_PROJECT: ProjectState = {
   projectName: 'Untitled project',
-  dataConnectors: [],
+  connectors: [],
   pages: [
     {
       name: 'Untitled page',
@@ -261,3 +284,6 @@ export const DEFAULT_PROJECT: ProjectState = {
   ],
   currentPage: 0,
 };
+
+export const ProjectContext =
+  React.createContext<ProjectState>(DEFAULT_PROJECT);

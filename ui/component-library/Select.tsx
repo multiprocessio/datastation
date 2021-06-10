@@ -5,14 +5,24 @@ export function Select({
   onChange,
   children,
   disabled,
+  label,
+  className,
 }: {
   value: string;
   onChange: (value: string) => void;
   children: React.ReactNode;
   disabled?: boolean;
+  label?: string;
+  className?: string;
 }) {
-  return (
+  let selectClass = 'select';
+  if (className) {
+    selectClass += ' ' + className;
+  }
+
+  const select = (
     <select
+      className={label ? '' : className}
       value={value}
       onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
         onChange(e.target.value)
@@ -21,4 +31,15 @@ export function Select({
       disabled={disabled}
     />
   );
+
+  if (label) {
+    return (
+      <label className={selectClass}>
+        {label}
+        {select}
+      </label>
+    );
+  }
+
+  return select;
 }

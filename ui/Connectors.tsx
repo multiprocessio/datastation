@@ -16,8 +16,8 @@ export function Connectors({
   const [expanded, setExpanded] = React.useState(true);
   if (!expanded) {
     return (
-      <div className="section dataConnectors dataConnectors--collapsed">
-        <div className="title">
+      <div className="section connectors connectors--collapsed">
+        <div className="title vertical-align-center">
           <span className="material-icons-outlined">manage_search</span>
           <Button icon onClick={() => setExpanded(true)}>
             keyboard_arrow_right
@@ -28,17 +28,17 @@ export function Connectors({
   }
 
   return (
-    <div className="section dataConnectors">
-      <div className="title">
+    <div className="section connectors">
+      <div className="title vertical-align-center">
         <span className="material-icons-outlined">manage_search</span>
         Connectors
         <Button icon onClick={() => setExpanded(false)}>
           keyboard_arrow_left
         </Button>
       </div>
-      {state.dataConnectors?.map((dc: ConnectorInfo, i: number) => (
+      {state.connectors?.map((dc: ConnectorInfo, i: number) => (
         <Connector
-          dataConnector={dc}
+          connector={dc}
           updateConnector={(dc: ConnectorInfo) => updateConnector(i, dc)}
         />
       ))}
