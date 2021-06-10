@@ -18,10 +18,16 @@ contextBridge.exposeInMainWorld('asyncRpc', async function <
   };
   ipcRenderer.send(RPC_ASYNC_REQUEST, payload);
 
-  const result = await new Promise((resolve, reject) => {
+  const result = await new Promise<{
+    isError: boolean;
+    body: Response | string;
+  }>((resolve, reject) => {
     ipcRenderer.once(
       `${RPC_ASYNC_RESPONSE}:${payload.messageNumber}`,
-      (e: IpcRendererEvent, response: Response) => resolve(response)
+      (
+        e: IpcRendererEvent,
+        response: { isError: boolean; body: Response | string }
+      ) => resolve(response)
     );
   });
 

@@ -4,6 +4,7 @@ import { app, BrowserWindow, ipcMain } from 'electron';
 
 import { APP_NAME, DEBUG } from '../shared/constants';
 import { storeHandlers } from './store';
+import { registerRPCHandlers } from './rpc';
 import { evalSQLHandler } from './sql';
 import { evalHTTPHandler } from './http';
 

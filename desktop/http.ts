@@ -1,9 +1,9 @@
-import * as fetch from 'node-fetch';
+import fetch from 'node-fetch';
 
 import { HTTPConnectorInfo } from '../shared/state';
 
 export const evalHTTPHandler = {
-  name: 'evalHTTP',
+  resource: 'evalHTTP',
   handler: async function (body: string, { http }: HTTPConnectorInfo) {
     const headers: { [v: string]: string } = {};
     http.headers.forEach((h: { value: string; name: string }) => {

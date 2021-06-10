@@ -3,7 +3,7 @@ import { Client as PostgresClient } from 'pg';
 import { SQLConnectorInfo } from '../shared/state';
 
 export const evalSQLHandler = {
-  name: 'evalSQL',
+  resource: 'evalSQL',
   handler: async function (content: string, { sql }: SQLConnectorInfo) {
     const port = +sql.address.split(':')[1] || 5432;
     const host = sql.address.split(':')[0];

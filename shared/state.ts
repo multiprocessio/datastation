@@ -23,7 +23,8 @@ export class HTTPConnectorInfo extends ConnectorInfo {
   ) {
     super(name, 'http');
     this.http = {
-      headers: headers || ([] as {[value:string,name:string]}),
+      // This `any` is absurd
+      headers: headers || ([] as any),
       url: url || '',
     };
   }

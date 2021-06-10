@@ -9,7 +9,15 @@ interface RPCPayload {
   args: any;
 }
 
-function registerRPCHandlers(ipcMain: IpcMain, handlers: Array<RPCHandler>) {
+interface RPCHandler {
+  resource: string;
+  handler: (args: any, body: any) => Promise<any>;
+}
+
+export function registerRPCHandlers(
+  ipcMain: IpcMain,
+  handlers: Array<RPCHandler>
+) {
   ipcMain.on(
     RPC_ASYNC_REQUEST,
     async function (event: IpcMainEvent, payload: RPCPayload) {
