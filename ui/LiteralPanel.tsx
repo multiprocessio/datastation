@@ -27,6 +27,7 @@ export function LiteralPanelDetails({
     <React.Fragment>
       <div>
         <Select
+          label="Type"
           value={panel.literal.type}
           onChange={(value: string) => {
             switch (value) {

@@ -16,8 +16,8 @@ export function TablePanelDetails({
   return (
     <React.Fragment>
       <div>
-        <span>Panel Source:</span>
         <Input
+          label="Panel Source"
           type="number"
           min={0}
           max={panelCount - 1}
@@ -29,19 +29,19 @@ export function TablePanelDetails({
         />
       </div>
       <div>
-        <span>Columns</span>
+        <label>Columns</label>
         {panel.table.columns.map((c) => (
           <div>
-            Field:
             <Input
+              label="Field"
               value={c.field}
               onChange={(value: string) => {
                 c.field = value;
                 updatePanel(panel);
               }}
             />
-            Label:
             <Input
+              label="Label"
               value={c.label}
               onChange={(value: string) => {
                 c.label = value;

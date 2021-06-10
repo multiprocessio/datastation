@@ -50,6 +50,7 @@ export function HTTPPanelDetails({
     <React.Fragment>
       <div>
         <Select
+          label="Type"
           value={panel.http.type}
           onChange={(value: string) => {
             switch (value) {

@@ -56,6 +56,7 @@ export function ProgramPanelDetails({
     <React.Fragment>
       <div>
         <Select
+          label="Language"
           value={panel.program.type}
           onChange={(value: string) => {
             panel.program.type = value as 'javascript' | 'python';

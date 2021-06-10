@@ -151,8 +151,8 @@ export function Panel({
         {details && (
           <div className="panel-details">
             <div>
-              <span>Type:</span>
               <Select
+                label="Type"
                 value={panel.type}
                 onChange={(value: string) => {
                   let newPanel;

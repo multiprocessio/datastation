@@ -49,8 +49,8 @@ export function GraphPanelDetails({
   return (
     <React.Fragment>
       <div>
-        <span>Panel Source:</span>
         <Input
+          label="Panel Source"
           type="number"
           min={0}
           max={panelCount - 1}
@@ -62,8 +62,8 @@ export function GraphPanelDetails({
         />
       </div>
       <div>
-        <span>X-Axis Field:</span>
         <Input
+          label="X-Axis Field"
           value={panel.graph.x}
           onChange={(value: string) => {
             panel.graph.x = value;
@@ -72,18 +72,18 @@ export function GraphPanelDetails({
         />
       </div>
       <div>
-        <span>Y-Axis Field and Label</span>
+        <label>Y-Axis Field and Label</label>
         <div>
-          Field:
           <Input
+            label="Field"
             value={panel.graph.y.field}
             onChange={(value: string) => {
               panel.graph.y.field = value;
               updatePanel(panel);
             }}
           />
-          Label:
           <Input
+            label="Label"
             value={panel.graph.y.label}
             onChange={(value: string) => {
               panel.graph.y.label = value;

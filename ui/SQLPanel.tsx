@@ -39,22 +39,11 @@ export async function evalSQLPanel(
   }
 
   if (panel.sql.sql.type === 'postgres') {
-    const port = +panel.sql.sql.address.split(':')[1] || 5432;
-    const host = panel.sql.sql.address.split(':')[0];
-    const client = new PostgresClient({
-      user: panel.sql.sql.username,
-      password: panel.sql.sql.password,
-      database: panel.sql.sql.database,
-      host,
-      port,
-    });
-    try {
-      await client.connect();
-      const res = await client.query(content);
-      return res.rows;
-    } finally {
-      await client.end();
-    }
+    return await asyncRPC<SQLConnectorInfo, void, Array<object>>(
+      'evalSQLPanel',
+      null,
+      panel.sql.sql
+    );
   }
 
   throw new Error(`Unknown SQL type: '${panel.sql.type}'`);

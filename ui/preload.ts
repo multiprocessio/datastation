@@ -4,7 +4,7 @@ import { RPC_ASYNC_REQUEST, RPC_ASYNC_RESPONSE } from './constants';
 
 let messageNumber = -1;
 
-contextBridge.exposeInMainWorld('asyncRpc', function <
+contextBridge.exposeInMainWorld('asyncRpc', async function <
   Request,
   Args,
   Response
@@ -18,10 +18,16 @@ contextBridge.exposeInMainWorld('asyncRpc', function <
   };
   ipcRenderer.send(RPC_ASYNC_REQUEST, payload);
 
-  return new Promise((resolve, reject) => {
+  const result = await new Promise((resolve, reject) => {
     ipcRenderer.once(
       `${RPC_ASYNC_RESPONSE}:${payload.messageNumber}`,
       (e: IpcRendererEvent, response: Response) => resolve(response)
     );
   });
+
+  if (result.isError) {
+    throw result.body;
+  }
+
+  return result.body;
 });

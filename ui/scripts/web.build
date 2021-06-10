@@ -1,3 +1,3 @@
-yarn esbuild app.tsx --loader:.ts=tsx --loader:.js=jsx --bundle --sourcemap --outfile=build/web.js
-cp index.html build
-cp style.css build
+yarn esbuild ui/app.tsx --loader:.ts=tsx --loader:.js=jsx --bundle --sourcemap --outfile=build/web.js
+cp ui/index.html build
+cp ui/style.css build

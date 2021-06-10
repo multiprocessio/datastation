@@ -1,8 +1,8 @@
 import { IpcMain, IpcMainEvent } from 'electron';
 import fs from 'fs/promises';
 
-import { RPC_ASYNC_REQUEST, RPC_ASYNC_RESPONSE } from './constants';
-import { ProjectState } from './ProjectStore';
+import { RPC_ASYNC_REQUEST, RPC_ASYNC_RESPONSE } from '../shared/constants';
+import { ProjectState } from '../shared/store';
 
 interface RPCPayload {
   messageNumber: number;

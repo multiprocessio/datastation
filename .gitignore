@@ -3,3 +3,6 @@ node_modules
 ui/sample.csv
 ui/build
 ui/data
+data
+build
+electron/build
