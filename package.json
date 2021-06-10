@@ -8,7 +8,7 @@
         "build-web": "python ./scripts/build.py ./ui/scripts/web.build",
         "start-desktop": "yarn build-web && yarn build-desktop && yarn electron --trace-warnings build/desktop.js",
         "start": "yarn build-web && python3 -m http.server --directory build 8080",
-        "format": "yarn prettier --write \"**/*.ts\" \"**/*.tsx\""
+        "format": "yarn prettier --write \"**/*.ts\" \"**/*.tsx\" \"**/*.css\""
     },
     "dependencies": {
         "@types/pg": "^8.6.0",
