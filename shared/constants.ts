@@ -11,6 +11,7 @@ export const MODE = IS_DESKTOP_APP ? 'desktop' : 'demo';
 export const MODE_FEATURES = {
   appHeader: MODE === 'demo',
   connectors: MODE !== 'demo',
+  sql: MODE !== 'demo',
 };
 
 export const DEBUG = true;

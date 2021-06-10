@@ -6,7 +6,7 @@ The build process uses esbuild.
 
 ```bash
 $ cd ui
-$ yarn start
+$ yarn start-ui
 ```
 
 ## Load the desktop app

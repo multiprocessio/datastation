@@ -205,7 +205,7 @@ export function Panel({
                   updatePanel(newPanel);
                 }}
               >
-                <option value="sql">SQL</option>
+                {MODE_FEATURES.sql && <option value="sql">SQL</option>}
                 <option value="program">Code</option>
                 <option value="http">HTTP Request</option>
                 <option value="table">Table</option>
