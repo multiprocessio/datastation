@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { SQLConnectorInfo } from './ProjectStore';
+import { SQLConnectorInfo } from './../shared/state';
 import { Input } from './component-library/Input';
 
 export function SQLConnector({

@@ -1,7 +1,7 @@
 import * as React from 'react';
 import Chart from 'chart.js/auto';
 
-import { GraphPanelInfo } from './ProjectStore';
+import { GraphPanelInfo } from './../shared/state';
 import { Input } from './component-library/Input';
 
 export function GraphPanel({

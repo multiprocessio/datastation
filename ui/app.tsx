@@ -1,18 +1,17 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
-import { APP_NAME, MODE, MODE_FEATURES } from './constants';
-import { Pages } from './Pages';
-import { Connectors } from './Connectors';
+import { APP_NAME, MODE, MODE_FEATURES } from '../shared/constants';
 import {
-  DEFAULT_PROJECT,
-  makeStore,
   ProjectPage,
-  ProjectStore,
   ProjectState,
   ConnectorInfo,
-  ProjectContext,
-} from './ProjectStore';
+  DEFAULT_PROJECT,
+} from '../shared/state';
+
+import { Pages } from './Pages';
+import { Connectors } from './Connectors';
+import { makeStore, ProjectContext, ProjectStore } from './ProjectStore';
 import { Input } from './component-library/Input';
 
 function useProjectState(

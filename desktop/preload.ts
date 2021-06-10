@@ -1,6 +1,6 @@
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
 
-import { RPC_ASYNC_REQUEST, RPC_ASYNC_RESPONSE } from './constants';
+import { RPC_ASYNC_REQUEST, RPC_ASYNC_RESPONSE } from '../shared/constants';
 
 let messageNumber = -1;
 

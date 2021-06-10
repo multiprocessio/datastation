@@ -1,4 +1,4 @@
-export type ConnectorInfoType = 'sql';
+export type ConnectorInfoType = 'sql' | 'http';
 
 export class ConnectorInfo {
   name: string;
@@ -7,6 +7,25 @@ export class ConnectorInfo {
   constructor(name?: string, type?: ConnectorInfoType) {
     this.name = name || 'Untitled Connector';
     this.type = type || 'sql';
+  }
+}
+
+export class HTTPConnectorInfo extends ConnectorInfo {
+  http: {
+    headers: [{ value: string; name: string }];
+    url: string;
+  };
+
+  constructor(
+    name?: string,
+    url?: string,
+    headers?: [{ value: string; name: string }]
+  ) {
+    super(name, 'http');
+    this.http = {
+      headers: headers || ([] as {[value:string,name:string]}),
+      url: url || '',
+    };
   }
 }
 
@@ -120,15 +139,11 @@ export class SQLPanelInfo extends PanelInfo {
 export type HTTPPanelInfoType = 'csv' | 'json';
 
 export class HTTPPanelInfo extends PanelInfo {
-  http: {
-    type: HTTPPanelInfoType;
-  };
+  http: HTTPConnectorInfo;
 
-  constructor(name: string, type?: HTTPPanelInfoType, content?: string) {
+  constructor(name: string, http?: HTTPConnectorInfo, content?: string) {
     super(name, 'http', content);
-    this.http = {
-      type: type || 'json',
-    };
+    this.http = http || new HTTPConnectorInfo();
   }
 }
 
@@ -183,3 +198,26 @@ export interface ProjectState {
   currentPage: number;
   connectors: Array<ConnectorInfo>;
 }
+
+export const DEFAULT_PROJECT: ProjectState = {
+  projectName: 'Untitled project',
+  connectors: [],
+  pages: [
+    {
+      name: 'Untitled page',
+      panels: [
+        new LiteralPanelInfo(
+          'Raw CSV Text',
+          'csv',
+          'name,age\nPhil,12\nJames,17'
+        ),
+        (() => {
+          const panel = new GraphPanelInfo('Display');
+          panel.graph.y = { field: 'age', label: 'Age' };
+          return panel;
+        })(),
+      ],
+    },
+  ],
+  currentPage: 0,
+};

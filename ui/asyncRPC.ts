@@ -3,4 +3,4 @@ export const asyncRPC = (window as any).asyncRPC as <Request, Args, Response>(
   resource: string,
   args?: Args,
   body?: Request
-) => Response;
+) => Promise<Response>;

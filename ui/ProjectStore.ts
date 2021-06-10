@@ -1,8 +1,9 @@
 import { IpcRenderer } from 'electron';
 import * as React from 'react';
 
+import { ProjectState, DEFAULT_PROJECT } from '../shared/state';
+
 import { asyncRPC } from './asyncRPC';
-import { ProjectState } from '../shared/store';
 
 export interface PanelResult {
   exception?: string;
@@ -30,7 +31,7 @@ class LocalStorageStore {
 
 class DesktopIPCStore {
   update(projectId: string, newState: ProjectState) {
-    return asyncRpc<ProjectState, string, void>(
+    return asyncRPC<ProjectState, string, void>(
       'updateProjectState',
       projectId,
       newState
@@ -38,7 +39,7 @@ class DesktopIPCStore {
   }
 
   get(projectId: string) {
-    return asyncRpc<ProjectState, string, ProjectState>(
+    return asyncRPC<ProjectState, string, ProjectState>(
       'getProjectState',
       projectId
     );
@@ -47,11 +48,11 @@ class DesktopIPCStore {
 
 class HostedStore {
   async update(projectId: string, state: ProjectState) {
-    throw new Error('Unsupported store manager');
+    throw new Error('Unsupported state manager');
   }
 
   async get(): Promise<ProjectState> {
-    throw new Error('Unsupported store manager');
+    throw new Error('Unsupported state manager');
   }
 }
 
@@ -61,36 +62,13 @@ export interface ProjectStore {
 }
 
 export function makeStore(mode: string) {
-  const store = {
+  const state = {
     desktop: DesktopIPCStore,
     demo: LocalStorageStore,
     hosted: HostedStore,
   }[mode];
-  return new store();
+  return new state();
 }
-
-export const DEFAULT_PROJECT: ProjectState = {
-  projectName: 'Untitled project',
-  connectors: [],
-  pages: [
-    {
-      name: 'Untitled page',
-      panels: [
-        new LiteralPanelInfo(
-          'Raw CSV Text',
-          'csv',
-          'name,age\nPhil,12\nJames,17'
-        ),
-        (() => {
-          const panel = new GraphPanelInfo('Display');
-          panel.graph.y = { field: 'age', label: 'Age' };
-          return panel;
-        })(),
-      ],
-    },
-  ],
-  currentPage: 0,
-};
 
 export const ProjectContext =
   React.createContext<ProjectState>(DEFAULT_PROJECT);

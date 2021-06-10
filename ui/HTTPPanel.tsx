@@ -1,42 +1,39 @@
-import * as CSV from 'papaparse';
 import * as React from 'react';
 
-import { HTTPPanelInfo } from './ProjectStore';
-import { Select } from './component-library/Select';
+import { HTTPPanelInfo, HTTPConnectorInfo } from '../shared/state';
+import { MODE } from '../shared/constants';
+import { parseCSV } from '../shared/text';
 
-export function parseCSV(csvString: string) {
-  const csv = CSV.parse(csvString).data;
-  const data: Array<{ [k: string]: any }> = [];
-  csv.forEach((row: Array<string>, i: number) => {
-    // First row is header
-    if (i === 0) {
-      return;
-    }
-
-    const rowData: { [k: string]: any } = {};
-    (csv[0] as Array<string>).forEach(
-      (headerName: string, position: number) => {
-        rowData[headerName] = row[position];
-      }
-    );
-    data.push(rowData);
-  });
-
-  return data;
-}
+import { asyncRPC } from './asyncRPC';
+import { Button } from './component-library/Button';
+import { Input } from './component-library/Input';
 
 export async function evalHTTPPanel(panel: HTTPPanelInfo) {
-  const res = await window.fetch(panel.content);
-  const body = await res.text();
-  const http = panel.http;
-  switch (http.type) {
-    case 'csv':
-      return parseCSV(body);
-    case 'json':
-      return JSON.parse(body);
+  if (MODE === 'demo') {
+    const headers: { [v: string]: string } = {};
+    panel.http.http.headers.forEach((h: { value: string; name: string }) => {
+      headers[h.name] = h.value;
+    });
+    const res = await window.fetch(panel.content, {
+      headers,
+      body: panel.content,
+    });
+    const body = await res.text();
+    const type = res.headers.get('content-type');
+    switch (type) {
+      case 'text/csv':
+        return parseCSV(body);
+      case 'application/json':
+        return JSON.parse(body);
+    }
+    throw new Error(`Unknown HTTP type: '${type}'`);
   }
 
-  throw new Error(`Unknown HTTP type: '${http.type}'`);
+  return await asyncRPC<HTTPConnectorInfo, string, Array<object>>(
+    'evalHTTP',
+    panel.content,
+    panel.http
+  );
 }
 
 export function HTTPPanelDetails({
@@ -47,29 +44,49 @@ export function HTTPPanelDetails({
   updatePanel: (d: HTTPPanelInfo) => void;
 }) {
   return (
-    <React.Fragment>
+    <div>
+      <Input
+        className="block"
+        label="URL"
+        value={panel.http.http.url}
+        onChange={(value: string) => {
+          panel.http.http.url = value;
+          updatePanel(panel);
+        }}
+      />
       <div>
-        <Select
-          label="Type"
-          value={panel.http.type}
-          onChange={(value: string) => {
-            switch (value) {
-              case 'json':
-                panel.http.type = 'json';
-                break;
-              case 'csv':
-                panel.http.type = 'csv';
-                break;
-              default:
-                throw new Error(`Unknown HTTP type: ${value}`);
-            }
+        <label>Headers</label>
+        {panel.http.http.headers.map(
+          (header: { value: string; name: string }) => (
+            <div>
+              <Input
+                label="Name"
+                value={header.name}
+                onChange={(value: string) => {
+                  header.name = value;
+                  updatePanel(panel);
+                }}
+              />
+              <Input
+                label="Value"
+                value={header.value}
+                onChange={(value: string) => {
+                  header.value = value;
+                  updatePanel(panel);
+                }}
+              />
+            </div>
+          )
+        )}
+        <Button
+          onClick={() => {
+            panel.http.http.headers.push({ name: '', value: '' });
             updatePanel(panel);
           }}
         >
-          <option value="csv">CSV</option>
-          <option value="json">JSON</option>
-        </Select>
+          Add Header
+        </Button>
       </div>
-    </React.Fragment>
+    </div>
   );
 }

@@ -1,7 +1,7 @@
 import * as React from 'react';
 
-import { LiteralPanelInfo, ProjectPage } from './ProjectStore';
-import { parseCSV } from './HTTPPanel';
+import { LiteralPanelInfo } from '../shared/state';
+import { parseCSV } from '../shared/text';
 import { Select } from './component-library/Select';
 
 export function evalLiteralPanel(panel: LiteralPanelInfo) {

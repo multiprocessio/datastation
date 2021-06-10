@@ -1,6 +1,8 @@
 import * as React from 'react';
 
-import { ProgramPanelInfo, PanelResult } from './ProjectStore';
+import { ProgramPanelInfo } from './../shared/state';
+
+import { PanelResult } from './ProjectStore';
 import { Select } from './component-library/Select';
 
 export function evalProgramPanel(

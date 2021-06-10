@@ -3,14 +3,15 @@ import * as React from 'react';
 import {
   ProjectPage,
   PanelInfo,
-  PanelResult,
   GraphPanelInfo,
   HTTPPanelInfo,
   SQLPanelInfo,
   ProgramPanelInfo,
   TablePanelInfo,
   LiteralPanelInfo,
-} from './ProjectStore';
+} from './../shared/state';
+
+import { PanelResult } from './ProjectStore';
 import { GraphPanel, GraphPanelDetails } from './GraphPanel';
 import { evalHTTPPanel, HTTPPanelDetails } from './HTTPPanel';
 import { evalProgramPanel, ProgramPanelDetails } from './ProgramPanel';

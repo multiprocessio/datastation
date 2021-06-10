@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { Page } from './Page';
-import { ProjectState, ProjectPage } from './ProjectStore';
+import { ProjectState, ProjectPage } from './../shared/state';
 import { Button } from './component-library/Button';
 import { Input } from './component-library/Input';
 

@@ -2,9 +2,10 @@ import * as path from 'path';
 
 import { app, BrowserWindow, ipcMain } from 'electron';
 
-import { APP_NAME, DEBUG } from './constants';
-import { DesktopStore } from './electron-main/DesktopStore';
-import { evalSQLHandler } from './electron-main/sql';
+import { APP_NAME, DEBUG } from '../shared/constants';
+import { storeHandlers } from './store';
+import { evalSQLHandler } from './sql';
+import { evalHTTPHandler } from './http';
 
 app.whenReady().then(() => {
   const preload = path.join(__dirname, 'preload.js');
@@ -23,8 +24,11 @@ app.whenReady().then(() => {
   }
   win.loadFile('index.html');
 
-  const store = new DesktopStore();
-  registerRPCHandlers(ipcMain, [...store.handlers, evalSQLHandler]);
+  registerRPCHandlers(ipcMain, [
+    ...storeHandlers,
+    evalSQLHandler,
+    evalHTTPHandler,
+  ]);
 });
 
 app.on('window-all-closed', function () {

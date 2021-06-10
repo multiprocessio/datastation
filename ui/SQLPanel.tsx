@@ -1,13 +1,13 @@
-import { Client as PostgresClient } from 'pg';
 import * as React from 'react';
 
 import {
   ConnectorInfo,
   SQLConnectorInfo,
   SQLPanelInfo,
-  PanelResult,
-  ProjectContext,
-} from './ProjectStore';
+} from './../shared/state';
+
+import { asyncRPC } from './asyncRPC';
+import { PanelResult, ProjectContext } from './ProjectStore';
 import { Select } from './component-library/Select';
 
 export async function evalSQLPanel(
@@ -39,10 +39,10 @@ export async function evalSQLPanel(
   }
 
   if (panel.sql.sql.type === 'postgres') {
-    return await asyncRPC<SQLConnectorInfo, void, Array<object>>(
-      'evalSQLPanel',
-      null,
-      panel.sql.sql
+    return await asyncRPC<SQLConnectorInfo, string, Array<object>>(
+      'evalSQL',
+      content,
+      panel.sql
     );
   }
 

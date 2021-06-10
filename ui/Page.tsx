@@ -1,8 +1,10 @@
 import * as React from 'react';
 
+import { ProjectPage } from './../shared/state';
+
 import { Panels } from './Panels';
 import { evalPanel } from './Panel';
-import { ProjectPage, PanelResult } from './ProjectStore';
+import { PanelResult } from './ProjectStore';
 
 export function Page({
   page,

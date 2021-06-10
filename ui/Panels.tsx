@@ -1,13 +1,9 @@
 import * as React from 'react';
 
-import { Panel } from './Panel';
+import { ProjectPage, PanelInfo, LiteralPanelInfo } from './../shared/state';
 
-import {
-  ProjectPage,
-  PanelResult,
-  PanelInfo,
-  LiteralPanelInfo,
-} from './ProjectStore';
+import { PanelResult } from './ProjectStore';
+import { Panel } from './Panel';
 
 export function Panels({
   page,
