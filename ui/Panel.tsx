@@ -56,6 +56,10 @@ export async function evalPanel(
   }
 }
 
+function previewValueAsString(value: any) {
+  return JSON.stringify(value, null, 2);
+}
+
 export function Panel({
   panel,
   updatePanel,
@@ -97,6 +101,23 @@ export function Panel({
       />
     );
   }
+
+  const [preview, setPreview] = React.useState('');
+  const results = panelResults[panelIndex];
+  React.useEffect(() => {
+    if (
+      panel.type === 'http' ||
+      panel.type === 'sql' ||
+      panel.type === 'program'
+    ) {
+      if (results && !results.exception) {
+        const resultsLines = previewValueAsString(results.value).split('\n');
+        setPreview(resultsLines.slice(0, 10).join('\n'));
+      }
+    }
+  }, [results?.value, results?.exception]);
+
+  const [previewVisible, setPreviewVisible] = React.useState(false);
 
   return (
     <div className={`panel ${hidden ? 'panel--hidden' : ''}`}>
@@ -184,7 +205,7 @@ export function Panel({
                   updatePanel(newPanel);
                 }}
               >
-                <option value="literal">SQL</option>
+                <option value="sql">SQL</option>
                 <option value="program">Code</option>
                 <option value="http">HTTP Request</option>
                 <option value="table">Table</option>
@@ -269,6 +290,22 @@ export function Panel({
               Use builtin
               <code>DM_getPanel($panel_number)[$panel_column]</code>
               to interact with columns from other panels.
+            </div>
+          )}
+          {preview && (
+            <div
+              className="panel-preview"
+              onMouseEnter={() => setPreviewVisible(true)}
+              onMouseLeave={() => setPreviewVisible(false)}
+            >
+              {previewVisible && (
+                <pre className="panel-preview-results">
+                  <code>{preview}</code>
+                </pre>
+              )}
+              {!previewVisible && (
+                <div className="panel-preview-message">Preview results</div>
+              )}
             </div>
           )}
         </div>

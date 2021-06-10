@@ -165,7 +165,6 @@ input.input, label.input input {
 .panel-head {
     border-bottom: 1px solid #9f04ff;
     padding: 15px;
-    margin-bottom: 15px;
 }
 
 .panel-controls .button {
@@ -178,12 +177,22 @@ input.input, label.input input {
 
 .panel-body {
     padding: 15px;
+    position: relative;
 }
 
 .panel-order {
     width: 30px;
     margin-right: 15px;
     margin-left: 5px;
+}
+
+.panel-preview {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: rgba(0,0,0,75%);
+    padding: 5px;
+    color: white;
 }
 
 .last-run {

@@ -62,7 +62,7 @@ export function SQLPanelDetails({
     <React.Fragment>
       <div>
         <Select
-          label="Type"
+          label="Vendor"
           className="block"
           value={panel.sql.type}
           onChange={(value: string) => {
