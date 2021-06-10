@@ -19,25 +19,27 @@ export function DataConnectors({
 }) {
   const [expanded, setExpanded] = React.useState(true);
   if (!expanded) {
-    <div className="section dataConnectors dataConnectors--collapsed">
-      <div className="title">
-        <span className="material-icons-outlined">manage_search</span>
+    return (
+      <div className="section dataConnectors dataConnectors--collapsed">
+        <div className="title">
+          <span className="material-icons-outlined">manage_search</span>
+          <Button icon onClick={() => setExpanded(true)}>
+            keyboard_arrow_right
+          </Button>
+        </div>
       </div>
-      <Button icon onClick={() => setExpanded(true)}>
-        keyboard_arrow_left
-      </Button>
-    </div>;
+    );
   }
 
   return (
     <div className="section dataConnectors">
       <div className="title">
-        Data Connectors
         <span className="material-icons-outlined">manage_search</span>
+        Data Connectors
+        <Button icon onClick={() => setExpanded(false)}>
+          keyboard_arrow_left
+        </Button>
       </div>
-      <Button icon onClick={() => setExpanded(false)}>
-        keyboard_arrow_right
-      </Button>
       {state.dataConnectors?.map((dc: DataConnectorInfo, i: number) => (
         <DataConnector
           dataConnector={dc}

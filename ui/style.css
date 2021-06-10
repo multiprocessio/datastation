@@ -108,11 +108,18 @@ input.input, label.input input {
     font-size: .9rem;
     color: #777;
     padding-bottom: 15px;
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
 }
 
 .pages .section-title {
     font-size: 1.5rem;
     padding-bottom: 15px;
+}
+
+.dataConnectors {
+    border-right: 1px solid #ccc;
 }
 
 .dataConnector {
