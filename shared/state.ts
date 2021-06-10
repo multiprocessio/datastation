@@ -215,6 +215,7 @@ export const DEFAULT_PROJECT: ProjectState = {
         (() => {
           const panel = new GraphPanelInfo('Display');
           panel.graph.y = { field: 'age', label: 'Age' };
+          panel.graph.x = 'name';
           return panel;
         })(),
       ],

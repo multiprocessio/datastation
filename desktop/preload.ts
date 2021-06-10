@@ -4,7 +4,7 @@ import { RPC_ASYNC_REQUEST, RPC_ASYNC_RESPONSE } from '../shared/constants';
 
 let messageNumber = -1;
 
-contextBridge.exposeInMainWorld('asyncRpc', async function <
+contextBridge.exposeInMainWorld('asyncRPC', async function <
   Request,
   Args,
   Response

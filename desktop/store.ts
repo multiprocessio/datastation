@@ -6,18 +6,22 @@ export const storeHandlers = [
   {
     resource: 'getProjectState',
     handler: async (projectId: string) => {
-      const f = await fs.readFile(getFile(projectId));
+      const fileName = await ensureFile(projectId);
+      const f = await fs.readFile(fileName);
       return JSON.parse(f.toString());
     },
   },
   {
     resource: 'updateProjectState',
-    handler: (projectId: string, newState: ProjectState) => {
-      return fs.writeFile(getFile(projectId), JSON.stringify(newState));
+    handler: async (projectId: string, newState: ProjectState) => {
+      const fileName = await ensureFile(projectId);
+      return fs.writeFile(fileName, JSON.stringify(newState));
     },
   },
 ];
 
-function getFile(projectId: string) {
-  return `data/${projectId}.project`;
+async function ensureFile(projectId: string) {
+  const base = 'data';
+  await fs.mkdir(base, { recursive: true });
+  return `${base}/${projectId}.project`;
 }

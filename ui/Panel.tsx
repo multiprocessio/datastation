@@ -10,6 +10,7 @@ import {
   TablePanelInfo,
   LiteralPanelInfo,
 } from './../shared/state';
+import { MODE_FEATURES } from '../shared/constants';
 
 import { PanelResult } from './ProjectStore';
 import { GraphPanel, GraphPanelDetails } from './GraphPanel';
