@@ -197,6 +197,9 @@ header {
   background: rgba(0, 0, 0, 75%);
   padding: 5px;
   color: white;
+  max-width: 300px;
+  max-height: 300px;
+  overflow: auto;
 }
 
 .last-run {

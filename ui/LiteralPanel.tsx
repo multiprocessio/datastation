@@ -1,19 +1,17 @@
 import * as React from 'react';
 
 import { LiteralPanelInfo } from '../shared/state';
-import { parseCSV } from '../shared/text';
+import { parseText } from '../shared/text';
 import { Select } from './component-library/Select';
 
 export function evalLiteralPanel(panel: LiteralPanelInfo) {
   const literal = panel.literal;
-  switch (literal.type) {
-    case 'csv':
-      return parseCSV(panel.content);
-    case 'json':
-      return JSON.parse(panel.content);
-  }
+  const type = {
+    csv: 'text/csv',
+    json: 'application/json',
+  }[literal.type];
 
-  throw new Error(`Unknown literal type: '${literal.type}'`);
+  return parseText(type, panel.content);
 }
 
 export function LiteralPanelDetails({

@@ -80,7 +80,9 @@ export function Panel({
   movePanel: (from: number, to: number) => void;
   panelCount: number;
 }) {
-  const [details, setDetails] = React.useState(false);
+  const [details, setDetails] = React.useState(
+    panel.type === 'table' || panel.type === 'graph' || panel.type === 'http'
+  );
   const [hidden, setHidden] = React.useState(false);
 
   let body = null;
@@ -113,7 +115,7 @@ export function Panel({
     ) {
       if (results && !results.exception) {
         const resultsLines = previewValueAsString(results.value).split('\n');
-        setPreview(resultsLines.slice(0, 10).join('\n'));
+        setPreview(resultsLines.slice(0, 50).join('\n'));
       }
     }
   }, [results?.value, results?.exception]);
@@ -151,9 +153,13 @@ export function Panel({
             }}
             value={panel.name}
           />
-          <Button icon onClick={() => setDetails(!details)}>
-            {details ? 'unfold_less' : 'unfold_more'}
-          </Button>
+          {panel.type !== 'table' &&
+            panel.type !== 'graph' &&
+            panel.type !== 'http' && (
+              <Button icon onClick={() => setDetails(!details)}>
+                {details ? 'unfold_less' : 'unfold_more'}
+              </Button>
+            )}
           <span className="panel-controls vertical-align-center flex-right">
             <span className="last-run">
               {(panelResults[panelIndex] || {}).lastRun

@@ -7,6 +7,7 @@ import {
   ProjectState,
   ConnectorInfo,
   DEFAULT_PROJECT,
+  rawStateToObjects,
 } from '../shared/state';
 
 import { Pages } from './Pages';
@@ -30,10 +31,12 @@ function useProjectState(
     async function fetch() {
       let state;
       try {
-        state = await store.get(projectId);
+        const rawState = await store.get(projectId);
+        console.log('here?????');
+        state = rawStateToObjects(rawState);
       } catch (e) {
         console.error(e);
-        state = DEFAULT_PROJECT;
+        state = rawStateToObjects(DEFAULT_PROJECT);
         await store.update(projectId, state);
       }
       setProjectState(state);
@@ -56,18 +59,16 @@ function App() {
     return <span>Loading</span>;
   }
 
+  const [currentPage, setCurrentPage] = React.useState(0);
+
   function updatePage(page: ProjectPage) {
-    state.pages[state.currentPage] = page;
+    state.pages[currentPage] = page;
     updateProjectState({ ...state });
   }
 
   function addPage(page: ProjectPage) {
     state.pages.push(page);
     updateProjectState({ ...state });
-  }
-
-  function setCurrentPage(pageIndex: number) {
-    updateProjectState({ ...state, currentPage: pageIndex });
   }
 
   function updateConnector(dcIndex: number, dc: ConnectorInfo) {
@@ -109,6 +110,7 @@ function App() {
             state={state}
             updatePage={updatePage}
             addPage={addPage}
+            currentPage={currentPage}
             setCurrentPage={setCurrentPage}
           />
         </main>

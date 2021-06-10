@@ -3,30 +3,19 @@ import * as React from 'react';
 import { ProjectPage } from './../shared/state';
 
 import { Panels } from './Panels';
-import { evalPanel } from './Panel';
 import { PanelResult } from './ProjectStore';
 
 export function Page({
   page,
   updatePage,
+  reevalPanel,
+  panelResults,
 }: {
   page: ProjectPage;
   updatePage: (page: ProjectPage) => void;
+  panelResults: Array<PanelResult>;
+  reevalPanel: (panelIndex: number) => void;
 }) {
-  const [panelResults, setPanelResults] = React.useState<Array<PanelResult>>(
-    []
-  );
-  async function reevalPanel(panelIndex: number) {
-    try {
-      const r = await evalPanel(page, panelIndex, panelResults);
-      panelResults[panelIndex] = { lastRun: new Date(), value: r };
-    } catch (e) {
-      panelResults[panelIndex] = { lastRun: new Date(), exception: e.stack };
-    } finally {
-      setPanelResults({ ...panelResults });
-    }
-  }
-
   return (
     <Panels
       page={page}

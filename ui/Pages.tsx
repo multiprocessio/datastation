@@ -1,7 +1,9 @@
 import * as React from 'react';
 
+import { ProjectState, ProjectPage, PanelResult } from './../shared/state';
+
+import { evalPanel } from './Panel';
 import { Page } from './Page';
-import { ProjectState, ProjectPage } from './../shared/state';
 import { Button } from './component-library/Button';
 import { Input } from './component-library/Input';
 
@@ -10,13 +12,40 @@ export function Pages({
   addPage,
   updatePage,
   setCurrentPage,
+  currentPage,
 }: {
   state: ProjectState;
   addPage: (page: ProjectPage) => void;
   updatePage: (page: ProjectPage) => void;
   setCurrentPage: (pageIndex: number) => void;
+  currentPage: string;
 }) {
-  const page = state.pages[state.currentPage];
+  const page = state.pages[currentPage];
+  const [panelResults, setPanelResults] = React.useState<
+    Array<Array<PanelResult>>
+  >([]);
+  // Reset results when project changes
+  React.useEffect(() => {
+    setPanelResults([]);
+  }, [state.id]);
+
+  async function reevalPanel(panelIndex: number) {
+    if (!panelResults[currentPage]) {
+      panelResults[currentPage] = [];
+    }
+
+    try {
+      const r = await evalPanel(page, panelIndex, panelResults[currentPage]);
+      panelResults[currentPage][panelIndex] = { lastRun: new Date(), value: r };
+    } catch (e) {
+      panelResults[currentPage][panelIndex] = {
+        lastRun: new Date(),
+        exception: e.stack,
+      };
+    } finally {
+      setPanelResults({ ...panelResults });
+    }
+  }
 
   return (
     <div className="section pages">
@@ -27,7 +56,7 @@ export function Pages({
           value={page.name}
         />
         {state.pages.map((page: ProjectPage, i: number) =>
-          i === state.currentPage ? undefined : (
+          i === currentPage ? undefined : (
             <Button className="page-name" onClick={() => setCurrentPage(i)}>
               {page.name}
             </Button>
@@ -45,7 +74,7 @@ export function Pages({
         </Button>
       </div>
 
-      <Page page={page} updatePage={updatePage} />
+      <Page page={page} updatePage={updatePage} reevalPanel={reevalPanel} />
     </div>
   );
 }

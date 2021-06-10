@@ -20,3 +20,14 @@ export function parseCSV(csvString: string) {
 
   return data;
 }
+
+export function parseText(type: string, body: string) {
+  switch (type.split(';')[0]) {
+    case 'text/csv':
+      return parseCSV(body);
+    case 'application/json':
+      return JSON.parse(body);
+  }
+
+  throw new Error(`Unknown HTTP type: '${type}'`);
+}
