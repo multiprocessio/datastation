@@ -51,6 +51,11 @@ input.input, label.input input {
     display: block;
 }
 
+.clickable {
+    cursor: pointer;
+    cursor: hand;
+}
+
 .button {
     outline: 0;
     border: 1px solid #9f04ff;

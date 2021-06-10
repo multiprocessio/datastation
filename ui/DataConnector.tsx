@@ -14,7 +14,10 @@ export function DataConnector({
   const [expanded, setExpanded] = React.useState(false);
 
   return (
-    <div className="dataConnector" onClick={() => setExpanded(!expanded)}>
+    <div
+      className="dataConnector clickable"
+      onClick={() => setExpanded(!expanded)}
+    >
       <span className="dataConnector-type">{dataConnector.type}</span>
       <span className="dataConnector-name">
         {expanded ? (
