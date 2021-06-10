@@ -130,19 +130,19 @@ export interface ProjectPage {
   name: string;
 }
 
-export type DataConnectorInfoType = 'sql';
+export type ConnectorInfoType = 'sql';
 
-export class DataConnectorInfo {
+export class ConnectorInfo {
   name: string;
-  type: DataConnectorInfoType;
+  type: ConnectorInfoType;
 
-  constructor(name?: string, type?: DataConnectorInfoType) {
-    this.name = name || 'Untitled Data Connector';
+  constructor(name?: string, type?: ConnectorInfoType) {
+    this.name = name || 'Untitled Connector';
     this.type = type || 'sql';
   }
 }
 
-export class SQLDataConnectorInfo extends DataConnectorInfo {
+export class SQLConnectorInfo extends ConnectorInfo {
   database: string;
   username: string;
   password: string;
@@ -167,7 +167,7 @@ export interface ProjectState {
   pages: Array<ProjectPage>;
   projectName: string;
   currentPage: number;
-  dataConnectors: Array<DataConnectorInfo>;
+  dataConnectors: Array<ConnectorInfo>;
 }
 
 class LocalStorageStore {

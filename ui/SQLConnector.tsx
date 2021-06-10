@@ -1,20 +1,20 @@
 import * as React from 'react';
 
-import { SQLDataConnectorInfo } from './ProjectStore';
+import { SQLConnectorInfo } from './ProjectStore';
 import { Input } from './component-library/Input';
 
-export function SQLDataConnector({
+export function SQLConnector({
   dataConnector,
-  updateDataConnector,
+  updateConnector,
 }: {
-  dataConnector: SQLDataConnectorInfo;
-  updateDataConnector: (dc: SQLDataConnectorInfo) => void;
+  dataConnector: SQLConnectorInfo;
+  updateConnector: (dc: SQLConnectorInfo) => void;
 }) {
   // Don't try to show initial password
   const [password, setPassword] = React.useState('');
   React.useEffect(() => {
     // Sync typed password to state
-    updateDataConnector({ ...dataConnector, password });
+    updateConnector({ ...dataConnector, password });
   }, [password]);
 
   return (
@@ -24,7 +24,7 @@ export function SQLDataConnector({
         label="Address"
         value={dataConnector.address}
         onChange={(value: string) =>
-          updateDataConnector({ ...dataConnector, address: value })
+          updateConnector({ ...dataConnector, address: value })
         }
       />
       <Input
@@ -32,7 +32,7 @@ export function SQLDataConnector({
         label="Database"
         value={dataConnector.database}
         onChange={(value: string) =>
-          updateDataConnector({ ...dataConnector, database: value })
+          updateConnector({ ...dataConnector, database: value })
         }
       />
       <Input
@@ -40,7 +40,7 @@ export function SQLDataConnector({
         label="Username"
         value={dataConnector.username}
         onChange={(value: string) =>
-          updateDataConnector({ ...dataConnector, username: value })
+          updateConnector({ ...dataConnector, username: value })
         }
       />
       <Input

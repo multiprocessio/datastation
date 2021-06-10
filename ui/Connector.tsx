@@ -1,15 +1,15 @@
 import * as React from 'react';
 
-import { DataConnectorInfo, SQLDataConnectorInfo } from './ProjectStore';
-import { SQLDataConnector } from './SQLDataConnector';
+import { ConnectorInfo, SQLConnectorInfo } from './ProjectStore';
+import { SQLConnector } from './SQLConnector';
 import { Input } from './component-library/Input';
 
-export function DataConnector({
+export function Connector({
   dataConnector,
-  updateDataConnector,
+  updateConnector,
 }: {
-  dataConnector: DataConnectorInfo;
-  updateDataConnector: (dc: DataConnectorInfo) => void;
+  dataConnector: ConnectorInfo;
+  updateConnector: (dc: ConnectorInfo) => void;
 }) {
   const [expanded, setExpanded] = React.useState(false);
 
@@ -24,7 +24,7 @@ export function DataConnector({
           <Input
             className="dataConnector-name"
             onChange={(value: string) =>
-              updateDataConnector({ ...dataConnector, name: value })
+              updateConnector({ ...dataConnector, name: value })
             }
             value={dataConnector.name}
           />
@@ -35,9 +35,9 @@ export function DataConnector({
       {expanded && (
         <React.Fragment>
           {dataConnector.type === 'sql' && (
-            <SQLDataConnector
-              dataConnector={dataConnector as SQLDataConnectorInfo}
-              updateDataConnector={updateDataConnector}
+            <SQLConnector
+              dataConnector={dataConnector as SQLConnectorInfo}
+              updateConnector={updateConnector}
             />
           )}
         </React.Fragment>

@@ -1,21 +1,17 @@
 import * as React from 'react';
 
-import {
-  DataConnectorInfo,
-  ProjectState,
-  SQLDataConnectorInfo,
-} from './ProjectStore';
-import { DataConnector } from './DataConnector';
+import { ConnectorInfo, ProjectState, SQLConnectorInfo } from './ProjectStore';
+import { Connector } from './Connector';
 import { Button } from './component-library/Button';
 
-export function DataConnectors({
+export function Connectors({
   state,
-  addDataConnector,
-  updateDataConnector,
+  addConnector,
+  updateConnector,
 }: {
   state: ProjectState;
-  addDataConnector: (dc: DataConnectorInfo) => void;
-  updateDataConnector: (n: number, dc: DataConnectorInfo) => void;
+  addConnector: (dc: ConnectorInfo) => void;
+  updateConnector: (n: number, dc: ConnectorInfo) => void;
 }) {
   const [expanded, setExpanded] = React.useState(true);
   if (!expanded) {
@@ -35,27 +31,25 @@ export function DataConnectors({
     <div className="section dataConnectors">
       <div className="title">
         <span className="material-icons-outlined">manage_search</span>
-        Data Connectors
+        Connectors
         <Button icon onClick={() => setExpanded(false)}>
           keyboard_arrow_left
         </Button>
       </div>
-      {state.dataConnectors?.map((dc: DataConnectorInfo, i: number) => (
-        <DataConnector
+      {state.dataConnectors?.map((dc: ConnectorInfo, i: number) => (
+        <Connector
           dataConnector={dc}
-          updateDataConnector={(dc: DataConnectorInfo) =>
-            updateDataConnector(i, dc)
-          }
+          updateConnector={(dc: ConnectorInfo) => updateConnector(i, dc)}
         />
       ))}
       <button
         type="button"
         className="button button--primary"
         onClick={() => {
-          addDataConnector(new SQLDataConnectorInfo());
+          addConnector(new SQLConnectorInfo());
         }}
       >
-        New Data Connector
+        New Connector
       </button>
     </div>
   );

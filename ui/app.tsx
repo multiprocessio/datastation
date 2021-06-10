@@ -3,14 +3,14 @@ import * as ReactDOM from 'react-dom';
 
 import { APP_NAME, MODE, MODE_FEATURES } from './constants';
 import { Pages } from './Pages';
-import { DataConnectors } from './DataConnectors';
+import { Connectors } from './Connectors';
 import {
   DEFAULT_PROJECT,
   makeStore,
   ProjectPage,
   ProjectStore,
   ProjectState,
-  DataConnectorInfo,
+  ConnectorInfo,
 } from './ProjectStore';
 import { Input } from './component-library/Input';
 
@@ -70,12 +70,12 @@ function App() {
     updateProjectState({ ...state, currentPage: pageIndex });
   }
 
-  function updateDataConnector(dcIndex: number, dc: DataConnectorInfo) {
+  function updateConnector(dcIndex: number, dc: ConnectorInfo) {
     state.dataConnectors[dcIndex] = dc;
     updateProjectState({ ...state });
   }
 
-  function addDataConnector(dc: DataConnectorInfo) {
+  function addConnector(dc: ConnectorInfo) {
     if (!state.dataConnectors) {
       state.dataConnectors = [];
     }
@@ -98,10 +98,10 @@ function App() {
       )}
       <main>
         {MODE_FEATURES.dataConnectors && (
-          <DataConnectors
+          <Connectors
             state={state}
-            updateDataConnector={updateDataConnector}
-            addDataConnector={addDataConnector}
+            updateConnector={updateConnector}
+            addConnector={addConnector}
           />
         )}
         <Pages
