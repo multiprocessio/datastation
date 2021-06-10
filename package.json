@@ -4,7 +4,7 @@
     "license": "MIT",
     "scripts": {
         "typecheck": "yarn tsc",
-        "build-desktop": "python ./scripts/build.py ./ui/scripts/desktop.build",
+        "build-desktop": "python ./scripts/build.py ./desktop/scripts/desktop.build",
         "build-web": "python ./scripts/build.py ./ui/scripts/web.build",
         "start-desktop": "yarn build-web && yarn build-desktop && yarn electron --trace-warnings build/desktop.js",
         "start": "yarn build-web && python3 -m http.server --directory build 8080",

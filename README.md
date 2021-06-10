@@ -13,13 +13,19 @@ $ yarn start
 
 ```bash
 $ cd ui
-$ yarn start-electron
+$ yarn start-desktop
 ```
 
-## Devving on the UI
+## Devving
 
-To format all JavaScript files: 
+To format all files:
 
 ```bash
-yarn format
+$ yarn format
+```
+
+To run TypeScript type checker:
+
+```bash
+$ yarn tsc
 ```
