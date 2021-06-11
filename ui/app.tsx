@@ -99,6 +99,9 @@ function App() {
               <a href="https://datastation.multiprocess.io/demo.html" target="_blank">
                 About this app
               </a>
+              <a href="https://github.com/multiprocessio/datastation" target="_blank">
+                <img height="32" width="32" src="https://cdn.jsdelivr.net/npm/simple-icons@v5/icons/github.svg" />
+              </a>
             </div>
           </header>
         )}
