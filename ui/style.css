@@ -11,6 +11,13 @@ main {
 header {
   background: #9f04ff;
   color: white;
+  display: flex;
+}
+
+header a {
+  color: white;
+  text-decoration: none;
+  padding-left: 15px;
 }
 
 .logo {
@@ -46,6 +53,9 @@ header {
 input.input,
 label.input input {
   padding: 5px;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid #aaa;
 }
 
 .vertical-align-center {

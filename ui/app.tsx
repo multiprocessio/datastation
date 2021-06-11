@@ -13,6 +13,7 @@ import {
 import { Pages } from './Pages';
 import { Connectors } from './Connectors';
 import { makeStore, ProjectContext, ProjectStore } from './ProjectStore';
+import { Button } from './component-library/Button';
 import { Input } from './component-library/Input';
 
 function useProjectState(
@@ -33,13 +34,13 @@ function useProjectState(
       try {
         let rawState = await store.get(projectId);
         if (!rawState) {
-          rawState = DEFAULT_PROJECT;
+          state = DEFAULT_PROJECT;
+        } else {
+          state = rawStateToObjects(rawState);
         }
-        state = rawStateToObjects(rawState);
       } catch (e) {
         console.error(e);
-        state = rawStateToObjects(DEFAULT_PROJECT);
-        await store.update(projectId, state);
+        state = DEFAULT_PROJECT;
       }
       setProjectState(state);
     }
@@ -89,14 +90,16 @@ function App() {
     <ProjectContext.Provider value={state}>
       <div>
         {MODE_FEATURES.appHeader && (
-          <header>
+          <header className="vertical-align-center">
             <span className="logo">{APP_NAME}</span>
-            <Input
-              onChange={(value: string) => {
-                updateProjectState({ ...state, projectName: value });
-              }}
-              value={state.projectName}
-            />
+            <div className="flex-right">
+              <Button onClick={() => updateProjectState(DEFAULT_PROJECT)}>
+                Reset app state
+              </Button>
+              <a href="https://datastation.multiprocess.io/demo">
+                About this app
+              </a>
+            </div>
           </header>
         )}
         <main>
