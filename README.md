@@ -1,31 +1,19 @@
-# Data IDE
+# DataStation - The Data IDE for Developers
 
-The build process uses esbuild.
+DataStation allows you to seamless connect SQL queries, HTTP requests,
+scripting, and visualization in a single platform.
 
-## Load the in-browser app
+## Try it out
 
-```bash
-$ cd ui
-$ yarn start-ui
-```
+Visit https://app.datastation.multiprocess.io to try out the entirely
+in-memory browser application. Access to the desktop application is
+coming soon.
 
-## Load the desktop app
+## Subscribe to updates
 
-```bash
-$ cd ui
-$ yarn start-desktop
-```
+If you want to keep in touch, [share your
+email](https://forms.gle/wH5fdxrxXwZHoNxk8).
 
-## Devving
+## License
 
-To format all files:
-
-```bash
-$ yarn format
-```
-
-To run TypeScript type checker:
-
-```bash
-$ yarn tsc
-```
+This software is licensed under an Apache 2 license.
