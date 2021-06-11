@@ -8,13 +8,14 @@ scripting, and visualization in a single platform.
 ## Try it out
 
 Visit https://app.datastation.multiprocess.io to try out the entirely
-in-memory browser application. Access to the desktop application is
-coming soon.
+in-memory browser application.
+
+Access to the desktop application is coming soon.
 
 ## Subscribe to updates
 
-If you want to keep in touch, [share your
-email](https://forms.gle/wH5fdxrxXwZHoNxk8).
+If you want to keep in touch, [sign up
+here](https://forms.gle/wH5fdxrxXwZHoNxk8).
 
 ## Community
 
