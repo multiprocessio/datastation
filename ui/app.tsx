@@ -92,15 +92,28 @@ function App() {
         {MODE_FEATURES.appHeader && (
           <header className="vertical-align-center">
             <span className="logo">{APP_NAME}</span>
-            <div className="flex-right">
+            <div className="flex-right vertical-align-center">
               <Button onClick={() => updateProjectState(DEFAULT_PROJECT)}>
                 Reset app state
               </Button>
-              <a href="https://datastation.multiprocess.io/demo.html" target="_blank">
+              <a
+                href="https://datastation.multiprocess.io/demo.html"
+                target="_blank"
+              >
                 About this app
               </a>
-              <a href="https://github.com/multiprocessio/datastation" target="_blank">
-                <img height="32" width="32" src="https://cdn.jsdelivr.net/npm/simple-icons@v5/icons/github.svg" />
+              <a
+                href="https://github.com/multiprocessio/datastation"
+                target="_blank"
+              >
+                <iframe
+                  src="https://ghbtns.com/github-btn.html?user=multiprocessio&repo=datastation&type=star&count=true&size=medium"
+                  frameborder="0"
+                  scrolling="0"
+                  width="71"
+                  height="20"
+                  title="GitHub"
+                ></iframe>
               </a>
             </div>
           </header>
