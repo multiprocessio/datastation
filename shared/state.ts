@@ -121,7 +121,7 @@ export type GraphPanelInfoType = 'bar';
 
 export class GraphPanelInfo extends PanelInfo {
   graph: {
-    panelSource: string;
+    panelSource: number;
     y: GraphY;
     x: string;
     type: GraphPanelInfoType;
@@ -129,7 +129,7 @@ export class GraphPanelInfo extends PanelInfo {
 
   constructor(
     name?: string,
-    panelSource?: string,
+    panelSource?: number,
     y?: GraphY,
     x?: string,
     type?: GraphPanelInfoType,
@@ -137,7 +137,7 @@ export class GraphPanelInfo extends PanelInfo {
   ) {
     super('graph', name, content);
     this.graph = {
-      panelSource: panelSource || '',
+      panelSource: panelSource || 0,
       x: x || '',
       y: y || { field: '', label: '' },
       type: type || 'bar',
@@ -173,13 +173,13 @@ export interface TableColumn {
 export class TablePanelInfo extends PanelInfo {
   table: {
     columns: Array<TableColumn>;
-    panelSource: string;
+    panelSource: number;
   };
 
   constructor(
     name?: string,
     columns: Array<TableColumn> = [],
-    panelSource: string = '',
+    panelSource: number = 0,
     content?: string
   ) {
     super('table', name, content);
@@ -205,8 +205,6 @@ export class LiteralPanelInfo extends PanelInfo {
   }
 }
 
-export type Array<T> = { [k: string]: T };
-
 export class ProjectPage {
   panels: Array<PanelInfo>;
   name: string;
@@ -225,37 +223,47 @@ export class ProjectState {
   connectors: Array<ConnectorInfo>;
   id: string;
 
-  constructor(pages?: Array<ProjectPage>, projectName?: string);
+  constructor(
+    projectName?: string,
+    pages?: Array<ProjectPage>,
+    connectors?: Array<ConnectorInfo>
+  ) {
+    this.pages = pages || [];
+    this.projectName = projectName || '';
+    this.connectors = connectors || [];
+    this.id = uuid.v4();
+  }
 }
 
-export const DEFAULT_PROJECT: ProjectState = {
-  projectName: 'Untitled project',
-  connectors: [],
-  pages: [
-    {
-      name: 'Untitled page',
-      panels: [
-        new LiteralPanelInfo(
-          'Raw CSV Text',
-          'csv',
-          'name,age\nPhil,12\nJames,17'
-        ),
-        (() => {
-          const panel = new GraphPanelInfo('Display');
-          panel.graph.y = { field: 'age', label: 'Age' };
-          panel.graph.x = 'name';
-          return panel;
-        })(),
-      ],
-    },
-  ],
-};
+export const DEFAULT_PROJECT: ProjectState = new ProjectState(
+  'Untitled project',
+  [
+    new ProjectPage('Untitled page', [
+      new LiteralPanelInfo(
+        'Raw CSV Text',
+        'csv',
+        'name,age\nPhil,12\nJames,17'
+      ),
+      (() => {
+        const panel = new GraphPanelInfo('Display');
+        panel.graph.y = { field: 'age', label: 'Age' };
+        panel.graph.x = 'name';
+        return panel;
+      })(),
+    ]),
+  ]
+);
 
 // The point of this is to make sure that (new) defaults get set on
 // existing data.
-// Probably fine this isn't actually a deep copy...
+//
+// Probably fine this isn't actually a completely deep copy...
 export function rawStateToObjects(raw: ProjectState): ProjectState {
-  raw.pages.forEach((page: ProjectPage) => {
+  const object = mergeDeep(new ProjectState(), raw);
+
+  object.pages.forEach((page: ProjectPage, pageI: number) => {
+    object.pages[pageI] = mergeDeep(new ProjectPage(), pageI);
+
     page.panels.forEach((panel: PanelInfo, i: number) => {
       switch (panel.type) {
         case 'table':
@@ -282,18 +290,18 @@ export function rawStateToObjects(raw: ProjectState): ProjectState {
     });
   });
 
-  raw.connectors.forEach((c: ConnectorInfo, i: number) => {
+  object.connectors.forEach((c: ConnectorInfo, i: number) => {
     switch (c.type) {
       case 'sql':
-        raw.connectors[i] = mergeDeep(new SQLConnectorInfo(), c);
+        object.connectors[i] = mergeDeep(new SQLConnectorInfo(), c);
         break;
       case 'http':
-        raw.connectors[i] = mergeDeep(new HTTPConnectorInfo(), c);
+        object.connectors[i] = mergeDeep(new HTTPConnectorInfo(), c);
         break;
       default:
         console.error(`Unknown connector type: ${c.type}`);
     }
   });
 
-  return raw;
+  return object;
 }

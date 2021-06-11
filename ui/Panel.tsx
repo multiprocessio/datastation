@@ -9,7 +9,6 @@ import {
   ProgramPanelInfo,
   TablePanelInfo,
   LiteralPanelInfo,
-  Array,
 } from './../shared/state';
 import { MODE_FEATURES } from '../shared/constants';
 
@@ -91,10 +90,7 @@ export function Panel({
     panelResults[panelIndex] && panelResults[panelIndex].exception;
   if (!exception && panel.type === 'table') {
     body = (
-      <TablePanel
-        panel={panel as TablePanelInfo}
-        panelResults={panelResults}
-      />
+      <TablePanel panel={panel as TablePanelInfo} panelResults={panelResults} />
     );
   } else if (!exception && panel.type === 'graph') {
     body = (

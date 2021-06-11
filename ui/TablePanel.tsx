@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { TablePanelInfo, TableColumn, Array } from './../shared/state';
+import { TablePanelInfo, TableColumn } from './../shared/state';
 
 import { PanelResult } from './ProjectStore';
 import { Button } from './component-library/Button';

@@ -59,8 +59,8 @@ function App() {
     return <span>Loading</span>;
   }
 
-  const firstPageId = state.pages[0]?.id || '';
-  const [currentPage, setCurrentPage] = React.useState(firstPageId);
+  // TODO: handle when there are zero pages?
+  const [currentPage, setCurrentPage] = React.useState(0);
 
   function updatePage(page: ProjectPage) {
     state.pages[currentPage] = page;
@@ -78,9 +78,6 @@ function App() {
   }
 
   function addConnector(dc: ConnectorInfo) {
-    if (!state.connectors) {
-      state.connectors = [];
-    }
     state.connectors.push(dc);
     updateProjectState({ ...state });
   }

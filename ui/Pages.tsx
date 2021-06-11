@@ -1,12 +1,13 @@
 import * as React from 'react';
 
-import { ProjectState, ProjectPage, Array } from './../shared/state';
+import { ProjectState, ProjectPage } from './../shared/state';
 
 import { PanelResult } from './ProjectStore';
-import { evalPanel } from './Panel';
 import { Page } from './Page';
 import { Button } from './component-library/Button';
 import { Input } from './component-library/Input';
+
+type IDDict<T> = { [k: string]: T };
 
 export function Pages({
   state,
@@ -22,26 +23,24 @@ export function Pages({
   currentPage: number;
 }) {
   const page = state.pages[currentPage];
-  const [panelResults, setPanelResults] = React.useState<
-    Array<PanelResult>
+  const [panelResultsByPage, setPanelResultsByPage] = React.useState<
+    IDDict<Array<PanelResult>>
   >({});
-  // Reset results when project changes
+
+  // Reset all page results when project changes
   React.useEffect(() => {
-    setPanelResults({});
+    setPanelResultsByPage({});
   }, [state.id]);
 
-  async function reevalPanel(panelIndex: number) {
-    try {
-      const r = await evalPanel(page, panelIndex, panelResults);
-      panelResults[currentPage][panelIndex] = { lastRun: new Date(), value: r };
-    } catch (e) {
-      panelResults[currentPage][panelIndex] = {
-        lastRun: new Date(),
-        exception: e.stack,
-      };
-    } finally {
-      setPanelResults({ ...panelResults });
+  // Make sure panelResults are initialized when page changes.
+  React.useEffect(() => {
+    if (!panelResultsByPage[page.id]) {
+      panelResultsByPage[page.id] = [];
     }
+  }, [page.id]);
+
+  function setPanelResults(panelIndex: number, result: PanelResult) {
+    panelResultsByPage[page.id][panelIndex] = result;
   }
 
   return (
@@ -63,7 +62,7 @@ export function Pages({
           type="primary"
           className="flex-right"
           onClick={() => {
-            addPage({ name: 'Untitled page', panels: [] });
+            addPage(new ProjectPage('Untitled Page'));
             setCurrentPage(state.pages.length - 1);
           }}
         >
@@ -71,7 +70,12 @@ export function Pages({
         </Button>
       </div>
 
-      <Page page={page} updatePage={updatePage} reevalPanel={reevalPanel} />
+      <Page
+        page={page}
+        updatePage={updatePage}
+        panelResults={panelResultsByPage[page.id]}
+        setPanelResults={setPanelResults}
+      />
     </div>
   );
 }
