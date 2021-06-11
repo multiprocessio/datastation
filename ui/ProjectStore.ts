@@ -12,20 +12,20 @@ export interface PanelResult {
 }
 
 class LocalStorageStore {
-  #makeKey(projectId: string) {
+  makeKey(projectId: string) {
     return `projectState:${projectId}`;
   }
 
   update(projectId: string, newState: ProjectState) {
     window.localStorage.setItem(
-      this.#makeKey(projectId),
+      this.makeKey(projectId),
       JSON.stringify(newState)
     );
     return Promise.resolve();
   }
 
   get(projectId: string) {
-    return JSON.parse(window.localStorage.getItem(this.#makeKey(projectId)));
+    return JSON.parse(window.localStorage.getItem(this.makeKey(projectId)));
   }
 }
 
