@@ -16,6 +16,16 @@ coming soon.
 If you want to keep in touch, [share your
 email](https://forms.gle/wH5fdxrxXwZHoNxk8).
 
+## Community
+
+[Join us on Discord](https://discord.gg/f2wQBc4bXX).
+
+## Support / Roadmap
+
+The open-source app is supported on a best-effort basis. If you're
+interested in commercial support or to partner on the roadmap, please
+[get in touch](mailto:phil@multiprocess.io).
+
 ## License
 
 This software is licensed under an Apache 2 license.
