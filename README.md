@@ -3,7 +3,7 @@
 DataStation allows you to seamless connect SQL queries, HTTP requests,
 scripting, and visualization in a single platform.
 
-![A screenshot of app.datastation.multiprocess.io](./screenshot.png)
+![A screenshot of app.datastation.multiprocess.io](./screenshot.jpg)
 
 ## Try it out
 
