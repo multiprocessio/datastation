@@ -282,16 +282,20 @@ export function Panel({
           )}
           {panel.type === 'program' && (
             <div className="alert alert-info">
-              Use builtin functions, <code>DM_setPanel($some_array_data)</code>
+              Use builtin functions, <code>DM_setPanel($some_array_data)</code>{' '}
               and <code>DM_getPanel($panel_number)</code>, to interact with
-              other panels.
+              other panels. For example:{' '}
+              <code>
+                const passthrough = DM_getPanel(0); DM_setPanel(passthrough);
+              </code>
+              .
             </div>
           )}
           {panel.type === 'sql' && (
             <div className="alert alert-info">
-              Use builtin
-              <code>DM_getPanel($panel_number)[$panel_column]</code>
-              to interact with columns from other panels.
+              Use builtin <code>DM_getPanel($panel_number)</code> to interact
+              with other panels as tables. For example:{' '}
+              <code>SELECT * FROM DM_getPanel(0);</code>.
             </div>
           )}
           {preview && (

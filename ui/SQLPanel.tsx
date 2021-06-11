@@ -29,7 +29,7 @@ export async function evalSQLPanel(
     let replacements: Array<number> = [];
     content = content.replace(matcher, function (match, panelIndex) {
       replacements.push(+panelIndex);
-      return `t${replacements.length}`;
+      return `t${replacements.length - 1}`;
     });
 
     replacements.forEach((panelIndex: number, tableIndex: number) => {
@@ -67,7 +67,7 @@ export async function evalSQLPanel(
         .join(', ');
       content = `WITH t${tableIndex}(${columns.join(
         ','
-      )}) AS (SELECT * FROM (VALUES ${values})), ${content}`;
+      )}) AS (SELECT * FROM (VALUES ${values})) ${content}`;
     });
   } catch (e) {
     console.error(e);
@@ -83,28 +83,22 @@ export async function evalSQLPanel(
   }
 
   if (panel.sql.sql.type === 'in-memory') {
-    let sql;
-    if (!(window as any).SQL) {
-      console.log(1);
+    let sql = (window as any).SQL;
+    if (!sql) {
       sql = (window as any).SQL = await (window as any).initSqlJs({
-        locateFile: (file: string) => `https://sql.js.org/dist/${file}`,
+        locateFile: (file: string) => `${file}`,
       });
-      console.log(2);
     }
 
-    console.log(3, content);
     const db = new sql.Database();
-    console.log(content);
-    const res = db.exec(content);
-    const formattedResults: Array<{ [k: string]: any }> = [];
-    for (let i = 0; i < res.values.length; i++) {
-      const row: { [k: string]: any } = {};
-      res[i].columns.forEach((c: string, i: number) => {
-        row[c] = res[i].values[i];
+    const [res] = db.exec(content);
+    return res.values.map((row: Array<any>) => {
+      const formattedRow: { [k: string]: any } = {};
+      res.columns.forEach((c: string, i: number) => {
+        formattedRow[c] = row[i];
       });
-      formattedResults.push(row);
-    }
-    return formattedResults;
+      return formattedRow;
+    });
   }
 
   throw new Error(`Unknown SQL type: '${panel.sql.type}'`);

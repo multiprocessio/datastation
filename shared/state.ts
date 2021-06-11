@@ -242,12 +242,18 @@ export const DEFAULT_PROJECT: ProjectState = new ProjectState(
       new LiteralPanelInfo(
         'Raw CSV Text',
         'csv',
-        'name,age\nPhil,12\nJames,17'
+        'name,age\nMorgan,12\nJames,17'
+      ),
+      new SQLPanelInfo(
+        'Transform with SQL',
+        new SQLConnectorInfo('In Memory', 'in-memory'),
+        'SELECT name, age+5 AS age FROM DM_getPanel(0);'
       ),
       (() => {
         const panel = new GraphPanelInfo('Display');
         panel.graph.y = { field: 'age', label: 'Age' };
         panel.graph.x = 'name';
+        panel.graph.panelSource = 1;
         return panel;
       })(),
     ]),
