@@ -9,9 +9,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - run: curl -fsSL https://deb.nodesource.com/setup_16.x | bash -
-    - run: apt-get install -y nodejs
-    - run: npm install --global yarn
+    - run: curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
+    - run: sudo apt-get install -y nodejs
+    - run: sudo npm install --global yarn
     - run: yarn
     - run: yarn lint
     - run: yarn tsc
