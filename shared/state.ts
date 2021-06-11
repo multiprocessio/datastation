@@ -45,7 +45,7 @@ export class HTTPConnectorInfo extends ConnectorInfo {
   }
 }
 
-export type SQLConnectorInfoType = 'postgres';
+export type SQLConnectorInfoType = 'postgres' | 'in-memory';
 
 export class SQLConnectorInfo extends ConnectorInfo {
   sql: {
@@ -66,7 +66,7 @@ export class SQLConnectorInfo extends ConnectorInfo {
   ) {
     super('sql', name);
     this.sql = {
-      type: type || 'postgres',
+      type: type || 'in-memory',
       database: database || '',
       username: username || '',
       password: password || '',
@@ -236,9 +236,9 @@ export class ProjectState {
 }
 
 export const DEFAULT_PROJECT: ProjectState = new ProjectState(
-  'Untitled project',
+  'Example project',
   [
-    new ProjectPage('Untitled page', [
+    new ProjectPage('CSV Discovery Example', [
       new LiteralPanelInfo(
         'Raw CSV Text',
         'csv',
@@ -257,12 +257,15 @@ export const DEFAULT_PROJECT: ProjectState = new ProjectState(
 // The point of this is to make sure that (new) defaults get set on
 // existing data.
 //
-// Probably fine this isn't actually a completely deep copy...
 export function rawStateToObjects(raw: ProjectState): ProjectState {
-  const object = mergeDeep(new ProjectState(), raw);
+  // Make a deep copy
+  const object = mergeDeep(new ProjectState(), JSON.parse(JSON.stringify(raw)));
 
-  object.pages.forEach((page: ProjectPage, pageI: number) => {
-    object.pages[pageI] = mergeDeep(new ProjectPage(), pageI);
+  object.pages.forEach((_: ProjectPage, pageI: number) => {
+    const page = (object.pages[pageI] = mergeDeep(
+      new ProjectPage(),
+      object.pages[pageI]
+    ));
 
     page.panels.forEach((panel: PanelInfo, i: number) => {
       switch (panel.type) {

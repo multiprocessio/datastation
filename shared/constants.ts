@@ -1,4 +1,4 @@
-export const APP_NAME = 'datathing';
+export const APP_NAME = 'datastation';
 
 let IS_DESKTOP_APP = false;
 try {

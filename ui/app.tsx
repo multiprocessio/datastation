@@ -31,8 +31,10 @@ function useProjectState(
     async function fetch() {
       let state;
       try {
-        const rawState = await store.get(projectId);
-        console.log('here?????');
+        let rawState = await store.get(projectId);
+        if (!rawState) {
+          rawState = DEFAULT_PROJECT;
+        }
         state = rawStateToObjects(rawState);
       } catch (e) {
         console.error(e);
@@ -54,13 +56,14 @@ function App() {
 
   const store = makeStore(MODE);
   const [state, updateProjectState] = useProjectState(projectId, store);
+
+  // TODO: handle when there are zero pages?
+  const [currentPage, setCurrentPage] = React.useState(0);
+
   if (!state) {
     // Loading
     return <span>Loading</span>;
   }
-
-  // TODO: handle when there are zero pages?
-  const [currentPage, setCurrentPage] = React.useState(0);
 
   function updatePage(page: ProjectPage) {
     state.pages[currentPage] = page;

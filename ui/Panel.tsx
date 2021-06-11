@@ -10,7 +10,6 @@ import {
   TablePanelInfo,
   LiteralPanelInfo,
 } from './../shared/state';
-import { MODE_FEATURES } from '../shared/constants';
 
 import { PanelResult } from './ProjectStore';
 import { GraphPanel, GraphPanelDetails } from './GraphPanel';
@@ -208,7 +207,7 @@ export function Panel({
                   updatePanel(newPanel);
                 }}
               >
-                {MODE_FEATURES.sql && <option value="sql">SQL</option>}
+                <option value="sql">SQL</option>
                 <option value="program">Code</option>
                 <option value="http">HTTP Request</option>
                 <option value="table">Table</option>

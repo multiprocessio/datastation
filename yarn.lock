@@ -784,6 +784,11 @@ sprintf-js@^1.1.2:
   resolved "https://registry.yarnpkg.com/sprintf-js/-/sprintf-js-1.1.2.tgz#da1765262bf8c0f571749f2ad6c26300207ae673"
   integrity sha512-VE0SOVEHCk7Qc8ulkWw3ntAzXuqf7S2lvwQaDLRnUeIEaKNQJzV6BwmLKhOqT61aGhfUMrXeaBk+oDGCzvhcug==
 
+sql.js@^1.5.0:
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/sql.js/-/sql.js-1.5.0.tgz#6625c3e41115194f6bfab80a5e53647f1378c3fb"
+  integrity sha512-Qqr6HgX/hCDpLFWdN0BNoNpYQ2c1tOl1c3HGI0cshjaFSAWszKICuLZ9CyFUvRFPpEGW8RzHzwuXWWvXVGTKBg==
+
 string_decoder@^1.1.1:
   version "1.3.0"
   resolved "https://registry.yarnpkg.com/string_decoder/-/string_decoder-1.3.0.tgz#42f114594a46cf1a8e30b0a84f56c78c3edac21e"

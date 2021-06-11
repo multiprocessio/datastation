@@ -20,6 +20,7 @@
         "pg": "^8.6.0",
         "react": "^17.0.2",
         "react-dom": "^17.0.2",
+        "sql.js": "^1.5.0",
         "uuid": "^8.3.2"
     },
     "devDependencies": {

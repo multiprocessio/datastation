@@ -35,12 +35,17 @@ export function Pages({
   // Make sure panelResults are initialized when page changes.
   React.useEffect(() => {
     if (!panelResultsByPage[page.id]) {
-      panelResultsByPage[page.id] = [];
+      setPanelResultsByPage({ ...panelResultsByPage, [page.id]: [] });
     }
   }, [page.id]);
 
+  if (!panelResultsByPage || !panelResultsByPage[page.id]) {
+    return null;
+  }
+
   function setPanelResults(panelIndex: number, result: PanelResult) {
     panelResultsByPage[page.id][panelIndex] = result;
+    setPanelResultsByPage({ ...panelResultsByPage });
   }
 
   return (

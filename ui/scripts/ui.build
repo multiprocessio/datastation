@@ -1,3 +1,8 @@
+rm -rf build
+mkdir build
 yarn esbuild ui/app.tsx --loader:.ts=tsx --loader:.js=jsx --bundle --sourcemap --outfile=build/ui.js
 cp ui/index.html build
 cp ui/style.css build
+cp node_modules/sql.js/dist/sql-wasm.js build
+#append "window.initSqlJs = initSqlJs;" build/sql-wasm.js
+#append "alert('hereeee');" build/sql-wasm.js

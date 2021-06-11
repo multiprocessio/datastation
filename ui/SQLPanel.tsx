@@ -3,8 +3,10 @@ import * as React from 'react';
 import {
   ConnectorInfo,
   SQLConnectorInfo,
+  SQLConnectorInfoType,
   SQLPanelInfo,
 } from './../shared/state';
+import { MODE_FEATURES } from '../shared/constants';
 
 import { asyncRPC } from './asyncRPC';
 import { PanelResult, ProjectContext } from './ProjectStore';
@@ -21,17 +23,51 @@ export async function evalSQLPanel(
   // TODO: make panel substitution based on an actual parser since
   // regex will match instances of `' foo bar DM_getPanel(21)[sdklf] '`
   // among other bad things...
-  const matcher = /DM_getPanel\(([0-9]+)\)\[(.*)\]/;
+  const matcher = /DM_getPanel\(([0-9]+)\)/;
   let content = panel.content;
   try {
-    content = content.replace(matcher, function (match, panelIndex, column) {
-      return (
-        '(' +
-        (panelResults[panelIndex]?.value || [])
-          .map((row) => row[column])
-          .join(',') +
-        ')'
+    let replacements: Array<number> = [];
+    content = content.replace(matcher, function (match, panelIndex) {
+      replacements.push(+panelIndex);
+      return `t${replacements.length}`;
+    });
+
+    replacements.forEach((panelIndex: number, tableIndex: number) => {
+      const results = panelResults[panelIndex];
+      if (results.exception || results.value.length === 0) {
+        // TODO: figure out how to query empty panels. (How to resolve column names for SELECT?)
+        throw new Error('Cannot query empty results in panel ${panelIndex}');
+      }
+      const columns = Object.keys(results.value[0]);
+      const valuesAsSQLStrings = results.value.map(
+        (row: { [k: string]: any }) => {
+          return columns.map((column: string) => {
+            const cell = row[column];
+            if (typeof cell === 'number' || typeof cell === 'boolean') {
+              return cell.toString();
+            }
+
+            // Default to stringifying.
+            const stringified = JSON.stringify(cell);
+
+            // JSON strings use double quote, SQL uses single quote
+            if (stringified[0] === '"') {
+              const replace = stringified.split('');
+              replace[0] = "'";
+              replace[replace.length - 1] = "'";
+              return replace.join('');
+            }
+
+            return `'${stringified}'`;
+          });
+        }
       );
+      const values = valuesAsSQLStrings
+        .map((v: Array<string>) => `(${v.join(', ')})`)
+        .join(', ');
+      content = `WITH t${tableIndex}(${columns.join(
+        ','
+      )}) AS (SELECT * FROM (VALUES ${values})), ${content}`;
     });
   } catch (e) {
     console.error(e);
@@ -44,6 +80,31 @@ export async function evalSQLPanel(
       content,
       panel.sql
     );
+  }
+
+  if (panel.sql.sql.type === 'in-memory') {
+    let sql;
+    if (!(window as any).SQL) {
+      console.log(1);
+      sql = (window as any).SQL = await (window as any).initSqlJs({
+        locateFile: (file: string) => `https://sql.js.org/dist/${file}`,
+      });
+      console.log(2);
+    }
+
+    console.log(3, content);
+    const db = new sql.Database();
+    console.log(content);
+    const res = db.exec(content);
+    const formattedResults: Array<{ [k: string]: any }> = [];
+    for (let i = 0; i < res.values.length; i++) {
+      const row: { [k: string]: any } = {};
+      res[i].columns.forEach((c: string, i: number) => {
+        row[c] = res[i].values[i];
+      });
+      formattedResults.push(row);
+    }
+    return formattedResults;
   }
 
   throw new Error(`Unknown SQL type: '${panel.sql.type}'`);
@@ -66,39 +127,36 @@ export function SQLPanelDetails({
           className="block"
           value={panel.sql.type}
           onChange={(value: string) => {
-            switch (value) {
-              case 'postgres':
-                panel.sql.sql.type = 'postgres';
-                break;
-              default:
-                throw new Error(`Unknown SQL type: ${value}`);
-            }
+            panel.sql.sql.type = value as SQLConnectorInfoType;
             updatePanel(panel);
           }}
         >
-          <option value="postgres">PostgreSQL</option>
+          {MODE_FEATURES.sql && <option value="postgres">PostgreSQL</option>}
+          <option value="in-memory">In-Memory SQL</option>
         </Select>
-        <Select
-          label="Connector"
-          className="block"
-          value={panel.sql.type}
-          onChange={(connectorIndex: string) => {
-            panel.sql.sql = (
-              connectors[+connectorIndex] as SQLConnectorInfo
-            ).sql;
-            updatePanel(panel);
-          }}
-        >
-          {connectors
-            .map((c: ConnectorInfo, index: number) => {
-              if (c.type != 'sql') {
-                return null;
-              }
+        {MODE_FEATURES.sql && (
+          <Select
+            label="Connector"
+            className="block"
+            value={panel.sql.type}
+            onChange={(connectorIndex: string) => {
+              panel.sql.sql = (
+                connectors[+connectorIndex] as SQLConnectorInfo
+              ).sql;
+              updatePanel(panel);
+            }}
+          >
+            {connectors
+              .map((c: ConnectorInfo, index: number) => {
+                if (c.type != 'sql') {
+                  return null;
+                }
 
-              return <option value={index}>c.name</option>;
-            })
-            .filter(Boolean)}
-        </Select>
+                return <option value={index}>c.name</option>;
+              })
+              .filter(Boolean)}
+          </Select>
+        )}
       </div>
     </React.Fragment>
   );
