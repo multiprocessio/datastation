@@ -107,11 +107,11 @@ function App() {
                 target="_blank"
               >
                 <iframe
-                  src="https://ghbtns.com/github-btn.html?user=twbs&repo=bootstrap&type=star&count=true&size=large"
+                  src="https://ghbtns.com/github-btn.html?user=multiprocessio&repo=datastation&type=star&count=true&size=medium"
                   frameborder="0"
                   scrolling="0"
-                  width="170"
-                  height="30"
+                  width="71"
+                  height="20"
                   title="GitHub"
                 ></iframe>
               </a>
