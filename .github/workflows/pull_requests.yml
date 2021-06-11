@@ -12,6 +12,10 @@ jobs:
     - run: curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
     - run: sudo apt-get install -y nodejs
     - run: sudo npm install --global yarn
+    - name: checkout repo
+      uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
     - run: yarn
     - run: ls
     - run: yarn lint
