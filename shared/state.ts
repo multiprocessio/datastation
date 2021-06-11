@@ -121,7 +121,7 @@ export type GraphPanelInfoType = 'bar';
 
 export class GraphPanelInfo extends PanelInfo {
   graph: {
-    panelSource: number;
+    panelSource: string;
     y: GraphY;
     x: string;
     type: GraphPanelInfoType;
@@ -129,7 +129,7 @@ export class GraphPanelInfo extends PanelInfo {
 
   constructor(
     name?: string,
-    panelSource?: number,
+    panelSource?: string,
     y?: GraphY,
     x?: string,
     type?: GraphPanelInfoType,
@@ -137,7 +137,7 @@ export class GraphPanelInfo extends PanelInfo {
   ) {
     super('graph', name, content);
     this.graph = {
-      panelSource: panelSource || 0,
+      panelSource: panelSource || '',
       x: x || '',
       y: y || { field: '', label: '' },
       type: type || 'bar',
@@ -173,13 +173,13 @@ export interface TableColumn {
 export class TablePanelInfo extends PanelInfo {
   table: {
     columns: Array<TableColumn>;
-    panelSource: number;
+    panelSource: string;
   };
 
   constructor(
     name?: string,
     columns: Array<TableColumn> = [],
-    panelSource: number = 0,
+    panelSource: string = '',
     content?: string
   ) {
     super('table', name, content);
@@ -204,6 +204,8 @@ export class LiteralPanelInfo extends PanelInfo {
     };
   }
 }
+
+export type Array<T> = { [k: string]: T };
 
 export class ProjectPage {
   panels: Array<PanelInfo>;

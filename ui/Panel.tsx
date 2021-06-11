@@ -9,6 +9,7 @@ import {
   ProgramPanelInfo,
   TablePanelInfo,
   LiteralPanelInfo,
+  Array,
 } from './../shared/state';
 import { MODE_FEATURES } from '../shared/constants';
 
@@ -64,7 +65,7 @@ function previewValueAsString(value: any) {
 export function Panel({
   panel,
   updatePanel,
-  panelResults = [],
+  panelResults,
   reevalPanel,
   panelIndex,
   removePanel,
@@ -93,7 +94,6 @@ export function Panel({
       <TablePanel
         panel={panel as TablePanelInfo}
         panelResults={panelResults}
-        panelIndex={panelIndex}
       />
     );
   } else if (!exception && panel.type === 'graph') {

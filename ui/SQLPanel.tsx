@@ -4,6 +4,7 @@ import {
   ConnectorInfo,
   SQLConnectorInfo,
   SQLPanelInfo,
+  Array,
 } from './../shared/state';
 
 import { asyncRPC } from './asyncRPC';

@@ -59,7 +59,8 @@ function App() {
     return <span>Loading</span>;
   }
 
-  const [currentPage, setCurrentPage] = React.useState(0);
+  const firstPageId = state.pages[0]?.id || '';
+  const [currentPage, setCurrentPage] = React.useState(firstPageId);
 
   function updatePage(page: ProjectPage) {
     state.pages[currentPage] = page;

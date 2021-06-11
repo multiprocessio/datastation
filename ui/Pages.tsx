@@ -1,7 +1,8 @@
 import * as React from 'react';
 
-import { ProjectState, ProjectPage, PanelResult } from './../shared/state';
+import { ProjectState, ProjectPage, Array } from './../shared/state';
 
+import { PanelResult } from './ProjectStore';
 import { evalPanel } from './Panel';
 import { Page } from './Page';
 import { Button } from './component-library/Button';
@@ -17,25 +18,21 @@ export function Pages({
   state: ProjectState;
   addPage: (page: ProjectPage) => void;
   updatePage: (page: ProjectPage) => void;
-  setCurrentPage: (pageIndex: number) => void;
-  currentPage: string;
+  setCurrentPage: (i: number) => void;
+  currentPage: number;
 }) {
   const page = state.pages[currentPage];
   const [panelResults, setPanelResults] = React.useState<
-    Array<Array<PanelResult>>
-  >([]);
+    Array<PanelResult>
+  >({});
   // Reset results when project changes
   React.useEffect(() => {
-    setPanelResults([]);
+    setPanelResults({});
   }, [state.id]);
 
   async function reevalPanel(panelIndex: number) {
-    if (!panelResults[currentPage]) {
-      panelResults[currentPage] = [];
-    }
-
     try {
-      const r = await evalPanel(page, panelIndex, panelResults[currentPage]);
+      const r = await evalPanel(page, panelIndex, panelResults);
       panelResults[currentPage][panelIndex] = { lastRun: new Date(), value: r };
     } catch (e) {
       panelResults[currentPage][panelIndex] = {

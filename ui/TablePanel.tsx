@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { TablePanelInfo, TableColumn } from './../shared/state';
+import { TablePanelInfo, TableColumn, Array } from './../shared/state';
 
 import { PanelResult } from './ProjectStore';
 import { Button } from './component-library/Button';
@@ -67,11 +67,9 @@ export function TablePanelDetails({
 
 export function TablePanel({
   panel,
-  panelIndex,
   panelResults,
 }: {
   panel: TablePanelInfo;
-  panelIndex: number;
   panelResults: Array<PanelResult>;
 }) {
   return (
@@ -84,7 +82,7 @@ export function TablePanel({
         </tr>
       </thead>
       <tbody>
-        {((panelResults[panelIndex] || {}).value || []).map(
+        {((panelResults[panel.table.panelSource] || {}).value || []).map(
           (row: any, i: number) => (
             <tr key={i}>
               {panel.table.columns.map((column: TableColumn) => (
