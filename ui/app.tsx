@@ -96,7 +96,7 @@ function App() {
               <Button onClick={() => updateProjectState(DEFAULT_PROJECT)}>
                 Reset app state
               </Button>
-              <a href="https://datastation.multiprocess.io/demo">
+              <a href="https://datastation.multiprocess.io/demo.html">
                 About this app
               </a>
             </div>
