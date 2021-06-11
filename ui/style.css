@@ -28,7 +28,7 @@ header a {
 }
 
 [contenteditable='true'] {
-  border-bottom: 1px dashed #4eb5ff;
+    border-bottom: 1px dashed #4eb5ff;
 }
 
 [contenteditable='true']:focus {
