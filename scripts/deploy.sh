@@ -2,7 +2,7 @@
 
 set -eux
 
-REMOTE=fedora@dataman.multiprocess.io
+REMOTE=fedora@datastation.multiprocess.io
 REMOTE_HOME=/home/fedora
 
 function remote_copy () {
