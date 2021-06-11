@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
-set -eux
+set -eu
 
 if [[ "$(git diff)" != "" ]]; then
-    echo "Unexpected diff"
-    git diff
+    printf "\033[0;31mFAILURE: Unexpected diff\n\n\033[0m"
+    git diff --color=never
     exit 1
 fi
