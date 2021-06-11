@@ -16,5 +16,6 @@ jobs:
       with:
         ref: ${{ github.ref }}
     - run: yarn
-    - run: yarn format && bash -c '[[ `git diff | head -c1 | wc -c` -eq 0 ]]'
+    - run: yarn format
     - run: yarn tsc
+    - run: ./scripts/fail_on_diff.sh
