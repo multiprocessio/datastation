@@ -110,7 +110,7 @@ function App() {
                   src="https://ghbtns.com/github-btn.html?user=multiprocessio&repo=datastation&type=star&count=true&size=medium"
                   frameBorder="0"
                   scrolling="0"
-                  width="71"
+                  width="80"
                   height="20"
                   title="GitHub"
                 ></iframe>
