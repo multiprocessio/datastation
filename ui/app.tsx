@@ -174,7 +174,7 @@ function App() {
               {MODE_FEATURES.shareProject && (
                 <div
                   className="share"
-                  tabIndex="1000"
+                  tabIndex={1000}
                   onBlur={() => setShareDialog(false)}
                 >
                   <Button
