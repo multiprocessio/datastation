@@ -97,7 +97,7 @@ function App() {
                 Reset app state
               </Button>
               <a
-                href="https://datastation.multiprocess.io/demo.html"
+                href="https://datastation.multiprocess.io/#online-environment"
                 target="_blank"
               >
                 About this app
