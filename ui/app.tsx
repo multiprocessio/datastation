@@ -48,8 +48,14 @@ function getShareState(): undefined | ProjectState {
   const shareState = getQueryParameter('share');
   if (shareState) {
     // TODO: this can be more efficient than calling split
-    const intArray = Uint8Array.from(shareState.split(',').map(i => parseInt(i)));
-    console.log(intArray, shareState.split(','), parseInt(shareState.split(',')[3]));
+    const intArray = Uint8Array.from(
+      shareState.split(',').map((i) => parseInt(i))
+    );
+    console.log(
+      intArray,
+      shareState.split(','),
+      parseInt(shareState.split(',')[3])
+    );
     const uncompressed = JSON.parse(pako.inflate(intArray, { to: 'string' }));
     shareStateCache.state = rawStateToObjects(uncompressed);
   }
@@ -166,7 +172,11 @@ function App() {
                 Reset
               </Button>
               {MODE_FEATURES.shareProject && (
-                <div className="share" tabIndex="1000" onBlur={() => setShareDialog(false)}>
+                <div
+                  className="share"
+                  tabIndex="1000"
+                  onBlur={() => setShareDialog(false)}
+                >
                   <Button
                     onClick={() => {
                       computeShareURL();
@@ -176,9 +186,7 @@ function App() {
                     Share
                   </Button>
                   {shareDialog && (
-                    <div
-                      className="share-details"
-                    >
+                    <div className="share-details">
                       <p>
                         This is a URL encoding the entire state of the current
                         project. The URL and project data is not stored on any
