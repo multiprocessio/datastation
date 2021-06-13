@@ -1,3 +1,4 @@
+import * as pako from 'pako';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
@@ -16,9 +17,50 @@ import { makeStore, ProjectContext, ProjectStore } from './ProjectStore';
 import { Button } from './component-library/Button';
 import { Input } from './component-library/Input';
 
+function getQueryParameter(param: String) {
+  const query = window.location.search.substring(1);
+  const vars = query.split('&');
+
+  for (let i = 0; i < vars.length; i++) {
+    const pair = vars[i].split('=');
+    if (pair[0] === param) {
+      return pair[1];
+    }
+  }
+
+  return '';
+}
+
+const shareStateCache: {
+  state: undefined | ProjectState;
+  checked: boolean;
+} = {
+  state: undefined,
+  checked: false,
+};
+
+function getShareState(): undefined | ProjectState {
+  if (shareStateCache.checked) {
+    return shareStateCache.state;
+  }
+
+  shareStateCache.checked = true;
+  const shareState = getQueryParameter('share');
+  if (shareState) {
+    // TODO: this can be more efficient than calling split
+    const intArray = Uint8Array.from(shareState.split(',').map(i => parseInt(i)));
+    console.log(intArray, shareState.split(','), parseInt(shareState.split(',')[3]));
+    const uncompressed = JSON.parse(pako.inflate(intArray, { to: 'string' }));
+    shareStateCache.state = rawStateToObjects(uncompressed);
+  }
+
+  return shareStateCache.state;
+}
+
 function useProjectState(
   projectId: string,
-  store: ProjectStore
+  store: ProjectStore,
+  shareState: ProjectState | undefined
 ): [ProjectState, (d: ProjectState) => void] {
   const [state, setProjectState] = React.useState<ProjectState>(null);
 
@@ -29,6 +71,11 @@ function useProjectState(
 
   // Re-read state when projectId changes
   React.useEffect(() => {
+    if (shareState) {
+      setProjectState(shareState);
+      return;
+    }
+
     async function fetch() {
       let state;
       try {
@@ -53,13 +100,35 @@ function useProjectState(
 
 function App() {
   // TODO: projectId needs to come from opened project.
-  const [projectId, setProjectId] = React.useState('default');
+  const shareState = getShareState();
+  console.log(shareState, shareState ? shareState.id : 'nothing');
+  const [projectId, setProjectId] = React.useState(
+    (shareState && shareState.id) || 'default'
+  );
 
   const store = makeStore(MODE);
-  const [state, updateProjectState] = useProjectState(projectId, store);
+  const [state, updateProjectState] = useProjectState(
+    projectId,
+    store,
+    shareState
+  );
 
   // TODO: handle when there are zero pages?
   const [currentPage, setCurrentPage] = React.useState(0);
+
+  const [shareDialog, setShareDialog] = React.useState(false);
+  const [shareURL, setShareURL] = React.useState('');
+
+  function computeShareURL() {
+    const domain =
+      window.location.protocol +
+      '//' +
+      window.location.hostname +
+      (window.location.port ? ':' + window.location.port : '');
+    const json = JSON.stringify(state);
+    const compressed = pako.deflate(json, { to: 'string' });
+    setShareURL(domain + '/?share=' + compressed);
+  }
 
   if (!state) {
     // Loading
@@ -94,14 +163,38 @@ function App() {
             <span className="logo">{APP_NAME}</span>
             <div className="flex-right vertical-align-center">
               <Button onClick={() => updateProjectState(DEFAULT_PROJECT)}>
-                Reset app state
+                Reset
               </Button>
-              <a
-                href="https://datastation.multiprocess.io/#online-environment"
-                target="_blank"
-              >
-                About this app
-              </a>
+              {MODE_FEATURES.shareProject && (
+                <div className="share">
+                  <Button
+                    onClick={() => {
+                      computeShareURL();
+                      setShareDialog(true);
+                    }}
+                  >
+                    Share
+                  </Button>
+                  {shareDialog && (
+                    <div
+                      className="share-details"
+                      onBlur={() => setShareDialog(false)}
+                    >
+                      <p>
+                        This is a URL encoding the entire state of the current
+                        project. The URL and project data is not stored on any
+                        server; it only exists in the browser. So you can safely
+                        use it to share a project. But since the state isn't
+                        stored in any server, any changes you make after sharing
+                        the URL will not be visible to whoever you share the URL
+                        with. You will need to click "Share this project" again
+                        to get a new URL.
+                      </p>
+                      <Input readOnly value={shareURL} onChange={() => {}} />
+                    </div>
+                  )}
+                </div>
+              )}
               <a
                 href="https://github.com/multiprocessio/datastation"
                 target="_blank"
@@ -114,6 +207,12 @@ function App() {
                   height="20"
                   title="GitHub"
                 ></iframe>
+              </a>
+              <a
+                href="https://datastation.multiprocess.io/#online-environment"
+                target="_blank"
+              >
+                About
               </a>
             </div>
           </header>

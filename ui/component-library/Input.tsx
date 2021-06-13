@@ -9,6 +9,7 @@ export function Input({
   max,
   label,
   disabled,
+  readOnly,
 }: {
   type?: 'text' | 'number' | 'email' | 'password';
   className?: string;
@@ -18,6 +19,7 @@ export function Input({
   max?: number;
   label?: string;
   disabled?: boolean;
+  readOnly?: boolean;
 }) {
   let inputClass = `input ${className ? ' ' + className : ''}`;
 
@@ -29,6 +31,7 @@ export function Input({
         onChange(e.target.value)
       }
       disabled={disabled}
+      readOnly={readOnly}
       value={value}
       min={min}
       max={max}

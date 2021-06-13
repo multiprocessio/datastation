@@ -6,12 +6,13 @@ try {
 } catch (e) {}
 
 // TODO: handle hosted/saas mode
-export const MODE = IS_DESKTOP_APP ? 'desktop' : 'demo';
+export const MODE = IS_DESKTOP_APP ? 'desktop' : 'browser';
 
 export const MODE_FEATURES = {
-  appHeader: MODE === 'demo',
-  connectors: MODE !== 'demo',
-  sql: MODE !== 'demo',
+  appHeader: MODE === 'browser',
+  connectors: MODE !== 'browser',
+  sql: MODE !== 'browser',
+  shareProject: MODE === 'browser',
 };
 
 export const DEBUG = true;
