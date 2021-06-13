@@ -14,7 +14,7 @@ import { Input } from './component-library/Input';
 import { Select } from './component-library/Select';
 
 export async function evalHTTPPanel(panel: HTTPPanelInfo) {
-  if (MODE === 'demo') {
+  if (MODE === 'browser') {
     const headers: { [v: string]: string } = {};
     panel.http.http.headers.forEach((h: { value: string; name: string }) => {
       headers[h.name] = h.value;

@@ -64,7 +64,7 @@ export interface ProjectStore {
 export function makeStore(mode: string) {
   const state = {
     desktop: DesktopIPCStore,
-    demo: LocalStorageStore,
+    browser: LocalStorageStore,
     hosted: HostedStore,
   }[mode];
   return new state();

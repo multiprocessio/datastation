@@ -17,14 +17,16 @@ header {
 header a {
   color: white;
   text-decoration: none;
-  padding-left: 15px;
+}
+
+header .button,
+header a {
+  margin-left: 15px;
+  display: inline-block;
 }
 
 .logo {
   padding-right: 15px;
-  text-transform: uppercase;
-  font-weight: bolder;
-  font-size: 12px;
 }
 
 [contenteditable='true'] {
@@ -225,4 +227,25 @@ header {
 .alert-info {
   background: #ffe7e7;
   border: 1px solid #ffc0c0;
+}
+
+.share {
+  position: relative;
+}
+
+.share-details {
+  position: absolute;
+  top: 30px;
+  right: 1px;
+  background: white;
+  z-index: 1;
+  border: 1px solid #ccc;
+  padding: 15px;
+  width: 400px;
+  color: black;
+}
+
+.share-details input {
+  border: 1px solid;
+  width: 100%;
 }
