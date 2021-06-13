@@ -166,7 +166,7 @@ function App() {
                 Reset
               </Button>
               {MODE_FEATURES.shareProject && (
-                <div className="share">
+                <div className="share" tabIndex="1000" onBlur={() => setShareDialog(false)}>
                   <Button
                     onClick={() => {
                       computeShareURL();
@@ -178,7 +178,6 @@ function App() {
                   {shareDialog && (
                     <div
                       className="share-details"
-                      onBlur={() => setShareDialog(false)}
                     >
                       <p>
                         This is a URL encoding the entire state of the current
