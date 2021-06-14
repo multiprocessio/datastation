@@ -23,6 +23,7 @@ header .button,
 header a {
   margin-left: 15px;
   display: inline-block;
+  border: 0;
 }
 
 .logo {
@@ -71,7 +72,7 @@ label.input input {
 
 .button {
   outline: 0;
-  border: 1px solid #9f04ff;
+  border: 1px solid #ccc;
   background: white;
   padding: 5px;
   cursor: pointer;
@@ -94,19 +95,19 @@ label.input input {
 
 .button.material-icons {
   border: 0;
-  background: white;
-  color: #9f04ff;
+  background: transparent;
+  color: #333;
   font-size: 20px;
   padding: 0;
 }
 
-.button.material-icons:hover {
-  color: #56008c;
+.button.button--primary.material-icons {
+    color: #9f04ff;
 }
 
 .button.material-icons:disabled,
 .button.material-icons:disabled:hover {
-  color: grey;
+  color: #ccc;
 }
 
 .flex-right {
@@ -149,7 +150,8 @@ header {
 }
 
 .pages .page-name--current {
-  margin-right: 5px;
+    margin-right: 5px;
+    font-size: 1.1rem;
 }
 
 .pages .page-name.button {
@@ -160,8 +162,12 @@ header {
 }
 
 .panel {
-  border: 1px solid #9f04ff;
+  border: 1px solid #777;
   margin-bottom: 15px;
+}
+
+.panel:focus-within, .panel:focus {
+    border-color: #9f04ff;
 }
 
 .panel--hidden {
@@ -180,7 +186,7 @@ header {
 }
 
 .panel-head {
-  border-bottom: 1px solid #9f04ff;
+  border-bottom: 1px solid #ccc;
   padding: 15px;
 }
 

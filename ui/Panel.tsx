@@ -166,7 +166,6 @@ export function Panel({
           >
             keyboard_arrow_down
           </Button>
-          <span className="material-icons">{PANEL_TYPE_ICON[panel.type]}</span>
           <Input
             className="panel-name"
             onChange={(value: string) => {
@@ -175,6 +174,7 @@ export function Panel({
             }}
             value={panel.name}
           />
+          <span className="material-icons">{PANEL_TYPE_ICON[panel.type]}</span>
           {!alwaysOpenTypes.includes(panel.type) && (
             <Button icon onClick={() => setDetails(!details)}>
               {details ? 'unfold_less' : 'unfold_more'}
@@ -187,7 +187,7 @@ export function Panel({
                 : 'Not run'}
             </span>
             <span title="Ctrl-Enter">
-              <Button icon onClick={() => reevalPanel(panelIndex)}>
+              <Button icon onClick={() => reevalPanel(panelIndex)} type="primary">
                 play_arrow
               </Button>
             </span>
