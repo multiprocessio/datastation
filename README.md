@@ -1,4 +1,4 @@
-# DataStation - The Data IDE for Developers
+# DataStation Community Edition
 
 DataStation allows you to seamless connect SQL queries, HTTP requests,
 scripting, and visualization in a single platform.
