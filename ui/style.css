@@ -226,6 +226,11 @@ header {
   top: -15px;
 }
 
+.new-panel {
+    text-align: center;
+    margin-bottom: 15px;
+}
+
 .last-run {
   font-size: 0.9rem;
   color: #777;
