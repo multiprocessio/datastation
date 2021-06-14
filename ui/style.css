@@ -220,22 +220,22 @@ header {
 }
 
 .panel-preview:hover {
-    z-index: 1;
-}	  
+  z-index: 1;
+}
 
 .panel-preview-results {
-    display: none;
+  display: none;
 }
 
 .panel-preview:hover .panel-preview-results {
-    max-width: 300px;
-    max-height: 300px;
-    overflow: auto;
-    display: block;
+  max-width: 300px;
+  max-height: 300px;
+  overflow: auto;
+  display: block;
 }
 
 .panel-preview:hover .panel-preview-message {
-    display: none;
+  display: none;
 }
 
 .panel--empty .panel-preview {

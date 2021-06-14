@@ -339,9 +339,7 @@ export function Panel({
             </div>
           )}
           {preview && (
-            <div
-              className="panel-preview"
-            >
+            <div className="panel-preview">
               <pre className="panel-preview-results">
                 <code>{preview}</code>
               </pre>

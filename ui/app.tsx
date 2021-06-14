@@ -181,12 +181,15 @@ function App() {
                   </Button>
                   {shareDialog && (
                     <div className="share-details">
+                      <p>This URL contains the entire project state.</p>
                       <p>
-                        This serializes project state to a URL. It is not stored
-                        in any database but it will be stored in DataStation web
-                        server access logs if someone uses this URL. If you make
-                        changes, you will need to click "Share" again to get a
-                        new URL.
+                        Project data is not stored on a server. But if you do
+                        use this URL, the data encoded in the URL will appear in
+                        DataStation web server access logs.
+                      </p>
+                      <p>
+                        If you make changes, you will need to click "Share"
+                        again to get a new URL.
                       </p>
                       <Input readOnly value={shareURL} onChange={() => {}} />
                     </div>
