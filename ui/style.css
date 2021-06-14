@@ -102,7 +102,7 @@ label.input input {
 }
 
 .button.button--primary.material-icons {
-    color: #9f04ff;
+  color: #9f04ff;
 }
 
 .button.material-icons:disabled,
@@ -150,8 +150,8 @@ header {
 }
 
 .pages .page-name--current {
-    margin-right: 5px;
-    font-size: 1.1rem;
+  margin-right: 5px;
+  font-size: 1.1rem;
 }
 
 .pages .page-name.button {
@@ -166,8 +166,9 @@ header {
   margin-bottom: 15px;
 }
 
-.panel:focus-within, .panel:focus {
-    border-color: #9f04ff;
+.panel:focus-within,
+.panel:focus {
+  border-color: #9f04ff;
 }
 
 .panel--hidden {
@@ -227,8 +228,8 @@ header {
 }
 
 .new-panel {
-    text-align: center;
-    margin-bottom: 15px;
+  text-align: center;
+  margin-bottom: 15px;
 }
 
 .last-run {

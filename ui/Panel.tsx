@@ -187,7 +187,11 @@ export function Panel({
                 : 'Not run'}
             </span>
             <span title="Ctrl-Enter">
-              <Button icon onClick={() => reevalPanel(panelIndex)} type="primary">
+              <Button
+                icon
+                onClick={() => reevalPanel(panelIndex)}
+                type="primary"
+              >
                 play_arrow
               </Button>
             </span>
