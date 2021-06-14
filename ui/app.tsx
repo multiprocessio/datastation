@@ -51,11 +51,6 @@ function getShareState(): undefined | ProjectState {
     const intArray = Uint8Array.from(
       shareState.split(',').map((i) => parseInt(i))
     );
-    console.log(
-      intArray,
-      shareState.split(','),
-      parseInt(shareState.split(',')[3])
-    );
     const uncompressed = JSON.parse(pako.inflate(intArray, { to: 'string' }));
     shareStateCache.state = rawStateToObjects(uncompressed);
   }
@@ -107,7 +102,6 @@ function useProjectState(
 function App() {
   // TODO: projectId needs to come from opened project.
   const shareState = getShareState();
-  console.log(shareState, shareState ? shareState.id : 'nothing');
   const [projectId, setProjectId] = React.useState(
     (shareState && shareState.id) || 'default'
   );

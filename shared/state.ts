@@ -195,13 +195,20 @@ export class FilePanelInfo extends PanelInfo {
   file: {
     name: string;
     content: ArrayBuffer;
+    type: string;
   };
 
-  constructor(name?: string, fileName?: string, fileContent?: ArrayBuffer) {
+  constructor(
+    name?: string,
+    fileName?: string,
+    fileContent?: ArrayBuffer,
+    fileType?: string
+  ) {
     super('file', name, '');
     this.file = {
-      name: fileName,
-      content: fileContent,
+      name: fileName || '',
+      content: fileContent || new ArrayBuffer(0),
+      type: fileType || '',
     };
   }
 }
@@ -308,6 +315,9 @@ export function rawStateToObjects(raw: ProjectState): ProjectState {
           break;
         case 'sql':
           page.panels[i] = mergeDeep(new SQLPanelInfo(), panel);
+          break;
+        case 'file':
+          page.panels[i] = mergeDeep(new FilePanelInfo(), panel);
           break;
         default:
           console.error(`Unknown panel type: ${panel.type}`);

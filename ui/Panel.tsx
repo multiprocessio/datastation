@@ -84,6 +84,7 @@ export function Panel({
   movePanel: (from: number, to: number) => void;
   panelCount: number;
 }) {
+  const previewableTypes = ['http', 'sql', 'program', 'file'];
   const alwaysOpenTypes = ['table', 'graph', 'http', 'file'];
   const [details, setDetails] = React.useState(
     alwaysOpenTypes.includes(panel.type)
@@ -93,27 +94,25 @@ export function Panel({
   let body = null;
   const exception =
     panelResults[panelIndex] && panelResults[panelIndex].exception;
-  if (!exception && panel.type === 'table') {
+  if (panel.type === 'table') {
     body = (
       <TablePanel panel={panel as TablePanelInfo} panelResults={panelResults} />
     );
-  } else if (!exception && panel.type === 'graph') {
+  } else if (panel.type === 'graph') {
     body = (
       <GraphPanel
         panel={panel as GraphPanelInfo}
         data={panelResults[panelIndex]}
       />
     );
+  } else if (panel.type === 'file') {
+    body = <span />;
   }
 
   const [preview, setPreview] = React.useState('');
   const results = panelResults[panelIndex];
   React.useEffect(() => {
-    if (
-      panel.type === 'http' ||
-      panel.type === 'sql' ||
-      panel.type === 'program'
-    ) {
+    if (previewableTypes.includes(panel.type)) {
       if (results && !results.exception) {
         const resultsLines = previewValueAsString(results.value).split('\n');
         setPreview(resultsLines.slice(0, 50).join('\n'));
@@ -123,8 +122,30 @@ export function Panel({
 
   const [previewVisible, setPreviewVisible] = React.useState(false);
 
+  const panelRef = React.useRef(null);
+  function keyboardShortcuts(e: React.KeyboardEvent) {
+    if (
+      !panelRef.current &&
+      panelRef.current !== document.activeElement &&
+      !panelRef.current.contains(document.activeElement)
+    ) {
+      return;
+    }
+
+    if ((e.ctrlKey || e.metaKey) && e.code === 'Enter') {
+      reevalPanel(panelIndex);
+    }
+  }
+
   return (
-    <div className={`panel ${hidden ? 'panel--hidden' : ''}`}>
+    <div
+      className={`panel ${hidden ? 'panel--hidden' : ''} ${
+        panel.type === 'file' ? 'panel--empty' : ''
+      }`}
+      tabIndex={1001}
+      ref={panelRef}
+      onKeyDown={keyboardShortcuts}
+    >
       <div className="panel-head">
         <div className="panel-header vertical-align-center">
           <Button
@@ -165,9 +186,11 @@ export function Panel({
                 ? 'Last run ' + panelResults[panelIndex].lastRun
                 : 'Not run'}
             </span>
-            <Button icon onClick={() => reevalPanel(panelIndex)}>
-              play_arrow
-            </Button>
+            <span title="Ctrl-Enter">
+              <Button icon onClick={() => reevalPanel(panelIndex)}>
+                play_arrow
+              </Button>
+            </span>
             <Button icon onClick={() => setHidden(!hidden)}>
               {hidden ? 'visibility' : 'visibility_off'}
             </Button>
@@ -203,6 +226,9 @@ export function Panel({
                     case 'http':
                       newPanel = new HTTPPanelInfo(panel.name);
                       break;
+                    case 'file':
+                      newPanel = new FilePanelInfo(panel.name);
+                      break;
                     default:
                       throw new Error(`Invalid panel type: ${value}`);
                   }
@@ -216,6 +242,7 @@ export function Panel({
                 <option value="http">HTTP Request</option>
                 <option value="table">Table</option>
                 <option value="graph">Graph</option>
+                <option value="file">File</option>
                 <option value="literal">Literal</option>
               </Select>
             </div>
@@ -273,6 +300,7 @@ export function Panel({
             body
           ) : (
             <Textarea
+              onKeyDown={keyboardShortcuts}
               spellCheck="false"
               value={panel.content}
               onChange={(value: string) => {

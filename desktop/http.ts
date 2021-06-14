@@ -3,6 +3,12 @@ import fetch from 'node-fetch';
 import { parseArrayBuffer } from '../shared/text';
 import { HTTPConnectorInfo } from '../shared/state';
 
+import { parseParquet } from './parquet';
+
+export const additionalParsers = {
+  parquet: parseParquet,
+};
+
 export const evalHTTPHandler = {
   resource: 'evalHTTP',
   handler: async function (body: string, { http }: HTTPConnectorInfo) {
@@ -18,6 +24,6 @@ export const evalHTTPHandler = {
     });
     const rspBody = await rsp.arrayBuffer();
     const type = rsp.headers.get('content-type');
-    return await parseArrayBuffer(type, rspBody);
+    return await parseArrayBuffer(type, rspBody, additionalParsers);
   },
 };

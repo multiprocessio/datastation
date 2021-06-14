@@ -6,12 +6,14 @@ export function FileInput({
   label,
   disabled,
   readOnly,
+  accept,
 }: {
   className?: string;
   onChange: (files: Array<File>) => void;
   label?: string;
   disabled?: boolean;
   readOnly?: boolean;
+  accept?: string;
 }) {
   let inputClass = `input ${className ? ' ' + className : ''}`;
 
@@ -19,11 +21,12 @@ export function FileInput({
     <input
       className={label ? '' : inputClass}
       type="file"
-      onChange={function () {
-        onChange(this.files);
+      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+        onChange(Array.prototype.slice.apply(e.target.files));
       }}
       disabled={disabled}
       readOnly={readOnly}
+      accept={accept}
     />
   );
 

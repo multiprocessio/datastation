@@ -168,7 +168,8 @@ header {
   border-color: #ccc;
 }
 
-.panel--hidden .panel-head {
+.panel--hidden .panel-head,
+.panel--empty .panel-head {
   border-bottom: 0;
 }
 
@@ -212,6 +213,11 @@ header {
   max-width: 300px;
   max-height: 300px;
   overflow: auto;
+  z-index: 1;
+}
+
+.panel--empty .panel-preview {
+  top: -15px;
 }
 
 .last-run {
