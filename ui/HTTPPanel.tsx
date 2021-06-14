@@ -6,7 +6,7 @@ import {
   HTTPConnectorInfoMethod,
 } from '../shared/state';
 import { MODE } from '../shared/constants';
-import { parseText } from '../shared/text';
+import { parseArrayBuffer } from '../shared/text';
 
 import { asyncRPC } from './asyncRPC';
 import { Button } from './component-library/Button';
@@ -25,9 +25,9 @@ export async function evalHTTPPanel(panel: HTTPPanelInfo) {
       method,
       body: method !== 'GET' && method !== 'HEAD' ? panel.content : undefined,
     });
-    const body = await res.text();
+    const body = await res.arrayBuffer();
     const type = res.headers.get('content-type');
-    return parseText(type, body);
+    return await parseArrayBuffer(type, body);
   }
 
   return await asyncRPC<HTTPConnectorInfo, string, Array<object>>(

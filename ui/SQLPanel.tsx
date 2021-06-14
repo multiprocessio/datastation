@@ -49,6 +49,9 @@ export async function evalSQLPanel(
 
             // Default to stringifying.
             const stringified = JSON.stringify(cell);
+            if (!stringified) {
+              return 'null';
+            }
 
             // JSON strings use double quote, SQL uses single quote
             if (stringified[0] === '"') {
@@ -62,12 +65,13 @@ export async function evalSQLPanel(
           });
         }
       );
+      const quotedColumns = columns
+        .map((c: string) => `'${c.replace("'", "\\'")}'`)
+        .join(',');
       const values = valuesAsSQLStrings
         .map((v: Array<string>) => `(${v.join(', ')})`)
         .join(', ');
-      content = `WITH t${tableIndex}(${columns.join(
-        ','
-      )}) AS (SELECT * FROM (VALUES ${values})) ${content}`;
+      content = `WITH t${tableIndex}(${quotedColumns}) AS (SELECT * FROM (VALUES ${values})) ${content}`;
     });
   } catch (e) {
     console.error(e);
@@ -91,7 +95,14 @@ export async function evalSQLPanel(
     }
 
     const db = new sql.Database();
-    const [res] = db.exec(content);
+    let res: any;
+    try {
+      res = db.exec(content)[0];
+    } catch (e) {
+      console.error(e, content);
+      throw new Error('Syntax error');
+    }
+
     return res.values.map((row: Array<any>) => {
       const formattedRow: { [k: string]: any } = {};
       res.columns.forEach((c: string, i: number) => {

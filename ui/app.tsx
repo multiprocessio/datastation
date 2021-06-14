@@ -51,11 +51,6 @@ function getShareState(): undefined | ProjectState {
     const intArray = Uint8Array.from(
       shareState.split(',').map((i) => parseInt(i))
     );
-    console.log(
-      intArray,
-      shareState.split(','),
-      parseInt(shareState.split(',')[3])
-    );
     const uncompressed = JSON.parse(pako.inflate(intArray, { to: 'string' }));
     shareStateCache.state = rawStateToObjects(uncompressed);
   }
@@ -107,7 +102,6 @@ function useProjectState(
 function App() {
   // TODO: projectId needs to come from opened project.
   const shareState = getShareState();
-  console.log(shareState, shareState ? shareState.id : 'nothing');
   const [projectId, setProjectId] = React.useState(
     (shareState && shareState.id) || 'default'
   );
@@ -187,15 +181,15 @@ function App() {
                   </Button>
                   {shareDialog && (
                     <div className="share-details">
+                      <p>This URL contains the entire project state.</p>
                       <p>
-                        This is a URL encoding the entire state of the current
-                        project. The URL and project data is not stored on any
-                        server; it only exists in the browser. So you can safely
-                        use it to share a project. But since the state isn't
-                        stored in any server, any changes you make after sharing
-                        the URL will not be visible to whoever you share the URL
-                        with. You will need to click "Share this project" again
-                        to get a new URL.
+                        Project data is not stored on a server. But if you do
+                        use this URL, the data encoded in the URL will appear in
+                        DataStation web server access logs.
+                      </p>
+                      <p>
+                        If you make changes, you will need to click "Share"
+                        again to get a new URL.
                       </p>
                       <Input readOnly value={shareURL} onChange={() => {}} />
                     </div>

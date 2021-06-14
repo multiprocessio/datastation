@@ -6,7 +6,11 @@
 	"target": "esnext",
 	"module": "commonjs",
 	"skipLibCheck": true,
-	"esModuleInterop": true
+	"esModuleInterop": true,
+	"typeRoots": [
+	    "./node_modules/@types",
+	    "./type-overrides"
+	]
     },
     "exclude": ["node_modules", "*.js", "build"]
 }
