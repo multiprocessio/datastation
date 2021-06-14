@@ -6,12 +6,14 @@ export function Textarea({
   onChange,
   className,
   disabled,
+  onKeyDown,
 }: {
   spellCheck?: 'true' | 'false';
   value: string;
   onChange: (value: string) => void;
   className?: string;
   disabled?: boolean;
+  onKeyDown?: (e: React.KeyboardEvent) => void;
 }) {
   let textareaClass = 'textarea';
   if (className) {
@@ -21,6 +23,7 @@ export function Textarea({
   return (
     <textarea
       value={value}
+      onKeyDown={onKeyDown}
       spellCheck={spellCheck}
       onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
         onChange(e.target.value)

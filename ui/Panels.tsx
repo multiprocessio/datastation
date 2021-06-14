@@ -4,6 +4,7 @@ import { ProjectPage, PanelInfo, LiteralPanelInfo } from './../shared/state';
 
 import { PanelResult } from './ProjectStore';
 import { Panel } from './Panel';
+import { Button } from './component-library/Button';
 
 export function Panels({
   page,
@@ -39,29 +40,35 @@ export function Panels({
     <div>
       <div>
         {page.panels.map((panel, panelIndex) => (
-          <Panel
-            key={panelIndex}
-            panel={panel}
-            updatePanel={updatePanel(page, panelIndex)}
-            panelResults={panelResults}
-            reevalPanel={reevalPanel}
-            panelIndex={panelIndex}
-            movePanel={movePanel}
-            removePanel={removePanel}
-            panelCount={page.panels.length}
-          />
+          <React.Fragment>
+            <Panel
+              key={panelIndex}
+              panel={panel}
+              updatePanel={updatePanel(page, panelIndex)}
+              panelResults={panelResults}
+              reevalPanel={reevalPanel}
+              panelIndex={panelIndex}
+              movePanel={movePanel}
+              removePanel={removePanel}
+              panelCount={page.panels.length}
+            />
+            <div className="new-panel">
+              <Button
+                onClick={() => {
+                  page.panels.splice(
+                    panelIndex + 1,
+                    0,
+                    new LiteralPanelInfo('Untitled panel')
+                  );
+                  updatePage(page);
+                }}
+              >
+                New Panel
+              </Button>
+            </div>
+          </React.Fragment>
         ))}
       </div>
-      <button
-        type="button"
-        className="button button--primary"
-        onClick={() => {
-          page.panels.push(new LiteralPanelInfo('Untitled panel'));
-          updatePage(page);
-        }}
-      >
-        New Panel
-      </button>
     </div>
   );
 }

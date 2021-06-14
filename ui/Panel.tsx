@@ -9,11 +9,13 @@ import {
   ProgramPanelInfo,
   TablePanelInfo,
   LiteralPanelInfo,
+  FilePanelInfo,
 } from './../shared/state';
 
 import { PanelResult } from './ProjectStore';
 import { GraphPanel, GraphPanelDetails } from './GraphPanel';
 import { evalHTTPPanel, HTTPPanelDetails } from './HTTPPanel';
+import { evalFilePanel, FilePanelDetails } from './FilePanel';
 import { evalProgramPanel, ProgramPanelDetails } from './ProgramPanel';
 import { TablePanel, TablePanelDetails } from './TablePanel';
 import { evalLiteralPanel, LiteralPanelDetails } from './LiteralPanel';
@@ -30,6 +32,7 @@ export const PANEL_TYPE_ICON = {
   graph: 'bar_chart',
   http: 'http',
   sql: 'table_rows',
+  file: 'description',
 };
 
 export async function evalPanel(
@@ -42,7 +45,7 @@ export async function evalPanel(
     case 'program':
       return await evalProgramPanel(panel as ProgramPanelInfo, panelResults);
     case 'literal':
-      return evalLiteralPanel(panel as LiteralPanelInfo);
+      return await evalLiteralPanel(panel as LiteralPanelInfo);
     case 'sql':
       return evalSQLPanel(panel as SQLPanelInfo, panelResults);
     case 'graph':
@@ -53,6 +56,8 @@ export async function evalPanel(
         .value;
     case 'http':
       return await evalHTTPPanel(panel as HTTPPanelInfo);
+    case 'file':
+      return await evalFilePanel(panel as FilePanelInfo);
   }
 }
 
@@ -79,35 +84,35 @@ export function Panel({
   movePanel: (from: number, to: number) => void;
   panelCount: number;
 }) {
+  const previewableTypes = ['http', 'sql', 'program', 'file'];
+  const alwaysOpenTypes = ['table', 'graph', 'http', 'file'];
   const [details, setDetails] = React.useState(
-    panel.type === 'table' || panel.type === 'graph' || panel.type === 'http'
+    alwaysOpenTypes.includes(panel.type)
   );
   const [hidden, setHidden] = React.useState(false);
 
   let body = null;
   const exception =
     panelResults[panelIndex] && panelResults[panelIndex].exception;
-  if (!exception && panel.type === 'table') {
+  if (panel.type === 'table') {
     body = (
       <TablePanel panel={panel as TablePanelInfo} panelResults={panelResults} />
     );
-  } else if (!exception && panel.type === 'graph') {
+  } else if (panel.type === 'graph') {
     body = (
       <GraphPanel
         panel={panel as GraphPanelInfo}
         data={panelResults[panelIndex]}
       />
     );
+  } else if (panel.type === 'file') {
+    body = <span />;
   }
 
   const [preview, setPreview] = React.useState('');
   const results = panelResults[panelIndex];
   React.useEffect(() => {
-    if (
-      panel.type === 'http' ||
-      panel.type === 'sql' ||
-      panel.type === 'program'
-    ) {
+    if (previewableTypes.includes(panel.type)) {
       if (results && !results.exception) {
         const resultsLines = previewValueAsString(results.value).split('\n');
         setPreview(resultsLines.slice(0, 50).join('\n'));
@@ -115,10 +120,30 @@ export function Panel({
     }
   }, [results?.value, results?.exception]);
 
-  const [previewVisible, setPreviewVisible] = React.useState(false);
+  const panelRef = React.useRef(null);
+  function keyboardShortcuts(e: React.KeyboardEvent) {
+    if (
+      !panelRef.current &&
+      panelRef.current !== document.activeElement &&
+      !panelRef.current.contains(document.activeElement)
+    ) {
+      return;
+    }
+
+    if ((e.ctrlKey || e.metaKey) && e.code === 'Enter') {
+      reevalPanel(panelIndex);
+    }
+  }
 
   return (
-    <div className={`panel ${hidden ? 'panel--hidden' : ''}`}>
+    <div
+      className={`panel ${hidden ? 'panel--hidden' : ''} ${
+        panel.type === 'file' ? 'panel--empty' : ''
+      }`}
+      tabIndex={1001}
+      ref={panelRef}
+      onKeyDown={keyboardShortcuts}
+    >
       <div className="panel-head">
         <div className="panel-header vertical-align-center">
           <Button
@@ -139,7 +164,6 @@ export function Panel({
           >
             keyboard_arrow_down
           </Button>
-          <span className="material-icons">{PANEL_TYPE_ICON[panel.type]}</span>
           <Input
             className="panel-name"
             onChange={(value: string) => {
@@ -148,22 +172,27 @@ export function Panel({
             }}
             value={panel.name}
           />
-          {panel.type !== 'table' &&
-            panel.type !== 'graph' &&
-            panel.type !== 'http' && (
-              <Button icon onClick={() => setDetails(!details)}>
-                {details ? 'unfold_less' : 'unfold_more'}
-              </Button>
-            )}
+          <span className="material-icons">{PANEL_TYPE_ICON[panel.type]}</span>
+          {!alwaysOpenTypes.includes(panel.type) && (
+            <Button icon onClick={() => setDetails(!details)}>
+              {details ? 'unfold_less' : 'unfold_more'}
+            </Button>
+          )}
           <span className="panel-controls vertical-align-center flex-right">
             <span className="last-run">
               {(panelResults[panelIndex] || {}).lastRun
                 ? 'Last run ' + panelResults[panelIndex].lastRun
                 : 'Not run'}
             </span>
-            <Button icon onClick={() => reevalPanel(panelIndex)}>
-              play_arrow
-            </Button>
+            <span title="Ctrl-Enter">
+              <Button
+                icon
+                onClick={() => reevalPanel(panelIndex)}
+                type="primary"
+              >
+                play_arrow
+              </Button>
+            </span>
             <Button icon onClick={() => setHidden(!hidden)}>
               {hidden ? 'visibility' : 'visibility_off'}
             </Button>
@@ -199,6 +228,9 @@ export function Panel({
                     case 'http':
                       newPanel = new HTTPPanelInfo(panel.name);
                       break;
+                    case 'file':
+                      newPanel = new FilePanelInfo(panel.name);
+                      break;
                     default:
                       throw new Error(`Invalid panel type: ${value}`);
                   }
@@ -212,6 +244,7 @@ export function Panel({
                 <option value="http">HTTP Request</option>
                 <option value="table">Table</option>
                 <option value="graph">Graph</option>
+                <option value="file">File</option>
                 <option value="literal">Literal</option>
               </Select>
             </div>
@@ -254,6 +287,12 @@ export function Panel({
                 panelIndex={panelIndex}
               />
             )}
+            {panel.type === 'file' && (
+              <FilePanelDetails
+                panel={panel as FilePanelInfo}
+                updatePanel={updatePanel}
+              />
+            )}
           </div>
         )}
       </div>
@@ -263,6 +302,7 @@ export function Panel({
             body
           ) : (
             <Textarea
+              onKeyDown={keyboardShortcuts}
               spellCheck="false"
               value={panel.content}
               onChange={(value: string) => {
@@ -299,19 +339,11 @@ export function Panel({
             </div>
           )}
           {preview && (
-            <div
-              className="panel-preview"
-              onMouseEnter={() => setPreviewVisible(true)}
-              onMouseLeave={() => setPreviewVisible(false)}
-            >
-              {previewVisible && (
-                <pre className="panel-preview-results">
-                  <code>{preview}</code>
-                </pre>
-              )}
-              {!previewVisible && (
-                <div className="panel-preview-message">Preview results</div>
-              )}
+            <div className="panel-preview">
+              <pre className="panel-preview-results">
+                <code>{preview}</code>
+              </pre>
+              <div className="panel-preview-message">Preview results</div>
             </div>
           )}
         </div>
