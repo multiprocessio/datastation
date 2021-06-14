@@ -9,11 +9,13 @@ import {
   ProgramPanelInfo,
   TablePanelInfo,
   LiteralPanelInfo,
+  FilePanelInfo,
 } from './../shared/state';
 
 import { PanelResult } from './ProjectStore';
 import { GraphPanel, GraphPanelDetails } from './GraphPanel';
 import { evalHTTPPanel, HTTPPanelDetails } from './HTTPPanel';
+import { evalFilePanel, FilePanelDetails } from './FilePanel';
 import { evalProgramPanel, ProgramPanelDetails } from './ProgramPanel';
 import { TablePanel, TablePanelDetails } from './TablePanel';
 import { evalLiteralPanel, LiteralPanelDetails } from './LiteralPanel';
@@ -30,6 +32,7 @@ export const PANEL_TYPE_ICON = {
   graph: 'bar_chart',
   http: 'http',
   sql: 'table_rows',
+  file: 'description',
 };
 
 export async function evalPanel(
@@ -42,7 +45,7 @@ export async function evalPanel(
     case 'program':
       return await evalProgramPanel(panel as ProgramPanelInfo, panelResults);
     case 'literal':
-      return evalLiteralPanel(panel as LiteralPanelInfo);
+      return await evalLiteralPanel(panel as LiteralPanelInfo);
     case 'sql':
       return evalSQLPanel(panel as SQLPanelInfo, panelResults);
     case 'graph':
@@ -53,6 +56,8 @@ export async function evalPanel(
         .value;
     case 'http':
       return await evalHTTPPanel(panel as HTTPPanelInfo);
+    case 'file':
+      return await evalFilePanel(panel as FilePanelInfo);
   }
 }
 
@@ -79,8 +84,9 @@ export function Panel({
   movePanel: (from: number, to: number) => void;
   panelCount: number;
 }) {
+  const alwaysOpenTypes = ['table', 'graph', 'http', 'file'];
   const [details, setDetails] = React.useState(
-    panel.type === 'table' || panel.type === 'graph' || panel.type === 'http'
+    alwaysOpenTypes.includes(panel.type)
   );
   const [hidden, setHidden] = React.useState(false);
 
@@ -148,13 +154,11 @@ export function Panel({
             }}
             value={panel.name}
           />
-          {panel.type !== 'table' &&
-            panel.type !== 'graph' &&
-            panel.type !== 'http' && (
-              <Button icon onClick={() => setDetails(!details)}>
-                {details ? 'unfold_less' : 'unfold_more'}
-              </Button>
-            )}
+          {!alwaysOpenTypes.includes(panel.type) && (
+            <Button icon onClick={() => setDetails(!details)}>
+              {details ? 'unfold_less' : 'unfold_more'}
+            </Button>
+          )}
           <span className="panel-controls vertical-align-center flex-right">
             <span className="last-run">
               {(panelResults[panelIndex] || {}).lastRun
@@ -252,6 +256,12 @@ export function Panel({
                 panel={panel as ProgramPanelInfo}
                 updatePanel={updatePanel}
                 panelIndex={panelIndex}
+              />
+            )}
+            {panel.type === 'file' && (
+              <FilePanelDetails
+                panel={panel as FilePanelInfo}
+                updatePanel={updatePanel}
               />
             )}
           </div>

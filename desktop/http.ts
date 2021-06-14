@@ -1,6 +1,6 @@
 import fetch from 'node-fetch';
 
-import { parseText } from '../shared/text';
+import { parseArrayBuffer } from '../shared/text';
 import { HTTPConnectorInfo } from '../shared/state';
 
 export const evalHTTPHandler = {
@@ -16,8 +16,8 @@ export const evalHTTPHandler = {
       body: method === 'GET' || method === 'HEAD' ? undefined : body,
       method,
     });
-    const rspBody = await rsp.text();
+    const rspBody = await rsp.arrayBuffer();
     const type = rsp.headers.get('content-type');
-    return parseText(type, rspBody);
+    return await parseArrayBuffer(type, rspBody);
   },
 };

@@ -1,17 +1,18 @@
 import * as React from 'react';
 
 import { LiteralPanelInfo } from '../shared/state';
-import { parseText } from '../shared/text';
+import { parseArrayBuffer } from '../shared/text';
 import { Select } from './component-library/Select';
 
-export function evalLiteralPanel(panel: LiteralPanelInfo) {
+export async function evalLiteralPanel(panel: LiteralPanelInfo) {
   const literal = panel.literal;
   const type = {
     csv: 'text/csv',
     json: 'application/json',
   }[literal.type];
 
-  return parseText(type, panel.content);
+  const array = new TextEncoder().encode(panel.content);
+  return await parseArrayBuffer(type, array);
 }
 
 export function LiteralPanelDetails({
@@ -38,7 +39,6 @@ export function LiteralPanelDetails({
               default:
                 throw new Error(`Unknown literal type: ${value}`);
             }
-            updatePanel(panel);
             updatePanel(panel);
           }}
         >

@@ -81,7 +81,8 @@ export type PanelInfoType =
   | 'graph'
   | 'program'
   | 'literal'
-  | 'sql';
+  | 'sql'
+  | 'file';
 
 export class PanelInfo {
   content: string;
@@ -186,6 +187,21 @@ export class TablePanelInfo extends PanelInfo {
     this.table = {
       columns,
       panelSource,
+    };
+  }
+}
+
+export class FilePanelInfo extends PanelInfo {
+  file: {
+    name: string;
+    content: ArrayBuffer;
+  };
+
+  constructor(name?: string, fileName?: string, fileContent?: ArrayBuffer) {
+    super('file', name, '');
+    this.file = {
+      name: fileName,
+      content: fileContent,
     };
   }
 }
