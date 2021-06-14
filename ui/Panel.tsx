@@ -120,8 +120,6 @@ export function Panel({
     }
   }, [results?.value, results?.exception]);
 
-  const [previewVisible, setPreviewVisible] = React.useState(false);
-
   const panelRef = React.useRef(null);
   function keyboardShortcuts(e: React.KeyboardEvent) {
     if (
@@ -343,17 +341,11 @@ export function Panel({
           {preview && (
             <div
               className="panel-preview"
-              onMouseEnter={() => setPreviewVisible(true)}
-              onMouseLeave={() => setPreviewVisible(false)}
             >
-              {previewVisible && (
-                <pre className="panel-preview-results">
-                  <code>{preview}</code>
-                </pre>
-              )}
-              {!previewVisible && (
-                <div className="panel-preview-message">Preview results</div>
-              )}
+              <pre className="panel-preview-results">
+                <code>{preview}</code>
+              </pre>
+              <div className="panel-preview-message">Preview results</div>
             </div>
           )}
         </div>

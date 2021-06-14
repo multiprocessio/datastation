@@ -182,14 +182,11 @@ function App() {
                   {shareDialog && (
                     <div className="share-details">
                       <p>
-                        This is a URL encoding the entire state of the current
-                        project. The URL and project data is not stored on any
-                        server; it only exists in the browser. So you can safely
-                        use it to share a project. But since the state isn't
-                        stored in any server, any changes you make after sharing
-                        the URL will not be visible to whoever you share the URL
-                        with. You will need to click "Share this project" again
-                        to get a new URL.
+                        This serializes project state to a URL. It is not stored
+                        in any database but it will be stored in DataStation web
+                        server access logs if someone uses this URL. If you make
+                        changes, you will need to click "Share" again to get a
+                        new URL.
                       </p>
                       <Input readOnly value={shareURL} onChange={() => {}} />
                     </div>
