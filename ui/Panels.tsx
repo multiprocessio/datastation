@@ -36,6 +36,27 @@ export function Panels({
     };
   }
 
+  function newPanel(panelIndex: number) {
+    return (
+      <div className="new-panel">
+        <Button
+          onClick={() => {
+            const panel = new LiteralPanelInfo('Untitled panel');
+            if (panelIndex) {
+              page.panels.splice(panelIndex + 1, 0, panel);
+            } else {
+              page.panels.push(panel);
+            }
+
+            updatePage(page);
+          }}
+        >
+          New Panel
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <div>
       <div>
@@ -52,22 +73,10 @@ export function Panels({
               removePanel={removePanel}
               panelCount={page.panels.length}
             />
-            <div className="new-panel">
-              <Button
-                onClick={() => {
-                  page.panels.splice(
-                    panelIndex + 1,
-                    0,
-                    new LiteralPanelInfo('Untitled panel')
-                  );
-                  updatePage(page);
-                }}
-              >
-                New Panel
-              </Button>
-            </div>
+            {newPanel(panelIndex)}
           </React.Fragment>
         ))}
+        {page.panels.length === 0 && newPanel(0)}
       </div>
     </div>
   );
