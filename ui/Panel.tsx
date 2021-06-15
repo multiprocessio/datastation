@@ -146,24 +146,28 @@ export function Panel({
     >
       <div className="panel-head">
         <div className="panel-header vertical-align-center">
-          <Button
-            icon
-            disabled={panelIndex === 0}
-            onClick={() => {
-              movePanel(panelIndex, panelIndex - 1);
-            }}
-          >
-            keyboard_arrow_up
-          </Button>
-          <Button
-            icon
-            disabled={panelIndex === panelCount - 1}
-            onClick={() => {
-              movePanel(panelIndex, panelIndex + 1);
-            }}
-          >
-            keyboard_arrow_down
-          </Button>
+          <span title="Move up">
+            <Button
+              icon
+              disabled={panelIndex === 0}
+              onClick={() => {
+                movePanel(panelIndex, panelIndex - 1);
+              }}
+            >
+              keyboard_arrow_up
+            </Button>
+          </span>
+          <span title="Move down">
+            <Button
+              icon
+              disabled={panelIndex === panelCount - 1}
+              onClick={() => {
+                movePanel(panelIndex, panelIndex + 1);
+              }}
+            >
+              keyboard_arrow_down
+            </Button>
+          </span>
           <Input
             className="panel-name"
             onChange={(value: string) => {
@@ -174,9 +178,11 @@ export function Panel({
           />
           <span className="material-icons">{PANEL_TYPE_ICON[panel.type]}</span>
           {!alwaysOpenTypes.includes(panel.type) && (
-            <Button icon onClick={() => setDetails(!details)}>
-              {details ? 'unfold_less' : 'unfold_more'}
-            </Button>
+            <span title="Panel details">
+              <Button icon onClick={() => setDetails(!details)}>
+                {details ? 'unfold_less' : 'unfold_more'}
+              </Button>
+            </span>
           )}
           <span className="panel-controls vertical-align-center flex-right">
             <span className="last-run">
@@ -184,7 +190,7 @@ export function Panel({
                 ? 'Last run ' + panelResults[panelIndex].lastRun
                 : 'Not run'}
             </span>
-            <span title="Ctrl-Enter">
+            <span title="Evaluate panel (Ctrl-Enter)">
               <Button
                 icon
                 onClick={() => reevalPanel(panelIndex)}
@@ -193,12 +199,16 @@ export function Panel({
                 play_arrow
               </Button>
             </span>
-            <Button icon onClick={() => setHidden(!hidden)}>
-              {hidden ? 'visibility' : 'visibility_off'}
-            </Button>
-            <Button icon onClick={() => removePanel(panelIndex)}>
-              delete
-            </Button>
+            <span title="Hide panel">
+              <Button icon onClick={() => setHidden(!hidden)}>
+                {hidden ? 'visibility' : 'visibility_off'}
+              </Button>
+            </span>
+            <span title="Delete panel">
+              <Button icon onClick={() => removePanel(panelIndex)}>
+                delete
+              </Button>
+            </span>
           </span>
         </div>
         {details && (
@@ -297,53 +307,56 @@ export function Panel({
         )}
       </div>
       {!hidden && (
-        <div className="panel-body">
-          {body ? (
-            body
-          ) : (
-            <Textarea
-              onKeyDown={keyboardShortcuts}
-              spellCheck="false"
-              value={panel.content}
-              onChange={(value: string) => {
-                panel.content = value;
-                updatePanel(panel);
-              }}
-              className="editor"
-            />
-          )}
-          {exception && (
-            <div className="error">
-              <div>Error evaluating panel:</div>
-              <pre>
-                <code>{exception}</code>
-              </pre>
-            </div>
-          )}
-          {panel.type === 'program' && (
-            <div className="alert alert-info">
-              Use builtin functions, <code>DM_setPanel($some_array_data)</code>{' '}
-              and <code>DM_getPanel($panel_number)</code>, to interact with
-              other panels. For example:{' '}
-              <code>
-                const passthrough = DM_getPanel(0); DM_setPanel(passthrough);
-              </code>
-              .
-            </div>
-          )}
-          {panel.type === 'sql' && (
-            <div className="alert alert-info">
-              Use builtin <code>DM_getPanel($panel_number)</code> to interact
-              with other panels as tables. For example:{' '}
-              <code>SELECT * FROM DM_getPanel(0);</code>.
-            </div>
-          )}
+        <div className="flex">
+          <div className="panel-body">
+            {body ? (
+              body
+            ) : (
+              <Textarea
+                onKeyDown={keyboardShortcuts}
+                spellCheck="false"
+                value={panel.content}
+                onChange={(value: string) => {
+                  panel.content = value;
+                  updatePanel(panel);
+                }}
+                className="editor"
+              />
+            )}
+            {exception && (
+              <div className="error">
+                <div>Error evaluating panel:</div>
+                <pre>
+                  <code>{exception}</code>
+                </pre>
+              </div>
+            )}
+            {panel.type === 'program' && (
+              <div className="alert alert-info">
+                Use builtin functions,{' '}
+                <code>DM_setPanel($some_array_data)</code> and{' '}
+                <code>DM_getPanel($panel_number)</code>, to interact with other
+                panels. For example:{' '}
+                <code>
+                  const passthrough = DM_getPanel(0); DM_setPanel(passthrough);
+                </code>
+                .
+              </div>
+            )}
+            {panel.type === 'sql' && (
+              <div className="alert alert-info">
+                Use builtin <code>DM_getPanel($panel_number)</code> to interact
+                with other panels as tables. For example:{' '}
+                <code>SELECT * FROM DM_getPanel(0);</code>.
+              </div>
+            )}
+          </div>
           {preview && (
             <div className="panel-preview">
+              <div className="text-center">Panel Preview</div>
               <pre className="panel-preview-results">
                 <code>{preview}</code>
               </pre>
-              <div className="panel-preview-message">Preview results</div>
             </div>
           )}
         </div>

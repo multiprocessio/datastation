@@ -66,6 +66,10 @@ label.input input {
   align-items: center;
 }
 
+.flex {
+  display: flex;
+}
+
 .block {
   display: block;
 }
@@ -202,6 +206,7 @@ header {
 .panel-body {
   padding: 15px;
   position: relative;
+  width: 100%;
 }
 
 .panel-order {
@@ -211,35 +216,22 @@ header {
 }
 
 .panel-preview {
-  position: absolute;
-  top: 15px;
-  right: 15px;
-  background: rgba(0, 0, 0, 75%);
+  background: #333;
   padding: 5px;
   color: white;
-}
-
-.panel-preview:hover {
-  z-index: 1;
-}
-
-.panel-preview-results {
-  display: none;
-}
-
-.panel-preview:hover .panel-preview-results {
-  max-width: 300px;
+  width: 400px;
+  max-width: 50%;
   max-height: 300px;
   overflow: auto;
-  display: block;
-}
-
-.panel-preview:hover .panel-preview-message {
-  display: none;
 }
 
 .panel--empty .panel-preview {
-  top: -15px;
+  width: 100%;
+  max-width: 100%;
+}
+
+.panel--empty .panel-body {
+  display: none;
 }
 
 .new-panel {
@@ -281,4 +273,8 @@ header {
 .share-details input {
   border: 1px solid;
   width: 100%;
+}
+
+.text-center {
+  text-align: center;
 }
