@@ -1,6 +1,6 @@
 # DataStation Community Edition
 
-DataStation allows you to seamless connect SQL queries, HTTP requests,
+DataStation allows you to seamlessly connect SQL queries, HTTP requests,
 scripting, and visualization in a single platform.
 
 ![A screenshot of app.datastation.multiprocess.io](./screenshot.jpg)
@@ -29,4 +29,4 @@ interested in commercial support or to partner on the roadmap, please
 
 ## License
 
-This software is licensed under an Apache 2 license.
+This software is licensed under an Apache 2.0 license.

@@ -1,0 +1,39 @@
+{
+  "productName": "DataStation Community Edition",
+  "appId": "io.multiprocess.datastation.communityedition",
+
+  "directories": {
+    "output": "release"
+  },
+
+  // The files which will be packed
+  "files": ["build/", "node_modules/", "package.json"],
+
+  "mac": {
+    "target": ["dmg", "zip"],
+    "artifactName": "${productName}-${version}-${os}.${ext}"
+  },
+  "win": {
+    "target": ["nsis", "zip"],
+    "artifactName": "${productName}-${version}-${os}.${ext}"
+  },
+  "linux": {
+    "target": ["AppImage"],
+    "artifactName": "${productName}-${version}-${os}.${ext}"
+  },
+  "dmg": {
+    "title": "${productName}-${version}",
+    "contents": [
+      {
+        "x": 300,
+        "y": 360
+      },
+      {
+        "x": 490,
+        "y": 360,
+        "type": "link",
+        "path": "/Applications"
+      }
+    ]
+  }
+}

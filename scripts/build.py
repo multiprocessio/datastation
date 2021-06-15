@@ -58,7 +58,7 @@ def lex_command(command):
     return line
 
 for command in script:
-    if command.strip().startswith('#'):
+    if command.strip().startswith('#') or not command.strip():
         continue
 
     line = lex_command(command)
