@@ -179,6 +179,11 @@ function App() {
                       to get a new URL.
                     </p>
                     <Input readOnly value={shareURL} onChange={() => {}} />
+                    <p>
+                      <a href="https://tinyurl.com/app">TinyURL</a> is a good
+                      service for shortening these URLs correctly, some other
+                      systems break the URL.
+                    </p>
                   </div>
                 </div>
               )}

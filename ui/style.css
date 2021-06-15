@@ -294,6 +294,11 @@ header {
   color: black;
 }
 
+.share-details a {
+  color: blue;
+  margin: 0;
+}
+
 .share:focus-within .share-details {
   display: block;
 }
