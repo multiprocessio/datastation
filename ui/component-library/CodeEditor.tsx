@@ -27,14 +27,18 @@ export function CodeEditor({
       .map((line, i) => `<span class='editorLineNumber'>${i + 1}</span>${line}`)
       .join('\n');
   return (
-    <Editor
-      value={value}
-      onValueChange={onChange}
-      highlight={(code) => highlightWithLineNumbers(code, languages[language])}
-      onKeyDown={onKeyDown}
-      className={className}
-      disabled={disabled}
-      textareaId="codeArea"
-    />
+    <div className="editor-container">
+      <Editor
+        value={value}
+        onValueChange={onChange}
+        highlight={(code) =>
+          highlightWithLineNumbers(code, languages[language])
+        }
+        onKeyDown={onKeyDown}
+        className={className}
+        disabled={disabled}
+        textareaId="codeArea"
+      />
+    </div>
   );
 }
