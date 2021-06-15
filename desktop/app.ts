@@ -23,7 +23,7 @@ app.whenReady().then(() => {
     // In addition to removing the menu on Windows/Linux this also disables Chrome devtools.
     win.removeMenu();
   }
-  win.loadFile('index.html');
+  win.loadFile(path.join(__dirname, 'index.html'));
 
   registerRPCHandlers(ipcMain, [
     ...storeHandlers,
