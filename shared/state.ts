@@ -147,11 +147,22 @@ export class GraphPanelInfo extends PanelInfo {
 }
 
 export class SQLPanelInfo extends PanelInfo {
-  sql: SQLConnectorInfo;
+  sql: {
+    type: SQLConnectorInfoType;
+    connectorIndex: number;
+  };
 
-  constructor(name?: string, sql?: SQLConnectorInfo, content?: string) {
+  constructor(
+    name?: string,
+    type?: SQLConnectorInfoType,
+    connectorIndex?: number,
+    content?: string
+  ) {
     super('sql', name, content);
-    this.sql = new SQLConnectorInfo();
+    this.sql = {
+      type: type || 'in-memory',
+      connectorIndex: connectorIndex || 0,
+    };
   }
 }
 
@@ -269,7 +280,8 @@ export const DEFAULT_PROJECT: ProjectState = new ProjectState(
       ),
       new SQLPanelInfo(
         'Transform with SQL',
-        new SQLConnectorInfo('In Memory', 'in-memory'),
+        'in-memory',
+        0,
         'SELECT name, age+5 AS age FROM DM_getPanel(0);'
       ),
       (() => {

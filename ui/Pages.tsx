@@ -77,6 +77,7 @@ export function Pages({
 
       <Page
         page={page}
+        connectors={state.connectors}
         updatePage={updatePage}
         panelResults={panelResultsByPage[page.id]}
         setPanelResults={setPanelResults}
