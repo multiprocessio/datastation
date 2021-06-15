@@ -133,8 +133,9 @@ export function Panel({
       return;
     }
 
-    if ((e.ctrlKey || e.metaKey) && e.code === 'Enter') {
+    if (e.ctrlKey && e.code === 'Enter') {
       reevalPanel(panelIndex);
+      e.preventDefault();
     }
   }
 
