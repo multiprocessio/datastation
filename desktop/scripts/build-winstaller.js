@@ -3,10 +3,10 @@ const electronInstaller = require('electron-winstaller');
 (async function() {
   try {
     await electronInstaller.createWindowsInstaller({
-      appDirectory: 'build',
+      appDirectory: 'DataStation Community Edition-win32-x64',
       outputDirectory: 'release',
       authors: 'DataStation Authors',
-      exe: 'DataStationCommunityEdition.exe'
+      exe: 'DataStation Community Edition.exe',
     });
     console.log('It worked!');
   } catch (e) {

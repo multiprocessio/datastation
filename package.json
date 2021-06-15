@@ -5,12 +5,14 @@
   "license": "Apache-2.0",
   "description": "The Data IDE for Developers",
   "author": "DataStation Authors",
+  "main": "build/desktop.js",
   "scripts": {
     "typecheck": "yarn tsc",
     "build-desktop": "python ./scripts/build.py ./desktop/scripts/desktop.build",
     "build-ui": "python ./scripts/build.py ./ui/scripts/ui.build",
     "start-desktop": "yarn build-ui && yarn build-desktop && yarn electron --trace-warnings build/desktop.js",
     "start-ui": "yarn build-ui && python3 -m http.server --directory build 8080",
+    "build-desktop-app": "yarn electron-packager --overwrite --out=releases .",
     "format": "yarn prettier --write \"**/*.ts\" \"**/*.tsx\" \"**/*.css\" \"**/*.json\""
   },
   "dependencies": {

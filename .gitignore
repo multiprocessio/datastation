@@ -7,4 +7,4 @@ data
 build
 electron/build
 yarn-error.log
-release
+releases
