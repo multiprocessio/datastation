@@ -23,7 +23,7 @@ import { evalSQLPanel, SQLPanelDetails } from './SQLPanel';
 import { Button } from './component-library/Button';
 import { Input } from './component-library/Input';
 import { Select } from './component-library/Select';
-import { Textarea } from './component-library/Textarea';
+import { CodeEditor } from './component-library/CodeEditor';
 
 export const PANEL_TYPE_ICON = {
   literal: 'format_quote',
@@ -119,6 +119,9 @@ export function Panel({
       }
     }
   }, [results?.value, results?.exception]);
+
+  const language =
+    panel.type === 'program' ? (panel as ProgramPanelInfo).program.type : 'sql';
 
   const panelRef = React.useRef(null);
   function keyboardShortcuts(e: React.KeyboardEvent) {
@@ -312,14 +315,14 @@ export function Panel({
             {body ? (
               body
             ) : (
-              <Textarea
+              <CodeEditor
                 onKeyDown={keyboardShortcuts}
-                spellCheck="false"
                 value={panel.content}
                 onChange={(value: string) => {
                   panel.content = value;
                   updatePanel(panel);
                 }}
+                language={language}
                 className="editor"
               />
             )}

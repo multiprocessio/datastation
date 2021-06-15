@@ -47,10 +47,29 @@ header a {
   font-size: 1.1rem;
   height: 200px;
   resize: vertical;
+  counter-reset: line;
 }
 
-.editor:focus {
-  outline: 0;
+.editor #codeArea {
+  outline: none;
+  padding-left: 60px !important;
+}
+
+.editor pre {
+  padding-left: 60px !important;
+}
+
+.editor .editorLineNumber {
+  position: absolute;
+  left: 0px;
+  color: #ccc;
+  text-align: right;
+  width: 40px;
+  font-weight: 100;
+}
+
+.editor textarea:focus {
+  outline: none;
 }
 
 input.input,
