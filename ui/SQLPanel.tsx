@@ -78,6 +78,7 @@ export async function evalSQLPanel(
     throw new Error('Malformed substitution in SQL');
   }
 
+  console.log(panel.sql.sql.type);
   if (panel.sql.sql.type === 'postgres') {
     return await asyncRPC<SQLConnectorInfo, string, Array<object>>(
       'evalSQL',
@@ -96,12 +97,7 @@ export async function evalSQLPanel(
 
     const db = new sql.Database();
     let res: any;
-    try {
-      res = db.exec(content)[0];
-    } catch (e) {
-      console.error(e, content);
-      throw new Error('Syntax error');
-    }
+    res = db.exec(content)[0];
 
     return res.values.map((row: Array<any>) => {
       const formattedRow: { [k: string]: any } = {};
@@ -130,7 +126,7 @@ export function SQLPanelDetails({
         <Select
           label="Vendor"
           className="block"
-          value={panel.sql.type}
+          value={panel.sql.sql.type}
           onChange={(value: string) => {
             panel.sql.sql.type = value as SQLConnectorInfoType;
             updatePanel(panel);
@@ -139,7 +135,7 @@ export function SQLPanelDetails({
           {MODE_FEATURES.sql && <option value="postgres">PostgreSQL</option>}
           <option value="in-memory">In-Memory SQL</option>
         </Select>
-        {MODE_FEATURES.sql && (
+        {MODE_FEATURES.sql && panel.sql.sql.type !== 'in-memory' && (
           <Select
             label="Connector"
             className="block"
@@ -157,7 +153,7 @@ export function SQLPanelDetails({
                   return null;
                 }
 
-                return <option value={index}>c.name</option>;
+                return <option value={index}>{c.name}</option>;
               })
               .filter(Boolean)}
           </Select>
