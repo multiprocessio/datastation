@@ -1,7 +1,8 @@
 {
   "name": "datastation",
+  "productName": "DataStation Community Edition",
   "version": "0.0.1",
-  "license": "Apache 2.0",
+  "license": "Apache-2.0",
   "description": "The Data IDE for Developers",
   "author": "DataStation Authors",
   "scripts": {
@@ -12,7 +13,6 @@
     "start-ui": "yarn build-ui && python3 -m http.server --directory build 8080",
     "format": "yarn prettier --write \"**/*.ts\" \"**/*.tsx\" \"**/*.css\" \"**/*.json\""
   },
-  "entrypoint": "build/desktop.js",
   "dependencies": {
     "@types/pg": "^8.6.0",
     "@types/uuid": "^8.3.0",
@@ -39,7 +39,8 @@
     "@types/react": "^17.0.9",
     "@types/react-dom": "^17.0.6",
     "electron": "^13.1.2",
-    "electron-builder": "^22.11.7",
+    "electron-packager": "^15.2.0",
+    "electron-winstaller": "^5.0.0",
     "esbuild": "^0.12.7",
     "prettier": "^2.3.0",
     "typescript": "^4.3.2"
