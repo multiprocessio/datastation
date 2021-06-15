@@ -116,7 +116,6 @@ function App() {
   // TODO: handle when there are zero pages?
   const [currentPage, setCurrentPage] = React.useState(0);
 
-  const [shareDialog, setShareDialog] = React.useState(false);
   const [shareURL, setShareURL] = React.useState('');
 
   function computeShareURL() {
@@ -166,34 +165,21 @@ function App() {
                 Reset
               </Button>
               {MODE_FEATURES.shareProject && (
-                <div
-                  className="share"
-                  tabIndex={1000}
-                  onBlur={() => setShareDialog(false)}
-                >
-                  <Button
-                    onClick={() => {
-                      computeShareURL();
-                      setShareDialog(true);
-                    }}
-                  >
-                    Share
-                  </Button>
-                  {shareDialog && (
-                    <div className="share-details">
-                      <p>This URL contains the entire project state.</p>
-                      <p>
-                        Project data is not stored on a server. But if you do
-                        use this URL, the data encoded in the URL will appear in
-                        DataStation web server access logs.
-                      </p>
-                      <p>
-                        If you make changes, you will need to click "Share"
-                        again to get a new URL.
-                      </p>
-                      <Input readOnly value={shareURL} onChange={() => {}} />
-                    </div>
-                  )}
+                <div className="share" tabIndex={1000}>
+                  <Button onClick={() => computeShareURL()}>Share</Button>
+                  <div className="share-details">
+                    <p>This URL contains the entire project state.</p>
+                    <p>
+                      Project data is not stored on a server. But if you do use
+                      this URL, the data encoded in the URL will appear in
+                      DataStation web server access logs.
+                    </p>
+                    <p>
+                      If you make changes, you will need to click "Share" again
+                      to get a new URL.
+                    </p>
+                    <Input readOnly value={shareURL} onChange={() => {}} />
+                  </div>
                 </div>
               )}
               <a

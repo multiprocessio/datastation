@@ -278,6 +278,7 @@ header {
 }
 
 .share-details {
+  display: none;
   position: absolute;
   top: 30px;
   right: 1px;
@@ -287,6 +288,10 @@ header {
   padding: 15px;
   width: 400px;
   color: black;
+}
+
+.share:focus-within .share-details {
+  display: block;
 }
 
 .share-details input {
