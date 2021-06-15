@@ -1,16 +1,13 @@
 {
-    "compilerOptions": {
-	"noImplicitAny": true,
-	"noEmit": true,
-	"jsx": "react",
-	"target": "esnext",
-	"module": "commonjs",
-	"skipLibCheck": true,
-	"esModuleInterop": true,
-	"typeRoots": [
-	    "./node_modules/@types",
-	    "./type-overrides"
-	]
-    },
-    "exclude": ["node_modules", "*.js", "build"]
+  "compilerOptions": {
+    "noImplicitAny": true,
+    "noEmit": true,
+    "jsx": "react",
+    "target": "esnext",
+    "module": "commonjs",
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "typeRoots": ["./node_modules/@types", "./type-overrides"]
+  },
+  "exclude": ["node_modules", "*.js", "build"]
 }

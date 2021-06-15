@@ -14,7 +14,8 @@ import { Select } from './component-library/Select';
 
 export async function evalSQLPanel(
   panel: SQLPanelInfo,
-  panelResults: Array<PanelResult>
+  panelResults: Array<PanelResult>,
+  connectors: Array<ConnectorInfo>
 ) {
   if (!panel.content.trim().toLowerCase().startsWith('select ')) {
     throw new Error('SQL must be read-only SELECT');
@@ -78,15 +79,15 @@ export async function evalSQLPanel(
     throw new Error('Malformed substitution in SQL');
   }
 
-  if (panel.sql.sql.type === 'postgres') {
+  if (panel.sql.type === 'postgres') {
     return await asyncRPC<SQLConnectorInfo, string, Array<object>>(
       'evalSQL',
       content,
-      panel.sql
+      connectors[+panel.sql.connectorIndex] as SQLConnectorInfo
     );
   }
 
-  if (panel.sql.sql.type === 'in-memory') {
+  if (panel.sql.type === 'in-memory') {
     let sql = (window as any).SQL;
     if (!sql) {
       sql = (window as any).SQL = await (window as any).initSqlJs({
@@ -96,12 +97,7 @@ export async function evalSQLPanel(
 
     const db = new sql.Database();
     let res: any;
-    try {
-      res = db.exec(content)[0];
-    } catch (e) {
-      console.error(e, content);
-      throw new Error('Syntax error');
-    }
+    res = db.exec(content)[0];
 
     return res.values.map((row: Array<any>) => {
       const formattedRow: { [k: string]: any } = {};
@@ -132,24 +128,23 @@ export function SQLPanelDetails({
           className="block"
           value={panel.sql.type}
           onChange={(value: string) => {
-            panel.sql.sql.type = value as SQLConnectorInfoType;
+            panel.sql.type = value as SQLConnectorInfoType;
             updatePanel(panel);
           }}
         >
           {MODE_FEATURES.sql && <option value="postgres">PostgreSQL</option>}
           <option value="in-memory">In-Memory SQL</option>
         </Select>
-        {MODE_FEATURES.sql && (
+        {MODE_FEATURES.sql && panel.sql.type !== 'in-memory' && (
           <Select
             label="Connector"
             className="block"
-            value={panel.sql.type}
+            value={panel.sql.connectorIndex.toString()}
             onChange={(connectorIndex: string) => {
-              panel.sql.sql = (
-                connectors[+connectorIndex] as SQLConnectorInfo
-              ).sql;
+              panel.sql.connectorIndex = +connectorIndex;
               updatePanel(panel);
             }}
+            nodefault
           >
             {connectors
               .map((c: ConnectorInfo, index: number) => {
@@ -157,7 +152,7 @@ export function SQLPanelDetails({
                   return null;
                 }
 
-                return <option value={index}>c.name</option>;
+                return <option value={index}>{c.name}</option>;
               })
               .filter(Boolean)}
           </Select>

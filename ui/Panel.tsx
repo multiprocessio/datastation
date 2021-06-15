@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import {
+  ConnectorInfo,
   ProjectPage,
   PanelInfo,
   GraphPanelInfo,
@@ -38,7 +39,8 @@ export const PANEL_TYPE_ICON = {
 export async function evalPanel(
   page: ProjectPage,
   panelId: number,
-  panelResults: Array<PanelResult>
+  panelResults: Array<PanelResult>,
+  connectors: Array<ConnectorInfo>
 ) {
   const panel = page.panels[panelId];
   switch (panel.type) {
@@ -47,7 +49,7 @@ export async function evalPanel(
     case 'literal':
       return await evalLiteralPanel(panel as LiteralPanelInfo);
     case 'sql':
-      return evalSQLPanel(panel as SQLPanelInfo, panelResults);
+      return evalSQLPanel(panel as SQLPanelInfo, panelResults, connectors);
     case 'graph':
       return (panelResults[(panel as GraphPanelInfo).graph.panelSource] || {})
         .value;

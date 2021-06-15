@@ -6,3 +6,5 @@ ui/data
 data
 build
 electron/build
+yarn-error.log
+releases

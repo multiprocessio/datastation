@@ -7,6 +7,7 @@ export function Select({
   disabled,
   label,
   className,
+  nodefault,
 }: {
   value: string;
   onChange: (value: string) => void;
@@ -14,6 +15,7 @@ export function Select({
   disabled?: boolean;
   label?: string;
   className?: string;
+  nodefault?: boolean;
 }) {
   let selectClass = 'select';
   if (className) {
@@ -27,9 +29,11 @@ export function Select({
       onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
         onChange(e.target.value)
       }
-      children={children}
       disabled={disabled}
-    />
+    >
+      {nodefault && <option label=" "></option>}
+      {children}
+    </select>
   );
 
   if (label) {

@@ -1,6 +1,7 @@
 import * as pako from 'pako';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
+import debounce from 'lodash.debounce';
 
 import { APP_NAME, MODE, MODE_FEATURES } from '../shared/constants';
 import {
@@ -66,7 +67,8 @@ function useProjectState(
   const [state, setProjectState] = React.useState<ProjectState>(null);
 
   function setState(newState: ProjectState) {
-    store.update(projectId, newState);
+    const syncMillis = 5000;
+    debounce(() => store.update(projectId, newState), syncMillis);
     setProjectState(newState);
   }
 
