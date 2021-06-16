@@ -6,7 +6,7 @@ import {
   SQLConnectorInfoType,
   SQLPanelInfo,
 } from './../shared/state';
-import { MODE_FEATURES } from '../shared/constants';
+import { DEBUG, MODE_FEATURES } from '../shared/constants';
 
 import { asyncRPC } from './asyncRPC';
 import { PanelResult, ProjectContext } from './ProjectStore';
@@ -24,7 +24,7 @@ export async function evalSQLPanel(
   // TODO: make panel substitution based on an actual parser since
   // regex will match instances of `' foo bar DM_getPanel(21)[sdklf] '`
   // among other bad things...
-  const matcher = /DM_getPanel\(([0-9]+)\)/;
+  const matcher = /DM_getPanel\(([0-9]+)\)/g;
   let content = panel.content;
   try {
     let replacements: Array<number> = [];
@@ -33,6 +33,7 @@ export async function evalSQLPanel(
       return `t${replacements.length - 1}`;
     });
 
+    let ctePrefix = '';
     replacements.forEach((panelIndex: number, tableIndex: number) => {
       const results = panelResults[panelIndex];
       if (results.exception || results.value.length === 0) {
@@ -70,8 +71,17 @@ export async function evalSQLPanel(
       const values = valuesAsSQLStrings
         .map((v: Array<string>) => `(${v.join(', ')})`)
         .join(', ');
-      content = `WITH t${tableIndex}(${quotedColumns}) AS (SELECT * FROM (VALUES ${values})) ${content}`;
+      let prefix = ', ';
+      if (tableIndex === 0) {
+        prefix = 'WITH ';
+      }
+      ctePrefix = `${ctePrefix}${prefix}t${tableIndex}(${quotedColumns}) AS (SELECT * FROM (VALUES ${values}))`;
     });
+    content = ctePrefix + ' ' + content;
+
+    if (DEBUG) {
+      console.log(`Interpolated SQL: ${content}`);
+    }
   } catch (e) {
     console.error(e);
     throw new Error('Malformed substitution in SQL');

@@ -1,31 +1,29 @@
 import * as React from 'react';
 
-import { TablePanelInfo, TableColumn } from './../shared/state';
+import { PanelInfo, TablePanelInfo, TableColumn } from './../shared/state';
 
+import { PanelSourcePicker } from './PanelSourcePicker';
 import { PanelResult } from './ProjectStore';
 import { Button } from './component-library/Button';
 import { Input } from './component-library/Input';
 
 export function TablePanelDetails({
   panel,
+  panels,
   updatePanel,
-  panelCount,
 }: {
   panel: TablePanelInfo;
   updatePanel: (d: TablePanelInfo) => void;
-  panelCount: number;
+  panels: Array<PanelInfo>;
 }) {
   return (
     <React.Fragment>
       <div>
-        <Input
-          label="Panel Source"
-          type="number"
-          min={0}
-          max={panelCount - 1}
-          value={panel.table.panelSource.toString()}
-          onChange={(value: string) => {
-            panel.table.panelSource = +value;
+        <PanelSourcePicker
+          panels={panels}
+          value={panel.table.panelSource}
+          onChange={(value: number) => {
+            panel.table.panelSource = value;
             updatePanel(panel);
           }}
         />

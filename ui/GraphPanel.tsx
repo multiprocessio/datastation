@@ -1,7 +1,9 @@
 import * as React from 'react';
 import Chart from 'chart.js/auto';
 
-import { GraphPanelInfo } from './../shared/state';
+import { PanelInfo, GraphPanelInfo } from './../shared/state';
+
+import { PanelSourcePicker } from './PanelSourcePicker';
 import { Input } from './component-library/Input';
 
 export function GraphPanel({
@@ -39,24 +41,21 @@ export function GraphPanel({
 
 export function GraphPanelDetails({
   panel,
-  panelCount,
+  panels,
   updatePanel,
 }: {
   panel: GraphPanelInfo;
-  panelCount: number;
+  panels: Array<PanelInfo>;
   updatePanel: (d: GraphPanelInfo) => void;
 }) {
   return (
     <React.Fragment>
       <div>
-        <Input
-          label="Panel Source"
-          type="number"
-          min={0}
-          max={panelCount - 1}
-          value={panel.graph.panelSource.toString()}
-          onChange={(value: string) => {
-            panel.graph.panelSource = +value;
+        <PanelSourcePicker
+          panels={panels}
+          value={panel.graph.panelSource}
+          onChange={(value: number) => {
+            panel.graph.panelSource = value;
             updatePanel(panel);
           }}
         />
