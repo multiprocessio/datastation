@@ -13,6 +13,7 @@ export const MODE_FEATURES = {
   connectors: MODE !== 'browser',
   sql: MODE !== 'browser',
   shareProject: MODE === 'browser',
+  corsOnly: MODE === 'browser',
 };
 
 export const DEBUG = true;

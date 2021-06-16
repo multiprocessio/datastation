@@ -38,7 +38,7 @@ export function FilePanelDetails({
 }) {
   return (
     <React.Fragment>
-      <div>
+      <div className="form-row">
         <FileInput
           label="File"
           accept={SUPPORTED_FILE_TYPES.map((p: string) => `.${p}`).join(',')}

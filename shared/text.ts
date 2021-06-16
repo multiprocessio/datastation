@@ -35,11 +35,13 @@ export function parseCSV(csvString: string) {
   return data;
 }
 
+export type Parsers = { [type: string]: (a: ArrayBuffer) => Promise<any> };
+
 export async function parseArrayBuffer(
   type: string,
   fileName: string,
   body: ArrayBuffer,
-  additionalParsers?: { [type: string]: (a: ArrayBuffer) => Promise<any> }
+  additionalParsers?: Parsers
 ) {
   const bodyAsString = () => new TextDecoder('utf-8').decode(body);
   let realType = type.split(';')[0];

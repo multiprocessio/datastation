@@ -5,7 +5,7 @@ import {
   SQLConnectorInfo,
   SQLConnectorInfoType,
   SQLPanelInfo,
-} from './../shared/state';
+} from '../shared/state';
 import { DEBUG, MODE_FEATURES } from '../shared/constants';
 
 import { asyncRPC } from './asyncRPC';
@@ -130,10 +130,9 @@ export function SQLPanelDetails({
 
   return (
     <React.Fragment>
-      <div>
+      <div className="form-row">
         <Select
           label="Vendor"
-          className="block"
           value={panel.sql.type}
           onChange={(value: string) => {
             panel.sql.type = value as SQLConnectorInfoType;
@@ -143,10 +142,11 @@ export function SQLPanelDetails({
           {MODE_FEATURES.sql && <option value="postgres">PostgreSQL</option>}
           <option value="in-memory">In-Memory SQL</option>
         </Select>
-        {MODE_FEATURES.sql && panel.sql.type !== 'in-memory' && (
+      </div>
+      {MODE_FEATURES.sql && panel.sql.type !== 'in-memory' && (
+        <div className="form-row">
           <Select
             label="Connector"
-            className="block"
             value={panel.sql.connectorIndex.toString()}
             onChange={(connectorIndex: string) => {
               panel.sql.connectorIndex = +connectorIndex;
@@ -164,8 +164,8 @@ export function SQLPanelDetails({
               })
               .filter(Boolean)}
           </Select>
-        )}
-      </div>
+        </div>
+      )}
     </React.Fragment>
   );
 }

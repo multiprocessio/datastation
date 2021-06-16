@@ -11,7 +11,8 @@ import {
   TablePanelInfo,
   LiteralPanelInfo,
   FilePanelInfo,
-} from './../shared/state';
+} from '../shared/state';
+import { MODE_FEATURES } from '../shared/constants';
 
 import { PanelResult } from './ProjectStore';
 import { GraphPanel, GraphPanelDetails } from './GraphPanel';
@@ -219,7 +220,7 @@ export function Panel({
         </div>
         {details && (
           <div className="panel-details">
-            <div>
+            <div className="form-row">
               <Select
                 label="Type"
                 value={panel.type}
@@ -358,6 +359,19 @@ export function Panel({
                   SELECT age, name FROM DM_getPanel(0) WHERE t0.age &gt; 1;
                 </code>
                 .
+              </div>
+            )}
+            {panel.type === 'http' && MODE_FEATURES.corsOnly && (
+              <div className="alert alert-info">
+                Since this runs in the browser, the server you are talking to
+                must set CORS headers otherwise the request will not work.
+              </div>
+            )}
+            {panel.type === 'http' && (
+              <div className="alert alert-info">
+                Use the textarea to supply a HTTP request body. This will be
+                ignored for <code>GET</code> and
+                <code>HEAD</code> requests.
               </div>
             )}
           </div>

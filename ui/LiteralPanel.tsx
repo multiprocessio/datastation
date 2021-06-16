@@ -19,7 +19,7 @@ export function LiteralPanelDetails({
 }) {
   return (
     <React.Fragment>
-      <div>
+      <div className="form-row">
         <Select
           label="Format"
           value={panel.literal.type}

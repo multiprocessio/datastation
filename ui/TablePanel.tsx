@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { PanelInfo, TablePanelInfo, TableColumn } from './../shared/state';
+import { PanelInfo, TablePanelInfo, TableColumn } from '../shared/state';
 
 import { PanelSourcePicker } from './PanelSourcePicker';
 import { PanelResult } from './ProjectStore';
@@ -18,7 +18,7 @@ export function TablePanelDetails({
 }) {
   return (
     <React.Fragment>
-      <div>
+      <div className="form-row">
         <PanelSourcePicker
           panels={panels}
           value={panel.table.panelSource}
@@ -28,10 +28,10 @@ export function TablePanelDetails({
           }}
         />
       </div>
-      <div>
+      <div className="form-row">
         <label>Columns</label>
         {panel.table.columns.map((c) => (
-          <div>
+          <div className="form-row">
             <Input
               label="Field"
               value={c.field}
