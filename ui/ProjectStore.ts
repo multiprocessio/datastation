@@ -1,4 +1,5 @@
 import { IpcRenderer } from 'electron';
+import debounce from 'lodash.debounce';
 import * as React from 'react';
 
 import { ProjectState, DEFAULT_PROJECT } from '../shared/state';
@@ -61,13 +62,20 @@ export interface ProjectStore {
   get: (projectId: string) => Promise<ProjectState>;
 }
 
-export function makeStore(mode: string) {
-  const state = {
+export function makeStore(mode: string, syncMillis: number = 5000) {
+  const storeClass = {
     desktop: DesktopIPCStore,
     browser: LocalStorageStore,
     hosted: HostedStore,
   }[mode];
-  return new state();
+  const store = new storeClass();
+  if (syncMillis) {
+    store.update = debounce<[string, ProjectState], Promise<void>>(
+      store.update.bind(store),
+      syncMillis
+    );
+  }
+  return store;
 }
 
 export const ProjectContext =

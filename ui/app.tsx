@@ -1,7 +1,6 @@
 import * as pako from 'pako';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import debounce from 'lodash.debounce';
 
 import { APP_NAME, MODE, MODE_FEATURES } from '../shared/constants';
 import {
@@ -67,8 +66,7 @@ function useProjectState(
   const [state, setProjectState] = React.useState<ProjectState>(null);
 
   function setState(newState: ProjectState) {
-    const syncMillis = 5000;
-    debounce(() => store.update(projectId, newState), syncMillis);
+    store.update(projectId, newState);
     setProjectState(newState);
   }
 
@@ -167,7 +165,7 @@ function App() {
                 Reset
               </Button>
               {MODE_FEATURES.shareProject && (
-                <div className="share" tabIndex={1000}>
+                <div className="share">
                   <Button onClick={() => computeShareURL()}>Share</Button>
                   <div className="share-details">
                     <p>This URL contains the entire project state.</p>

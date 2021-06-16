@@ -37,11 +37,24 @@ export function parseCSV(csvString: string) {
 
 export async function parseArrayBuffer(
   type: string,
+  fileName: string,
   body: ArrayBuffer,
   additionalParsers?: { [type: string]: (a: ArrayBuffer) => Promise<any> }
 ) {
   const bodyAsString = () => new TextDecoder('utf-8').decode(body);
-  switch (type.split(';')[0]) {
+  let realType = type.split(';')[0];
+  if (realType === 'text/plain') {
+    const fileBits = fileName.split('.');
+    const fileExtension = fileBits[fileBits.length - 1];
+    realType =
+      {
+        csv: 'text/csv',
+        json: 'application/json',
+        xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      }[fileExtension] || realType;
+  }
+
+  switch (realType) {
     case 'text/csv':
       return parseCSV(bodyAsString());
     case 'application/json':
@@ -51,9 +64,10 @@ export async function parseArrayBuffer(
     }
   }
 
-  if (additionalParsers[type]) {
+  if (additionalParsers && additionalParsers[type]) {
     return await additionalParsers[type](body);
   }
 
-  throw new Error(`Unknown HTTP type: '${type}'`);
+  console.error(`Unsupported HTTP type: '${type}'`);
+  return bodyAsString();
 }

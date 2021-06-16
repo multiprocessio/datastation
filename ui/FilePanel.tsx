@@ -9,23 +9,24 @@ import { FileInput } from './component-library/FileInput';
 
 export async function evalFilePanel(panel: FilePanelInfo) {
   if (MODE === 'browser') {
-    return await parseArrayBuffer(panel.file.type, panel.file.content);
+    return await parseArrayBuffer(
+      'text/plain',
+      panel.file.name,
+      panel.file.content
+    );
   }
 
-  return await asyncRPC<{ name: string; type: string }, string, Array<object>>(
+  return await asyncRPC<{ name: string }, string, Array<object>>(
     'evalFile',
     panel.content,
     panel.file
   );
 }
 
-const SUPPORTED_FILE_TYPES: { [k: string]: string } = {
-  csv: 'text/csv',
-  json: 'application/json',
-  xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-};
+// This is kind of duplicated
+const SUPPORTED_FILE_TYPES = ['csv', 'json', 'xlsx'];
 if (MODE !== 'browser') {
-  SUPPORTED_FILE_TYPES['parquet'] = 'parquet';
+  SUPPORTED_FILE_TYPES.push('parquet');
 }
 
 export function FilePanelDetails({
@@ -40,9 +41,7 @@ export function FilePanelDetails({
       <div>
         <FileInput
           label="File"
-          accept={Object.keys(SUPPORTED_FILE_TYPES)
-            .map((p: string) => `.${p}`)
-            .join(',')}
+          accept={SUPPORTED_FILE_TYPES.map((p: string) => `.${p}`).join(',')}
           onChange={(files: Array<File>) => {
             const fr = new FileReader();
 
@@ -56,9 +55,6 @@ export function FilePanelDetails({
             }
 
             panel.file.name = files[0].name;
-            const fileSplit = panel.file.name.split('.');
-            const fileType = fileSplit[fileSplit.length - 1];
-            panel.file.type = SUPPORTED_FILE_TYPES[fileType];
             updatePanel(panel);
           }}
         />

@@ -206,20 +206,13 @@ export class FilePanelInfo extends PanelInfo {
   file: {
     name: string;
     content: ArrayBuffer;
-    type: string;
   };
 
-  constructor(
-    name?: string,
-    fileName?: string,
-    fileContent?: ArrayBuffer,
-    fileType?: string
-  ) {
+  constructor(name?: string, fileName?: string, fileContent?: ArrayBuffer) {
     super('file', name, '');
     this.file = {
       name: fileName || '',
       content: fileContent || new ArrayBuffer(0),
-      type: fileType || '',
     };
   }
 }
