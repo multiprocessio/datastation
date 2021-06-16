@@ -42,12 +42,7 @@ export function Panels({
         <Button
           onClick={() => {
             const panel = new LiteralPanelInfo('Untitled panel');
-            if (panelIndex) {
-              page.panels.splice(panelIndex + 1, 0, panel);
-            } else {
-              page.panels.push(panel);
-            }
-
+            page.panels.splice(panelIndex + 1, 0, panel);
             updatePage(page);
           }}
         >
@@ -71,7 +66,7 @@ export function Panels({
               panelIndex={panelIndex}
               movePanel={movePanel}
               removePanel={removePanel}
-              panelCount={page.panels.length}
+              panels={page.panels}
             />
             {newPanel(panelIndex)}
           </React.Fragment>

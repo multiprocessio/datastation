@@ -75,7 +75,7 @@ export function Panel({
   panelIndex,
   removePanel,
   movePanel,
-  panelCount,
+  panels,
 }: {
   panel: PanelInfo;
   updatePanel: (d: PanelInfo) => void;
@@ -84,7 +84,7 @@ export function Panel({
   panelIndex: number;
   removePanel: (i: number) => void;
   movePanel: (from: number, to: number) => void;
-  panelCount: number;
+  panels: Array<PanelInfo>;
 }) {
   const previewableTypes = ['http', 'sql', 'program', 'file'];
   const alwaysOpenTypes = ['table', 'graph', 'http', 'file'];
@@ -166,7 +166,7 @@ export function Panel({
           <span title="Move down">
             <Button
               icon
-              disabled={panelIndex === panelCount - 1}
+              disabled={panelIndex === panels.length - 1}
               onClick={() => {
                 movePanel(panelIndex, panelIndex + 1);
               }}
@@ -268,7 +268,7 @@ export function Panel({
               <TablePanelDetails
                 panel={panel as TablePanelInfo}
                 updatePanel={updatePanel}
-                panelCount={panelCount}
+                panels={panels}
               />
             )}
             {panel.type === 'sql' && (
@@ -293,7 +293,7 @@ export function Panel({
               <GraphPanelDetails
                 panel={panel as GraphPanelInfo}
                 updatePanel={updatePanel}
-                panelCount={panelCount}
+                panels={panels}
               />
             )}
             {panel.type === 'program' && (
@@ -351,9 +351,13 @@ export function Panel({
             )}
             {panel.type === 'sql' && (
               <div className="alert alert-info">
-                Use builtin <code>DM_getPanel($panel_number)</code> to interact
-                with other panels as tables. For example:{' '}
-                <code>SELECT * FROM DM_getPanel(0);</code>.
+                Use <code>DM_getPanel($panel_number)</code> to reference other
+                panels. Once you have called this once for one panel, use{' '}
+                <code>t$panel_number</code> to refer to it again. For example:{' '}
+                <code>
+                  SELECT age, name FROM DM_getPanel(0) WHERE t0.age &gt; 1;
+                </code>
+                .
               </div>
             )}
           </div>
