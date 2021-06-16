@@ -24,6 +24,6 @@ export const evalHTTPHandler = {
     });
     const rspBody = await rsp.arrayBuffer();
     const type = rsp.headers.get('content-type');
-    return await parseArrayBuffer(type, rspBody, additionalParsers);
+    return await parseArrayBuffer(type, http.url, rspBody, additionalParsers);
   },
 };

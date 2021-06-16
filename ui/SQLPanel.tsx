@@ -49,26 +49,24 @@ export async function evalSQLPanel(
             }
 
             // Default to stringifying.
-            const stringified = JSON.stringify(cell);
+            let stringified = JSON.stringify(cell);
             if (!stringified) {
               return 'null';
             }
 
-            // JSON strings use double quote, SQL uses single quote
+            // Replace double quoted strings with single quoted
             if (stringified[0] === '"') {
-              const replace = stringified.split('');
-              replace[0] = "'";
-              replace[replace.length - 1] = "'";
-              return replace.join('');
+              stringified = stringified.substring(1, stringified.length - 1);
             }
 
-            return `'${stringified}'`;
+            // Make sure to escape embedded single quotes
+            return `'${stringified.replace("'", "''")}'`;
           });
         }
       );
       const quotedColumns = columns
-        .map((c: string) => `'${c.replace("'", "\\'")}'`)
-        .join(',');
+        .map((c: string) => `'${c.replace("'", "''")}'`)
+        .join(', ');
       const values = valuesAsSQLStrings
         .map((v: Array<string>) => `(${v.join(', ')})`)
         .join(', ');

@@ -20,14 +20,14 @@ export async function evalHTTPPanel(panel: HTTPPanelInfo) {
       headers[h.name] = h.value;
     });
     const method = panel.http.http.method;
-    const res = await window.fetch(panel.content, {
+    const res = await window.fetch(panel.http.http.url, {
       headers,
       method,
       body: method !== 'GET' && method !== 'HEAD' ? panel.content : undefined,
     });
     const body = await res.arrayBuffer();
     const type = res.headers.get('content-type');
-    return await parseArrayBuffer(type, body);
+    return await parseArrayBuffer(type, panel.http.http.url, body);
   }
 
   return await asyncRPC<HTTPConnectorInfo, string, Array<object>>(
