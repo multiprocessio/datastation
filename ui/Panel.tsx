@@ -87,7 +87,7 @@ export function Panel({
   movePanel: (from: number, to: number) => void;
   panels: Array<PanelInfo>;
 }) {
-  const previewableTypes = ['http', 'sql', 'program', 'file'];
+  const previewableTypes = ['http', 'sql', 'program', 'file', 'literal'];
   const alwaysOpenTypes = ['table', 'graph', 'http', 'file'];
   const [details, setDetails] = React.useState(
     alwaysOpenTypes.includes(panel.type)
@@ -314,75 +314,78 @@ export function Panel({
         )}
       </div>
       {!hidden && (
-        <div className="flex">
-          <div className="panel-body">
-            {body ? (
-              body
-            ) : (
-              <CodeEditor
-                onKeyDown={keyboardShortcuts}
-                value={panel.content}
-                onChange={(value: string) => {
-                  panel.content = value;
-                  updatePanel(panel);
-                }}
-                language={language}
-                className="editor"
-              />
-            )}
-            {exception && (
-              <div className="error">
-                <div>Error evaluating panel:</div>
-                <pre>
-                  <code>{exception}</code>
+        <div className="panel-body-container">
+          <div className="flex">
+            <div className="panel-body">
+              {body ? (
+                body
+              ) : (
+                <CodeEditor
+                  onKeyDown={keyboardShortcuts}
+                  value={panel.content}
+                  onChange={(value: string) => {
+                    panel.content = value;
+                    updatePanel(panel);
+                  }}
+                  language={language}
+                  className="editor"
+                />
+              )}
+              {exception && (
+                <div className="error">
+                  <div>Error evaluating panel:</div>
+                  <pre>
+                    <code>{exception}</code>
+                  </pre>
+                </div>
+              )}
+              {panel.type === 'program' && (
+                <div className="alert alert-info">
+                  Use builtin functions,{' '}
+                  <code>DM_setPanel($some_array_data)</code> and{' '}
+                  <code>DM_getPanel($panel_number)</code>, to interact with
+                  other panels. For example:{' '}
+                  <code>
+                    const passthrough = DM_getPanel(0);
+                    DM_setPanel(passthrough);
+                  </code>
+                  .
+                </div>
+              )}
+              {panel.type === 'sql' && (
+                <div className="alert alert-info">
+                  Use <code>DM_getPanel($panel_number)</code> to reference other
+                  panels. Once you have called this once for one panel, use{' '}
+                  <code>t$panel_number</code> to refer to it again. For example:{' '}
+                  <code>
+                    SELECT age, name FROM DM_getPanel(0) WHERE t0.age &gt; 1;
+                  </code>
+                  .
+                </div>
+              )}
+              {panel.type === 'http' && MODE_FEATURES.corsOnly && (
+                <div className="alert alert-info">
+                  Since this runs in the browser, the server you are talking to
+                  must set CORS headers otherwise the request will not work.
+                </div>
+              )}
+              {panel.type === 'http' && (
+                <div className="alert alert-info">
+                  Use the textarea to supply a HTTP request body. This will be
+                  ignored for <code>GET</code> and
+                  <code>HEAD</code> requests.
+                </div>
+              )}
+            </div>
+            {preview && (
+              <div className="panel-preview">
+                <div className="text-center">Panel Preview</div>
+                <pre className="panel-preview-results">
+                  <code>{preview}</code>
                 </pre>
               </div>
             )}
-            {panel.type === 'program' && (
-              <div className="alert alert-info">
-                Use builtin functions,{' '}
-                <code>DM_setPanel($some_array_data)</code> and{' '}
-                <code>DM_getPanel($panel_number)</code>, to interact with other
-                panels. For example:{' '}
-                <code>
-                  const passthrough = DM_getPanel(0); DM_setPanel(passthrough);
-                </code>
-                .
-              </div>
-            )}
-            {panel.type === 'sql' && (
-              <div className="alert alert-info">
-                Use <code>DM_getPanel($panel_number)</code> to reference other
-                panels. Once you have called this once for one panel, use{' '}
-                <code>t$panel_number</code> to refer to it again. For example:{' '}
-                <code>
-                  SELECT age, name FROM DM_getPanel(0) WHERE t0.age &gt; 1;
-                </code>
-                .
-              </div>
-            )}
-            {panel.type === 'http' && MODE_FEATURES.corsOnly && (
-              <div className="alert alert-info">
-                Since this runs in the browser, the server you are talking to
-                must set CORS headers otherwise the request will not work.
-              </div>
-            )}
-            {panel.type === 'http' && (
-              <div className="alert alert-info">
-                Use the textarea to supply a HTTP request body. This will be
-                ignored for <code>GET</code> and
-                <code>HEAD</code> requests.
-              </div>
-            )}
           </div>
-          {preview && (
-            <div className="panel-preview">
-              <div className="text-center">Panel Preview</div>
-              <pre className="panel-preview-results">
-                <code>{preview}</code>
-              </pre>
-            </div>
-          )}
         </div>
       )}
     </div>
