@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { ConnectorInfo, ProjectPage } from './../shared/state';
+import { ConnectorInfo, ProjectPage } from '../shared/state';
 
 import { Panels } from './Panels';
 import { evalPanel } from './Panel';

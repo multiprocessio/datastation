@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { ProjectState, ProjectPage } from './../shared/state';
+import { ProjectState, ProjectPage } from '../shared/state';
 
 import { PanelResult } from './ProjectStore';
 import { Page } from './Page';

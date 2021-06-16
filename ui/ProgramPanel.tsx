@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { ProgramPanelInfo } from './../shared/state';
+import { ProgramPanelInfo } from '../shared/state';
 
 import { PanelResult } from './ProjectStore';
 import { Select } from './component-library/Select';
@@ -56,7 +56,7 @@ export function ProgramPanelDetails({
 }) {
   return (
     <React.Fragment>
-      <div>
+      <div className="form-row">
         <Select
           label="Language"
           value={panel.program.type}

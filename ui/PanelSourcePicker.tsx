@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { PanelInfo, PanelInfoType } from './../shared/state';
+import { PanelInfo, PanelInfoType } from '../shared/state';
 
 import { Select } from './component-library/Select';
 
@@ -20,7 +20,7 @@ export function PanelSourcePicker({
       value={value.toString()}
     >
       {panels.map((panel, i) => (
-        <option value={i.toString()}>
+        <option key={panel.id} value={i.toString()}>
           [#{i}] {panel.name}
         </option>
       ))}

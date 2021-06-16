@@ -1,7 +1,7 @@
 import * as React from 'react';
 import Chart from 'chart.js/auto';
 
-import { PanelInfo, GraphPanelInfo } from './../shared/state';
+import { PanelInfo, GraphPanelInfo } from '../shared/state';
 
 import { PanelSourcePicker } from './PanelSourcePicker';
 import { Input } from './component-library/Input';
@@ -50,7 +50,7 @@ export function GraphPanelDetails({
 }) {
   return (
     <React.Fragment>
-      <div>
+      <div className="form-row">
         <PanelSourcePicker
           panels={panels}
           value={panel.graph.panelSource}
@@ -60,7 +60,7 @@ export function GraphPanelDetails({
           }}
         />
       </div>
-      <div>
+      <div className="form-row">
         <Input
           label="X-Axis Field"
           value={panel.graph.x}
@@ -70,9 +70,9 @@ export function GraphPanelDetails({
           }}
         />
       </div>
-      <div>
+      <div className="form-row">
         <label>Y-Axis Field and Label</label>
-        <div>
+        <div className="form-row">
           <Input
             label="Field"
             value={panel.graph.y.field}

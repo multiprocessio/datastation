@@ -78,7 +78,9 @@ header a {
 }
 
 input.input,
-label.input input {
+label.input input,
+select.select,
+label.select select {
   padding: 5px;
   background: transparent;
   border: 0;
@@ -311,4 +313,15 @@ header {
 
 .text-center {
   text-align: center;
+}
+
+.form-row {
+  padding: 5px 0;
+}
+
+.form-row label {
+  padding-right: 5px;
+  color: #777;
+  font-size: 0.9rem;
+  text-transform: uppercase;
 }
