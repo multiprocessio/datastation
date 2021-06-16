@@ -44,6 +44,7 @@ header a {
   height: 200px;
   resize: vertical;
   overflow: auto;
+  flex: 1;
 }
 
 .editor {
@@ -94,6 +95,10 @@ label.select select {
 
 .flex {
   display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: stretch;
+  align-content: center;
 }
 
 .block {
@@ -229,10 +234,17 @@ header {
   margin-top: 15px;
 }
 
+.panel-body-container {
+  overflow: auto;
+  resize: vertical;
+}
+
 .panel-body {
   padding: 15px;
   position: relative;
   width: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .panel-order {
@@ -247,7 +259,6 @@ header {
   color: white;
   width: 400px;
   max-width: 50%;
-  max-height: 300px;
   overflow: auto;
 }
 
