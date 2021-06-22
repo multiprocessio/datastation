@@ -1,4 +1,4 @@
-import { unzlibSync, zlibSync } from 'fflate';
+import * as pako from 'pako';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
@@ -51,7 +51,7 @@ function getShareState(): undefined | ProjectState {
     const intArray = Uint8Array.from(
       shareState.split(',').map((i) => parseInt(i))
     );
-    const uncompressed = JSON.parse(unzlibSync(intArray, { to: 'string' }));
+    const uncompressed = JSON.parse(pako.inflate(intArray, { to: 'string' }));
     shareStateCache.state = rawStateToObjects(uncompressed);
   }
 
@@ -125,7 +125,7 @@ function App() {
       window.location.hostname +
       (window.location.port ? ':' + window.location.port : '');
     const json = JSON.stringify(state);
-    const compressed = zlibSync(json, { level: 9, to: 'string' });
+    const compressed = pako.deflate(json, { to: 'string' });
     setShareURL(domain + '/?share=' + compressed);
   }
 
