@@ -5,16 +5,18 @@ import { PanelInfo, TablePanelInfo, TableColumn } from '../shared/state';
 import { PanelSourcePicker } from './PanelSourcePicker';
 import { PanelResult } from './ProjectStore';
 import { Button } from './component-library/Button';
-import { Input } from './component-library/Input';
+import { FieldPicker } from './FieldPicker';
 
 export function TablePanelDetails({
   panel,
   panels,
   updatePanel,
+  data,
 }: {
   panel: TablePanelInfo;
   updatePanel: (d: TablePanelInfo) => void;
   panels: Array<PanelInfo>;
+  data: PanelResult;
 }) {
   return (
     <React.Fragment>
@@ -32,18 +34,16 @@ export function TablePanelDetails({
         <label>Columns</label>
         {panel.table.columns.map((c) => (
           <div className="form-row">
-            <Input
+            <FieldPicker
               label="Field"
               value={c.field}
+              panelSourceResult={data}
               onChange={(value: string) => {
                 c.field = value;
                 updatePanel(panel);
               }}
-            />
-            <Input
-              label="Label"
-              value={c.label}
-              onChange={(value: string) => {
+              labelValue={c.label}
+              labelOnChange={(value: string) => {
                 c.label = value;
                 updatePanel(panel);
               }}
