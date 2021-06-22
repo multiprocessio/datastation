@@ -270,6 +270,7 @@ export function Panel({
                 panel={panel as TablePanelInfo}
                 updatePanel={updatePanel}
                 panels={panels}
+                data={panelResults[(panel as TablePanelInfo).table.panelSource]}
               />
             )}
             {panel.type === 'sql' && (
@@ -295,6 +296,7 @@ export function Panel({
                 panel={panel as GraphPanelInfo}
                 updatePanel={updatePanel}
                 panels={panels}
+                data={panelResults[(panel as GraphPanelInfo).graph.panelSource]}
               />
             )}
             {panel.type === 'program' && (

@@ -1,5 +1,13 @@
 import * as React from 'react';
 
+function getOptionValues(children: React.ReactNode) {
+  return React.Children.map(
+    children,
+    // This could blow up if someone ever doesn't pass <option> to <Select>
+    (c) => (c as React.ReactElement).props.value
+  );
+}
+
 export function Select({
   value,
   onChange,
@@ -21,6 +29,13 @@ export function Select({
   if (className) {
     selectClass += ' ' + className;
   }
+
+  React.useEffect(() => {
+    const values = getOptionValues(children);
+    if (values.length && !values.includes(value)) {
+      onChange(values[0]);
+    }
+  }, [value, getOptionValues(children).join(',')]);
 
   const select = (
     <select

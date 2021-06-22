@@ -118,7 +118,7 @@ export interface GraphY {
   label: string;
 }
 
-export type GraphPanelInfoType = 'bar';
+export type GraphPanelInfoType = 'bar' | 'pie';
 
 export class GraphPanelInfo extends PanelInfo {
   graph: {
