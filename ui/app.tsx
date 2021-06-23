@@ -161,7 +161,7 @@ function App() {
 
   return (
     <ProjectContext.Provider value={state}>
-      <div>
+      <div className={`app app--${MODE}`}>
         {MODE_FEATURES.appHeader && (
           <header>
             <div className="vertical-align-center">

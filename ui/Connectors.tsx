@@ -32,7 +32,7 @@ export function Connectors({
       <div className="title vertical-align-center">
         <span className="material-icons-outlined">manage_search</span>
         Connectors
-        <Button icon onClick={() => setExpanded(false)}>
+        <Button icon className="flex-right" onClick={() => setExpanded(false)}>
           keyboard_arrow_left
         </Button>
       </div>
