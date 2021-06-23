@@ -87,7 +87,7 @@ export async function evalSQLPanel(
     throw new Error('Malformed substitution in SQL');
   }
 
-  if (panel.sql.type === 'postgres') {
+  if (panel.sql.type !== 'in-memory') {
     return await asyncRPC<SQLConnectorInfo, string, Array<object>>(
       'evalSQL',
       content,
@@ -140,6 +140,7 @@ export function SQLPanelDetails({
           }}
         >
           {MODE_FEATURES.sql && <option value="postgres">PostgreSQL</option>}
+          {MODE_FEATURES.sql && <option value="mysql">MySQL</option>}
           <option value="in-memory">In-Memory SQL</option>
         </Select>
       </div>

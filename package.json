@@ -16,10 +16,9 @@
     "format": "yarn prettier --write \"**/*.ts\" \"**/*.tsx\" \"**/*.css\" \"**/*.json\""
   },
   "dependencies": {
-    "@types/pg": "^8.6.0",
-    "@types/uuid": "^8.3.0",
     "chart.js": "^3.3.2",
     "lodash.throttle": "^4.1.1",
+    "mysql2": "^2.2.5",
     "node-fetch": "^2.6.1",
     "pako": "^2.0.3",
     "papaparse": "^5.3.1",
@@ -38,9 +37,11 @@
     "@types/node-fetch": "^2.5.10",
     "@types/pako": "^1.0.1",
     "@types/papaparse": "^5.2.5",
+    "@types/pg": "^8.6.0",
     "@types/prismjs": "^1.16.5",
     "@types/react": "^17.0.9",
     "@types/react-dom": "^17.0.6",
+    "@types/uuid": "^8.3.0",
     "electron": "^13.1.2",
     "electron-packager": "^15.2.0",
     "electron-winstaller": "^5.0.0",
