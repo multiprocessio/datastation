@@ -113,7 +113,6 @@ function App() {
     shareState
   );
 
-  // TODO: handle when there are zero pages?
   const [currentPage, setCurrentPage] = React.useState(0);
 
   const [shareURL, setShareURL] = React.useState('');
