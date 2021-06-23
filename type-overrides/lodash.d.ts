@@ -1,7 +1,7 @@
-declare module 'lodash.debounce' {
-  declare function debounce<Input, Output>(
+declare module 'lodash.throttle' {
+  declare function throttle<Input, Output>(
     f: () => void,
     t: number
   ): (...args: Input) => Output;
-  export = debounce;
+  export = throttle;
 }

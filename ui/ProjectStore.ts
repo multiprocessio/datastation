@@ -1,5 +1,5 @@
 import { IpcRenderer } from 'electron';
-import debounce from 'lodash.debounce';
+import throttle from 'lodash.throttle';
 import * as React from 'react';
 
 import { ProjectState, DEFAULT_PROJECT } from '../shared/state';
@@ -70,7 +70,7 @@ export function makeStore(mode: string, syncMillis: number = 5000) {
   }[mode];
   const store = new storeClass();
   if (syncMillis) {
-    store.update = debounce<[string, ProjectState], Promise<void>>(
+    store.update = throttle<[string, ProjectState], Promise<void>>(
       store.update.bind(store),
       syncMillis
     );

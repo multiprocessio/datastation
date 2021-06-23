@@ -19,7 +19,7 @@
     "@types/pg": "^8.6.0",
     "@types/uuid": "^8.3.0",
     "chart.js": "^3.3.2",
-    "lodash.debounce": "^4.0.8",
+    "lodash.throttle": "^4.1.1",
     "node-fetch": "^2.6.1",
     "pako": "^2.0.3",
     "papaparse": "^5.3.1",

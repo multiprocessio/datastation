@@ -204,7 +204,7 @@ export function Panel({
             <span className="last-run">
               {(panelResults[panelIndex] || {}).lastRun
                 ? 'Last run ' + panelResults[panelIndex].lastRun
-                : 'Not run'}
+                : 'Run to apply changes'}
             </span>
             <span title="Evaluate panel (Ctrl-Enter)">
               <Button

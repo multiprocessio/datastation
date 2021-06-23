@@ -2,20 +2,23 @@ body {
   font-family: sans-serif;
   padding: 0;
   margin: 0;
+  background: #fbfbfb;
 }
 
 main {
   display: flex;
+  padding-top: 60px;
 }
 
 header {
-  background: #9f04ff;
-  color: white;
-  display: flex;
+  box-shadow: 0 1px 3px 0 #aaa;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  background: white;
 }
 
 header a {
-  color: white;
   text-decoration: none;
 }
 
@@ -23,11 +26,6 @@ header .button,
 header a {
   margin-left: 15px;
   display: inline-block;
-  border: 0;
-}
-
-.logo {
-  padding-right: 15px;
 }
 
 [contenteditable='true'] {
@@ -108,20 +106,29 @@ label.select select {
 .button {
   outline: 0;
   border: 1px solid #ccc;
-  background: white;
+  background: #fbfbfb;
   padding: 5px;
   cursor: pointer;
   cursor: hand;
+  border-radius: 3px;
+}
+
+.button:not(.material-icons):not(.button--primary) {
+  box-shadow: 0px 1px 0px 0px #ccc;
 }
 
 .button:hover {
-  background: #f2deff;
+  background: #f0f0f0;
 }
 
 .button--primary {
-  border: 0;
+  border-color: #3a005f;
   background: #9f04ff;
   color: white;
+}
+
+.button--primary:not(.material-icons) {
+  box-shadow: 0px 1px 0px 0px #3a005f;
 }
 
 .button--primary:hover {
@@ -150,7 +157,7 @@ label.select select {
 }
 
 .section,
-header {
+header > div {
   padding: 15px;
 }
 
@@ -160,6 +167,17 @@ header {
   color: #777;
   padding-bottom: 15px;
   white-space: nowrap;
+}
+
+.pages--empty {
+  display: block;
+  text-align: center;
+  margin: 100px auto;
+}
+
+.pages--empty .button--primary {
+  margin-right: 10px;
+  display: inline-block;
 }
 
 .pages .section-title {
@@ -196,8 +214,14 @@ header {
   border-right: 0;
 }
 
+.page-delete {
+  margin-right: 15px;
+  display: inline-block;
+}
+
 .panel {
-  border: 1px solid #777;
+  background: white;
+  border: 1px solid #ccc;
   margin-bottom: 15px;
 }
 
