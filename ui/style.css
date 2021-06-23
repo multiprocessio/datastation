@@ -5,8 +5,15 @@ body {
   background: #fbfbfb;
 }
 
+.app--desktop {
+  border-top: 1px solid #ccc;
+}
+
 main {
   display: flex;
+}
+
+header + main {
   padding-top: 60px;
 }
 
@@ -187,6 +194,7 @@ header > div {
 
 .connectors {
   border-right: 1px solid #ccc;
+  background: white;
 }
 
 .connector {
