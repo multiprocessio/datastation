@@ -2,7 +2,7 @@ import * as pako from 'pako';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
-import { APP_NAME, MODE, MODE_FEATURES } from '../shared/constants';
+import { APP_NAME, VERSION, MODE, MODE_FEATURES } from '../shared/constants';
 import {
   ProjectPage,
   ProjectState,
@@ -113,7 +113,6 @@ function App() {
     shareState
   );
 
-  // TODO: handle when there are zero pages?
   const [currentPage, setCurrentPage] = React.useState(0);
 
   const [shareURL, setShareURL] = React.useState('');
@@ -128,6 +127,13 @@ function App() {
     const compressed = pako.deflate(json, { to: 'string' });
     setShareURL(domain + '/?share=' + compressed);
   }
+
+  // Set body overflow once on init
+  React.useEffect(() => {
+    if (MODE_FEATURES.noBodyYOverflow) {
+      document.body.style.overflowY = 'hidden';
+    }
+  });
 
   if (!state) {
     // Loading
@@ -156,6 +162,11 @@ function App() {
 
   function addConnector(dc: ConnectorInfo) {
     state.connectors.push(dc);
+    updateProjectState({ ...state });
+  }
+
+  function deleteConnector(at: number) {
+    state.connectors.splice(at, 1);
     updateProjectState({ ...state });
   }
 
@@ -229,16 +240,20 @@ function App() {
               state={state}
               updateConnector={updateConnector}
               addConnector={addConnector}
+              deleteConnector={deleteConnector}
             />
           )}
-          <Pages
-            state={state}
-            updatePage={updatePage}
-            addPage={addPage}
-            deletePage={deletePage}
-            currentPage={currentPage}
-            setCurrentPage={setCurrentPage}
-          />
+          <div className="main-body">
+            <Pages
+              state={state}
+              updatePage={updatePage}
+              addPage={addPage}
+              deletePage={deletePage}
+              currentPage={currentPage}
+              setCurrentPage={setCurrentPage}
+            />
+            <div className="version">Version {VERSION}</div>
+          </div>
         </main>
       </div>
     </ProjectContext.Provider>

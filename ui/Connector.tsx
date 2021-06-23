@@ -8,15 +8,20 @@ import { Input } from './component-library/Input';
 export function Connector({
   connector,
   updateConnector,
+  deleteConnector,
 }: {
   connector: ConnectorInfo;
   updateConnector: (dc: ConnectorInfo) => void;
+  deleteConnector: () => void;
 }) {
   const [expanded, setExpanded] = React.useState(false);
 
   return (
     <div className="connector">
       <div className="connector-header vertical-align-center">
+        <Button icon className="page-delete" onClick={deleteConnector}>
+          delete
+        </Button>
         <span className="connector-type">{connector.type}</span>
         <span className="connector-name">
           {expanded ? (

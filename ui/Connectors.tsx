@@ -8,10 +8,12 @@ export function Connectors({
   state,
   addConnector,
   updateConnector,
+  deleteConnector,
 }: {
   state: ProjectState;
   addConnector: (dc: ConnectorInfo) => void;
   updateConnector: (n: number, dc: ConnectorInfo) => void;
+  deleteConnector: (n: number) => void;
 }) {
   const [expanded, setExpanded] = React.useState(true);
   if (!expanded) {
@@ -40,17 +42,19 @@ export function Connectors({
         <Connector
           connector={dc}
           updateConnector={(dc: ConnectorInfo) => updateConnector(i, dc)}
+          deleteConnector={deleteConnector.bind(null, i)}
         />
       ))}
-      <button
-        type="button"
-        className="button button--primary"
-        onClick={() => {
-          addConnector(new SQLConnectorInfo());
-        }}
-      >
-        New Connector
-      </button>
+      <div className="text-center">
+        <Button
+          type="primary"
+          onClick={() => {
+            addConnector(new SQLConnectorInfo());
+          }}
+        >
+          New Connector
+        </Button>
+      </div>
     </div>
   );
 }

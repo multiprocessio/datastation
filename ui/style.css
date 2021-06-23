@@ -3,14 +3,17 @@ body {
   padding: 0;
   margin: 0;
   background: #fbfbfb;
+  height: 100%;
 }
 
 .app--desktop {
   border-top: 1px solid #ccc;
+  overflow-y: hidden;
 }
 
-main {
+.app--desktop main {
   display: flex;
+  height: 100%;
 }
 
 header + main {
@@ -196,14 +199,27 @@ header > div {
 .connectors {
   border-right: 1px solid #ccc;
   background: white;
+  flex: 0 0 275px;
+  overflow-y: auto;
+}
+
+.connectors--collapsed {
+  flex: auto;
 }
 
 .connector {
   margin-bottom: 15px;
 }
 
-.pages {
-  flex: 1;
+.connector-name {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow-x: hidden;
+}
+
+.main-body {
+  width: 100%;
+  overflow-y: auto;
 }
 
 .pages .section-title {
@@ -358,6 +374,10 @@ header > div {
   text-align: center;
 }
 
+.text-light {
+  color: #777;
+}
+
 .form-row {
   padding: 5px 0;
 }
@@ -367,4 +387,11 @@ header > div {
   color: #777;
   font-size: 0.75rem;
   text-transform: uppercase;
+}
+
+.version {
+  text-align: center;
+  font-size: 0.9rem;
+  color: #aaa;
+  margin-bottom: 30px;
 }
