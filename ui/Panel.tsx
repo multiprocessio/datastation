@@ -113,15 +113,24 @@ export function Panel({
   }
 
   const [preview, setPreview] = React.useState('');
-  const results = panelResults[panelIndex];
+  const results: PanelResult = panelResults[panelIndex] || {
+    value: null,
+    exception: null,
+    lastRun: null,
+  };
   React.useEffect(() => {
+    if (!results.value) {
+      setPreview('');
+      return;
+    }
+
     if (previewableTypes.includes(panel.type)) {
       if (results && !results.exception) {
         const resultsLines = previewValueAsString(results.value).split('\n');
         setPreview(resultsLines.slice(0, 50).join('\n'));
       }
     }
-  }, [results?.value, results?.exception]);
+  }, [results.value, results.exception]);
 
   const language =
     panel.type === 'program' ? (panel as ProgramPanelInfo).program.type : 'sql';
