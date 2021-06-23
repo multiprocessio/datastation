@@ -16,6 +16,7 @@ header {
   top: 0;
   width: 100%;
   background: white;
+  z-index: 1;
 }
 
 header a {
@@ -325,7 +326,6 @@ header > div {
   top: 30px;
   right: 1px;
   background: white;
-  z-index: 1;
   border: 1px solid #ccc;
   padding: 15px;
   width: 400px;
