@@ -45,7 +45,7 @@ export class HTTPConnectorInfo extends ConnectorInfo {
   }
 }
 
-export type SQLConnectorInfoType = 'postgres' | 'in-memory';
+export type SQLConnectorInfoType = 'postgres' | 'mysql' | 'in-memory';
 
 export class SQLConnectorInfo extends ConnectorInfo {
   sql: {

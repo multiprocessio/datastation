@@ -1,26 +1,68 @@
+import util from 'util';
+
 import { Client as PostgresClient } from 'pg';
+import mysql from 'mysql2/promise';
 
 import { SQLConnectorInfo } from '../shared/state';
 
+async function evalPostgreSQL(
+  content: string,
+  host: string,
+  port: number,
+  { sql }: SQLConnectorInfo
+) {
+  const client = new PostgresClient({
+    user: sql.username,
+    password: sql.password,
+    database: sql.database,
+    host,
+    port,
+  });
+  try {
+    await client.connect();
+    const res = await client.query(content);
+    return res.rows;
+  } finally {
+    await client.end();
+  }
+}
+
+async function evalMySQL(
+  content: string,
+  host: string,
+  port: number,
+  { sql }: SQLConnectorInfo
+) {
+  const connection = await mysql.createConnection({
+    host: host,
+    user: sql.username,
+    password: sql.password,
+    database: sql.database,
+    port: port,
+  });
+
+  try {
+    const [rows] = await connection.execute(content);
+    return rows;
+  } finally {
+    connection.end();
+  }
+}
+
 export const evalSQLHandler = {
   resource: 'evalSQL',
-  handler: async function (content: string, { sql }: SQLConnectorInfo) {
-    const port = +sql.address.split(':')[1] || 5432;
-    const host = sql.address.split(':')[0];
+  handler: function (content: string, info: SQLConnectorInfo) {
+    const port = +info.sql.address.split(':')[1] || 5432;
+    const host = info.sql.address.split(':')[0];
 
-    const client = new PostgresClient({
-      user: sql.username,
-      password: sql.password,
-      database: sql.database,
-      host,
-      port,
-    });
-    try {
-      await client.connect();
-      const res = await client.query(content);
-      return res.rows;
-    } finally {
-      await client.end();
+    if (info.sql.type === 'postgres') {
+      return evalPostgreSQL(content, host, port, info);
     }
+
+    if (info.sql.type === 'mysql') {
+      return evalMySQL(content, host, port, info);
+    }
+
+    throw new Error(`Unknown SQL type: ${info.sql.type}`);
   },
 };
