@@ -66,6 +66,11 @@ export function Pages({
     );
   }
 
+  // Guard against effect that initializes this per page
+  if (!panelResultsByPage || !panelResultsByPage[page.id]) {
+    return null;
+  }
+
   return (
     <div className="section pages">
       <div className="section-title">
