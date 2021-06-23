@@ -14,6 +14,7 @@ export const MODE_FEATURES = {
   sql: MODE !== 'browser',
   shareProject: MODE === 'browser',
   corsOnly: MODE === 'browser',
+  noBodyYOverflow: MODE !== 'browser',
 };
 
 export const DEBUG = true;

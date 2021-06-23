@@ -129,6 +129,13 @@ function App() {
     setShareURL(domain + '/?share=' + compressed);
   }
 
+  // Set body overflow once on init
+  React.useEffect(() => {
+    if (MODE_FEATURES.noBodyYOverflow) {
+      document.body.style.overflowY = 'hidden';
+    }
+  });
+
   if (!state) {
     // Loading
     return <span>Loading</span>;
@@ -156,6 +163,11 @@ function App() {
 
   function addConnector(dc: ConnectorInfo) {
     state.connectors.push(dc);
+    updateProjectState({ ...state });
+  }
+
+  function deleteConnector(at: number) {
+    state.connectors.splice(at, 1);
     updateProjectState({ ...state });
   }
 
@@ -229,18 +241,19 @@ function App() {
               state={state}
               updateConnector={updateConnector}
               addConnector={addConnector}
+              deleteConnector={deleteConnector}
             />
           )}
-          <div>
-          <Pages
-            state={state}
-            updatePage={updatePage}
-            addPage={addPage}
-            deletePage={deletePage}
-            currentPage={currentPage}
-            setCurrentPage={setCurrentPage}
-          />
-          <div className="version">Version {VERSION}</div>
+          <div className="main-body">
+            <Pages
+              state={state}
+              updatePage={updatePage}
+              addPage={addPage}
+              deletePage={deletePage}
+              currentPage={currentPage}
+              setCurrentPage={setCurrentPage}
+            />
+            <div className="version">Version {VERSION}</div>
           </div>
         </main>
       </div>
