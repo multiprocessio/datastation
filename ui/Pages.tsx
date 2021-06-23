@@ -76,6 +76,7 @@ export function Pages({
       </div>
 
       <Page
+        key={page.id}
         page={page}
         connectors={state.connectors}
         updatePage={updatePage}

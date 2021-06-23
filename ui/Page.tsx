@@ -19,7 +19,12 @@ export function Page({
   panelResults: Array<PanelResult>;
   setPanelResults: (panelIndex: number, results: PanelResult) => void;
 }) {
-  async function reevalPanel(panelIndex: number) {
+  async function reevalPanel(panelIndex: number, reset?: boolean) {
+    if (reset) {
+      setPanelResults(panelIndex, null);
+      return;
+    }
+
     try {
       const r = await evalPanel(page, panelIndex, panelResults, connectors);
       setPanelResults(panelIndex, { lastRun: new Date(), value: r });

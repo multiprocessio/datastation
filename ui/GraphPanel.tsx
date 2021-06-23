@@ -80,7 +80,7 @@ export function GraphPanel({
   const value = (data || {}).value || [];
   const ref = React.useRef(null);
   React.useEffect(() => {
-    if (!ref) {
+    if (!ref || !value.length) {
       return;
     }
 
@@ -101,6 +101,11 @@ export function GraphPanel({
 
     return () => chart.destroy();
   }, [ref.current, data, panel.graph.x, panel.graph.y, panel.graph.type]);
+
+  if (!value.length) {
+    return null;
+  }
+
   return <canvas ref={ref} />;
 }
 

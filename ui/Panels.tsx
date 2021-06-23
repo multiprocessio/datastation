@@ -15,13 +15,15 @@ export function Panels({
   page: ProjectPage;
   updatePage: (page: ProjectPage) => void;
   panelResults: Array<PanelResult>;
-  reevalPanel: (panelIndex: number) => void;
+  reevalPanel: (panelIndex: number, reset?: boolean) => void;
 }) {
   function movePanel(from: number, to: number) {
     const panel = page.panels[from];
     page.panels.splice(from, 1);
     page.panels.splice(to, 0, panel);
     updatePage(page);
+    reevalPanel(to, true);
+    reevalPanel(from, true);
   }
 
   function removePanel(at: number) {
@@ -33,6 +35,7 @@ export function Panels({
     return (panel: PanelInfo) => {
       page.panels[panelIndex] = panel;
       updatePage(page);
+      reevalPanel(panelIndex, true);
     };
   }
 
@@ -56,9 +59,9 @@ export function Panels({
     <div>
       <div>
         {page.panels.map((panel, panelIndex) => (
-          <React.Fragment>
+          <React.Fragment key={panel.id}>
             <Panel
-              key={panelIndex}
+              key={panel.id}
               panel={panel}
               updatePanel={updatePanel(page, panelIndex)}
               panelResults={panelResults}
