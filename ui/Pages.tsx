@@ -12,17 +12,19 @@ type IDDict<T> = { [k: string]: T };
 export function Pages({
   state,
   addPage,
+  deletePage,
   updatePage,
   setCurrentPage,
   currentPage,
 }: {
   state: ProjectState;
   addPage: (page: ProjectPage) => void;
+  deletePage: (i: number) => void;
   updatePage: (page: ProjectPage) => void;
   setCurrentPage: (i: number) => void;
   currentPage: number;
 }) {
-  const page = state.pages[currentPage];
+  const page: ProjectPage | null = state.pages[currentPage] || null;
   const [panelResultsByPage, setPanelResultsByPage] = React.useState<
     IDDict<Array<PanelResult>>
   >({});
@@ -34,28 +36,58 @@ export function Pages({
 
   // Make sure panelResults are initialized when page changes.
   React.useEffect(() => {
-    if (!panelResultsByPage[page.id]) {
+    if (page && !panelResultsByPage[page.id]) {
       setPanelResultsByPage({ ...panelResultsByPage, [page.id]: [] });
     }
-  }, [page.id]);
-
-  if (!panelResultsByPage || !panelResultsByPage[page.id]) {
-    return null;
-  }
+  }, [page && page.id]);
 
   function setPanelResults(panelIndex: number, result: PanelResult) {
     panelResultsByPage[page.id][panelIndex] = result;
     setPanelResultsByPage({ ...panelResultsByPage });
   }
 
+  if (!page) {
+    return (
+      <div className="section pages pages--empty">
+        <p>This is an empty project.</p>
+        <p>
+          <Button
+            type="primary"
+            onClick={() => {
+              addPage(new ProjectPage('Untitled Page'));
+              setCurrentPage(state.pages.length - 1);
+            }}
+          >
+            Add a page
+          </Button>{' '}
+          to get started!
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="section pages">
       <div className="section-title">
-        <Input
-          className="page-name page-name--current"
-          onChange={(value: string) => updatePage({ ...page, name: value })}
-          value={page.name}
-        />
+        <div className="vertical-align-center">
+          <span title="Delete this page">
+            <Button
+              icon
+              className="page-delete"
+              onClick={() => {
+                deletePage(currentPage);
+                setCurrentPage(Math.min(state.pages.length - 1, 0));
+              }}
+            >
+              delete
+            </Button>
+          </span>
+          <Input
+            className="page-name page-name--current"
+            onChange={(value: string) => updatePage({ ...page, name: value })}
+            value={page.name}
+          />
+        </div>
         {state.pages.map((page: ProjectPage, i: number) =>
           i === currentPage ? undefined : (
             <Button className="page-name" onClick={() => setCurrentPage(i)}>
