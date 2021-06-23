@@ -20,3 +20,5 @@ export const DEBUG = true;
 
 export const RPC_ASYNC_REQUEST = 'rpcAsyncRequest';
 export const RPC_ASYNC_RESPONSE = 'rpcAsyncResponse';
+
+export const VERSION = '0.0.1-alpha';

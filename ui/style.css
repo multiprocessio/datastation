@@ -9,7 +9,7 @@ body {
   border-top: 1px solid #ccc;
 }
 
-main {
+.app--desktop main {
   display: flex;
 }
 
@@ -358,6 +358,10 @@ header > div {
   text-align: center;
 }
 
+.text-light {
+  color: #777;    
+}
+
 .form-row {
   padding: 5px 0;
 }
@@ -367,4 +371,11 @@ header > div {
   color: #777;
   font-size: 0.75rem;
   text-transform: uppercase;
+}
+
+.version {
+    text-align: center;
+    font-size: .9rem;
+    color: #aaa;
+    margin-bottom: 30px;
 }

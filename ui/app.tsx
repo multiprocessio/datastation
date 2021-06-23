@@ -2,7 +2,7 @@ import * as pako from 'pako';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
-import { APP_NAME, MODE, MODE_FEATURES } from '../shared/constants';
+import { APP_NAME, VERSION, MODE, MODE_FEATURES } from '../shared/constants';
 import {
   ProjectPage,
   ProjectState,
@@ -231,6 +231,7 @@ function App() {
               addConnector={addConnector}
             />
           )}
+          <div>
           <Pages
             state={state}
             updatePage={updatePage}
@@ -239,6 +240,8 @@ function App() {
             currentPage={currentPage}
             setCurrentPage={setCurrentPage}
           />
+          <div className="version">Version {VERSION}</div>
+          </div>
         </main>
       </div>
     </ProjectContext.Provider>
