@@ -12,11 +12,13 @@ export function SQLConnector({
 }) {
   // Don't try to show initial password
   const [password, setPassword] = React.useState('');
-  React.useEffect(() => {
-    // Sync typed password to state
-    connector.sql.password = password;
+  function syncPassword(p: string) {
+    setPassword(p);
+
+    // Sync typed password to state on change
+    connector.sql.password = p;
     updateConnector(connector);
-  }, [password]);
+  }
 
   return (
     <React.Fragment>
@@ -55,7 +57,7 @@ export function SQLConnector({
           label="Password"
           type="password"
           value={password}
-          onChange={(value: string) => setPassword(value)}
+          onChange={(value: string) => syncPassword(value)}
         />
       </div>
     </React.Fragment>

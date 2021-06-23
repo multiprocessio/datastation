@@ -14,9 +14,12 @@ export const MODE_FEATURES = {
   sql: MODE !== 'browser',
   shareProject: MODE === 'browser',
   corsOnly: MODE === 'browser',
+  noBodyYOverflow: MODE !== 'browser',
 };
 
 export const DEBUG = true;
 
 export const RPC_ASYNC_REQUEST = 'rpcAsyncRequest';
 export const RPC_ASYNC_RESPONSE = 'rpcAsyncResponse';
+
+export const VERSION = '0.0.1-alpha';
