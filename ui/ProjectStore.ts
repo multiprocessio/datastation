@@ -10,6 +10,7 @@ export interface PanelResult {
   exception?: string;
   value?: Array<any>;
   lastRun: Date;
+  stdout: string;
 }
 
 class LocalStorageStore {

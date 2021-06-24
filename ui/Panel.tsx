@@ -1,4 +1,5 @@
 import * as React from 'react';
+import circularSafeStringify from 'json-stringify-safe';
 
 import {
   ConnectorInfo,
@@ -42,30 +43,34 @@ export async function evalPanel(
   panelId: number,
   panelResults: Array<PanelResult>,
   connectors: Array<ConnectorInfo>
-) {
+): Promise<[any, string]> {
   const panel = page.panels[panelId];
   switch (panel.type) {
     case 'program':
       return await evalProgramPanel(panel as ProgramPanelInfo, panelResults);
     case 'literal':
-      return await evalLiteralPanel(panel as LiteralPanelInfo);
+      return [await evalLiteralPanel(panel as LiteralPanelInfo), ''];
     case 'sql':
-      return evalSQLPanel(panel as SQLPanelInfo, panelResults, connectors);
+      return [evalSQLPanel(panel as SQLPanelInfo, panelResults, connectors), ''];
     case 'graph':
-      return (panelResults[(panel as GraphPanelInfo).graph.panelSource] || {})
-        .value;
+      return [(panelResults[(panel as GraphPanelInfo).graph.panelSource] || {})
+        .value, ''];
     case 'table':
-      return (panelResults[(panel as TablePanelInfo).table.panelSource] || {})
-        .value;
+      return [(panelResults[(panel as TablePanelInfo).table.panelSource] || {})
+        .value, ''];
     case 'http':
-      return await evalHTTPPanel(panel as HTTPPanelInfo);
+      return [await evalHTTPPanel(panel as HTTPPanelInfo), ''];
     case 'file':
-      return await evalFilePanel(panel as FilePanelInfo);
+      return [await evalFilePanel(panel as FilePanelInfo), ''];
   }
 }
 
 function previewValueAsString(value: any) {
-  return JSON.stringify(value, null, 2);
+  try {
+    return circularSafeStringify(value, null, 2);
+  } catch (e) {
+    return String(value);
+  }
 }
 
 export function Panel({
@@ -89,9 +94,7 @@ export function Panel({
 }) {
   const previewableTypes = ['http', 'sql', 'program', 'file', 'literal'];
   const alwaysOpenTypes = ['table', 'graph', 'http', 'file'];
-  const [details, setDetails] = React.useState(
-    alwaysOpenTypes.includes(panel.type)
-  );
+  const [details, setDetails] = React.useState(true);
   const [hidden, setHidden] = React.useState(false);
 
   let body = null;
@@ -112,11 +115,13 @@ export function Panel({
     body = <span />;
   }
 
+  const [panelOut, setPanelOut] = React.useState('preview');
   const [preview, setPreview] = React.useState('');
   const results: PanelResult = panelResults[panelIndex] || {
     value: null,
     exception: null,
     lastRun: null,
+    stdout: '',
   };
   React.useEffect(() => {
     if (!results.value) {
@@ -162,7 +167,7 @@ export function Panel({
     >
       <div className="panel-head">
         <div className="panel-header vertical-align-center">
-          <span title="Move up">
+          <span title="Move Up">
             <Button
               icon
               disabled={panelIndex === 0}
@@ -173,7 +178,7 @@ export function Panel({
               keyboard_arrow_up
             </Button>
           </span>
-          <span title="Move down">
+          <span title="Move Down">
             <Button
               icon
               disabled={panelIndex === panels.length - 1}
@@ -194,7 +199,7 @@ export function Panel({
           />
           <span className="material-icons">{PANEL_TYPE_ICON[panel.type]}</span>
           {!alwaysOpenTypes.includes(panel.type) && (
-            <span title="Panel details">
+            <span title={details ? 'Hide Details' : 'Show Details'}>
               <Button icon onClick={() => setDetails(!details)}>
                 {details ? 'unfold_less' : 'unfold_more'}
               </Button>
@@ -202,11 +207,11 @@ export function Panel({
           )}
           <span className="panel-controls vertical-align-center flex-right">
             <span className="last-run">
-              {(panelResults[panelIndex] || {}).lastRun
-                ? 'Last run ' + panelResults[panelIndex].lastRun
+              {results.lastRun
+                ? 'Last run ' + results.lastRun
                 : 'Run to apply changes'}
             </span>
-            <span title="Evaluate panel (Ctrl-Enter)">
+            <span title="Evaluate Panel (Ctrl-Enter)">
               <Button
                 icon
                 onClick={() => reevalPanel(panelIndex)}
@@ -215,12 +220,12 @@ export function Panel({
                 play_arrow
               </Button>
             </span>
-            <span title="Hide panel">
+            <span title="Hide Panel">
               <Button icon onClick={() => setHidden(!hidden)}>
                 {hidden ? 'visibility' : 'visibility_off'}
               </Button>
             </span>
-            <span title="Delete panel">
+            <span title="Delete Panel">
               <Button icon onClick={() => removePanel(panelIndex)}>
                 delete
               </Button>
@@ -388,14 +393,20 @@ export function Panel({
                 </div>
               )}
             </div>
-            {preview && (
+            {previewableTypes.includes(panel.type) &&
+             <div className="panel-out">
+              <div className="panel-out-header">
+                <Button disabled={panel.type !== 'program'} className={panelOut === 'preview' ? 'selected' : ''} onClick={() => setPanelOut('preview')}>Preview</Button>
+                {panel.type === 'program' &&
+                <Button className={panelOut === 'output' ? 'selected' : ''} onClick={() => setPanelOut('output')}>Output</Button>}
+              </div>
               <div className="panel-preview">
-                <div className="text-center">Panel Preview</div>
                 <pre className="panel-preview-results">
-                  <code>{preview}</code>
+                  {!(panelOut === 'preview' ? preview : results.stdout) ? (results.lastRun ? 'Nothing to show.' : 'Panel not yet run.') :
+                  <code>{panelOut === 'preview' ? preview : results.stdout}</code>}
                 </pre>
               </div>
-            )}
+            </div>}
           </div>
         </div>
       )}

@@ -75,7 +75,7 @@ export function Pages({
     <div className="section pages">
       <div className="section-title">
         <div className="vertical-align-center">
-          <span title="Delete this page">
+          <span title="Delete Page">
             <Button
               icon
               className="page-delete"
