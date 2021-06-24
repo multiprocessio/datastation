@@ -302,18 +302,42 @@ header > div {
   margin-left: 5px;
 }
 
-.panel-preview {
+.panel-out {
   background: #333;
   padding: 5px;
   color: white;
   width: 400px;
   max-width: 50%;
   overflow: auto;
+  display: flex;
+  flex-direction: column;
 }
 
-.panel--empty .panel-preview {
+.panel--empty .panel-out {
   width: 100%;
   max-width: 100%;
+}
+
+.panel-out-header {
+    border-bottom: 1px solid white;
+}
+
+.panel-out-header .button {
+    border: 0;
+    background: 0;
+    color: white;
+    padding: 5px 15px;
+    box-shadow: 0 0 0 0 !important;
+}
+
+.panel-out-header .button.selected {
+    border: 1px solid white;
+    border-bottom: 0;
+}
+
+.panel-preview {
+    overflow: auto;
+    height: 100%;
 }
 
 .panel--empty .panel-body {

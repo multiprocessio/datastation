@@ -46,7 +46,11 @@ export async function evalSQLPanel(
           return columns.map((column: string) => {
             const cell = row[column];
             if (typeof cell === 'number' || typeof cell === 'boolean') {
-              return cell.toString();
+              return String(cell);
+            }
+
+            if (cell === undefined || cell === null) {
+              return 'null';
             }
 
             // Default to stringifying.
