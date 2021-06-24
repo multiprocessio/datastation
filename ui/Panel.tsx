@@ -51,13 +51,20 @@ export async function evalPanel(
     case 'literal':
       return [await evalLiteralPanel(panel as LiteralPanelInfo), ''];
     case 'sql':
-      return [evalSQLPanel(panel as SQLPanelInfo, panelResults, connectors), ''];
+      return [
+        evalSQLPanel(panel as SQLPanelInfo, panelResults, connectors),
+        '',
+      ];
     case 'graph':
-      return [(panelResults[(panel as GraphPanelInfo).graph.panelSource] || {})
-        .value, ''];
+      return [
+        (panelResults[(panel as GraphPanelInfo).graph.panelSource] || {}).value,
+        '',
+      ];
     case 'table':
-      return [(panelResults[(panel as TablePanelInfo).table.panelSource] || {})
-        .value, ''];
+      return [
+        (panelResults[(panel as TablePanelInfo).table.panelSource] || {}).value,
+        '',
+      ];
     case 'http':
       return [await evalHTTPPanel(panel as HTTPPanelInfo), ''];
     case 'file':
@@ -393,20 +400,42 @@ export function Panel({
                 </div>
               )}
             </div>
-            {previewableTypes.includes(panel.type) &&
-             <div className="panel-out">
-              <div className="panel-out-header">
-                <Button disabled={panel.type !== 'program'} className={panelOut === 'preview' ? 'selected' : ''} onClick={() => setPanelOut('preview')}>Preview</Button>
-                {panel.type === 'program' &&
-                <Button className={panelOut === 'output' ? 'selected' : ''} onClick={() => setPanelOut('output')}>Output</Button>}
+            {previewableTypes.includes(panel.type) && (
+              <div className="panel-out">
+                <div className="panel-out-header">
+                  <Button
+                    disabled={panel.type !== 'program'}
+                    className={panelOut === 'preview' ? 'selected' : ''}
+                    onClick={() => setPanelOut('preview')}
+                  >
+                    Preview
+                  </Button>
+                  {panel.type === 'program' && (
+                    <Button
+                      className={panelOut === 'output' ? 'selected' : ''}
+                      onClick={() => setPanelOut('output')}
+                    >
+                      Output
+                    </Button>
+                  )}
+                </div>
+                <div className="panel-preview">
+                  <pre className="panel-preview-results">
+                    {!(panelOut === 'preview' ? preview : results.stdout) ? (
+                      results.lastRun ? (
+                        'Nothing to show.'
+                      ) : (
+                        'Panel not yet run.'
+                      )
+                    ) : (
+                      <code>
+                        {panelOut === 'preview' ? preview : results.stdout}
+                      </code>
+                    )}
+                  </pre>
+                </div>
               </div>
-              <div className="panel-preview">
-                <pre className="panel-preview-results">
-                  {!(panelOut === 'preview' ? preview : results.stdout) ? (results.lastRun ? 'Nothing to show.' : 'Panel not yet run.') :
-                  <code>{panelOut === 'preview' ? preview : results.stdout}</code>}
-                </pre>
-              </div>
-            </div>}
+            )}
           </div>
         </div>
       )}

@@ -21,13 +21,21 @@ export function Page({
 }) {
   async function reevalPanel(panelIndex: number, reset?: boolean) {
     if (reset) {
-      setPanelResults(panelIndex, { ...panelResults[panelIndex], lastRun: null });
+      setPanelResults(panelIndex, {
+        ...panelResults[panelIndex],
+        lastRun: null,
+      });
       return;
     }
 
     try {
-      const [r, stdout] = await evalPanel(page, panelIndex, panelResults, connectors);
-      setPanelResults(panelIndex, { lastRun: new Date(), value: r, stdout, });
+      const [r, stdout] = await evalPanel(
+        page,
+        panelIndex,
+        panelResults,
+        connectors
+      );
+      setPanelResults(panelIndex, { lastRun: new Date(), value: r, stdout });
     } catch (e) {
       setPanelResults(panelIndex, {
         lastRun: new Date(),

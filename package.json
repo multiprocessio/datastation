@@ -35,6 +35,7 @@
   },
   "devDependencies": {
     "@types/electron": "^1.6.10",
+    "@types/json-stringify-safe": "^5.0.0",
     "@types/node-fetch": "^2.5.10",
     "@types/pako": "^1.0.1",
     "@types/papaparse": "^5.2.5",
