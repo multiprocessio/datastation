@@ -18,7 +18,8 @@ export function evalProgramPanel(
     JSON.parse(JSON.stringify((panelResults[panelId] || {}).value));
 
   const stdout: Array<string> = [];
-  const print = (...n: Array<any>) => stdout.push(n.map(v => circularSafeStringify(v)).join(' '));
+  const print = (...n: Array<any>) =>
+    stdout.push(n.map((v) => circularSafeStringify(v)).join(' '));
 
   switch (program.type) {
     case 'javascript':
