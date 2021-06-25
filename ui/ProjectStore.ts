@@ -2,16 +2,9 @@ import { IpcRenderer } from 'electron';
 import throttle from 'lodash.throttle';
 import * as React from 'react';
 
-import { ProjectState, DEFAULT_PROJECT } from '../shared/state';
+import { ProjectState, DEFAULT_PROJECT, PanelResult } from '../shared/state';
 
 import { asyncRPC } from './asyncRPC';
-
-export interface PanelResult {
-  exception?: string;
-  value?: Array<any>;
-  lastRun: Date;
-  stdout: string;
-}
 
 class LocalStorageStore {
   makeKey(projectId: string) {
@@ -48,16 +41,6 @@ class DesktopIPCStore {
   }
 }
 
-class HostedStore {
-  async update(projectId: string, state: ProjectState) {
-    throw new Error('Unsupported state manager');
-  }
-
-  async get(): Promise<ProjectState> {
-    throw new Error('Unsupported state manager');
-  }
-}
-
 export interface ProjectStore {
   update: (projectId: string, state: ProjectState) => Promise<void>;
   get: (projectId: string) => Promise<ProjectState>;
@@ -67,7 +50,6 @@ export function makeStore(mode: string, syncMillis: number = 5000) {
   const storeClass = {
     desktop: DesktopIPCStore,
     browser: LocalStorageStore,
-    hosted: HostedStore,
   }[mode];
   const store = new storeClass();
   if (syncMillis) {

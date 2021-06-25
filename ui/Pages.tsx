@@ -1,13 +1,23 @@
+import throttle from 'lodash.throttle';
 import * as React from 'react';
 
-import { ProjectState, ProjectPage } from '../shared/state';
+import { MODE_FEATURES } from '../shared/constants';
+import {
+  ProjectState,
+  ProjectPage,
+  PanelResult,
+  PanelResults,
+} from '../shared/state';
 
-import { PanelResult } from './ProjectStore';
+import { asyncRPC } from './asyncRPC';
 import { Page } from './Page';
 import { Button } from './component-library/Button';
 import { Input } from './component-library/Input';
 
-type IDDict<T> = { [k: string]: T };
+const throttledAsyncRpc = throttle<[string, void, PanelResults], Promise<void>>(
+  asyncRPC,
+  5000
+);
 
 export function Pages({
   state,
@@ -25,9 +35,18 @@ export function Pages({
   currentPage: number;
 }) {
   const page: ProjectPage | null = state.pages[currentPage] || null;
-  const [panelResultsByPage, setPanelResultsByPage] = React.useState<
-    IDDict<Array<PanelResult>>
-  >({});
+  const [panelResultsByPage, setPanelResultsByPageInternal] =
+    React.useState<PanelResults>({});
+
+  function setPanelResultsByPage(results: PanelResults) {
+    if (MODE_FEATURES.storeResults) {
+      throttledAsyncRpc('storeResults', null, results).catch((e) => {
+        console.error(e);
+      });
+    }
+
+    setPanelResultsByPageInternal(results);
+  }
 
   // Reset all page results when project changes
   React.useEffect(() => {

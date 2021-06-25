@@ -2,10 +2,9 @@ import * as React from 'react';
 import circularSafeStringify from 'json-stringify-safe';
 
 import { MODE } from '../shared/constants';
-import { ProgramPanelInfo } from '../shared/state';
+import { PanelResult, ProgramPanelInfo } from '../shared/state';
 
 import { asyncRPC } from './asyncRPC';
-import { PanelResult } from './ProjectStore';
 import { Select } from './component-library/Select';
 
 export function evalProgramPanel(
@@ -16,22 +15,10 @@ export function evalProgramPanel(
   const anyWindow = window as any;
 
   if (MODE === 'desktop') {
-    // TODO: make panel substitution based on an actual parser since
-    // regex will match instances of `' foo bar DM_getPanel(21)[sdklf] '`
-    // among other bad things...
-    const matcher = /DM_getPanel\(([0-9]+)\)/g;
-    const content = panel.content.replace(matcher, function (match, panelIndex) {
-      replacements.push(+panelIndex);
-      return `t${replacements.length - 1}`;
-    });
-
     return asyncRPC<ProgramPanelInfo, null, [Array<object>, string]>(
       'evalProgram',
       null,
-      {
-        ...panel,
-        content,
-      },
+      panel
     );
   }
 

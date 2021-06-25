@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { PanelResult } from './ProjectStore';
+import { PanelResult } from '../shared/state';
 
 import { Input } from './component-library/Input';
 import { Select } from './component-library/Select';

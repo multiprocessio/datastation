@@ -2,6 +2,16 @@ import * as uuid from 'uuid';
 
 import { mergeDeep } from './merge';
 
+export interface PanelResult {
+  exception?: string;
+  value?: Array<any>;
+  lastRun: Date;
+  loading: boolean;
+  stdout: string;
+}
+export type IDDict<T> = { [k: string]: T };
+export type PanelResults = IDDict<Array<PanelResult>>;
+
 export type ConnectorInfoType = 'sql' | 'http';
 
 export class ConnectorInfo {

@@ -1,9 +1,13 @@
 import * as React from 'react';
 import Chart from 'chart.js/auto';
 
-import { PanelInfo, GraphPanelInfo, GraphPanelInfoType } from '../shared/state';
+import {
+  PanelInfo,
+  GraphPanelInfo,
+  GraphPanelInfoType,
+  PanelResult,
+} from '../shared/state';
 
-import { PanelResult } from './ProjectStore';
 import { PanelSourcePicker } from './PanelSourcePicker';
 import { FieldPicker } from './FieldPicker';
 import { Select } from './component-library/Select';
