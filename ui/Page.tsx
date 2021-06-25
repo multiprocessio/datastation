@@ -20,8 +20,11 @@ export function Page({
 }) {
   async function reevalPanel(panelIndex: number, reset?: boolean) {
     const panel = panelResults[panelIndex];
-    panel.lastRun = null;
-    panel.loading = true;
+    if (panel) {
+      panel.lastRun = null;
+      panel.loading = true;
+    }
+
     if (reset) {
       panel.loading = false;
       setPanelResults(panelIndex, panel);
