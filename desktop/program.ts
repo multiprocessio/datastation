@@ -38,7 +38,7 @@ def DM_getPanel(i):
   return __GLOBAL[i]
 def DM_setPanel(v):
   with open('${outFile}', 'w') as f:
-    json.dump(v, f)`;
+    __DM_JSON.dump(v, f)`;
 
 const PREAMBLE = {
   javascript: JAVASCRIPT_PREAMBLE,
