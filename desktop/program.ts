@@ -81,3 +81,5 @@ export const evalProgramHandler = {
     }
   },
 };
+
+export const programHandlers = [storeResultsHandler, evalProgramHandler];
