@@ -63,7 +63,6 @@ export const evalProgramHandler = {
     const outputTmp = await makeTmpFile();
 
     try {
-      const matcher = /DM_setPanel\(([a-Z-A-Z_\$0-9]+)\)/g;
       const preamble = PREAMBLE[ppi.program.type];
       await fs.writeFile(programTmp.path, [preamble, ppi.content].join('\n'));
       const runtime = ppi.program.type === 'javascript' ? 'node' : 'python3';
