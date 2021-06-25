@@ -63,7 +63,7 @@ export const evalProgramHandler = {
     const outputTmp = await makeTmpFile();
 
     try {
-      const preamble = PREAMBLE[ppi.program.type];
+      const preamble = PREAMBLE[ppi.program.type](outputTmp.path);
       await fs.writeFile(programTmp.path, [preamble, ppi.content].join('\n'));
       const runtime = ppi.program.type === 'javascript' ? 'node' : 'python3';
       const { stdout, stderr } = await execPromise(
