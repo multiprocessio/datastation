@@ -15,6 +15,8 @@ BUILTIN_VARIABLES = {
     }[platform.machine()],
     'os': platform.system().lower(),
 }
+for i, arg in enumerate(sys.argv[2:]):
+    BUILTIN_VARIABLES['arg'+str(i)] = arg
 
 with open(sys.argv[1]) as f:
     script = f.read().split('\n')
