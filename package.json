@@ -12,7 +12,8 @@
     "start-desktop": "yarn build-ui && yarn build-desktop && yarn electron --trace-warnings build/desktop.js",
     "start-ui": "./ui/scripts/watch_and_serve.sh",
     "release-desktop": "python3 ./scripts/build.py ./desktop/scripts/release.build",
-    "format": "yarn prettier --write \"**/*.ts\" \"**/*.tsx\" \"**/*.css\" \"**/*.json\""
+    "format": "yarn prettier --write \"**/*.ts\" \"**/*.tsx\" \"**/*.css\" \"**/*.json\"",
+    "test-licenses": "yarn license-checker --production --onlyAllow 'MIT;Apache-2.0;ISC;BSD-3-Clause;MIT*;BSD-2-Clause'"
   },
   "dependencies": {
     "chart.js": "^3.3.2",
@@ -47,6 +48,7 @@
     "electron-packager": "^15.2.0",
     "electron-winstaller": "^5.0.0",
     "esbuild": "^0.12.7",
+    "license-checker": "^25.0.1",
     "prettier": "^2.3.0",
     "typescript": "^4.3.2"
   }
