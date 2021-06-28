@@ -12,6 +12,7 @@ IS_WINDOWS = os.name == 'nt'
 BUILTIN_VARIABLES = {
     'arch': {
         'x86_64': 'x64',
+        'aarch64': 'arm64',
     }[platform.machine()],
     'os': platform.system().lower(),
 }
