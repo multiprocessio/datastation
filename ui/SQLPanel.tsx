@@ -18,10 +18,6 @@ export async function evalSQLPanel(
   panelResults: Array<PanelResult>,
   connectors: Array<ConnectorInfo>
 ) {
-  if (!panel.content.trim().toLowerCase().startsWith('select ')) {
-    throw new Error('SQL must be read-only SELECT');
-  }
-
   // TODO: make panel substitution based on an actual parser since
   // regex will match instances of `' foo bar DM_getPanel(21)[sdklf] '`
   // among other bad things...
