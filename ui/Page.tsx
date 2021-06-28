@@ -1,10 +1,9 @@
 import * as React from 'react';
 
-import { ConnectorInfo, ProjectPage } from '../shared/state';
+import { ConnectorInfo, ProjectPage, PanelResult } from '../shared/state';
 
 import { Panels } from './Panels';
 import { evalPanel } from './Panel';
-import { PanelResult } from './ProjectStore';
 
 export function Page({
   page,
@@ -20,11 +19,15 @@ export function Page({
   setPanelResults: (panelIndex: number, results: PanelResult) => void;
 }) {
   async function reevalPanel(panelIndex: number, reset?: boolean) {
+    const panel = panelResults[panelIndex];
+    if (panel) {
+      panel.lastRun = null;
+      panel.loading = true;
+    }
+
     if (reset) {
-      setPanelResults(panelIndex, {
-        ...panelResults[panelIndex],
-        lastRun: null,
-      });
+      panel.loading = false;
+      setPanelResults(panelIndex, panel);
       return;
     }
 
@@ -35,9 +38,15 @@ export function Page({
         panelResults,
         connectors
       );
-      setPanelResults(panelIndex, { lastRun: new Date(), value: r, stdout });
+      setPanelResults(panelIndex, {
+        lastRun: new Date(),
+        value: r,
+        stdout,
+        loading: false,
+      });
     } catch (e) {
       setPanelResults(panelIndex, {
+        loading: false,
         lastRun: new Date(),
         exception: e.stack,
         stdout: '',

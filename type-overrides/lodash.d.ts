@@ -1,6 +1,6 @@
 declare module 'lodash.throttle' {
   declare function throttle<Input, Output>(
-    f: () => void,
+    f: (...args: Input) => Output,
     t: number
   ): (...args: Input) => Output;
   export = throttle;

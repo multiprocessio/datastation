@@ -5,11 +5,12 @@ import {
   SQLConnectorInfo,
   SQLConnectorInfoType,
   SQLPanelInfo,
+  PanelResult,
 } from '../shared/state';
 import { DEBUG, MODE_FEATURES } from '../shared/constants';
 
 import { asyncRPC } from './asyncRPC';
-import { PanelResult, ProjectContext } from './ProjectStore';
+import { ProjectContext } from './ProjectStore';
 import { Select } from './component-library/Select';
 
 export async function evalSQLPanel(

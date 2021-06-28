@@ -1,9 +1,13 @@
 import * as React from 'react';
 
-import { PanelInfo, TablePanelInfo, TableColumn } from '../shared/state';
+import {
+  PanelInfo,
+  TablePanelInfo,
+  TableColumn,
+  PanelResult,
+} from '../shared/state';
 
 import { PanelSourcePicker } from './PanelSourcePicker';
-import { PanelResult } from './ProjectStore';
 import { Button } from './component-library/Button';
 import { FieldPicker } from './FieldPicker';
 

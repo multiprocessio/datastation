@@ -359,9 +359,14 @@ header > div {
   padding: 15px 5px;
 }
 
-.alert-info {
+.alert-error {
   background: #ffe7e7;
   border: 1px solid #ffc0c0;
+}
+
+.alert-info {
+  background: #e7f7ff;
+  border: 1px solid #c0f0ff;
 }
 
 .share {

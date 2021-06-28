@@ -1,13 +1,17 @@
 import * as React from 'react';
 
-import { ProjectState, ProjectPage } from '../shared/state';
+import { MODE_FEATURES } from '../shared/constants';
+import {
+  ProjectState,
+  ProjectPage,
+  PanelResult,
+  PanelResults,
+} from '../shared/state';
 
-import { PanelResult } from './ProjectStore';
+import { asyncRPC } from './asyncRPC';
 import { Page } from './Page';
 import { Button } from './component-library/Button';
 import { Input } from './component-library/Input';
-
-type IDDict<T> = { [k: string]: T };
 
 export function Pages({
   state,
@@ -25,24 +29,37 @@ export function Pages({
   currentPage: number;
 }) {
   const page: ProjectPage | null = state.pages[currentPage] || null;
-  const [panelResultsByPage, setPanelResultsByPage] = React.useState<
-    IDDict<Array<PanelResult>>
-  >({});
+  const [panelResultsByPage, setPanelResultsByPageInternal] =
+    React.useState<PanelResults>([]);
+
+  function setPanelResultsByPage(results: PanelResults) {
+    if (MODE_FEATURES.storeResults && results[currentPage]) {
+      asyncRPC<any, void, void>(
+        'storeResults',
+        null,
+        results[currentPage].map((r) => r.value)
+      ).catch((e) => {
+        console.error(e);
+      });
+    }
+
+    setPanelResultsByPageInternal(results);
+  }
 
   // Reset all page results when project changes
   React.useEffect(() => {
-    setPanelResultsByPage({});
+    setPanelResultsByPage([]);
   }, [state.id]);
 
   // Make sure panelResults are initialized when page changes.
   React.useEffect(() => {
-    if (page && !panelResultsByPage[page.id]) {
-      setPanelResultsByPage({ ...panelResultsByPage, [page.id]: [] });
+    if (page && !panelResultsByPage[currentPage]) {
+      setPanelResultsByPage({ ...panelResultsByPage, [currentPage]: [] });
     }
   }, [page && page.id]);
 
   function setPanelResults(panelIndex: number, result: PanelResult) {
-    panelResultsByPage[page.id][panelIndex] = result;
+    panelResultsByPage[currentPage][panelIndex] = result;
     setPanelResultsByPage({ ...panelResultsByPage });
   }
 
@@ -67,7 +84,7 @@ export function Pages({
   }
 
   // Guard against effect that initializes this per page
-  if (!panelResultsByPage || !panelResultsByPage[page.id]) {
+  if (!panelResultsByPage || !panelResultsByPage[currentPage]) {
     return null;
   }
 
@@ -117,7 +134,7 @@ export function Pages({
         page={page}
         connectors={state.connectors}
         updatePage={updatePage}
-        panelResults={panelResultsByPage[page.id]}
+        panelResults={panelResultsByPage[currentPage]}
         setPanelResults={setPanelResults}
       />
     </div>

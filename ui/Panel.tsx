@@ -12,10 +12,10 @@ import {
   TablePanelInfo,
   LiteralPanelInfo,
   FilePanelInfo,
+  PanelResult,
 } from '../shared/state';
 import { MODE_FEATURES } from '../shared/constants';
 
-import { PanelResult } from './ProjectStore';
 import { GraphPanel, GraphPanelDetails } from './GraphPanel';
 import { evalHTTPPanel, HTTPPanelDetails } from './HTTPPanel';
 import { evalFilePanel, FilePanelDetails } from './FilePanel';
@@ -129,6 +129,7 @@ export function Panel({
     exception: null,
     lastRun: null,
     stdout: '',
+    loading: false,
   };
   React.useEffect(() => {
     if (!results.value) {
@@ -214,7 +215,9 @@ export function Panel({
           )}
           <span className="panel-controls vertical-align-center flex-right">
             <span className="last-run">
-              {results.lastRun
+              {results.loading
+                ? 'Loading'
+                : results.lastRun
                 ? 'Last run ' + results.lastRun
                 : 'Run to apply changes'}
             </span>
@@ -355,7 +358,7 @@ export function Panel({
                 />
               )}
               {exception && (
-                <div className="error">
+                <div className="alert alert-error">
                   <div>Error evaluating panel:</div>
                   <pre>
                     <code>{exception}</code>
