@@ -52,7 +52,7 @@ export async function evalPanel(
       return [await evalLiteralPanel(panel as LiteralPanelInfo), ''];
     case 'sql':
       return [
-        evalSQLPanel(panel as SQLPanelInfo, panelResults, connectors),
+        await evalSQLPanel(panel as SQLPanelInfo, panelResults, connectors),
         '',
       ];
     case 'graph':

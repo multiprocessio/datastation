@@ -27,6 +27,7 @@ export async function evalSQLPanel(
   // among other bad things...
   const matcher = /DM_getPanel\(([0-9]+)\)/g;
   let content = panel.content;
+  console.log(panelResults);
   try {
     let replacements: Array<number> = [];
     content = content.replace(matcher, function (match, panelIndex) {
@@ -100,28 +101,28 @@ export async function evalSQLPanel(
     );
   }
 
-  if (panel.sql.type === 'in-memory') {
-    let sql = (window as any).SQL;
-    if (!sql) {
-      sql = (window as any).SQL = await (window as any).initSqlJs({
-        locateFile: (file: string) => `${file}`,
-      });
+  let sql = (window as any).SQL;
+  if (!sql) {
+    while (!(window as any).initSqlJs) {
+      console.log('Waiting for SQL.js to load');
+      await new Promise((r) => setTimeout(r, 1000));
     }
-
-    const db = new sql.Database();
-    let res: any;
-    res = db.exec(content)[0];
-
-    return res.values.map((row: Array<any>) => {
-      const formattedRow: { [k: string]: any } = {};
-      res.columns.forEach((c: string, i: number) => {
-        formattedRow[c] = row[i];
-      });
-      return formattedRow;
+    sql = (window as any).SQL = await (window as any).initSqlJs({
+      locateFile: (file: string) => `${file}`,
     });
   }
 
-  throw new Error(`Unknown SQL type: '${panel.sql.type}'`);
+  const db = new sql.Database();
+  let res: any;
+  res = db.exec(content)[0];
+
+  return res.values.map((row: Array<any>) => {
+    const formattedRow: { [k: string]: any } = {};
+    res.columns.forEach((c: string, i: number) => {
+      formattedRow[c] = row[i];
+    });
+    return formattedRow;
+  });
 }
 
 export function SQLPanelDetails({
