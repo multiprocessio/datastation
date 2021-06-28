@@ -94,14 +94,24 @@ function valueAsString(value: any) {
   }
 }
 
-function download(filename: string, value: any) {
+function download(filename: string, value: any, isChart = false) {
   // SOURCE: https://stackoverflow.com/a/18197341/1507139
   const element = document.createElement('a');
-  const [text, mimeType, extension] = valueAsString(value);
-  element.setAttribute(
-    'href',
-    `data:${mimeType};charset=utf-8,` + encodeURIComponent(text)
-  );
+  let [dataURL, mimeType, extension] = ['', '', ''];
+  if (isChart) {
+    if (!value) {
+      console.error('Invalid context ref');
+      return;
+    }
+    mimeType = 'image/png';
+    dataURL = (value as HTMLCanvasElement).toDataURL(mimeType, 1.0);
+    extension = '.png';
+  } else {
+    let text;
+    [text, mimeType, extension] = valueAsString(value);
+    dataURL = `data:${mimeType};charset=utf-8,` + encodeURIComponent(text);
+  }
+  element.setAttribute('href', dataURL);
   element.setAttribute('download', filename + extension);
   element.style.display = 'none';
   document.body.appendChild(element);
@@ -195,8 +205,9 @@ export function Panel({
 
   return (
     <div
-      className={`panel ${hidden ? 'panel--hidden' : ''} ${panel.type === 'file' ? 'panel--empty' : ''
-        }`}
+      className={`panel ${hidden ? 'panel--hidden' : ''} ${
+        panel.type === 'file' ? 'panel--empty' : ''
+      }`}
       tabIndex={1001}
       ref={panelRef}
       onKeyDown={keyboardShortcuts}
@@ -246,8 +257,8 @@ export function Panel({
               {results.loading
                 ? 'Loading'
                 : results.lastRun
-                  ? 'Last run ' + results.lastRun
-                  : 'Run to apply changes'}
+                ? 'Last run ' + results.lastRun
+                : 'Run to apply changes'}
             </span>
             <span title="Evaluate Panel (Ctrl-Enter)">
               <Button
@@ -262,7 +273,15 @@ export function Panel({
               <Button
                 icon
                 disabled={!results.lastRun}
-                onClick={() => download(panel.name, results.value)}
+                onClick={() =>
+                  download(
+                    panel.name,
+                    panel.type === 'graph'
+                      ? panelRef.current.querySelector('canvas')
+                      : results.value,
+                    panel.type === 'graph'
+                  )
+                }
               >
                 file_download
               </Button>
