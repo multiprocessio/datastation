@@ -5,4 +5,4 @@ prepend "window.DS_CONFIG_DEBUG = false; window.DS_CONFIG_VERSION={arg0};" build
 yarn build-desktop
 prepend "global.DS_CONFIG_DEBUG = false; global.DS_CONFIG_VERSION={arg0};" build/desktop.js
 yarn electron-packager --overwrite --out=releases --build-version={arg0} .
-zip -r releases/{os}-{arch}-{version}.zip "releases/DataStation Community Edition-{os}-{arch}"
+zip -r releases/{os}-{arch}-{arg0}.zip "releases/DataStation Community Edition-{os}-{arch}"
