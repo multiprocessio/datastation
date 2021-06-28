@@ -18,9 +18,24 @@ export const MODE_FEATURES = {
   storeResults: MODE !== 'browser',
 };
 
-export const DEBUG = true;
-
 export const RPC_ASYNC_REQUEST = 'rpcAsyncRequest';
 export const RPC_ASYNC_RESPONSE = 'rpcAsyncResponse';
 
 export const VERSION = '0.0.1-alpha';
+
+function getConfig(v: string, _default: any) {
+  const key = 'DS_CONFIG_' + v;
+  let wg;
+  try {
+    wg = window as any;
+  } catch (e) {
+    wg = global as any;
+  }
+  if (key in wg) {
+    return wg[key] as any;
+  }
+
+  return _default;
+}
+
+export const DEBUG = getConfig('DEBUG', true);

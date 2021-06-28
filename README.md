@@ -27,6 +27,10 @@ The open-source app is supported on a best-effort basis. If you're
 interested in commercial support or to partner on the roadmap, please
 [get in touch](mailto:phil@multiprocess.io).
 
+## Contributing
+
+See [HACKING.md](HACKING.md).
+
 ## License
 
 This software is licensed under an Apache 2.0 license.
