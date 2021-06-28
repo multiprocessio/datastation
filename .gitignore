@@ -8,3 +8,4 @@ build
 electron/build
 yarn-error.log
 releases
+.results

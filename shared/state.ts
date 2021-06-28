@@ -10,7 +10,7 @@ export interface PanelResult {
   stdout: string;
 }
 export type IDDict<T> = { [k: string]: T };
-export type PanelResults = IDDict<Array<PanelResult>>;
+export type PanelResults = Array<Array<PanelResult>>;
 
 export type ConnectorInfoType = 'sql' | 'http';
 
