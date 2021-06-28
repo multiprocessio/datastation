@@ -424,3 +424,7 @@ header > div {
   color: #aaa;
   margin-bottom: 30px;
 }
+
+canvas {
+  background: white;
+}

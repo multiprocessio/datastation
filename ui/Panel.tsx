@@ -1,6 +1,8 @@
-import * as React from 'react';
+import * as CSV from 'papaparse';
 import circularSafeStringify from 'json-stringify-safe';
+import * as React from 'react';
 
+import { MODE_FEATURES } from '../shared/constants';
 import {
   ConnectorInfo,
   ProjectPage,
@@ -14,7 +16,6 @@ import {
   FilePanelInfo,
   PanelResult,
 } from '../shared/state';
-import { MODE_FEATURES } from '../shared/constants';
 
 import { GraphPanel, GraphPanelDetails } from './GraphPanel';
 import { evalHTTPPanel, HTTPPanelDetails } from './HTTPPanel';
@@ -72,12 +73,50 @@ export async function evalPanel(
   }
 }
 
-function previewValueAsString(value: any) {
+function valueAsString(value: any) {
   try {
-    return circularSafeStringify(value, null, 2);
+    if (
+      Array.isArray(value) &&
+      Object.keys(value[0]).every(
+        (k) => value === null || typeof value[0][k] !== 'object'
+      )
+    ) {
+      return [CSV.unparse(value), 'text/csv', '.csv'];
+    } else {
+      return [
+        circularSafeStringify(value, null, 2),
+        'application/json',
+        '.json',
+      ];
+    }
   } catch (e) {
-    return String(value);
+    return [String(value), 'text/plain', '.txt'];
   }
+}
+
+function download(filename: string, value: any, isChart = false) {
+  // SOURCE: https://stackoverflow.com/a/18197341/1507139
+  const element = document.createElement('a');
+  let [dataURL, mimeType, extension] = ['', '', ''];
+  if (isChart) {
+    if (!value) {
+      console.error('Invalid context ref');
+      return;
+    }
+    mimeType = 'image/png';
+    dataURL = (value as HTMLCanvasElement).toDataURL(mimeType, 1.0);
+    extension = '.png';
+  } else {
+    let text;
+    [text, mimeType, extension] = valueAsString(value);
+    dataURL = `data:${mimeType};charset=utf-8,` + encodeURIComponent(text);
+  }
+  element.setAttribute('href', dataURL);
+  element.setAttribute('download', filename + extension);
+  element.style.display = 'none';
+  document.body.appendChild(element);
+  element.click();
+  document.body.removeChild(element);
 }
 
 export function Panel({
@@ -139,7 +178,7 @@ export function Panel({
 
     if (previewableTypes.includes(panel.type)) {
       if (results && !results.exception) {
-        const resultsLines = previewValueAsString(results.value).split('\n');
+        const resultsLines = valueAsString(results.value)[0].split('\n');
         setPreview(resultsLines.slice(0, 50).join('\n'));
       }
     }
@@ -228,6 +267,23 @@ export function Panel({
                 type="primary"
               >
                 play_arrow
+              </Button>
+            </span>
+            <span title="Download Results">
+              <Button
+                icon
+                disabled={!results.lastRun}
+                onClick={() =>
+                  download(
+                    panel.name,
+                    panel.type === 'graph'
+                      ? panelRef.current.querySelector('canvas')
+                      : results.value,
+                    panel.type === 'graph'
+                  )
+                }
+              >
+                file_download
               </Button>
             </span>
             <span title="Hide Panel">
