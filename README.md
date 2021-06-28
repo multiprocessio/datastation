@@ -29,7 +29,8 @@ interested in commercial support or to partner on the roadmap, please
 
 ## Contributing
 
-See [HACKING.md](HACKING.md).
+See [HACKING.md](HACKING.md). Before starting on any feature, check in
+on [Discord](https://discord.gg/f2wQBc4bXX).
 
 ## License
 
