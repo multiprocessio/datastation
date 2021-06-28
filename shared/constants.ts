@@ -23,8 +23,19 @@ export const RPC_ASYNC_RESPONSE = 'rpcAsyncResponse';
 
 export const VERSION = '0.0.1-alpha';
 
-function getConfig(v: string, default: any): {
-  return (window || global as any)['DS_CONFIG_'+v];
+function getConfig(v: string, _default: any) {
+  const key = 'DS_CONFIG_'+v;
+  let wg;
+  try {
+    wg = window;
+  } catch (e) {
+    wg = global;
+  }
+  if (key in wg) {
+    return wg[key];
+  }
+
+  return _default;
 }
 
 export const DEBUG = getConfig('DEBUG', true);

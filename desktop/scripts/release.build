@@ -1,3 +1,5 @@
-prepend "(window as any).DS_CONFIG_DEBUG = false;" shared/constants.ts
+yarn build-ui
 yarn build-desktop
+prepend "global.DS_CONFIG_DEBUG = false;" build/desktop.js
+prepend "window.DS_CONFIG_DEBUG = false;" build/ui.js
 yarn electron-packager --overwrite --out=releases .
