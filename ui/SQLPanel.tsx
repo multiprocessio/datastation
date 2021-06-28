@@ -155,11 +155,13 @@ export function SQLPanelDetails({
               panel.sql.connectorIndex = +connectorIndex;
               updatePanel(panel);
             }}
-            nodefault
           >
             {connectors
               .map((c: ConnectorInfo, index: number) => {
-                if (c.type != 'sql') {
+                if (
+                  c.type !== 'sql' ||
+                  (c as SQLConnectorInfo).sql.type !== panel.sql.type
+                ) {
                   return null;
                 }
 

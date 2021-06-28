@@ -15,7 +15,6 @@ export function Select({
   disabled,
   label,
   className,
-  nodefault,
 }: {
   value: string;
   onChange: (value: string) => void;
@@ -23,7 +22,6 @@ export function Select({
   disabled?: boolean;
   label?: string;
   className?: string;
-  nodefault?: boolean;
 }) {
   let selectClass = 'select';
   if (className) {
@@ -46,7 +44,6 @@ export function Select({
       }
       disabled={disabled}
     >
-      {nodefault && <option label=" "></option>}
       {children}
     </select>
   );
