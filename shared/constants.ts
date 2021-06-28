@@ -21,9 +21,7 @@ export const MODE_FEATURES = {
 export const RPC_ASYNC_REQUEST = 'rpcAsyncRequest';
 export const RPC_ASYNC_RESPONSE = 'rpcAsyncResponse';
 
-export const VERSION = '0.0.1-alpha';
-
-function getConfig(v: string, _default: any) {
+function getConfig<T>(v: string, _default: T) {
   const key = 'DS_CONFIG_' + v;
   let wg;
   try {
@@ -32,10 +30,11 @@ function getConfig(v: string, _default: any) {
     wg = global as any;
   }
   if (key in wg) {
-    return wg[key] as any;
+    return wg[key] as T;
   }
 
   return _default;
 }
 
-export const DEBUG = getConfig('DEBUG', true);
+export const DEBUG = getConfig<Boolean>('DEBUG', true);
+export const VERSION = getConfig<string>('VERSION', 'development');

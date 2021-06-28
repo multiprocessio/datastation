@@ -36,3 +36,11 @@ yarn format
 ```
 yarn tsc
 ```
+
+## Building a release
+
+This needs to be done on each supported platform.
+
+```
+yarn release-desktop $version
+```

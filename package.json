@@ -1,7 +1,6 @@
 {
   "name": "datastation",
   "productName": "DataStation Community Edition",
-  "version": "0.0.1",
   "license": "Apache-2.0",
   "description": "The Data IDE for Developers",
   "author": "DataStation Authors",
