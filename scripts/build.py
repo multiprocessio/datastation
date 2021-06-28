@@ -12,9 +12,14 @@ IS_WINDOWS = os.name == 'nt'
 BUILTIN_VARIABLES = {
     'arch': {
         'x86_64': 'x64',
+        'amd64': 'x64',
         'aarch64': 'arm64',
-    }[platform.machine()],
-    'os': platform.system().lower(),
+    }[platform.machine().lower()],
+    'os': {
+        'darwin': 'darwin',
+        'linux': 'linux',
+        'windows': 'win32',
+    }[platform.system().lower()],
 }
 for i, arg in enumerate(sys.argv[2:]):
     BUILTIN_VARIABLES['arg'+str(i)] = arg

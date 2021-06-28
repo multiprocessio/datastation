@@ -1,7 +1,8 @@
 import * as React from 'react';
 
-import { SQLConnectorInfo } from '../shared/state';
+import { SQLConnectorInfo, SQLConnectorInfoType } from '../shared/state';
 import { Input } from './component-library/Input';
+import { Select } from './component-library/Select';
 
 export function SQLConnector({
   connector,
@@ -22,6 +23,19 @@ export function SQLConnector({
 
   return (
     <React.Fragment>
+      <div className="form-row">
+        <Select
+          label="Vendor"
+          value={connector.sql.type}
+          onChange={(value: string) => {
+            connector.sql.type = value as SQLConnectorInfoType;
+            updateConnector(connector);
+          }}
+        >
+          <option value="postgres">PostgreSQL</option>
+          <option value="mysql">MySQL</option>
+        </Select>
+      </div>
       <div className="form-row">
         <Input
           label="Address"
