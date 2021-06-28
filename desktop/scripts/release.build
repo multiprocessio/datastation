@@ -1,0 +1,3 @@
+prepend "(window as any).DS_CONFIG_DEBUG = false;" shared/constants.ts
+yarn build-desktop
+yarn electron-packager --overwrite --out=releases .

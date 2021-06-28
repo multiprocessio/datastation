@@ -72,6 +72,12 @@ for command in script:
         with open(to, 'a') as to:
             to.write('\n'+what)
         continue
+    elif line[0] == 'prepend':
+        what = line[1]
+        to = line[2]
+        with open(to, 'rw') as to:
+            to.write(what+'\n'+to.read())
+        continue
 
     line = ' '.join(line)
 
