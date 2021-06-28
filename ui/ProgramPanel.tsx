@@ -1,9 +1,10 @@
 import * as React from 'react';
 import circularSafeStringify from 'json-stringify-safe';
 
-import { ProgramPanelInfo } from '../shared/state';
+import { MODE } from '../shared/constants';
+import { PanelResult, ProgramPanelInfo } from '../shared/state';
 
-import { PanelResult } from './ProjectStore';
+import { asyncRPC } from './asyncRPC';
 import { Select } from './component-library/Select';
 
 export function evalProgramPanel(
@@ -12,6 +13,14 @@ export function evalProgramPanel(
 ): Promise<[any, string]> {
   const program = panel.program;
   const anyWindow = window as any;
+
+  if (MODE === 'desktop') {
+    return asyncRPC<ProgramPanelInfo, null, [Array<object>, string]>(
+      'evalProgram',
+      null,
+      panel
+    );
+  }
 
   // TODO: better deep copy
   anyWindow.DM_getPanel = (panelId: number) =>
