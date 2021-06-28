@@ -87,22 +87,28 @@ export const evalProgramHandler = {
         if (ppi.program.type === 'python') {
           const matcher = /, line ([1-9]*), in <module>/g;
           // Rewrite line numbers in traceback
-          e.message = e.message.replace(matcher, function (_, line) {
-            return `, line ${
-              line - PYTHON_PREAMBLE('').split('\n').length
-            }, in <module>`;
-          });
+          e.message = e.message.replace(
+            matcher,
+            function (_: string, line: string) {
+              return `, line ${
+                +line - PYTHON_PREAMBLE('').split('\n').length
+              }, in <module>`;
+            }
+          );
         } else if (ppi.program.type === 'javascript') {
           const matcher = RegExp(
             `${programTmp.path}:([1-9]*)`.replace('/', '\\/'),
             'g'
           );
           // Rewrite line numbers in traceback
-          e.message = e.message.replace(matcher, function (_, line) {
-            return `${
-              programTmp.path
-            }:${line - JAVASCRIPT_PREAMBLE('').split('\n').length}`;
-          });
+          e.message = e.message.replace(
+            matcher,
+            function (_: string, line: string) {
+              return `${programTmp.path}:${
+                +line - JAVASCRIPT_PREAMBLE('').split('\n').length
+              }`;
+            }
+          );
         }
 
         throw e;
