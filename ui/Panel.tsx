@@ -358,7 +358,7 @@ export function Panel({
                 />
               )}
               {exception && (
-                <div className="error">
+                <div className="alert alert-error">
                   <div>Error evaluating panel:</div>
                   <pre>
                     <code>{exception}</code>
