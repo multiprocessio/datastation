@@ -30,14 +30,14 @@ export function Pages({
 }) {
   const page: ProjectPage | null = state.pages[currentPage] || null;
   const [panelResultsByPage, setPanelResultsByPageInternal] =
-    React.useState<PanelResults>([]);
+    React.useState<PanelResults>({});
 
   function setPanelResultsByPage(results: PanelResults) {
-    if (MODE_FEATURES.storeResults && results[currentPage]) {
+    if (MODE_FEATURES.storeResults && results[page.id]) {
       asyncRPC<any, void, void>(
         'storeResults',
         null,
-        results[currentPage].map((r) => r.value)
+        results[page.id].map((r) => r.value)
       ).catch((e) => {
         console.error(e);
       });
@@ -48,18 +48,18 @@ export function Pages({
 
   // Reset all page results when project changes
   React.useEffect(() => {
-    setPanelResultsByPage([]);
+    setPanelResultsByPage({});
   }, [state.id]);
 
   // Make sure panelResults are initialized when page changes.
   React.useEffect(() => {
-    if (page && !panelResultsByPage[currentPage]) {
-      setPanelResultsByPage({ ...panelResultsByPage, [currentPage]: [] });
+    if (page && !panelResultsByPage[page.id]) {
+      setPanelResultsByPage({ ...panelResultsByPage, [page.id]: [] });
     }
   }, [page && page.id]);
 
   function setPanelResults(panelIndex: number, result: PanelResult) {
-    panelResultsByPage[currentPage][panelIndex] = result;
+    panelResultsByPage[page.id][panelIndex] = result;
     setPanelResultsByPage({ ...panelResultsByPage });
   }
 
@@ -84,7 +84,7 @@ export function Pages({
   }
 
   // Guard against effect that initializes this per page
-  if (!panelResultsByPage || !panelResultsByPage[currentPage]) {
+  if (!panelResultsByPage || !panelResultsByPage[page.id]) {
     return null;
   }
 
@@ -134,7 +134,7 @@ export function Pages({
         page={page}
         connectors={state.connectors}
         updatePage={updatePage}
-        panelResults={panelResultsByPage[currentPage]}
+        panelResults={panelResultsByPage[page.id]}
         setPanelResults={setPanelResults}
       />
     </div>
