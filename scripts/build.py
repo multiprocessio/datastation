@@ -4,9 +4,17 @@ will work on Windows and the *nixes.
 """
 
 import os
+import platform
 import sys
 
 IS_WINDOWS = os.name == 'nt'
+
+BUILTIN_VARIABLES = {
+    'arch': {
+        'x86_64': 'x64',
+    }[platform.machine()],
+    'os': platform.system().lower(),
+}
 
 with open(sys.argv[1]) as f:
     script = f.read().split('\n')
@@ -62,8 +70,14 @@ for command in script:
         continue
 
     line = lex_command(command)
+    for i, token in enumerate(line):
+        if i == 0:
+            continue
+        # Do basic variable substitition
+        line[i] = token.format(**BUILTIN_VARIABLES)
+
     print(' '.join(line))
-    
+
     if line[0] == 'cp' and IS_WINDOWS:
         line[0] = 'copy'
     elif line[0] == 'append':
@@ -82,6 +96,11 @@ for command in script:
             to.truncate()
         continue
 
+    # Quote arguments when passing back to system
+    for i, token in enumerate(line):
+        if i == 0: continue
+
+        line[i] = '"{}"'.format(token)
     line = ' '.join(line)
 
     os.system(line)
