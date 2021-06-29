@@ -5,13 +5,13 @@ import util from 'util';
 
 import { file as makeTmpFile } from 'tmp-promise';
 
-import { DISK_ROOT } from '../shared/constants';
 import { ProgramPanelInfo } from '../shared/state';
 import { parseArrayBuffer } from '../shared/text';
 
+import { DISK_ROOT, RESULTS_FILE } from './constants';
+
 const execPromise = util.promisify(exec);
 
-let TMP_RESULTS_FILE = path.join(DISK_ROOT, '.results');
 const JAVASCRIPT_PREAMBLE = (outFile: string) =>
   `
 const fs = require('fs');
@@ -21,7 +21,7 @@ function DM_getPanel(i) {
     return global.cache[i];
   }
  
-  global.cache = JSON.parse(fs.readFileSync('${TMP_RESULTS_FILE}'));
+  global.cache = JSON.parse(fs.readFileSync('${RESULTS_FILE}'));
   if (!global.cache) {
     return [];
   }
@@ -39,7 +39,7 @@ __GLOBAL = None
 def DM_getPanel(i):
   global __GLOBAL
   if __GLOBAL: return __GLOBAL[i]
-  with open('${TMP_RESULTS_FILE}') as f:
+  with open('${RESULTS_FILE}') as f:
     __GLOBAL = __DM_JSON.load(f)
   if not __GLOBAL: return []
   return __GLOBAL[i]
@@ -55,10 +55,6 @@ const PREAMBLE = {
 export const evalProgramHandler = {
   resource: 'evalProgram',
   handler: async function (_: string, ppi: ProgramPanelInfo) {
-    if (!TMP_RESULTS_FILE) {
-      return [];
-    }
-
     const programTmp = await makeTmpFile();
     const outputTmp = await makeTmpFile();
 

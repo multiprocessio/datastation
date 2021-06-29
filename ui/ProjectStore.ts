@@ -46,7 +46,7 @@ export interface ProjectStore {
   get: (projectId: string) => Promise<ProjectState>;
 }
 
-export function makeStore(mode: string, syncMillis: number = 5000) {
+export function makeStore(mode: string, syncMillis: number = 2000) {
   const storeClass = {
     desktop: DesktopIPCStore,
     browser: LocalStorageStore,
