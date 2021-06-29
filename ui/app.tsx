@@ -11,12 +11,12 @@ import {
   rawStateToObjects,
 } from '../shared/state';
 
+import { asyncRPC } from './asyncRPC';
 import { Pages } from './Pages';
 import { Connectors } from './Connectors';
 import { makeStore, ProjectContext, ProjectStore } from './ProjectStore';
 import { Button } from './component-library/Button';
 import { Input } from './component-library/Input';
-import { Modal } from './component-library/Modal';
 
 function getQueryParameter(param: String) {
   const query = window.location.search.substring(1);
@@ -64,9 +64,11 @@ function useProjectState(
   store: ProjectStore,
   shareState: ProjectState | undefined
 ): [ProjectState, (d: ProjectState) => void] {
-  const [state, setProjectState] = React.useState<ProjectState>(
-    new ProjectState()
-  );
+  const [state, setProjectState] = React.useState<ProjectState>(null);
+
+  const [previousProjectId, setPreviousProjectId] = React.useState('');
+  const isNewProject =
+    projectId && previousProjectId === '' && projectId !== previousProjectId;
 
   function setState(newState: ProjectState) {
     store.update(projectId, newState);
@@ -84,11 +86,13 @@ function useProjectState(
       let state;
       try {
         let rawState = await store.get(projectId);
-        if (!rawState) {
+        console.log(rawState);
+        if (!rawState && !isNewProject) {
           throw new Error();
         } else {
           state = rawStateToObjects(rawState);
         }
+        console.log(state);
       } catch (e) {
         if (MODE_FEATURES.useDefaultProject && projectId === 'default') {
           state = DEFAULT_PROJECT;
@@ -100,6 +104,7 @@ function useProjectState(
       state.projectName = projectId;
       state.lastVersion = VERSION;
       setProjectState(state);
+      setPreviousProjectId(projectId);
     }
 
     if (projectId) {
@@ -113,7 +118,9 @@ function useProjectState(
 function App() {
   const shareState = getShareState();
   const [projectId, setProjectId] = React.useState(
-    (shareState && shareState.id) || getQueryParameter('project') || 'default'
+    (shareState && shareState.id) ||
+      getQueryParameter('project') ||
+      (MODE_FEATURES.useDefaultProject ? 'default' : '')
   );
 
   const store = makeStore(MODE);
@@ -151,7 +158,7 @@ function App() {
 
   const [projectNameTmp, setProjectNameTmp] = React.useState('');
 
-  if (!state) {
+  if (!state && projectId) {
     return <span>Loading</span>;
   }
 
@@ -185,21 +192,13 @@ function App() {
     updateProjectState({ ...state });
   }
 
+  async function openProject() {
+    await asyncRPC<void, void, void>('openProject');
+    window.close();
+  }
+
   return (
     <ProjectContext.Provider value={state}>
-      <Modal open={Boolean(state.projectName)}>
-        <p>Name this project to get started.</p>
-        <div className="form-row">
-          <Input
-            value={projectNameTmp}
-            label="Project name"
-            onChange={(v) => setProjectNameTmp(v)}
-          />
-        </div>
-        <div className="form-row">
-          <Button onClick={() => setProjectId(projectNameTmp)}>Save</Button>
-        </div>
-      </Modal>
       <div className={`app app--${MODE}`}>
         {MODE_FEATURES.appHeader && (
           <header>
@@ -263,7 +262,7 @@ function App() {
           </header>
         )}
         <main>
-          {MODE_FEATURES.connectors && (
+          {projectId && MODE_FEATURES.connectors && (
             <Connectors
               state={state}
               updateConnector={updateConnector}
@@ -272,14 +271,43 @@ function App() {
             />
           )}
           <div className="main-body">
-            <Pages
-              state={state}
-              updatePage={updatePage}
-              addPage={addPage}
-              deletePage={deletePage}
-              currentPage={currentPage}
-              setCurrentPage={setCurrentPage}
-            />
+            {!projectId ? (
+              <div className="project-name">
+                <h1>New Project</h1>
+                <p>Pick a name for this project to get started.</p>
+                <div className="form-row">
+                  <Input
+                    value={projectNameTmp}
+                    label="Project name"
+                    onChange={(v) => setProjectNameTmp(v)}
+                  />
+                </div>
+                <div className="form-row">
+                  <Button
+                    type="primary"
+                    onClick={() => setProjectId(projectNameTmp)}
+                  >
+                    Save
+                  </Button>
+                </div>
+                <div className="project-existing">
+                  <h2>Load Project</h2>
+                  <p>Or open an existing project.</p>
+                  <div className="form-row">
+                    <Button onClick={openProject}>Open</Button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <Pages
+                state={state}
+                updatePage={updatePage}
+                addPage={addPage}
+                deletePage={deletePage}
+                currentPage={currentPage}
+                setCurrentPage={setCurrentPage}
+              />
+            )}
             <div className="version">Version {VERSION}</div>
           </div>
         </main>

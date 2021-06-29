@@ -5,9 +5,10 @@ import util from 'util';
 
 import { file as makeTmpFile } from 'tmp-promise';
 
-import { DISK_ROOT, RESULTS_FILE } from '../shared/constants';
 import { ProgramPanelInfo } from '../shared/state';
 import { parseArrayBuffer } from '../shared/text';
+
+import { DISK_ROOT, RESULTS_FILE } from './constants';
 
 const execPromise = util.promisify(exec);
 

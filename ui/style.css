@@ -444,3 +444,24 @@ canvas {
   border: 1px solid #ccc;
   padding: 15px;
 }
+
+.project-name {
+  background: white;
+  border: 1px solid #ccc;
+  padding: 15px;
+  margin: 15px auto;
+  width: 500px;
+}
+
+.project-name .input,
+.project-name .input input,
+.project-name .button {
+  width: 100%;
+  padding: 15px;
+}
+
+.project-existing {
+  border-top: 1px solid #ccc;
+  padding-top: 15px;
+  margin-top: 15px;
+}
