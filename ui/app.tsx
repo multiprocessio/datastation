@@ -121,8 +121,8 @@ function App() {
   const shareState = getShareState();
   const [projectId, setProjectId] = React.useState(
     (shareState && shareState.id) ||
-    getQueryParameter('project') ||
-    (MODE_FEATURES.useDefaultProject ? DEFAULT_PROJECT.projectName : '')
+      getQueryParameter('project') ||
+      (MODE_FEATURES.useDefaultProject ? DEFAULT_PROJECT.projectName : '')
   );
 
   const store = makeStore(MODE);
@@ -231,7 +231,7 @@ function App() {
                         If you make changes, you will need to click "Share"
                         again to get a new URL.
                       </p>
-                      <Input readOnly value={shareURL} onChange={() => { }} />
+                      <Input readOnly value={shareURL} onChange={() => {}} />
                       <p>
                         <a href="https://tinyurl.com/app">TinyURL</a> is a good
                         service for shortening these URLs correctly, some other
