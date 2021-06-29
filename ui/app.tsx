@@ -16,6 +16,7 @@ import { Connectors } from './Connectors';
 import { makeStore, ProjectContext, ProjectStore } from './ProjectStore';
 import { Button } from './component-library/Button';
 import { Input } from './component-library/Input';
+import { Modal } from './component-library/Modal';
 
 function getQueryParameter(param: String) {
   const query = window.location.search.substring(1);
@@ -63,7 +64,9 @@ function useProjectState(
   store: ProjectStore,
   shareState: ProjectState | undefined
 ): [ProjectState, (d: ProjectState) => void] {
-  const [state, setProjectState] = React.useState<ProjectState>(null);
+  const [state, setProjectState] = React.useState<ProjectState>(
+    new ProjectState()
+  );
 
   function setState(newState: ProjectState) {
     store.update(projectId, newState);
@@ -82,18 +85,26 @@ function useProjectState(
       try {
         let rawState = await store.get(projectId);
         if (!rawState) {
-          state = DEFAULT_PROJECT;
+          throw new Error();
         } else {
           state = rawStateToObjects(rawState);
         }
       } catch (e) {
-        console.error(e);
-        state = DEFAULT_PROJECT;
+        if (MODE_FEATURES.useDefaultProject && projectId === 'default') {
+          state = DEFAULT_PROJECT;
+        } else {
+          console.error(e);
+        }
       }
+
+      state.projectName = projectId;
+      state.lastVersion = VERSION;
       setProjectState(state);
     }
 
-    fetch();
+    if (projectId) {
+      fetch();
+    }
   }, [projectId]);
 
   return [state, setState];
@@ -127,16 +138,20 @@ function App() {
     setShareURL(domain + '/?share=' + compressed);
   }
 
-  // Set body overflow once on init
   React.useEffect(() => {
-    document.title = state.projectName;
+    if (state && state.projectName) {
+      document.title = state.projectName;
+    }
+
+    // Set body overflow once on init
     if (MODE_FEATURES.noBodyYOverflow) {
       document.body.style.overflowY = 'hidden';
     }
-  });
+  }, [state && state.projectName]);
+
+  const [projectNameTmp, setProjectNameTmp] = React.useState('');
 
   if (!state) {
-    // Loading
     return <span>Loading</span>;
   }
 
@@ -172,6 +187,19 @@ function App() {
 
   return (
     <ProjectContext.Provider value={state}>
+      <Modal open={Boolean(state.projectName)}>
+        <p>Name this project to get started.</p>
+        <div className="form-row">
+          <Input
+            value={projectNameTmp}
+            label="Project name"
+            onChange={(v) => setProjectNameTmp(v)}
+          />
+        </div>
+        <div className="form-row">
+          <Button onClick={() => setProjectId(projectNameTmp)}>Save</Button>
+        </div>
+      </Modal>
       <div className={`app app--${MODE}`}>
         {MODE_FEATURES.appHeader && (
           <header>

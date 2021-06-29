@@ -19,6 +19,7 @@ export const MODE_FEATURES = {
   corsOnly: MODE === 'browser',
   noBodyYOverflow: MODE !== 'browser',
   storeResults: MODE !== 'browser',
+  useDefaultProject: MODE === 'browser',
 };
 
 export const RPC_ASYNC_REQUEST = 'rpcAsyncRequest';
@@ -43,5 +44,5 @@ function getConfig<T>(v: string, _default: T) {
   return _default;
 }
 
-export const DEBUG = getConfig<Boolean>('DEBUG', true);
+export const DEBUG = getConfig<boolean>('DEBUG', true);
 export const VERSION = getConfig<string>('VERSION', 'development');

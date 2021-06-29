@@ -36,7 +36,7 @@ export const storeHandlers = [
   },
 ];
 
-async function ensureFile(f: string) {
+export async function ensureFile(f: string) {
   await fs.mkdir(DISK_ROOT, { recursive: true });
   return path.join(DISK_ROOT, f);
 }
