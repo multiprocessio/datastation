@@ -1,15 +1,17 @@
-import fs from 'fs/promises';
-import util from 'util';
 import { exec } from 'child_process';
+import fs from 'fs/promises';
+import path from 'path';
+import util from 'util';
 
 import { file as makeTmpFile } from 'tmp-promise';
 
+import { DISK_ROOT } from '../shared/constants';
 import { ProgramPanelInfo } from '../shared/state';
 import { parseArrayBuffer } from '../shared/text';
 
 const execPromise = util.promisify(exec);
 
-let TMP_RESULTS_FILE = '.results';
+let TMP_RESULTS_FILE = path.join(DISK_ROOT, '.results');
 const JAVASCRIPT_PREAMBLE = (outFile: string) =>
   `
 const fs = require('fs');
@@ -48,16 +50,6 @@ def DM_setPanel(v):
 const PREAMBLE = {
   javascript: JAVASCRIPT_PREAMBLE,
   python: PYTHON_PREAMBLE,
-};
-
-export const storeResultsHandler = {
-  resource: 'storeResults',
-  handler: function (_: string, results: any) {
-    if (!results) {
-      return;
-    }
-    return fs.writeFile(TMP_RESULTS_FILE, JSON.stringify(results));
-  },
 };
 
 export const evalProgramHandler = {
@@ -119,5 +111,3 @@ export const evalProgramHandler = {
     }
   },
 };
-
-export const programHandlers = [storeResultsHandler, evalProgramHandler];
