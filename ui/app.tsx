@@ -100,10 +100,9 @@ function useProjectState(
 }
 
 function App() {
-  // TODO: projectId needs to come from opened project.
   const shareState = getShareState();
   const [projectId, setProjectId] = React.useState(
-    (shareState && shareState.id) || 'default'
+    (shareState && shareState.id) || getQueryParameter('project') || 'default'
   );
 
   const store = makeStore(MODE);
@@ -130,6 +129,7 @@ function App() {
 
   // Set body overflow once on init
   React.useEffect(() => {
+    document.title = state.projectName;
     if (MODE_FEATURES.noBodyYOverflow) {
       document.body.style.overflowY = 'hidden';
     }

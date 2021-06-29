@@ -1,4 +1,4 @@
-import * as path from 'path';
+import path from 'path';
 
 import { app, BrowserWindow, ipcMain } from 'electron';
 
@@ -8,6 +8,8 @@ import { registerRPCHandlers } from './rpc';
 import { evalSQLHandler } from './sql';
 import { evalHTTPHandler } from './http';
 import { evalProgramHandler } from './program';
+
+const project = process.argv[1];
 
 app.whenReady().then(() => {
   const preload = path.join(__dirname, 'preload.js');
@@ -24,7 +26,7 @@ app.whenReady().then(() => {
     // In addition to removing the menu on Windows/Linux this also disables Chrome devtools.
     win.removeMenu();
   }
-  win.loadFile(path.join(__dirname, 'index.html'));
+  win.loadFile(path.join(__dirname, 'index.html?project=' + project));
 
   registerRPCHandlers(ipcMain, [
     ...storeHandlers,

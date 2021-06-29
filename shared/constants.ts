@@ -25,6 +25,8 @@ export const RPC_ASYNC_REQUEST = 'rpcAsyncRequest';
 export const RPC_ASYNC_RESPONSE = 'rpcAsyncResponse';
 
 export const DISK_ROOT = path.join(os.homedir(), '.datastation');
+export const PROJECT_EXTENSION = '.dsproj';
+export const RESULTS_FILE = '.results';
 
 function getConfig<T>(v: string, _default: T) {
   const key = 'DS_CONFIG_' + v;
