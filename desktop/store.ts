@@ -33,7 +33,8 @@ export const storeHandlers = [
         return;
       }
       const fileName = await ensureFile(RESULTS_FILE);
-      return fs.writeFile(fileName, JSON.stringify(results));
+      await fs.writeFile(fileName, JSON.stringify(results));
+      console.log('Project synced');
     },
   },
 ];

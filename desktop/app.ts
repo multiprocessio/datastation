@@ -22,7 +22,7 @@ import { evalProgramHandler } from './program';
 
 const dsprojFlag = '--dsproj';
 
-async function openProject() {
+async function openProject(win: BrowserWindow) {
   const { filePaths } = await dialog.showOpenDialog({
     properties: ['openFile'],
     defaultPath: DISK_ROOT,
@@ -34,14 +34,9 @@ async function openProject() {
     ],
   });
   if (filePaths.length) {
-    let cmd = process.argv[0];
-    let args = [dsprojFlag, filePaths[0]];
-    if (cmd.toLowerCase().endsWith('electron')) {
-      cmd = 'yarn';
-      args = ['start-desktop', ...args];
-    }
-    console.log(`Spawning: "${cmd} ${args.join(' ')}"`);
-    spawn(cmd, args);
+    win.loadURL(
+      'file://' + path.join(__dirname, 'index.html?project=' + filePaths[0])
+    );
   }
 }
 
@@ -137,7 +132,7 @@ app.whenReady().then(async () => {
     evalProgramHandler,
     {
       resource: 'openProject',
-      handler: (_1: string, _2: any) => openProject(),
+      handler: (_1: string, _2: any) => openProject(win),
     },
   ]);
 });
