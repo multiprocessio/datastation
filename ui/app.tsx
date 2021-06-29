@@ -75,6 +75,10 @@ function useProjectState(
     setProjectState(newState);
   }
 
+  const isDefault =
+    MODE_FEATURES.useDefaultProject &&
+    projectId === DEFAULT_PROJECT.projectName;
+
   // Re-read state when projectId changes
   React.useEffect(() => {
     if (shareState) {
@@ -86,15 +90,13 @@ function useProjectState(
       let state;
       try {
         let rawState = await store.get(projectId);
-        console.log(rawState);
-        if (!rawState && !isNewProject) {
+        if (!rawState && (!isNewProject || isDefault)) {
           throw new Error();
         } else {
           state = rawStateToObjects(rawState);
         }
-        console.log(state);
       } catch (e) {
-        if (MODE_FEATURES.useDefaultProject && projectId === 'default') {
+        if (isDefault) {
           state = DEFAULT_PROJECT;
         } else {
           console.error(e);
@@ -120,7 +122,7 @@ function App() {
   const [projectId, setProjectId] = React.useState(
     (shareState && shareState.id) ||
       getQueryParameter('project') ||
-      (MODE_FEATURES.useDefaultProject ? 'default' : '')
+      (MODE_FEATURES.useDefaultProject ? DEFAULT_PROJECT.projectName : '')
   );
 
   const store = makeStore(MODE);
@@ -285,6 +287,7 @@ function App() {
                 <div className="form-row">
                   <Button
                     type="primary"
+                    disabled={!projectNameTmp}
                     onClick={() => setProjectId(projectNameTmp)}
                   >
                     Save

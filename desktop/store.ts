@@ -40,11 +40,11 @@ export const storeHandlers = [
 
 export function ensureProjectFile(projectId: string) {
   const ext = projectId.split('.').pop();
-  if (projectId.endsWith(ext)) {
+  if (ext !== projectId && ext && projectId.endsWith(ext)) {
     return ensureFile(projectId);
   }
 
-  return ensureFile('.' + PROJECT_EXTENSION);
+  return ensureFile(projectId + '.' + PROJECT_EXTENSION);
 }
 
 export async function ensureFile(f: string) {

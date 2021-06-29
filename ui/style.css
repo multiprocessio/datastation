@@ -154,12 +154,22 @@ label.select select {
   padding: 0;
 }
 
+.button:not(.material-icons):disabled,
+.button:not(.material-icons):disabled:hover {
+  background: #ccc;
+  color: #777;
+  cursor: not-allowed;
+  pointer-events: all !important;
+}
+
 .button.button--primary.material-icons {
   color: #9f04ff;
 }
 
 .button.material-icons:disabled,
 .button.material-icons:disabled:hover {
+  cursor: not-allowed;
+  pointer-events: all !important;
   color: #ccc;
 }
 
