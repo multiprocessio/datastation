@@ -1,6 +1,7 @@
 import * as uuid from 'uuid';
 
 import { mergeDeep } from './merge';
+import { VERSION } from './constants';
 
 export interface PanelResult {
   exception?: string;
@@ -259,15 +260,21 @@ export class ProjectState {
   projectName: string;
   connectors: Array<ConnectorInfo>;
   id: string;
+  originalVersion: string;
+  lastVersion: string;
 
   constructor(
     projectName?: string,
     pages?: Array<ProjectPage>,
-    connectors?: Array<ConnectorInfo>
+    connectors?: Array<ConnectorInfo>,
+    originalVersion?: string,
+    lastVersion?: string
   ) {
     this.pages = pages || [];
     this.projectName = projectName || '';
     this.connectors = connectors || [];
+    this.originalVersion = originalVersion || VERSION;
+    this.lastVersion = lastVersion || VERSION;
     this.id = uuid.v4();
   }
 }

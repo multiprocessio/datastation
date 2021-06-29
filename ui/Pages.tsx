@@ -46,11 +46,6 @@ export function Pages({
     setPanelResultsByPageInternal(results);
   }
 
-  // Reset all page results when project changes
-  React.useEffect(() => {
-    setPanelResultsByPage({});
-  }, [state.id]);
-
   // Make sure panelResults are initialized when page changes.
   React.useEffect(() => {
     if (page && !panelResultsByPage[page.id]) {

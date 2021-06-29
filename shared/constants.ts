@@ -1,6 +1,3 @@
-import os from 'os';
-import path from 'path';
-
 export const APP_NAME = 'DataStation Community Edition';
 
 let IS_DESKTOP_APP = false;
@@ -19,12 +16,11 @@ export const MODE_FEATURES = {
   corsOnly: MODE === 'browser',
   noBodyYOverflow: MODE !== 'browser',
   storeResults: MODE !== 'browser',
+  useDefaultProject: MODE === 'browser',
 };
 
 export const RPC_ASYNC_REQUEST = 'rpcAsyncRequest';
 export const RPC_ASYNC_RESPONSE = 'rpcAsyncResponse';
-
-export const DISK_ROOT = path.join(os.homedir(), '.datastation');
 
 function getConfig<T>(v: string, _default: T) {
   const key = 'DS_CONFIG_' + v;
@@ -41,5 +37,5 @@ function getConfig<T>(v: string, _default: T) {
   return _default;
 }
 
-export const DEBUG = getConfig<Boolean>('DEBUG', true);
+export const DEBUG = getConfig<boolean>('DEBUG', true);
 export const VERSION = getConfig<string>('VERSION', 'development');
