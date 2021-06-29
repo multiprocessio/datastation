@@ -7,7 +7,7 @@ import { storeHandlers } from './store';
 import { registerRPCHandlers } from './rpc';
 import { evalSQLHandler } from './sql';
 import { evalHTTPHandler } from './http';
-import { programHandlers } from './program';
+import { evalProgramHandler } from './program';
 
 app.whenReady().then(() => {
   const preload = path.join(__dirname, 'preload.js');
@@ -30,7 +30,7 @@ app.whenReady().then(() => {
     ...storeHandlers,
     evalSQLHandler,
     evalHTTPHandler,
-    ...programHandlers,
+    evalProgramHandler,
   ]);
 });
 
