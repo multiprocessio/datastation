@@ -25,7 +25,7 @@ function getQueryParameter(param: String) {
   for (let i = 0; i < vars.length; i++) {
     const pair = vars[i].split('=');
     if (pair[0] === param) {
-      return pair[1];
+      return decodeURIComponent(pair[1]);
     }
   }
 
@@ -196,7 +196,6 @@ function App() {
 
   async function openProject() {
     await asyncRPC<void, void, void>('openProject');
-    window.close();
   }
 
   return (
@@ -290,11 +289,10 @@ function App() {
                     disabled={!projectNameTmp}
                     onClick={() => setProjectId(projectNameTmp)}
                   >
-                    {projectNameTmp ? 'Go!' : 'Waiting for a name...'}
+                    {projectNameTmp ? 'Go!' : 'Pick a name'}
                   </Button>
                 </div>
                 <div className="project-existing">
-                  <h2>Load Project</h2>
                   <p>Or open an existing project.</p>
                   <div className="form-row">
                     <Button onClick={openProject}>Open</Button>
