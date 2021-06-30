@@ -25,7 +25,7 @@ export async function evalSQLPanel(
   let content = panel.content;
   try {
     let replacements: Array<number> = [];
-    content = content.replace(matcher, function(match, panelIndex) {
+    content = content.replace(matcher, function (match, panelIndex) {
       replacements.push(+panelIndex);
       return `t${replacements.length - 1}`;
     });
@@ -36,7 +36,7 @@ export async function evalSQLPanel(
     let ctePrefix = '';
     replacements.forEach((panelIndex: number, tableIndex: number) => {
       const results = panelResults[panelIndex];
-      if (results.exception || results.value.length === 0) {
+      if (!results || results.exception || results.value.length === 0) {
         // TODO: figure out how to query empty panels. (How to resolve column names for SELECT?)
         throw new Error('Cannot query empty results in panel ${panelIndex}');
       }

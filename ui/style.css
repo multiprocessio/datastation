@@ -356,6 +356,11 @@ header > div {
   height: 100%;
 }
 
+.panel-out .button:disabled {
+  background: transparent;
+  color: white;
+}
+
 .panel--empty .panel-body {
   display: none;
 }
