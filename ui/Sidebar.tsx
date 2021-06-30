@@ -14,7 +14,7 @@ export function Sidebar({ children }: { children: React.ReactNode }) {
           className="flex-right"
           onClick={() => setExpanded(!expanded)}
         >
-          keyboard_arrow_right
+          {expanded ? 'keyboard_arrow_left' : 'keyboard_arrow_right'}
         </Button>
       </div>
       {expanded && children}
