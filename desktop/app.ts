@@ -1,5 +1,4 @@
 import path from 'path';
-import { spawn } from 'child_process';
 
 import {
   app,
@@ -7,40 +6,21 @@ import {
   Menu,
   MenuItemConstructorOptions,
   ipcMain,
-  dialog,
   shell,
 } from 'electron';
 
-import { APP_NAME, DEBUG } from '../shared/constants';
+import { APP_NAME, DEBUG, SITE_ROOT } from '../shared/constants';
 
-import { DISK_ROOT, PROJECT_EXTENSION } from './constants';
-import { storeHandlers, ensureFile } from './store';
+import { DSPROJ_FLAG } from './constants';
+import { storeHandlers } from './store';
 import { registerRPCHandlers } from './rpc';
 import { evalSQLHandler } from './sql';
 import { evalHTTPHandler } from './http';
 import { evalProgramHandler } from './program';
+import { openProject, getOpenProjectHandler } from './project';
+import { loadSettings } from './settings';
 
-const dsprojFlag = '--dsproj';
-
-async function openProject(win: BrowserWindow) {
-  const { filePaths } = await dialog.showOpenDialog({
-    properties: ['openFile'],
-    defaultPath: DISK_ROOT,
-    filters: [
-      {
-        name: 'DataStation Projects',
-        extensions: [PROJECT_EXTENSION],
-      },
-    ],
-  });
-  if (filePaths.length) {
-    win.loadURL(
-      'file://' + path.join(__dirname, 'index.html?project=' + filePaths[0])
-    );
-  }
-}
-
-const menuTemplate = [
+const menuTemplate = (win: BrowserWindow) => [
   ...(process.platform === 'darwin'
     ? [
         {
@@ -54,7 +34,7 @@ const menuTemplate = [
     submenu: [
       {
         label: 'Open Project',
-        click: openProject,
+        click: () => openProject(win),
       },
     ],
   },
@@ -64,8 +44,7 @@ const menuTemplate = [
     submenu: [
       {
         label: 'Documentation',
-        click: () =>
-          shell.openExternal('https://datastation.multiprocess.io/docs/'),
+        click: () => shell.openExternal(`${SITE_ROOT}/docs/`),
       },
       {
         label: 'Community',
@@ -107,17 +86,22 @@ app.whenReady().then(async () => {
 
   let project = '';
   for (let i = 0; i < process.argv.length; i++) {
-    if (process.argv[i] === dsprojFlag) {
+    if (process.argv[i] === DSPROJ_FLAG) {
       project = process.argv[i + 1];
       break;
     }
   }
 
-  // Make sure this file/path exists
-  await ensureFile('.settings');
+  const settings = await loadSettings();
+  if (!project) {
+    project = settings.lastProject;
+  } else {
+    settings.lastProject = project;
+  }
+  await settings.save();
 
   const menu = Menu.buildFromTemplate(
-    menuTemplate as MenuItemConstructorOptions[]
+    menuTemplate(win) as MenuItemConstructorOptions[]
   );
   Menu.setApplicationMenu(menu);
 
@@ -130,10 +114,8 @@ app.whenReady().then(async () => {
     evalSQLHandler,
     evalHTTPHandler,
     evalProgramHandler,
-    {
-      resource: 'openProject',
-      handler: (_1: string, _2: any) => openProject(win),
-    },
+    getOpenProjectHandler(win),
+    settings.getUpdateHandler(),
   ]);
 });
 

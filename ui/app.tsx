@@ -2,7 +2,13 @@ import * as pako from 'pako';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
-import { APP_NAME, VERSION, MODE, MODE_FEATURES } from '../shared/constants';
+import {
+  APP_NAME,
+  SITE_ROOT,
+  VERSION,
+  MODE,
+  MODE_FEATURES,
+} from '../shared/constants';
 import {
   ProjectPage,
   ProjectState,
@@ -12,8 +18,11 @@ import {
 } from '../shared/state';
 
 import { asyncRPC } from './asyncRPC';
+import { ErrorBoundary } from './ErrorBoundary';
+import { Sidebar } from './Sidebar';
 import { Pages } from './Pages';
 import { Connectors } from './Connectors';
+import { Updates } from './Updates';
 import { makeStore, ProjectContext, ProjectStore } from './ProjectStore';
 import { Button } from './component-library/Button';
 import { Input } from './component-library/Input';
@@ -119,11 +128,20 @@ function useProjectState(
 
 function App() {
   const shareState = getShareState();
-  const [projectId, setProjectId] = React.useState(
+  const [projectId, setProjectIdInternal] = React.useState(
     (shareState && shareState.id) ||
       getQueryParameter('project') ||
       (MODE_FEATURES.useDefaultProject ? DEFAULT_PROJECT.projectName : '')
   );
+
+  function setProjectId(projectId: string) {
+    setProjectIdInternal(projectId);
+    return asyncRPC<{ lastProject: string }, void, void>(
+      'updateSettings',
+      null,
+      { lastProject: projectId }
+    );
+  }
 
   const store = makeStore(MODE);
   const [state, updateProjectState] = useProjectState(
@@ -252,10 +270,7 @@ function App() {
                     title="GitHub"
                   ></iframe>
                 </a>
-                <a
-                  href="https://datastation.multiprocess.io/#online-environment"
-                  target="_blank"
-                >
+                <a href={`${SITE_ROOT}/#online-environment`} target="_blank">
                   About
                 </a>
               </div>
@@ -264,12 +279,17 @@ function App() {
         )}
         <main>
           {projectId && MODE_FEATURES.connectors && (
-            <Connectors
-              state={state}
-              updateConnector={updateConnector}
-              addConnector={addConnector}
-              deleteConnector={deleteConnector}
-            />
+            <Sidebar>
+              <Connectors
+                state={state}
+                updateConnector={updateConnector}
+                addConnector={addConnector}
+                deleteConnector={deleteConnector}
+              />
+              <ErrorBoundary>
+                <Updates />
+              </ErrorBoundary>
+            </Sidebar>
           )}
           <div className="main-body">
             {!projectId ? (

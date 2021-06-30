@@ -15,29 +15,8 @@ export function Connectors({
   updateConnector: (n: number, dc: ConnectorInfo) => void;
   deleteConnector: (n: number) => void;
 }) {
-  const [expanded, setExpanded] = React.useState(true);
-  if (!expanded) {
-    return (
-      <div className="section connectors connectors--collapsed">
-        <div className="title vertical-align-center">
-          <span className="material-icons-outlined">manage_search</span>
-          <Button icon onClick={() => setExpanded(true)}>
-            keyboard_arrow_right
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="section connectors">
-      <div className="title vertical-align-center">
-        <span className="material-icons-outlined">manage_search</span>
-        Connectors
-        <Button icon className="flex-right" onClick={() => setExpanded(false)}>
-          keyboard_arrow_left
-        </Button>
-      </div>
+    <div className="connectors">
       {state.connectors?.map((dc: ConnectorInfo, i: number) => (
         <Connector
           connector={dc}

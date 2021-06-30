@@ -206,15 +206,21 @@ header > div {
   padding-bottom: 15px;
 }
 
-.connectors {
+.sidebar {
   border-right: 1px solid #ccc;
   background: white;
   flex: 0 0 275px;
   overflow-y: auto;
+  display: flex;
+  flex-direction: column;
 }
 
-.connectors--collapsed {
+.sidebar--collapsed {
   flex: auto;
+}
+
+.connectors {
+  flex: 1;
 }
 
 .connector {
