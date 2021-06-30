@@ -1,5 +1,4 @@
 import path from 'path';
-import { spawn } from 'child_process';
 
 import {
   app,
@@ -7,43 +6,19 @@ import {
   Menu,
   MenuItemConstructorOptions,
   ipcMain,
-  dialog,
   shell,
 } from 'electron';
 
 import { APP_NAME, DEBUG, SITE_ROOT } from '../shared/constants';
 
-import { DISK_ROOT, PROJECT_EXTENSION } from './constants';
-import { storeHandlers, ensureFile } from './store';
+import { DSPROJ_FLAG } from './constants';
+import { storeHandlers } from './store';
 import { registerRPCHandlers } from './rpc';
 import { evalSQLHandler } from './sql';
 import { evalHTTPHandler } from './http';
 import { evalProgramHandler } from './program';
-
-const dsprojFlag = '--dsproj';
-
-async function openProject() {
-  const { filePaths } = await dialog.showOpenDialog({
-    properties: ['openFile'],
-    defaultPath: DISK_ROOT,
-    filters: [
-      {
-        name: 'DataStation Projects',
-        extensions: [PROJECT_EXTENSION],
-      },
-    ],
-  });
-  if (filePaths.length) {
-    let cmd = process.argv[0];
-    let args = [dsprojFlag, filePaths[0]];
-    if (cmd.toLowerCase().endsWith('electron')) {
-      cmd = 'yarn';
-      args = ['start-desktop', ...args];
-    }
-    console.log(`Spawning: "${cmd} ${args.join(' ')}"`);
-    spawn(cmd, args);
-  }
-}
+import { openProject, openProjectHandler } from './project';
+import { loadSettings } from './settings';
 
 const menuTemplate = [
   ...(process.platform === 'darwin'
@@ -111,16 +86,19 @@ app.whenReady().then(async () => {
 
   let project = '';
   for (let i = 0; i < process.argv.length; i++) {
-    if (process.argv[i] === dsprojFlag) {
+    if (process.argv[i] === DSPROJ_FLAG) {
       project = process.argv[i + 1];
       break;
     }
   }
 
-  // Make sure this file/path exists
-  await ensureFile('.settings');
-
-  // TODO: write uuid as id to settings and send in /updates req
+  const settings = await loadSettings();
+  if (!project) {
+    project = settings.lastProject;
+  } else {
+    settings.lastProject = project;
+    await settings.save();
+  }
 
   const menu = Menu.buildFromTemplate(
     menuTemplate as MenuItemConstructorOptions[]
@@ -136,10 +114,7 @@ app.whenReady().then(async () => {
     evalSQLHandler,
     evalHTTPHandler,
     evalProgramHandler,
-    {
-      resource: 'openProject',
-      handler: (_1: string, _2: any) => openProject(),
-    },
+    openProjectHandler,
   ]);
 });
 

@@ -18,6 +18,8 @@ import {
 } from '../shared/state';
 
 import { asyncRPC } from './asyncRPC';
+import { ErrorBoundary } from './ErrorBoundary';
+import { Sidebar } from './Sidebar';
 import { Pages } from './Pages';
 import { Connectors } from './Connectors';
 import { Updates } from './Updates';
@@ -269,15 +271,17 @@ function App() {
         )}
         <main>
           {projectId && MODE_FEATURES.connectors && (
-            <React.Fragment>
+            <Sidebar>
               <Connectors
                 state={state}
                 updateConnector={updateConnector}
                 addConnector={addConnector}
                 deleteConnector={deleteConnector}
               />
-              <Updates />
-            </React.Fragment>
+              <ErrorBoundary>
+                <Updates />
+              </ErrorBoundary>
+            </Sidebar>
           )}
           <div className="main-body">
             {!projectId ? (
@@ -297,7 +301,7 @@ function App() {
                     disabled={!projectNameTmp}
                     onClick={() => setProjectId(projectNameTmp)}
                   >
-                    {projectNameTmp ? 'Go!' : 'Waiting for a name...'}
+                    {projectNameTmp ? 'Go!' : 'Pick a name'}
                   </Button>
                 </div>
                 <div className="project-existing">
