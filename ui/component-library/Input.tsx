@@ -2,6 +2,7 @@ import * as React from 'react';
 
 export function Input({
   type,
+  placeholder,
   className,
   onChange,
   value,
@@ -12,6 +13,7 @@ export function Input({
   readOnly,
 }: {
   type?: 'text' | 'number' | 'email' | 'password';
+  placeholder?: string;
   className?: string;
   onChange: (value: string) => void;
   value: string;
@@ -35,6 +37,7 @@ export function Input({
       value={value}
       min={min}
       max={max}
+      placeholder={placeholder}
     />
   );
 

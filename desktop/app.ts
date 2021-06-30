@@ -114,7 +114,7 @@ app.whenReady().then(async () => {
     evalSQLHandler,
     evalHTTPHandler,
     evalProgramHandler,
-    openProjectHandler,
+    getOpenProjectHandler(win),
     settings.getUpdateHandler(),
   ]);
 });
