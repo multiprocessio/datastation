@@ -8,10 +8,12 @@ export function PanelSourcePicker({
   value,
   onChange,
   panels,
+  currentPanel,
 }: {
   value: number;
   onChange: (n: number) => void;
   panels: Array<PanelInfo>;
+  currentPanel: string;
 }) {
   return (
     <Select
@@ -19,11 +21,15 @@ export function PanelSourcePicker({
       onChange={(value: string) => onChange(+value)}
       value={value.toString()}
     >
-      {panels.map((panel, i) => (
-        <option key={panel.id} value={i.toString()}>
-          [#{i}] {panel.name}
-        </option>
-      ))}
+      {panels
+        .map((panel, i) =>
+          panel.id === currentPanel ? null : (
+            <option key={panel.id} value={i.toString()}>
+              [#{i}] {panel.name}
+            </option>
+          )
+        )
+        .filter(Boolean)}
     </Select>
   );
 }

@@ -65,11 +65,6 @@ header a {
   counter-reset: line;
 }
 
-.editor #codeArea {
-  outline: none;
-  padding-left: 60px !important;
-}
-
 .editor pre {
   padding-left: 60px !important;
 }
@@ -354,6 +349,11 @@ header > div {
 .panel-preview {
   overflow: auto;
   height: 100%;
+}
+
+.panel-out .button:disabled {
+  background: transparent;
+  color: white;
 }
 
 .panel--empty .panel-body {

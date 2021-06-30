@@ -30,10 +30,13 @@ export async function evalSQLPanel(
       return `t${replacements.length - 1}`;
     });
 
+    const valueQuote = panel.sql.type === 'in-memory' ? "'" : '"';
+    const columnQuote = panel.sql.type === 'mysql' ? '`' : '"';
+
     let ctePrefix = '';
     replacements.forEach((panelIndex: number, tableIndex: number) => {
       const results = panelResults[panelIndex];
-      if (results.exception || results.value.length === 0) {
+      if (!results || results.exception || results.value.length === 0) {
         // TODO: figure out how to query empty panels. (How to resolve column names for SELECT?)
         throw new Error('Cannot query empty results in panel ${panelIndex}');
       }
@@ -56,18 +59,27 @@ export async function evalSQLPanel(
               return 'null';
             }
 
-            // Replace double quoted strings with single quoted
+            // Replace double quoted strings with correct quote type
             if (stringified[0] === '"') {
               stringified = stringified.substring(1, stringified.length - 1);
             }
 
-            // Make sure to escape embedded single quotes
-            return `'${stringified.replace("'", "''")}'`;
+            // Make sure to escape embedded quotes
+            return (
+              valueQuote +
+              stringified.replace(valueQuote, valueQuote + valueQuote) +
+              valueQuote
+            );
           });
         }
       );
       const quotedColumns = columns
-        .map((c: string) => `'${c.replace("'", "''")}'`)
+        .map(
+          (c: string) =>
+            columnQuote +
+            c.replace(columnQuote, columnQuote + columnQuote) +
+            columnQuote
+        )
         .join(', ');
       const values = valuesAsSQLStrings
         .map((v: Array<string>) => `(${v.join(', ')})`)
@@ -76,7 +88,7 @@ export async function evalSQLPanel(
       if (tableIndex === 0) {
         prefix = 'WITH ';
       }
-      ctePrefix = `${ctePrefix}${prefix}t${tableIndex}(${quotedColumns}) AS (SELECT * FROM (VALUES ${values}))`;
+      ctePrefix = `${ctePrefix}${prefix}t${tableIndex}(${quotedColumns}) AS (SELECT * FROM (VALUES ${values}) t${tableIndex})`;
     });
     content = ctePrefix + ' ' + content;
 

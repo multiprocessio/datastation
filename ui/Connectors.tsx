@@ -19,6 +19,7 @@ export function Connectors({
     <div className="connectors">
       {state.connectors?.map((dc: ConnectorInfo, i: number) => (
         <Connector
+          key={dc.id}
           connector={dc}
           updateConnector={(dc: ConnectorInfo) => updateConnector(i, dc)}
           deleteConnector={deleteConnector.bind(null, i)}
