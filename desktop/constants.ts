@@ -7,3 +7,5 @@ export const PROJECT_EXTENSION = 'dsproj';
 export const RESULTS_FILE = '.results';
 
 export const DSPROJ_FLAG = '--dsproj';
+
+export const SYNC_PERIOD = 3000; // seconds
