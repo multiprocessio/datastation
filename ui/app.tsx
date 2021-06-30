@@ -2,7 +2,13 @@ import * as pako from 'pako';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
-import { APP_NAME, VERSION, MODE, MODE_FEATURES } from '../shared/constants';
+import {
+  APP_NAME,
+  SITE_ROOT,
+  VERSION,
+  MODE,
+  MODE_FEATURES,
+} from '../shared/constants';
 import {
   ProjectPage,
   ProjectState,
@@ -14,6 +20,7 @@ import {
 import { asyncRPC } from './asyncRPC';
 import { Pages } from './Pages';
 import { Connectors } from './Connectors';
+import { Updates } from './Updates';
 import { makeStore, ProjectContext, ProjectStore } from './ProjectStore';
 import { Button } from './component-library/Button';
 import { Input } from './component-library/Input';
@@ -253,10 +260,7 @@ function App() {
                     title="GitHub"
                   ></iframe>
                 </a>
-                <a
-                  href="https://datastation.multiprocess.io/#online-environment"
-                  target="_blank"
-                >
+                <a href={`${SITE_ROOT}/#online-environment`} target="_blank">
                   About
                 </a>
               </div>
@@ -265,12 +269,15 @@ function App() {
         )}
         <main>
           {projectId && MODE_FEATURES.connectors && (
-            <Connectors
-              state={state}
-              updateConnector={updateConnector}
-              addConnector={addConnector}
-              deleteConnector={deleteConnector}
-            />
+            <React.Fragment>
+              <Connectors
+                state={state}
+                updateConnector={updateConnector}
+                addConnector={addConnector}
+                deleteConnector={deleteConnector}
+              />
+              <Updates />
+            </React.Fragment>
           )}
           <div className="main-body">
             {!projectId ? (

@@ -11,7 +11,7 @@ import {
   shell,
 } from 'electron';
 
-import { APP_NAME, DEBUG } from '../shared/constants';
+import { APP_NAME, DEBUG, SITE_ROOT } from '../shared/constants';
 
 import { DISK_ROOT, PROJECT_EXTENSION } from './constants';
 import { storeHandlers, ensureFile } from './store';
@@ -69,8 +69,7 @@ const menuTemplate = [
     submenu: [
       {
         label: 'Documentation',
-        click: () =>
-          shell.openExternal('https://datastation.multiprocess.io/docs/'),
+        click: () => shell.openExternal(`${SITE_ROOT}/docs/`),
       },
       {
         label: 'Community',
@@ -120,6 +119,8 @@ app.whenReady().then(async () => {
 
   // Make sure this file/path exists
   await ensureFile('.settings');
+
+  // TODO: write uuid as id to settings and send in /updates req
 
   const menu = Menu.buildFromTemplate(
     menuTemplate as MenuItemConstructorOptions[]

@@ -1,4 +1,5 @@
 export const APP_NAME = 'DataStation Community Edition';
+export const SITE_ROOT = 'https://datastation.multiprocess.io';
 
 let IS_DESKTOP_APP = false;
 try {
