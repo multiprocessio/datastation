@@ -15,7 +15,13 @@ import { Select } from './component-library/Select';
 
 export async function evalHTTPPanel(panel: HTTPPanelInfo) {
   if (MODE === 'browser') {
-    return await request((window as any).fetch, panel.http, panel.content);
+    return await request(
+      (window as any).fetch,
+      panel.http.http.method,
+      panel.http.http.url,
+      panel.http.http.headers,
+      panel.content
+    );
   }
 
   return await asyncRPC<HTTPConnectorInfo, string, Array<object>>(

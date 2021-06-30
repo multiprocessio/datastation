@@ -1,14 +1,21 @@
 import * as React from 'react';
 
 import { SITE_ROOT, VERSION } from '../shared/constants';
+import { request } from '../shared/http';
 
 export function Updates() {
   const [updates, setUpdates] = React.useState(null);
   React.useEffect(() => {
     async function run() {
       try {
-        const updates = await window.fetch(
-          `${SITE_ROOT}/api/updates?version=${VERSION}`
+        const updates = await request(
+          window.fetch,
+          'GET',
+          `${SITE_ROOT}/api/updates?version=${VERSION}`,
+          [],
+          '',
+          null,
+          true
         );
         setUpdates(updates);
       } catch (e) {

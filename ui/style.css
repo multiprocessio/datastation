@@ -211,10 +211,16 @@ header > div {
   background: white;
   flex: 0 0 275px;
   overflow-y: auto;
+  display: flex;
+  flex-direction: column;
 }
 
 .sidebar--collapsed {
   flex: auto;
+}
+
+.connectors {
+  flex: 1;
 }
 
 .connector {

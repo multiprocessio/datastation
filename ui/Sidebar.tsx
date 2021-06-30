@@ -9,11 +9,15 @@ export function Sidebar({ children }: { children: React.ReactNode }) {
     <div className={`section sidebar ${!expanded ? 'sidebar--collapsed' : ''}`}>
       <div className="title vertical-align-center">
         <span className="material-icons-outlined">manage_search</span>;
-        <Button icon onClick={() => setExpanded(!expanded)}>
+        <Button
+          icon
+          className="flex-right"
+          onClick={() => setExpanded(!expanded)}
+        >
           keyboard_arrow_right
         </Button>
-        {expanded && children}
       </div>
+      {expanded && children}
     </div>
   );
 }

@@ -23,10 +23,9 @@ export async function evalSQLPanel(
   // among other bad things...
   const matcher = /DM_getPanel\(([0-9]+)\)/g;
   let content = panel.content;
-  console.log(panelResults);
   try {
     let replacements: Array<number> = [];
-    content = content.replace(matcher, function (match, panelIndex) {
+    content = content.replace(matcher, function(match, panelIndex) {
       replacements.push(+panelIndex);
       return `t${replacements.length - 1}`;
     });

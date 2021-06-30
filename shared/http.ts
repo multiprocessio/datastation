@@ -12,23 +12,31 @@ export type FetchFunction = (
 
 export async function request(
   fetchFunction: FetchFunction,
-  { http }: HTTPConnectorInfo,
-  content: string,
-  additionalParsers?: Parsers
+  method: string,
+  url: string,
+  headers: Array<{ name: string; value: string }> = [],
+  content = '',
+  additionalParsers: Parsers = undefined,
+  require200 = false
 ) {
-  const headers: { [v: string]: string } = {};
-  http.headers.forEach((h: { value: string; name: string }) => {
+  const headersDict: { [v: string]: string } = {};
+  headers.forEach((h: { value: string; name: string }) => {
     if (h.name.length && h.value.length) {
-      headers[h.name] = h.value;
+      headersDict[h.name] = h.value;
     }
   });
-  const method = http.method;
-  const res = await fetchFunction(http.url, {
-    headers,
+  const res = await fetchFunction(url, {
+    headers: headersDict,
     method,
     body: method !== 'GET' && method !== 'HEAD' ? content : undefined,
   });
+
   const body = await res.arrayBuffer();
   const type = res.headers.get('content-type');
-  return await parseArrayBuffer(type, http.url, body, additionalParsers);
+  const data = await parseArrayBuffer(type, url, body, additionalParsers);
+  if (require200 && res.status !== 200) {
+    throw data;
+  }
+
+  return data;
 }
