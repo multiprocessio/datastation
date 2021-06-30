@@ -128,11 +128,20 @@ function useProjectState(
 
 function App() {
   const shareState = getShareState();
-  const [projectId, setProjectId] = React.useState(
+  const [projectId, setProjectIdInternal] = React.useState(
     (shareState && shareState.id) ||
       getQueryParameter('project') ||
       (MODE_FEATURES.useDefaultProject ? DEFAULT_PROJECT.projectName : '')
   );
+
+  function setProjectId(projectId: string) {
+    setProjectIdInternal(projectId);
+    return asyncRPC<{ lastProject: string }, void, void>(
+      'updateSettings',
+      null,
+      { lastProject: projectId }
+    );
+  }
 
   const store = makeStore(MODE);
   const [state, updateProjectState] = useProjectState(

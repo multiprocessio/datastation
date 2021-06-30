@@ -97,8 +97,8 @@ app.whenReady().then(async () => {
     project = settings.lastProject;
   } else {
     settings.lastProject = project;
-    await settings.save();
   }
+  await settings.save();
 
   const menu = Menu.buildFromTemplate(
     menuTemplate as MenuItemConstructorOptions[]
@@ -115,6 +115,7 @@ app.whenReady().then(async () => {
     evalHTTPHandler,
     evalProgramHandler,
     openProjectHandler,
+    settings.getUpdateHandler(),
   ]);
 });
 

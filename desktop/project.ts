@@ -15,16 +15,20 @@ export async function openProject() {
       },
     ],
   });
-  if (filePaths.length) {
-    let cmd = process.argv[0];
-    let args = [DSPROJ_FLAG, filePaths[0]];
-    if (cmd.toLowerCase().endsWith('electron')) {
-      cmd = 'yarn';
-      args = ['start-desktop', ...args];
-    }
-    console.log(`Spawning: "${cmd} ${args.join(' ')}"`);
-    spawn(cmd, args);
+  if (!filePaths.length) {
+    return;
   }
+
+  const project = filePaths[0];
+  let cmd = process.argv[0];
+  let args = [DSPROJ_FLAG, project];
+  if (cmd.toLowerCase().endsWith('electron')) {
+    cmd = 'yarn';
+    args = ['start-desktop', ...args];
+  }
+
+  console.log(`Spawning: "${cmd} ${args.join(' ')}"`);
+  spawn(cmd, args);
 }
 
 export const openProjectHandler = {

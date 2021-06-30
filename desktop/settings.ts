@@ -11,14 +11,20 @@ export class Settings {
   lastProject?: string;
   file: string;
 
-  constructor(file?: string, uid?: string, lastProject?: string) {
+  constructor(file: string, uid?: string, lastProject?: string) {
     this.uid = uid || uuid.v4();
-    this.lastProject = lastProject;
+    this.lastProject = lastProject || '';
     this.file = file;
   }
 
   static async fromFile(settingsFile: string) {
-    const existingSettingsString = await fs.readFile(settingsFile);
+    let existingSettingsString: Buffer | null = null;
+    try {
+      existingSettingsString = await fs.readFile(settingsFile);
+    } catch (e) {
+      // Fine if it doesn't exist
+    }
+
     let existingSettings: Partial<Settings> = {
       file: settingsFile,
     };
@@ -35,11 +41,22 @@ export class Settings {
       }
     }
 
-    return mergeDeep(new Settings(), existingSettings);
+    return mergeDeep(new Settings(settingsFile), existingSettings);
   }
 
   save() {
+    console.log('Saving settings');
     return fs.writeFile(this.file, JSON.stringify(this));
+  }
+
+  getUpdateHandler() {
+    return {
+      resource: 'updateSettings',
+      handler: (_: string, settings: Settings) => {
+        this.lastProject = settings.lastProject;
+        return this.save();
+      },
+    };
   }
 }
 
