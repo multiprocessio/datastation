@@ -95,9 +95,7 @@ export function ensureProjectFile(projectId: string) {
 }
 
 export async function ensureFile(f: string) {
-  if (path.isAbsolute(f)) {
-    return f;
-  }
-  await fsPromises.mkdir(DISK_ROOT, { recursive: true });
-  return path.join(DISK_ROOT, f);
+  let root = path.isAbsolute(f) ? path.dirname(f) : DISK_ROOT;
+  await fsPromises.mkdir(root, { recursive: true });
+  return path.isAbsolute(f) ? f : path.join(DISK_ROOT, f);
 }

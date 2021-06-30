@@ -9,7 +9,6 @@ import { ProgramPanelInfo } from '../shared/state';
 import { parseArrayBuffer } from '../shared/text';
 
 import { DISK_ROOT, RESULTS_FILE } from './constants';
-import { writeFileBuffered } from './store';
 
 const execPromise = util.promisify(exec);
 
@@ -61,10 +60,7 @@ export const evalProgramHandler = {
 
     try {
       const preamble = PREAMBLE[ppi.program.type](outputTmp.path);
-      await writeFileBuffered(
-        programTmp.path,
-        [preamble, ppi.content].join('\n')
-      );
+      await fs.writeFile(programTmp.path, [preamble, ppi.content].join('\n'));
       const runtime = ppi.program.type === 'javascript' ? 'node' : 'python3';
       try {
         const { stdout, stderr } = await execPromise(
