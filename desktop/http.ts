@@ -12,6 +12,13 @@ export const additionalParsers = {
 export const evalHTTPHandler = {
   resource: 'evalHTTP',
   handler: async function (body: string, hci: HTTPConnectorInfo) {
-    return await request(fetch, hci, body, additionalParsers);
+    return await request(
+      fetch,
+      hci.http.method,
+      hci.http.url,
+      hci.http.headers,
+      body,
+      additionalParsers
+    );
   },
 };
