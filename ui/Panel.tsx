@@ -411,6 +411,7 @@ export function Panel({
                   body
                 ) : (
                   <CodeEditor
+                    id={panel.id}
                     onKeyDown={keyboardShortcuts}
                     value={panel.content}
                     onChange={(value: string) => {
