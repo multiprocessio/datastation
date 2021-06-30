@@ -45,7 +45,6 @@ export class Settings {
   }
 
   save() {
-    console.log('Saving settings');
     return fs.writeFile(this.file, JSON.stringify(this));
   }
 

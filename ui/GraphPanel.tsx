@@ -155,6 +155,7 @@ export function GraphPanelDetails({
       </div>
       <div className="form-row">
         <PanelSourcePicker
+          currentPanel={panel.id}
           panels={panels}
           value={panel.graph.panelSource}
           onChange={(value: number) => {

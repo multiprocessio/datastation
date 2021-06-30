@@ -1,10 +1,9 @@
 import * as React from 'react';
-import Editor from 'react-simple-code-editor';
-import { highlight, languages, Language } from 'prismjs/components/prism-core';
-import 'prismjs/components/prism-python';
-import 'prismjs/components/prism-sql';
-import 'prismjs/components/prism-clike';
-import 'prismjs/components/prism-javascript';
+import AceEditor from 'react-ace';
+import 'ace-builds/src-noconflict/mode-sql';
+import 'ace-builds/src-noconflict/mode-javascript';
+import 'ace-builds/src-noconflict/mode-python';
+import 'ace-builds/src-noconflict/theme-github';
 
 export function CodeEditor({
   value,
@@ -13,6 +12,7 @@ export function CodeEditor({
   disabled,
   onKeyDown,
   language,
+  id,
 }: {
   value: string;
   onChange: (value: string) => void;
@@ -20,24 +20,35 @@ export function CodeEditor({
   disabled?: boolean;
   onKeyDown?: (e: React.KeyboardEvent) => void;
   language: string;
+  id: string;
 }) {
-  const highlightWithLineNumbers = (input: string, language: Language) =>
-    highlight(input, language)
-      .split('\n')
-      .map((line, i) => `<span class='editorLineNumber'>${i + 1}</span>${line}`)
-      .join('\n');
   return (
     <div className="editor-container">
-      <Editor
+      <AceEditor
+        mode={language}
+        theme="github"
+        onChange={onChange}
+        name={id}
         value={value}
-        onValueChange={onChange}
-        highlight={(code) =>
-          highlightWithLineNumbers(code, languages[language])
-        }
-        onKeyDown={onKeyDown}
         className={className}
-        disabled={disabled}
-        textareaId="codeArea"
+        readOnly={disabled}
+        width="100%"
+        fontSize="1rem"
+        commands={[
+          // AceEditor wants commands in this way but outside here we
+          // only support onKeyDown so doing this funky translation.
+          {
+            name: 'ctrl-enter',
+            bindKey: { win: 'Ctrl-Enter', mac: 'Ctrl-Enter' },
+            exec: () =>
+              onKeyDown({
+                ctrlKey: true,
+                code: 'Enter',
+              } as React.KeyboardEvent),
+          },
+        ]}
+        showGutter={true}
+        keyboardHandler="emacs"
       />
     </div>
   );

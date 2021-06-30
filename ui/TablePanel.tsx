@@ -26,6 +26,7 @@ export function TablePanelDetails({
     <React.Fragment>
       <div className="form-row">
         <PanelSourcePicker
+          currentPanel={panel.id}
           panels={panels}
           value={panel.table.panelSource}
           onChange={(value: number) => {

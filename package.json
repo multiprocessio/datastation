@@ -16,9 +16,9 @@
     "test-licenses": "yarn license-checker --production --onlyAllow 'MIT;Apache-2.0;ISC;BSD-3-Clause;MIT*;BSD-2-Clause'"
   },
   "dependencies": {
+    "ace-builds": "^1.4.12",
     "chart.js": "^3.3.2",
     "json-stringify-safe": "^5.0.1",
-    "lodash.throttle": "^4.1.1",
     "mysql2": "^2.2.5",
     "node-fetch": "^2.6.1",
     "pako": "^2.0.3",
@@ -27,6 +27,7 @@
     "pg": "^8.6.0",
     "prismjs": "^1.24.0",
     "react": "^17.0.2",
+    "react-ace": "^9.4.1",
     "react-dom": "^17.0.2",
     "react-simple-code-editor": "^0.11.0",
     "sql.js": "^1.5.0",

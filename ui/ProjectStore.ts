@@ -1,5 +1,4 @@
 import { IpcRenderer } from 'electron';
-import throttle from 'lodash.throttle';
 import * as React from 'react';
 
 import { ProjectState, DEFAULT_PROJECT, PanelResult } from '../shared/state';
@@ -46,19 +45,12 @@ export interface ProjectStore {
   get: (projectId: string) => Promise<ProjectState>;
 }
 
-export function makeStore(mode: string, syncMillis: number = 2000) {
+export function makeStore(mode: string) {
   const storeClass = {
     desktop: DesktopIPCStore,
     browser: LocalStorageStore,
   }[mode];
-  const store = new storeClass();
-  if (syncMillis) {
-    store.update = throttle<[string, ProjectState], Promise<void>>(
-      store.update.bind(store),
-      syncMillis
-    );
-  }
-  return store;
+  return new storeClass();
 }
 
 export const ProjectContext =
