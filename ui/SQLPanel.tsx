@@ -25,7 +25,7 @@ export async function evalSQLPanel(
   let content = panel.content;
   try {
     let replacements: Array<number> = [];
-    content = content.replace(matcher, function(match, panelIndex) {
+    content = content.replace(matcher, function (match, panelIndex) {
       replacements.push(+panelIndex);
       return `t${replacements.length - 1}`;
     });

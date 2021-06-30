@@ -1,4 +1,4 @@
-import { spawn } from 'child_process';
+import path from 'path';
 
 import { BrowserWindow, dialog } from 'electron';
 
@@ -22,7 +22,7 @@ export async function openProject(win: BrowserWindow) {
   win.loadURL(
     'file://' + path.join(__dirname, 'index.html?project=' + filePaths[0])
   );
-  /* 
+  /*
    *   const project = filePaths[0];
    *   let cmd = process.argv[0];
    *   let args = [DSPROJ_FLAG, project];
@@ -30,12 +30,12 @@ export async function openProject(win: BrowserWindow) {
    *     cmd = 'yarn';
    *     args = ['start-desktop', ...args];
    *   }
-   * 
+   *
    *   console.log(`Spawning: "${cmd} ${args.join(' ')}"`);
    *   spawn(cmd, args); */
 }
 
-export const getOpenProjectHandler = (win: BrowserWindow) => {
+export const getOpenProjectHandler = (win: BrowserWindow) => ({
   resource: 'openProject',
   handler: (_1: string, _2: any) => openProject(win),
-};
+});

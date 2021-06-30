@@ -17,10 +17,10 @@ import { registerRPCHandlers } from './rpc';
 import { evalSQLHandler } from './sql';
 import { evalHTTPHandler } from './http';
 import { evalProgramHandler } from './program';
-import { openProject, openProjectHandler } from './project';
+import { openProject, getOpenProjectHandler } from './project';
 import { loadSettings } from './settings';
 
-const menuTemplate = [
+const menuTemplate = (win: BrowserWindow) => [
   ...(process.platform === 'darwin'
     ? [
         {
@@ -34,7 +34,7 @@ const menuTemplate = [
     submenu: [
       {
         label: 'Open Project',
-        click: openProject,
+        click: () => openProject(win),
       },
     ],
   },
@@ -101,7 +101,7 @@ app.whenReady().then(async () => {
   await settings.save();
 
   const menu = Menu.buildFromTemplate(
-    menuTemplate as MenuItemConstructorOptions[]
+    menuTemplate(win) as MenuItemConstructorOptions[]
   );
   Menu.setApplicationMenu(menu);
 
