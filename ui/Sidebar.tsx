@@ -8,7 +8,7 @@ export function Sidebar({ children }: { children: React.ReactNode }) {
   return (
     <div className={`section sidebar ${!expanded ? 'sidebar--collapsed' : ''}`}>
       <div className="title vertical-align-center">
-        <span className="material-icons-outlined">manage_search</span>;
+        <span className="material-icons-outlined">manage_search</span>
         <Button
           icon
           className="flex-right"
