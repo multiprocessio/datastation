@@ -5,12 +5,16 @@ scripting, and visualization in a single platform.
 
 ![A screenshot of app.datastation.multiprocess.io](./screenshot.jpg)
 
-## Try it out
+## Install
 
-Visit https://app.datastation.multiprocess.io to try out the entirely
-in-memory browser application.
+Zip files for the latest release provided on the
+[tags](https://github.com/multiprocessio/datastation/tags)
+page. x86-64 builds for Mac and Windows are available. In the future
+this will expand to ARM and Linux.
 
-Access to the desktop application is coming soon.
+## Documentation
+
+See [here](https://datastation.multiprocess.io/docs/]) for details.
 
 ## Subscribe to updates
 
