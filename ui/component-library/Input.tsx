@@ -11,8 +11,9 @@ export function Input({
   label,
   disabled,
   readOnly,
+  autoWidth,
 }: {
-  type?: 'text' | 'number' | 'email' | 'password';
+  type?: 'text' | 'number' | 'email' | 'password' | 'url';
   placeholder?: string;
   className?: string;
   onChange: (value: string) => void;
@@ -22,6 +23,7 @@ export function Input({
   label?: string;
   disabled?: boolean;
   readOnly?: boolean;
+  autoWidth?: boolean;
 }) {
   let inputClass = `input ${className ? ' ' + className : ''}`;
 
@@ -38,6 +40,7 @@ export function Input({
       min={min}
       max={max}
       placeholder={placeholder}
+      size={autoWidth ? Math.min(100, value.length) : undefined}
     />
   );
 
