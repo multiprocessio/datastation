@@ -294,6 +294,13 @@ header > div {
   margin-top: 15px;
 }
 
+.panel-details label.select select,
+.panel-details select.select,
+.panel-details label.input input,
+.panel-details input.input {
+  max-width: 100%;
+}
+
 .panel-body-container {
   overflow: auto;
   resize: vertical;
