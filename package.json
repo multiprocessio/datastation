@@ -31,6 +31,8 @@
     "react-dom": "^17.0.2",
     "react-simple-code-editor": "^0.11.0",
     "sql.js": "^1.5.0",
+    "ssh2-sftp-client": "^7.0.0",
+    "tunnel-ssh": "^4.1.4",
     "uuid": "^8.3.2",
     "xlsx": "^0.17.0"
   },
@@ -44,6 +46,8 @@
     "@types/prismjs": "^1.16.5",
     "@types/react": "^17.0.9",
     "@types/react-dom": "^17.0.6",
+    "@types/ssh2-sftp-client": "^5.3.2",
+    "@types/tunnel-ssh": "^4.1.1",
     "@types/uuid": "^8.3.0",
     "electron": "^13.1.2",
     "electron-packager": "^15.2.0",

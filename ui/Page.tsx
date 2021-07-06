@@ -1,6 +1,11 @@
 import * as React from 'react';
 
-import { ConnectorInfo, ProjectPage, PanelResult } from '../shared/state';
+import {
+  ServerInfo,
+  ConnectorInfo,
+  ProjectPage,
+  PanelResult,
+} from '../shared/state';
 
 import { Panels } from './Panels';
 import { evalPanel } from './Panel';
@@ -8,6 +13,7 @@ import { evalPanel } from './Panel';
 export function Page({
   page,
   connectors,
+  servers,
   updatePage,
   panelResults,
   setPanelResults,
@@ -15,6 +21,7 @@ export function Page({
   page: ProjectPage;
   updatePage: (page: ProjectPage) => void;
   connectors: Array<ConnectorInfo>;
+  servers: Array<ServerInfo>;
   panelResults: Array<PanelResult>;
   setPanelResults: (panelIndex: number, results: PanelResult) => void;
 }) {
@@ -36,7 +43,8 @@ export function Page({
         page,
         panelIndex,
         panelResults,
-        connectors
+        connectors,
+        servers
       );
       setPanelResults(panelIndex, {
         lastRun: new Date(),

@@ -12,7 +12,7 @@ export function Input({
   disabled,
   readOnly,
 }: {
-  type?: 'text' | 'number' | 'email' | 'password' | 'url';
+  type?: 'text' | 'number' | 'email' | 'password' | 'url' | 'checkbox';
   placeholder?: string;
   className?: string;
   onChange: (value: string) => void;
@@ -27,6 +27,7 @@ export function Input({
 
   const input = (
     <input
+      {...(type === 'checkbox' ? { checked: value === 'true' } : { value })}
       className={label ? '' : inputClass}
       type={type}
       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
@@ -34,7 +35,6 @@ export function Input({
       }
       disabled={disabled}
       readOnly={readOnly}
-      value={value}
       min={min}
       max={max}
       placeholder={placeholder}

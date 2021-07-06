@@ -48,6 +48,10 @@ export class ServerInfo {
   }
 }
 
+export type Proxy<T> = T & {
+  server?: ServerInfo;
+};
+
 export type ConnectorInfoType = 'sql' | 'http';
 
 export class ConnectorInfo {

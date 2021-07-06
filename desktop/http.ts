@@ -1,8 +1,9 @@
 import fetch from 'node-fetch';
 
-import { HTTPConnectorInfo } from '../shared/state';
+import { Proxy, HTTPConnectorInfo } from '../shared/state';
 import { request } from '../shared/http';
 
+import { tunnel } from './tunnel';
 import { parseParquet } from './parquet';
 
 export const additionalParsers = {
@@ -11,14 +12,16 @@ export const additionalParsers = {
 
 export const evalHTTPHandler = {
   resource: 'evalHTTP',
-  handler: async function (body: string, hci: HTTPConnectorInfo) {
-    return await request(
-      fetch,
-      hci.http.method,
-      hci.http.url,
-      hci.http.headers,
-      body,
-      additionalParsers
+  handler: async function (body: string, hci: Proxy<HTTPConnectorInfo>) {
+    return tunnel(hci.server, () =>
+      request(
+        fetch,
+        hci.http.method,
+        hci.http.url,
+        hci.http.headers,
+        body,
+        additionalParsers
+      )
     );
   },
 };

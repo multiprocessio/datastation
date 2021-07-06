@@ -128,6 +128,7 @@ export function Pages({
         key={page.id}
         page={page}
         connectors={state.connectors}
+        servers={state.servers}
         updatePage={updatePage}
         panelResults={panelResultsByPage[page.id]}
         setPanelResults={setPanelResults}

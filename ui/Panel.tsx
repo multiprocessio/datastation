@@ -4,6 +4,7 @@ import * as React from 'react';
 
 import { MODE_FEATURES } from '../shared/constants';
 import {
+  ServerInfo,
   ConnectorInfo,
   ProjectPage,
   PanelInfo,
@@ -44,7 +45,8 @@ export async function evalPanel(
   page: ProjectPage,
   panelId: number,
   panelResults: Array<PanelResult>,
-  connectors: Array<ConnectorInfo>
+  connectors: Array<ConnectorInfo>,
+  servers: Array<ServerInfo>
 ): Promise<[any, string]> {
   const panel = page.panels[panelId];
   switch (panel.type) {
@@ -54,7 +56,12 @@ export async function evalPanel(
       return [await evalLiteralPanel(panel as LiteralPanelInfo), ''];
     case 'sql':
       return [
-        await evalSQLPanel(panel as SQLPanelInfo, panelResults, connectors),
+        await evalSQLPanel(
+          panel as SQLPanelInfo,
+          panelResults,
+          connectors,
+          servers
+        ),
         '',
       ];
     case 'graph':
@@ -68,9 +75,9 @@ export async function evalPanel(
         '',
       ];
     case 'http':
-      return [await evalHTTPPanel(panel as HTTPPanelInfo), ''];
+      return [await evalHTTPPanel(panel as HTTPPanelInfo, null, servers), ''];
     case 'file':
-      return [await evalFilePanel(panel as FilePanelInfo), ''];
+      return [await evalFilePanel(panel as FilePanelInfo, null, servers), ''];
   }
 }
 

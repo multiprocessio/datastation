@@ -1,6 +1,8 @@
 import * as React from 'react';
 
 import {
+  Proxy,
+  ServerInfo,
   HTTPPanelInfo,
   HTTPConnectorInfo,
   HTTPConnectorInfoMethod,
@@ -13,7 +15,11 @@ import { Button } from './component-library/Button';
 import { Input } from './component-library/Input';
 import { Select } from './component-library/Select';
 
-export async function evalHTTPPanel(panel: HTTPPanelInfo) {
+export async function evalHTTPPanel(
+  panel: HTTPPanelInfo,
+  _: any,
+  servers: Array<ServerInfo>
+) {
   if (MODE === 'browser') {
     return await request(
       (window as any).fetch,
@@ -24,10 +30,14 @@ export async function evalHTTPPanel(panel: HTTPPanelInfo) {
     );
   }
 
-  return await asyncRPC<HTTPConnectorInfo, string, Array<object>>(
+  const connector = panel.http as Proxy<HTTPConnectorInfo>;
+  connector.server = servers.find(
+    (s) => s.id === (panel.serverId || connector.serverId)
+  );
+  return await asyncRPC<Proxy<HTTPConnectorInfo>, string, Array<object>>(
     'evalHTTP',
     panel.content,
-    panel.http
+    connector
   );
 }
 

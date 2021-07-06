@@ -1,6 +1,8 @@
 import * as React from 'react';
 
 import {
+  Proxy,
+  ServerInfo,
   ConnectorInfo,
   SQLConnectorInfo,
   SQLConnectorInfoType,
@@ -16,7 +18,8 @@ import { Select } from './component-library/Select';
 export async function evalSQLPanel(
   panel: SQLPanelInfo,
   panelResults: Array<PanelResult>,
-  connectors: Array<ConnectorInfo>
+  connectors: Array<ConnectorInfo>,
+  servers: Array<ServerInfo>
 ) {
   // TODO: make panel substitution based on an actual parser since
   // regex will match instances of `' foo bar DM_getPanel(21)[sdklf] '`
@@ -101,10 +104,17 @@ export async function evalSQLPanel(
   }
 
   if (panel.sql.type !== 'in-memory') {
-    return await asyncRPC<SQLConnectorInfo, string, Array<object>>(
+    const connector = connectors[
+      +panel.sql.connectorIndex
+    ] as Proxy<SQLConnectorInfo>;
+    connector.server = servers.find(
+      (s) => s.id === (panel.serverId || connector.serverId)
+    );
+
+    return await asyncRPC<Proxy<SQLConnectorInfo>, string, Array<object>>(
       'evalSQL',
       content,
-      connectors[+panel.sql.connectorIndex] as SQLConnectorInfo
+      connector
     );
   }
 
