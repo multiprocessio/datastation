@@ -70,6 +70,6 @@ export async function parseArrayBuffer(
     return await additionalParsers[type](body);
   }
 
-  console.error(`Unsupported HTTP type: '${type}'`);
+  console.error(`Unsupported file type: '${type}'`);
   return bodyAsString();
 }
