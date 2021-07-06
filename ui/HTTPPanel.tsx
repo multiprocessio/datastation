@@ -77,6 +77,8 @@ export function HTTPPanelDetails({
             panel.http.http.url = value;
             updatePanel(panel);
           }}
+          type="url"
+          autoWidth={true}
         />
       </div>
       <div className="form-row">

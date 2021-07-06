@@ -472,8 +472,7 @@ export function Panel({
                 {panel.type === 'http' && (
                   <div className="alert alert-info">
                     Use the textarea to supply a HTTP request body. This will be
-                    ignored for <code>GET</code> and
-                    <code>HEAD</code> requests.
+                    ignored for <code>GET</code> and <code>HEAD</code> requests.
                   </div>
                 )}
               </div>

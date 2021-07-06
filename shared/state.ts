@@ -161,7 +161,7 @@ export class ProgramPanelInfo extends PanelInfo {
   constructor(name?: string, type?: ProgramPanelInfoType, content?: string) {
     super('program', name, content);
     this.program = {
-      type: type || 'javascript',
+      type: type || 'python',
     };
   }
 }
