@@ -7,7 +7,7 @@ import { Proxy } from '../shared/state';
 import { parseArrayBuffer } from '../shared/text';
 
 import { additionalParsers } from './http';
-import { getSSHConfig } from './tunnel';
+import { getSSHConfig, resolvePath } from './tunnel';
 
 export const evalFileHandler = {
   resource: 'evalFile',
@@ -15,6 +15,7 @@ export const evalFileHandler = {
     _: string,
     { name, server }: Proxy<{ name: string }>
   ) {
+    name = resolvePath(name);
     if (!server) {
       const body = await fs.readFile(name);
       return parseArrayBuffer('text/plain', name, body, additionalParsers);

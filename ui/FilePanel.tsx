@@ -54,7 +54,7 @@ export function FilePanelDetails({
             onChange={(files: Array<File>) => {
               const fr = new FileReader();
 
-              fr.onload = function () {
+              fr.onload = function() {
                 panel.file.content = fr.result as ArrayBuffer;
                 updatePanel(panel);
               };
@@ -68,6 +68,7 @@ export function FilePanelDetails({
         ) : (
           <Input
             label="File"
+            autoWidth={true}
             value={panel.file.name}
             onChange={(v: string) => {
               panel.file.name = v;

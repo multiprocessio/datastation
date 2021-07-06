@@ -23,7 +23,7 @@ export function ServerPicker({
   return (
     <React.Fragment>
       <div className="form-row">
-        <Checkbox label="Use Proxy" value={remote} onChange={setRemote} />
+        <Checkbox label="Via Server" value={remote} onChange={setRemote} />
       </div>
       {remote && (
         <div className="form-row">

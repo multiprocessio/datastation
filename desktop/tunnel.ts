@@ -1,29 +1,54 @@
 import fs from 'fs/promises';
+import path from 'path';
 import { Server } from 'net';
 
 import getPort from 'get-port';
 import tunnelSSH from 'tunnel-ssh';
 
+import { DEBUG } from '../shared/constants';
 import { ServerInfo } from '../shared/state';
+
+export function resolvePath(name: string) {
+  if (name.startsWith('~/')) {
+    name = path.join(process.env.HOME, name.slice(2));
+  }
+  return path.resolve(name);
+}
 
 export async function getSSHConfig(
   server: ServerInfo
 ): Promise<tunnelSSH.Config> {
-  let privateKey = '';
-  if (server.privateKeyFile) {
-    const buffer = await fs.readFile(server.privateKeyFile);
-    privateKey = buffer.toString();
-  }
-
-  return {
+  const config: Partial<tunnelSSH.Config> = {
     host: server.address,
     port: server.port,
-    username: server.username,
-    password: server.password,
-    agent: process.env.SSH_AGENT,
-    privateKey: privateKey,
-    passphrase: server.passphrase,
+    readyTimeout: 20000,
+    retries: 2,
+    retry_factor: 2,
+    retry_minTimeout: 2000,
+    debug: DEBUG ? console.error : null,
   };
+
+  if (server.type === 'ssh-agent') {
+    config.agent = process.env.SSH_AGENT;
+  }
+
+  if (server.type === 'private-key') {
+    config.username = server.username;
+    if (server.privateKeyFile) {
+      const buffer = await fs.readFile(resolvePath(server.privateKeyFile));
+      config.privateKey = buffer.toString();
+    }
+    if (server.passphrase) {
+      config.passphrase = server.passphrase;
+    }
+  }
+
+  if (server.type === 'password') {
+    config.username = server.username;
+    config.password = server.password;
+  }
+
+  return config;
 }
 
 export async function getTunnelConfig(

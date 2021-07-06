@@ -214,7 +214,7 @@ export function Panel({
   return (
     <div
       className={`panel ${hidden ? 'panel--hidden' : ''} ${
-        panel.type === 'file' ? 'panel--empty' : ''
+        panel.type === 'file' && !results.exception ? 'panel--empty' : ''
       }`}
       tabIndex={1001}
       ref={panelRef}
