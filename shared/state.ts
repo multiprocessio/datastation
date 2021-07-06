@@ -36,13 +36,13 @@ export class ServerInfo {
     privateKeyFile?: string,
     passphrase?: string
   ) {
-    this.type = type || 'ssh-agent';
+    this.type = type || 'private-key';
     this.name = name || 'Untitled server';
     this.address = address || '';
     this.port = port || 22;
     this.username = username || '';
     this.password = password || '';
-    this.privateKeyFile = privateKeyFile || '';
+    this.privateKeyFile = privateKeyFile || '~/.ssh/id_rsa';
     this.passphrase = passphrase || '';
     this.id = uuid.v4();
   }
