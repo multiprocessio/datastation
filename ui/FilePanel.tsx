@@ -54,7 +54,7 @@ export function FilePanelDetails({
             onChange={(files: Array<File>) => {
               const fr = new FileReader();
 
-              fr.onload = function() {
+              fr.onload = function () {
                 panel.file.content = fr.result as ArrayBuffer;
                 updatePanel(panel);
               };
