@@ -1,6 +1,7 @@
 import fs from 'fs/promises';
 import { Server } from 'net';
 
+import getPort from 'get-port';
 import tunnelSSH from 'tunnel-ssh';
 
 import { ServerInfo } from '../shared/state';
@@ -25,17 +26,38 @@ export async function getSSHConfig(
   };
 }
 
+export async function getTunnelConfig(
+  server: ServerInfo,
+  destAddress: string,
+  destPort: number
+): Promise<[tunnelSSH.Config, string, number]> {
+  const config = await getSSHConfig(server);
+  const localhost = '127.0.0.1';
+  const freeLocalPort = await getPort({ host: localhost });
+  config.dstHost = destAddress;
+  config.dstPort = destPort;
+  config.localHost = localhost;
+  config.localPort = freeLocalPort;
+  config.keepAlive = true;
+  return [config, localhost, freeLocalPort];
+}
+
 export async function tunnel<T>(
   server: ServerInfo | null,
-  callback: () => Promise<T>
+  destAddress: string,
+  destPort: number,
+  callback: (host: string, port: number) => Promise<T>
 ) {
   if (!server) {
-    return callback();
+    return callback(destAddress, destPort);
   }
 
-  const config = await getSSHConfig(server);
+  const [config, localhost, localport] = await getTunnelConfig(
+    server,
+    destAddress,
+    destPort
+  );
 
-  config.keepAlive = true;
   return new Promise((accept, reject) =>
     tunnelSSH(config, async (error: Error | null, tnl: Server) => {
       if (error) {
@@ -43,7 +65,7 @@ export async function tunnel<T>(
       }
 
       try {
-        const res = await callback();
+        const res = await callback(localhost, localport);
         accept(res);
       } catch (e) {
         reject(e);

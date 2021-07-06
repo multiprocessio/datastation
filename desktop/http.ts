@@ -1,3 +1,5 @@
+import { URL } from 'url';
+
 import fetch from 'node-fetch';
 
 import { Proxy, HTTPConnectorInfo } from '../shared/state';
@@ -13,15 +15,18 @@ export const additionalParsers = {
 export const evalHTTPHandler = {
   resource: 'evalHTTP',
   handler: async function (body: string, hci: Proxy<HTTPConnectorInfo>) {
-    return tunnel(hci.server, () =>
-      request(
+    const url = new URL(hci.http.url);
+    return tunnel(hci.server, url.host, +url.port, (host, port) => {
+      url.host = host;
+      url.port = String(port);
+      return request(
         fetch,
         hci.http.method,
-        hci.http.url,
+        url.toString(),
         hci.http.headers,
         body,
         additionalParsers
-      )
-    );
+      );
+    });
   },
 };

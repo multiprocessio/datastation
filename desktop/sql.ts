@@ -57,16 +57,21 @@ export const evalSQLHandler = {
     const port = +info.sql.address.split(':')[1] || 5432;
     const host = info.sql.address.split(':')[0];
 
-    return tunnel(info.server, (): any => {
-      if (info.sql.type === 'postgres') {
-        return evalPostgreSQL(content, host, port, info);
-      }
+    return tunnel(
+      info.server,
+      host,
+      port,
+      (host: string, port: number): any => {
+        if (info.sql.type === 'postgres') {
+          return evalPostgreSQL(content, host, port, info);
+        }
 
-      if (info.sql.type === 'mysql') {
-        return evalMySQL(content, host, port, info);
-      }
+        if (info.sql.type === 'mysql') {
+          return evalMySQL(content, host, port, info);
+        }
 
-      throw new Error(`Unknown SQL type: ${info.sql.type}`);
-    });
+        throw new Error(`Unknown SQL type: ${info.sql.type}`);
+      }
+    );
   },
 };
