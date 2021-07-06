@@ -11,6 +11,8 @@ import { MODE } from '../shared/constants';
 import { request } from '../shared/http';
 
 import { asyncRPC } from './asyncRPC';
+import { ProjectContext } from './ProjectStore';
+import { ServerPicker } from './ServerPicker';
 import { Button } from './component-library/Button';
 import { Input } from './component-library/Input';
 import { Select } from './component-library/Select';
@@ -48,6 +50,7 @@ export function HTTPPanelDetails({
   panel: HTTPPanelInfo;
   updatePanel: (d: HTTPPanelInfo) => void;
 }) {
+  const { servers } = React.useContext(ProjectContext);
   return (
     <React.Fragment>
       <div className="form-row">
@@ -116,6 +119,14 @@ export function HTTPPanelDetails({
         >
           Add Header
         </Button>
+        <ServerPicker
+          servers={servers}
+          serverId={panel.serverId}
+          onChange={(serverId: string) => {
+            panel.serverId = serverId;
+            updatePanel(panel);
+          }}
+        />
       </div>
     </React.Fragment>
   );

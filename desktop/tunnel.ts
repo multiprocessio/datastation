@@ -1,11 +1,13 @@
 import fs from 'fs/promises';
-import { Server  } from 'net';
+import { Server } from 'net';
 
 import tunnelSSH from 'tunnel-ssh';
 
 import { ServerInfo } from '../shared/state';
 
-export async function getSSHConfig(server: ServerInfo): Promise<tunnelSSH.Config> {
+export async function getSSHConfig(
+  server: ServerInfo
+): Promise<tunnelSSH.Config> {
   let privateKey = '';
   if (server.privateKeyFile) {
     const buffer = await fs.readFile(server.privateKeyFile);
@@ -23,7 +25,10 @@ export async function getSSHConfig(server: ServerInfo): Promise<tunnelSSH.Config
   };
 }
 
-export async function tunnel<T>(server: ServerInfo | null, callback: () => Promise<T>) {
+export async function tunnel<T>(
+  server: ServerInfo | null,
+  callback: () => Promise<T>
+) {
   if (!server) {
     return callback();
   }
@@ -45,5 +50,6 @@ export async function tunnel<T>(server: ServerInfo | null, callback: () => Promi
       } finally {
         tnl.close();
       }
-    }));
+    })
+  );
 }

@@ -13,6 +13,7 @@ import { DEBUG, MODE_FEATURES } from '../shared/constants';
 
 import { asyncRPC } from './asyncRPC';
 import { ProjectContext } from './ProjectStore';
+import { ServerPicker } from './ServerPicker';
 import { Select } from './component-library/Select';
 
 export async function evalSQLPanel(
@@ -149,7 +150,7 @@ export function SQLPanelDetails({
   panel: SQLPanelInfo;
   updatePanel: (d: SQLPanelInfo) => void;
 }) {
-  const { connectors } = React.useContext(ProjectContext);
+  const { connectors, servers } = React.useContext(ProjectContext);
 
   return (
     <React.Fragment>
@@ -168,29 +169,39 @@ export function SQLPanelDetails({
         </Select>
       </div>
       {MODE_FEATURES.sql && panel.sql.type !== 'in-memory' && (
-        <div className="form-row">
-          <Select
-            label="Connector"
-            value={panel.sql.connectorIndex.toString()}
-            onChange={(connectorIndex: string) => {
-              panel.sql.connectorIndex = +connectorIndex;
+        <React.Fragment>
+          <div className="form-row">
+            <Select
+              label="Connector"
+              value={panel.sql.connectorIndex.toString()}
+              onChange={(connectorIndex: string) => {
+                panel.sql.connectorIndex = +connectorIndex;
+                updatePanel(panel);
+              }}
+            >
+              {connectors
+                .map((c: ConnectorInfo, index: number) => {
+                  if (
+                    c.type !== 'sql' ||
+                    (c as SQLConnectorInfo).sql.type !== panel.sql.type
+                  ) {
+                    return null;
+                  }
+
+                  return <option value={index}>{c.name}</option>;
+                })
+                .filter(Boolean)}
+            </Select>
+          </div>
+          <ServerPicker
+            servers={servers}
+            serverId={panel.serverId}
+            onChange={(serverId: string) => {
+              panel.serverId = serverId;
               updatePanel(panel);
             }}
-          >
-            {connectors
-              .map((c: ConnectorInfo, index: number) => {
-                if (
-                  c.type !== 'sql' ||
-                  (c as SQLConnectorInfo).sql.type !== panel.sql.type
-                ) {
-                  return null;
-                }
-
-                return <option value={index}>{c.name}</option>;
-              })
-              .filter(Boolean)}
-          </Select>
-        </div>
+          />
+        </React.Fragment>
       )}
     </React.Fragment>
   );

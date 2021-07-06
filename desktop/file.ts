@@ -24,7 +24,7 @@ export const evalFileHandler = {
 
     const sftp = new Client();
     await sftp.connect(config);
-    let body = await sftp.get(name) as ArrayBuffer;
+    let body = (await sftp.get(name)) as ArrayBuffer;
     return await parseArrayBuffer('text/plain', name, body, additionalParsers);
   },
 };
