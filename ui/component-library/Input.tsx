@@ -12,7 +12,7 @@ export function Input({
   disabled,
   readOnly,
 }: {
-  type?: 'text' | 'number' | 'email' | 'password';
+  type?: 'text' | 'number' | 'email' | 'password' | 'url';
   placeholder?: string;
   className?: string;
   onChange: (value: string) => void;

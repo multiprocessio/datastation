@@ -12,6 +12,7 @@ import {
 import {
   ProjectPage,
   ProjectState,
+  ServerInfo,
   ConnectorInfo,
   DEFAULT_PROJECT,
   rawStateToObjects,
@@ -22,6 +23,7 @@ import { ErrorBoundary } from './ErrorBoundary';
 import { Sidebar } from './Sidebar';
 import { Pages } from './Pages';
 import { Connectors } from './Connectors';
+import { Servers } from './Servers';
 import { Updates } from './Updates';
 import { makeStore, ProjectContext, ProjectStore } from './ProjectStore';
 import { Button } from './component-library/Button';
@@ -212,6 +214,21 @@ function App() {
     updateProjectState({ ...state });
   }
 
+  function updateServer(dcIndex: number, dc: ServerInfo) {
+    state.servers[dcIndex] = dc;
+    updateProjectState({ ...state });
+  }
+
+  function addServer(dc: ServerInfo) {
+    state.servers.push(dc);
+    updateProjectState({ ...state });
+  }
+
+  function deleteServer(at: number) {
+    state.servers.splice(at, 1);
+    updateProjectState({ ...state });
+  }
+
   async function openProject() {
     await asyncRPC<void, void, void>('openProject');
   }
@@ -285,6 +302,12 @@ function App() {
                 updateConnector={updateConnector}
                 addConnector={addConnector}
                 deleteConnector={deleteConnector}
+              />
+              <Servers
+                state={state}
+                updateServer={updateServer}
+                addServer={addServer}
+                deleteServer={deleteServer}
               />
               <ErrorBoundary>
                 <Updates />
