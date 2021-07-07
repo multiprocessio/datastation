@@ -9,7 +9,7 @@ import {
   shell,
 } from 'electron';
 
-import { APP_NAME, DEBUG, SITE_ROOT } from '../shared/constants';
+import { APP_NAME, VERSION, DEBUG, SITE_ROOT } from '../shared/constants';
 import log from '../shared/log';
 
 import { DSPROJ_FLAG } from './constants';
@@ -23,7 +23,9 @@ import { evalProgramHandler } from './program';
 import { openProject, getOpenProjectHandler } from './project';
 import { loadSettings } from './settings';
 
-//configureLogger();
+configureLogger().then(() => {
+  log.info(APP_NAME, VERSION, DEBUG ? 'DEBUG' : '');
+});
 process.on('uncaughtException', (e) => {
   log.error(e);
 });

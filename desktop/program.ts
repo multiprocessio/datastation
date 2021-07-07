@@ -30,7 +30,7 @@ function DM_getPanel(i) {
 }
 function DM_setPanel(v) {
   fs.writeFileSync('${outFile}', JSON.stringify(v));
-}`
+}`;
 
 const PYTHON_PREAMBLE = (outFile: string) => `
 import json as __DM_JSON
@@ -80,7 +80,7 @@ export const evalProgramHandler = {
             matcher,
             function (_: string, line: string) {
               return `, line ${
-                +line - PYTHON_PREAMBLE('').split(${EOL}).length
+                +line - PYTHON_PREAMBLE('').split(EOL).length
               }, in <module>`;
             }
           );
@@ -94,7 +94,7 @@ export const evalProgramHandler = {
             matcher,
             function (_: string, line: string) {
               return `${programTmp.path}:${
-                +line - JAVASCRIPT_PREAMBLE('').split(${EOL}).length
+                +line - JAVASCRIPT_PREAMBLE('').split(EOL).length
               }`;
             }
           );
