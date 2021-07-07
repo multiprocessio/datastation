@@ -23,7 +23,11 @@ export function Page({
   connectors: Array<ConnectorInfo>;
   servers: Array<ServerInfo>;
   panelResults: Array<PanelResult>;
-  setPanelResults: (panelIndex: number, results: PanelResult) => void;
+  setPanelResults: (
+    panelIndex: number,
+    results: PanelResult,
+    valueChange?: boolean
+  ) => void;
 }) {
   async function reevalPanel(panelIndex: number, reset?: boolean) {
     let panel = panelResults[panelIndex] || new PanelResult();

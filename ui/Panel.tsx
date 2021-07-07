@@ -218,7 +218,7 @@ export function Panel({
     <div
       className={`panel ${hidden ? 'panel--hidden' : ''} ${
         panel.type === 'file' && !results.exception ? 'panel--empty' : ''
-      }`}
+      } ${results.loading ? 'panel--loading' : ''}`}
       tabIndex={1001}
       ref={panelRef}
       onKeyDown={keyboardShortcuts}

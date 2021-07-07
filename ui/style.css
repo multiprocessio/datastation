@@ -266,6 +266,25 @@ header > div {
   border-color: #9f04ff;
 }
 
+.panel--loading {
+  background-color: white;
+  animation-name: color;
+  animation-duration: 2s;
+  animation-iteration-count: infinite;
+}
+
+@keyframes color {
+  0% {
+    background-color: white;
+  }
+  50% {
+    background-color: #f5e6ff;
+  }
+  100 {
+    background-color: #f9f0ff;
+  }
+}
+
 .panel--hidden {
   border-color: #ccc;
 }

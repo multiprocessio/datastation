@@ -53,11 +53,11 @@ async function evalMySQL(
 
 export const evalSQLHandler = {
   resource: 'evalSQL',
-  handler: function (content: string, info: Proxy<SQLConnectorInfo>) {
+  handler: async function (content: string, info: Proxy<SQLConnectorInfo>) {
     const port = +info.sql.address.split(':')[1] || 5432;
     const host = info.sql.address.split(':')[0];
 
-    return tunnel(
+    return await tunnel(
       info.server,
       host,
       port,

@@ -32,11 +32,6 @@ export function writeFileBuffered(name: string, contents: string) {
 }
 
 function flushUnwritten(...args: any[]) {
-  if (args && args.length > 1) {
-    // Otherwise errors are masked
-    log.error(args);
-  }
-
   Object.keys(buffers).map((fileName: string) => {
     clearTimeout(buffers[fileName].timeout);
     // Must be a synchronous write in this 'exit' context

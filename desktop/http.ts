@@ -16,10 +16,10 @@ export const evalHTTPHandler = {
   resource: 'evalHTTP',
   handler: async function (body: string, hci: Proxy<HTTPConnectorInfo>) {
     const url = new URL(hci.http.url);
-    return tunnel(hci.server, url.host, +url.port, (host, port) => {
+    return await tunnel(hci.server, url.host, +url.port, async (host, port) => {
       url.host = host;
       url.port = String(port);
-      return request(
+      return await request(
         fetch,
         hci.http.method,
         url.toString(),

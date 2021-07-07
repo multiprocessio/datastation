@@ -2,8 +2,8 @@ import fs from 'fs/promises';
 import path from 'path';
 import { Server } from 'net';
 
-import getPort from 'get-port';
-import tunnelSSH from 'tunnel-ssh';
+import SSH2Promise from 'ssh2-promise';
+import SSH2Config from 'ssh2-promise/lib/SSHConfig';
 
 import { DEBUG } from '../shared/constants';
 import { ServerInfo } from '../shared/state';
@@ -11,7 +11,7 @@ import log from '../shared/log';
 
 import { HOME } from './constants';
 
-interface SSHConfig extends tunnelSSH.Config {
+interface SSHConfig extends SSH2Config {
   retries: number;
   retry_factor: number;
   retry_minTimeout: number;
@@ -58,22 +58,6 @@ export async function getSSHConfig(server: ServerInfo): Promise<SSHConfig> {
   return config;
 }
 
-export async function getTunnelConfig(
-  server: ServerInfo,
-  destAddress: string,
-  destPort: number
-): Promise<[SSHConfig, string, number]> {
-  const config = await getSSHConfig(server);
-  const localhost = '127.0.0.1';
-  const freeLocalPort = await getPort({ host: localhost });
-  config.dstHost = destAddress;
-  config.dstPort = destPort;
-  config.localHost = localhost;
-  config.localPort = freeLocalPort;
-  config.keepAlive = true;
-  return [config, localhost, freeLocalPort];
-}
-
 export async function tunnel<T>(
   server: ServerInfo | null,
   destAddress: string,
@@ -84,26 +68,16 @@ export async function tunnel<T>(
     return callback(destAddress, destPort);
   }
 
-  const [config, localhost, localport] = await getTunnelConfig(
-    server,
-    destAddress,
-    destPort
-  );
+  const config = await getSSHConfig(server);
 
-  return new Promise((accept, reject) =>
-    tunnelSSH(config, async (error: Error | null, tnl: Server) => {
-      if (error) {
-        reject(error);
-      }
-
-      try {
-        const res = await callback(localhost, localport);
-        accept(res);
-      } catch (e) {
-        reject(e);
-      } finally {
-        tnl.close();
-      }
-    })
-  );
+  const ssh = new SSH2Promise(config);
+  const tunnel = await ssh.addTunnel({
+    remoteAddr: destAddress,
+    remotePort: destPort,
+  });
+  try {
+    return await callback(tunnel.localAddress, tunnel.localPort);
+  } finally {
+    tunnel.close();
+  }
 }

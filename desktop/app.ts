@@ -10,6 +10,7 @@ import {
 } from 'electron';
 
 import { APP_NAME, DEBUG, SITE_ROOT } from '../shared/constants';
+import log from '../shared/log';
 
 import { DSPROJ_FLAG } from './constants';
 import { storeHandlers } from './store';
@@ -20,6 +21,10 @@ import { evalFileHandler } from './file';
 import { evalProgramHandler } from './program';
 import { openProject, getOpenProjectHandler } from './project';
 import { loadSettings } from './settings';
+
+process.on('uncaughtException', (e) => {
+  log.error(e);
+});
 
 const menuTemplate = (win: BrowserWindow) => [
   ...(process.platform === 'darwin'
