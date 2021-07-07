@@ -147,7 +147,7 @@ app.whenReady().then(async () => {
     ...storeHandlers,
     evalSQLHandler,
     evalHTTPHandler,
-    evalProgramHandler,
+    getEvalProgramHandler(settings),
     evalFileHandler,
     getOpenProjectHandler(win),
     settings.getUpdateHandler(),

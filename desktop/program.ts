@@ -10,61 +10,76 @@ import { ProgramPanelInfo } from '../shared/state';
 import { parseArrayBuffer } from '../shared/text';
 
 import { DISK_ROOT, RESULTS_FILE } from './constants';
+import { Settings } from './settings';
 
 const execPromise = util.promisify(exec);
 
 const JAVASCRIPT_PREAMBLE = (outFile: string) =>
   `
-const fs = require('fs');
-global.cache = null;
 function DM_getPanel(i) {
-  if (global.cache) {
-    return global.cache[i];
-  }
- 
-  global.cache = JSON.parse(fs.readFileSync('${RESULTS_FILE}'));
-  if (!global.cache) {
-    return [];
-  }
-  return global.cache[i];
+  const fs = require('fs');
+  return JSON.parse(fs.readFileSync('${RESULTS_FILE}'))[i];
 }
 function DM_setPanel(v) {
+  const fs = require('fs');
   fs.writeFileSync('${outFile}', JSON.stringify(v));
 }`;
 
 const PYTHON_PREAMBLE = (outFile: string) => `
-import json as __DM_JSON
-__GLOBAL = None
 def DM_getPanel(i):
-  global __GLOBAL
-  if __GLOBAL: return __GLOBAL[i]
+  import json
   with open(r'${RESULTS_FILE}') as f:
-    __GLOBAL = __DM_JSON.load(f)
-  if not __GLOBAL: return []
-  return __GLOBAL[i]
+    return json.load(f)[i]
 def DM_setPanel(v):
+  import json
   with open(r'${outFile}', 'w') as f:
-    __DM_JSON.dump(v, f)`;
+    json.dump(v, f)`;
+
+const RUBY_PREAMBLE = (outFile: string) => `
+def DM_getPanel(i)
+  require 'json'
+  JSON.parse(File.read('${RESULTS_FILE}'))[i]
+end
+def DM_setPanel(v)
+  require 'json'
+  File.write('${outFile}', v.to_json)
+end`;
+
+const JULIA_PREAMBLE = (outFile: string) => `
+`;
+
+const R_PREAMBLE = (outFile: string) => `
+`;
 
 const PREAMBLE = {
   javascript: JAVASCRIPT_PREAMBLE,
   python: PYTHON_PREAMBLE,
+  ruby: RUBY_PREAMBLE,
+  julia: JULIA_PREAMBLE,
+  r: R_PREAMBLE,
 };
 
-export const evalProgramHandler = {
+export const getEvalProgramHandler = (settings: Settings) => ({
   resource: 'evalProgram',
   handler: async function (_: string, ppi: ProgramPanelInfo) {
     const programTmp = await makeTmpFile();
     const outputTmp = await makeTmpFile();
 
+    const programPathOrName = {
+      javascript: settings.nodePath,
+      python: settings.pythonPath,
+      ruby: settings.rubyPath,
+      r: settings.rPath,
+      julia: settings.juliaPath,
+    }[ppi.program.type];
+
     let out = '';
     try {
       const preamble = PREAMBLE[ppi.program.type](outputTmp.path);
       await fs.writeFile(programTmp.path, [preamble, ppi.content].join(EOL));
-      const runtime = ppi.program.type === 'javascript' ? 'node' : 'python3';
       try {
         const { stdout, stderr } = await execPromise(
-          `${runtime} ${programTmp.path}`
+          `${programPathOrName} ${programTmp.path}`
         );
         out = stdout + stderr;
         const body = await fs.readFile(outputTmp.path);
@@ -108,4 +123,4 @@ export const evalProgramHandler = {
       outputTmp.cleanup();
     }
   },
-};
+});
