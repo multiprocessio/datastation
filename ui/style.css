@@ -267,17 +267,17 @@ header > div {
 }
 
 .panel--loading {
-    animation: pulse 2s infinite ease-out;
+  animation: pulse 2s infinite ease-out;
 }
 
 @keyframes pulse {
-    0% {
-	background: white;
-    }
+  0% {
+    background: white;
+  }
 
-    50% {
-	background: #fcf6ff;
-    }
+  50% {
+    background: #fcf6ff;
+  }
 }
 
 .panel--hidden {
