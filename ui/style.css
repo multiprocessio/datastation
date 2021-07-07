@@ -218,10 +218,12 @@ header > div {
   flex: 1;
 }
 
+.server,
 .connector {
   margin-bottom: 15px;
 }
 
+.server-name,
 .connector-name {
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -264,6 +266,20 @@ header > div {
 .panel:focus-within,
 .panel:focus {
   border-color: #9f04ff;
+}
+
+.panel--loading {
+  animation: pulse 2s infinite ease-out;
+}
+
+@keyframes pulse {
+  0% {
+    background: white;
+  }
+
+  50% {
+    background: #fcf6ff;
+  }
 }
 
 .panel--hidden {

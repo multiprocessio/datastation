@@ -1,6 +1,7 @@
 import { IpcMain, IpcMainEvent } from 'electron';
 
 import { RPC_ASYNC_REQUEST, RPC_ASYNC_RESPONSE } from '../shared/constants';
+import log from '../shared/log';
 
 interface RPCPayload {
   messageNumber: number;
@@ -35,7 +36,7 @@ export function registerRPCHandlers(
           body: rsp,
         });
       } catch (e) {
-        console.error(e);
+        log.error(e);
         event.sender.send(responseChannel, {
           isError: true,
           body: e,

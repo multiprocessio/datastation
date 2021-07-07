@@ -1,6 +1,9 @@
 import * as React from 'react';
 
 import { SQLConnectorInfo, SQLConnectorInfoType } from '../shared/state';
+
+import { ProjectContext } from './ProjectStore';
+import { ServerPicker } from './ServerPicker';
 import { Input } from './component-library/Input';
 import { Select } from './component-library/Select';
 
@@ -20,6 +23,8 @@ export function SQLConnector({
     connector.sql.password = p;
     updateConnector(connector);
   }
+
+  const { servers } = React.useContext(ProjectContext);
 
   return (
     <React.Fragment>
@@ -74,6 +79,14 @@ export function SQLConnector({
           onChange={(value: string) => syncPassword(value)}
         />
       </div>
+      <ServerPicker
+        servers={servers}
+        serverId={connector.serverId}
+        onChange={(serverId: string) => {
+          connector.serverId = serverId;
+          updateConnector(connector);
+        }}
+      />
     </React.Fragment>
   );
 }

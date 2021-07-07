@@ -3,7 +3,9 @@ import util from 'util';
 import { Client as PostgresClient } from 'pg';
 import mysql from 'mysql2/promise';
 
-import { SQLConnectorInfo } from '../shared/state';
+import { Proxy, SQLConnectorInfo } from '../shared/state';
+
+import { tunnel } from './tunnel';
 
 async function evalPostgreSQL(
   content: string,
@@ -51,18 +53,25 @@ async function evalMySQL(
 
 export const evalSQLHandler = {
   resource: 'evalSQL',
-  handler: function (content: string, info: SQLConnectorInfo) {
+  handler: async function (content: string, info: Proxy<SQLConnectorInfo>) {
     const port = +info.sql.address.split(':')[1] || 5432;
     const host = info.sql.address.split(':')[0];
 
-    if (info.sql.type === 'postgres') {
-      return evalPostgreSQL(content, host, port, info);
-    }
+    return await tunnel(
+      info.server,
+      host,
+      port,
+      (host: string, port: number): any => {
+        if (info.sql.type === 'postgres') {
+          return evalPostgreSQL(content, host, port, info);
+        }
 
-    if (info.sql.type === 'mysql') {
-      return evalMySQL(content, host, port, info);
-    }
+        if (info.sql.type === 'mysql') {
+          return evalMySQL(content, host, port, info);
+        }
 
-    throw new Error(`Unknown SQL type: ${info.sql.type}`);
+        throw new Error(`Unknown SQL type: ${info.sql.type}`);
+      }
+    );
   },
 };

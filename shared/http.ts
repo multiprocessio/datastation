@@ -19,6 +19,9 @@ export async function request(
   additionalParsers: Parsers = undefined,
   require200 = false
 ) {
+  if (!(url.startsWith('https://') || url.startsWith('http://'))) {
+    url = 'http://' + url;
+  }
   const headersDict: { [v: string]: string } = {};
   headers.forEach((h: { value: string; name: string }) => {
     if (h.name.length && h.value.length) {

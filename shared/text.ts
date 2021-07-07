@@ -1,6 +1,8 @@
 import * as XLSX from 'xlsx';
 import * as CSV from 'papaparse';
 
+import log from './log';
+
 export function parseCSV(csvString: string) {
   const csvWhole = CSV.parse(csvString);
   const csv = csvWhole.data;
@@ -70,6 +72,6 @@ export async function parseArrayBuffer(
     return await additionalParsers[type](body);
   }
 
-  console.error(`Unsupported HTTP type: '${type}'`);
+  log.info(`Unsupported file type: '${type}'`);
   return bodyAsString();
 }

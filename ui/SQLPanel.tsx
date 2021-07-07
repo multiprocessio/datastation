@@ -1,6 +1,8 @@
 import * as React from 'react';
 
 import {
+  Proxy,
+  ServerInfo,
   ConnectorInfo,
   SQLConnectorInfo,
   SQLConnectorInfoType,
@@ -11,12 +13,14 @@ import { DEBUG, MODE_FEATURES } from '../shared/constants';
 
 import { asyncRPC } from './asyncRPC';
 import { ProjectContext } from './ProjectStore';
+import { ServerPicker } from './ServerPicker';
 import { Select } from './component-library/Select';
 
 export async function evalSQLPanel(
   panel: SQLPanelInfo,
   panelResults: Array<PanelResult>,
-  connectors: Array<ConnectorInfo>
+  connectors: Array<ConnectorInfo>,
+  servers: Array<ServerInfo>
 ) {
   // TODO: make panel substitution based on an actual parser since
   // regex will match instances of `' foo bar DM_getPanel(21)[sdklf] '`
@@ -38,7 +42,7 @@ export async function evalSQLPanel(
       const results = panelResults[panelIndex];
       if (!results || results.exception || results.value.length === 0) {
         // TODO: figure out how to query empty panels. (How to resolve column names for SELECT?)
-        throw new Error('Cannot query empty results in panel ${panelIndex}');
+        throw new Error(`Cannot query empty results in panel ${panelIndex}`);
       }
       const columns = Object.keys(results.value[0]);
       const valuesAsSQLStrings = results.value.map(
@@ -101,10 +105,17 @@ export async function evalSQLPanel(
   }
 
   if (panel.sql.type !== 'in-memory') {
-    return await asyncRPC<SQLConnectorInfo, string, Array<object>>(
+    const connector = connectors[
+      +panel.sql.connectorIndex
+    ] as Proxy<SQLConnectorInfo>;
+    connector.server = servers.find(
+      (s) => s.id === (panel.serverId || connector.serverId)
+    );
+
+    return await asyncRPC<Proxy<SQLConnectorInfo>, string, Array<object>>(
       'evalSQL',
       content,
-      connectors[+panel.sql.connectorIndex] as SQLConnectorInfo
+      connector
     );
   }
 
@@ -139,7 +150,7 @@ export function SQLPanelDetails({
   panel: SQLPanelInfo;
   updatePanel: (d: SQLPanelInfo) => void;
 }) {
-  const { connectors } = React.useContext(ProjectContext);
+  const { connectors, servers } = React.useContext(ProjectContext);
 
   return (
     <React.Fragment>
@@ -158,29 +169,39 @@ export function SQLPanelDetails({
         </Select>
       </div>
       {MODE_FEATURES.sql && panel.sql.type !== 'in-memory' && (
-        <div className="form-row">
-          <Select
-            label="Connector"
-            value={panel.sql.connectorIndex.toString()}
-            onChange={(connectorIndex: string) => {
-              panel.sql.connectorIndex = +connectorIndex;
+        <React.Fragment>
+          <div className="form-row">
+            <Select
+              label="Connector"
+              value={panel.sql.connectorIndex.toString()}
+              onChange={(connectorIndex: string) => {
+                panel.sql.connectorIndex = +connectorIndex;
+                updatePanel(panel);
+              }}
+            >
+              {connectors
+                .map((c: ConnectorInfo, index: number) => {
+                  if (
+                    c.type !== 'sql' ||
+                    (c as SQLConnectorInfo).sql.type !== panel.sql.type
+                  ) {
+                    return null;
+                  }
+
+                  return <option value={index}>{c.name}</option>;
+                })
+                .filter(Boolean)}
+            </Select>
+          </div>
+          <ServerPicker
+            servers={servers}
+            serverId={panel.serverId}
+            onChange={(serverId: string) => {
+              panel.serverId = serverId;
               updatePanel(panel);
             }}
-          >
-            {connectors
-              .map((c: ConnectorInfo, index: number) => {
-                if (
-                  c.type !== 'sql' ||
-                  (c as SQLConnectorInfo).sql.type !== panel.sql.type
-                ) {
-                  return null;
-                }
-
-                return <option value={index}>{c.name}</option>;
-              })
-              .filter(Boolean)}
-          </Select>
-        </div>
+          />
+        </React.Fragment>
       )}
     </React.Fragment>
   );

@@ -1,6 +1,7 @@
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
 
 import { RPC_ASYNC_REQUEST, RPC_ASYNC_RESPONSE } from '../shared/constants';
+import log from '../shared/log';
 
 let messageNumber = -1;
 
@@ -32,7 +33,13 @@ contextBridge.exposeInMainWorld('asyncRPC', async function <
   });
 
   if (result.isError) {
-    throw result.body;
+    try {
+      throw result.body;
+    } catch (e) {
+      // Want to log it as an error, not just the object result.body
+      log.error(e);
+      throw e;
+    }
   }
 
   return result.body;

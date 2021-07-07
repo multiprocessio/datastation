@@ -4,6 +4,7 @@ import * as React from 'react';
 
 import { MODE_FEATURES } from '../shared/constants';
 import {
+  ServerInfo,
   ConnectorInfo,
   ProjectPage,
   PanelInfo,
@@ -40,11 +41,40 @@ export const PANEL_TYPE_ICON = {
   file: 'description',
 };
 
+function objectPreview(obj: any, nKeys: number = 100): string {
+  nKeys = Math.max(nKeys, 1);
+  const nextNKeys = nKeys / 2;
+  if (Array.isArray(obj)) {
+    return obj
+      .slice(0, nKeys)
+      .map((o) => objectPreview(o, nextNKeys))
+      .join('\n');
+  }
+
+  if (typeof obj === 'object') {
+    const keys = Object.keys(obj).slice(0, nKeys);
+    const preview: Array<any> = [];
+    keys.forEach((k) => {
+      preview.push(k + ':' + objectPreview(obj[k], nextNKeys));
+    });
+
+    return preview.join(', ');
+  }
+
+  let res = String(obj).slice(0, nKeys * 10);
+  if (String(obj).length > nKeys * 10) {
+    res += '...';
+  }
+
+  return res;
+}
+
 export async function evalPanel(
   page: ProjectPage,
   panelId: number,
   panelResults: Array<PanelResult>,
-  connectors: Array<ConnectorInfo>
+  connectors: Array<ConnectorInfo>,
+  servers: Array<ServerInfo>
 ): Promise<[any, string]> {
   const panel = page.panels[panelId];
   switch (panel.type) {
@@ -54,7 +84,12 @@ export async function evalPanel(
       return [await evalLiteralPanel(panel as LiteralPanelInfo), ''];
     case 'sql':
       return [
-        await evalSQLPanel(panel as SQLPanelInfo, panelResults, connectors),
+        await evalSQLPanel(
+          panel as SQLPanelInfo,
+          panelResults,
+          connectors,
+          servers
+        ),
         '',
       ];
     case 'graph':
@@ -68,9 +103,9 @@ export async function evalPanel(
         '',
       ];
     case 'http':
-      return [await evalHTTPPanel(panel as HTTPPanelInfo), ''];
+      return [await evalHTTPPanel(panel as HTTPPanelInfo, null, servers), ''];
     case 'file':
-      return [await evalFilePanel(panel as FilePanelInfo), ''];
+      return [await evalFilePanel(panel as FilePanelInfo, null, servers), ''];
   }
 }
 
@@ -179,8 +214,8 @@ export function Panel({
 
     if (previewableTypes.includes(panel.type)) {
       if (results && !results.exception) {
-        const resultsLines = valueAsString(results.value)[0].split('\n');
-        setPreview(resultsLines.slice(0, 50).join('\n'));
+        const prev = objectPreview(results.value);
+        setPreview(prev);
       }
     }
   }, [results.value, results.exception]);
@@ -200,15 +235,17 @@ export function Panel({
 
     if (e.ctrlKey && e.code === 'Enter') {
       reevalPanel(panelIndex);
-      e.preventDefault();
+      if (e.preventDefault) {
+        e.preventDefault();
+      }
     }
   }
 
   return (
     <div
       className={`panel ${hidden ? 'panel--hidden' : ''} ${
-        panel.type === 'file' ? 'panel--empty' : ''
-      }`}
+        panel.type === 'file' && !results.exception ? 'panel--empty' : ''
+      } ${results.loading ? 'panel--loading' : ''}`}
       tabIndex={1001}
       ref={panelRef}
       onKeyDown={keyboardShortcuts}
@@ -259,7 +296,7 @@ export function Panel({
             <span className="panel-controls vertical-align-center flex-right">
               <span className="last-run">
                 {results.loading
-                  ? 'Loading'
+                  ? 'Running...'
                   : results.lastRun
                   ? 'Last run ' + results.lastRun
                   : 'Run to apply changes'}

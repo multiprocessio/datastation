@@ -9,16 +9,26 @@ import {
   shell,
 } from 'electron';
 
-import { APP_NAME, DEBUG, SITE_ROOT } from '../shared/constants';
+import { APP_NAME, VERSION, DEBUG, SITE_ROOT } from '../shared/constants';
+import log from '../shared/log';
 
 import { DSPROJ_FLAG } from './constants';
+import { configureLogger } from './log';
 import { storeHandlers } from './store';
 import { registerRPCHandlers } from './rpc';
 import { evalSQLHandler } from './sql';
 import { evalHTTPHandler } from './http';
+import { evalFileHandler } from './file';
 import { evalProgramHandler } from './program';
 import { openProject, getOpenProjectHandler } from './project';
 import { loadSettings } from './settings';
+
+configureLogger().then(() => {
+  log.info(APP_NAME, VERSION, DEBUG ? 'DEBUG' : '');
+});
+process.on('uncaughtException', (e) => {
+  log.error(e);
+});
 
 const menuTemplate = (win: BrowserWindow) => [
   ...(process.platform === 'darwin'
@@ -99,7 +109,7 @@ const menuTemplate = (win: BrowserWindow) => [
 app.whenReady().then(async () => {
   const preload = path.join(__dirname, 'preload.js');
   const win = new BrowserWindow({
-    width: 1200,
+    width: 1400,
     height: 800,
     title: APP_NAME,
     webPreferences: {
@@ -138,6 +148,7 @@ app.whenReady().then(async () => {
     evalSQLHandler,
     evalHTTPHandler,
     evalProgramHandler,
+    evalFileHandler,
     getOpenProjectHandler(win),
     settings.getUpdateHandler(),
   ]);
