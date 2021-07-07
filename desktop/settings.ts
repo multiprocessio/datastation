@@ -10,11 +10,30 @@ import { ensureFile } from './store';
 export class Settings {
   uid: string;
   lastProject?: string;
+  pythonPath: string;
+  nodePath: string;
+  rPath: string;
+  juliaPath: string;
+  rubyPath: string;
   file: string;
 
-  constructor(file: string, uid?: string, lastProject?: string) {
+  constructor(
+    file: string,
+    uid?: string,
+    lastProject?: string,
+    pythonPath?: string,
+    nodePath?: string,
+    rPath?: string,
+    juliaPath?: string,
+    rubyPath?: string
+  ) {
     this.uid = uid || uuid.v4();
     this.lastProject = lastProject || '';
+    this.pythonPath = pythonPath || 'python3';
+    this.nodePath = nodePath || 'node';
+    this.rPath = rPath || 'Rscript';
+    this.juliaPath = juliaPath || 'julia';
+    this.rubyPath = rubyPath || 'ruby';
     this.file = file;
   }
 
