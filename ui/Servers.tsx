@@ -17,7 +17,7 @@ export function Servers({
 }) {
   return (
     <div className="servers">
-      <h2 className="title">Servers</h2>
+      <h2 className="title">SSH Connections</h2>
       {state.servers?.map((dc: ServerInfo, i: number) => (
         <Server
           key={dc.id}

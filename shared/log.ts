@@ -4,7 +4,7 @@ function log(level: string, ...args: any[]) {
       args[i] = args[i].stack;
     }
   }
-  const f = level === 'ERROR' ? console.error : console.log;
+  const f = level === 'ERROR' ? console.trace : console.log;
   f(`[${level}] ${new Date()} ${args.map(String).join(' ')}`);
 }
 

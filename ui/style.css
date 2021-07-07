@@ -218,10 +218,12 @@ header > div {
   flex: 1;
 }
 
+.server,
 .connector {
   margin-bottom: 15px;
 }
 
+.server-name,
 .connector-name {
   white-space: nowrap;
   text-overflow: ellipsis;

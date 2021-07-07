@@ -41,6 +41,31 @@ export const PANEL_TYPE_ICON = {
   file: 'description',
 };
 
+function objectPreview(obj: any, nKeys: number = 100): string {
+  nKeys = Math.max(nKeys, 1);
+  const nextNKeys = nKeys / 2;
+  if (Array.isArray(obj)) {
+    return obj.slice(0, nKeys).map(o => objectPreview(o, nextNKeys)).join('\n');
+  }
+
+  if (typeof obj === 'object') {
+    const keys = Object.keys(obj).slice(0, nKeys);
+    const preview: Array<any> = [];
+    keys.forEach((k) => {
+      preview.push(k + ':' + objectPreview(obj[k], nextNKeys));
+    });
+
+    return preview.join(', ');
+  }
+
+  let res = String(obj).slice(0, nKeys * 10);
+  if (String(obj).length > nKeys * 10) {
+    res += '...';
+  }
+
+  return res;
+}
+
 export async function evalPanel(
   page: ProjectPage,
   panelId: number,
@@ -186,10 +211,7 @@ export function Panel({
 
     if (previewableTypes.includes(panel.type)) {
       if (results && !results.exception) {
-        let prev = String(results.value).slice(0, 300);
-        if (results.value.length > 300) {
-          prev += '...';
-        }
+        const prev = objectPreview(results.value);
         setPreview(prev);
       }
     }
@@ -210,15 +232,16 @@ export function Panel({
 
     if (e.ctrlKey && e.code === 'Enter') {
       reevalPanel(panelIndex);
-      e.preventDefault();
+      if (e.preventDefault) {
+        e.preventDefault();
+      }
     }
   }
 
   return (
     <div
-      className={`panel ${hidden ? 'panel--hidden' : ''} ${
-        panel.type === 'file' && !results.exception ? 'panel--empty' : ''
-      } ${results.loading ? 'panel--loading' : ''}`}
+      className={`panel ${hidden ? 'panel--hidden' : ''} ${panel.type === 'file' && !results.exception ? 'panel--empty' : ''
+        } ${results.loading ? 'panel--loading' : ''}`}
       tabIndex={1001}
       ref={panelRef}
       onKeyDown={keyboardShortcuts}
@@ -271,8 +294,8 @@ export function Panel({
                 {results.loading
                   ? 'Running...'
                   : results.lastRun
-                  ? 'Last run ' + results.lastRun
-                  : 'Run to apply changes'}
+                    ? 'Last run ' + results.lastRun
+                    : 'Run to apply changes'}
               </span>
               <span title="Evaluate Panel (Ctrl-Enter)">
                 <Button

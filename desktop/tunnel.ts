@@ -76,11 +76,8 @@ export async function tunnel<T>(
     remotePort: destPort,
   });
   try {
-    console.log('HEYYYY');
-    const a = await callback(tunnel.localAddress, tunnel.localPort);
-    console.log('HEYYYY!!!!!!!');
-    return a;
+    return await callback(tunnel.localAddress, tunnel.localPort);
   } finally {
-    tunnel.close();
+    ssh.close();
   }
 }

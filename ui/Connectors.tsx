@@ -17,7 +17,7 @@ export function Connectors({
 }) {
   return (
     <div className="connectors">
-      <h2 className="title">Connectors</h2>
+      <h2 className="title">Data Sources</h2>
       {state.connectors?.map((dc: ConnectorInfo, i: number) => (
         <Connector
           key={dc.id}

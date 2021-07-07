@@ -63,7 +63,7 @@ export function Page({
         {
           loading: false,
           lastRun: new Date(),
-          exception: e.stack,
+          exception: e.stack || e.message,
           stdout: e.stdout,
         },
         true

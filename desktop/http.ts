@@ -17,7 +17,7 @@ export const evalHTTPHandler = {
   handler: async function (body: string, hci: Proxy<HTTPConnectorInfo>) {
     const url = new URL(hci.http.url);
     return await tunnel(hci.server, url.host, +url.port, async (host, port) => {
-      url.host = host;
+      url.host = host || '127.0.0.1';
       url.port = String(port);
       return await request(
         fetch,

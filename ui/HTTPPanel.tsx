@@ -121,14 +121,16 @@ export function HTTPPanelDetails({
         >
           Add Header
         </Button>
-        <ServerPicker
-          servers={servers}
-          serverId={panel.serverId}
-          onChange={(serverId: string) => {
-            panel.serverId = serverId;
-            updatePanel(panel);
-          }}
-        />
+        {false /* the http proxy isn't working at the moment */ && (
+          <ServerPicker
+            servers={servers}
+            serverId={panel.serverId}
+            onChange={(serverId: string) => {
+              panel.serverId = serverId;
+              updatePanel(panel);
+            }}
+          />
+        )}
       </div>
     </React.Fragment>
   );

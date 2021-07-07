@@ -39,9 +39,7 @@ export function Pages({
         'storeResults',
         null,
         results[page.id].map((r) => r.value)
-      ).catch((e) => {
-        console.error(e);
-      });
+      );
     }
   }
 
