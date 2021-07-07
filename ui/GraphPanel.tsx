@@ -92,6 +92,7 @@ export function GraphPanel({
     const chart = new Chart(ctx, {
       plugins: [
         {
+          id: 'background-white',
           // Pretty ridiculous there's no builtin way to set a background color
           // https://stackoverflow.com/a/38493678/1507139
           beforeDraw: function () {

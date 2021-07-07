@@ -1,13 +1,20 @@
 import * as React from 'react';
 
-import { FilePanelInfo } from '../shared/state';
+import { Proxy, ServerInfo, FilePanelInfo } from '../shared/state';
 import { parseArrayBuffer } from '../shared/text';
 import { MODE } from '../shared/constants';
 
+import { ProjectContext } from './ProjectStore';
 import { asyncRPC } from './asyncRPC';
+import { ServerPicker } from './ServerPicker';
 import { FileInput } from './component-library/FileInput';
+import { Input } from './component-library/Input';
 
-export async function evalFilePanel(panel: FilePanelInfo) {
+export async function evalFilePanel(
+  panel: FilePanelInfo,
+  _: any,
+  servers: Array<ServerInfo>
+) {
   if (MODE === 'browser') {
     return await parseArrayBuffer(
       'text/plain',
@@ -16,10 +23,10 @@ export async function evalFilePanel(panel: FilePanelInfo) {
     );
   }
 
-  return await asyncRPC<{ name: string }, string, Array<object>>(
+  return await asyncRPC<Proxy<{ name: string }>, string, Array<object>>(
     'evalFile',
     panel.content,
-    panel.file
+    { ...panel.file, server: servers.find((s) => s.id === panel.serverId) }
   );
 }
 
@@ -36,29 +43,48 @@ export function FilePanelDetails({
   panel: FilePanelInfo;
   updatePanel: (d: FilePanelInfo) => void;
 }) {
+  const { servers } = React.useContext(ProjectContext);
   return (
     <React.Fragment>
       <div className="form-row">
-        <FileInput
-          label="File"
-          accept={SUPPORTED_FILE_TYPES.map((p: string) => `.${p}`).join(',')}
-          onChange={(files: Array<File>) => {
-            const fr = new FileReader();
+        {MODE === 'browser' ? (
+          <FileInput
+            label="File"
+            accept={SUPPORTED_FILE_TYPES.map((p: string) => `.${p}`).join(',')}
+            onChange={(files: Array<File>) => {
+              const fr = new FileReader();
 
-            if (MODE === 'browser') {
               fr.onload = function () {
                 panel.file.content = fr.result as ArrayBuffer;
                 updatePanel(panel);
               };
 
               fr.readAsArrayBuffer(files[0]);
-            }
 
-            panel.file.name = files[0].name;
-            updatePanel(panel);
-          }}
-        />
+              panel.file.name = files[0].name;
+              updatePanel(panel);
+            }}
+          />
+        ) : (
+          <Input
+            label="File"
+            autoWidth={true}
+            value={panel.file.name}
+            onChange={(v: string) => {
+              panel.file.name = v;
+              updatePanel(panel);
+            }}
+          />
+        )}
       </div>
+      <ServerPicker
+        servers={servers}
+        serverId={panel.serverId}
+        onChange={(serverId: string) => {
+          panel.serverId = serverId;
+          updatePanel(panel);
+        }}
+      />
     </React.Fragment>
   );
 }

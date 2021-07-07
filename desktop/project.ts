@@ -22,17 +22,6 @@ export async function openProject(win: BrowserWindow) {
   win.loadURL(
     'file://' + path.join(__dirname, 'index.html?project=' + filePaths[0])
   );
-  /*
-   *   const project = filePaths[0];
-   *   let cmd = process.argv[0];
-   *   let args = [DSPROJ_FLAG, project];
-   *   if (cmd.toLowerCase().endsWith('electron')) {
-   *     cmd = 'yarn';
-   *     args = ['start-desktop', ...args];
-   *   }
-   *
-   *   console.log(`Spawning: "${cmd} ${args.join(' ')}"`);
-   *   spawn(cmd, args); */
 }
 
 export const getOpenProjectHandler = (win: BrowserWindow) => ({

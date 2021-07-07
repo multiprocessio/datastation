@@ -1,6 +1,8 @@
 import * as React from 'react';
 
 import {
+  Proxy,
+  ServerInfo,
   HTTPPanelInfo,
   HTTPConnectorInfo,
   HTTPConnectorInfoMethod,
@@ -9,11 +11,17 @@ import { MODE } from '../shared/constants';
 import { request } from '../shared/http';
 
 import { asyncRPC } from './asyncRPC';
+import { ProjectContext } from './ProjectStore';
+import { ServerPicker } from './ServerPicker';
 import { Button } from './component-library/Button';
 import { Input } from './component-library/Input';
 import { Select } from './component-library/Select';
 
-export async function evalHTTPPanel(panel: HTTPPanelInfo) {
+export async function evalHTTPPanel(
+  panel: HTTPPanelInfo,
+  _: any,
+  servers: Array<ServerInfo>
+) {
   if (MODE === 'browser') {
     return await request(
       (window as any).fetch,
@@ -24,10 +32,14 @@ export async function evalHTTPPanel(panel: HTTPPanelInfo) {
     );
   }
 
-  return await asyncRPC<HTTPConnectorInfo, string, Array<object>>(
+  const connector = panel.http as Proxy<HTTPConnectorInfo>;
+  connector.server = servers.find(
+    (s) => s.id === (panel.serverId || connector.serverId)
+  );
+  return await asyncRPC<Proxy<HTTPConnectorInfo>, string, Array<object>>(
     'evalHTTP',
     panel.content,
-    panel.http
+    connector
   );
 }
 
@@ -38,6 +50,7 @@ export function HTTPPanelDetails({
   panel: HTTPPanelInfo;
   updatePanel: (d: HTTPPanelInfo) => void;
 }) {
+  const { servers } = React.useContext(ProjectContext);
   return (
     <React.Fragment>
       <div className="form-row">
@@ -108,6 +121,16 @@ export function HTTPPanelDetails({
         >
           Add Header
         </Button>
+        {false /* the http proxy isn't working at the moment */ && (
+          <ServerPicker
+            servers={servers}
+            serverId={panel.serverId}
+            onChange={(serverId: string) => {
+              panel.serverId = serverId;
+              updatePanel(panel);
+            }}
+          />
+        )}
       </div>
     </React.Fragment>
   );

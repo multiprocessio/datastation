@@ -2,16 +2,62 @@ import * as uuid from 'uuid';
 
 import { mergeDeep } from './merge';
 import { VERSION } from './constants';
+import log from './log';
 
-export interface PanelResult {
+export class PanelResult {
   exception?: string;
   value?: Array<any>;
   lastRun: Date;
   loading: boolean;
   stdout: string;
+
+  constructor() {
+    this.lastRun = null;
+    this.loading = false;
+    this.stdout = '';
+  }
 }
 export type IDDict<T> = { [k: string]: T };
 export type PanelResults = IDDict<Array<PanelResult>>;
+
+export type ServerInfoType = 'ssh-agent' | 'password' | 'private-key';
+
+export class ServerInfo {
+  name: string;
+  address: string;
+  port: number;
+  type: ServerInfoType;
+  username: string;
+  password: string;
+  privateKeyFile: string;
+  passphrase: string;
+  id: string;
+
+  constructor(
+    name?: string,
+    address?: string,
+    port?: number,
+    type?: ServerInfoType,
+    username?: string,
+    password?: string,
+    privateKeyFile?: string,
+    passphrase?: string
+  ) {
+    this.type = type || 'private-key';
+    this.name = name || 'Untitled server';
+    this.address = address || '';
+    this.port = port || 22;
+    this.username = username || '';
+    this.password = password || '';
+    this.privateKeyFile = privateKeyFile || '~/.ssh/id_rsa';
+    this.passphrase = passphrase || '';
+    this.id = uuid.v4();
+  }
+}
+
+export type Proxy<T> = T & {
+  server?: ServerInfo;
+};
 
 export type ConnectorInfoType = 'sql' | 'http';
 
@@ -19,10 +65,12 @@ export class ConnectorInfo {
   name: string;
   type: ConnectorInfoType;
   id: string;
+  serverId?: string;
 
-  constructor(type?: ConnectorInfoType, name?: string) {
+  constructor(type?: ConnectorInfoType, name?: string, serverId?: string) {
     this.name = name || 'Untitled Connector';
     this.type = type || 'sql';
+    this.serverId = serverId;
     this.id = uuid.v4();
   }
 }
@@ -100,6 +148,7 @@ export class PanelInfo {
   type: PanelInfoType;
   name: string;
   id: string;
+  serverId: string;
 
   constructor(type: PanelInfoType, name?: string, content?: string) {
     this.content = content || '';
@@ -259,6 +308,7 @@ export class ProjectState {
   pages: Array<ProjectPage>;
   projectName: string;
   connectors: Array<ConnectorInfo>;
+  servers: Array<ServerInfo>;
   id: string;
   originalVersion: string;
   lastVersion: string;
@@ -267,12 +317,14 @@ export class ProjectState {
     projectName?: string,
     pages?: Array<ProjectPage>,
     connectors?: Array<ConnectorInfo>,
+    servers?: Array<ServerInfo>,
     originalVersion?: string,
     lastVersion?: string
   ) {
     this.pages = pages || [];
     this.projectName = projectName || '';
     this.connectors = connectors || [];
+    this.servers = servers || [];
     this.originalVersion = originalVersion || VERSION;
     this.lastVersion = lastVersion || VERSION;
     this.id = uuid.v4();
@@ -342,9 +394,13 @@ export function rawStateToObjects(raw: ProjectState): ProjectState {
           page.panels[i] = mergeDeep(new FilePanelInfo(), panel);
           break;
         default:
-          console.error(`Unknown panel type: ${panel.type}`);
+          log.info(`Unknown panel type: ${panel.type}`);
       }
     });
+  });
+
+  object.servers.forEach((s: ServerInfo, i: number) => {
+    object.servers[i] = mergeDeep(new ServerInfo(), s);
   });
 
   object.connectors.forEach((c: ConnectorInfo, i: number) => {
@@ -356,7 +412,7 @@ export function rawStateToObjects(raw: ProjectState): ProjectState {
         object.connectors[i] = mergeDeep(new HTTPConnectorInfo(), c);
         break;
       default:
-        console.error(`Unknown connector type: ${c.type}`);
+        log.info(`Unknown connector type: ${c.type}`);
     }
   });
 

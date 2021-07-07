@@ -3,6 +3,7 @@ import * as fs from 'fs/promises';
 import * as uuid from 'uuid';
 
 import { mergeDeep } from '../shared/merge';
+import log from '../shared/log';
 
 import { ensureFile } from './store';
 
@@ -33,7 +34,7 @@ export class Settings {
         existingSettings = JSON.parse(existingSettingsString.toString());
       } catch (e) {
         const backupFile = settingsFile + '.bak';
-        console.error(
+        log.error(
           `Settings file has been corrupted, renaming to ${backupFile}`,
           e
         );
