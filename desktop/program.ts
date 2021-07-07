@@ -46,10 +46,24 @@ def DM_setPanel(v)
 end`;
 
 const JULIA_PREAMBLE = (outFile: string) => `
-`;
+import JSON
+function DM_getPanel(i)
+  JSON.parsefile("${RESULTS_FILE}")[i]
+end
+function DM_setPanel(v)
+  open("${outFile}", "w") do f
+    JSON.print(f, v)
+  end
+end`;
 
 const R_PREAMBLE = (outFile: string) => `
-`;
+library("rjson")
+DM_getPanel <- function(i) {
+  fromJSON(file="${RESULTS_FILE}")[i]
+}
+DM_setPanel <- function(v) {
+  write(toJSON(v), "${outFile}")
+}`;
 
 const PREAMBLE = {
   javascript: JAVASCRIPT_PREAMBLE,

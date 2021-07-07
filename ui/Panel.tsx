@@ -243,9 +243,8 @@ export function Panel({
 
   return (
     <div
-      className={`panel ${hidden ? 'panel--hidden' : ''} ${
-        panel.type === 'file' && !results.exception ? 'panel--empty' : ''
-      } ${results.loading ? 'panel--loading' : ''}`}
+      className={`panel ${hidden ? 'panel--hidden' : ''} ${panel.type === 'file' && !results.exception ? 'panel--empty' : ''
+        } ${results.loading ? 'panel--loading' : ''}`}
       tabIndex={1001}
       ref={panelRef}
       onKeyDown={keyboardShortcuts}
@@ -298,8 +297,8 @@ export function Panel({
                 {results.loading
                   ? 'Running...'
                   : results.lastRun
-                  ? 'Last run ' + results.lastRun
-                  : 'Run to apply changes'}
+                    ? 'Last run ' + results.lastRun
+                    : 'Run to apply changes'}
               </span>
               <span title="Evaluate Panel (Ctrl-Enter)">
                 <Button
@@ -469,15 +468,29 @@ export function Panel({
                 )}
                 {panel.type === 'program' && (
                   <div className="alert alert-info">
-                    Use builtin functions,{' '}
-                    <code>DM_setPanel($some_array_data)</code> and{' '}
-                    <code>DM_getPanel($panel_number)</code>, to interact with
-                    other panels. For example:{' '}
-                    <code>
-                      const passthrough = DM_getPanel(0);
-                      DM_setPanel(passthrough);
-                    </code>
-                    .
+                    <p>
+                      Use builtin functions,{' '}
+                      <code>DM_setPanel($some_array_data)</code> and{' '}
+                      <code>DM_getPanel($panel_number)</code>, to interact with
+                      other panels. For example:{' '}
+                      <code>
+                        const passthrough = DM_getPanel(0);
+                        DM_setPanel(passthrough);
+                      </code>
+                      .
+                    </p>
+                    {(panel as ProgramPanelInfo).program.type === 'julia' && (
+                      <p>
+                        Install{' '}
+                        <a href="https://github.com/JuliaIO/JSON.jl">JSON.jl</a>{' '}
+                        to script with Julia.
+                      </p>
+                    )}
+                    {(panel as ProgramPanelInfo).program.type === 'r' && (
+                      <p>
+                        Install <a href="https://rdrr.io/cran/rjson/">rjson</a> to script with R.
+                      </p>
+                    )}
                   </div>
                 )}
                 {panel.type === 'sql' && (

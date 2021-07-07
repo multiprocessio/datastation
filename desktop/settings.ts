@@ -17,7 +17,16 @@ export class Settings {
   rubyPath: string;
   file: string;
 
-  constructor(file: string, uid?: string, lastProject?: string, pythonPath?: string, nodePath?: string, rPath?: string, juliaPath?: string, rubyPath?: string) {
+  constructor(
+    file: string,
+    uid?: string,
+    lastProject?: string,
+    pythonPath?: string,
+    nodePath?: string,
+    rPath?: string,
+    juliaPath?: string,
+    rubyPath?: string
+  ) {
     this.uid = uid || uuid.v4();
     this.lastProject = lastProject || '';
     this.pythonPath = pythonPath || 'python3';

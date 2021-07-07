@@ -1,8 +1,12 @@
 import * as React from 'react';
 import circularSafeStringify from 'json-stringify-safe';
 
-import { MODE } from '../shared/constants';
-import { PanelResult, ProgramPanelInfo } from '../shared/state';
+import { MODE, MODE_FEATURES } from '../shared/constants';
+import {
+  PanelResult,
+  ProgramPanelInfo,
+  ProgramPanelInfoType,
+} from '../shared/state';
 
 import { asyncRPC } from './asyncRPC';
 import { Select } from './component-library/Select';
@@ -87,7 +91,7 @@ export function ProgramPanelDetails({
           label="Language"
           value={panel.program.type}
           onChange={(value: string) => {
-            panel.program.type = value as 'javascript' | 'python';
+            panel.program.type = value as ProgramPanelInfoType;
             if (panel.content === '') {
               switch (panel.program.type) {
                 case 'javascript':
@@ -116,6 +120,13 @@ export function ProgramPanelDetails({
         >
           <option value="javascript">JavaScript</option>
           <option value="python">Python</option>
+          {MODE_FEATURES.extraLanguages ? (
+            <React.Fragment>
+              <option value="ruby">Ruby</option>
+              <option value="r">R</option>
+              <option value="julia">Julia</option>
+            </React.Fragment>
+          ) : null}
         </Select>
       </div>
     </React.Fragment>
