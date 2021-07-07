@@ -267,22 +267,17 @@ header > div {
 }
 
 .panel--loading {
-  background-color: white;
-  animation-name: color;
-  animation-duration: 2s;
-  animation-iteration-count: infinite;
+    animation: pulse 2s infinite ease-out;
 }
 
-@keyframes color {
-  0% {
-    background-color: white;
-  }
-  50% {
-    background-color: #f5e6ff;
-  }
-  100 {
-    background-color: #f9f0ff;
-  }
+@keyframes pulse {
+    0% {
+	background: white;
+    }
+
+    50% {
+	background: #fcf6ff;
+    }
 }
 
 .panel--hidden {

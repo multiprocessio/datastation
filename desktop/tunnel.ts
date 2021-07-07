@@ -76,7 +76,10 @@ export async function tunnel<T>(
     remotePort: destPort,
   });
   try {
-    return await callback(tunnel.localAddress, tunnel.localPort);
+    console.log('HEYYYY');
+    const a = await callback(tunnel.localAddress, tunnel.localPort);
+    console.log('HEYYYY!!!!!!!');
+    return a;
   } finally {
     tunnel.close();
   }

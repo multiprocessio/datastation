@@ -21,11 +21,16 @@ async function evalPostgreSQL(
     port,
   });
   try {
+    console.log('FIRST HERE');
     await client.connect();
+    console.log('NOW CONNECTED HERE');
     const res = await client.query(content);
+    console.log('NOW QUERYING HERE');
     return res.rows;
   } finally {
+    console.log('NOW CLOSING');
     await client.end();
+    console.log('NOW CLOSED');
   }
 }
 
