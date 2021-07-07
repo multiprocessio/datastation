@@ -3,7 +3,7 @@ import path from 'path';
 import { Server } from 'net';
 
 import SSH2Promise from 'ssh2-promise';
-import SSH2Config from 'ssh2-promise/lib/SSHConfig';
+import SSH2Config from 'ssh2-promise/lib/sshConfig';
 
 import { DEBUG } from '../shared/constants';
 import { ServerInfo } from '../shared/state';
