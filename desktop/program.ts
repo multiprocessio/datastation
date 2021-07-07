@@ -48,7 +48,7 @@ end`;
 const JULIA_PREAMBLE = (outFile: string) => `
 import JSON
 function DM_getPanel(i)
-  JSON.parsefile("${RESULTS_FILE}")[i]
+  JSON.parsefile("${RESULTS_FILE}")[i+1]
 end
 function DM_setPanel(v)
   open("${outFile}", "w") do f
@@ -127,7 +127,21 @@ export const getEvalProgramHandler = (settings: Settings) => ({
               }`;
             }
           );
-        }
+        } else if (ppi.program.type === 'julia') {
+	  const matcher = RegExp(
+            `${programTmp.path}:([1-9]*)`.replace('/', '\\/'),
+            'g'
+          );
+          // Rewrite line numbers in traceback
+          e.message = e.message.replace(
+            matcher,
+            function (_: string, line: string) {
+              return `${programTmp.path}:${
+                +line - JULIA_PREAMBLE('').split(EOL).length
+              }`;
+            }
+          );
+	}
 
         e.stdout = out;
         throw e;

@@ -31,7 +31,7 @@ export class Settings {
     this.lastProject = lastProject || '';
     this.pythonPath = pythonPath || 'python3';
     this.nodePath = nodePath || 'node';
-    this.rPath = rPath || 'R';
+    this.rPath = rPath || 'Rscript';
     this.juliaPath = juliaPath || 'julia';
     this.rubyPath = rubyPath || 'ruby';
     this.file = file;

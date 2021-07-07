@@ -243,8 +243,9 @@ export function Panel({
 
   return (
     <div
-      className={`panel ${hidden ? 'panel--hidden' : ''} ${panel.type === 'file' && !results.exception ? 'panel--empty' : ''
-        } ${results.loading ? 'panel--loading' : ''}`}
+      className={`panel ${hidden ? 'panel--hidden' : ''} ${
+        panel.type === 'file' && !results.exception ? 'panel--empty' : ''
+      } ${results.loading ? 'panel--loading' : ''}`}
       tabIndex={1001}
       ref={panelRef}
       onKeyDown={keyboardShortcuts}
@@ -297,8 +298,8 @@ export function Panel({
                 {results.loading
                   ? 'Running...'
                   : results.lastRun
-                    ? 'Last run ' + results.lastRun
-                    : 'Run to apply changes'}
+                  ? 'Last run ' + results.lastRun
+                  : 'Run to apply changes'}
               </span>
               <span title="Evaluate Panel (Ctrl-Enter)">
                 <Button
@@ -488,7 +489,8 @@ export function Panel({
                     )}
                     {(panel as ProgramPanelInfo).program.type === 'r' && (
                       <p>
-                        Install <a href="https://rdrr.io/cran/rjson/">rjson</a> to script with R.
+                        Install <a href="https://rdrr.io/cran/rjson/">rjson</a>{' '}
+                        to script with R.
                       </p>
                     )}
                   </div>

@@ -84,6 +84,17 @@ export function ProgramPanelDetails({
   updatePanel: (d: ProgramPanelInfo) => void;
   panelIndex: number;
 }) {
+  const options = [
+    { value: 'javascript', name: 'JavaScript' },
+    { value: 'python', name: 'Python' },
+    ...(MODE_FEATURES.extraLanguages
+      ? [
+          { value: 'ruby', name: 'Ruby' },
+          { value: 'r', name: 'R' },
+          { value: 'julia', name: 'Julia' },
+        ]
+      : []),
+  ];
   return (
     <React.Fragment>
       <div className="form-row">
@@ -118,15 +129,9 @@ export function ProgramPanelDetails({
             updatePanel(panel);
           }}
         >
-          <option value="javascript">JavaScript</option>
-          <option value="python">Python</option>
-          {MODE_FEATURES.extraLanguages ? (
-            <React.Fragment>
-              <option value="ruby">Ruby</option>
-              <option value="r">R</option>
-              <option value="julia">Julia</option>
-            </React.Fragment>
-          ) : null}
+          {options.map((o) => (
+            <option value={o.value}>{o.name}</option>
+          ))}
         </Select>
       </div>
     </React.Fragment>
