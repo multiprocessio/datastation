@@ -158,7 +158,12 @@ export class PanelInfo {
   }
 }
 
-export type ProgramPanelInfoType = 'javascript' | 'python';
+export type ProgramPanelInfoType =
+  | 'javascript'
+  | 'python'
+  | 'ruby'
+  | 'julia'
+  | 'r';
 
 export class ProgramPanelInfo extends PanelInfo {
   program: {

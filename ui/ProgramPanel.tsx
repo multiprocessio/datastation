@@ -1,8 +1,12 @@
 import * as React from 'react';
 import circularSafeStringify from 'json-stringify-safe';
 
-import { MODE } from '../shared/constants';
-import { PanelResult, ProgramPanelInfo } from '../shared/state';
+import { MODE, MODE_FEATURES } from '../shared/constants';
+import {
+  PanelResult,
+  ProgramPanelInfo,
+  ProgramPanelInfoType,
+} from '../shared/state';
 
 import { asyncRPC } from './asyncRPC';
 import { Select } from './component-library/Select';
@@ -80,6 +84,17 @@ export function ProgramPanelDetails({
   updatePanel: (d: ProgramPanelInfo) => void;
   panelIndex: number;
 }) {
+  const options = [
+    { value: 'javascript', name: 'JavaScript' },
+    { value: 'python', name: 'Python' },
+    ...(MODE_FEATURES.extraLanguages
+      ? [
+          { value: 'ruby', name: 'Ruby' },
+          { value: 'r', name: 'R' },
+          { value: 'julia', name: 'Julia' },
+        ]
+      : []),
+  ];
   return (
     <React.Fragment>
       <div className="form-row">
@@ -87,7 +102,7 @@ export function ProgramPanelDetails({
           label="Language"
           value={panel.program.type}
           onChange={(value: string) => {
-            panel.program.type = value as 'javascript' | 'python';
+            panel.program.type = value as ProgramPanelInfoType;
             if (panel.content === '') {
               switch (panel.program.type) {
                 case 'javascript':
@@ -114,8 +129,9 @@ export function ProgramPanelDetails({
             updatePanel(panel);
           }}
         >
-          <option value="javascript">JavaScript</option>
-          <option value="python">Python</option>
+          {options.map((o) => (
+            <option value={o.value}>{o.name}</option>
+          ))}
         </Select>
       </div>
     </React.Fragment>

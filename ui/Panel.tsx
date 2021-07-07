@@ -42,6 +42,10 @@ export const PANEL_TYPE_ICON = {
 };
 
 function objectPreview(obj: any, nKeys: number = 100): string {
+  if (!obj) {
+    return String(obj);
+  }
+
   nKeys = Math.max(nKeys, 1);
   const nextNKeys = nKeys / 2;
   if (Array.isArray(obj)) {
@@ -469,15 +473,30 @@ export function Panel({
                 )}
                 {panel.type === 'program' && (
                   <div className="alert alert-info">
-                    Use builtin functions,{' '}
-                    <code>DM_setPanel($some_array_data)</code> and{' '}
-                    <code>DM_getPanel($panel_number)</code>, to interact with
-                    other panels. For example:{' '}
-                    <code>
-                      const passthrough = DM_getPanel(0);
-                      DM_setPanel(passthrough);
-                    </code>
-                    .
+                    <p>
+                      Use builtin functions,{' '}
+                      <code>DM_setPanel($some_array_data)</code> and{' '}
+                      <code>DM_getPanel($panel_number)</code>, to interact with
+                      other panels. For example:{' '}
+                      <code>
+                        const passthrough = DM_getPanel(0);
+                        DM_setPanel(passthrough);
+                      </code>
+                      .
+                    </p>
+                    {(panel as ProgramPanelInfo).program.type === 'julia' && (
+                      <p>
+                        Install{' '}
+                        <a href="https://github.com/JuliaIO/JSON.jl">JSON.jl</a>{' '}
+                        to script with Julia.
+                      </p>
+                    )}
+                    {(panel as ProgramPanelInfo).program.type === 'r' && (
+                      <p>
+                        Install <a href="https://rdrr.io/cran/rjson/">rjson</a>{' '}
+                        to script with R.
+                      </p>
+                    )}
                   </div>
                 )}
                 {panel.type === 'sql' && (

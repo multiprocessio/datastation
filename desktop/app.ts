@@ -19,7 +19,7 @@ import { registerRPCHandlers } from './rpc';
 import { evalSQLHandler } from './sql';
 import { evalHTTPHandler } from './http';
 import { evalFileHandler } from './file';
-import { evalProgramHandler } from './program';
+import { getEvalProgramHandler } from './program';
 import { openProject, getOpenProjectHandler } from './project';
 import { loadSettings } from './settings';
 
@@ -147,7 +147,7 @@ app.whenReady().then(async () => {
     ...storeHandlers,
     evalSQLHandler,
     evalHTTPHandler,
-    evalProgramHandler,
+    getEvalProgramHandler(settings),
     evalFileHandler,
     getOpenProjectHandler(win),
     settings.getUpdateHandler(),

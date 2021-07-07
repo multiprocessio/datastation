@@ -18,6 +18,7 @@ export const MODE_FEATURES = {
   noBodyYOverflow: MODE !== 'browser',
   storeResults: MODE !== 'browser',
   useDefaultProject: MODE === 'browser',
+  extraLanguages: MODE !== 'browser',
 };
 
 export const RPC_ASYNC_REQUEST = 'rpcAsyncRequest';
