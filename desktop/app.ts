@@ -13,6 +13,7 @@ import { APP_NAME, DEBUG, SITE_ROOT } from '../shared/constants';
 import log from '../shared/log';
 
 import { DSPROJ_FLAG } from './constants';
+import { configureLogger } from './log';
 import { storeHandlers } from './store';
 import { registerRPCHandlers } from './rpc';
 import { evalSQLHandler } from './sql';
@@ -22,6 +23,7 @@ import { evalProgramHandler } from './program';
 import { openProject, getOpenProjectHandler } from './project';
 import { loadSettings } from './settings';
 
+//configureLogger();
 process.on('uncaughtException', (e) => {
   log.error(e);
 });

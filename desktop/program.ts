@@ -1,3 +1,4 @@
+import { EOL } from 'os';
 import { exec } from 'child_process';
 import fs from 'fs/promises';
 import path from 'path';
@@ -30,8 +31,6 @@ function DM_getPanel(i) {
 function DM_setPanel(v) {
   fs.writeFileSync('${outFile}', JSON.stringify(v));
 }`
-    .replace('\n', ' ')
-    .replace('  ', '');
 
 const PYTHON_PREAMBLE = (outFile: string) => `
 import json as __DM_JSON
@@ -61,7 +60,7 @@ export const evalProgramHandler = {
     let out = '';
     try {
       const preamble = PREAMBLE[ppi.program.type](outputTmp.path);
-      await fs.writeFile(programTmp.path, [preamble, ppi.content].join('\n'));
+      await fs.writeFile(programTmp.path, [preamble, ppi.content].join(EOL));
       const runtime = ppi.program.type === 'javascript' ? 'node' : 'python3';
       try {
         const { stdout, stderr } = await execPromise(
@@ -81,7 +80,7 @@ export const evalProgramHandler = {
             matcher,
             function (_: string, line: string) {
               return `, line ${
-                +line - PYTHON_PREAMBLE('').split('\n').length
+                +line - PYTHON_PREAMBLE('').split(${EOL}).length
               }, in <module>`;
             }
           );
@@ -95,7 +94,7 @@ export const evalProgramHandler = {
             matcher,
             function (_: string, line: string) {
               return `${programTmp.path}:${
-                +line - JAVASCRIPT_PREAMBLE('').split('\n').length
+                +line - JAVASCRIPT_PREAMBLE('').split(${EOL}).length
               }`;
             }
           );
