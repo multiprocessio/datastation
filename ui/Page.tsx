@@ -26,15 +26,12 @@ export function Page({
   setPanelResults: (panelIndex: number, results: PanelResult) => void;
 }) {
   async function reevalPanel(panelIndex: number, reset?: boolean) {
-    const panel = panelResults[panelIndex];
-    if (panel) {
-      panel.lastRun = null;
-      panel.loading = true;
-    }
+    let panel = panelResults[panelIndex] || new PanelResult();
+    panel.lastRun = null;
+    panel.loading = !reset;
 
+    setPanelResults(panelIndex, panel);
     if (reset) {
-      panel.loading = false;
-      setPanelResults(panelIndex, panel);
       return;
     }
 
@@ -46,19 +43,27 @@ export function Page({
         connectors,
         servers
       );
-      setPanelResults(panelIndex, {
-        lastRun: new Date(),
-        value: r,
-        stdout,
-        loading: false,
-      });
+      setPanelResults(
+        panelIndex,
+        {
+          lastRun: new Date(),
+          value: r,
+          stdout,
+          loading: false,
+        },
+        true
+      );
     } catch (e) {
-      setPanelResults(panelIndex, {
-        loading: false,
-        lastRun: new Date(),
-        exception: e.stack,
-        stdout: '',
-      });
+      setPanelResults(
+        panelIndex,
+        {
+          loading: false,
+          lastRun: new Date(),
+          exception: e.stack,
+          stdout: e.stdout,
+        },
+        true
+      );
     }
   }
 

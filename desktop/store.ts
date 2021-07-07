@@ -3,6 +3,7 @@ import fsPromises from 'fs/promises';
 import path from 'path';
 
 import { IDDict, ProjectState } from '../shared/state';
+import log from '../shared/log';
 
 import {
   DISK_ROOT,
@@ -25,7 +26,7 @@ export function writeFileBuffered(name: string, contents: string) {
   };
   buffers[name].timeout = setTimeout(() => {
     fs.writeFileSync(name, contents);
-    console.info('Wrote ' + name);
+    log.info('Wrote ' + name);
     delete buffers[name];
   }, SYNC_PERIOD);
 }
@@ -33,7 +34,7 @@ export function writeFileBuffered(name: string, contents: string) {
 function flushUnwritten(...args: any[]) {
   if (args && args.length > 1) {
     // Otherwise errors are masked
-    console.error(args);
+    log.error(args);
   }
 
   Object.keys(buffers).map((fileName: string) => {
@@ -41,7 +42,7 @@ function flushUnwritten(...args: any[]) {
     // Must be a synchronous write in this 'exit' context
     // https://nodejs.org/api/process.html#process_event_exit
     fs.writeFileSync(fileName, buffers[fileName].contents);
-    console.trace('Flushed ' + fileName);
+    log.info('Flushed ' + fileName);
     delete buffers[fileName];
   });
 }
@@ -59,7 +60,7 @@ export const storeHandlers = [
         const f = await fsPromises.readFile(fileName);
         return JSON.parse(f.toString());
       } catch (e) {
-        console.error(e);
+        log.error(e);
         return null;
       }
     },
@@ -80,7 +81,7 @@ export const storeHandlers = [
       const fileName = await ensureFile(RESULTS_FILE);
       // Don't use buffered write
       await fsPromises.writeFile(fileName, JSON.stringify(results));
-      console.info('Project synced');
+      log.info('Results synced');
     },
   },
 ];

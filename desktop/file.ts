@@ -15,9 +15,8 @@ export const evalFileHandler = {
     _: string,
     { name, server }: Proxy<{ name: string }>
   ) {
-    name = resolvePath(name);
     if (!server) {
-      const body = await fs.readFile(name);
+      const body = await fs.readFile(resolvePath(name));
       return parseArrayBuffer('text/plain', name, body, additionalParsers);
     }
 

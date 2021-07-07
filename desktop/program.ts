@@ -39,12 +39,12 @@ __GLOBAL = None
 def DM_getPanel(i):
   global __GLOBAL
   if __GLOBAL: return __GLOBAL[i]
-  with open('${RESULTS_FILE}') as f:
+  with open(r'${RESULTS_FILE}') as f:
     __GLOBAL = __DM_JSON.load(f)
   if not __GLOBAL: return []
   return __GLOBAL[i]
 def DM_setPanel(v):
-  with open('${outFile}', 'w') as f:
+  with open(r'${outFile}', 'w') as f:
     __DM_JSON.dump(v, f)`;
 
 const PREAMBLE = {
@@ -58,6 +58,7 @@ export const evalProgramHandler = {
     const programTmp = await makeTmpFile();
     const outputTmp = await makeTmpFile();
 
+    let out = '';
     try {
       const preamble = PREAMBLE[ppi.program.type](outputTmp.path);
       await fs.writeFile(programTmp.path, [preamble, ppi.content].join('\n'));
@@ -66,6 +67,7 @@ export const evalProgramHandler = {
         const { stdout, stderr } = await execPromise(
           `${runtime} ${programTmp.path}`
         );
+        out = stdout + stderr;
         const body = await fs.readFile(outputTmp.path);
         return [
           await parseArrayBuffer('application/json', '', body),
@@ -99,6 +101,7 @@ export const evalProgramHandler = {
           );
         }
 
+        e.stdout = out;
         throw e;
       }
     } finally {

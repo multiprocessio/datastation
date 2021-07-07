@@ -186,8 +186,11 @@ export function Panel({
 
     if (previewableTypes.includes(panel.type)) {
       if (results && !results.exception) {
-        const resultsLines = valueAsString(results.value)[0].split('\n');
-        setPreview(resultsLines.slice(0, 50).join('\n'));
+        let prev = String(results.value).slice(0, 300);
+        if (results.value.length > 300) {
+          prev += '...';
+        }
+        setPreview(prev);
       }
     }
   }, [results.value, results.exception]);
@@ -266,7 +269,7 @@ export function Panel({
             <span className="panel-controls vertical-align-center flex-right">
               <span className="last-run">
                 {results.loading
-                  ? 'Loading'
+                  ? 'Running...'
                   : results.lastRun
                   ? 'Last run ' + results.lastRun
                   : 'Run to apply changes'}

@@ -32,8 +32,9 @@ export function Pages({
   const [panelResultsByPage, setPanelResultsByPageInternal] =
     React.useState<PanelResults>({});
 
-  function setPanelResultsByPage(results: PanelResults) {
-    if (MODE_FEATURES.storeResults && results[page.id]) {
+  function setPanelResultsByPage(results: PanelResults, valueChange: boolean) {
+    setPanelResultsByPageInternal(results);
+    if (valueChange && MODE_FEATURES.storeResults && results[page.id]) {
       asyncRPC<any, void, void>(
         'storeResults',
         null,
@@ -42,20 +43,22 @@ export function Pages({
         console.error(e);
       });
     }
-
-    setPanelResultsByPageInternal(results);
   }
 
   // Make sure panelResults are initialized when page changes.
   React.useEffect(() => {
     if (page && !panelResultsByPage[page.id]) {
-      setPanelResultsByPage({ ...panelResultsByPage, [page.id]: [] });
+      setPanelResultsByPage({ ...panelResultsByPage, [page.id]: [] }, true);
     }
   }, [page && page.id]);
 
-  function setPanelResults(panelIndex: number, result: PanelResult) {
+  function setPanelResults(
+    panelIndex: number,
+    result: PanelResult,
+    valueChange: boolean = false
+  ) {
     panelResultsByPage[page.id][panelIndex] = result;
-    setPanelResultsByPage({ ...panelResultsByPage });
+    setPanelResultsByPage({ ...panelResultsByPage }, valueChange);
   }
 
   if (!page) {

@@ -7,25 +7,32 @@ import tunnelSSH from 'tunnel-ssh';
 
 import { DEBUG } from '../shared/constants';
 import { ServerInfo } from '../shared/state';
+import log from '../shared/log';
+
+import { HOME } from './constants';
+
+interface SSHConfig extends tunnelSSH.Config {
+  retries: number;
+  retry_factor: number;
+  retry_minTimeout: number;
+}
 
 export function resolvePath(name: string) {
   if (name.startsWith('~/')) {
-    name = path.join(process.env.HOME, name.slice(2));
+    name = path.join(HOME, name.slice(2));
   }
   return path.resolve(name);
 }
 
-export async function getSSHConfig(
-  server: ServerInfo
-): Promise<tunnelSSH.Config> {
-  const config: Partial<tunnelSSH.Config> = {
+export async function getSSHConfig(server: ServerInfo): Promise<SSHConfig> {
+  const config: SSHConfig = {
     host: server.address,
     port: server.port,
     readyTimeout: 20000,
     retries: 2,
     retry_factor: 2,
     retry_minTimeout: 2000,
-    debug: DEBUG ? console.error : null,
+    debug: DEBUG ? log.info : null,
   };
 
   if (server.type === 'ssh-agent') {
@@ -55,7 +62,7 @@ export async function getTunnelConfig(
   server: ServerInfo,
   destAddress: string,
   destPort: number
-): Promise<[tunnelSSH.Config, string, number]> {
+): Promise<[SSHConfig, string, number]> {
   const config = await getSSHConfig(server);
   const localhost = '127.0.0.1';
   const freeLocalPort = await getPort({ host: localhost });

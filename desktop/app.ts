@@ -100,7 +100,7 @@ const menuTemplate = (win: BrowserWindow) => [
 app.whenReady().then(async () => {
   const preload = path.join(__dirname, 'preload.js');
   const win = new BrowserWindow({
-    width: 1200,
+    width: 1400,
     height: 800,
     title: APP_NAME,
     webPreferences: {

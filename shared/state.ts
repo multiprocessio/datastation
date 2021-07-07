@@ -2,13 +2,20 @@ import * as uuid from 'uuid';
 
 import { mergeDeep } from './merge';
 import { VERSION } from './constants';
+import log from './log';
 
-export interface PanelResult {
+export class PanelResult {
   exception?: string;
   value?: Array<any>;
   lastRun: Date;
   loading: boolean;
   stdout: string;
+
+  constructor() {
+    this.lastRun = null;
+    this.loading = false;
+    this.stdout = '';
+  }
 }
 export type IDDict<T> = { [k: string]: T };
 export type PanelResults = IDDict<Array<PanelResult>>;
@@ -387,7 +394,7 @@ export function rawStateToObjects(raw: ProjectState): ProjectState {
           page.panels[i] = mergeDeep(new FilePanelInfo(), panel);
           break;
         default:
-          console.error(`Unknown panel type: ${panel.type}`);
+          log.info(`Unknown panel type: ${panel.type}`);
       }
     });
   });
@@ -405,7 +412,7 @@ export function rawStateToObjects(raw: ProjectState): ProjectState {
         object.connectors[i] = mergeDeep(new HTTPConnectorInfo(), c);
         break;
       default:
-        console.error(`Unknown connector type: ${c.type}`);
+        log.info(`Unknown connector type: ${c.type}`);
     }
   });
 

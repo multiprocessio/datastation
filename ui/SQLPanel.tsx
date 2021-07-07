@@ -42,7 +42,7 @@ export async function evalSQLPanel(
       const results = panelResults[panelIndex];
       if (!results || results.exception || results.value.length === 0) {
         // TODO: figure out how to query empty panels. (How to resolve column names for SELECT?)
-        throw new Error('Cannot query empty results in panel ${panelIndex}');
+        throw new Error(`Cannot query empty results in panel ${panelIndex}`);
       }
       const columns = Object.keys(results.value[0]);
       const valuesAsSQLStrings = results.value.map(
