@@ -10,7 +10,8 @@ function log(level: keyof typeof logger, ...args: any[]) {
     }
   }
   const f = logger[level];
-  f(`[${level}] ${new Date()} ${args.map(String).join(' ')}`);
+  const now = new Date();
+  f(`[${level}] ${now.toISOString()} ${args.map(String).join(' ')}`);
 }
 
 function info(...args: any[]) {
