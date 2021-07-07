@@ -42,6 +42,10 @@ export const PANEL_TYPE_ICON = {
 };
 
 function objectPreview(obj: any, nKeys: number = 100): string {
+  if (!obj) {
+    return String(obj);
+  }
+
   nKeys = Math.max(nKeys, 1);
   const nextNKeys = nKeys / 2;
   if (Array.isArray(obj)) {

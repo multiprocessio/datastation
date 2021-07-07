@@ -59,7 +59,7 @@ end`;
 const R_PREAMBLE = (outFile: string) => `
 library("rjson")
 DM_getPanel <- function(i) {
-  fromJSON(file="${RESULTS_FILE}")[i]
+  fromJSON(file="${RESULTS_FILE}")[i+1]
 }
 DM_setPanel <- function(v) {
   write(toJSON(v), "${outFile}")
@@ -128,7 +128,7 @@ export const getEvalProgramHandler = (settings: Settings) => ({
             }
           );
         } else if (ppi.program.type === 'julia') {
-	  const matcher = RegExp(
+          const matcher = RegExp(
             `${programTmp.path}:([1-9]*)`.replace('/', '\\/'),
             'g'
           );
@@ -141,7 +141,7 @@ export const getEvalProgramHandler = (settings: Settings) => ({
               }`;
             }
           );
-	}
+        }
 
         e.stdout = out;
         throw e;
