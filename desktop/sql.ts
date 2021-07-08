@@ -51,10 +51,16 @@ async function evalMySQL(
   }
 }
 
+const DEFAULT_PORT = {
+  postgres: 5432,
+  mysql: 3306,
+  'in-memory': 0,
+};
+
 export const evalSQLHandler = {
   resource: 'evalSQL',
   handler: async function (content: string, info: Proxy<SQLConnectorInfo>) {
-    const port = +info.sql.address.split(':')[1] || 5432;
+    const port = +info.sql.address.split(':')[1] || DEFAULT_PORT[info.sql.type];
     const host = info.sql.address.split(':')[0];
 
     return await tunnel(
