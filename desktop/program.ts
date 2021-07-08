@@ -59,7 +59,7 @@ end`;
 const R_PREAMBLE = (outFile: string) => `
 library("rjson")
 DM_getPanel <- function(i) {
-  fromJSON(file="${RESULTS_FILE}")[i+1]
+  fromJSON(file="${RESULTS_FILE}")[[i+1]]
 }
 DM_setPanel <- function(v) {
   write(toJSON(v), "${outFile}")
