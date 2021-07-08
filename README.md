@@ -14,7 +14,7 @@ this will expand to ARM and Linux.
 
 ## Documentation
 
-See [here](https://datastation.multiprocess.io/docs/]) for details.
+See [here](https://datastation.multiprocess.io/docs/) for details.
 
 ## Subscribe to updates
 
