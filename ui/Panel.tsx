@@ -30,6 +30,7 @@ import { Button } from './component-library/Button';
 import { Input } from './component-library/Input';
 import { Select } from './component-library/Select';
 import { CodeEditor } from './component-library/CodeEditor';
+import { previewObject } from './preview';
 
 export const PANEL_TYPE_ICON = {
   literal: 'format_quote',
@@ -40,38 +41,6 @@ export const PANEL_TYPE_ICON = {
   sql: 'table_rows',
   file: 'description',
 };
-
-function objectPreview(obj: any, nKeys: number = 100): string {
-  if (!obj) {
-    return String(obj);
-  }
-
-  nKeys = Math.max(nKeys, 1);
-  const nextNKeys = nKeys / 2;
-  if (Array.isArray(obj)) {
-    return obj
-      .slice(0, nKeys)
-      .map((o) => objectPreview(o, nextNKeys))
-      .join('\n');
-  }
-
-  if (typeof obj === 'object') {
-    const keys = Object.keys(obj).slice(0, nKeys);
-    const preview: Array<any> = [];
-    keys.forEach((k) => {
-      preview.push(k + ':' + objectPreview(obj[k], nextNKeys));
-    });
-
-    return preview.join(', ');
-  }
-
-  let res = String(obj).slice(0, nKeys * 10);
-  if (String(obj).length > nKeys * 10) {
-    res += '...';
-  }
-
-  return res;
-}
 
 export async function evalPanel(
   page: ProjectPage,
@@ -218,7 +187,7 @@ export function Panel({
 
     if (previewableTypes.includes(panel.type)) {
       if (results && !results.exception) {
-        const prev = objectPreview(results.value);
+        const prev = previewObject(results.value);
         setPreview(prev);
       }
     }
@@ -540,7 +509,7 @@ export function Panel({
                         className={panelOut === 'output' ? 'selected' : ''}
                         onClick={() => setPanelOut('output')}
                       >
-                        Output
+                        Stdout
                       </Button>
                     )}
                   </div>
