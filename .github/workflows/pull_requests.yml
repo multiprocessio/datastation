@@ -20,3 +20,4 @@ jobs:
     - run: yarn tsc
     - run: ./scripts/fail_on_diff.sh
     - run: yarn test-licenses
+    - run: yarn test-coverage
