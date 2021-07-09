@@ -115,7 +115,7 @@ export const getEvalProgramHandler = (settings: Settings) => ({
           );
         } else if (ppi.program.type === 'javascript') {
           const matcher = RegExp(
-            `${programTmp.path}:([1-9]*)`.replace('/', '\\/'),
+            `${programTmp.path}:([1-9]*)`.replaceAll('/', '\\/'),
             'g'
           );
           // Rewrite line numbers in traceback
@@ -129,7 +129,7 @@ export const getEvalProgramHandler = (settings: Settings) => ({
           );
         } else if (ppi.program.type === 'julia') {
           const matcher = RegExp(
-            `${programTmp.path}:([1-9]*)`.replace('/', '\\/'),
+            `${programTmp.path}:([1-9]*)`.replaceAll('/', '\\/'),
             'g'
           );
           // Rewrite line numbers in traceback
