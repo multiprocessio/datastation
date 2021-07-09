@@ -61,7 +61,7 @@ function unsafePreview(obj: any, nKeys: number, topLevel = false): string {
     res += '...';
   }
 
-  if (typeof obj === 'string') {
+  if (typeof obj === 'string' && !topLevel) {
     res = `"${res.replace('"', '\\"')}"`;
   }
 
