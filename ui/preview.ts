@@ -2,14 +2,16 @@ function unsafePreviewArray(
   obj: any,
   nKeys: number,
   nextNKeys: number,
+  prefixChar: string,
   joinChar: string
 ) {
   const keys = obj.slice(0, nKeys);
   keys.sort();
   const suffix = obj.length > keys.length ? '...' : '';
   const childPreview =
-    keys.map((o: string) => unsafePreview(o, nextNKeys)).join(',' + joinChar) +
-    suffix;
+    keys
+      .map((o: string) => prefixChar + unsafePreview(o, nextNKeys))
+      .join(',' + joinChar) + suffix;
   return ['[', childPreview, ']'].join(joinChar);
 }
 
@@ -17,6 +19,7 @@ function unsafePreviewObject(
   obj: any,
   nKeys: number,
   nextNKeys: number,
+  prefixChar: string,
   joinChar: string
 ) {
   const keys = Object.keys(obj);
@@ -25,7 +28,9 @@ function unsafePreviewObject(
   const preview: Array<any> = [];
   keys.forEach((k) => {
     const formattedKey = `"${k.replace('"', '\\"')}"`;
-    preview.push(formattedKey + ': ' + unsafePreview(obj[k], nextNKeys));
+    preview.push(
+      prefixChar + formattedKey + ': ' + unsafePreview(obj[k], nextNKeys)
+    );
   });
 
   const suffix = keys.length > firstKeys.length ? '...' : '';
@@ -40,13 +45,14 @@ function unsafePreview(obj: any, nKeys: number, topLevel = false): string {
 
   const nextNKeys = nKeys < 1 ? 0 : nKeys / 2;
   const joinChar = topLevel ? '\n' : ' ';
+  const prefixChar = topLevel ? '  ' : '';
 
   if (Array.isArray(obj)) {
-    return unsafePreviewArray(obj, nKeys, nextNKeys, joinChar);
+    return unsafePreviewArray(obj, nKeys, nextNKeys, prefixChar, joinChar);
   }
 
   if (typeof obj === 'object') {
-    return unsafePreviewObject(obj, nKeys, nextNKeys, joinChar);
+    return unsafePreviewObject(obj, nKeys, nextNKeys, prefixChar, joinChar);
   }
 
   const stringMax = nKeys * 10;
