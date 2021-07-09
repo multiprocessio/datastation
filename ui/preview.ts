@@ -27,7 +27,7 @@ function unsafePreviewObject(
   firstKeys.sort();
   const preview: Array<any> = [];
   keys.forEach((k) => {
-    const formattedKey = `"${k.replace('"', '\\"')}"`;
+    const formattedKey = `"${k.replaceAll('"', '\\"')}"`;
     preview.push(
       prefixChar + formattedKey + ': ' + unsafePreview(obj[k], nextNKeys)
     );

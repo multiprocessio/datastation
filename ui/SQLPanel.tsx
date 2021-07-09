@@ -71,7 +71,7 @@ export async function evalSQLPanel(
             // Make sure to escape embedded quotes
             return (
               valueQuote +
-              stringified.replace(valueQuote, valueQuote + valueQuote) +
+              stringified.replaceAll(valueQuote, valueQuote + valueQuote) +
               valueQuote
             );
           });
@@ -81,7 +81,7 @@ export async function evalSQLPanel(
         .map(
           (c: string) =>
             columnQuote +
-            c.replace(columnQuote, columnQuote + columnQuote) +
+            c.replaceAll(columnQuote, columnQuote + columnQuote) +
             columnQuote
         )
         .join(', ');
