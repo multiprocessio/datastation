@@ -41,33 +41,49 @@ export const PANEL_TYPE_ICON = {
   file: 'description',
 };
 
-function objectPreview(obj: any, nKeys: number = 100): string {
+function objectPreview(obj: any, nKeys = 100, topLevel = true): string {
   if (!obj) {
     return String(obj);
   }
 
   nKeys = Math.max(nKeys, 1);
   const nextNKeys = nKeys / 2;
+  const joinChar = topLevel ? '\n' : ' ';
+
   if (Array.isArray(obj)) {
-    return obj
-      .slice(0, nKeys)
-      .map((o) => objectPreview(o, nextNKeys))
-      .join('\n');
+    const keys = obj.slice(0, nKeys);
+    keys.sort();
+    const suffix = obj.length > keys.length ? '...' : '';
+    const childPreview = keys
+      .map((o) => objectPreview(o, nextNKeys, false))
+      .join(',' + joinChar);
+    return ['[', ...childPreview, ']'].join(joinChar);
   }
 
   if (typeof obj === 'object') {
-    const keys = Object.keys(obj).slice(0, nKeys);
+    const keys = Object.keys(obj);
+    const firstKeys = keys.slice(0, nKeys);
+    firstKeys.sort();
     const preview: Array<any> = [];
     keys.forEach((k) => {
-      preview.push(k + ':' + objectPreview(obj[k], nextNKeys));
+      const formattedKey = `"${k.replace('"', '\\"')}"`;
+      preview.push(
+        formattedKey + ':' + objectPreview(obj[k], nextNKeys, false)
+      );
     });
 
-    return preview.join(', ');
+    const suffix = keys.length > firstKeys.length ? '...' : '';
+
+    return ['{', preview.join(',' + joinChar) + suffix, '}'].join(joinChar);
   }
 
   let res = String(obj).slice(0, nKeys * 10);
   if (String(obj).length > nKeys * 10) {
     res += '...';
+  }
+
+  if (typeof obj === 'string') {
+    res = `"${res.replace('"', '\\"')}"`;
   }
 
   return res;
@@ -540,7 +556,7 @@ export function Panel({
                         className={panelOut === 'output' ? 'selected' : ''}
                         onClick={() => setPanelOut('output')}
                       >
-                        Output
+                        Stdout
                       </Button>
                     )}
                   </div>
