@@ -8,7 +8,8 @@ function unsafePreviewArray(
   keys.sort();
   const suffix = obj.length > keys.length ? '...' : '';
   const childPreview =
-    keys.map((o) => unsafePreview(o, nextNKeys)).join(',' + joinChar) + suffix;
+    keys.map((o: string) => unsafePreview(o, nextNKeys)).join(',' + joinChar) +
+    suffix;
   return ['[', childPreview, ']'].join(joinChar);
 }
 
