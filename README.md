@@ -5,10 +5,26 @@ scripting, and visualization in a single platform.
 
 ![A screenshot of app.datastation.multiprocess.io](./screenshot.png)
 
+## Major Features
+
+* Query PostgreSQL and MySQL
+  * With builtin support for proxying over SSH
+* Query HTTP servers
+  * With builtin support for proxying over SSH
+* Read files from disk
+  * With builtin support for reading over SSH (i.e. SFTP)
+* Script against data in Python, JavaScript, Ruby, Julia, and R
+* Produce bar graphs and pie charts from data
+
+You can [try out DataStation](https://app.datastation.multiprocess.io)
+using the in-browser environment or you can install the desktop
+application. The in-browser environment has some limitations the
+desktop app does not.
+
 ## Install
 
 Zip files for the latest release provided on the
-[tags](https://github.com/multiprocessio/datastation/tags)
+[releases](https://github.com/multiprocessio/datastation/releases)
 page. x86-64 builds for Mac and Windows are available. In the future
 this will expand to ARM and Linux.
 
