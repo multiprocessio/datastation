@@ -504,3 +504,11 @@ canvas {
   padding-top: 15px;
   margin-top: 15px;
 }
+
+th {
+  text-align: left;
+}
+
+tbody tr:nth-child(odd) {
+  background: #f9f0ff;
+}

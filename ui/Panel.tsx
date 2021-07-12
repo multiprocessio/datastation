@@ -283,10 +283,14 @@ export function Panel({
                   play_arrow
                 </Button>
               </span>
-              <span title="Download Results">
+              <span
+                title={
+                  !results.value ? 'Nothing to Download' : 'Download Results'
+                }
+              >
                 <Button
                   icon
-                  disabled={!results.lastRun}
+                  disabled={!results.value}
                   onClick={() =>
                     download(
                       panel.name,
