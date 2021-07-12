@@ -75,6 +75,11 @@ export function TablePanel({
   panel: TablePanelInfo;
   panelResults: Array<PanelResult>;
 }) {
+  let valueAsArray = (panelResults[panel.table.panelSource] || {}).value || [];
+  // Panels don't have to be an array. Don't crash if the currently selected one is not one.
+  if (!Array.isArray(valueAsArray)) {
+    valueAsArray = [];
+  }
   return (
     <table>
       <thead>
@@ -85,15 +90,13 @@ export function TablePanel({
         </tr>
       </thead>
       <tbody>
-        {((panelResults[panel.table.panelSource] || {}).value || []).map(
-          (row: any, i: number) => (
-            <tr key={i}>
-              {panel.table.columns.map((column: TableColumn) => (
-                <td key={column.field}>{row[column.field]}</td>
-              ))}
-            </tr>
-          )
-        )}
+        {valueAsArray.map((row: any, i: number) => (
+          <tr key={i}>
+            {panel.table.columns.map((column: TableColumn) => (
+              <td key={column.field}>{row[column.field]}</td>
+            ))}
+          </tr>
+        ))}
       </tbody>
     </table>
   );
