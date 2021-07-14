@@ -8,11 +8,11 @@ function unsafePreviewArray(
   const keys = obj.slice(0, nKeys);
   keys.sort();
   const suffix = obj.length > keys.length ? '...' : '';
-  const childPreview =
+  const childPreview = 
     keys
-      .map((o: string) => prefixChar + unsafePreview(o, nextNKeys))
-      .join(',' + joinChar) + suffix;
-  return ['[', childPreview, ']'].join(joinChar);
+      .map((o: string) => prefixChar + unsafePreview(o, nextNKeys));
+  childPreview.push(suffix);
+  return ['[', childPreview.join(',' + joinChar), ']'].join(joinChar);
 }
 
 function unsafePreviewObject(
@@ -34,8 +34,9 @@ function unsafePreviewObject(
   });
 
   const suffix = keys.length > firstKeys.length ? '...' : '';
+  preview.push(suffix);
 
-  return ['{', preview.join(',' + joinChar) + suffix, '}'].join(joinChar);
+  return ['{', preview.join(',' + joinChar), '}'].join(joinChar);
 }
 
 function unsafePreview(obj: any, nKeys: number, topLevel = false): string {
@@ -43,7 +44,8 @@ function unsafePreview(obj: any, nKeys: number, topLevel = false): string {
     return String(obj);
   }
 
-  const nextNKeys = nKeys < 1 ? 0 : nKeys / 2;
+  // Decrease slightly slower than (nKeys / 2) each time
+  const nextNKeys = nKeys < 1 ? 0 : Math.floor(nKeys * .6);
   const joinChar = topLevel ? '\n' : ' ';
   const prefixChar = topLevel ? '  ' : '';
 
@@ -55,7 +57,7 @@ function unsafePreview(obj: any, nKeys: number, topLevel = false): string {
     return unsafePreviewObject(obj, nKeys, nextNKeys, prefixChar, joinChar);
   }
 
-  const stringMax = nKeys * 10;
+  const stringMax = 100;
   let res = String(obj).slice(0, stringMax);
   if (String(obj).length > stringMax) {
     res += '...';
@@ -68,7 +70,7 @@ function unsafePreview(obj: any, nKeys: number, topLevel = false): string {
   return res;
 }
 
-export function previewObject(obj: any, nKeys = 100): string {
+export function previewObject(obj: any, nKeys = 10): string {
   try {
     return unsafePreview(obj, nKeys, true);
   } catch (e) {
