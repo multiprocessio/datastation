@@ -26,7 +26,8 @@ header {
   top: 0;
   width: 100%;
   background: white;
-  z-index: 1;
+  /* React Ace Editor has z-index of at least 4 or 6 */
+  z-index: 10;
 }
 
 header a {
@@ -58,28 +59,11 @@ header a {
 
 .editor {
   width: 100%;
-  height: 100%;
+  height: 100% !important;
   border: 0;
   font-family: monospace;
   font-size: 1.1rem;
   counter-reset: line;
-}
-
-.editor pre {
-  padding-left: 60px !important;
-}
-
-.editor .editorLineNumber {
-  position: absolute;
-  left: 0px;
-  color: #ccc;
-  text-align: right;
-  width: 40px;
-  font-weight: 100;
-}
-
-.editor textarea:focus {
-  outline: none;
 }
 
 input.input,
