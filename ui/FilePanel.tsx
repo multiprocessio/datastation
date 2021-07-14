@@ -45,37 +45,27 @@ export function FilePanelDetails({
 }) {
   const { servers } = React.useContext(ProjectContext);
   return (
-    <React.Fragment>
+    <div className="FilePanel">
       <div className="form-row">
-        {MODE === 'browser' ? (
-          <FileInput
-            label="File"
-            accept={SUPPORTED_FILE_TYPES.map((p: string) => `.${p}`).join(',')}
-            onChange={(files: Array<File>) => {
-              const fr = new FileReader();
-
-              fr.onload = function () {
-                panel.file.content = fr.result as ArrayBuffer;
-                updatePanel(panel);
-              };
-
-              fr.readAsArrayBuffer(files[0]);
-
-              panel.file.name = files[0].name;
-              updatePanel(panel);
-            }}
-          />
-        ) : (
-          <Input
-            label="File"
-            autoWidth={true}
-            value={panel.file.name}
-            onChange={(v: string) => {
-              panel.file.name = v;
-              updatePanel(panel);
-            }}
-          />
-        )}
+        <FileInput
+          label="File"
+          accept={SUPPORTED_FILE_TYPES.map((p: string) => `.${p}`).join(',')}
+          value={panel.file.name}
+          allowManualEntry={MODE !== 'browser' ? true : false}
+          allowFilePicker={!panel.serverId ? true : false}
+          onRead={
+            MODE !== 'desktop'
+              ? (value: ArrayBuffer) => {
+                  panel.file.content = value;
+                  updatePanel(panel);
+                }
+              : null
+          }
+          onChange={(fileName: string) => {
+            panel.file.name = fileName;
+            updatePanel(panel);
+          }}
+        />
       </div>
       <ServerPicker
         servers={servers}
@@ -85,6 +75,6 @@ export function FilePanelDetails({
           updatePanel(panel);
         }}
       />
-    </React.Fragment>
+    </div>
   );
 }

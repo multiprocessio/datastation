@@ -92,6 +92,11 @@ label.select select {
   border-bottom: 1px solid #aaa;
 }
 
+input.input[type='file'],
+label.input input[type='file'] {
+  border-bottom: 0;
+}
+
 .vertical-align-center {
   display: flex;
   align-items: center;
