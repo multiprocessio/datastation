@@ -58,8 +58,8 @@ header a {
 }
 
 .editor {
-    width: 100%;
-    min-height: 500px;
+  width: 100%;
+  min-height: 500px;
   height: 100% !important;
   border: 0;
   font-family: monospace;
