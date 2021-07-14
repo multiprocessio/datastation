@@ -2,6 +2,7 @@ import * as pako from 'pako';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
+import '../shared/polyfill';
 import {
   APP_NAME,
   SITE_ROOT,
