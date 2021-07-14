@@ -1,12 +1,16 @@
 import * as React from 'react';
 import AceEditor from 'react-ace';
-import 'ace-builds/src-noconflict/mode-sql';
-import 'ace-builds/src-noconflict/mode-javascript';
-import 'ace-builds/src-noconflict/mode-ruby';
-import 'ace-builds/src-noconflict/mode-julia';
-import 'ace-builds/src-noconflict/mode-r';
-import 'ace-builds/src-noconflict/mode-python';
-import 'ace-builds/src-noconflict/theme-github';
+// UI theme
+import 'ace-builds/src-min-noconflict/theme-github';
+// Enables Ctrl-f
+import 'ace-builds/src-min-noconflict/ext-searchbox';
+// Enables syntax highlighting
+import 'ace-builds/src-min-noconflict/mode-sql';
+import 'ace-builds/src-min-noconflict/mode-javascript';
+import 'ace-builds/src-min-noconflict/mode-ruby';
+import 'ace-builds/src-min-noconflict/mode-julia';
+import 'ace-builds/src-min-noconflict/mode-r';
+import 'ace-builds/src-min-noconflict/mode-python';
 
 export function CodeEditor({
   value,
