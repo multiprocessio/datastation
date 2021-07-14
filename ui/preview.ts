@@ -72,7 +72,7 @@ function unsafePreview(obj: any, nKeys: number, stringMax: number, topLevel = fa
   return res;
 }
 
-export function previewObject(obj: any, nKeys = 10, stringMax = 200): string {
+export function previewObject(obj: any, nKeys = 20, stringMax = 200): string {
   try {
     return unsafePreview(obj, nKeys, stringMax, true);
   } catch (e) {
