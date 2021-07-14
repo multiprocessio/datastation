@@ -9,6 +9,7 @@ import {
   shell,
 } from 'electron';
 
+import '../shared/polyfill';
 import { APP_NAME, VERSION, DEBUG, SITE_ROOT } from '../shared/constants';
 import log from '../shared/log';
 
