@@ -12,6 +12,7 @@ export function Updates() {
           window.fetch,
           'GET',
           `${SITE_ROOT}/api/updates?version=${VERSION}`,
+          '',
           [],
           '',
           null,

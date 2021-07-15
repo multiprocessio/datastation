@@ -14,6 +14,7 @@ export async function request(
   fetchFunction: FetchFunction,
   method: string,
   url: string,
+  type: string,
   headers: Array<{ name: string; value: string }> = [],
   content = '',
   additionalParsers: Parsers = undefined,
@@ -35,7 +36,13 @@ export async function request(
   });
 
   const body = await res.arrayBuffer();
-  const type = res.headers.get('content-type');
+  if (!type) {
+    type = res.headers.get('content-type');
+    if (type.startsWith('text/plain')) {
+      type = '';
+    }
+  }
+
   const data = await parseArrayBuffer(type, url, body, additionalParsers);
   if (require200 && res.status !== 200) {
     throw data;

@@ -1,14 +1,14 @@
 import * as React from 'react';
 
 import { Proxy, ServerInfo, FilePanelInfo } from '../shared/state';
-import { parseArrayBuffer, XLSX_MIME_TYPE } from '../shared/text';
+import { parseArrayBuffer } from '../shared/text';
 import { MODE } from '../shared/constants';
 
 import { ProjectContext } from './ProjectStore';
 import { asyncRPC } from './asyncRPC';
 import { ServerPicker } from './ServerPicker';
+import { ContentTypePicker } from './ContentTypePicker';
 import { FileInput } from './component-library/FileInput';
-import { Select } from './component-library/Select';
 
 export async function evalFilePanel(
   panel: FilePanelInfo,
@@ -63,29 +63,13 @@ export function FilePanelDetails({
           }}
         />
       </div>
-      <div className="form-row">
-        <Select
-          label="File Type"
-          value={panel.file.type}
-          onChange={(type: string) => {
-            if (type === 'null') {
-              type = '';
-            }
-            panel.file.type = type;
-            updatePanel(panel);
-          }}
-        >
-          <option value="null">Auto-detect</option>
-          <option value="text/csv">CSV</option>
-          <option value={XLSX_MIME_TYPE}>Excel</option>
-          {MODE !==
-            'browser' /* This is getting ridiculous. Really need to find a plugin architecture */ && (
-            <option value="parquet">Parquet</option>
-          )}
-          <option value="application/json">JSON</option>
-          <option value="application/jsonlines">Newline-delimited JSON</option>
-        </Select>
-      </div>
+      <ContentTypePicker
+        value={panel.file.type}
+        onChange={(type: string) => {
+          panel.file.type = type;
+          updatePanel(panel);
+        }}
+      />
       <ServerPicker
         servers={servers}
         serverId={panel.serverId}

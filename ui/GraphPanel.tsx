@@ -8,6 +8,7 @@ import {
   PanelResult,
 } from '../shared/state';
 
+import { previewObject } from './preview';
 import { PanelSourcePicker } from './PanelSourcePicker';
 import { FieldPicker } from './FieldPicker';
 import { Select } from './component-library/Select';
@@ -85,6 +86,14 @@ export function GraphPanel({
   const ref = React.useRef(null);
   React.useEffect(() => {
     if (!ref || !value.length) {
+      return;
+    }
+
+    if (!Array.isArray(value)) {
+      console.error(
+        `Expected array input to graph, got (${typeof value}): ` +
+          previewObject(value)
+      );
       return;
     }
 

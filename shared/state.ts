@@ -87,19 +87,22 @@ export class HTTPConnectorInfo extends ConnectorInfo {
     headers: Array<{ value: string; name: string }>;
     url: string;
     method: HTTPConnectorInfoMethod;
+    type: string;
   };
 
   constructor(
     name?: string,
     url?: string,
     headers: Array<{ value: string; name: string }> = [],
-    method?: HTTPConnectorInfoMethod
+    method?: HTTPConnectorInfoMethod,
+    type?: string
   ) {
     super('http', name);
     this.http = {
       headers,
       url: url || '',
       method: method || 'GET',
+      type: type || '',
     };
   }
 }

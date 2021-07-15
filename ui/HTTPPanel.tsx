@@ -12,6 +12,7 @@ import { request } from '../shared/http';
 
 import { asyncRPC } from './asyncRPC';
 import { ProjectContext } from './ProjectStore';
+import { ContentTypePicker } from './ContentTypePicker';
 import { ServerPicker } from './ServerPicker';
 import { Button } from './component-library/Button';
 import { Input } from './component-library/Input';
@@ -27,6 +28,7 @@ export async function evalHTTPPanel(
       (window as any).fetch,
       panel.http.http.method,
       panel.http.http.url,
+      panel.http.http.type,
       panel.http.http.headers,
       panel.content
     );
@@ -86,6 +88,15 @@ export function HTTPPanelDetails({
         {panel.http.http.headers.map(
           (header: { value: string; name: string }, headerIndex: number) => (
             <div className="form-row">
+              <Button
+                icon
+                onClick={() => {
+                  panel.http.http.headers.splice(headerIndex, 1);
+                  updatePanel(panel);
+                }}
+              >
+                delete
+              </Button>
               <Input
                 label="Name"
                 value={header.name}
@@ -102,14 +113,6 @@ export function HTTPPanelDetails({
                   updatePanel(panel);
                 }}
               />
-              <Button
-                onClick={() => {
-                  panel.http.http.headers.splice(headerIndex, 1);
-                  updatePanel(panel);
-                }}
-              >
-                Remove
-              </Button>
             </div>
           )
         )}
@@ -121,6 +124,13 @@ export function HTTPPanelDetails({
         >
           Add Header
         </Button>
+        <ContentTypePicker
+          value={panel.http.http.type}
+          onChange={(type: string) => {
+            panel.http.http.type = type;
+            updatePanel(panel);
+          }}
+        />
         <ServerPicker
           servers={servers}
           serverId={panel.serverId}

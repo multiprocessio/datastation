@@ -32,6 +32,7 @@ export const evalHTTPHandler = {
           fetch,
           hci.http.method,
           tunnelledUrl.toString(),
+          hci.http.type,
           hci.http.headers,
           body,
           additionalParsers

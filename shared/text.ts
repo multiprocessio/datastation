@@ -83,10 +83,14 @@ export async function parseArrayBuffer(
       realType = builtinTypes[fileExtension];
     }
 
-    if (additionalParsers[fileExtension]) {
+    if (additionalParsers && additionalParsers[fileExtension]) {
       realType = fileExtension;
     }
   }
+
+  log.info(
+    `Assumed '${realType}' from '${type}' given '${fileName}' when parsing array buffer`
+  );
 
   if (additionalParsers && additionalParsers[realType]) {
     return await additionalParsers[realType](body);
@@ -127,6 +131,5 @@ export async function parseArrayBuffer(
     }
   }
 
-  log.info(`Unsupported file type: '${realType}'`);
   return bodyAsString();
 }

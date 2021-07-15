@@ -37,9 +37,13 @@ export function TablePanelDetails({
       </div>
       <div className="form-row">
         <label>Columns</label>
-        {panel.table.columns.map((c) => (
+        {panel.table.columns.map((c, i) => (
           <div className="form-row">
             <FieldPicker
+              onDelete={() => {
+                panel.table.columns.splice(i, 1);
+                updatePanel(panel);
+              }}
               label="Field"
               value={c.field}
               panelSourceResult={data}

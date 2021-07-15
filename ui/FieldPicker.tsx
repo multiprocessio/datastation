@@ -2,6 +2,7 @@ import * as React from 'react';
 
 import { PanelResult } from '../shared/state';
 
+import { Button } from './component-library/Button';
 import { Input } from './component-library/Input';
 import { Select } from './component-library/Select';
 
@@ -12,6 +13,7 @@ export function FieldPicker({
   panelSourceResult,
   labelValue,
   labelOnChange,
+  onDelete,
 }: {
   onChange: (v: string) => void;
   label: string;
@@ -19,6 +21,7 @@ export function FieldPicker({
   panelSourceResult: PanelResult;
   labelValue?: string;
   labelOnChange?: (v: string) => void;
+  onDelete?: () => void;
 }) {
   // Default the label to the field name
   const [labelModified, setLabelModified] = React.useState(false);
@@ -44,7 +47,9 @@ export function FieldPicker({
     fieldPicker = (
       <Select label={label} value={value} onChange={onChange}>
         {fields.map((f) => (
-          <option value={f}>{f}</option>
+          <option key={f} value={f}>
+            {f}
+          </option>
         ))}
       </Select>
     );
@@ -58,6 +63,11 @@ export function FieldPicker({
 
   return (
     <div>
+      {onDelete && (
+        <Button icon onClick={onDelete}>
+          delete
+        </Button>
+      )}
       {fieldPicker}
       <Input label="Label" value={labelValue} onChange={labelOnChangeWrapper} />
     </div>
