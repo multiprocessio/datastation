@@ -13,7 +13,7 @@ export const evalFileHandler = {
   resource: 'evalFile',
   handler: async function (
     _: string,
-    { name, server }: Proxy<{ name: string }>
+    { type, name, server }: Proxy<{ name: string; type: string }>
   ) {
     if (!server) {
       const body = await fs.readFile(resolvePath(name));
@@ -25,6 +25,6 @@ export const evalFileHandler = {
     const sftp = new Client();
     await sftp.connect(config);
     let body = (await sftp.get(name)) as ArrayBuffer;
-    return await parseArrayBuffer('', name, body, additionalParsers);
+    return await parseArrayBuffer(type, name, body, additionalParsers);
   },
 };

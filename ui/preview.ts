@@ -1,14 +1,13 @@
 function unsafePreviewArray(
   obj: any,
   nKeys: number,
-  stringMax: number,
   nextNKeys: number,
   prefixChar: string,
   joinChar: string
 ) {
   const keys = obj.slice(0, nKeys);
   const childPreview = keys.map(
-    (o: string) => prefixChar + unsafePreview(o, nextNKeys, stringMax)
+    (o: string) => prefixChar + unsafePreview(o, nextNKeys)
   );
   if (obj.length > nKeys) {
     childPreview.push(prefixChar + '...');
@@ -19,7 +18,6 @@ function unsafePreviewArray(
 function unsafePreviewObject(
   obj: any,
   nKeys: number,
-  stringMax: number,
   nextNKeys: number,
   prefixChar: string,
   joinChar: string
@@ -31,10 +29,7 @@ function unsafePreviewObject(
   firstKeys.forEach((k) => {
     const formattedKey = `"${k.replaceAll('"', '\\"')}"`;
     preview.push(
-      prefixChar +
-        formattedKey +
-        ': ' +
-        unsafePreview(obj[k], nextNKeys, stringMax)
+      prefixChar + formattedKey + ': ' + unsafePreview(obj[k], nextNKeys)
     );
   });
 
@@ -45,12 +40,7 @@ function unsafePreviewObject(
   return ['{', preview.join(',' + joinChar), '}'].join(joinChar);
 }
 
-function unsafePreview(
-  obj: any,
-  nKeys: number,
-  stringMax: number,
-  topLevel = false
-): string {
+function unsafePreview(obj: any, nKeys: number, topLevel = false): string {
   if (!obj) {
     return String(obj);
   }
@@ -61,44 +51,36 @@ function unsafePreview(
   const prefixChar = topLevel ? '  ' : '';
 
   if (Array.isArray(obj)) {
-    return unsafePreviewArray(
-      obj,
-      nKeys,
-      stringMax,
-      nextNKeys,
-      prefixChar,
-      joinChar
-    );
+    return unsafePreviewArray(obj, nKeys, nextNKeys, prefixChar, joinChar);
   }
 
   if (typeof obj === 'object') {
-    return unsafePreviewObject(
-      obj,
-      nKeys,
-      stringMax,
-      nextNKeys,
-      prefixChar,
-      joinChar
-    );
+    return unsafePreviewObject(obj, nKeys, nextNKeys, prefixChar, joinChar);
   }
 
+  let stringMax = 200;
+  if (typeof obj === 'string' && topLevel) {
+    stringMax = 5000;
+  }
+
+  // Truncate before quoting
   let res = String(obj).slice(0, stringMax);
   if (String(obj).length > stringMax) {
     res += '...';
   }
 
   if (typeof obj === 'string' && !topLevel) {
-    res = `"${res.replace('"', '\\"')}"`;
+    return `"${res.replace('"', '\\"')}"`;
   }
 
   return res;
 }
 
-export function previewObject(obj: any, nKeys = 20, stringMax = 200): string {
+export function previewObject(obj: any, nKeys = 20): string {
   try {
-    return unsafePreview(obj, nKeys, stringMax, true);
+    return unsafePreview(obj, nKeys, true);
   } catch (e) {
     console.error(e);
-    return String(obj).slice(0, stringMax);
+    return String(obj).slice(0, 200);
   }
 }
