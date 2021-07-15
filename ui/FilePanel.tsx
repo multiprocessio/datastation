@@ -16,11 +16,7 @@ export async function evalFilePanel(
   servers: Array<ServerInfo>
 ) {
   if (MODE === 'browser') {
-    return await parseArrayBuffer(
-      'text/plain',
-      panel.file.name,
-      panel.file.content
-    );
+    return await parseArrayBuffer('', panel.file.name, panel.file.content);
   }
 
   return await asyncRPC<Proxy<{ name: string }>, string, Array<object>>(
@@ -28,12 +24,6 @@ export async function evalFilePanel(
     panel.content,
     { ...panel.file, server: servers.find((s) => s.id === panel.serverId) }
   );
-}
-
-// This is kind of duplicated
-const SUPPORTED_FILE_TYPES = ['csv', 'json', 'xlsx'];
-if (MODE !== 'browser') {
-  SUPPORTED_FILE_TYPES.push('parquet');
 }
 
 export function FilePanelDetails({
@@ -49,7 +39,6 @@ export function FilePanelDetails({
       <div className="form-row">
         <FileInput
           label="File"
-          accept={SUPPORTED_FILE_TYPES.map((p: string) => `.${p}`).join(',')}
           value={panel.file.name}
           allowManualEntry={MODE !== 'browser' ? true : false}
           allowFilePicker={!panel.serverId ? true : false}

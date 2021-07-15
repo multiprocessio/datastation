@@ -7,7 +7,7 @@ import { Select } from './component-library/Select';
 export async function evalLiteralPanel(panel: LiteralPanelInfo) {
   const literal = panel.literal;
   const array = new TextEncoder().encode(panel.content);
-  return await parseArrayBuffer('text/plain', 'literal.' + literal.type, array);
+  return await parseArrayBuffer('', 'literal.' + literal.type, array);
 }
 
 export function LiteralPanelDetails({

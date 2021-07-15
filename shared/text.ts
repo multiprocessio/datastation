@@ -45,17 +45,33 @@ export async function parseArrayBuffer(
   body: ArrayBuffer,
   additionalParsers?: Parsers
 ) {
+  // I'm not sure body is actually always an arraybuffer.
+  if (!body || (body as any).length === 0 || body.byteLength === 0) {
+    return null;
+  }
+
   const bodyAsString = () => new TextDecoder('utf-8').decode(body);
   let realType = type.split(';')[0];
-  if (realType === 'text/plain') {
+  if (realType === '') {
     const fileBits = fileName.split('.');
     const fileExtension = fileBits[fileBits.length - 1];
-    realType =
-      {
-        csv: 'text/csv',
-        json: 'application/json',
-        xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      }[fileExtension] || realType;
+    const builtinTypes: Record<string, string> = {
+      csv: 'text/csv',
+      json: 'application/json',
+      xls: 'application/vnd.ms-excel',
+      xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    };
+    if (builtinTypes[fileExtension]) {
+      realType = builtinTypes[fileExtension];
+    }
+
+    if (additionalParsers[fileExtension]) {
+      realType = fileExtension;
+    }
+  }
+
+  if (additionalParsers && additionalParsers[realType]) {
+    return await additionalParsers[realType](body);
   }
 
   switch (realType) {
@@ -63,15 +79,24 @@ export async function parseArrayBuffer(
       return parseCSV(bodyAsString());
     case 'application/json':
       return JSON.parse(bodyAsString());
+    case 'application/vnd.ms-excel':
     case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': {
-      return XLSX.read(body, { type: 'array' });
+      const file = XLSX.read(body, { type: 'array' });
+      const sheets: Record<string, any> = {};
+
+      file.SheetNames.forEach((name: string) => {
+        sheets[name] = XLSX.utils.sheet_to_json(file.Sheets[name]);
+      });
+
+      // Make flat when there's only one sheet
+      if (file.SheetNames.length === 1) {
+        return sheets[file.SheetNames[0]];
+      }
+
+      return sheets;
     }
   }
 
-  if (additionalParsers && additionalParsers[type]) {
-    return await additionalParsers[type](body);
-  }
-
-  log.info(`Unsupported file type: '${type}'`);
+  log.info(`Unsupported file type: '${realType}'`);
   return bodyAsString();
 }

@@ -59,7 +59,7 @@ header a {
 
 .editor {
   width: 100%;
-  min-height: 500px;
+  min-height: 350px;
   height: 100% !important;
   border: 0;
   font-family: monospace;
@@ -434,6 +434,14 @@ header > div {
 
 .text-light {
   color: #777;
+}
+
+.text-success {
+  color: #129412;
+}
+
+.text-failure {
+  color: #a00505;
 }
 
 .form-row {
