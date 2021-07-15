@@ -8,8 +8,9 @@ import {
   PanelResults,
 } from '../shared/state';
 
+import { evalPanel } from './Panel';
+import { Panels } from './Panels';
 import { asyncRPC } from './asyncRPC';
-import { Page } from './Page';
 import { Button } from './component-library/Button';
 import { Input } from './component-library/Input';
 
@@ -84,6 +85,59 @@ export function Pages({
     return null;
   }
 
+  const panelResults = panelResultsByPage[page.id];
+
+  async function reevalPanel(panelIndex: number, reset?: boolean) {
+    const { connectors, servers } = state;
+
+    let panel = panelResults[panelIndex] || new PanelResult();
+    panel.lastRun = null;
+    panel.loading = !reset;
+
+    setPanelResults(panelIndex, panel);
+    if (reset) {
+      return;
+    }
+
+    try {
+      const [r, stdout] = await evalPanel(
+        page,
+        panelIndex,
+        panelResults,
+        connectors,
+        servers
+      );
+      setPanelResults(
+        panelIndex,
+        {
+          lastRun: new Date(),
+          value: r,
+          stdout,
+          loading: false,
+        },
+        true
+      );
+    } catch (e) {
+      setPanelResults(
+        panelIndex,
+        {
+          loading: false,
+          lastRun: new Date(),
+          exception: e.stack || e.message,
+          stdout: e.stdout,
+        },
+        true
+      );
+    }
+  }
+
+  async function evalAll() {
+    for (let i = 0; i < page.panels.length; i++) {
+      await reevalPanel(i);
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+    }
+  }
+
   return (
     <div className="section pages">
       <div className="section-title">
@@ -105,6 +159,11 @@ export function Pages({
             onChange={(value: string) => updatePage({ ...page, name: value })}
             value={page.name}
           />
+          <span title="Evaluate all panels sequentially">
+            <Button icon onClick={evalAll} type="primary">
+              play_arrow
+            </Button>
+          </span>
         </div>
         {state.pages.map((page: ProjectPage, i: number) =>
           i === currentPage ? undefined : (
@@ -125,14 +184,11 @@ export function Pages({
         </Button>
       </div>
 
-      <Page
-        key={page.id}
+      <Panels
         page={page}
-        connectors={state.connectors}
-        servers={state.servers}
         updatePage={updatePage}
-        panelResults={panelResultsByPage[page.id]}
-        setPanelResults={setPanelResults}
+        reevalPanel={reevalPanel}
+        panelResults={panelResults}
       />
     </div>
   );
