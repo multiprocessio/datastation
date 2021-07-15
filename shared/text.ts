@@ -37,6 +37,21 @@ export function parseCSV(csvString: string) {
   return data;
 }
 
+// SOURCE: https://github.com/SheetJS/sheetjs/issues/1529#issuecomment-544705184
+function trimExcelHeaders(ws: XLSX.WorkSheet) {
+  if (!ws || !ws['!ref']) return;
+  const ref = XLSX.utils.decode_range(ws['!ref']);
+  for (let C = ref.s.c; C <= ref.e.c; ++C) {
+    const cell = ws[XLSX.utils.encode_cell({ r: ref.s.r, c: C })];
+    if (cell.t === 's') {
+      cell.v = cell.v.trim();
+      if (cell.w) {
+        cell.w = cell.w.trim();
+      }
+    }
+  }
+}
+
 export type Parsers = { [type: string]: (a: ArrayBuffer) => Promise<any> };
 
 export async function parseArrayBuffer(
@@ -85,6 +100,7 @@ export async function parseArrayBuffer(
       const sheets: Record<string, any> = {};
 
       file.SheetNames.forEach((name: string) => {
+        trimExcelHeaders(file.Sheets[name]);
         sheets[name] = XLSX.utils.sheet_to_json(file.Sheets[name]);
       });
 
