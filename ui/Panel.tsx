@@ -1,5 +1,6 @@
-import * as CSV from 'papaparse';
+import formatDistanceToNow from 'date-fns/formatDistanceToNow';
 import circularSafeStringify from 'json-stringify-safe';
+import * as CSV from 'papaparse';
 import * as React from 'react';
 
 import { MODE_FEATURES } from '../shared/constants';
@@ -268,11 +269,22 @@ export function Panel({
             )}
             <span className="panel-controls vertical-align-center flex-right">
               <span className="last-run">
-                {results.loading
-                  ? 'Running...'
-                  : results.lastRun
-                  ? 'Last run ' + results.lastRun
-                  : 'Run to apply changes'}
+                {results.loading ? (
+                  'Running...'
+                ) : results.lastRun ? (
+                  <>
+                    <span
+                      className={
+                        results.exception ? 'text-failure' : 'text-success'
+                      }
+                    >
+                      {results.exception ? 'Failed' : 'Succeeded'}
+                    </span>{' '}
+                    {formatDistanceToNow(results.lastRun, { addSuffix: true })}
+                  </>
+                ) : (
+                  'Run to apply changes'
+                )}
               </span>
               <span title="Evaluate Panel (Ctrl-Enter)">
                 <Button
