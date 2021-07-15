@@ -436,6 +436,14 @@ header > div {
   color: #777;
 }
 
+.text-success {
+  color: #129412;
+}
+
+.text-failure {
+  color: #a00505;
+}
+
 .form-row {
   padding: 5px 0;
 }

@@ -17,7 +17,7 @@ export const evalFileHandler = {
   ) {
     if (!server) {
       const body = await fs.readFile(resolvePath(name));
-      return parseArrayBuffer('text/plain', name, body, additionalParsers);
+      return parseArrayBuffer('', name, body, additionalParsers);
     }
 
     const config = await getSSHConfig(server);
@@ -25,6 +25,6 @@ export const evalFileHandler = {
     const sftp = new Client();
     await sftp.connect(config);
     let body = (await sftp.get(name)) as ArrayBuffer;
-    return await parseArrayBuffer('text/plain', name, body, additionalParsers);
+    return await parseArrayBuffer('', name, body, additionalParsers);
   },
 };
