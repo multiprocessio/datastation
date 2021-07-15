@@ -54,6 +54,9 @@ function trimExcelHeaders(ws: XLSX.WorkSheet) {
 
 export type Parsers = { [type: string]: (a: ArrayBuffer) => Promise<any> };
 
+export const XLSX_MIME_TYPE =
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+
 export async function parseArrayBuffer(
   type: string,
   fileName: string,
@@ -73,8 +76,8 @@ export async function parseArrayBuffer(
     const builtinTypes: Record<string, string> = {
       csv: 'text/csv',
       json: 'application/json',
-      xls: 'application/vnd.ms-excel',
-      xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      xls: XLSX_MIME_TYPE,
+      xlsx: XLSX_MIME_TYPE,
     };
     if (builtinTypes[fileExtension]) {
       realType = builtinTypes[fileExtension];
@@ -94,8 +97,19 @@ export async function parseArrayBuffer(
       return parseCSV(bodyAsString());
     case 'application/json':
       return JSON.parse(bodyAsString());
+    case 'application/jsonlines':
+      return bodyAsString()
+        .split('\n')
+        .filter(Boolean)
+        .map((l) => {
+          try {
+            return JSON.parse(l);
+          } catch (e) {
+            log.error(e, l);
+          }
+        });
     case 'application/vnd.ms-excel':
-    case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': {
+    case XLSX_MIME_TYPE: {
       const file = XLSX.read(body, { type: 'array' });
       const sheets: Record<string, any> = {};
 

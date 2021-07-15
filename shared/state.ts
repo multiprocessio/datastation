@@ -269,15 +269,22 @@ export class TablePanelInfo extends PanelInfo {
 
 export class FilePanelInfo extends PanelInfo {
   file: {
+    type: string;
     name: string;
     content: ArrayBuffer;
   };
 
-  constructor(name?: string, fileName?: string, fileContent?: ArrayBuffer) {
+  constructor(
+    name?: string,
+    fileName?: string,
+    fileContent?: ArrayBuffer,
+    type?: string
+  ) {
     super('file', name, '');
     this.file = {
       name: fileName || '',
       content: fileContent || new ArrayBuffer(0),
+      type: type || '',
     };
   }
 }
