@@ -12,6 +12,7 @@ scripting, and visualization in a single platform.
 * Query HTTP servers
   * With builtin support for proxying over SSH
 * Read files from disk
+  * Builtin support for parquet, CSV, JSON, and Excel (.xlsx, .xls)
   * With builtin support for reading over SSH (i.e. SFTP)
 * Script against data in Python, JavaScript, Ruby, Julia, and R
 * Produce bar graphs and pie charts from data
