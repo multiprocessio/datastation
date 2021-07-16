@@ -1,14 +1,14 @@
 import * as React from 'react';
 
 export function Textarea({
-  spellCheck,
+  spellCheck = false,
   value,
   onChange,
   className,
   disabled,
   onKeyDown,
 }: {
-  spellCheck?: 'true' | 'false';
+  spellCheck?: boolean;
   value: string;
   onChange: (value: string) => void;
   className?: string;
