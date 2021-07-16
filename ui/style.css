@@ -67,6 +67,15 @@ header a {
   counter-reset: line;
 }
 
+.textarea {
+  padding: 5px;
+  background: transparent;
+  border: 1px solid #aaa;
+  min-height: 100px;
+  width: 800px;
+  max-width: 100%;
+}
+
 input.input,
 label.input input,
 select.select,

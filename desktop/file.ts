@@ -13,11 +13,19 @@ export const evalFileHandler = {
   resource: 'evalFile',
   handler: async function (
     _: string,
-    { type, name, server }: Proxy<{ name: string; type: string }>
+    {
+      contentTypeInfo,
+      name,
+      server,
+    }: Proxy<{
+      name: string;
+      contentTypeInfo: { type: string; customLineRegexp: string };
+    }>
   ) {
+    const typeInfo = { ...contentTypeInfo, additionalParsers };
     if (!server) {
       const body = await fs.readFile(resolvePath(name));
-      return parseArrayBuffer('', name, body, additionalParsers);
+      return parseArrayBuffer(typeInfo, name, body);
     }
 
     const config = await getSSHConfig(server);
@@ -25,6 +33,6 @@ export const evalFileHandler = {
     const sftp = new Client();
     await sftp.connect(config);
     let body = (await sftp.get(name)) as ArrayBuffer;
-    return await parseArrayBuffer(type, name, body, additionalParsers);
+    return await parseArrayBuffer(typeInfo, name, body);
   },
 };

@@ -115,7 +115,10 @@ export const getProgramHandlers = (settings: Settings) => [
           }
 
           const body = await fs.readFile(outputTmp.path);
-          return [await parseArrayBuffer('application/json', '', body), out];
+          return [
+            await parseArrayBuffer({ type: 'application/json' }, '', body),
+            out,
+          ];
         } catch (e) {
           if (ppi.program.type === 'python') {
             const matcher = /, line ([1-9]*), in <module>/g;
