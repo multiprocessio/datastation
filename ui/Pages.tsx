@@ -12,6 +12,7 @@ import { evalPanel } from './Panel';
 import { Panels } from './Panels';
 import { asyncRPC } from './asyncRPC';
 import { Button } from './component-library/Button';
+import { Confirm } from './component-library/Confirm';
 import { Input } from './component-library/Input';
 
 export function Pages({
@@ -143,16 +144,21 @@ export function Pages({
       <div className="section-title">
         <div className="vertical-align-center">
           <span title="Delete Page">
-            <Button
-              icon
-              className="page-delete"
-              onClick={() => {
+            <Confirm
+              right
+              onConfirm={() => {
                 deletePage(currentPage);
                 setCurrentPage(Math.min(state.pages.length - 1, 0));
               }}
-            >
-              delete
-            </Button>
+              message="delete this page"
+              action="Delete"
+              className="page-delete"
+              render={(confirm: () => void) => (
+                <Button icon onClick={confirm}>
+                  delete
+                </Button>
+              )}
+            />
           </span>
           <Input
             className="page-name page-name--current"

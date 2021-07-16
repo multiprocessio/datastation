@@ -29,6 +29,7 @@ import { TablePanel, TablePanelDetails } from './TablePanel';
 import { evalLiteralPanel, LiteralPanelDetails } from './LiteralPanel';
 import { evalSQLPanel, SQLPanelDetails } from './SQLPanel';
 import { Button } from './component-library/Button';
+import { Confirm } from './component-library/Confirm';
 import { Input } from './component-library/Input';
 import { Select } from './component-library/Select';
 import { CodeEditor } from './component-library/CodeEditor';
@@ -228,8 +229,9 @@ export function Panel({
 
   return (
     <div
-      className={`panel ${hidden ? 'panel--hidden' : ''} ${panel.type === 'file' && !results.exception ? 'panel--empty' : ''
-        } ${results.loading ? 'panel--loading' : ''}`}
+      className={`panel ${hidden ? 'panel--hidden' : ''} ${
+        panel.type === 'file' && !results.exception ? 'panel--empty' : ''
+      } ${results.loading ? 'panel--loading' : ''}`}
       tabIndex={1001}
       ref={panelRef}
       onKeyDown={keyboardShortcuts}
@@ -305,8 +307,8 @@ export function Panel({
               >
                 <Button
                   icon
-                  onClick={
-                    () => runningProgram ? killProcess() : reevalPanel(panelIndex)
+                  onClick={() =>
+                    runningProgram ? killProcess() : reevalPanel(panelIndex)
                   }
                   type="primary"
                 >
@@ -340,9 +342,16 @@ export function Panel({
                 </Button>
               </span>
               <span title="Delete Panel">
-                <Button icon onClick={() => removePanel(panelIndex)}>
-                  delete
-                </Button>
+                <Confirm
+                  onConfirm={() => removePanel(panelIndex)}
+                  message="delete this panel"
+                  action="Delete"
+                  render={(confirm: () => void) => (
+                    <Button icon onClick={confirm}>
+                      delete
+                    </Button>
+                  )}
+                />
               </span>
             </span>
           </div>
