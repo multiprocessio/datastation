@@ -25,7 +25,7 @@ export function Updates() {
     }
 
     run();
-  });
+  }, []);
 
   if (!updates) {
     return null;

@@ -130,7 +130,9 @@ export function ProgramPanelDetails({
           }}
         >
           {options.map((o) => (
-            <option value={o.value}>{o.name}</option>
+            <option key={o.value} value={o.value}>
+              {o.name}
+            </option>
           ))}
         </Select>
       </div>
