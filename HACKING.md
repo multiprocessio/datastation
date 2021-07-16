@@ -1,6 +1,6 @@
 # Hacking
 
-You'll need a recent Node.js, Python, and
+You'll need a recent Node.js, Python, cmake, and
 [yarn](https://yarnpkg.com/).
 
 If you want to have hot-reloading, install
