@@ -216,12 +216,13 @@ export function Panel({
     }
   }
 
-  const runningProgram = results.loading && panel.type === 'program' && MODE_FEATURES.killProcess;
+  const runningProgram =
+    results.loading && panel.type === 'program' && MODE_FEATURES.killProcess;
   function killProcess() {
     asyncRPC<ProgramPanelInfo, void, void>(
       'killProcess',
       null,
-      panel as ProgramPanelInfo,
+      panel as ProgramPanelInfo
     );
   }
 
@@ -296,10 +297,18 @@ export function Panel({
                   'Run to apply changes'
                 )}
               </span>
-              <span title={runningProgram ? 'Kill Process' : "Evaluate Panel (Ctrl-Enter)"}>
+              <span
+                title={
+                  runningProgram
+                    ? 'Kill Process'
+                    : 'Evaluate Panel (Ctrl-Enter)'
+                }
+              >
                 <Button
                   icon
-                  onClick={runningProgram ? () => reevalPanel(panelIndex) : killProcess}
+                  onClick={
+                    runningProgram ? () => reevalPanel(panelIndex) : killProcess
+                  }
                   type="primary"
                 >
                   {runningProgram ? 'close' : 'play_arrow'}
