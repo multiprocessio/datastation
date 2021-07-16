@@ -1,6 +1,11 @@
 import * as React from 'react';
 
-import { Proxy, ServerInfo, FilePanelInfo } from '../shared/state';
+import {
+  Proxy,
+  ServerInfo,
+  FilePanelInfo,
+  ContentTypeInfo,
+} from '../shared/state';
 import { parseArrayBuffer } from '../shared/text';
 import { MODE } from '../shared/constants';
 
@@ -17,14 +22,14 @@ export async function evalFilePanel(
 ) {
   if (MODE === 'browser') {
     return await parseArrayBuffer(
-      panel.file.type,
+      panel.file.contentTypeInfo,
       panel.file.name,
       panel.file.content
     );
   }
 
   return await asyncRPC<
-    Proxy<{ name: string; type: string }>,
+    Proxy<{ name: string; contentTypeInfo: ContentTypeInfo }>,
     void,
     Array<object>
   >('evalFile', null, {
@@ -64,9 +69,10 @@ export function FilePanelDetails({
         />
       </div>
       <ContentTypePicker
-        value={panel.file.type}
-        onChange={(type: string) => {
-          panel.file.type = type;
+        inMemoryEval={MODE !== 'browser'}
+        value={panel.file.contentTypeInfo}
+        onChange={(cti: { type: string; customLineRegexp: string }) => {
+          panel.file.contentTypeInfo = cti;
           updatePanel(panel);
         }}
       />

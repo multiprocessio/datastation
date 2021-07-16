@@ -263,6 +263,7 @@ export function Panel({
             </span>
             <Input
               className="panel-name"
+              autoWidth
               onChange={(value: string) => {
                 panel.name = value;
                 updatePanel(panel);
