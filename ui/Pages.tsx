@@ -173,7 +173,11 @@ export function Pages({
         </div>
         {state.pages.map((page: ProjectPage, i: number) =>
           i === currentPage ? undefined : (
-            <Button className="page-name" onClick={() => setCurrentPage(i)}>
+            <Button
+              key={page.id}
+              className="page-name"
+              onClick={() => setCurrentPage(i)}
+            >
               {page.name}
             </Button>
           )
