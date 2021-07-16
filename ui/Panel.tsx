@@ -219,7 +219,7 @@ export function Panel({
   const runningProgram =
     results.loading && panel.type === 'program' && MODE_FEATURES.killProcess;
   function killProcess() {
-    asyncRPC<ProgramPanelInfo, void, void>(
+    return asyncRPC<ProgramPanelInfo, void, void>(
       'killProcess',
       null,
       panel as ProgramPanelInfo
@@ -228,9 +228,8 @@ export function Panel({
 
   return (
     <div
-      className={`panel ${hidden ? 'panel--hidden' : ''} ${
-        panel.type === 'file' && !results.exception ? 'panel--empty' : ''
-      } ${results.loading ? 'panel--loading' : ''}`}
+      className={`panel ${hidden ? 'panel--hidden' : ''} ${panel.type === 'file' && !results.exception ? 'panel--empty' : ''
+        } ${results.loading ? 'panel--loading' : ''}`}
       tabIndex={1001}
       ref={panelRef}
       onKeyDown={keyboardShortcuts}
@@ -307,7 +306,7 @@ export function Panel({
                 <Button
                   icon
                   onClick={
-                    runningProgram ? () => reevalPanel(panelIndex) : killProcess
+                    () => runningProgram ? killProcess() : reevalPanel(panelIndex)
                   }
                   type="primary"
                 >
