@@ -19,6 +19,7 @@ import {
   PanelResult,
 } from '../shared/state';
 
+import { asyncRPC } from './asyncRPC';
 import { ErrorBoundary } from './ErrorBoundary';
 import { GraphPanel, GraphPanelDetails } from './GraphPanel';
 import { evalHTTPPanel, HTTPPanelDetails } from './HTTPPanel';
@@ -215,6 +216,15 @@ export function Panel({
     }
   }
 
+  const runningProgram = results.loading && panel.type === 'program' && MODE_FEATURES.killProcess;
+  function killProcess() {
+    asyncRPC<ProgramPanelInfo, void, void>(
+      'killProcess',
+      null,
+      panel as ProgramPanelInfo,
+    );
+  }
+
   return (
     <div
       className={`panel ${hidden ? 'panel--hidden' : ''} ${
@@ -286,13 +296,13 @@ export function Panel({
                   'Run to apply changes'
                 )}
               </span>
-              <span title="Evaluate Panel (Ctrl-Enter)">
+              <span title={runningProgram ? 'Kill Process' : "Evaluate Panel (Ctrl-Enter)"}>
                 <Button
                   icon
-                  onClick={() => reevalPanel(panelIndex)}
+                  onClick={runningProgram ? () => reevalPanel(panelIndex) : killProcess}
                   type="primary"
                 >
-                  play_arrow
+                  {runningProgram ? 'close' : 'play_arrow'}
                 </Button>
               </span>
               <span

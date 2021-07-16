@@ -1,5 +1,5 @@
 import { EOL } from 'os';
-import { exec } from 'child_process';
+import { spawn } from 'child_process';
 import fs from 'fs/promises';
 import path from 'path';
 import util from 'util';
@@ -12,7 +12,7 @@ import { parseArrayBuffer } from '../shared/text';
 import { DISK_ROOT, RESULTS_FILE } from './constants';
 import { Settings } from './settings';
 
-const execPromise = util.promisify(exec);
+const runningProcesses = {};
 
 const JAVASCRIPT_PREAMBLE = (outFile: string) =>
   `
@@ -73,7 +73,8 @@ const PREAMBLE = {
   r: R_PREAMBLE,
 };
 
-export const getEvalProgramHandler = (settings: Settings) => ({
+export const getEvalProgramHandler = (settings: Settings) => [
+  {
   resource: 'evalProgram',
   handler: async function (_: string, ppi: ProgramPanelInfo) {
     const programTmp = await makeTmpFile();
@@ -92,10 +93,25 @@ export const getEvalProgramHandler = (settings: Settings) => ({
       const preamble = PREAMBLE[ppi.program.type](outputTmp.path);
       await fs.writeFile(programTmp.path, [preamble, ppi.content].join(EOL));
       try {
-        const { stdout, stderr } = await execPromise(
-          `${programPathOrName} ${programTmp.path}`
-        );
-        out = stdout + stderr;
+        const child = spawn(programPathOrName, [programTmp.path]);
+        // TODO: stream back
+        let out = '';
+        let stderr = '';
+        child.stdout.on('data', (data) => {
+          out += data;
+        });
+
+        child.stderr.on('data', (data) => {
+          out += data;
+          stderr += data;
+        });
+
+        runningProcesses[ppi.id] = child.pid;
+        const code = await new Promise((resolve) => child.on('close', resolve));
+        if (code !== 0) {
+          throw stderr;
+        }
+
         const body = await fs.readFile(outputTmp.path);
         return [
           await parseArrayBuffer('application/json', '', body),
@@ -146,9 +162,20 @@ export const getEvalProgramHandler = (settings: Settings) => ({
         e.stdout = out;
         throw e;
       }
-    } finally {
+    } finally { 
+      delete runningProcesses[ppi.id];
       programTmp.cleanup();
       outputTmp.cleanup();
     }
   },
-});
+  },
+  {
+    resource: 'killProcess',
+    handler: async function (_: string, ppi: ProgramPanelInfo) {
+      const pid = runningProcesses[ppi.id];
+      if (pid) {
+        process.kill(pid);
+      }
+    },
+  },
+];
