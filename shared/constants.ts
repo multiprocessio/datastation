@@ -19,6 +19,7 @@ export const MODE_FEATURES = {
   storeResults: MODE !== 'browser',
   useDefaultProject: MODE === 'browser',
   extraLanguages: MODE !== 'browser',
+  killProcess: MODE !== 'browser',
 };
 
 export const RPC_ASYNC_REQUEST = 'rpcAsyncRequest';
