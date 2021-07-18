@@ -5,6 +5,7 @@ will work on Windows and the *nixes.
 
 import os
 import platform
+import subprocess
 import sys
 
 IS_WINDOWS = os.name == 'nt'
@@ -109,6 +110,5 @@ for command in script:
         if i == 0: continue
 
         line[i] = '"{}"'.format(token)
-    line = ' '.join(line)
 
-    os.system(line)
+    subprocess.run(line, check=True)
