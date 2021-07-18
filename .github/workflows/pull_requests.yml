@@ -22,7 +22,7 @@ jobs:
     - run: yarn test-licenses
     - run: yarn test-coverage
 
-e2e-linux:
+  e2e-linux:
     needs: test
 
     runs-on: ubuntu-latest
@@ -36,7 +36,7 @@ e2e-linux:
         ref: ${{ github.ref }}
     - run: yarn e2e-test "releases/DataStation Community Edition-linux-x64/DataStation Community Edition"
 
-e2e-macos:
+  e2e-macos:
     needs: test
 
     runs-on: macos-latest
@@ -50,7 +50,7 @@ e2e-macos:
         ref: ${{ github.ref }}
     - run: yarn e2e-test "releases/DataStation Community Edition-darwin-x64/DataStation Community Edition.app"
 
-e2e-windows:
+  e2e-windows:
     needs: test
 
     runs-on: windows-latest
