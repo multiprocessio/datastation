@@ -3,6 +3,7 @@ import * as React from 'react';
 import { ConnectorInfo, SQLConnectorInfo } from '../shared/state';
 import { SQLConnector } from './SQLConnector';
 import { Button } from './component-library/Button';
+import { Confirm } from './component-library/Confirm';
 import { Input } from './component-library/Input';
 
 export function Connector({
@@ -19,9 +20,20 @@ export function Connector({
   return (
     <div className="connector">
       <div className="connector-header vertical-align-center">
-        <Button icon className="page-delete" onClick={deleteConnector}>
-          delete
-        </Button>
+        <span title="Delete data source">
+          <Confirm
+            right
+            onConfirm={deleteConnector}
+            message="delete this data source"
+            action="Delete"
+            className="page-delete"
+            render={(confirm: () => void) => (
+              <Button icon onClick={confirm}>
+                delete
+              </Button>
+            )}
+          />
+        </span>
         <span className="connector-type">{connector.type}</span>
         <span className="connector-name">
           {expanded ? (

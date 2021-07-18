@@ -3,6 +3,32 @@ import * as CSV from 'papaparse';
 
 import log from './log';
 
+export type Parsers = { [type: string]: (a: ArrayBuffer) => Promise<any> };
+
+export interface ContentTypeInfoPlusParsers {
+  additionalParsers?: Parsers;
+  type: string;
+  customLineRegexp?: string;
+}
+
+const APACHE2_ACCESS_RE =
+  /^(?<host>[^ ]*) [^ ]* (?<user>[^ ]*) \[(?<time>[^\]]*)\] "(?<method>\S+)(?: +(?<path>(?:[^\"]|\\.)*?)(?: +\S*)?)?" (?<code>[^ ]*) (?<size>[^ ]*)(?: "(?<referer>(?:[^\"]|\\.)*)" "(?<agent>(?:[^\"]|\\.)*)")?$/;
+const APACHE2_ERROR_RE =
+  /^\[[^ ]* (?<time>[^\]]*)\] \[(?<level>[^\]]*)\](?: \[pid (?<pid>[^\]]*)\])? \[client (?<client>[^\]]*)\] (?<message>.*)$/;
+const NGINX_ACCESS_RE =
+  /^(?<remote>[^ ]*) (?<host>[^ ]*) (?<user>[^ ]*) \[(?<time>[^\]]*)\] "(?<method>\S+)(?: +(?<path>[^\"]*?)(?: +\S*)?)?" (?<code>[^ ]*) (?<size>[^ ]*)(?: "(?<referer>[^\"]*)" "(?<agent>[^\"]*)"(?:\s+(?<http_x_forwarded_for>[^ ]+))?)?$/;
+const SYSLOG_RFC3164_RE =
+  /^\<(?<pri>[0-9]+)\>(?<time>[^ ]* {1,2}[^ ]* [^ ]*) (?<host>[^ ]*) (?<ident>[^ :\[]*)(?:\[(?<pid>[0-9]+)\])?(?:[^\:]*\:)? *(?<message>.*)$/;
+const SYSLOG_RFC5424_RE =
+  /\A\<(?<pri>[0-9]{1,3})\>[1-9]\d{0,2} (?<time>[^ ]+) (?<host>[!-~]{1,255}) (?<ident>[!-~]{1,48}) (?<pid>[!-~]{1,128}) (?<msgid>[!-~]{1,32}) (?<extradata>(?:\-|(?:\[.*?(?<!\\)\])+))(?: (?<message>.+))?\z/;
+
+export function parseWithRegex(body: string, re: RegExp) {
+  return body
+    .split('\n')
+    .filter(Boolean)
+    .map((line) => re.exec(line).groups);
+}
+
 export function parseCSV(csvString: string) {
   const csvWhole = CSV.parse(csvString);
   const csv = csvWhole.data;
@@ -52,16 +78,13 @@ function trimExcelHeaders(ws: XLSX.WorkSheet) {
   }
 }
 
-export type Parsers = { [type: string]: (a: ArrayBuffer) => Promise<any> };
-
 export const XLSX_MIME_TYPE =
   'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 
 export async function parseArrayBuffer(
-  type: string,
+  { type, additionalParsers, customLineRegexp }: ContentTypeInfoPlusParsers,
   fileName: string,
-  body: ArrayBuffer,
-  additionalParsers?: Parsers
+  body: ArrayBuffer
 ) {
   // I'm not sure body is actually always an arraybuffer.
   if (!body || (body as any).length === 0 || body.byteLength === 0) {
@@ -97,6 +120,18 @@ export async function parseArrayBuffer(
   }
 
   switch (realType) {
+    case 'text/regexplines':
+      return parseWithRegex(bodyAsString(), new RegExp(customLineRegexp));
+    case 'text/syslogrfc3164':
+      return parseWithRegex(bodyAsString(), SYSLOG_RFC3164_RE);
+    case 'text/syslogrfc5424':
+      return parseWithRegex(bodyAsString(), SYSLOG_RFC5424_RE);
+    case 'text/apache2error':
+      return parseWithRegex(bodyAsString(), APACHE2_ERROR_RE);
+    case 'text/apache2access':
+      return parseWithRegex(bodyAsString(), APACHE2_ACCESS_RE);
+    case 'text/nginxaccess':
+      return parseWithRegex(bodyAsString(), NGINX_ACCESS_RE);
     case 'text/csv':
       return parseCSV(bodyAsString());
     case 'application/json':

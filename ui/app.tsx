@@ -73,7 +73,7 @@ function getShareState(): undefined | ProjectState {
 
 function useProjectState(
   projectId: string,
-  store: ProjectStore,
+  store: ProjectStore | null,
   shareState: ProjectState | undefined
 ): [ProjectState, (d: ProjectState) => void] {
   const [state, setProjectState] = React.useState<ProjectState>(null);
@@ -82,14 +82,29 @@ function useProjectState(
   const isNewProject =
     projectId && previousProjectId === '' && projectId !== previousProjectId;
 
-  function setState(newState: ProjectState) {
-    store.update(projectId, newState);
+  function setState(newState: ProjectState, addToRestoreBuffer = true) {
+    store.update(projectId, newState, addToRestoreBuffer);
     setProjectState(newState);
   }
 
   const isDefault =
     MODE_FEATURES.useDefaultProject &&
     projectId === DEFAULT_PROJECT.projectName;
+
+  // Set up undo mechanism
+  React.useEffect(() => {
+    function handleUndo(e: KeyboardEvent) {
+      if ((e.ctrlKey || e.metaKey) && e.code === 'KeyZ') {
+        const prevState = store.undo(projectId);
+        if (prevState) {
+          setState(prevState, false);
+        }
+      }
+    }
+
+    document.addEventListener('keydown', handleUndo);
+    return () => document.removeEventListener('keydown', handleUndo);
+  }, []);
 
   // Re-read state when projectId changes
   React.useEffect(() => {
@@ -129,6 +144,8 @@ function useProjectState(
   return [state, setState];
 }
 
+const store = makeStore(MODE);
+
 function App() {
   const shareState = getShareState();
   const [projectId, setProjectIdInternal] = React.useState(
@@ -146,7 +163,6 @@ function App() {
     );
   }
 
-  const store = makeStore(MODE);
   const [state, updateProjectState] = useProjectState(
     projectId,
     store,

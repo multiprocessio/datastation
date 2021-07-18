@@ -11,6 +11,9 @@ import 'ace-builds/src-min-noconflict/mode-ruby';
 import 'ace-builds/src-min-noconflict/mode-julia';
 import 'ace-builds/src-min-noconflict/mode-r';
 import 'ace-builds/src-min-noconflict/mode-python';
+// Shortcuts support, TODO: support non-emacs
+// This steals Ctrl-a so this should not be a default
+//import 'ace-builds/src-min-noconflict/keybinding-emacs';
 
 export function CodeEditor({
   value,
