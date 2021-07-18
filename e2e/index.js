@@ -12,7 +12,7 @@ async function run() {
   const isVisible = await app.browserWindow.isVisible();
   assert.equal(isVisible, true);
   const title = await app.client.getTitle();
-  assert.equal(title, 'Blubberty');
+  assert.equal(title, 'DataStation Community Edition');
   await app.stop();
 }
 
