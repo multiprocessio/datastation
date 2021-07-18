@@ -58,7 +58,7 @@ jobs:
     steps:
     - run: Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')
     - run: Join-Path (Resolve-Path ~).Path "scoop\shims" >> $Env:GITHUB_PATH
-    - run: scoop install nodejs cmake python3
+    - run: scoop install nodejs cmake python
     - run: npm install --global yarn
     - uses: actions/checkout@master
       with:
