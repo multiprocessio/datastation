@@ -60,6 +60,7 @@ jobs:
     - run: Join-Path (Resolve-Path ~).Path "scoop\shims" >> $Env:GITHUB_PATH
     - run: scoop install nodejs cmake python
     - run: npm install --global yarn
+    - run: Join-Path (Resolve-Path ~).Path ".yarn\bin" >> $Env:GITHUB_PATH
     - uses: actions/checkout@master
       with:
         ref: ${{ github.ref }}

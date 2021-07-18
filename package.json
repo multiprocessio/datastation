@@ -7,8 +7,8 @@
   "main": "build/desktop.js",
   "scripts": {
     "typecheck": "yarn tsc",
-    "build-desktop": "python ./scripts/build.py ./desktop/scripts/desktop.build",
-    "build-ui": "python ./scripts/build.py ./ui/scripts/ui.build",
+    "build-desktop": "python3 ./scripts/build.py ./desktop/scripts/desktop.build",
+    "build-ui": "python3 ./scripts/build.py ./ui/scripts/ui.build",
     "start-desktop": "yarn build-ui && yarn build-desktop && yarn electron --trace-warning --unhandled-rejection=strict build/desktop.js",
     "start-ui": "./ui/scripts/watch_and_serve.sh",
     "release-desktop": "python3 ./scripts/build.py ./desktop/scripts/release.build",
@@ -16,7 +16,7 @@
     "test-licenses": "yarn license-checker --production --onlyAllow 'MIT;Apache-2.0;ISC;BSD-3-Clause;MIT*;BSD-2-Clause;Unlicense'",
     "test": "yarn jest",
     "test-coverage": "yarn jest --coverage",
-    "e2e-test": "python ./scripts/build.py ./scripts/e2e.build"
+    "e2e-test": "python3 ./scripts/build.py ./scripts/e2e.build"
   },
   "dependencies": {
     "ace-builds": "^1.4.12",
