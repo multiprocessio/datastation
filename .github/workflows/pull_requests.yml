@@ -21,3 +21,45 @@ jobs:
     - run: ./scripts/fail_on_diff.sh
     - run: yarn test-licenses
     - run: yarn test-coverage
+
+e2e-linux:
+    needs: test
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - run: curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
+    - run: sudo apt-get install -y nodejs cmake
+    - run: sudo npm install --global yarn
+    - uses: actions/checkout@master
+      with:
+        ref: ${{ github.ref }}
+    - run: yarn e2e-test
+
+e2e-macos:
+    needs: test
+
+    runs-on: macos-latest
+
+    steps:
+    - run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    - run: brew install nodejs cmake python3
+    - run: npm install --global yarn
+    - uses: actions/checkout@master
+      with:
+        ref: ${{ github.ref }}
+    - run: yarn e2e-test
+
+e2e-windows:
+    needs: test
+
+    runs-on: windows-latest
+
+    steps:
+    - run: "Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')"
+    - run: scoop install nodejs cmake python3
+    - run: npm install --global yarn
+    - uses: actions/checkout@master
+      with:
+        ref: ${{ github.ref }}
+    - run: yarn e2e-test

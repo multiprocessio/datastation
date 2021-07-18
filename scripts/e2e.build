@@ -1,0 +1,3 @@
+yarn
+yarn release-desktop $arg0
+node ./e2e/index.js
