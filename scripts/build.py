@@ -105,10 +105,4 @@ for command in script:
             to.truncate()
         continue
 
-    # Quote arguments when passing back to system
-    for i, token in enumerate(line):
-        if i == 0: continue
-
-        line[i] = '"{}"'.format(token)
-
     subprocess.run(line, check=True)
