@@ -34,7 +34,7 @@ jobs:
     - uses: actions/checkout@master
       with:
         ref: ${{ github.ref }}
-    - run: yarn e2e-test "releases/DataStation Community Edition-linux-x64/DataStation Community Edition"
+    - run: yarn e2e-test
 
   e2e-macos:
     needs: test
@@ -48,7 +48,7 @@ jobs:
     - uses: actions/checkout@master
       with:
         ref: ${{ github.ref }}
-    - run: yarn e2e-test "releases/DataStation Community Edition-darwin-x64/DataStation Community Edition.app"
+    - run: yarn e2e-test
 
   e2e-windows:
     needs: test
@@ -63,4 +63,4 @@ jobs:
     - uses: actions/checkout@master
       with:
         ref: ${{ github.ref }}
-    - run: yarn e2e-test "releases/DataStation Community Edition-win32-x64/DataStation Community Edition.exe"
+    - run: yarn e2e-test
