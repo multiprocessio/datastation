@@ -7,6 +7,7 @@ scripting, and visualization in a single platform.
 
 ## Major Features
 
+* Cross-platform: Windows, macOS, and Linux
 * Query PostgreSQL- and MySQL-compatible databases
   * With builtin support for proxying over SSH
 * Query HTTP servers
@@ -17,11 +18,6 @@ scripting, and visualization in a single platform.
   * With builtin support for reading over SSH (i.e. SFTP)
 * Script against data in Python, JavaScript, Ruby, Julia, and R
 * Produce bar graphs and pie charts from data
-
-You can [try out DataStation](https://app.datastation.multiprocess.io)
-using the in-browser environment or you can install the desktop
-application. The in-browser environment has some limitations the
-desktop app does not.
 
 ## Install
 
