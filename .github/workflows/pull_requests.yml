@@ -34,7 +34,7 @@ e2e-linux:
     - uses: actions/checkout@master
       with:
         ref: ${{ github.ref }}
-    - run: yarn e2e-test
+    - run: yarn e2e-test "releases/DataStation Community Edition-linux-x64/DataStation Community Edition"
 
 e2e-macos:
     needs: test
