@@ -2,6 +2,7 @@ import * as React from 'react';
 
 import { SITE_ROOT, VERSION } from '../shared/constants';
 import { request } from '../shared/http';
+import { ContentTypeInfo } from '../shared/state';
 
 export function Updates() {
   const [updates, setUpdates] = React.useState(null);
@@ -12,10 +13,9 @@ export function Updates() {
           window.fetch,
           'GET',
           `${SITE_ROOT}/api/updates?version=${VERSION}`,
-          '',
+          new ContentTypeInfo(),
           [],
           '',
-          null,
           true
         );
         setUpdates(updates);
@@ -25,7 +25,7 @@ export function Updates() {
     }
 
     run();
-  });
+  }, []);
 
   if (!updates) {
     return null;

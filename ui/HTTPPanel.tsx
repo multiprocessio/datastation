@@ -6,6 +6,7 @@ import {
   HTTPPanelInfo,
   HTTPConnectorInfo,
   HTTPConnectorInfoMethod,
+  ContentTypeInfo,
 } from '../shared/state';
 import { MODE } from '../shared/constants';
 import { request } from '../shared/http';
@@ -28,7 +29,7 @@ export async function evalHTTPPanel(
       (window as any).fetch,
       panel.http.http.method,
       panel.http.http.url,
-      panel.http.http.type,
+      panel.http.http.contentTypeInfo,
       panel.http.http.headers,
       panel.content
     );
@@ -125,9 +126,10 @@ export function HTTPPanelDetails({
           Add Header
         </Button>
         <ContentTypePicker
-          value={panel.http.http.type}
-          onChange={(type: string) => {
-            panel.http.http.type = type;
+          inMemoryEval={MODE !== 'browser'}
+          value={panel.http.http.contentTypeInfo}
+          onChange={(type: ContentTypeInfo) => {
+            panel.http.http.contentTypeInfo = type;
             updatePanel(panel);
           }}
         />

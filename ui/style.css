@@ -67,6 +67,15 @@ header a {
   counter-reset: line;
 }
 
+.textarea {
+  padding: 5px;
+  background: transparent;
+  border: 1px solid #aaa;
+  min-height: 100px;
+  width: 800px;
+  max-width: 100%;
+}
+
 input.input,
 label.input input,
 select.select,
@@ -428,6 +437,10 @@ header > div {
   width: 100%;
 }
 
+.text-right {
+  text-align: right;
+}
+
 .text-center {
   text-align: center;
 }
@@ -509,4 +522,36 @@ th {
 
 tbody tr:nth-child(odd) {
   background: #f9f0ff;
+}
+
+.confirm {
+  position: relative;
+}
+
+.confirm-popup {
+  display: none;
+  position: absolute;
+  top: calc(100% + 5px);
+  right: 0;
+  z-index: 4;
+  padding: 15px;
+  min-width: 200px;
+  background: white;
+  box-shadow: 0 1px 3px 0 #aaa;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+}
+
+.confirm-popup .button + .button {
+  display: inline-block;
+  margin-left: 15px;
+}
+
+.confirm-popup--open {
+  display: block;
+}
+
+.confirm-popup--right {
+  left: 0;
+  right: unset;
 }

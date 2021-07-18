@@ -1,5 +1,5 @@
 import { HTTPConnectorInfo } from './state';
-import { parseArrayBuffer, Parsers } from './text';
+import { parseArrayBuffer, ContentTypeInfoPlusParsers } from './text';
 
 export type FetchFunction = (
   url: string,
@@ -14,10 +14,9 @@ export async function request(
   fetchFunction: FetchFunction,
   method: string,
   url: string,
-  type: string,
+  contentTypeInfo: ContentTypeInfoPlusParsers,
   headers: Array<{ name: string; value: string }> = [],
   content = '',
-  additionalParsers: Parsers = undefined,
   require200 = false
 ) {
   if (!(url.startsWith('https://') || url.startsWith('http://'))) {
@@ -36,14 +35,15 @@ export async function request(
   });
 
   const body = await res.arrayBuffer();
-  if (!type) {
-    type = res.headers.get('content-type');
+  if (!contentTypeInfo.type) {
+    let type = res.headers.get('content-type');
     if (type.startsWith('text/plain')) {
       type = '';
     }
+    contentTypeInfo.type = type;
   }
 
-  const data = await parseArrayBuffer(type, url, body, additionalParsers);
+  const data = await parseArrayBuffer(contentTypeInfo, url, body);
   if (require200 && res.status !== 200) {
     throw data;
   }

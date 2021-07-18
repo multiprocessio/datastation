@@ -60,26 +60,24 @@ export function Panels({
   }
 
   return (
-    <div>
-      <div>
-        {page.panels.map((panel, panelIndex) => (
-          <React.Fragment key={panel.id}>
-            <Panel
-              key={panel.id}
-              panel={panel}
-              updatePanel={updatePanel(page, panelIndex)}
-              panelResults={panelResults}
-              reevalPanel={reevalPanel}
-              panelIndex={panelIndex}
-              movePanel={movePanel}
-              removePanel={removePanel}
-              panels={page.panels}
-            />
-            {newPanel(panelIndex)}
-          </React.Fragment>
-        ))}
-        {page.panels.length === 0 && newPanel(0)}
-      </div>
-    </div>
+    <React.Fragment>
+      {newPanel(-1)}
+      {page.panels.map((panel, panelIndex) => (
+        <React.Fragment key={panel.id}>
+          <Panel
+            key={panel.id}
+            panel={panel}
+            updatePanel={updatePanel(page, panelIndex)}
+            panelResults={panelResults}
+            reevalPanel={reevalPanel}
+            panelIndex={panelIndex}
+            movePanel={movePanel}
+            removePanel={removePanel}
+            panels={page.panels}
+          />
+          {newPanel(panelIndex)}
+        </React.Fragment>
+      ))}
+    </React.Fragment>
   );
 }

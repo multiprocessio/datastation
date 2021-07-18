@@ -19,6 +19,7 @@ import {
   PanelResult,
 } from '../shared/state';
 
+import { asyncRPC } from './asyncRPC';
 import { ErrorBoundary } from './ErrorBoundary';
 import { GraphPanel, GraphPanelDetails } from './GraphPanel';
 import { evalHTTPPanel, HTTPPanelDetails } from './HTTPPanel';
@@ -28,6 +29,7 @@ import { TablePanel, TablePanelDetails } from './TablePanel';
 import { evalLiteralPanel, LiteralPanelDetails } from './LiteralPanel';
 import { evalSQLPanel, SQLPanelDetails } from './SQLPanel';
 import { Button } from './component-library/Button';
+import { Confirm } from './component-library/Confirm';
 import { Input } from './component-library/Input';
 import { Select } from './component-library/Select';
 import { CodeEditor } from './component-library/CodeEditor';
@@ -215,6 +217,16 @@ export function Panel({
     }
   }
 
+  const runningProgram =
+    results.loading && panel.type === 'program' && MODE_FEATURES.killProcess;
+  function killProcess() {
+    return asyncRPC<ProgramPanelInfo, void, void>(
+      'killProcess',
+      null,
+      panel as ProgramPanelInfo
+    );
+  }
+
   return (
     <div
       className={`panel ${hidden ? 'panel--hidden' : ''} ${
@@ -251,6 +263,7 @@ export function Panel({
             </span>
             <Input
               className="panel-name"
+              autoWidth
               onChange={(value: string) => {
                 panel.name = value;
                 updatePanel(panel);
@@ -286,13 +299,21 @@ export function Panel({
                   'Run to apply changes'
                 )}
               </span>
-              <span title="Evaluate Panel (Ctrl-Enter)">
+              <span
+                title={
+                  runningProgram
+                    ? 'Kill Process'
+                    : 'Evaluate Panel (Ctrl-Enter)'
+                }
+              >
                 <Button
                   icon
-                  onClick={() => reevalPanel(panelIndex)}
+                  onClick={() =>
+                    runningProgram ? killProcess() : reevalPanel(panelIndex)
+                  }
                   type="primary"
                 >
-                  play_arrow
+                  {runningProgram ? 'close' : 'play_arrow'}
                 </Button>
               </span>
               <span
@@ -322,9 +343,16 @@ export function Panel({
                 </Button>
               </span>
               <span title="Delete Panel">
-                <Button icon onClick={() => removePanel(panelIndex)}>
-                  delete
-                </Button>
+                <Confirm
+                  onConfirm={() => removePanel(panelIndex)}
+                  message="delete this panel"
+                  action="Delete"
+                  render={(confirm: () => void) => (
+                    <Button icon onClick={confirm}>
+                      delete
+                    </Button>
+                  )}
+                />
               </span>
             </span>
           </div>

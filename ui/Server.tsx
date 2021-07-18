@@ -2,6 +2,7 @@ import * as React from 'react';
 
 import { ServerInfo, ServerInfoType } from '../shared/state';
 import { Button } from './component-library/Button';
+import { Confirm } from './component-library/Confirm';
 import { Input } from './component-library/Input';
 import { Select } from './component-library/Select';
 
@@ -35,9 +36,20 @@ export function Server({
   return (
     <div className="server">
       <div className="server-header vertical-align-center">
-        <Button icon className="page-delete" onClick={deleteServer}>
-          delete
-        </Button>
+        <span title="Delete server">
+          <Confirm
+            right
+            onConfirm={deleteServer}
+            message="delete this server"
+            action="Delete"
+            className="page-delete"
+            render={(confirm: () => void) => (
+              <Button icon onClick={confirm}>
+                delete
+              </Button>
+            )}
+          />
+        </span>
         <span>
           {expanded ? (
             <Input

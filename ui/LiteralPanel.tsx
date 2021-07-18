@@ -1,13 +1,18 @@
 import * as React from 'react';
 
-import { LiteralPanelInfo } from '../shared/state';
+import { LiteralPanelInfo, ContentTypeInfo } from '../shared/state';
 import { parseArrayBuffer } from '../shared/text';
-import { Select } from './component-library/Select';
+
+import { ContentTypePicker } from './ContentTypePicker';
 
 export async function evalLiteralPanel(panel: LiteralPanelInfo) {
   const literal = panel.literal;
   const array = new TextEncoder().encode(panel.content);
-  return await parseArrayBuffer('', 'literal.' + literal.type, array);
+  return await parseArrayBuffer(
+    panel.literal.contentTypeInfo,
+    'literal.' + literal.contentTypeInfo.type,
+    array
+  );
 }
 
 export function LiteralPanelDetails({
@@ -20,26 +25,15 @@ export function LiteralPanelDetails({
   return (
     <React.Fragment>
       <div className="form-row">
-        <Select
-          label="Format"
-          value={panel.literal.type}
-          onChange={(value: string) => {
-            switch (value) {
-              case 'json':
-                panel.literal.type = 'json';
-                break;
-              case 'csv':
-                panel.literal.type = 'csv';
-                break;
-              default:
-                throw new Error(`Unknown literal type: ${value}`);
-            }
+        <ContentTypePicker
+          disableAutoDetect
+          inMemoryEval={false}
+          value={panel.literal.contentTypeInfo}
+          onChange={(cti: ContentTypeInfo) => {
+            panel.literal.contentTypeInfo = cti;
             updatePanel(panel);
           }}
-        >
-          <option value="csv">CSV</option>
-          <option value="json">JSON</option>
-        </Select>
+        />
       </div>
     </React.Fragment>
   );

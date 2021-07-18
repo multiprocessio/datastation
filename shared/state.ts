@@ -82,12 +82,22 @@ export type HTTPConnectorInfoMethod =
   | 'POST'
   | 'DELETE';
 
+export class ContentTypeInfo {
+  type: string;
+  customLineRegexp: string;
+
+  constructor(type?: string, customLineRegexp?: string) {
+    this.type = type || '';
+    this.customLineRegexp = customLineRegexp || '';
+  }
+}
+
 export class HTTPConnectorInfo extends ConnectorInfo {
   http: {
     headers: Array<{ value: string; name: string }>;
     url: string;
     method: HTTPConnectorInfoMethod;
-    type: string;
+    contentTypeInfo: ContentTypeInfo;
   };
 
   constructor(
@@ -95,14 +105,14 @@ export class HTTPConnectorInfo extends ConnectorInfo {
     url?: string,
     headers: Array<{ value: string; name: string }> = [],
     method?: HTTPConnectorInfoMethod,
-    type?: string
+    contentTypeInfo?: ContentTypeInfo
   ) {
     super('http', name);
     this.http = {
       headers,
       url: url || '',
       method: method || 'GET',
-      type: type || '',
+      contentTypeInfo: contentTypeInfo || new ContentTypeInfo(),
     };
   }
 }
@@ -272,7 +282,7 @@ export class TablePanelInfo extends PanelInfo {
 
 export class FilePanelInfo extends PanelInfo {
   file: {
-    type: string;
+    contentTypeInfo: ContentTypeInfo;
     name: string;
     content: ArrayBuffer;
   };
@@ -281,28 +291,30 @@ export class FilePanelInfo extends PanelInfo {
     name?: string,
     fileName?: string,
     fileContent?: ArrayBuffer,
-    type?: string
+    contentTypeInfo?: ContentTypeInfo
   ) {
     super('file', name, '');
     this.file = {
       name: fileName || '',
       content: fileContent || new ArrayBuffer(0),
-      type: type || '',
+      contentTypeInfo: contentTypeInfo || new ContentTypeInfo(),
     };
   }
 }
 
-export type LiteralPanelInfoType = 'csv' | 'json';
-
 export class LiteralPanelInfo extends PanelInfo {
   literal: {
-    type: LiteralPanelInfoType;
+    contentTypeInfo: ContentTypeInfo;
   };
 
-  constructor(name?: string, type?: LiteralPanelInfoType, content?: string) {
+  constructor(
+    name?: string,
+    content?: string,
+    contentTypeInfo?: ContentTypeInfo
+  ) {
     super('literal', name, content);
     this.literal = {
-      type: type || 'csv',
+      contentTypeInfo: contentTypeInfo || new ContentTypeInfo(),
     };
   }
 }
@@ -352,8 +364,8 @@ export const DEFAULT_PROJECT: ProjectState = new ProjectState(
     new ProjectPage('CSV Discovery Example', [
       new LiteralPanelInfo(
         'Raw CSV Text',
-        'csv',
-        'name,age\nMorgan,12\nJames,17'
+        'name,age\nMorgan,12\nJames,17',
+        new ContentTypeInfo('text/csv')
       ),
       new SQLPanelInfo(
         'Transform with SQL',
