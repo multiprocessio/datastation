@@ -48,7 +48,7 @@ e2e-macos:
     - uses: actions/checkout@master
       with:
         ref: ${{ github.ref }}
-    - run: yarn e2e-test
+    - run: yarn e2e-test "releases/DataStation Community Edition-darwin-x64/DataStation Community Edition.app"
 
 e2e-windows:
     needs: test
@@ -62,4 +62,4 @@ e2e-windows:
     - uses: actions/checkout@master
       with:
         ref: ${{ github.ref }}
-    - run: yarn e2e-test
+    - run: yarn e2e-test "releases/DataStation Community Edition-win32-x64/DataStation Community Edition.exe"

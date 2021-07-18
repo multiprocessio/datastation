@@ -1,8 +1,10 @@
-const Application = require('spectron').Application;
 const assert = require('assert');
+const path = require('path');
+
+const Application = require('spectron').Application;
 
 const app = new Application({
-  path: process.argv[1],
+  path: path.join(process.cwd(), process.argv[2]),
 });
 
 app.start().then(function () {
