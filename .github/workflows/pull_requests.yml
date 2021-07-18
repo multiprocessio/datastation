@@ -56,8 +56,8 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - run: "Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')"
     - run: "Set-ExecutionPolicy RemoteSigned -scope CurrentUser"
+    - run: "Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')"
     - run: scoop install nodejs cmake python3
     - run: npm install --global yarn
     - uses: actions/checkout@master
