@@ -13,7 +13,7 @@ jobs:
       with:
         ref: ${{ github.ref }}
     - run: curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
-    - run: sudo apt-get install -y nodejs
+    - run: sudo apt-get install -y nodejs cmake
     - run: sudo npm install --global yarn
     - run: yarn
     - run: yarn format
@@ -33,9 +33,13 @@ jobs:
       with:
         ref: ${{ github.ref }}
     - run: curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
-    - run: sudo apt-get install -y nodejs cmake
+    - run: sudo apt-get install -y nodejs cmake xvfb
     - run: sudo npm install --global yarn
     - run: yarn release-desktop e2etest
+    # Set up a virtual framebuffer so Chrome will start
+    # https://www.electronjs.org/docs/tutorial/testing-on-headless-ci
+    - run: echo "DISPLAY=':99.0'" >> $GITHUB_ENV
+    - run: Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
     - run: yarn e2e-test
 
   e2e-macos:
