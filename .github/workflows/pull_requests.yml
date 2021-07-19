@@ -26,7 +26,6 @@ jobs:
     needs: test
 
     runs-on: ubuntu-latest
-    container: selenium/standalone-chrome-debug
 
     steps:
     - uses: actions/checkout@master
