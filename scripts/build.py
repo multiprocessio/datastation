@@ -111,4 +111,4 @@ for command in script:
         continue
 
     print(' '.join(line))
-    subprocess.run(line, check=True)
+    subprocess.run(line, check=True, shell=True)
