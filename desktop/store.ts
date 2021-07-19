@@ -43,6 +43,13 @@ function flushUnwritten() {
   process.on(sig, flushUnwritten)
 );
 
+export function getCurrentProjectResultsFile() {
+  const projectFullPath: string = (BrowserWindow.getFocusedWindow() as any).DS_project;
+  const fileName = path.basename(projectFullPath).replace('.'+PROJECT_EXTENSION, '');
+  const directory = path.dirname(projectFullPath);
+  return path.join(directory, "."+fileName+".results");
+}
+
 export const storeHandlers = [
   {
     resource: 'getProjectState',
@@ -70,8 +77,7 @@ export const storeHandlers = [
       if (!results) {
         return;
       }
-      const resultsFile =
-        (BrowserWindow.getFocusedWindow() as any).DS_project + '.results';
+      const resultsFile = getCurrentProjectResultsFile();
       const fileName = await ensureFile(resultsFile);
       // Don't use buffered write
       await fsPromises.writeFile(fileName, JSON.stringify(results));

@@ -4,7 +4,6 @@ import fs from 'fs/promises';
 import path from 'path';
 import util from 'util';
 
-import { BrowserWindow } from 'electron';
 import { file as makeTmpFile } from 'tmp-promise';
 
 import { ProgramPanelInfo } from '../shared/state';
@@ -12,6 +11,7 @@ import { parseArrayBuffer } from '../shared/text';
 
 import { DISK_ROOT } from './constants';
 import { SETTINGS } from './settings';
+import { getCurrentProjectResultsFile } from './store';
 
 const runningProcesses: Record<string, number> = {};
 
@@ -89,10 +89,7 @@ export const programHandlers = [
         julia: SETTINGS.juliaPath,
       }[ppi.program.type];
 
-      const projectResultsFile = path.join(
-        DISK_ROOT,
-        (BrowserWindow.getFocusedWindow() as any).DS_project + '.results'
-      );
+      const projectResultsFile = getCurrentProjectResultsFile();
 
       let out = '';
       try {

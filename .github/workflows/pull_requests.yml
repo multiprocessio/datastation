@@ -64,8 +64,6 @@ jobs:
         ref: ${{ github.ref }}
     - run: Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')
     - run: Join-Path (Resolve-Path ~).Path "scoop\shims" >> $Env:GITHUB_PATH
-    - run: scoop install nodejs cmake python
-    - run: npm install --global yarn
-    - run: Join-Path (Resolve-Path ~).Path ".yarn\bin" >> $Env:GITHUB_PATH
+    - run: scoop install nodejs cmake python yarn
     - run: yarn release-desktop e2etest
     - run: yarn e2e-test
