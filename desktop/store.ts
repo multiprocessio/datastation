@@ -2,15 +2,12 @@ import fs from 'fs';
 import fsPromises from 'fs/promises';
 import path from 'path';
 
+import { BrowserWindow } from 'electron';
+
 import { IDDict, ProjectState } from '../shared/state';
 import log from '../shared/log';
 
-import {
-  DISK_ROOT,
-  PROJECT_EXTENSION,
-  RESULTS_FILE,
-  SYNC_PERIOD,
-} from './constants';
+import { DISK_ROOT, PROJECT_EXTENSION, SYNC_PERIOD } from './constants';
 
 const buffers: IDDict<{
   contents: string;
@@ -73,7 +70,9 @@ export const storeHandlers = [
       if (!results) {
         return;
       }
-      const fileName = await ensureFile(RESULTS_FILE);
+      const resultsFile =
+        (BrowserWindow.getFocusedWindow() as any).DS_project + '.results';
+      const fileName = await ensureFile(resultsFile);
       // Don't use buffered write
       await fsPromises.writeFile(fileName, JSON.stringify(results));
       log.info('Results synced');
