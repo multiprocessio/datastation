@@ -28,6 +28,7 @@ const menuTemplate = [
       {
         label: 'Open Project',
         click: openProject,
+	accelerator: 'CmdOrCtrl+O',
       },
     ],
   },

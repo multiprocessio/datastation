@@ -54,7 +54,7 @@ export function ContentTypePicker({
         </Select>
       </div>
       {value.type === 'text/regexplines' && (
-        <div className="form-row">
+        <div className="form-row regexpcode">
           <CodeEditor
             id=""
             language=""

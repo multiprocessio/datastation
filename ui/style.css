@@ -67,6 +67,10 @@ header a {
   counter-reset: line;
 }
 
+.regexpcode .editor {
+    min-height: auto;
+}
+
 .textarea {
   padding: 5px;
   background: transparent;
