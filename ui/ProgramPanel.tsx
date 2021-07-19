@@ -61,9 +61,9 @@ export function evalProgramPanel(
         console.log = print;
         try {
           const program =
-            'from browser import window\nprint = lambda *args: window.console.log(*args)\nDM_getPanel = window.DM_getPanel\nDM_setPanel = window.DM_setPanel\n' +
+            'import js as window\nprint = lambda *args: window.console.log(*args)\nDM_getPanel = window.DM_getPanel\nDM_setPanel = window.DM_setPanel\n' +
             panel.content;
-          eval(anyWindow.__BRYTHON__.python_to_js(program));
+          (window as any).pyodide.runPython(program);
         } catch (e) {
           reject(e);
         } finally {
@@ -89,10 +89,10 @@ export function ProgramPanelDetails({
     { value: 'python', name: 'Python' },
     ...(MODE_FEATURES.extraLanguages
       ? [
-          { value: 'ruby', name: 'Ruby' },
-          { value: 'r', name: 'R' },
-          { value: 'julia', name: 'Julia' },
-        ]
+        { value: 'ruby', name: 'Ruby' },
+        { value: 'r', name: 'R' },
+        { value: 'julia', name: 'Julia' },
+      ]
       : []),
   ];
   return (
@@ -109,18 +109,16 @@ export function ProgramPanelDetails({
                   if (panelIndex === 0) {
                     panel.content = 'DM_setPanel([])';
                   } else {
-                    panel.content = `const previous = DM_getPanel(${
-                      panelIndex - 1
-                    });\nDM_setPanel(previous);`;
+                    panel.content = `const previous = DM_getPanel(${panelIndex - 1
+                      });\nDM_setPanel(previous);`;
                   }
                   return;
                 case 'python':
                   if (panelIndex === 0) {
                     panel.content = 'DM_setPanel([])';
                   } else {
-                    panel.content = `previous = DM_getPanel(${
-                      panelIndex - 1
-                    })\nDM_setPanel(previous)`;
+                    panel.content = `previous = DM_getPanel(${panelIndex - 1
+                      })\nDM_setPanel(previous)`;
                   }
                   return;
               }
