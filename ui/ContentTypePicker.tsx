@@ -4,7 +4,7 @@ import { XLSX_MIME_TYPE } from '../shared/text';
 import { ContentTypeInfo } from '../shared/state';
 
 import { Select } from './component-library/Select';
-import { CodeEditor } from './component-library/CodeEditor';
+import { Input } from './component-library/Input';
 
 export function ContentTypePicker({
   value,
@@ -54,10 +54,10 @@ export function ContentTypePicker({
         </Select>
       </div>
       {value.type === 'text/regexplines' && (
-        <div className="form-row regexpcode">
-          <CodeEditor
-            id=""
-            language=""
+        <div className="form-row">
+          <Input
+            autoWidth
+            type="text"
             value={value.customLineRegexp}
             onChange={(customLineRegexp: string) =>
               onChange({ ...value, customLineRegexp })

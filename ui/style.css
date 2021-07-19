@@ -50,12 +50,14 @@ header a {
   font-style: italic;
 }
 
+/*
+NOT SURE IF THIS IS STILL NEEDED
 .editor-container {
-  height: 200px;
   resize: vertical;
   overflow: auto;
   flex: 1;
 }
+*/
 
 .editor {
   width: 100%;
@@ -67,10 +69,6 @@ header a {
   counter-reset: line;
 }
 
-.regexpcode .editor {
-  min-height: auto;
-}
-
 .textarea {
   padding: 5px;
   background: transparent;
@@ -80,6 +78,7 @@ header a {
   max-width: 100%;
 }
 
+.editor-container .input,
 input.input,
 label.input input,
 select.select,
@@ -389,6 +388,10 @@ header > div {
 .new-panel {
   text-align: center;
   margin-bottom: 15px;
+}
+
+.panel p {
+  max-width: 800px;
 }
 
 .last-run {
