@@ -39,7 +39,7 @@ jobs:
     - run: sudo npm install --global yarn
 
     # Build and e2e test if PR
-    - run: yarn release-desktop e2etest
+    - run: yarn release-desktop 0.0.0-e2etest
       if: github.event_name == 'pull_request'
       # Set up a virtual framebuffer so Chrome will start
       # https://www.electronjs.org/docs/tutorial/testing-on-headless-ci
@@ -73,7 +73,7 @@ jobs:
     - run: npm install --global yarn
 
     # Build and e2e test if PR
-    - run: yarn release-desktop e2etest
+    - run: yarn release-desktop 0.0.0-e2etest
       if: github.event_name == 'pull_request'
     - run: yarn e2e-test
       if: github.event_name == 'pull_request'
@@ -104,7 +104,7 @@ jobs:
     - run: scoop install nodejs cmake python yarn
 
     # Build and e2e test if PR
-    - run: yarn release-desktop e2etest
+    - run: yarn release-desktop 0.0.0-e2etest
       if: github.event_name == 'pull_request'
     - run: yarn e2e-test
       if: github.event_name == 'pull_request'
