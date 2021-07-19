@@ -3,21 +3,120 @@ name: Run tests
 on:
   pull_request:
     branches: [master]
+  release:
+    types: [published]
 
 jobs:  
   test:
     runs-on: ubuntu-latest
 
+    if: github.event_name == 'pull_request'
     steps:
-    - run: curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
-    - run: sudo apt-get install -y nodejs
-    - run: sudo npm install --global yarn
     - uses: actions/checkout@master
       with:
         ref: ${{ github.ref }}
+    - run: curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
+    - run: sudo apt-get install -y nodejs cmake
+    - run: sudo npm install --global yarn
     - run: yarn
     - run: yarn format
     - run: yarn tsc
     - run: ./scripts/fail_on_diff.sh
     - run: yarn test-licenses
     - run: yarn test-coverage
+
+  e2e-linux:
+    needs: test
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@master
+      with:
+        ref: ${{ github.ref }}
+    - run: curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
+    - run: sudo apt-get install -y nodejs cmake xvfb
+    - run: sudo npm install --global yarn
+
+    # Build and e2e test if PR
+    - run: yarn release-desktop 0.0.0-e2etest
+      if: github.event_name == 'pull_request'
+      # Set up a virtual framebuffer so Chrome will start
+      # https://www.electronjs.org/docs/tutorial/testing-on-headless-ci
+      # https://github.com/juliangruber/browser-run/issues/147
+    - run: xvfb-run --auto-servernum yarn e2e-test
+      if: github.event_name == 'pull_request'
+
+    # Build and release if release
+    - run: yarn release-desktop $GITHUB_REF
+      if: github.event_name == 'release'
+    - name: Upload on release
+      if: github.event_name == 'release'
+      run: |
+        curl \
+          -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+          -H "Content-Type: application/zip" \
+          --data-binary @./releases/linux-x64-$GITHUB_REF.zip \
+          "https://uploads.github.com/repos/multiprocessio/datastation/releases/$GITHUB_REF/assets?name=linux-x64-$GITHUB_REF.zip"
+
+  e2e-macos:
+    needs: test
+
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@master
+      with:
+        ref: ${{ github.ref }}
+    - run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    - run: brew install nodejs cmake python3
+    - run: npm install --global yarn
+
+    # Build and e2e test if PR
+    - run: yarn release-desktop 0.0.0-e2etest
+      if: github.event_name == 'pull_request'
+    - run: yarn e2e-test
+      if: github.event_name == 'pull_request'
+
+    # Build and release if release
+    - run: yarn release-desktop $GITHUB_REF
+      if: github.event_name == 'release'
+    - name: Upload release
+      if: github.event_name == 'release'
+      run: |
+        curl \
+          -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+          -H "Content-Type: application/zip" \
+          --data-binary @./releases/darwin-x64-$GITHUB_REF.zip \
+          "https://uploads.github.com/repos/multiprocessio/datastation/releases/$GITHUB_REF/assets?name=darwin-x64-$GITHUB_REF.zip"
+
+  e2e-windows:
+    needs: test
+
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@master
+      with:
+        ref: ${{ github.ref }}
+    - run: Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')
+    - run: Join-Path (Resolve-Path ~).Path "scoop\shims" >> $Env:GITHUB_PATH
+    - run: scoop install nodejs cmake python yarn zip
+
+    # Build and e2e test if PR
+    - run: yarn release-desktop 0.0.0-e2etest
+      if: github.event_name == 'pull_request'
+    - run: yarn e2e-test
+      if: github.event_name == 'pull_request'
+
+    # Build and release if release
+    - run: yarn release-desktop $Env:GITHUB_REF
+      if: github.event_name == 'release'
+    - name: Upload release
+      if: github.event_name == 'release'
+      run: |
+        curl \
+          -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+          -H "Content-Type: application/zip" \
+          --data-binary @./releases/win32-x64-$Env:GITHUB_REF.zip \
+          "https://uploads.github.com/repos/multiprocessio/datastation/releases/$Env:GITHUB_REF/assets?name=win32-x64-$Env:GITHUB_REF.zip"

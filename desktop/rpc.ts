@@ -10,7 +10,7 @@ interface RPCPayload {
   args: any;
 }
 
-interface RPCHandler {
+export interface RPCHandler {
   resource: string;
   handler: (args: any, body: any) => Promise<any>;
 }

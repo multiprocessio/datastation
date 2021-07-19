@@ -1,4 +1,26 @@
 import * as React from 'react';
+import debounce from 'lodash.debounce';
+
+export function useDebouncedLocalState(
+  nonLocalValue: string,
+  nonLocalSet: (v: string) => void,
+  isText: boolean = true,
+  delay: number = 250
+): [string, (v: string) => void] {
+  if (!isText) {
+    return [nonLocalValue, nonLocalSet];
+  }
+
+  const [localValue, setLocalValue] = React.useState(nonLocalValue);
+
+  const debounced = debounce(nonLocalSet, delay);
+  function wrapSetLocalValue(v: string) {
+    setLocalValue(v);
+    debounced(v);
+  }
+
+  return [localValue, wrapSetLocalValue];
+}
 
 export function Input({
   type,
@@ -27,20 +49,28 @@ export function Input({
 }) {
   let inputClass = `input ${className ? ' ' + className : ''}`;
 
+  const [localValue, setLocalValue] = useDebouncedLocalState(
+    value,
+    onChange,
+    type !== 'checkbox'
+  );
+
   const input = (
     <input
-      {...(type === 'checkbox' ? { checked: value === 'true' } : { value })}
+      {...(type === 'checkbox'
+        ? { checked: value === 'true' }
+        : { value: localValue })}
       className={label ? '' : inputClass}
       type={type}
       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-        onChange(e.target.value)
+        setLocalValue(e.target.value)
       }
       disabled={disabled}
       readOnly={readOnly}
       min={min}
       max={max}
       placeholder={placeholder}
-      size={autoWidth ? Math.min(100, value.length) : undefined}
+      size={autoWidth ? Math.min(100, localValue.length) : undefined}
     />
   );
 
