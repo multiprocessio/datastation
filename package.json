@@ -23,6 +23,7 @@
     "chart.js": "^3.3.2",
     "date-fns": "^2.22.1",
     "json-stringify-safe": "^5.0.1",
+    "lodash.debounce": "^4.0.8",
     "mysql2": "^2.2.5",
     "node-fetch": "^2.6.1",
     "pako": "^2.0.3",
@@ -42,6 +43,7 @@
   "devDependencies": {
     "@types/electron": "^1.6.10",
     "@types/json-stringify-safe": "^5.0.0",
+    "@types/lodash.debounce": "^4.0.6",
     "@types/node-fetch": "^2.5.10",
     "@types/pako": "^1.0.1",
     "@types/papaparse": "^5.2.5",
