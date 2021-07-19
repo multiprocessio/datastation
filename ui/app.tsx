@@ -248,6 +248,7 @@ function App() {
 
   async function openProject() {
     await asyncRPC<void, void, void>('openProject');
+    window.close();
   }
 
   return (
