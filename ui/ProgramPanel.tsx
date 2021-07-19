@@ -61,9 +61,9 @@ export function evalProgramPanel(
         console.log = print;
         try {
           const program =
-            'from browser import window\nprint = lambda *args: window.console.log(*args)\nDM_getPanel = window.DM_getPanel\nDM_setPanel = window.DM_setPanel\n' +
+            'import js as window\nprint = lambda *args: window.console.log(*args)\nDM_getPanel = window.DM_getPanel\nDM_setPanel = window.DM_setPanel\n' +
             panel.content;
-          eval(anyWindow.__BRYTHON__.python_to_js(program));
+          (window as any).pyodide.runPython(program);
         } catch (e) {
           reject(e);
         } finally {
