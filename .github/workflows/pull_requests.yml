@@ -34,6 +34,7 @@ jobs:
     - uses: actions/checkout@master
       with:
         ref: ${{ github.ref }}
+    - run: yarn release-desktop e2etest
     - run: yarn e2e-test
 
   e2e-macos:
@@ -48,6 +49,7 @@ jobs:
     - uses: actions/checkout@master
       with:
         ref: ${{ github.ref }}
+    - run: yarn release-desktop e2etest
     - run: yarn e2e-test
 
   e2e-windows:
@@ -64,4 +66,5 @@ jobs:
     - uses: actions/checkout@master
       with:
         ref: ${{ github.ref }}
+    - run: yarn release-desktop e2etest
     - run: yarn e2e-test

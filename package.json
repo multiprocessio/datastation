@@ -16,7 +16,7 @@
     "test-licenses": "yarn license-checker --production --onlyAllow 'MIT;Apache-2.0;ISC;BSD-3-Clause;MIT*;BSD-2-Clause;Unlicense'",
     "test": "yarn jest",
     "test-coverage": "yarn jest --coverage",
-    "e2e-test": "python3 ./scripts/build.py ./scripts/e2e.build"
+    "e2e-test": "node --unhandled-rejections=throw ./e2e/index.js"
   },
   "dependencies": {
     "ace-builds": "^1.4.12",

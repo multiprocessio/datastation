@@ -1,3 +1,0 @@
-yarn
-yarn release-desktop e2etest
-node --unhandled-rejections=throw ./e2e/index.js "releases/DataStation Community Edition-{os}-{arch}/DataStation Community Edition{ext}"
