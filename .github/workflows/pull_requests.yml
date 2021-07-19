@@ -11,20 +11,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - if: github.event_name == 'pull_request'
-        steps:
-        - uses: actions/checkout@master
-          with:
-            ref: ${{ github.ref }}
-        - run: curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
-        - run: sudo apt-get install -y nodejs cmake
-        - run: sudo npm install --global yarn
-        - run: yarn
-        - run: yarn format
-        - run: yarn tsc
-        - run: ./scripts/fail_on_diff.sh
-        - run: yarn test-licenses
-        - run: yarn test-coverage
+    - if: github.event_name == 'pull_request'
+      steps:
+      - uses: actions/checkout@master
+        with:
+          ref: ${{ github.ref }}
+      - run: curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
+      - run: sudo apt-get install -y nodejs cmake
+      - run: sudo npm install --global yarn
+      - run: yarn
+      - run: yarn format
+      - run: yarn tsc
+      - run: ./scripts/fail_on_diff.sh
+      - run: yarn test-licenses
+      - run: yarn test-coverage
 
   e2e-linux:
     needs: test
