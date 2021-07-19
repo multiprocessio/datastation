@@ -11,7 +11,7 @@ import { parseArrayBuffer } from '../shared/text';
 
 import { DISK_ROOT } from './constants';
 import { SETTINGS } from './settings';
-import { getCurrentProjectResultsFile } from './store';
+import { getProjectResultsFile } from './store';
 
 const runningProcesses: Record<string, number> = {};
 
@@ -77,7 +77,11 @@ const PREAMBLE = {
 export const programHandlers = [
   {
     resource: 'evalProgram',
-    handler: async function (_: string, ppi: ProgramPanelInfo) {
+    handler: async function (
+      projectId: string,
+      _: string,
+      ppi: ProgramPanelInfo
+    ) {
       const programTmp = await makeTmpFile();
       const outputTmp = await makeTmpFile();
 
@@ -89,7 +93,7 @@ export const programHandlers = [
         julia: SETTINGS.juliaPath,
       }[ppi.program.type];
 
-      const projectResultsFile = getCurrentProjectResultsFile();
+      const projectResultsFile = getProjectResultsFile(projectId);
 
       let out = '';
       try {
@@ -179,7 +183,7 @@ export const programHandlers = [
   },
   {
     resource: 'killProcess',
-    handler: async function (_: string, ppi: ProgramPanelInfo) {
+    handler: async function (_: string, _1: string, ppi: ProgramPanelInfo) {
       const pid = runningProcesses[ppi.id];
       if (pid) {
         process.kill(pid);

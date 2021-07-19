@@ -170,6 +170,7 @@ function App() {
       getQueryParameter('project') ||
       (MODE_FEATURES.useDefaultProject ? DEFAULT_PROJECT.projectName : '')
   );
+  (window as any).projectId = projectId;
 
   function setProjectId(projectId: string) {
     setProjectIdInternal(projectId);

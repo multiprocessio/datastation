@@ -14,7 +14,11 @@ export const additionalParsers = {
 
 export const evalHTTPHandler = {
   resource: 'evalHTTP',
-  handler: async function (body: string, hci: Proxy<HTTPConnectorInfo>) {
+  handler: async function (
+    _: string,
+    body: string,
+    hci: Proxy<HTTPConnectorInfo>
+  ) {
     const url = new URL(
       (hci.http.url.startsWith('http') ? '' : 'http://') + hci.http.url
     );

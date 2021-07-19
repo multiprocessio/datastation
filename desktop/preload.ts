@@ -9,13 +9,14 @@ contextBridge.exposeInMainWorld('asyncRPC', async function <
   Request,
   Args,
   Response
->(resource: string, args?: Args, body?: Request) {
+>(resource: string, projectId: string, args?: Args, body?: Request) {
   const payload = {
     // Assign a new message number
     messageNumber: ++messageNumber,
     resource,
     args,
     body,
+    projectId,
   };
   ipcRenderer.send(RPC_ASYNC_REQUEST, payload);
 

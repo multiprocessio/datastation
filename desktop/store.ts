@@ -43,13 +43,11 @@ function flushUnwritten() {
   process.on(sig, flushUnwritten)
 );
 
-export function getCurrentProjectResultsFile() {
-  const projectFullPath: string = (BrowserWindow.getFocusedWindow() as any)
-    .DS_project;
+export function getProjectResultsFile(projectId: string) {
   const fileName = path
-    .basename(projectFullPath)
+    .basename(projectId)
     .replace('.' + PROJECT_EXTENSION, '');
-  const directory = path.dirname(projectFullPath);
+  const directory = path.dirname(projectId);
   return path.join(directory, '.' + fileName + '.results');
 }
 
@@ -69,18 +67,18 @@ export const storeHandlers = [
   },
   {
     resource: 'updateProjectState',
-    handler: async (projectId: string, newState: ProjectState) => {
+    handler: async (projectId: string, _: string, newState: ProjectState) => {
       const fileName = await ensureProjectFile(projectId);
       return writeFileBuffered(fileName, JSON.stringify(newState));
     },
   },
   {
     resource: 'storeResults',
-    handler: async function (_: string, results: any) {
+    handler: async function (projectId: string, _: string, results: any) {
       if (!results) {
         return;
       }
-      const resultsFile = getCurrentProjectResultsFile();
+      const resultsFile = getProjectResultsFile(projectId);
       const fileName = await ensureFile(resultsFile);
       // Don't use buffered write
       await fsPromises.writeFile(fileName, JSON.stringify(results));

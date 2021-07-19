@@ -6,13 +6,14 @@ import log from '../shared/log';
 interface RPCPayload {
   messageNumber: number;
   resource: string;
+  projectId: string;
   body: any;
   args: any;
 }
 
 export interface RPCHandler {
   resource: string;
-  handler: (args: any, body: any) => Promise<any>;
+  handler: (projectId: string, args: any, body: any) => Promise<any>;
 }
 
 export function registerRPCHandlers(
@@ -31,7 +32,11 @@ export function registerRPCHandlers(
           throw new Error(`No RPC handler for resource: ${payload.resource}`);
         }
 
-        const rsp = await handler.handler(payload.args, payload.body);
+        const rsp = await handler.handler(
+          payload.projectId,
+          payload.args,
+          payload.body
+        );
         event.sender.send(responseChannel, {
           body: rsp,
         });
