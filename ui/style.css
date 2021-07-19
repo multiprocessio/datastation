@@ -6,6 +6,11 @@ body {
   height: 100%;
 }
 
+.loading {
+  text-align: center;
+  margin: 100px auto;
+}
+
 .app--desktop {
   border-top: 1px solid #ccc;
   overflow-y: hidden;
