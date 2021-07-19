@@ -218,7 +218,12 @@ function App() {
   const [projectNameTmp, setProjectNameTmp] = React.useState('');
 
   if (!state && projectId) {
-    return <span>Loading</span>;
+    return (
+      <div className="loading">
+        Loading...
+        <span id="spin"></span>
+      </div>
+    );
   }
 
   function updatePage(page: ProjectPage) {
