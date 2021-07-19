@@ -1,5 +1,7 @@
 import * as React from 'react';
 
+import { useDebouncedLocalState } from './Input';
+
 export function Textarea({
   spellCheck = false,
   value,
@@ -15,6 +17,7 @@ export function Textarea({
   disabled?: boolean;
   onKeyDown?: (e: React.KeyboardEvent) => void;
 }) {
+  const [localValue, setLocalValue] = useDebouncedLocalState(value, onChange);
   let textareaClass = 'textarea';
   if (className) {
     textareaClass += ` ${className}`;
@@ -22,11 +25,11 @@ export function Textarea({
 
   return (
     <textarea
-      value={value}
+      value={localValue}
       onKeyDown={onKeyDown}
       spellCheck={spellCheck}
       onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-        onChange(e.target.value)
+        setLocalValue(e.target.value)
       }
       className={textareaClass}
       disabled={disabled}
