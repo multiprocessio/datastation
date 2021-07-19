@@ -1,4 +1,3 @@
-git clean -xid
 yarn
 yarn build-ui
 prepend "window.DS_CONFIG_VERSION='{arg0}';" build/ui.js
