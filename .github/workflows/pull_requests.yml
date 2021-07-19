@@ -9,12 +9,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - run: curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
-    - run: sudo apt-get install -y nodejs
-    - run: sudo npm install --global yarn
     - uses: actions/checkout@master
       with:
         ref: ${{ github.ref }}
+    - run: curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
+    - run: sudo apt-get install -y nodejs
+    - run: sudo npm install --global yarn
     - run: yarn
     - run: yarn format
     - run: yarn tsc
@@ -29,12 +29,12 @@ jobs:
     container: selenium/standalone-chrome-debug
 
     steps:
-    - run: curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
-    - run: sudo apt-get install -y nodejs cmake
-    - run: sudo npm install --global yarn
     - uses: actions/checkout@master
       with:
         ref: ${{ github.ref }}
+    - run: curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
+    - run: sudo apt-get install -y nodejs cmake
+    - run: sudo npm install --global yarn
     - run: yarn release-desktop e2etest
     - run: yarn e2e-test
 
@@ -44,12 +44,12 @@ jobs:
     runs-on: macos-latest
 
     steps:
-    - run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    - run: brew install nodejs cmake python3
-    - run: npm install --global yarn
     - uses: actions/checkout@master
       with:
         ref: ${{ github.ref }}
+    - run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    - run: brew install nodejs cmake python3
+    - run: npm install --global yarn
     - run: yarn release-desktop e2etest
     - run: yarn e2e-test
 
@@ -59,13 +59,13 @@ jobs:
     runs-on: windows-latest
 
     steps:
+    - uses: actions/checkout@master
+      with:
+        ref: ${{ github.ref }}
     - run: Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')
     - run: Join-Path (Resolve-Path ~).Path "scoop\shims" >> $Env:GITHUB_PATH
     - run: scoop install nodejs cmake python
     - run: npm install --global yarn
     - run: Join-Path (Resolve-Path ~).Path ".yarn\bin" >> $Env:GITHUB_PATH
-    - uses: actions/checkout@master
-      with:
-        ref: ${{ github.ref }}
     - run: yarn release-desktop e2etest
     - run: yarn e2e-test
