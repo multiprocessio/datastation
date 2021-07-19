@@ -12,7 +12,10 @@ import 'ace-builds/src-min-noconflict/mode-julia';
 import 'ace-builds/src-min-noconflict/mode-r';
 import 'ace-builds/src-min-noconflict/mode-python';
 // Shortcuts support, TODO: support non-emacs
-import 'ace-builds/src-min-noconflict/keybinding-emacs';
+// This steals Ctrl-a so this should not be a default
+//import 'ace-builds/src-min-noconflict/keybinding-emacs';
+
+import { useDebouncedLocalState } from './Input';
 
 export function CodeEditor({
   value,
@@ -31,14 +34,16 @@ export function CodeEditor({
   language: string;
   id: string;
 }) {
+  const [localValue, setLocalValue] = useDebouncedLocalState(value, onChange);
+
   return (
     <div className="editor-container">
       <AceEditor
         mode={language}
         theme="github"
-        onChange={onChange}
+        onChange={setLocalValue}
         name={id}
-        value={value}
+        value={localValue}
         className={className}
         readOnly={disabled}
         width="100%"

@@ -79,8 +79,11 @@ export class Settings {
   }
 }
 
+export let SETTINGS: Settings = null;
+
 export async function loadSettings(): Promise<Settings> {
   const settingsFile = '.settings';
   const fullName = await ensureFile(settingsFile);
-  return await Settings.fromFile(fullName);
+  SETTINGS = await Settings.fromFile(fullName);
+  return SETTINGS;
 }

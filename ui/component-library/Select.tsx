@@ -1,11 +1,23 @@
 import * as React from 'react';
 
-function getOptionValues(children: React.ReactNode) {
-  return React.Children.map(
-    children,
-    // This could blow up if someone ever doesn't pass <option> to <Select>
-    (c) => (c ? (c as React.ReactElement).props.value : null)
-  ).filter(Boolean);
+function getOptionValues(children: React.ReactNode): Array<string> {
+  return React.Children.map(children, (c: React.ReactElement) => {
+    if (!c) {
+      return;
+    }
+
+    if (c.type === 'option') {
+      return (c as React.ReactElement).props.value;
+    }
+
+    if (c.type === 'optgroup') {
+      return getOptionValues(c.props.children);
+    }
+
+    return;
+  })
+    .filter(Boolean)
+    .flat();
 }
 
 export function Select({

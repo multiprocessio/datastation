@@ -7,21 +7,23 @@
   "main": "build/desktop.js",
   "scripts": {
     "typecheck": "yarn tsc",
-    "build-desktop": "python ./scripts/build.py ./desktop/scripts/desktop.build",
-    "build-ui": "python ./scripts/build.py ./ui/scripts/ui.build",
+    "build-desktop": "python3 ./scripts/build.py ./desktop/scripts/desktop.build",
+    "build-ui": "python3 ./scripts/build.py ./ui/scripts/ui.build",
     "start-desktop": "yarn build-ui && yarn build-desktop && yarn electron --trace-warning --unhandled-rejection=strict build/desktop.js",
     "start-ui": "./ui/scripts/watch_and_serve.sh",
     "release-desktop": "python3 ./scripts/build.py ./desktop/scripts/release.build",
     "format": "yarn prettier --write \"**/*.js\" \"**/*.ts\" \"**/*.tsx\" \"**/*.css\" \"**/*.json\"",
     "test-licenses": "yarn license-checker --production --onlyAllow 'MIT;Apache-2.0;ISC;BSD-3-Clause;MIT*;BSD-2-Clause;Unlicense'",
     "test": "yarn jest",
-    "test-coverage": "yarn jest --coverage"
+    "test-coverage": "yarn jest --coverage",
+    "e2e-test": "node --unhandled-rejections=throw ./e2e/index.js"
   },
   "dependencies": {
     "ace-builds": "^1.4.12",
     "chart.js": "^3.3.2",
     "date-fns": "^2.22.1",
     "json-stringify-safe": "^5.0.1",
+    "lodash.debounce": "^4.0.8",
     "mysql2": "^2.2.5",
     "node-fetch": "^2.6.1",
     "pako": "^2.0.3",
@@ -41,6 +43,7 @@
   "devDependencies": {
     "@types/electron": "^1.6.10",
     "@types/json-stringify-safe": "^5.0.0",
+    "@types/lodash.debounce": "^4.0.6",
     "@types/node-fetch": "^2.5.10",
     "@types/pako": "^1.0.1",
     "@types/papaparse": "^5.2.5",
@@ -56,6 +59,7 @@
     "jest": "^27.0.6",
     "license-checker": "^25.0.1",
     "prettier": "^2.3.0",
+    "spectron": "^15.0.0",
     "typescript": "^4.3.2"
   }
 }

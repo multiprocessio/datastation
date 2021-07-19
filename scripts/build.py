@@ -5,6 +5,7 @@ will work on Windows and the *nixes.
 
 import os
 import platform
+import subprocess
 import sys
 
 IS_WINDOWS = os.name == 'nt'
@@ -19,6 +20,11 @@ BUILTIN_VARIABLES = {
         'darwin': 'darwin',
         'linux': 'linux',
         'windows': 'win32',
+    }[platform.system().lower()],
+    'ext': {
+        'linux': '',
+        'darwin': '.app',
+        'windows': '.exe',
     }[platform.system().lower()],
 }
 for i, arg in enumerate(sys.argv[2:]):
@@ -84,19 +90,19 @@ for command in script:
         # Do basic variable substitition
         line[i] = token.format(**BUILTIN_VARIABLES)
 
-    print(' '.join(line))
-
     if line[0] == 'cp' and IS_WINDOWS:
         line[0] = 'copy'
     elif line[0] == 'append':
         what = line[1]
         to = line[2]
+        print(' '.join(line))
         with open(to, 'a') as to:
             to.write('\n'+what)
         continue
     elif line[0] == 'prepend':
         what = line[1]
         to = line[2]
+        print(' '.join(line))
         with open(to, 'r+') as to:
             current = to.read()
             to.seek(0)
@@ -104,11 +110,5 @@ for command in script:
             to.truncate()
         continue
 
-    # Quote arguments when passing back to system
-    for i, token in enumerate(line):
-        if i == 0: continue
-
-        line[i] = '"{}"'.format(token)
-    line = ' '.join(line)
-
-    os.system(line)
+    print(' '.join(line))
+    subprocess.run(line, check=True, shell=IS_WINDOWS)
