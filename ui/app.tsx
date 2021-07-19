@@ -31,19 +31,19 @@ import { Button } from './component-library/Button';
 import { Input } from './component-library/Input';
 
 // Load brython on startup if in browser app
-document.onload = function() {
+document.onload = function () {
   if (MODE !== 'browser') {
     return;
   }
 
-  const bmin = document.createElement("script");
+  const bmin = document.createElement('script');
   bmin.src = 'https://cdn.jsdelivr.net/npm/brython@3.9/brython.min.js';
   document.body.appendChild(bmin);
 
-  const bstdlib = document.createElement("script");
-  bstdlib.src = "https://cdn.jsdelivr.net/npm/brython@3.9/brython_stdlib.js";
+  const bstdlib = document.createElement('script');
+  bstdlib.src = 'https://cdn.jsdelivr.net/npm/brython@3.9/brython_stdlib.js';
   document.body.appendChild(bstdlib);
-}
+};
 
 function getQueryParameter(param: String) {
   const query = window.location.search.substring(1);
@@ -106,9 +106,7 @@ function useProjectState(
     MODE_FEATURES.useDefaultProject &&
     projectId === DEFAULT_PROJECT.projectName;
 
-  React.useEffect(() => {
-
-  }, []);
+  React.useEffect(() => {}, []);
 
   // Set up undo mechanism
   React.useEffect(() => {
@@ -169,8 +167,8 @@ function App() {
   const shareState = getShareState();
   const [projectId, setProjectIdInternal] = React.useState(
     (shareState && shareState.id) ||
-    getQueryParameter('project') ||
-    (MODE_FEATURES.useDefaultProject ? DEFAULT_PROJECT.projectName : '')
+      getQueryParameter('project') ||
+      (MODE_FEATURES.useDefaultProject ? DEFAULT_PROJECT.projectName : '')
   );
 
   function setProjectId(projectId: string) {
@@ -302,7 +300,7 @@ function App() {
                         If you make changes, you will need to click "Share"
                         again to get a new URL.
                       </p>
-                      <Input readOnly value={shareURL} onChange={() => { }} />
+                      <Input readOnly value={shareURL} onChange={() => {}} />
                       <p>
                         <a href="https://tinyurl.com/app">TinyURL</a> is a good
                         service for shortening these URLs correctly, some other
