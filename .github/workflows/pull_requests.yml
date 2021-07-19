@@ -42,7 +42,6 @@ jobs:
     needs: test
 
     runs-on: macos-latest
-    container: selenium/standalone-chrome
 
     steps:
     - run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
@@ -58,7 +57,6 @@ jobs:
     needs: test
 
     runs-on: windows-latest
-    container: selenium/standalone-chrome
 
     steps:
     - run: Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')
