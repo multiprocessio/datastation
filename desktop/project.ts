@@ -28,6 +28,7 @@ const menuTemplate = [
       {
         label: 'Open Project',
         click: openProject,
+        accelerator: 'CmdOrCtrl+O',
       },
     ],
   },
@@ -139,5 +140,5 @@ export async function openProject() {
 
 export const openProjectHandler = {
   resource: 'openProject',
-  handler: (_1: string, _2: any) => openProject,
+  handler: (_0: string, _1: string, _2: any) => openProject,
 };

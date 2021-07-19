@@ -13,6 +13,7 @@ export const evalFileHandler = {
   resource: 'evalFile',
   handler: async function (
     _: string,
+    _1: string,
     {
       contentTypeInfo,
       name,

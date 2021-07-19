@@ -25,6 +25,7 @@ export function CodeEditor({
   onKeyDown,
   language,
   id,
+  singleLine,
 }: {
   value: string;
   onChange: (value: string) => void;
@@ -33,6 +34,7 @@ export function CodeEditor({
   onKeyDown?: (e: React.KeyboardEvent) => void;
   language: string;
   id: string;
+  singleLine?: boolean;
 }) {
   const [localValue, setLocalValue] = useDebouncedLocalState(value, onChange);
 
@@ -41,10 +43,11 @@ export function CodeEditor({
       <AceEditor
         mode={language}
         theme="github"
+        maxLines={singleLine ? 1 : undefined}
         onChange={setLocalValue}
         name={id}
         value={localValue}
-        className={className}
+        className={`${className} ${singleLine ? 'input' : ''}`}
         readOnly={disabled}
         width="100%"
         fontSize="1rem"
@@ -60,9 +63,22 @@ export function CodeEditor({
                 code: 'Enter',
               } as React.KeyboardEvent),
           },
-        ]}
-        showGutter={true}
+          singleLine
+            ? {
+                name: 'disable newlines',
+                bindKey: { win: 'Enter|Shift-Enter', mac: 'Enter|Shift-Enter' },
+                // Do nothing
+                exec: () => {},
+              }
+            : undefined,
+        ].filter(Boolean)}
+        showGutter={!singleLine}
         keyboardHandler="emacs"
+        setOptions={
+          singleLine
+            ? { showLineNumbers: false, highlightActiveLine: false }
+            : undefined
+        }
       />
     </div>
   );

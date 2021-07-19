@@ -59,7 +59,11 @@ const DEFAULT_PORT = {
 
 export const evalSQLHandler = {
   resource: 'evalSQL',
-  handler: async function (content: string, info: Proxy<SQLConnectorInfo>) {
+  handler: async function (
+    _: string,
+    content: string,
+    info: Proxy<SQLConnectorInfo>
+  ) {
     const port = +info.sql.address.split(':')[1] || DEFAULT_PORT[info.sql.type];
     const host = info.sql.address.split(':')[0];
 

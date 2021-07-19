@@ -31,18 +31,20 @@ import { Button } from './component-library/Button';
 import { Input } from './component-library/Input';
 
 // Load brython on startup if in browser app
-document.onload = function () {
+window.onload = function () {
   if (MODE !== 'browser') {
     return;
   }
 
-  const bmin = document.createElement('script');
-  bmin.src = 'https://cdn.jsdelivr.net/npm/brython@3.9/brython.min.js';
-  document.body.appendChild(bmin);
+  const pyodide = document.createElement('script');
+  pyodide.src = 'https://cdn.jsdelivr.net/pyodide/v0.17.0/full/pyodide.js';
+  document.body.appendChild(pyodide);
 
-  const bstdlib = document.createElement('script');
-  bstdlib.src = 'https://cdn.jsdelivr.net/npm/brython@3.9/brython_stdlib.js';
-  document.body.appendChild(bstdlib);
+  pyodide.onload = function () {
+    (window as any).loadPyodide({
+      indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.17.0/full/',
+    });
+  };
 };
 
 function getQueryParameter(param: String) {
@@ -170,6 +172,7 @@ function App() {
       getQueryParameter('project') ||
       (MODE_FEATURES.useDefaultProject ? DEFAULT_PROJECT.projectName : '')
   );
+  (window as any).projectId = projectId;
 
   function setProjectId(projectId: string) {
     setProjectIdInternal(projectId);
