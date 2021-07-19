@@ -5,7 +5,7 @@ export function useDebouncedLocalState(
   nonLocalValue: string,
   nonLocalSet: (v: string) => void,
   isText: boolean = true,
-  delay: number = 250
+  delay: number = 125
 ): [string, (v: string) => void] {
   if (!isText) {
     return [nonLocalValue, nonLocalSet];
