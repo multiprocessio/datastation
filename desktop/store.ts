@@ -44,10 +44,13 @@ function flushUnwritten() {
 );
 
 export function getCurrentProjectResultsFile() {
-  const projectFullPath: string = (BrowserWindow.getFocusedWindow() as any).DS_project;
-  const fileName = path.basename(projectFullPath).replace('.'+PROJECT_EXTENSION, '');
+  const projectFullPath: string = (BrowserWindow.getFocusedWindow() as any)
+    .DS_project;
+  const fileName = path
+    .basename(projectFullPath)
+    .replace('.' + PROJECT_EXTENSION, '');
   const directory = path.dirname(projectFullPath);
-  return path.join(directory, "."+fileName+".results");
+  return path.join(directory, '.' + fileName + '.results');
 }
 
 export const storeHandlers = [
