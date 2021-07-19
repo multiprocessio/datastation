@@ -47,8 +47,7 @@ export function getProjectResultsFile(projectId: string) {
   const fileName = path
     .basename(projectId)
     .replace('.' + PROJECT_EXTENSION, '');
-  const directory = path.dirname(projectId);
-  return path.join(directory, '.' + fileName + '.results');
+  return path.join(DISK_ROOT, '.' + fileName + '.results');
 }
 
 export const storeHandlers = [

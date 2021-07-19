@@ -13,7 +13,7 @@ import { DISK_ROOT } from './constants';
 import { SETTINGS } from './settings';
 import { getProjectResultsFile } from './store';
 
-const runningProcesses: Record<string, number> = {};
+const runningProcesses: Record<string, Set<number>> = {};
 
 const JAVASCRIPT_PREAMBLE = (outFile: string, resultsFile: string) =>
   `
@@ -74,6 +74,13 @@ const PREAMBLE = {
   r: R_PREAMBLE,
 };
 
+function killAllByPanelId(panelId: string) {
+  const pids = runningProcesses[panelId];
+  if (pids) {
+    Array.from(pids).map((pid) => process.kill(pid));
+  }
+}
+
 export const programHandlers = [
   {
     resource: 'evalProgram',
@@ -96,6 +103,7 @@ export const programHandlers = [
       const projectResultsFile = getProjectResultsFile(projectId);
 
       let out = '';
+      let pid = 0;
       try {
         const preamble = PREAMBLE[ppi.program.type](
           outputTmp.path,
@@ -116,7 +124,12 @@ export const programHandlers = [
             stderr += data;
           });
 
-          runningProcesses[ppi.id] = child.pid;
+          killAllByPanelId(ppi.id);
+          if (!runningProcesses[ppi.id]) {
+            runningProcesses[ppi.id] = new Set();
+          }
+          pid = child.pid;
+          runningProcesses[ppi.id].add(child.pid);
           const code = await new Promise((resolve) =>
             child.on('close', resolve)
           );
@@ -175,7 +188,9 @@ export const programHandlers = [
           throw e;
         }
       } finally {
-        delete runningProcesses[ppi.id];
+        if (pid) {
+          runningProcesses[ppi.id].delete(pid);
+        }
         programTmp.cleanup();
         outputTmp.cleanup();
       }
@@ -184,10 +199,7 @@ export const programHandlers = [
   {
     resource: 'killProcess',
     handler: async function (_: string, _1: string, ppi: ProgramPanelInfo) {
-      const pid = runningProcesses[ppi.id];
-      if (pid) {
-        process.kill(pid);
-      }
+      killAllByPanelId(ppi.id);
     },
   },
 ];
