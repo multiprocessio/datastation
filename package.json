@@ -11,7 +11,7 @@
     "build-ui": "python3 ./scripts/build.py ./ui/scripts/ui.build",
     "start-desktop": "yarn build-ui && yarn build-desktop && yarn electron --trace-warning --unhandled-rejection=strict build/desktop.js",
     "start-ui": "./ui/scripts/watch_and_serve.sh",
-    "release-desktop": "python3 ./scripts/build.py ./desktop/scripts/release.build",
+    "release-desktop": "python3 ./scripts/build.py ./desktop/scripts/release.build false",
     "format": "yarn prettier --write \"**/*.js\" \"**/*.ts\" \"**/*.tsx\" \"**/*.css\" \"**/*.json\"",
     "test-licenses": "yarn license-checker --production --onlyAllow 'MIT;Apache-2.0;ISC;BSD-3-Clause;MIT*;BSD-2-Clause;Unlicense'",
     "test": "yarn jest",
