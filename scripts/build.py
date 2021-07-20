@@ -123,7 +123,7 @@ for command in script:
         continue
 
     print(' '.join(line))
-    if 'powershell' in os.environ['COMSPEC']:
+    if 'powershell' in str(os.environ.get('COMSPEC')):
         subprocess.run(line, check=True, shell=True)
     else:
         for i, t in enumerate(line):
