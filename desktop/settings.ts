@@ -16,6 +16,7 @@ export class Settings {
   juliaPath: string;
   rubyPath: string;
   file: string;
+  stdoutMaxSize: number;
 
   constructor(
     file: string,
@@ -25,7 +26,8 @@ export class Settings {
     nodePath?: string,
     rPath?: string,
     juliaPath?: string,
-    rubyPath?: string
+    rubyPath?: string,
+    stdoutMaxSize?: number
   ) {
     this.uid = uid || uuid.v4();
     this.lastProject = lastProject || '';
@@ -34,6 +36,7 @@ export class Settings {
     this.rPath = rPath || 'Rscript';
     this.juliaPath = juliaPath || 'julia';
     this.rubyPath = rubyPath || 'ruby';
+    this.stdoutMaxSize = stdoutMaxSize || 5000;
     this.file = file;
   }
 
