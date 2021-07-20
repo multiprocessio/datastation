@@ -52,10 +52,9 @@ export function evalProgramPanel(
         }
       });
     case 'python':
-      // TODO: sandbox
       return new Promise((resolve, reject) => {
         anyWindow.DM_setPanel = (v: any) => {
-          resolve([v, stdout.join('\n')]);
+          resolve([v.toJs(), stdout.join('\n')]);
         };
         const oldConsoleLog = console.log;
         console.log = print;

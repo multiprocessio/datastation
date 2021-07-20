@@ -115,13 +115,28 @@ export const programHandlers = [
           // TODO: stream back
           let out = '';
           let stderr = '';
+          let truncated = false;
           child.stdout.on('data', (data) => {
-            out += data;
+            if (out.length > SETTINGS.stdoutMaxSize && !truncated) {
+              out += '[TRUNCATED]';
+              truncated = true;
+            }
+
+            if (!truncated) {
+              out += data;
+            }
           });
 
           child.stderr.on('data', (data) => {
-            out += data;
-            stderr += data;
+            if (out.length > SETTINGS.stdoutMaxSize && !truncated) {
+              out += '[TRUNCATED]';
+              truncated = true;
+            }
+
+            if (!truncated) {
+              out += data;
+              stderr += data;
+            }
           });
 
           killAllByPanelId(ppi.id);

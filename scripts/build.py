@@ -4,7 +4,9 @@ will work on Windows and the *nixes.
 """
 
 import os
+import pathlib
 import platform
+import shutil
 import subprocess
 import sys
 
@@ -92,6 +94,16 @@ for command in script:
 
     if line[0] == 'cp' and IS_WINDOWS:
         line[0] = 'copy'
+    elif line[0] == 'rm' and line[1] == '-rf' and IS_WINDOWS:
+        print(' '.join(line))
+        for todelete in line[2:]:
+            shutil.rmtree(todelete, ignore_errors=True)
+        continue
+    elif line[0] == 'mkdir':
+        print(' '.join(line))
+        for tomake in line[1:]:
+            pathlib.Path(tomake).mkdir(parents=True, exist_ok=True)
+        continue
     elif line[0] == 'append':
         what = line[1]
         to = line[2]
@@ -111,4 +123,10 @@ for command in script:
         continue
 
     print(' '.join(line))
-    subprocess.run(line, check=True, shell=IS_WINDOWS)
+    if 'powershell' in str(os.environ.get('COMSPEC')):
+        subprocess.run(line, check=True, shell=True)
+    else:
+        for i, t in enumerate(line):
+            if " " in t:
+                line[i] = '"' + t + '"'
+        os.system(' '.join(line))
