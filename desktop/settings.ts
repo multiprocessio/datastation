@@ -7,14 +7,40 @@ import log from '../shared/log';
 
 import { ensureFile } from './store';
 
+export class LanguageSettings {
+  path: string;
+
+  constructor(path?: string) {
+    this.path = path || '';
+  }
+}
+
+export class LanguagesSettings {
+  python: LanguageSettings;
+  ruby: LanguageSettings;
+  r: LanguageSettings;
+  julia: LanguageSettings;
+  javascript: LanguageSettings;
+
+  constructor(
+    python?: LanguageSettings,
+    ruby?: LanguageSettings,
+    r?: LanguageSettings,
+    julia?: LanguageSettings,
+    javascript?: LanguageSettings
+  ) {
+    this.python = python || new LanguageSettings();
+    this.ruby = ruby || new LanguageSettings();
+    this.julia = julia || new LanguageSettings();
+    this.javascript = javascript || new LanguageSettings();
+    this.r = r || new LanguageSettings();
+  }
+}
+
 export class Settings {
   uid: string;
   lastProject?: string;
-  pythonPath: string;
-  nodePath: string;
-  rPath: string;
-  juliaPath: string;
-  rubyPath: string;
+  languages: LanguagesSettings;
   file: string;
   stdoutMaxSize: number;
 
@@ -22,20 +48,12 @@ export class Settings {
     file: string,
     uid?: string,
     lastProject?: string,
-    pythonPath?: string,
-    nodePath?: string,
-    rPath?: string,
-    juliaPath?: string,
-    rubyPath?: string,
+    languages?: LanguagesSettings,
     stdoutMaxSize?: number
   ) {
     this.uid = uid || uuid.v4();
     this.lastProject = lastProject || '';
-    this.pythonPath = pythonPath || 'python3';
-    this.nodePath = nodePath || 'node';
-    this.rPath = rPath || 'Rscript';
-    this.juliaPath = juliaPath || 'julia';
-    this.rubyPath = rubyPath || 'ruby';
+    this.languages = languages || new LanguagesSettings();
     this.stdoutMaxSize = stdoutMaxSize || 5000;
     this.file = file;
   }
