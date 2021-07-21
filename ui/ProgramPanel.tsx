@@ -31,8 +31,6 @@ export function evalProgramPanel(
     JSON.parse(JSON.stringify((panelResults[panelId] || {}).value));
 
   const stdout: Array<string> = [];
-  const print = (...n: Array<any>) =>
-    stdout.push(n.map((v) => circularSafeStringify(v)).join(' '));
 
   switch (program.type) {
     case 'javascript':
@@ -42,7 +40,8 @@ export function evalProgramPanel(
           resolve([v, stdout.join('\n')]);
         };
         const oldConsoleLog = console.log;
-        console.log = print;
+        console.log = (...n: Array<any>) =>
+          stdout.push(n.map((v) => circularSafeStringify(v)).join(' '));
         try {
           eval(panel.content);
         } catch (e) {
@@ -57,7 +56,8 @@ export function evalProgramPanel(
           resolve([v.toJs(), stdout.join('\n')]);
         };
         const oldConsoleLog = console.log;
-        console.log = print;
+        console.log = (...n: Array<any>) =>
+          stdout.push(n.map((v) => circularSafeStringify(v.toJs())).join(' '));
         try {
           const program =
             'import js as window\nprint = lambda *args: window.console.log(*args)\nDM_getPanel = window.DM_getPanel\nDM_setPanel = window.DM_setPanel\n' +
