@@ -30,10 +30,8 @@ function inMemoryEval(
   const anyWindow = window as any;
 
   // TODO: better deep copy
-  anyWindow.DM_getPanel = (panelId: number) => {
-    console.log(panelId, results[panelId]);
-    return JSON.parse(JSON.stringify((results[panelId] || {}).value));
-  };
+  anyWindow.DM_getPanel = (panelId: number) =>
+    JSON.parse(JSON.stringify((results[panelId] || {}).value));
 
   const stdout: Array<string> = [];
   return new Promise((resolve, reject) => {

@@ -9,6 +9,7 @@ import {
   SQLPanelInfo,
   PanelResult,
 } from '../shared/state';
+import log from '../shared/log';
 import { DEBUG, MODE_FEATURES } from '../shared/constants';
 
 import { asyncRPC } from './asyncRPC';
@@ -97,7 +98,7 @@ export async function evalSQLPanel(
     content = ctePrefix + ' ' + content;
 
     if (DEBUG) {
-      console.log(`Interpolated SQL: ${content}`);
+      log.info(`Interpolated SQL: ${content}`);
     }
   } catch (e) {
     console.error(e);
@@ -122,7 +123,7 @@ export async function evalSQLPanel(
   let sql = (window as any).SQL;
   if (!sql) {
     while (!(window as any).initSqlJs) {
-      console.log('Waiting for SQL.js to load');
+      log.info('Waiting for SQL.js to load');
       await new Promise((r) => setTimeout(r, 1000));
     }
     sql = (window as any).SQL = await (window as any).initSqlJs({
