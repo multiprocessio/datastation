@@ -3,7 +3,6 @@ import circularSafeStringify from 'json-stringify-safe';
 import { PanelResult } from './state';
 
 const EOL = /\r?\n/;
-const anyWindow = window as any;
 
 export interface LanguageInfo {
   name: string;
@@ -40,6 +39,7 @@ function DM_setPanel(v) {
   fs.writeFileSync('${outFile}', JSON.stringify(v));
 }`,
     inMemoryEval: (prog: string, results: Array<PanelResult>) => {
+      const anyWindow = window as any;
       // TODO: better deep copy
       anyWindow.DM_getPanel = (panelId: number) =>
         JSON.parse(JSON.stringify((results[panelId] || {}).value));
@@ -97,6 +97,7 @@ def DM_setPanel(v):
   with open(r'${outFile}', 'w') as f:
     json.dump(v, f)`,
     inMemoryEval: (prog: string, results: Array<PanelResult>) => {
+      const anyWindow = window as any;
       // TODO: better deep copy
       anyWindow.DM_getPanel = (panelId: number) =>
         JSON.parse(JSON.stringify((results[panelId] || {}).value));
