@@ -66,11 +66,11 @@ export function CodeEditor({
           },
           singleLine
             ? {
-              name: 'disable newlines',
-              bindKey: { win: 'Enter|Shift-Enter', mac: 'Enter|Shift-Enter' },
-              // Do nothing
-              exec: () => { },
-            }
+                name: 'disable newlines',
+                bindKey: { win: 'Enter|Shift-Enter', mac: 'Enter|Shift-Enter' },
+                // Do nothing
+                exec: () => {},
+              }
             : undefined,
         ].filter(Boolean)}
         showGutter={!singleLine}
