@@ -7,7 +7,7 @@ import util from 'util';
 import { file as makeTmpFile } from 'tmp-promise';
 
 import { LANGUAGES } from '../shared/languages';
-import { ProgramPanelInfo } from '../shared/state';
+import { ProgramPanelInfo, PanelResult } from '../shared/state';
 import { parseArrayBuffer } from '../shared/text';
 
 import { DISK_ROOT } from './constants';
@@ -35,10 +35,15 @@ export const programHandlers = [
       const outputTmp = await makeTmpFile();
       const language = LANGUAGES[ppi.program.type];
 
+      const projectResultsFile = getProjectResultsFile(projectId);
+
+      if (!language.defaultPath) {
+        const results: Array<PanelResult> = JSON.parse(await fs.readFile(projectResultsFile).toString());
+        return language.inMemoryEval(ppi.content, results);
+      }
+
       const programPathOrName =
         SETTINGS.languages[ppi.program.type].path || language.defaultPath;
-
-      const projectResultsFile = getProjectResultsFile(projectId);
 
       let out = '';
       let pid = 0;
