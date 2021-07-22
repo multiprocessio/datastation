@@ -1,11 +1,7 @@
 import fs from 'fs/promises';
-
 import Client from 'ssh2-sftp-client';
-import fetch from 'node-fetch';
-
 import { Proxy } from '../shared/state';
 import { parseArrayBuffer } from '../shared/text';
-
 import { additionalParsers } from './http';
 import { getSSHConfig, resolvePath } from './tunnel';
 
@@ -33,7 +29,11 @@ export const evalFileHandler = {
 
     const sftp = new Client();
     await sftp.connect(config);
-    let body = (await sftp.get(name)) as ArrayBuffer;
-    return await parseArrayBuffer(typeInfo, name, body);
+    try {
+      let body = (await sftp.get(name)) as ArrayBuffer;
+      return await parseArrayBuffer(typeInfo, name, body);
+    } finally {
+      await sftp.end();
+    }
   },
 };

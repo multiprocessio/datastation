@@ -1,21 +1,19 @@
 import * as React from 'react';
-
+import { DEBUG } from '../shared/constants';
+import log from '../shared/log';
 import {
+  ConnectorInfo,
+  PanelResult,
   Proxy,
   ServerInfo,
-  ConnectorInfo,
   SQLConnectorInfo,
   SQLConnectorInfoType,
   SQLPanelInfo,
-  PanelResult,
 } from '../shared/state';
-import log from '../shared/log';
-import { DEBUG, MODE_FEATURES } from '../shared/constants';
-
 import { asyncRPC } from './asyncRPC';
+import { Select } from './component-library/Select';
 import { ProjectContext } from './ProjectStore';
 import { ServerPicker } from './ServerPicker';
-import { Select } from './component-library/Select';
 
 export async function evalSQLPanel(
   panel: SQLPanelInfo,
@@ -35,7 +33,7 @@ export async function evalSQLPanel(
       return `t${replacements.length - 1}`;
     });
 
-    const valueQuote = panel.sql.type === 'in-memory' ? "'" : '"';
+    const valueQuote = '"';
     const columnQuote = panel.sql.type === 'mysql' ? '`' : '"';
 
     let ctePrefix = '';
@@ -105,43 +103,18 @@ export async function evalSQLPanel(
     throw new Error('Malformed substitution in SQL');
   }
 
-  if (panel.sql.type !== 'in-memory') {
-    const connector = connectors[
-      +panel.sql.connectorIndex
-    ] as Proxy<SQLConnectorInfo>;
-    connector.server = servers.find(
-      (s) => s.id === (panel.serverId || connector.serverId)
-    );
+  const connector = connectors[
+    +panel.sql.connectorIndex
+  ] as Proxy<SQLConnectorInfo>;
+  connector.server = servers.find(
+    (s) => s.id === (panel.serverId || connector.serverId)
+  );
 
-    return await asyncRPC<Proxy<SQLConnectorInfo>, string, Array<object>>(
-      'evalSQL',
-      content,
-      connector
-    );
-  }
-
-  let sql = (window as any).SQL;
-  if (!sql) {
-    while (!(window as any).initSqlJs) {
-      log.info('Waiting for SQL.js to load');
-      await new Promise((r) => setTimeout(r, 1000));
-    }
-    sql = (window as any).SQL = await (window as any).initSqlJs({
-      locateFile: (file: string) => `${file}`,
-    });
-  }
-
-  const db = new sql.Database();
-  let res: any;
-  res = db.exec(content)[0];
-
-  return res.values.map((row: Array<any>) => {
-    const formattedRow: { [k: string]: any } = {};
-    res.columns.forEach((c: string, i: number) => {
-      formattedRow[c] = row[i];
-    });
-    return formattedRow;
-  });
+  return await asyncRPC<Proxy<SQLConnectorInfo>, string, Array<object>>(
+    'evalSQL',
+    content,
+    connector
+  );
 }
 
 export function SQLPanelDetails({
@@ -164,46 +137,42 @@ export function SQLPanelDetails({
             updatePanel(panel);
           }}
         >
-          {MODE_FEATURES.sql && <option value="postgres">PostgreSQL</option>}
-          {MODE_FEATURES.sql && <option value="mysql">MySQL</option>}
-          <option value="in-memory">In-Memory SQL</option>
+          <option value="postgres">PostgreSQL</option>
+          <option value="mysql">MySQL</option>
+          <option value="sqlite">SQLite</option>
         </Select>
       </div>
-      {MODE_FEATURES.sql && panel.sql.type !== 'in-memory' && (
-        <React.Fragment>
-          <div className="form-row">
-            <Select
-              label="Connector"
-              value={panel.sql.connectorIndex.toString()}
-              onChange={(connectorIndex: string) => {
-                panel.sql.connectorIndex = +connectorIndex;
-                updatePanel(panel);
-              }}
-            >
-              {connectors
-                .map((c: ConnectorInfo, index: number) => {
-                  if (
-                    c.type !== 'sql' ||
-                    (c as SQLConnectorInfo).sql.type !== panel.sql.type
-                  ) {
-                    return null;
-                  }
+      <div className="form-row">
+        <Select
+          label="Connector"
+          value={panel.sql.connectorIndex.toString()}
+          onChange={(connectorIndex: string) => {
+            panel.sql.connectorIndex = +connectorIndex;
+            updatePanel(panel);
+          }}
+        >
+          {connectors
+            .map((c: ConnectorInfo, index: number) => {
+              if (
+                c.type !== 'sql' ||
+                (c as SQLConnectorInfo).sql.type !== panel.sql.type
+              ) {
+                return null;
+              }
 
-                  return <option value={index}>{c.name}</option>;
-                })
-                .filter(Boolean)}
-            </Select>
-          </div>
-          <ServerPicker
-            servers={servers}
-            serverId={panel.serverId}
-            onChange={(serverId: string) => {
-              panel.serverId = serverId;
-              updatePanel(panel);
-            }}
-          />
-        </React.Fragment>
-      )}
+              return <option value={index}>{c.name}</option>;
+            })
+            .filter(Boolean)}
+        </Select>
+      </div>
+      <ServerPicker
+        servers={servers}
+        serverId={panel.serverId}
+        onChange={(serverId: string) => {
+          panel.serverId = serverId;
+          updatePanel(panel);
+        }}
+      />
     </React.Fragment>
   );
 }

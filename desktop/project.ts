@@ -1,5 +1,3 @@
-import path from 'path';
-
 import {
   BrowserWindow,
   dialog,
@@ -7,10 +5,9 @@ import {
   MenuItemConstructorOptions,
   shell,
 } from 'electron';
-
-import { APP_NAME, VERSION, DEBUG, SITE_ROOT } from '../shared/constants';
-
-import { DSPROJ_FLAG, PROJECT_EXTENSION, DISK_ROOT } from './constants';
+import path from 'path';
+import { APP_NAME, DEBUG, SITE_ROOT } from '../shared/constants';
+import { DISK_ROOT, PROJECT_EXTENSION } from './constants';
 import { SETTINGS } from './settings';
 
 const menuTemplate = [

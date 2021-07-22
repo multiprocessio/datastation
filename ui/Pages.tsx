@@ -1,19 +1,17 @@
 import * as React from 'react';
-
 import { MODE_FEATURES } from '../shared/constants';
 import {
-  ProjectState,
-  ProjectPage,
   PanelResult,
   PanelResults,
+  ProjectPage,
+  ProjectState,
 } from '../shared/state';
-
-import { evalPanel } from './Panel';
-import { Panels } from './Panels';
 import { asyncRPC } from './asyncRPC';
 import { Button } from './component-library/Button';
 import { Confirm } from './component-library/Confirm';
 import { Input } from './component-library/Input';
+import { evalPanel } from './Panel';
+import { Panels } from './Panels';
 
 export function Pages({
   state,

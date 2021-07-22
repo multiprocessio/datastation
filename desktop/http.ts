@@ -1,12 +1,9 @@
-import { URL } from 'url';
-
 import fetch from 'node-fetch';
-
-import { Proxy, HTTPConnectorInfo } from '../shared/state';
+import { URL } from 'url';
 import { request } from '../shared/http';
-
-import { tunnel } from './tunnel';
+import { HTTPConnectorInfo, Proxy } from '../shared/state';
 import { parseParquet } from './parquet';
+import { tunnel } from './tunnel';
 
 export const additionalParsers = {
   parquet: parseParquet,

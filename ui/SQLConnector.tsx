@@ -1,11 +1,10 @@
 import * as React from 'react';
-
 import { SQLConnectorInfo, SQLConnectorInfoType } from '../shared/state';
-
-import { ProjectContext } from './ProjectStore';
-import { ServerPicker } from './ServerPicker';
+import { FileInput } from './component-library/FileInput';
 import { Input } from './component-library/Input';
 import { Select } from './component-library/Select';
+import { ProjectContext } from './ProjectStore';
+import { ServerPicker } from './ServerPicker';
 
 export function SQLConnector({
   connector,
@@ -39,46 +38,62 @@ export function SQLConnector({
         >
           <option value="postgres">PostgreSQL</option>
           <option value="mysql">MySQL</option>
+          <option value="sqlite">SQLite</option>
         </Select>
       </div>
-      <div className="form-row">
-        <Input
-          label="Address"
-          value={connector.sql.address}
-          onChange={(value: string) => {
-            connector.sql.address = value;
-            updateConnector(connector);
-          }}
-        />
-      </div>
-      <div className="form-row">
-        <Input
-          label="Database"
+      {connector.sql.type === 'sqlite' ? (
+        <FileInput
+          label="File"
           value={connector.sql.database}
-          onChange={(value: string) => {
-            connector.sql.database = value;
+          allowManualEntry
+          allowFilePicker={!connector.serverId ? true : false}
+          onChange={(fileName: string) => {
+            connector.sql.database = fileName;
             updateConnector(connector);
           }}
         />
-      </div>
-      <div className="form-row">
-        <Input
-          label="Username"
-          value={connector.sql.username}
-          onChange={(value: string) => {
-            connector.sql.username = value;
-            updateConnector(connector);
-          }}
-        />
-      </div>
-      <div className="form-row">
-        <Input
-          label="Password"
-          type="password"
-          value={password}
-          onChange={(value: string) => syncPassword(value)}
-        />
-      </div>
+      ) : (
+        <React.Fragment>
+          <div className="form-row">
+            <Input
+              label="Address"
+              value={connector.sql.address}
+              onChange={(value: string) => {
+                connector.sql.address = value;
+                updateConnector(connector);
+              }}
+            />
+          </div>
+          <div className="form-row">
+            <Input
+              label="Database"
+              value={connector.sql.database}
+              onChange={(value: string) => {
+                connector.sql.database = value;
+                updateConnector(connector);
+              }}
+            />
+          </div>
+          <div className="form-row">
+            <Input
+              label="Username"
+              value={connector.sql.username}
+              onChange={(value: string) => {
+                connector.sql.username = value;
+                updateConnector(connector);
+              }}
+            />
+          </div>
+          <div className="form-row">
+            <Input
+              label="Password"
+              type="password"
+              value={password}
+              onChange={(value: string) => syncPassword(value)}
+            />
+          </div>
+        </React.Fragment>
+      )}
       <ServerPicker
         servers={servers}
         serverId={connector.serverId}

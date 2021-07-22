@@ -1,14 +1,10 @@
 import fs from 'fs/promises';
 import path from 'path';
-import { Server } from 'net';
-
 import SSH2Promise from 'ssh2-promise';
 import SSH2Config from 'ssh2-promise/lib/sshConfig';
-
 import { DEBUG } from '../shared/constants';
-import { ServerInfo } from '../shared/state';
 import log from '../shared/log';
-
+import { ServerInfo } from '../shared/state';
 import { HOME } from './constants';
 
 interface SSHConfig extends SSH2Config {

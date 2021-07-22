@@ -1,20 +1,21 @@
-import * as React from 'react';
+// organize-imports-ignore
+// Must be loaded before other ace-builds imports
 import AceEditor from 'react-ace';
-// UI theme
-import 'ace-builds/src-min-noconflict/theme-github';
 // Enables Ctrl-f
 import 'ace-builds/src-min-noconflict/ext-searchbox';
+import 'ace-builds/src-min-noconflict/mode-javascript';
+import 'ace-builds/src-min-noconflict/mode-julia';
+import 'ace-builds/src-min-noconflict/mode-python';
+import 'ace-builds/src-min-noconflict/mode-r';
+import 'ace-builds/src-min-noconflict/mode-ruby';
 // Enables syntax highlighting
 import 'ace-builds/src-min-noconflict/mode-sql';
-import 'ace-builds/src-min-noconflict/mode-javascript';
-import 'ace-builds/src-min-noconflict/mode-ruby';
-import 'ace-builds/src-min-noconflict/mode-julia';
-import 'ace-builds/src-min-noconflict/mode-r';
-import 'ace-builds/src-min-noconflict/mode-python';
+// UI theme
+import 'ace-builds/src-min-noconflict/theme-github';
+import * as React from 'react';
 // Shortcuts support, TODO: support non-emacs
 // This steals Ctrl-a so this should not be a default
 //import 'ace-builds/src-min-noconflict/keybinding-emacs';
-
 import { useDebouncedLocalState } from './Input';
 
 export function CodeEditor({

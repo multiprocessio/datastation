@@ -1,15 +1,13 @@
 import * as React from 'react';
-
 import {
   PanelInfo,
-  TablePanelInfo,
-  TableColumn,
   PanelResult,
+  TableColumn,
+  TablePanelInfo,
 } from '../shared/state';
-
-import { PanelSourcePicker } from './PanelSourcePicker';
 import { Button } from './component-library/Button';
 import { FieldPicker } from './FieldPicker';
+import { PanelSourcePicker } from './PanelSourcePicker';
 
 export function TablePanelDetails({
   panel,

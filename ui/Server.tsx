@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 import { ServerInfo, ServerInfoType } from '../shared/state';
 import { Button } from './component-library/Button';
 import { Confirm } from './component-library/Confirm';

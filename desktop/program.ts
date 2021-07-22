@@ -1,16 +1,10 @@
-import { EOL } from 'os';
 import { spawn } from 'child_process';
 import fs from 'fs/promises';
-import path from 'path';
-import util from 'util';
-
+import { EOL } from 'os';
 import { file as makeTmpFile } from 'tmp-promise';
-
 import { LANGUAGES } from '../shared/languages';
-import { ProgramPanelInfo } from '../shared/state';
+import { PanelResult, ProgramPanelInfo } from '../shared/state';
 import { parseArrayBuffer } from '../shared/text';
-
-import { DISK_ROOT } from './constants';
 import { SETTINGS } from './settings';
 import { getProjectResultsFile } from './store';
 
@@ -35,10 +29,18 @@ export const programHandlers = [
       const outputTmp = await makeTmpFile();
       const language = LANGUAGES[ppi.program.type];
 
+      const projectResultsFile = getProjectResultsFile(projectId);
+
+      if (!language.defaultPath) {
+        const resultsRaw = (await fs.readFile(projectResultsFile)).toString();
+        const results: Array<PanelResult> = JSON.parse(resultsRaw).map(
+          (value: any) => ({ value })
+        );
+        return language.inMemoryEval(ppi.content, results);
+      }
+
       const programPathOrName =
         SETTINGS.languages[ppi.program.type].path || language.defaultPath;
-
-      const projectResultsFile = getProjectResultsFile(projectId);
 
       let out = '';
       let pid = 0;

@@ -70,7 +70,7 @@ function unsafePreview(obj: any, nKeys: number, topLevel = false): string {
   }
 
   if (typeof obj === 'string' && !topLevel) {
-    return `"${res.replace('"', '\\"')}"`;
+    return `"${res.replaceAll('"', '\\"')}"`;
   }
 
   return res;

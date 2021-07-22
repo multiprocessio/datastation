@@ -1,6 +1,5 @@
-import * as XLSX from 'xlsx';
 import * as CSV from 'papaparse';
-
+import * as XLSX from 'xlsx';
 import log from './log';
 
 export type Parsers = { [type: string]: (a: ArrayBuffer) => Promise<any> };
