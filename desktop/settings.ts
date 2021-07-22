@@ -4,6 +4,7 @@ import * as uuid from 'uuid';
 
 import { mergeDeep } from '../shared/merge';
 import log from '../shared/log';
+import { LANGUAGES, SupportedLanguages } from '../shared/languages';
 
 import { ensureFile } from './store';
 
@@ -15,32 +16,10 @@ export class LanguageSettings {
   }
 }
 
-export class LanguagesSettings {
-  python: LanguageSettings;
-  ruby: LanguageSettings;
-  r: LanguageSettings;
-  julia: LanguageSettings;
-  javascript: LanguageSettings;
-
-  constructor(
-    python?: LanguageSettings,
-    ruby?: LanguageSettings,
-    r?: LanguageSettings,
-    julia?: LanguageSettings,
-    javascript?: LanguageSettings
-  ) {
-    this.python = python || new LanguageSettings();
-    this.ruby = ruby || new LanguageSettings();
-    this.julia = julia || new LanguageSettings();
-    this.javascript = javascript || new LanguageSettings();
-    this.r = r || new LanguageSettings();
-  }
-}
-
 export class Settings {
   uid: string;
   lastProject?: string;
-  languages: LanguagesSettings;
+  languages: Record<SupportedLanguages, LanguageSettings>;
   file: string;
   stdoutMaxSize: number;
 
@@ -48,12 +27,20 @@ export class Settings {
     file: string,
     uid?: string,
     lastProject?: string,
-    languages?: LanguagesSettings,
+    languages?: Record<SupportedLanguages, LanguageSettings>,
     stdoutMaxSize?: number
   ) {
     this.uid = uid || uuid.v4();
     this.lastProject = lastProject || '';
-    this.languages = languages || new LanguagesSettings();
+    this.languages =
+      languages ||
+      Object.keys(LANGUAGES).reduce(
+        (agg, lang) => ({
+          ...agg,
+          [lang]: new LanguageSettings(),
+        }),
+        {}
+      );
     this.stdoutMaxSize = stdoutMaxSize || 5000;
     this.file = file;
   }

@@ -15,3 +15,5 @@ export const LANGUAGES: Record<string, LanguageInfo> = {
   r: R,
   sql: SQL,
 };
+
+export type SupportedLanguages = keyof typeof LANGUAGES;

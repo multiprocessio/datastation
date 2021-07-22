@@ -21,7 +21,7 @@ function preamble(outFile: string, resultsFile: string) {
   return '';
 }
 
-function inMemoryEval(
+async function inMemoryEval(
   prog: string,
   results: Array<PanelResult>
 ): Promise<[any, string]> {
@@ -34,7 +34,7 @@ function inMemoryEval(
     idx: any,
     query: any
   ) {
-    let res = results[n];
+    let res = results[n].value;
     if (cb) {
       res = cb(res, idx, query);
     }
@@ -44,7 +44,8 @@ function inMemoryEval(
   const patchedProgram = prog.replaceAll(/DM_getPanel/gi, thisDM_getPanel);
 
   try {
-    const res = alasql(patchedProgram);
+    // It is only asynchronous if you run "multiple" queries.
+    const [res] = await alasql([patchedProgram]);
     return [res, ''];
   } finally {
     delete fromAddons[thisDM_getPanel];

@@ -54,7 +54,7 @@ async function evalMySQL(
 const DEFAULT_PORT = {
   postgres: 5432,
   mysql: 3306,
-  'in-memory': 0,
+  sqlite: 0,
 };
 
 export const evalSQLHandler = {

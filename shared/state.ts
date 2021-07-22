@@ -2,6 +2,7 @@ import * as uuid from 'uuid';
 
 import { mergeDeep } from './merge';
 import { VERSION } from './constants';
+import { SupportedLanguages } from './languages';
 import log from './log';
 
 export class PanelResult {
@@ -117,7 +118,7 @@ export class HTTPConnectorInfo extends ConnectorInfo {
   }
 }
 
-export type SQLConnectorInfoType = 'postgres' | 'mysql' | 'in-memory';
+export type SQLConnectorInfoType = 'postgres' | 'mysql' | 'sqlite';
 
 export class SQLConnectorInfo extends ConnectorInfo {
   sql: {
@@ -138,7 +139,7 @@ export class SQLConnectorInfo extends ConnectorInfo {
   ) {
     super('sql', name);
     this.sql = {
-      type: type || 'in-memory',
+      type: type || 'postgres',
       database: database || '',
       username: username || '',
       password: password || '',
@@ -171,19 +172,12 @@ export class PanelInfo {
   }
 }
 
-export type ProgramPanelInfoType =
-  | 'javascript'
-  | 'python'
-  | 'ruby'
-  | 'julia'
-  | 'r';
-
 export class ProgramPanelInfo extends PanelInfo {
   program: {
-    type: ProgramPanelInfoType;
+    type: SupportedLanguages;
   };
 
-  constructor(name?: string, type?: ProgramPanelInfoType, content?: string) {
+  constructor(name?: string, type?: SupportedLanguages, content?: string) {
     super('program', name, content);
     this.program = {
       type: type || 'python',
@@ -238,7 +232,7 @@ export class SQLPanelInfo extends PanelInfo {
   ) {
     super('sql', name, content);
     this.sql = {
-      type: type || 'in-memory',
+      type: type || 'postgres',
       connectorIndex: connectorIndex || 0,
     };
   }
@@ -367,10 +361,9 @@ export const DEFAULT_PROJECT: ProjectState = new ProjectState(
         'name,age\nMorgan,12\nJames,17',
         new ContentTypeInfo('text/csv')
       ),
-      new SQLPanelInfo(
+      new ProgramPanelInfo(
         'Transform with SQL',
-        'in-memory',
-        0,
+        'sql',
         'SELECT name, age+5 AS age FROM DM_getPanel(0);'
       ),
       (() => {

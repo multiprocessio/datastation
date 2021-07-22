@@ -39,7 +39,9 @@ export const programHandlers = [
 
       if (!language.defaultPath) {
         const resultsRaw = (await fs.readFile(projectResultsFile)).toString();
-        const results: Array<PanelResult> = JSON.parse(resultsRaw);
+        const results: Array<PanelResult> = JSON.parse(resultsRaw).map(
+          (value: any) => ({ value })
+        );
         return language.inMemoryEval(ppi.content, results);
       }
 
