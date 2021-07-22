@@ -1,3 +1,6 @@
+// organize-imports-ignore
+// Must be loaded before other ace-builds imports
+import AceEditor from 'react-ace';
 // Enables Ctrl-f
 import 'ace-builds/src-min-noconflict/ext-searchbox';
 import 'ace-builds/src-min-noconflict/mode-javascript';
@@ -10,7 +13,6 @@ import 'ace-builds/src-min-noconflict/mode-sql';
 // UI theme
 import 'ace-builds/src-min-noconflict/theme-github';
 import * as React from 'react';
-import AceEditor from 'react-ace';
 // Shortcuts support, TODO: support non-emacs
 // This steals Ctrl-a so this should not be a default
 //import 'ace-builds/src-min-noconflict/keybinding-emacs';
@@ -64,11 +66,11 @@ export function CodeEditor({
           },
           singleLine
             ? {
-                name: 'disable newlines',
-                bindKey: { win: 'Enter|Shift-Enter', mac: 'Enter|Shift-Enter' },
-                // Do nothing
-                exec: () => {},
-              }
+              name: 'disable newlines',
+              bindKey: { win: 'Enter|Shift-Enter', mac: 'Enter|Shift-Enter' },
+              // Do nothing
+              exec: () => { },
+            }
             : undefined,
         ].filter(Boolean)}
         showGutter={!singleLine}

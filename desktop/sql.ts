@@ -1,6 +1,6 @@
 import mysql from 'mysql2/promise';
 import { Client as PostgresClient } from 'pg';
-import sqlite from 'sqlite';
+import * as sqlite from 'sqlite';
 import sqlite3 from 'sqlite3';
 import Client from 'ssh2-sftp-client';
 import { file as makeTmpFile } from 'tmp-promise';

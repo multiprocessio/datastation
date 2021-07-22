@@ -139,6 +139,7 @@ export function SQLPanelDetails({
         >
           <option value="postgres">PostgreSQL</option>
           <option value="mysql">MySQL</option>
+          <option value="sqlite">SQLite</option>
         </Select>
       </div>
       <div className="form-row">
