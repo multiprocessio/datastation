@@ -5,7 +5,7 @@ import sqlite3 from 'sqlite3';
 import Client from 'ssh2-sftp-client';
 import { file as makeTmpFile } from 'tmp-promise';
 import { Proxy, SQLConnectorInfo } from '../shared/state';
-import { tunnel } from './tunnel';
+import { getSSHConfig, tunnel } from './tunnel';
 
 async function evalPostgreSQL(
   content: string,
@@ -63,7 +63,7 @@ async function evalSqlite(content: string, info: Proxy<SQLConnectorInfo>) {
   }
 
   if (info.server) {
-    const localCopy = makeTmpFile();
+    const localCopy = await makeTmpFile();
     const config = await getSSHConfig(info.server);
 
     const sftp = new Client();
