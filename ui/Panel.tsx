@@ -394,13 +394,13 @@ export function Panel({
                     updatePanel(newPanel);
                   }}
                 >
-                  <option value="sql">SQL</option>
                   <option value="program">Code</option>
                   <option value="http">HTTP Request</option>
-                  <option value="table">Table</option>
+                  <option value="sql">SQL</option>
                   <option value="graph">Graph</option>
                   <option value="file">File</option>
                   <option value="literal">Literal</option>
+                  <option value="table">Table</option>
                 </Select>
               </div>
               {panel.type === 'table' && (
