@@ -5,6 +5,7 @@ import { PYTHON } from './python';
 import { RUBY } from './ruby';
 import { JULIA } from './julia';
 import { R } from './r';
+import { SQL } from './sql';
 
 export const LANGUAGES: Record<string, LanguageInfo> = {
   javascript: JAVASCRIPT,
@@ -12,4 +13,5 @@ export const LANGUAGES: Record<string, LanguageInfo> = {
   ruby: RUBY,
   julia: JULIA,
   r: R,
+  sql: SQL,
 };
