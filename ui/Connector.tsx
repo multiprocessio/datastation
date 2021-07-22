@@ -1,10 +1,9 @@
 import * as React from 'react';
-
 import { ConnectorInfo, SQLConnectorInfo } from '../shared/state';
-import { SQLConnector } from './SQLConnector';
 import { Button } from './component-library/Button';
 import { Confirm } from './component-library/Confirm';
 import { Input } from './component-library/Input';
+import { SQLConnector } from './SQLConnector';
 
 export function Connector({
   connector,

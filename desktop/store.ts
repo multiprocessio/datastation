@@ -1,12 +1,8 @@
 import fs from 'fs';
 import fsPromises from 'fs/promises';
 import path from 'path';
-
-import { BrowserWindow } from 'electron';
-
-import { IDDict, ProjectState } from '../shared/state';
 import log from '../shared/log';
-
+import { IDDict, ProjectState } from '../shared/state';
 import { DISK_ROOT, PROJECT_EXTENSION, SYNC_PERIOD } from './constants';
 
 const buffers: IDDict<{

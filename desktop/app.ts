@@ -1,21 +1,17 @@
-import path from 'path';
-
 import { app, ipcMain } from 'electron';
-
-import '../shared/polyfill';
-import { APP_NAME, VERSION, DEBUG } from '../shared/constants';
+import { APP_NAME, DEBUG, VERSION } from '../shared/constants';
 import log from '../shared/log';
-
+import '../shared/polyfill';
 import { DSPROJ_FLAG } from './constants';
-import { configureLogger } from './log';
-import { storeHandlers } from './store';
-import { registerRPCHandlers, RPCHandler } from './rpc';
-import { evalSQLHandler } from './sql';
-import { evalHTTPHandler } from './http';
 import { evalFileHandler } from './file';
+import { evalHTTPHandler } from './http';
+import { configureLogger } from './log';
 import { programHandlers } from './program';
-import { openProject, openProjectHandler, openWindow } from './project';
+import { openProjectHandler, openWindow } from './project';
+import { registerRPCHandlers, RPCHandler } from './rpc';
 import { loadSettings } from './settings';
+import { evalSQLHandler } from './sql';
+import { storeHandlers } from './store';
 
 configureLogger().then(() => {
   log.info(APP_NAME, VERSION, DEBUG ? 'DEBUG' : '');

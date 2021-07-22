@@ -1,13 +1,7 @@
 import * as React from 'react';
-
 import { MODE } from '../shared/constants';
-import { LANGUAGES } from '../shared/languages';
-import {
-  PanelResult,
-  ProgramPanelInfo,
-  ProgramPanelInfoType,
-} from '../shared/state';
-
+import { LANGUAGES, SupportedLanguages } from '../shared/languages';
+import { PanelResult, ProgramPanelInfo } from '../shared/state';
 import { asyncRPC } from './asyncRPC';
 import { Select } from './component-library/Select';
 
@@ -60,7 +54,7 @@ export function ProgramPanelDetails({
           label="Language"
           value={panel.program.type}
           onChange={(value: string) => {
-            panel.program.type = value as ProgramPanelInfoType;
+            panel.program.type = value as SupportedLanguages;
             if (panel.content === '') {
               panel.content =
                 LANGUAGES[panel.program.type].defaultContent(panelIndex);

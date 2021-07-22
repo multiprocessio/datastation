@@ -1,23 +1,21 @@
 import * as React from 'react';
-
-import {
-  Proxy,
-  ServerInfo,
-  HTTPPanelInfo,
-  HTTPConnectorInfo,
-  HTTPConnectorInfoMethod,
-  ContentTypeInfo,
-} from '../shared/state';
 import { MODE } from '../shared/constants';
 import { request } from '../shared/http';
-
+import {
+  ContentTypeInfo,
+  HTTPConnectorInfo,
+  HTTPConnectorInfoMethod,
+  HTTPPanelInfo,
+  Proxy,
+  ServerInfo,
+} from '../shared/state';
 import { asyncRPC } from './asyncRPC';
-import { ProjectContext } from './ProjectStore';
-import { ContentTypePicker } from './ContentTypePicker';
-import { ServerPicker } from './ServerPicker';
 import { Button } from './component-library/Button';
 import { Input } from './component-library/Input';
 import { Select } from './component-library/Select';
+import { ContentTypePicker } from './ContentTypePicker';
+import { ProjectContext } from './ProjectStore';
+import { ServerPicker } from './ServerPicker';
 
 export async function evalHTTPPanel(
   panel: HTTPPanelInfo,

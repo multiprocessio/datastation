@@ -13,13 +13,14 @@
     "start-ui": "./ui/scripts/watch_and_serve.sh",
     "release-desktop": "python3 ./scripts/build.py ./desktop/scripts/release.build",
     "format": "yarn prettier --write \"**/*.js\" \"**/*.ts\" \"**/*.tsx\" \"**/*.css\" \"**/*.json\"",
-    "test-licenses": "yarn license-checker --production --onlyAllow 'MIT;Apache-2.0;ISC;BSD-3-Clause;MIT*;BSD-2-Clause;Unlicense'",
+    "test-licenses": "yarn license-checker --production --onlyAllow 'AFLv2.1;BSD;MIT;Apache-2.0;ISC;BSD-3-Clause;MIT*;BSD-2-Clause;Unlicense'",
     "test": "yarn jest",
     "test-coverage": "yarn jest --coverage",
     "e2e-test": "node --unhandled-rejections=throw ./e2e/index.js"
   },
   "dependencies": {
     "ace-builds": "^1.4.12",
+    "alasql": "^1.7.3",
     "chart.js": "^3.3.2",
     "date-fns": "^2.22.1",
     "json-stringify-safe": "^5.0.1",
@@ -33,7 +34,8 @@
     "react": "^17.0.2",
     "react-ace": "^9.4.1",
     "react-dom": "^17.0.2",
-    "sql.js": "^1.5.0",
+    "sqlite": "^4.0.23",
+    "sqlite3": "^5.0.2",
     "ssh2-promise": "^1.0.0",
     "ssh2-sftp-client": "^7.0.0",
     "tmp-promise": "^3.0.2",
@@ -59,6 +61,7 @@
     "jest": "^27.0.6",
     "license-checker": "^25.0.1",
     "prettier": "^2.3.0",
+    "prettier-plugin-organize-imports": "^2.3.3",
     "spectron": "^15.0.0",
     "typescript": "^4.3.2"
   }

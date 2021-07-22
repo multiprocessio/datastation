@@ -1,8 +1,6 @@
 import * as React from 'react';
-
-import { LiteralPanelInfo, ContentTypeInfo } from '../shared/state';
+import { ContentTypeInfo, LiteralPanelInfo } from '../shared/state';
 import { parseArrayBuffer } from '../shared/text';
-
 import { ContentTypePicker } from './ContentTypePicker';
 
 export async function evalLiteralPanel(panel: LiteralPanelInfo) {

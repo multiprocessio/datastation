@@ -1,10 +1,10 @@
-import { LanguageInfo } from './types';
-
 import { JAVASCRIPT } from './javascript';
-import { PYTHON } from './python';
-import { RUBY } from './ruby';
 import { JULIA } from './julia';
+import { PYTHON } from './python';
 import { R } from './r';
+import { RUBY } from './ruby';
+import { SQL } from './sql';
+import { LanguageInfo } from './types';
 
 export const LANGUAGES: Record<string, LanguageInfo> = {
   javascript: JAVASCRIPT,
@@ -12,4 +12,7 @@ export const LANGUAGES: Record<string, LanguageInfo> = {
   ruby: RUBY,
   julia: JULIA,
   r: R,
+  sql: SQL,
 };
+
+export type SupportedLanguages = keyof typeof LANGUAGES;

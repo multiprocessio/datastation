@@ -1,5 +1,5 @@
-import * as React from 'react';
 import debounce from 'lodash.debounce';
+import * as React from 'react';
 
 export function useDebouncedLocalState(
   nonLocalValue: string,

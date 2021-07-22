@@ -1,9 +1,7 @@
 import * as React from 'react';
-
 import { ServerInfo } from '../shared/state';
-
-import { Select } from './component-library/Select';
 import { Checkbox } from './component-library/Checkbox';
+import { Select } from './component-library/Select';
 
 export function ServerPicker({
   serverId,

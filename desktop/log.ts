@@ -1,9 +1,7 @@
-import { EOL } from 'os';
 import fs from 'fs/promises';
+import { EOL } from 'os';
 import util from 'util';
-
-import log, { logger } from '../shared/log';
-
+import { logger } from '../shared/log';
 import { LOG_FILE } from './constants';
 
 export async function configureLogger() {

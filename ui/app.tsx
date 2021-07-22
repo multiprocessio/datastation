@@ -1,34 +1,32 @@
 import * as pako from 'pako';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-
-import '../shared/polyfill';
 import {
   APP_NAME,
-  SITE_ROOT,
-  VERSION,
   MODE,
   MODE_FEATURES,
+  SITE_ROOT,
+  VERSION,
 } from '../shared/constants';
+import '../shared/polyfill';
 import {
-  ProjectPage,
-  ProjectState,
-  ServerInfo,
   ConnectorInfo,
   DEFAULT_PROJECT,
+  ProjectPage,
+  ProjectState,
   rawStateToObjects,
+  ServerInfo,
 } from '../shared/state';
-
 import { asyncRPC } from './asyncRPC';
-import { ErrorBoundary } from './ErrorBoundary';
-import { Sidebar } from './Sidebar';
-import { Pages } from './Pages';
-import { Connectors } from './Connectors';
-import { Servers } from './Servers';
-import { Updates } from './Updates';
-import { makeStore, ProjectContext, ProjectStore } from './ProjectStore';
 import { Button } from './component-library/Button';
 import { Input } from './component-library/Input';
+import { Connectors } from './Connectors';
+import { ErrorBoundary } from './ErrorBoundary';
+import { Pages } from './Pages';
+import { makeStore, ProjectContext, ProjectStore } from './ProjectStore';
+import { Servers } from './Servers';
+import { Sidebar } from './Sidebar';
+import { Updates } from './Updates';
 
 // Load brython on startup if in browser app
 window.onload = function () {

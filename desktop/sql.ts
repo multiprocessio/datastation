@@ -1,11 +1,11 @@
-import util from 'util';
-
-import { Client as PostgresClient } from 'pg';
 import mysql from 'mysql2/promise';
-
+import { Client as PostgresClient } from 'pg';
+import * as sqlite from 'sqlite';
+import sqlite3 from 'sqlite3';
+import Client from 'ssh2-sftp-client';
+import { file as makeTmpFile } from 'tmp-promise';
 import { Proxy, SQLConnectorInfo } from '../shared/state';
-
-import { tunnel } from './tunnel';
+import { getSSHConfig, tunnel } from './tunnel';
 
 async function evalPostgreSQL(
   content: string,
@@ -51,10 +51,41 @@ async function evalMySQL(
   }
 }
 
+async function evalSqlite(content: string, info: Proxy<SQLConnectorInfo>) {
+  let sqlitefile = info.sql.database;
+
+  async function run() {
+    const db = await sqlite.open({
+      filename: sqlitefile,
+      driver: sqlite3.Database,
+    });
+    return db.all(content);
+  }
+
+  if (info.server) {
+    const localCopy = await makeTmpFile();
+    const config = await getSSHConfig(info.server);
+
+    const sftp = new Client();
+    await sftp.connect(config);
+
+    try {
+      await sftp.fastGet(sqlitefile, localCopy.path);
+      sqlitefile = localCopy.path;
+      return await run();
+    } finally {
+      localCopy.cleanup();
+      await sftp.end();
+    }
+  }
+
+  return await run();
+}
+
 const DEFAULT_PORT = {
   postgres: 5432,
   mysql: 3306,
-  'in-memory': 0,
+  sqlite: 0,
 };
 
 export const evalSQLHandler = {
@@ -64,6 +95,11 @@ export const evalSQLHandler = {
     content: string,
     info: Proxy<SQLConnectorInfo>
   ) {
+    // Sqlite is file, not network based so handle separately.
+    if (info.sql.type === 'sqlite') {
+      return await evalSqlite(content, info);
+    }
+
     const port = +info.sql.address.split(':')[1] || DEFAULT_PORT[info.sql.type];
     const host = info.sql.address.split(':')[0];
 

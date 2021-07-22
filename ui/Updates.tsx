@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 import { SITE_ROOT, VERSION } from '../shared/constants';
 import { request } from '../shared/http';
 import { ContentTypeInfo } from '../shared/state';
