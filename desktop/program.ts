@@ -1,16 +1,10 @@
-import { EOL } from 'os';
 import { spawn } from 'child_process';
 import fs from 'fs/promises';
-import path from 'path';
-import util from 'util';
-
+import { EOL } from 'os';
 import { file as makeTmpFile } from 'tmp-promise';
-
 import { LANGUAGES } from '../shared/languages';
-import { ProgramPanelInfo, PanelResult } from '../shared/state';
+import { PanelResult, ProgramPanelInfo } from '../shared/state';
 import { parseArrayBuffer } from '../shared/text';
-
-import { DISK_ROOT } from './constants';
 import { SETTINGS } from './settings';
 import { getProjectResultsFile } from './store';
 

@@ -1,11 +1,8 @@
 import * as fs from 'fs/promises';
-
 import * as uuid from 'uuid';
-
-import { mergeDeep } from '../shared/merge';
-import log from '../shared/log';
 import { LANGUAGES, SupportedLanguages } from '../shared/languages';
-
+import log from '../shared/log';
+import { mergeDeep } from '../shared/merge';
 import { ensureFile } from './store';
 
 export class LanguageSettings {

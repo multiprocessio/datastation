@@ -1,19 +1,17 @@
 import * as React from 'react';
-
+import { MODE } from '../shared/constants';
 import {
+  ContentTypeInfo,
+  FilePanelInfo,
   Proxy,
   ServerInfo,
-  FilePanelInfo,
-  ContentTypeInfo,
 } from '../shared/state';
 import { parseArrayBuffer } from '../shared/text';
-import { MODE } from '../shared/constants';
-
-import { ProjectContext } from './ProjectStore';
 import { asyncRPC } from './asyncRPC';
-import { ServerPicker } from './ServerPicker';
-import { ContentTypePicker } from './ContentTypePicker';
 import { FileInput } from './component-library/FileInput';
+import { ContentTypePicker } from './ContentTypePicker';
+import { ProjectContext } from './ProjectStore';
+import { ServerPicker } from './ServerPicker';
 
 export async function evalFilePanel(
   panel: FilePanelInfo,

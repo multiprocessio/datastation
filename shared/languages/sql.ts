@@ -1,9 +1,6 @@
-import { v4 as uuidv4 } from 'uuid';
 import alasql from 'alasql';
-import circularSafeStringify from 'json-stringify-safe';
-
+import { v4 as uuidv4 } from 'uuid';
 import { PanelResult } from '../state';
-import { EOL } from './types';
 
 function exceptionRewriter(msg: string, _: string) {
   return msg;

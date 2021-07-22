@@ -1,5 +1,4 @@
-import { HTTPConnectorInfo } from './state';
-import { parseArrayBuffer, ContentTypeInfoPlusParsers } from './text';
+import { ContentTypeInfoPlusParsers, parseArrayBuffer } from './text';
 
 export type FetchFunction = (
   url: string,

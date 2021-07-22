@@ -1,7 +1,5 @@
 import * as React from 'react';
-
 import { PanelResult } from '../shared/state';
-
 import { Button } from './component-library/Button';
 import { Input } from './component-library/Input';
 import { Select } from './component-library/Select';

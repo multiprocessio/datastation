@@ -2,38 +2,36 @@ import formatDistanceToNow from 'date-fns/formatDistanceToNow';
 import circularSafeStringify from 'json-stringify-safe';
 import * as CSV from 'papaparse';
 import * as React from 'react';
-
 import { MODE_FEATURES } from '../shared/constants';
 import {
-  ServerInfo,
   ConnectorInfo,
-  ProjectPage,
-  PanelInfo,
+  FilePanelInfo,
   GraphPanelInfo,
   HTTPPanelInfo,
-  SQLPanelInfo,
-  ProgramPanelInfo,
-  TablePanelInfo,
   LiteralPanelInfo,
-  FilePanelInfo,
+  PanelInfo,
   PanelResult,
+  ProgramPanelInfo,
+  ProjectPage,
+  ServerInfo,
+  SQLPanelInfo,
+  TablePanelInfo,
 } from '../shared/state';
-
 import { asyncRPC } from './asyncRPC';
-import { ErrorBoundary } from './ErrorBoundary';
-import { GraphPanel, GraphPanelDetails } from './GraphPanel';
-import { evalHTTPPanel, HTTPPanelDetails } from './HTTPPanel';
-import { evalFilePanel, FilePanelDetails } from './FilePanel';
-import { evalProgramPanel, ProgramPanelDetails } from './ProgramPanel';
-import { TablePanel, TablePanelDetails } from './TablePanel';
-import { evalLiteralPanel, LiteralPanelDetails } from './LiteralPanel';
-import { evalSQLPanel, SQLPanelDetails } from './SQLPanel';
 import { Button } from './component-library/Button';
+import { CodeEditor } from './component-library/CodeEditor';
 import { Confirm } from './component-library/Confirm';
 import { Input } from './component-library/Input';
 import { Select } from './component-library/Select';
-import { CodeEditor } from './component-library/CodeEditor';
+import { ErrorBoundary } from './ErrorBoundary';
+import { evalFilePanel, FilePanelDetails } from './FilePanel';
+import { GraphPanel, GraphPanelDetails } from './GraphPanel';
+import { evalHTTPPanel, HTTPPanelDetails } from './HTTPPanel';
+import { evalLiteralPanel, LiteralPanelDetails } from './LiteralPanel';
 import { previewObject } from './preview';
+import { evalProgramPanel, ProgramPanelDetails } from './ProgramPanel';
+import { evalSQLPanel, SQLPanelDetails } from './SQLPanel';
+import { TablePanel, TablePanelDetails } from './TablePanel';
 
 export const PANEL_TYPE_ICON = {
   literal: 'format_quote',

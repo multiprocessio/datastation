@@ -1,8 +1,5 @@
-import { IpcRenderer } from 'electron';
 import * as React from 'react';
-
-import { ProjectState, DEFAULT_PROJECT, PanelResult } from '../shared/state';
-
+import { DEFAULT_PROJECT, ProjectState } from '../shared/state';
 import { asyncRPC } from './asyncRPC';
 
 // This will store X copies of the entire state. Project state

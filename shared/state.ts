@@ -1,9 +1,8 @@
 import * as uuid from 'uuid';
-
-import { mergeDeep } from './merge';
 import { VERSION } from './constants';
 import { SupportedLanguages } from './languages';
 import log from './log';
+import { mergeDeep } from './merge';
 
 export class PanelResult {
   exception?: string;

@@ -1,10 +1,8 @@
 import * as React from 'react';
-
-import { XLSX_MIME_TYPE } from '../shared/text';
 import { ContentTypeInfo } from '../shared/state';
-
-import { Select } from './component-library/Select';
+import { XLSX_MIME_TYPE } from '../shared/text';
 import { Input } from './component-library/Input';
+import { Select } from './component-library/Select';
 
 export function ContentTypePicker({
   value,

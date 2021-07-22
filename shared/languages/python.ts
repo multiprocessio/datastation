@@ -1,5 +1,4 @@
 import circularSafeStringify from 'json-stringify-safe';
-
 import { PanelResult } from '../state';
 import { EOL } from './types';
 

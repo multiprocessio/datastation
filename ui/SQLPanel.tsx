@@ -1,21 +1,19 @@
 import * as React from 'react';
-
+import { DEBUG } from '../shared/constants';
+import log from '../shared/log';
 import {
+  ConnectorInfo,
+  PanelResult,
   Proxy,
   ServerInfo,
-  ConnectorInfo,
   SQLConnectorInfo,
   SQLConnectorInfoType,
   SQLPanelInfo,
-  PanelResult,
 } from '../shared/state';
-import log from '../shared/log';
-import { DEBUG, MODE_FEATURES } from '../shared/constants';
-
 import { asyncRPC } from './asyncRPC';
+import { Select } from './component-library/Select';
 import { ProjectContext } from './ProjectStore';
 import { ServerPicker } from './ServerPicker';
-import { Select } from './component-library/Select';
 
 export async function evalSQLPanel(
   panel: SQLPanelInfo,

@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 import { Button } from './component-library/Button';
 
 export function Sidebar({ children }: { children: React.ReactNode }) {
