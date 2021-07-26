@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { MODE } from '../shared/constants';
+import { previewObject } from '../shared/preview';
 import {
   ContentTypeInfo,
   FilePanelInfo,
@@ -19,17 +20,18 @@ export async function evalFilePanel(
   servers: Array<ServerInfo>
 ) {
   if (MODE === 'browser') {
-    return await parseArrayBuffer(
+    const value = await parseArrayBuffer(
       panel.file.contentTypeInfo,
       panel.file.name,
       panel.file.content
     );
+    return { value, preview: previewObject(value) };
   }
 
   return await asyncRPC<
     Proxy<{ name: string; contentTypeInfo: ContentTypeInfo }>,
     void,
-    Array<object>
+    { value: any; preview: string }
   >('evalFile', null, {
     ...panel.file,
     server: servers.find((s) => s.id === panel.serverId),

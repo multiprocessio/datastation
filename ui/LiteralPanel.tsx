@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { previewObject } from '../shared/preview';
 import { ContentTypeInfo, LiteralPanelInfo } from '../shared/state';
 import { parseArrayBuffer } from '../shared/text';
 import { ContentTypePicker } from './ContentTypePicker';
@@ -6,11 +7,13 @@ import { ContentTypePicker } from './ContentTypePicker';
 export async function evalLiteralPanel(panel: LiteralPanelInfo) {
   const literal = panel.literal;
   const array = new TextEncoder().encode(panel.content);
-  return await parseArrayBuffer(
+  const value = await parseArrayBuffer(
     panel.literal.contentTypeInfo,
     'literal.' + literal.contentTypeInfo.type,
     array
   );
+
+  return { value, preview: previewObject(value) };
 }
 
 export function LiteralPanelDetails({

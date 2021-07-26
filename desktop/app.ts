@@ -2,6 +2,7 @@ import { app, ipcMain } from 'electron';
 import { APP_NAME, DEBUG, VERSION } from '../shared/constants';
 import log from '../shared/log';
 import '../shared/polyfill';
+import { evalColumnsHandler } from './columns';
 import { DSPROJ_FLAG } from './constants';
 import { evalFileHandler } from './file';
 import { evalHTTPHandler } from './http';
@@ -35,6 +36,7 @@ app.whenReady().then(async () => {
 
   registerRPCHandlers(ipcMain, [
     ...storeHandlers,
+    evalColumnsHandler,
     evalSQLHandler,
     evalHTTPHandler,
     ...programHandlers,

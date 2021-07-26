@@ -1,13 +1,58 @@
 import * as React from 'react';
+import { MODE } from '../shared/constants';
+import { previewObject } from '../shared/preview';
 import {
   PanelInfo,
   PanelResult,
   TableColumn,
   TablePanelInfo,
 } from '../shared/state';
+import { asyncRPC } from './asyncRPC';
 import { Button } from './component-library/Button';
 import { FieldPicker } from './FieldPicker';
 import { PanelSourcePicker } from './PanelSourcePicker';
+
+export async function evalColumnPanel(
+  panelSource: number,
+  columns: Array<string>,
+  indexIdMap: Record<number, string>,
+  panelResults: Array<PanelResult>,
+) {
+  if (MODE === 'browser') {
+    const { value } = panelResults[panelSource];
+    if (value && !Array.isArray(value)) {
+      throw new Error(
+        `Expected array input to graph, got (${typeof value}): ` +
+          previewObject(value)
+      );
+    }
+    const valueWithRequestedColumns = (value || []).map((row) => {
+      // If none specified, select all
+      if (!columns.length) {
+        return row;
+      }
+      const cells: Record<string, any> = [];
+      (columns || []).forEach((name) => {
+        cells[name] = row[name];
+      });
+    });
+
+    return {
+      value: valueWithRequestedColumns,
+      preview: previewObject(valueWithRequestedColumns),
+    };
+  }
+
+  return await asyncRPC<
+    { panelSource: number; columns: Array<string>, indexIdMap: Record<number, string> },
+    void,
+    { value: any; preview: string }
+  >('evalColumns', null, {
+    panelSource,
+    columns,
+    indexIdMap,
+  });
+}
 
 export function TablePanelDetails({
   panel,

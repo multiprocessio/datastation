@@ -1,4 +1,5 @@
 import circularSafeStringify from 'json-stringify-safe';
+import { previewObject } from '../preview';
 import { PanelResult } from '../state';
 import { EOL } from './types';
 
@@ -10,22 +11,23 @@ function defaultContent(panelIndex: number) {
   return `previous = DM_getPanel(${panelIndex - 1});\nDM_setPanel(previous);`;
 }
 
-function preamble(outFile: string, resultsFile: string) {
+function preamble(resultsFile: string, panelId: string, indexIdMap: Record<number, string>) {
+  const file = ``;
   return `
 def DM_getPanel(i):
   import json
-  with open(r'${resultsFile}') as f:
-    return json.load(f)[i]
+  with open(r'${resultsFile}'+${JSON.stringify(indexIdMap)}[i]) as f:
+    return json.load(f)
 def DM_setPanel(v):
   import json
-  with open(r'${outFile}', 'w') as f:
+  with open(r'${resultsFile + panelId}', 'w') as f:
     json.dump(v, f)`;
 }
 
 function inMemoryEval(
   prog: string,
   results: Array<PanelResult>
-): Promise<[any, string]> {
+): Promise<{ value: any; preview: string; stdout: string }> {
   const anyWindow = window as any;
 
   // TODO: better deep copy
@@ -39,7 +41,12 @@ function inMemoryEval(
     }
 
     anyWindow.DM_setPanel = (v: any) => {
-      resolve([convertFromPyodideObjectIfNecessary(v), stdout.join('\n')]);
+      const value = convertFromPyodideObjectIfNecessary(v);
+      resolve({
+        value,
+        preview: previewObject(value),
+        stdout: stdout.join('\n'),
+      });
     };
     anyWindow.DM_print = (...n: Array<any>) =>
       stdout.push(

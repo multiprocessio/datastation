@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { MODE } from '../shared/constants';
+import { MODE, RPC } from '../shared/constants';
 import { LANGUAGES, SupportedLanguages } from '../shared/languages';
 import { PanelResult, ProgramPanelInfo } from '../shared/state';
 import { asyncRPC } from './asyncRPC';
@@ -7,16 +7,20 @@ import { Select } from './component-library/Select';
 
 export function evalProgramPanel(
   panel: ProgramPanelInfo,
-  panelResults: Array<PanelResult>
-): Promise<[any, string]> {
+  panelResults: Array<PanelResult>,
+  indexIdMap: Record<number, string>,
+): Promise<{ value: any; preview: string; stdout: string }> {
   const program = panel.program;
 
   if (MODE === 'desktop') {
-    return asyncRPC<ProgramPanelInfo, null, [Array<object>, string]>(
-      'evalProgram',
+    return asyncRPC<
+      ProgramPanelInfo & { indexIdMap: Record<number, string> },
       null,
-      panel
-    );
+      { value: any; preview: string; stdout: string }
+    >(RPC.EVAL_PROGRAM, null, {
+      ...panel,
+      indexIdMap,
+    });
   }
 
   const language = LANGUAGES[program.type];

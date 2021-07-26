@@ -5,11 +5,11 @@ export const EOL = /\r?\n/;
 export interface LanguageInfo {
   name: string;
   defaultContent: (panelIndex: number) => string;
-  preamble: (outFile: string, resultsFile: string) => string;
+  preamble: (resultsFile: string, panelId: string, indexIdMap: Record<number,string>) => string;
   defaultPath: string;
   exceptionRewriter: (msg: string, programPath: string) => string;
   inMemoryEval?: (
     prog: string,
     results: Array<PanelResult>
-  ) => Promise<[any, string]>;
+  ) => Promise<{ stdout: string; preview: string; value: any }>;
 }

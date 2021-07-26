@@ -5,6 +5,8 @@ import { file as makeTmpFile } from 'tmp-promise';
 import { LANGUAGES } from '../shared/languages';
 import { PanelResult, ProgramPanelInfo } from '../shared/state';
 import { parseArrayBuffer } from '../shared/text';
+import {previewObject } from '../shared/preview';
+import {RPC} from '../shared/constants';
 import { SETTINGS } from './settings';
 import { getProjectResultsFile } from './store';
 
@@ -19,24 +21,20 @@ function killAllByPanelId(panelId: string) {
 
 export const programHandlers = [
   {
-    resource: 'evalProgram',
+    resource: RPC.EVAL_PROGRAM,
     handler: async function (
       projectId: string,
       _: string,
-      ppi: ProgramPanelInfo
+      ppi: ProgramPanelInfo,
+      indexIdMap: Record<number, string>,
     ) {
       const programTmp = await makeTmpFile();
-      const outputTmp = await makeTmpFile();
       const language = LANGUAGES[ppi.program.type];
 
       const projectResultsFile = getProjectResultsFile(projectId);
 
       if (!language.defaultPath) {
-        const resultsRaw = (await fs.readFile(projectResultsFile)).toString();
-        const results: Array<PanelResult> = JSON.parse(resultsRaw).map(
-          (value: any) => ({ value })
-        );
-        return language.inMemoryEval(ppi.content, results);
+        return language.inMemoryEval(ppi.content, projectResultsFile, indexIdMap);
       }
 
       const programPathOrName =
@@ -45,7 +43,7 @@ export const programHandlers = [
       let out = '';
       let pid = 0;
       try {
-        const preamble = language.preamble(outputTmp.path, projectResultsFile);
+        const preamble = language.preamble(projectResultsFile, panelIndex, indexIdMap);
         await fs.writeFile(programTmp.path, [preamble, ppi.content].join(EOL));
         try {
           const child = spawn(programPathOrName, [programTmp.path]);
@@ -89,11 +87,11 @@ export const programHandlers = [
             throw Error(stderr);
           }
 
-          const body = await fs.readFile(outputTmp.path);
-          return [
-            await parseArrayBuffer({ type: 'application/json' }, '', body),
-            out,
-          ];
+          return {
+            value: '',
+            preview: objectPreview(value)
+            stdout: out,
+          }
         } catch (e) {
           e.message = language.exceptionRewriter(e.message, programTmp.path);
           e.stdout = out;
@@ -104,12 +102,11 @@ export const programHandlers = [
           runningProcesses[ppi.id].delete(pid);
         }
         programTmp.cleanup();
-        outputTmp.cleanup();
       }
     },
   },
   {
-    resource: 'killProcess',
+    resource: RPC.KILL_PROCESS,
     handler: async function (_: string, _1: string, ppi: ProgramPanelInfo) {
       killAllByPanelId(ppi.id);
     },

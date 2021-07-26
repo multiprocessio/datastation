@@ -1,4 +1,5 @@
 import circularSafeStringify from 'json-stringify-safe';
+import { previewObject } from '../preview';
 import { PanelResult } from '../state';
 import { EOL } from './types';
 
@@ -20,22 +21,22 @@ function defaultContent(panelIndex: number) {
   });\nDM_setPanel(previous);`;
 }
 
-function preamble(outFile: string, resultsFile: string) {
+function preamble(resultsFile: string, panelId: string; indexIdMap: Record<number, string>) {
   return `
 function DM_getPanel(i) {
   const fs = require('fs');
-  return JSON.parse(fs.readFileSync('${resultsFile}'))[i];
+  return JSON.parse(fs.readFileSync('${resultsFile}'+${JSON.stringify(indexIdMap)}[i]));
 }
 function DM_setPanel(v) {
   const fs = require('fs');
-  fs.writeFileSync('${outFile}', JSON.stringify(v));
+  fs.writeFileSync('${resultsFile + panelId}', JSON.stringify(v));
 }`;
 }
 
 function inMemoryEval(
   prog: string,
   results: Array<PanelResult>
-): Promise<[any, string]> {
+): Promise<{ value: any; preview: string; stdout: string }> {
   const anyWindow = window as any;
   // TODO: better deep copy
   anyWindow.DM_getPanel = (panelId: number) =>
@@ -45,8 +46,12 @@ function inMemoryEval(
 
   // TODO: sandbox
   return new Promise((resolve, reject) => {
-    anyWindow.DM_setPanel = (v: any) => {
-      resolve([v, stdout.join('\n')]);
+    anyWindow.DM_setPanel = (value: any) => {
+      resolve({
+        value,
+        preview: previewObject(value),
+        stdout: stdout.join('\n'),
+      });
     };
     const oldConsoleLog = console.log;
     console.log = (...n: Array<any>) =>

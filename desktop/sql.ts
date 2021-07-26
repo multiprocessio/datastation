@@ -91,10 +91,16 @@ const DEFAULT_PORT = {
 export const evalSQLHandler = {
   resource: 'evalSQL',
   handler: async function (
-    _: string,
+    projectId: string,
     content: string,
     info: Proxy<SQLConnectorInfo>
   ) {
+    // TODO: need to handle DM_getPanel here
+    // TODO:!!!
+    // TODO:!!!
+
+    const projectResultsFile = getProjectResultsFile(projectId);
+
     // Sqlite is file, not network based so handle separately.
     if (info.sql.type === 'sqlite') {
       return await evalSqlite(content, info);

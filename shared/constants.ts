@@ -22,6 +22,11 @@ export const MODE_FEATURES = {
   killProcess: MODE !== 'browser',
 };
 
+export const RPC = {
+  KILL_PROCESS: 'killProcess',
+  EVAL_PROGRAM: 'evalProgram',
+}
+
 export const RPC_ASYNC_REQUEST = 'rpcAsyncRequest';
 export const RPC_ASYNC_RESPONSE = 'rpcAsyncResponse';
 

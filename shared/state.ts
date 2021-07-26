@@ -7,6 +7,7 @@ import { mergeDeep } from './merge';
 export class PanelResult {
   exception?: string;
   value?: Array<any>;
+  preview: string;
   lastRun: Date;
   loading: boolean;
   stdout: string;

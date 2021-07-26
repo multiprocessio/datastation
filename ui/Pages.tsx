@@ -99,9 +99,18 @@ export function Pages({
     }
 
     try {
-      const [r, stdout] = await evalPanel(
+      const indexIdMap: Record<number, string> = page.panels.reduce((agg, { id }, i) => ({
+        ...agg,
+        [i]: id
+      }), {});
+      const {
+        value,
+        preview,
+        stdout,
+      } = await evalPanel(
         page,
         panelIndex,
+        indexIdMap,
         panelResults,
         connectors,
         servers
@@ -110,7 +119,8 @@ export function Pages({
         panelIndex,
         {
           lastRun: new Date(),
-          value: r,
+          value,
+          preview,
           stdout,
           loading: false,
         },
@@ -124,6 +134,7 @@ export function Pages({
           lastRun: new Date(),
           exception: e.stack || e.message,
           stdout: e.stdout,
+          preview: '',
         },
         true
       );
