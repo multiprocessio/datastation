@@ -1,3 +1,5 @@
+import { preview } from 'preview';
+
 // SOURCE: https://stackoverflow.com/a/34749873/1507139
 function isObject(item: any) {
   return item && typeof item === 'object' && !Array.isArray(item);
