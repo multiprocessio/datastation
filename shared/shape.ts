@@ -97,7 +97,7 @@ function getNRandomUniqueElements(arraySize: number, maxSampleSize: number) {
 
   const unique = [];
   while (unique.length < maxSampleSize) {
-    const random = Math.floor(Math.random() * arraySize) + 1;
+    const random = Math.floor(Math.random() * (arraySize - 1)) + 1;
     if (unique.indexOf(random) === -1) {
       unique.push(random);
     }
