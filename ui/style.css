@@ -381,6 +381,11 @@ header > div {
   height: 100%;
 }
 
+.panel-preview-results {
+  margin: 5px;
+  font-size: 0.9rem;
+}
+
 .panel-out .button:disabled {
   background: transparent;
   color: white;
