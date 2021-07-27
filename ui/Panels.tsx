@@ -2,7 +2,7 @@ import * as React from 'react';
 import {
   LiteralPanelInfo,
   PanelInfo,
-  PanelResult,
+  PanelResultMeta,
   ProjectPage,
 } from '../shared/state';
 import { Button } from './component-library/Button';
@@ -16,7 +16,7 @@ export function Panels({
 }: {
   page: ProjectPage;
   updatePage: (page: ProjectPage) => void;
-  panelResults: Array<PanelResult>;
+  panelResults: Array<PanelResultMeta>;
   reevalPanel: (panelIndex: number, reset?: boolean) => void;
 }) {
   function movePanel(from: number, to: number) {

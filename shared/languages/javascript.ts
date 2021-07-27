@@ -1,4 +1,5 @@
 import circularSafeStringify from 'json-stringify-safe';
+import { preview } from 'preview';
 import { PanelResult } from '../state';
 import { EOL } from './types';
 
@@ -6,7 +7,7 @@ function exceptionRewriter(msg: string, programPath: string) {
   const matcher = RegExp(`${programPath}:([1-9]*)`.replaceAll('/', '\\/'), 'g');
 
   return msg.replace(matcher, function (_: string, line: string) {
-    return `${programPath}:${+line - preamble('', '').split(EOL).length}`;
+    return `${programPath}:${+line - preamble('', '', []).split(EOL).length}`;
   });
 }
 
@@ -20,22 +21,36 @@ function defaultContent(panelIndex: number) {
   });\nDM_setPanel(previous);`;
 }
 
-function preamble(outFile: string, resultsFile: string) {
+function preamble(
+  resultsFile: string,
+  panelId: string,
+  indexIdMap: Array<string>
+) {
   return `
 function DM_getPanel(i) {
   const fs = require('fs');
-  return JSON.parse(fs.readFileSync('${resultsFile}'))[i];
+  return JSON.parse(fs.readFileSync('${resultsFile}'+${JSON.stringify(
+    indexIdMap
+  )}[i]));
 }
 function DM_setPanel(v) {
   const fs = require('fs');
-  fs.writeFileSync('${outFile}', JSON.stringify(v));
+  fs.writeFileSync('${resultsFile + panelId}', JSON.stringify(v));
 }`;
 }
 
 function inMemoryEval(
   prog: string,
-  results: Array<PanelResult>
-): Promise<[any, string]> {
+  results:
+    | Array<PanelResult>
+    | { indexIdMap: Array<string>; resultsFile: string }
+): Promise<{ value: any; preview: string; stdout: string }> {
+  if (!Array.isArray(results)) {
+    throw new Error(
+      'Bad calling convention for in-memory panel. Expected full results object.'
+    );
+  }
+
   const anyWindow = window as any;
   // TODO: better deep copy
   anyWindow.DM_getPanel = (panelId: number) =>
@@ -45,8 +60,12 @@ function inMemoryEval(
 
   // TODO: sandbox
   return new Promise((resolve, reject) => {
-    anyWindow.DM_setPanel = (v: any) => {
-      resolve([v, stdout.join('\n')]);
+    anyWindow.DM_setPanel = (value: any) => {
+      resolve({
+        value,
+        preview: preview(value),
+        stdout: stdout.join('\n'),
+      });
     };
     const oldConsoleLog = console.log;
     console.log = (...n: Array<any>) =>

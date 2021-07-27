@@ -1,28 +1,22 @@
 import fs from 'fs/promises';
 import Client from 'ssh2-sftp-client';
-import { Proxy } from '../shared/state';
-import { parseArrayBuffer } from '../shared/text';
+import { FilePanelInfo, Proxy } from '../../shared/state';
+import { parseArrayBuffer } from '../../shared/text';
+import { rpcEvalHandler } from './eval';
 import { additionalParsers } from './http';
 import { getSSHConfig, resolvePath } from './tunnel';
 
-export const evalFileHandler = {
+export const evalFileHandler = rpcEvalHandler<FilePanelInfo, void>({
   resource: 'evalFile',
   handler: async function (
     _: string,
     _1: string,
-    {
-      contentTypeInfo,
-      name,
-      server,
-    }: Proxy<{
-      name: string;
-      contentTypeInfo: { type: string; customLineRegexp: string };
-    }>
+    { file: { contentTypeInfo, name }, id, server }: Proxy<FilePanelInfo, void>
   ) {
     const typeInfo = { ...contentTypeInfo, additionalParsers };
     if (!server) {
       const body = await fs.readFile(resolvePath(name));
-      return parseArrayBuffer(typeInfo, name, body);
+      return await parseArrayBuffer(typeInfo, name, body);
     }
 
     const config = await getSSHConfig(server);
@@ -30,10 +24,10 @@ export const evalFileHandler = {
     const sftp = new Client();
     await sftp.connect(config);
     try {
-      let body = (await sftp.get(name)) as ArrayBuffer;
+      const body = (await sftp.get(name)) as ArrayBuffer;
       return await parseArrayBuffer(typeInfo, name, body);
     } finally {
       await sftp.end();
     }
   },
-};
+});

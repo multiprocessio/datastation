@@ -34,7 +34,9 @@ export function ServerPicker({
         <div className="form-row">
           <Select value={serverId} onChange={onChange}>
             {servers.map((s) => (
-              <option value={s.id}>{s.name}</option>
+              <option key={s.id} value={s.id}>
+                {s.name}
+              </option>
             ))}
           </Select>
         </div>

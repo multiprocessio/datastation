@@ -67,19 +67,6 @@ export const storeHandlers = [
       return writeFileBuffered(fileName, JSON.stringify(newState));
     },
   },
-  {
-    resource: 'storeResults',
-    handler: async function (projectId: string, _: string, results: any) {
-      if (!results) {
-        return;
-      }
-      const resultsFile = getProjectResultsFile(projectId);
-      const fileName = await ensureFile(resultsFile);
-      // Don't use buffered write
-      await fsPromises.writeFile(fileName, JSON.stringify(results));
-      log.info('Results synced');
-    },
-  },
 ];
 
 export function ensureProjectFile(projectId: string) {

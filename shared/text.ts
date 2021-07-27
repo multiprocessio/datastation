@@ -84,10 +84,10 @@ export async function parseArrayBuffer(
   { type, additionalParsers, customLineRegexp }: ContentTypeInfoPlusParsers,
   fileName: string,
   body: ArrayBuffer
-) {
+): Promise<{ value: any; contentType: string }> {
   // I'm not sure body is actually always an arraybuffer.
   if (!body || (body as any).length === 0 || body.byteLength === 0) {
-    return null;
+    return { value: null, contentType: 'unknown' };
   }
 
   const bodyAsString = () => new TextDecoder('utf-8').decode(body);
@@ -115,28 +115,47 @@ export async function parseArrayBuffer(
   );
 
   if (additionalParsers && additionalParsers[realType]) {
-    return await additionalParsers[realType](body);
+    const value = await additionalParsers[realType](body);
+    return { value, contentType: realType };
   }
 
   switch (realType) {
     case 'text/regexplines':
-      return parseWithRegex(bodyAsString(), new RegExp(customLineRegexp));
+      return {
+        value: parseWithRegex(bodyAsString(), new RegExp(customLineRegexp)),
+        contentType: realType,
+      };
     case 'text/syslogrfc3164':
-      return parseWithRegex(bodyAsString(), SYSLOG_RFC3164_RE);
+      return {
+        value: parseWithRegex(bodyAsString(), SYSLOG_RFC3164_RE),
+        contentType: realType,
+      };
     case 'text/syslogrfc5424':
-      return parseWithRegex(bodyAsString(), SYSLOG_RFC5424_RE);
+      return {
+        value: parseWithRegex(bodyAsString(), SYSLOG_RFC5424_RE),
+        contentType: realType,
+      };
     case 'text/apache2error':
-      return parseWithRegex(bodyAsString(), APACHE2_ERROR_RE);
+      return {
+        value: parseWithRegex(bodyAsString(), APACHE2_ERROR_RE),
+        contentType: realType,
+      };
     case 'text/apache2access':
-      return parseWithRegex(bodyAsString(), APACHE2_ACCESS_RE);
+      return {
+        value: parseWithRegex(bodyAsString(), APACHE2_ACCESS_RE),
+        contentType: realType,
+      };
     case 'text/nginxaccess':
-      return parseWithRegex(bodyAsString(), NGINX_ACCESS_RE);
+      return {
+        value: parseWithRegex(bodyAsString(), NGINX_ACCESS_RE),
+        contentType: realType,
+      };
     case 'text/csv':
-      return parseCSV(bodyAsString());
+      return { value: parseCSV(bodyAsString()), contentType: realType };
     case 'application/json':
-      return JSON.parse(bodyAsString());
-    case 'application/jsonlines':
-      return bodyAsString()
+      return { value: JSON.parse(bodyAsString()), contentType: realType };
+    case 'application/jsonlines': {
+      const value = bodyAsString()
         .split('\n')
         .filter(Boolean)
         .map((l) => {
@@ -146,6 +165,8 @@ export async function parseArrayBuffer(
             log.error(e, l);
           }
         });
+      return { value, contentType: realType };
+    }
     case 'application/vnd.ms-excel':
     case XLSX_MIME_TYPE: {
       const file = XLSX.read(body, { type: 'array' });
@@ -158,12 +179,37 @@ export async function parseArrayBuffer(
 
       // Make flat when there's only one sheet
       if (file.SheetNames.length === 1) {
-        return sheets[file.SheetNames[0]];
+        return { value: sheets[file.SheetNames[0]], contentType: realType };
       }
 
-      return sheets;
+      return { value: sheets, contentType: realType };
     }
   }
 
-  return bodyAsString();
+  return { value: bodyAsString(), contentType: realType };
+}
+
+export function humanSize(n: number) {
+  if (n < 1000) {
+    return `${n} bytes`;
+  }
+
+  const kb = n / 1000;
+  if (kb < 1000) {
+    return `${kb.toFixed(2)} KB`;
+  }
+
+  const mb = kb / 1000;
+  if (mb < 1000) {
+    return `${mb.toFixed(2)} MB`;
+  }
+
+  const gb = mb / 1000;
+  if (gb < 1000) {
+    return `${mb.toFixed(2)} GB`;
+  }
+
+  // This is kinda aspirational, huh.
+  const tb = gb / 1000;
+  return `${tb.toFixed(2)} TB`;
 }

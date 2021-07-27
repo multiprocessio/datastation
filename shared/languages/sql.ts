@@ -1,4 +1,5 @@
 import alasql from 'alasql';
+import { preview } from 'preview';
 import { v4 as uuidv4 } from 'uuid';
 import { PanelResult } from '../state';
 
@@ -14,24 +15,40 @@ function defaultContent(panelIndex: number) {
   return `SELECT * FROM DM_getPanel(${panelIndex - 1})`;
 }
 
-function preamble(outFile: string, resultsFile: string) {
+function preamble(
+  resultsFile: string,
+  panelId: string,
+  indexIdMap: Array<string>
+) {
   return '';
 }
 
 async function inMemoryEval(
   prog: string,
-  results: Array<PanelResult>
-): Promise<[any, string]> {
+  resultsOrDiskDetails:
+    | Array<PanelResult>
+    | { indexIdMap: Array<string>; resultsFile: string }
+): Promise<{ value: any; preview: string; stdout: string }> {
+  // Functions like this can only be declared globally. So we make sure DM_getPanel gets renamed to something unique
   const thisDM_getPanel = 'DM_getPanel_' + uuidv4().replaceAll('-', '_');
   const fromAddons = (alasql as any).from;
-  fromAddons[thisDM_getPanel] = function (
+  fromAddons[thisDM_getPanel] = async function (
     n: number,
     opts: any,
     cb: any,
     idx: any,
     query: any
   ) {
-    let res = results[n].value;
+    let res: any;
+    if (Array.isArray(resultsOrDiskDetails)) {
+      res = resultsOrDiskDetails[n].value;
+    } else {
+      const fs = require('fs/promises');
+      const f = await fs.readFile(
+        resultsOrDiskDetails.resultsFile + resultsOrDiskDetails.indexIdMap[n]
+      );
+      res = JSON.parse(f.toString());
+    }
     if (cb) {
       res = cb(res, idx, query);
     }
@@ -42,8 +59,12 @@ async function inMemoryEval(
 
   try {
     // It is only asynchronous if you run "multiple" queries.
-    const [res] = await alasql([patchedProgram]);
-    return [res, ''];
+    const [value] = await alasql([patchedProgram]);
+    return {
+      value,
+      preview: preview(value),
+      stdout: '',
+    };
   } finally {
     delete fromAddons[thisDM_getPanel];
     delete fromAddons[thisDM_getPanel.toUpperCase()];

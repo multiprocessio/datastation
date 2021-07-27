@@ -2,7 +2,8 @@ import formatDistanceToNow from 'date-fns/formatDistanceToNow';
 import circularSafeStringify from 'json-stringify-safe';
 import * as CSV from 'papaparse';
 import * as React from 'react';
-import { MODE_FEATURES } from '../shared/constants';
+import { MODE, MODE_FEATURES, RPC } from '../shared/constants';
+import { toString } from '../shared/shape';
 import {
   ConnectorInfo,
   FilePanelInfo,
@@ -11,12 +12,14 @@ import {
   LiteralPanelInfo,
   PanelInfo,
   PanelResult,
+  PanelResultMeta,
   ProgramPanelInfo,
   ProjectPage,
   ServerInfo,
   SQLPanelInfo,
   TablePanelInfo,
 } from '../shared/state';
+import { humanSize } from '../shared/text';
 import { asyncRPC } from './asyncRPC';
 import { Button } from './component-library/Button';
 import { CodeEditor } from './component-library/CodeEditor';
@@ -28,10 +31,9 @@ import { evalFilePanel, FilePanelDetails } from './FilePanel';
 import { GraphPanel, GraphPanelDetails } from './GraphPanel';
 import { evalHTTPPanel, HTTPPanelDetails } from './HTTPPanel';
 import { evalLiteralPanel, LiteralPanelDetails } from './LiteralPanel';
-import { previewObject } from './preview';
 import { evalProgramPanel, ProgramPanelDetails } from './ProgramPanel';
 import { evalSQLPanel, SQLPanelDetails } from './SQLPanel';
-import { TablePanel, TablePanelDetails } from './TablePanel';
+import { evalColumnPanel, TablePanel, TablePanelDetails } from './TablePanel';
 
 export const PANEL_TYPE_ICON = {
   literal: 'format_quote',
@@ -46,40 +48,54 @@ export const PANEL_TYPE_ICON = {
 export async function evalPanel(
   page: ProjectPage,
   panelId: number,
+  indexIdMap: Array<string>,
   panelResults: Array<PanelResult>,
   connectors: Array<ConnectorInfo>,
   servers: Array<ServerInfo>
-): Promise<[any, string]> {
+): Promise<PanelResult> {
   const panel = page.panels[panelId];
   switch (panel.type) {
     case 'program':
-      return await evalProgramPanel(panel as ProgramPanelInfo, panelResults);
-    case 'literal':
-      return [await evalLiteralPanel(panel as LiteralPanelInfo), ''];
-    case 'sql':
-      return [
-        await evalSQLPanel(
-          panel as SQLPanelInfo,
-          panelResults,
-          connectors,
-          servers
-        ),
-        '',
-      ];
-    case 'graph':
-      return [
-        (panelResults[(panel as GraphPanelInfo).graph.panelSource] || {}).value,
-        '',
-      ];
-    case 'table':
-      return [
-        (panelResults[(panel as TablePanelInfo).table.panelSource] || {}).value,
-        '',
-      ];
-    case 'http':
-      return [await evalHTTPPanel(panel as HTTPPanelInfo, null, servers), ''];
-    case 'file':
-      return [await evalFilePanel(panel as FilePanelInfo, null, servers), ''];
+      return await evalProgramPanel(
+        panel as ProgramPanelInfo,
+        panelResults,
+        indexIdMap
+      );
+    case 'literal': {
+      return await evalLiteralPanel(panel as LiteralPanelInfo);
+    }
+    case 'sql': {
+      return await evalSQLPanel(
+        panel as SQLPanelInfo,
+        indexIdMap,
+        connectors,
+        servers
+      );
+    }
+    case 'graph': {
+      const { graph } = panel as GraphPanelInfo;
+      return await evalColumnPanel(
+        graph.panelSource,
+        [graph.x, graph.y.field],
+        indexIdMap,
+        panelResults
+      );
+    }
+    case 'table': {
+      const { table } = panel as TablePanelInfo;
+      return await evalColumnPanel(
+        table.panelSource,
+        table.columns.map((c) => c.field),
+        indexIdMap,
+        panelResults
+      );
+    }
+    case 'http': {
+      return await evalHTTPPanel(panel as HTTPPanelInfo, null, servers);
+    }
+    case 'file': {
+      return await evalFilePanel(panel as FilePanelInfo, null, servers);
+    }
   }
 }
 
@@ -129,6 +145,67 @@ function download(filename: string, value: any, isChart = false) {
   document.body.removeChild(element);
 }
 
+async function fetchAndDownloadResults(
+  panel: PanelInfo,
+  panelRef: React.RefObject<HTMLCanvasElement>,
+  results: PanelResult
+) {
+  let value = results.value;
+  if (MODE !== 'browser') {
+    const res = await asyncRPC<{ id: string }, void, { value: any }>(
+      RPC.FETCH_RESULTS,
+      null,
+      { id: panel.id }
+    );
+    value = res.value;
+  }
+
+  download(
+    panel.name,
+    panel.type === 'graph' ? panelRef.current.querySelector('canvas') : value,
+    panel.type === 'graph'
+  );
+}
+
+function PreviewResults({
+  panelOut,
+  results,
+}: {
+  panelOut: 'preview' | 'stdout' | 'shape' | 'metadata';
+  results: PanelResultMeta;
+}) {
+  if (!results.lastRun) {
+    return <React.Fragment>Panel not yet run.</React.Fragment>;
+  }
+
+  if (panelOut === 'metadata') {
+    return (
+      <div>
+        <div>Size: {humanSize(results.size)}</div>
+        <div>Inferred Content-Type: {results.contentType}</div>
+      </div>
+    );
+  }
+
+  if (!results[panelOut]) {
+    return <React.Fragment>Nothing to show.</React.Fragment>;
+  }
+
+  if (panelOut === 'shape') {
+    return (
+      <pre>
+        <code>{toString(results.shape)}</code>
+      </pre>
+    );
+  }
+
+  return (
+    <pre>
+      <code>{results[panelOut]}</code>
+    </pre>
+  );
+}
+
 export function Panel({
   panel,
   updatePanel,
@@ -141,7 +218,7 @@ export function Panel({
 }: {
   panel: PanelInfo;
   updatePanel: (d: PanelInfo) => void;
-  panelResults: Array<PanelResult>;
+  panelResults: Array<PanelResultMeta>;
   reevalPanel: (i: number) => void;
   panelIndex: number;
   removePanel: (i: number) => void;
@@ -171,29 +248,10 @@ export function Panel({
     body = <span />;
   }
 
-  const [panelOut, setPanelOut] = React.useState('preview');
-  const [preview, setPreview] = React.useState('');
-  const results: PanelResult = panelResults[panelIndex] || {
-    value: null,
-    exception: null,
-    lastRun: null,
-    stdout: '',
-    loading: false,
-  };
-  React.useEffect(() => {
-    if (!results.value) {
-      setPreview('');
-      return;
-    }
-
-    if (previewableTypes.includes(panel.type)) {
-      if (results && !results.exception) {
-        const prev = previewObject(results.value);
-        setPreview(prev);
-      }
-    }
-  }, [results.value, results.exception]);
-
+  const [panelOut, setPanelOut] = React.useState<
+    'preview' | 'stdout' | 'shape' | 'metadata'
+  >('preview');
+  const results = panelResults[panelIndex] || new PanelResultMeta();
   const language =
     panel.type === 'program' ? (panel as ProgramPanelInfo).program.type : 'sql';
 
@@ -219,7 +277,7 @@ export function Panel({
     results.loading && panel.type === 'program' && MODE_FEATURES.killProcess;
   function killProcess() {
     return asyncRPC<ProgramPanelInfo, void, void>(
-      'killProcess',
+      RPC.KILL_PROCESS,
       null,
       panel as ProgramPanelInfo
     );
@@ -316,20 +374,14 @@ export function Panel({
               </span>
               <span
                 title={
-                  !results.value ? 'Nothing to Download' : 'Download Results'
+                  !results.lastRun ? 'Panel not yet run' : 'Download Results'
                 }
               >
                 <Button
                   icon
-                  disabled={!results.value}
+                  disabled={!results.lastRun}
                   onClick={() =>
-                    download(
-                      panel.name,
-                      panel.type === 'graph'
-                        ? panelRef.current.querySelector('canvas')
-                        : results.value,
-                      panel.type === 'graph'
-                    )
+                    fetchAndDownloadResults(panel, panelRef, results)
                   }
                 >
                   file_download
@@ -540,35 +592,36 @@ export function Panel({
                 <div className="panel-out">
                   <div className="panel-out-header">
                     <Button
-                      disabled={panel.type !== 'program'}
                       className={panelOut === 'preview' ? 'selected' : ''}
                       onClick={() => setPanelOut('preview')}
                     >
                       Preview
                     </Button>
+                    <Button
+                      className={panelOut === 'shape' ? 'selected' : ''}
+                      onClick={() => setPanelOut('shape')}
+                    >
+                      Inferred Schema
+                    </Button>
+                    <Button
+                      className={panelOut === 'metadata' ? 'selected' : ''}
+                      onClick={() => setPanelOut('metadata')}
+                    >
+                      Metadata
+                    </Button>
                     {panel.type === 'program' && (
                       <Button
-                        className={panelOut === 'output' ? 'selected' : ''}
-                        onClick={() => setPanelOut('output')}
+                        className={panelOut === 'stdout' ? 'selected' : ''}
+                        onClick={() => setPanelOut('stdout')}
                       >
                         Stdout
                       </Button>
                     )}
                   </div>
                   <div className="panel-preview">
-                    <pre className="panel-preview-results">
-                      {!(panelOut === 'preview' ? preview : results.stdout) ? (
-                        results.lastRun ? (
-                          'Nothing to show.'
-                        ) : (
-                          'Panel not yet run.'
-                        )
-                      ) : (
-                        <code>
-                          {panelOut === 'preview' ? preview : results.stdout}
-                        </code>
-                      )}
-                    </pre>
+                    <div className="panel-preview-results">
+                      <PreviewResults results={results} panelOut={panelOut} />
+                    </div>
                   </div>
                 </div>
               )}
