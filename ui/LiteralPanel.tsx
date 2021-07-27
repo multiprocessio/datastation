@@ -17,7 +17,6 @@ export async function evalLiteralPanel(panel: LiteralPanelInfo) {
   );
 
   if (MODE === 'desktop') {
-    console.log('here', value);
     await asyncRPC<{ id: string; value: any }, void, void>(
       RPC.STORE_LITERAL,
       null,

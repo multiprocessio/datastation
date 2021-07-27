@@ -356,12 +356,12 @@ export function Panel({
               </span>
               <span
                 title={
-                  !results.value ? 'Nothing to Download' : 'Download Results'
+                  !results.lastRun ? 'Panel not yet run' : 'Download Results'
                 }
               >
                 <Button
                   icon
-                  disabled={!results.value}
+		  disabled={!results.lastRun}
                   onClick={() =>
                     fetchAndDownloadResults(panel, panelRef, results)
                   }
