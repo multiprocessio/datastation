@@ -1,8 +1,9 @@
+import { shape } from '';
 import * as uuid from 'uuid';
 import { VERSION } from './constants';
 import { SupportedLanguages } from './languages';
 import log from './log';
-import { mergeDeep } from './merge';
+import { mergeDeep } from './object';
 
 export class PanelResult {
   exception?: string;
@@ -11,6 +12,7 @@ export class PanelResult {
   lastRun: Date;
   loading: boolean;
   stdout: string;
+  shape: Shape;
 
   constructor() {
     this.lastRun = null;

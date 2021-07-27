@@ -5,7 +5,7 @@ import sqlite3 from 'sqlite3';
 import Client from 'ssh2-sftp-client';
 import { file as makeTmpFile } from 'tmp-promise';
 import { Proxy, SQLConnectorInfo } from '../shared/state';
-import { getProjectResultsFile } from './store';
+import { rpcEvalHandler } from './eval';
 import { getSSHConfig, tunnel } from './tunnel';
 
 async function evalPostgreSQL(
@@ -89,18 +89,16 @@ const DEFAULT_PORT = {
   sqlite: 0,
 };
 
-export const evalSQLHandler = {
+export const evalSQLHandler = rpcEvalHandler({
   resource: 'evalSQL',
   handler: async function (
     projectId: string,
     content: string,
-    info: Proxy<SQLConnectorInfo>
+    info: Proxy<SQLPanelInfo>
   ) {
     // TODO: need to handle DM_getPanel here
     // TODO:!!!
     // TODO:!!!
-
-    const projectResultsFile = getProjectResultsFile(projectId);
 
     // Sqlite is file, not network based so handle separately.
     if (info.sql.type === 'sqlite') {
@@ -127,4 +125,4 @@ export const evalSQLHandler = {
       }
     );
   },
-};
+});

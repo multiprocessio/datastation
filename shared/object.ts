@@ -17,3 +17,11 @@ export function mergeDeep(target: any, source: any) {
 
   return target;
 }
+
+export function deepEquals(a: any, b: any) {
+  return JSON.stringify(a) === JSON.stringify(b);
+}
+
+export function deepClone(a: any) {
+  return JSON.parse(JSON.stringify(a));
+}

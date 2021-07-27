@@ -4892,6 +4892,10 @@ pretty-format@^27.0.6:
     ansi-styles "^5.0.0"
     react-is "^17.0.1"
 
+"preview@https://github.com/multiprocessio/preview":
+  version "0.1.0"
+  resolved "https://github.com/multiprocessio/preview#a3c0bb021dcb191582c44be507332c0aa543ddd0"
+
 printj@~1.1.0, printj@~1.1.2:
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/printj/-/printj-1.1.2.tgz#d90deb2975a8b9f600fb3a1c94e3f4c53c78a222"

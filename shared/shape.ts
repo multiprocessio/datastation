@@ -1,24 +1,26 @@
-type ScalarShape = {
+import { deepClone, deepEquals } from './object';
+
+export type ScalarShape = {
   kind: 'scalar';
   name: 'null' | 'string' | 'number' | 'boolean' | 'bigint';
 };
 
-type ObjectShape = {
+export type ObjectShape = {
   kind: 'object';
   children: Record<string, Shape>;
 };
 
-type ArrayShape = {
+export type ArrayShape = {
   kind: 'array';
   children: Shape;
 };
 
-type VariedShape = {
+export type VariedShape = {
   kind: 'varied';
   children: Shape[];
 };
 
-type Shape =
+export type Shape =
   | ArrayShape
   | ObjectShape
   | VariedShape
@@ -45,14 +47,6 @@ export function toString(shape: Shape): string {
     case 'unknown':
       return 'unknown';
   }
-}
-
-function deepEquals(a: any, b: any) {
-  return JSON.stringify(a) === JSON.stringify(b);
-}
-
-function deepClone(a: any) {
-  return JSON.parse(JSON.stringify(a));
 }
 
 function objectMerge(a: ObjectShape, b: ObjectShape) {

@@ -106,7 +106,7 @@ export function Pages({
         }),
         {}
       );
-      const { value, preview, stdout } = await evalPanel(
+      const { value, preview, stdout, shape } = await evalPanel(
         page,
         panelIndex,
         indexIdMap,
@@ -121,6 +121,7 @@ export function Pages({
           value,
           preview,
           stdout,
+          shape,
           loading: false,
         },
         true
@@ -134,6 +135,7 @@ export function Pages({
           exception: e.stack || e.message,
           stdout: e.stdout,
           preview: '',
+          shape: { kind: 'unknown' },
         },
         true
       );
