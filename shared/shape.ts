@@ -92,7 +92,7 @@ function objectMerge(a: ObjectShape, b: ObjectShape) {
 
 function getNRandomUniqueElements(arraySize: number, maxSampleSize: number) {
   if (!maxSampleSize || arraySize <= maxSampleSize) {
-    return new Array(arraySize).map((_, i) => i);
+    return [...Array(arraySize).keys()].map((_, i) => i);
   }
 
   const unique = [];
@@ -152,7 +152,7 @@ function merge(shapes: Array<Shape>, sampleSizeMax: number): Shape {
 }
 
 function shapeOfArray(data: any[], sampleSizeMax: number) {
-  const shapes = data.map(shape);
+  const shapes = data.map((d) => shape(d, sampleSizeMax));
   return merge(shapes, sampleSizeMax);
 }
 
