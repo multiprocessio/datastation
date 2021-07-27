@@ -2,7 +2,7 @@ import formatDistanceToNow from 'date-fns/formatDistanceToNow';
 import circularSafeStringify from 'json-stringify-safe';
 import * as CSV from 'papaparse';
 import * as React from 'react';
-import { MODE_FEATURES, RPC } from '../shared/constants';
+import { MODE, MODE_FEATURES, RPC } from '../shared/constants';
 import { toString } from '../shared/shape';
 import {
   ConnectorInfo,
@@ -142,6 +142,28 @@ function download(filename: string, value: any, isChart = false) {
   document.body.appendChild(element);
   element.click();
   document.body.removeChild(element);
+}
+
+async function fetchAndDownloadResults(
+  panel: PanelInfo,
+  panelRef: React.RefObject<HTMLCanvasElement>,
+  results: PanelResult
+) {
+  let value = results.value;
+  if (MODE !== 'browser') {
+    const res = await asyncRPC<{ id: string }, void, { value: any }>(
+      RPC.FETCH_RESULTS,
+      null,
+      { id: panel.id }
+    );
+    value = res.value;
+  }
+
+  download(
+    panel.name,
+    panel.type === 'graph' ? panelRef.current.querySelector('canvas') : value,
+    panel.type === 'graph'
+  );
 }
 
 function PreviewResults({
@@ -341,13 +363,7 @@ export function Panel({
                   icon
                   disabled={!results.value}
                   onClick={() =>
-                    download(
-                      panel.name,
-                      panel.type === 'graph'
-                        ? panelRef.current.querySelector('canvas')
-                        : results.value,
-                      panel.type === 'graph'
-                    )
+                    fetchAndDownloadResults(panel, panelRef, results)
                   }
                 >
                   file_download

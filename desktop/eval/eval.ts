@@ -19,6 +19,7 @@ export function rpcEvalHandler<T, S>({
     value: any;
     stdout?: string;
     skipWrite?: boolean;
+    returnValue?: boolean;
   }>;
 }) {
   async function wrappedHandler(
@@ -36,10 +37,10 @@ export function rpcEvalHandler<T, S>({
     }
 
     return {
-      ...res,
       stdout: res.stdout || '',
       preview: preview(res.value),
       shape: shape(res.value),
+      value: res.returnValue ? res.value : null,
     };
   }
 

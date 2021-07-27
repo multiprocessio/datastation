@@ -3,7 +3,11 @@ import { APP_NAME, DEBUG, VERSION } from '../shared/constants';
 import log from '../shared/log';
 import '../shared/polyfill';
 import { DSPROJ_FLAG } from './constants';
-import { evalColumnsHandler } from './eval/columns';
+import {
+  evalColumnsHandler,
+  fetchResultsHandler,
+  storeLiteralHandler,
+} from './eval/columns';
 import { evalFileHandler } from './eval/file';
 import { evalHTTPHandler } from './eval/http';
 import { programHandlers } from './eval/program';
@@ -37,8 +41,10 @@ app.whenReady().then(async () => {
   registerRPCHandlers(ipcMain, [
     ...storeHandlers,
     evalColumnsHandler,
+    storeLiteralHandler,
     evalSQLHandler,
     evalHTTPHandler,
+    fetchResultsHandler,
     ...programHandlers,
     evalFileHandler,
     openProjectHandler,

@@ -1,12 +1,10 @@
 import * as React from 'react';
-import { MODE_FEATURES } from '../shared/constants';
 import {
   PanelResultMeta,
   PanelResults,
   ProjectPage,
   ProjectState,
 } from '../shared/state';
-import { asyncRPC } from './asyncRPC';
 import { Button } from './component-library/Button';
 import { Confirm } from './component-library/Confirm';
 import { Input } from './component-library/Input';
@@ -29,34 +27,19 @@ export function Pages({
   currentPage: number;
 }) {
   const page: ProjectPage | null = state.pages[currentPage] || null;
-  const [panelResultsByPage, setPanelResultsByPageInternal] =
+  const [panelResultsByPage, setPanelResultsByPage] =
     React.useState<PanelResults>({});
-
-  function setPanelResultsByPage(results: PanelResults, valueChange: boolean) {
-    setPanelResultsByPageInternal(results);
-    if (valueChange && MODE_FEATURES.storeResults && results[page.id]) {
-      asyncRPC<any, void, void>(
-        'storeResults',
-        null,
-        results[page.id].map((r) => r.value)
-      );
-    }
-  }
 
   // Make sure panelResults are initialized when page changes.
   React.useEffect(() => {
     if (page && !panelResultsByPage[page.id]) {
-      setPanelResultsByPage({ ...panelResultsByPage, [page.id]: [] }, true);
+      setPanelResultsByPage({ ...panelResultsByPage, [page.id]: [] });
     }
   }, [page && page.id]);
 
-  function setPanelResults(
-    panelIndex: number,
-    result: PanelResultMeta,
-    valueChange: boolean = false
-  ) {
+  function setPanelResults(panelIndex: number, result: PanelResultMeta) {
     panelResultsByPage[page.id][panelIndex] = result;
-    setPanelResultsByPage({ ...panelResultsByPage }, valueChange);
+    setPanelResultsByPage({ ...panelResultsByPage });
   }
 
   if (!page) {
@@ -108,31 +91,23 @@ export function Pages({
         connectors,
         servers
       );
-      setPanelResults(
-        panelIndex,
-        {
-          lastRun: new Date(),
-          value,
-          preview,
-          stdout,
-          shape,
-          loading: false,
-        },
-        true
-      );
+      setPanelResults(panelIndex, {
+        lastRun: new Date(),
+        value,
+        preview,
+        stdout,
+        shape,
+        loading: false,
+      });
     } catch (e) {
-      setPanelResults(
-        panelIndex,
-        {
-          loading: false,
-          lastRun: new Date(),
-          exception: e.stack || e.message,
-          stdout: e.stdout,
-          preview: '',
-          shape: { kind: 'unknown' },
-        },
-        true
-      );
+      setPanelResults(panelIndex, {
+        loading: false,
+        lastRun: new Date(),
+        exception: e.stack || e.message,
+        stdout: e.stdout,
+        preview: '',
+        shape: { kind: 'unknown' },
+      });
     }
   }
 
