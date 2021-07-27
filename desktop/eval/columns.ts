@@ -14,7 +14,7 @@ export const evalColumnsHandler = rpcEvalHandler({
       columns,
     }: {
       id: string;
-      columns: Array<string>
+      columns: Array<string>;
     }
   ) {
     const projectResultsFile = getProjectResultsFile(projectId);
