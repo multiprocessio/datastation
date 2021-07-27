@@ -1,11 +1,14 @@
+import { preview } from 'preview';
 import * as React from 'react';
 import { MODE } from '../shared/constants';
 import { request } from '../shared/http';
+import { shape } from '../shared/shape';
 import {
   ContentTypeInfo,
   HTTPConnectorInfo,
   HTTPConnectorInfoMethod,
   HTTPPanelInfo,
+  PanelResult,
   Proxy,
   ServerInfo,
 } from '../shared/state';
@@ -23,7 +26,7 @@ export async function evalHTTPPanel(
   servers: Array<ServerInfo>
 ) {
   if (MODE === 'browser') {
-    return await request(
+    const { value, contentType } = await request(
       (window as any).fetch,
       panel.http.http.method,
       panel.http.http.url,
@@ -31,17 +34,28 @@ export async function evalHTTPPanel(
       panel.http.http.headers,
       panel.content
     );
+    return {
+      value,
+      size: JSON.stringify(value).length,
+      contentType,
+      preview: preview(value),
+      shape: shape(value),
+      stdout: '',
+    };
   }
 
-  const connector = panel.http as Proxy<HTTPConnectorInfo>;
-  connector.server = servers.find(
-    (s) => s.id === (panel.serverId || connector.serverId)
-  );
-  return await asyncRPC<Proxy<HTTPConnectorInfo>, string, Array<object>>(
-    'evalHTTP',
-    panel.content,
-    connector
-  );
+  const connector = panel.http;
+  return await asyncRPC<
+    Proxy<HTTPPanelInfo, HTTPConnectorInfo>,
+    string,
+    PanelResult
+  >('evalHTTP', panel.content, {
+    ...panel,
+    connector,
+    server: servers.find(
+      (s) => s.id === (panel.serverId || connector.serverId)
+    ),
+  });
 }
 
 export function HTTPPanelDetails({

@@ -1,12 +1,10 @@
 import * as React from 'react';
-import { MODE_FEATURES } from '../shared/constants';
 import {
-  PanelResult,
+  PanelResultMeta,
   PanelResults,
   ProjectPage,
   ProjectState,
 } from '../shared/state';
-import { asyncRPC } from './asyncRPC';
 import { Button } from './component-library/Button';
 import { Confirm } from './component-library/Confirm';
 import { Input } from './component-library/Input';
@@ -29,34 +27,19 @@ export function Pages({
   currentPage: number;
 }) {
   const page: ProjectPage | null = state.pages[currentPage] || null;
-  const [panelResultsByPage, setPanelResultsByPageInternal] =
+  const [panelResultsByPage, setPanelResultsByPage] =
     React.useState<PanelResults>({});
-
-  function setPanelResultsByPage(results: PanelResults, valueChange: boolean) {
-    setPanelResultsByPageInternal(results);
-    if (valueChange && MODE_FEATURES.storeResults && results[page.id]) {
-      asyncRPC<any, void, void>(
-        'storeResults',
-        null,
-        results[page.id].map((r) => r.value)
-      );
-    }
-  }
 
   // Make sure panelResults are initialized when page changes.
   React.useEffect(() => {
     if (page && !panelResultsByPage[page.id]) {
-      setPanelResultsByPage({ ...panelResultsByPage, [page.id]: [] }, true);
+      setPanelResultsByPage({ ...panelResultsByPage, [page.id]: [] });
     }
   }, [page && page.id]);
 
-  function setPanelResults(
-    panelIndex: number,
-    result: PanelResult,
-    valueChange: boolean = false
-  ) {
+  function setPanelResults(panelIndex: number, result: PanelResultMeta) {
     panelResultsByPage[page.id][panelIndex] = result;
-    setPanelResultsByPage({ ...panelResultsByPage }, valueChange);
+    setPanelResultsByPage({ ...panelResultsByPage });
   }
 
   if (!page) {
@@ -89,7 +72,7 @@ export function Pages({
   async function reevalPanel(panelIndex: number, reset?: boolean) {
     const { connectors, servers } = state;
 
-    let panel = panelResults[panelIndex] || new PanelResult();
+    let panel = panelResults[panelIndex] || new PanelResultMeta();
     panel.lastRun = null;
     panel.loading = !reset;
 
@@ -99,34 +82,37 @@ export function Pages({
     }
 
     try {
-      const [r, stdout] = await evalPanel(
-        page,
-        panelIndex,
-        panelResults,
-        connectors,
-        servers
-      );
-      setPanelResults(
-        panelIndex,
-        {
-          lastRun: new Date(),
-          value: r,
-          stdout,
-          loading: false,
-        },
-        true
-      );
+      const indexIdMap: Array<string> = page.panels.map((p) => p.id);
+      const { value, size, contentType, preview, stdout, shape } =
+        await evalPanel(
+          page,
+          panelIndex,
+          indexIdMap,
+          panelResults,
+          connectors,
+          servers
+        );
+      setPanelResults(panelIndex, {
+        lastRun: new Date(),
+        value,
+        preview,
+        stdout,
+        shape,
+        contentType,
+        size,
+        loading: false,
+      });
     } catch (e) {
-      setPanelResults(
-        panelIndex,
-        {
-          loading: false,
-          lastRun: new Date(),
-          exception: e.stack || e.message,
-          stdout: e.stdout,
-        },
-        true
-      );
+      setPanelResults(panelIndex, {
+        loading: false,
+        lastRun: new Date(),
+        exception: e.stack || e.message,
+        stdout: e.stdout,
+        preview: '',
+        contentType: 'unknown',
+        size: 0,
+        shape: { kind: 'unknown' },
+      });
     }
   }
 
@@ -158,11 +144,7 @@ export function Pages({
               )}
             />
           </span>
-          <Input
-            className="page-name page-name--current"
-            onChange={(value: string) => updatePage({ ...page, name: value })}
-            value={page.name}
-          />
+
           <span title="Evaluate all panels sequentially">
             <Button icon onClick={evalAll} type="primary">
               play_arrow
@@ -170,7 +152,13 @@ export function Pages({
           </span>
         </div>
         {state.pages.map((page: ProjectPage, i: number) =>
-          i === currentPage ? undefined : (
+          i === currentPage ? (
+            <Input
+              className="page-name page-name--current"
+              onChange={(value: string) => updatePage({ ...page, name: value })}
+              value={page.name}
+            />
+          ) : (
             <Button
               key={page.id}
               className="page-name"

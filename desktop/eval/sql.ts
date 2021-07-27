@@ -4,14 +4,15 @@ import * as sqlite from 'sqlite';
 import sqlite3 from 'sqlite3';
 import Client from 'ssh2-sftp-client';
 import { file as makeTmpFile } from 'tmp-promise';
-import { Proxy, SQLConnectorInfo } from '../shared/state';
+import { Proxy, SQLConnectorInfo, SQLPanelInfo } from '../../shared/state';
+import { rpcEvalHandler } from './eval';
 import { getSSHConfig, tunnel } from './tunnel';
 
 async function evalPostgreSQL(
   content: string,
   host: string,
   port: number,
-  { sql }: SQLConnectorInfo
+  { connector: { sql } }: Proxy<SQLPanelInfo, SQLConnectorInfo>
 ) {
   const client = new PostgresClient({
     user: sql.username,
@@ -23,7 +24,9 @@ async function evalPostgreSQL(
   try {
     await client.connect();
     const res = await client.query(content);
-    return res.rows;
+    return {
+      value: res.rows,
+    };
   } finally {
     await client.end();
   }
@@ -33,7 +36,7 @@ async function evalMySQL(
   content: string,
   host: string,
   port: number,
-  { sql }: SQLConnectorInfo
+  { connector: { sql } }: Proxy<SQLPanelInfo, SQLConnectorInfo>
 ) {
   const connection = await mysql.createConnection({
     host: host,
@@ -44,15 +47,18 @@ async function evalMySQL(
   });
 
   try {
-    const [rows] = await connection.execute(content);
-    return rows;
+    const [value] = await connection.execute(content);
+    return { value };
   } finally {
     connection.end();
   }
 }
 
-async function evalSqlite(content: string, info: Proxy<SQLConnectorInfo>) {
-  let sqlitefile = info.sql.database;
+async function evalSqlite(
+  content: string,
+  info: Proxy<SQLPanelInfo, SQLConnectorInfo>
+) {
+  let sqlitefile = info.connector.sql.database;
 
   async function run() {
     const db = await sqlite.open({
@@ -72,14 +78,16 @@ async function evalSqlite(content: string, info: Proxy<SQLConnectorInfo>) {
     try {
       await sftp.fastGet(sqlitefile, localCopy.path);
       sqlitefile = localCopy.path;
-      return await run();
+      const value = await run();
+      return { value };
     } finally {
       localCopy.cleanup();
       await sftp.end();
     }
   }
 
-  return await run();
+  const value = await run();
+  return { value };
 }
 
 const DEFAULT_PORT = {
@@ -88,20 +96,25 @@ const DEFAULT_PORT = {
   sqlite: 0,
 };
 
-export const evalSQLHandler = {
+export const evalSQLHandler = rpcEvalHandler({
   resource: 'evalSQL',
   handler: async function (
-    _: string,
+    projectId: string,
     content: string,
-    info: Proxy<SQLConnectorInfo>
+    info: Proxy<SQLPanelInfo, SQLConnectorInfo>
   ) {
+    // TODO: need to handle DM_getPanel here
+    // TODO:!!!
+    // TODO:!!!
+
     // Sqlite is file, not network based so handle separately.
     if (info.sql.type === 'sqlite') {
       return await evalSqlite(content, info);
     }
 
-    const port = +info.sql.address.split(':')[1] || DEFAULT_PORT[info.sql.type];
-    const host = info.sql.address.split(':')[0];
+    const port =
+      +info.connector.sql.address.split(':')[1] || DEFAULT_PORT[info.sql.type];
+    const host = info.connector.sql.address.split(':')[0];
 
     return await tunnel(
       info.server,
@@ -120,4 +133,4 @@ export const evalSQLHandler = {
       }
     );
   },
-};
+});

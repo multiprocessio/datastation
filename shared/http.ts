@@ -44,7 +44,7 @@ export async function request(
 
   const data = await parseArrayBuffer(contentTypeInfo, url, body);
   if (require200 && res.status !== 200) {
-    throw data;
+    throw data.value;
   }
 
   return data;

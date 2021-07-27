@@ -1,13 +1,50 @@
+import { preview } from 'preview';
 import * as React from 'react';
+import { MODE } from '../shared/constants';
+import { columnsFromObject } from '../shared/object';
+import { shape } from '../shared/shape';
 import {
   PanelInfo,
   PanelResult,
   TableColumn,
   TablePanelInfo,
 } from '../shared/state';
+import { asyncRPC } from './asyncRPC';
 import { Button } from './component-library/Button';
 import { FieldPicker } from './FieldPicker';
 import { PanelSourcePicker } from './PanelSourcePicker';
+
+export async function evalColumnPanel(
+  panelSource: number,
+  columns: Array<string>,
+  indexIdMap: Array<string>,
+  panelResults: Array<PanelResult>
+) {
+  if (MODE === 'browser') {
+    const { value } = panelResults[panelSource];
+    const valueWithRequestedColumns = columnsFromObject(value, columns);
+    return {
+      value: valueWithRequestedColumns,
+      preview: preview(valueWithRequestedColumns),
+      shape: shape(valueWithRequestedColumns),
+      stdout: '',
+      size: JSON.stringify(value).length,
+      contentType: 'application/json',
+    };
+  }
+
+  return await asyncRPC<
+    {
+      columns: Array<string>;
+      id: string;
+    },
+    void,
+    PanelResult
+  >('evalColumns', null, {
+    id: indexIdMap[panelSource],
+    columns,
+  });
+}
 
 export function TablePanelDetails({
   panel,

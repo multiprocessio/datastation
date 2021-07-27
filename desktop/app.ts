@@ -3,14 +3,19 @@ import { APP_NAME, DEBUG, VERSION } from '../shared/constants';
 import log from '../shared/log';
 import '../shared/polyfill';
 import { DSPROJ_FLAG } from './constants';
-import { evalFileHandler } from './file';
-import { evalHTTPHandler } from './http';
+import {
+  evalColumnsHandler,
+  fetchResultsHandler,
+  storeLiteralHandler,
+} from './eval/columns';
+import { evalFileHandler } from './eval/file';
+import { evalHTTPHandler } from './eval/http';
+import { programHandlers } from './eval/program';
+import { evalSQLHandler } from './eval/sql';
 import { configureLogger } from './log';
-import { programHandlers } from './program';
 import { openProjectHandler, openWindow } from './project';
 import { registerRPCHandlers, RPCHandler } from './rpc';
 import { loadSettings } from './settings';
-import { evalSQLHandler } from './sql';
 import { storeHandlers } from './store';
 
 configureLogger().then(() => {
@@ -35,8 +40,11 @@ app.whenReady().then(async () => {
 
   registerRPCHandlers(ipcMain, [
     ...storeHandlers,
+    evalColumnsHandler,
+    storeLiteralHandler,
     evalSQLHandler,
     evalHTTPHandler,
+    fetchResultsHandler,
     ...programHandlers,
     evalFileHandler,
     openProjectHandler,

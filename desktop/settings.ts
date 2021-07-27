@@ -2,7 +2,7 @@ import * as fs from 'fs/promises';
 import * as uuid from 'uuid';
 import { LANGUAGES, SupportedLanguages } from '../shared/languages';
 import log from '../shared/log';
-import { mergeDeep } from '../shared/merge';
+import { mergeDeep } from '../shared/object';
 import { ensureFile } from './store';
 
 export class LanguageSettings {
