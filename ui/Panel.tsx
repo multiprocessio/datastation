@@ -47,7 +47,7 @@ export const PANEL_TYPE_ICON = {
 export async function evalPanel(
   page: ProjectPage,
   panelId: number,
-  indexIdMap: Record<number, string>,
+  indexIdMap: Array<string>,
   panelResults: Array<PanelResult>,
   connectors: Array<ConnectorInfo>,
   servers: Array<ServerInfo>

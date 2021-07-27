@@ -14,7 +14,7 @@ function defaultContent(panelIndex: number) {
 function preamble(
   resultsFile: string,
   panelId: string,
-  indexIdMap: Record<number, string>
+  indexIdMap: Array<string>
 ) {
   const file = ``;
   return `
@@ -32,7 +32,7 @@ function inMemoryEval(
   prog: string,
   results:
     | Array<PanelResult>
-    | { indexIdMap: Record<number, string>; resultsFile: string }
+    | { indexIdMap: Array<string>; resultsFile: string }
 ): Promise<{ value: any; preview: string; stdout: string }> {
   if (!Array.isArray(results)) {
     throw new Error(
@@ -84,7 +84,7 @@ function exceptionRewriter(msg: string, _: string) {
 
   return msg.replace(matcher, function (_: string, line: string) {
     return `, line ${
-      +line - preamble('', '', {}).split(EOL).length
+      +line - preamble('', '', []).split(EOL).length
     }, in <module>`;
   });
 }

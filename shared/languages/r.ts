@@ -1,7 +1,7 @@
 function preamble(
   resultsFile: string,
   panelId: string,
-  indexIdMap: Record<number, string>
+  indexIdMap: Array<string>
 ) {
   return `
 library("rjson")

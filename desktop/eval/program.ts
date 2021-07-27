@@ -19,7 +19,7 @@ function killAllByPanelId(panelId: string) {
 }
 
 export const evalProgramHandler = rpcEvalHandler<
-  ProgramPanelInfo & { indexIdMap: Record<number, string> },
+  ProgramPanelInfo & { indexIdMap: Array<string> },
   void
 >({
   resource: RPC.EVAL_PROGRAM,
@@ -31,7 +31,7 @@ export const evalProgramHandler = rpcEvalHandler<
       ...ppi
     }: Proxy<
       ProgramPanelInfo & {
-        indexIdMap: Record<number, string>;
+        indexIdMap: Array<string>;
       },
       void
     >

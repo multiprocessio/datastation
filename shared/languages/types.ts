@@ -16,6 +16,6 @@ export interface LanguageInfo {
     prog: string,
     resultsOrDiskDetails:
       | Array<PanelResult>
-      | { indexIdMap: Record<number, string>; resultsFile: string }
+      | { indexIdMap: Array<string>; resultsFile: string }
   ) => Promise<{ stdout: string; preview: string; value: any }>;
 }

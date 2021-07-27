@@ -15,16 +15,13 @@ import { ServerPicker } from './ServerPicker';
 
 export async function evalSQLPanel(
   panel: SQLPanelInfo,
-  indexIdMap: Record<number, string>,
+  indexIdMap: Array<string>,
   connectors: Array<ConnectorInfo>,
   servers: Array<ServerInfo>
 ) {
   const connector = connectors[+panel.sql.connectorIndex] as SQLConnectorInfo;
   return await asyncRPC<
-    Proxy<
-      SQLPanelInfo & { indexIdMap: Record<number, string> },
-      SQLConnectorInfo
-    >,
+    Proxy<SQLPanelInfo & { indexIdMap: Array<string> }, SQLConnectorInfo>,
     string,
     PanelResult
   >('evalSQL', panel.content, {

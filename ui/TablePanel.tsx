@@ -16,7 +16,7 @@ import { PanelSourcePicker } from './PanelSourcePicker';
 export async function evalColumnPanel(
   panelSource: number,
   columns: Array<string>,
-  indexIdMap: Record<number, string>,
+  indexIdMap: Array<string>,
   panelResults: Array<PanelResult>
 ) {
   if (MODE === 'browser') {
@@ -50,7 +50,7 @@ export async function evalColumnPanel(
     {
       panelSource: number;
       columns: Array<string>;
-      indexIdMap: Record<number, string>;
+      indexIdMap: Array<string>;
     },
     void,
     PanelResult

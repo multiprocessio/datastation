@@ -9,7 +9,7 @@ function defaultContent(panelIndex: number) {
 function preamble(
   resultsFile: string,
   panelId: string,
-  indexIdMap: Record<number, string>
+  indexIdMap: Array<string>
 ) {
   return `
 def DM_getPanel(i)

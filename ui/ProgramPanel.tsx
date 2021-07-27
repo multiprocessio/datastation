@@ -9,13 +9,13 @@ import { Select } from './component-library/Select';
 export async function evalProgramPanel(
   panel: ProgramPanelInfo,
   panelResults: Array<PanelResult>,
-  indexIdMap: Record<number, string>
+  indexIdMap: Array<string>
 ): Promise<PanelResult> {
   const program = panel.program;
 
   if (MODE === 'desktop') {
     return asyncRPC<
-      ProgramPanelInfo & { indexIdMap: Record<number, string> },
+      ProgramPanelInfo & { indexIdMap: Array<string> },
       null,
       PanelResult
     >(RPC.EVAL_PROGRAM, null, {

@@ -7,7 +7,7 @@ function exceptionRewriter(msg: string, programPath: string) {
   const matcher = RegExp(`${programPath}:([1-9]*)`.replaceAll('/', '\\/'), 'g');
 
   return msg.replace(matcher, function (_: string, line: string) {
-    return `${programPath}:${+line - preamble('', '', {}).split(EOL).length}`;
+    return `${programPath}:${+line - preamble('', '', []).split(EOL).length}`;
   });
 }
 
@@ -24,7 +24,7 @@ function defaultContent(panelIndex: number) {
 function preamble(
   resultsFile: string,
   panelId: string,
-  indexIdMap: Record<number, string>
+  indexIdMap: Array<string>
 ) {
   return `
 function DM_getPanel(i) {
@@ -43,7 +43,7 @@ function inMemoryEval(
   prog: string,
   results:
     | Array<PanelResult>
-    | { indexIdMap: Record<number, string>; resultsFile: string }
+    | { indexIdMap: Array<string>; resultsFile: string }
 ): Promise<{ value: any; preview: string; stdout: string }> {
   if (!Array.isArray(results)) {
     throw new Error(
