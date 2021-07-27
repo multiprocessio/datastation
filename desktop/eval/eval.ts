@@ -30,10 +30,15 @@ export function rpcEvalHandler<T, S>({
     const projectResultsFile = getProjectResultsFile(projectId);
     const res = await handler(projectId, args, body);
     if (!res.skipWrite) {
-      await fs.writeFile(
-        projectResultsFile + body.id,
-        JSON.stringify(res.value)
+      // TODO: handle non-ascii better than this
+      // Adapted from https://gist.github.com/mathiasbynens/1243213
+      const json = JSON.stringify(res.value).replace(
+        /[\s\S]/g,
+        function (escape: string) {
+          return '\\u' + ('0000' + escape.charCodeAt(0).toString(16).slice(-4));
+        }
       );
+      await fs.writeFile(projectResultsFile + body.id, json);
     }
 
     return {
