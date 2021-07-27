@@ -8,6 +8,7 @@ import {
   TableColumn,
   TablePanelInfo,
 } from '../shared/state';
+import { columnsFromData } from '../shared/text';
 import { asyncRPC } from './asyncRPC';
 import { Button } from './component-library/Button';
 import { FieldPicker } from './FieldPicker';
@@ -21,23 +22,7 @@ export async function evalColumnPanel(
 ) {
   if (MODE === 'browser') {
     const { value } = panelResults[panelSource];
-    if (value && !Array.isArray(value)) {
-      throw new Error(
-        `Expected array input to graph, got (${typeof value}): ` +
-          preview(value)
-      );
-    }
-    const valueWithRequestedColumns = (value || []).map((row) => {
-      // If none specified, select all
-      if (!columns.length) {
-        return row;
-      }
-      const cells: Record<string, any> = [];
-      (columns || []).forEach((name) => {
-        cells[name] = row[name];
-      });
-    });
-
+    const valueWithRequestedColumns = columnsFromData(value, columns);
     return {
       value: valueWithRequestedColumns,
       preview: preview(valueWithRequestedColumns),
@@ -48,16 +33,14 @@ export async function evalColumnPanel(
 
   return await asyncRPC<
     {
-      panelSource: number;
       columns: Array<string>;
-      indexIdMap: Array<string>;
+      id: string;
     },
     void,
     PanelResult
   >('evalColumns', null, {
-    panelSource,
+    id: indexIdMap[panelSource],
     columns,
-    indexIdMap,
   });
 }
 

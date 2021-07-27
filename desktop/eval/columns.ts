@@ -1,6 +1,6 @@
 import fs from 'fs/promises';
-import { preview } from 'preview';
 import { RPC } from '../../shared/constants';
+import { columnsFromData } from '../../shared/text';
 import { getProjectResultsFile } from '../store';
 import { rpcEvalHandler } from './eval';
 
@@ -12,39 +12,16 @@ export const evalColumnsHandler = rpcEvalHandler({
     {
       id,
       columns,
-      panelSource,
-      indexIdMap,
     }: {
       id: string;
       panelSource: number;
-      columns: Array<string>;
-      indexIdMap: Array<string>;
     }
   ) {
     const projectResultsFile = getProjectResultsFile(projectId);
     const f = await fs.readFile(projectResultsFile + id);
     const value = JSON.parse(f.toString());
-    if (value && !Array.isArray(value)) {
-      throw new Error(
-        `Expected array input to graph, got (${typeof value}): ` +
-          preview(value)
-      );
-    }
-    const valueWithRequestedColumns = (value || []).map((row: any) => {
-      // If none specified, select all
-      if (!columns.length) {
-        return row;
-      }
 
-      if (!row) {
-        return null;
-      }
-
-      const cells: Record<string, any> = [];
-      (columns || []).forEach((name) => {
-        cells[name] = row[name];
-      });
-    });
+    const valueWithRequestedColumns = columnsFromData(value, columns);
 
     return {
       value: valueWithRequestedColumns,
