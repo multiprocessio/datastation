@@ -30,7 +30,7 @@ export type Shape =
     };
 
 export function levelPrefix(level: number) {
-  return [...Array(level*2).keys()].map(c => ' ').join('');
+  return [...Array(level * 2).keys()].map((c) => ' ').join('');
 }
 
 export function toString(shape: Shape, level = 0): string {
@@ -38,16 +38,25 @@ export function toString(shape: Shape, level = 0): string {
     case 'scalar':
       return levelPrefix(level) + shape.name;
     case 'array':
-      return levelPrefix(level) + 'Array of\n' + toString(shape.children, level+1);
+      return (
+        levelPrefix(level) + 'Array of\n' + toString(shape.children, level + 1)
+      );
     case 'object':
-      return levelPrefix(level) + (
-        'Object with\n' +
-        Object.keys(shape.children)
-          .map((k) => `${levelPrefix(level+1)}'${k}' of\n${toString(shape.children[k], level+2)}`)
-          .join(',\n')
+      return (
+        levelPrefix(level) +
+        ('Object with\n' +
+          Object.keys(shape.children)
+            .map(
+              (k) =>
+                `${levelPrefix(level + 1)}'${k}' of\n${toString(
+                  shape.children[k],
+                  level + 2
+                )}`
+            )
+            .join(',\n'))
       );
     case 'varied':
-      return shape.children.map(c => toString(c, level)).join(' or\n');
+      return shape.children.map((c) => toString(c, level)).join(' or\n');
     case 'unknown':
       return levelPrefix(level) + 'Unknown';
   }
@@ -136,33 +145,33 @@ function shapeOfObject(data: Record<string, any>): Shape {
 
 export function shape(data: any): Shape {
   try {
-  if (Array.isArray(data)) {
-    return shapeOfArray(data as any[]);
-  }
+    if (Array.isArray(data)) {
+      return shapeOfArray(data as any[]);
+    }
 
-  if (data === null) {
-    return { kind: 'scalar', name: 'null' };
-  }
+    if (data === null) {
+      return { kind: 'scalar', name: 'null' };
+    }
 
-  if (typeof data === 'object') {
-    return shapeOfObject(data);
-  }
+    if (typeof data === 'object') {
+      return shapeOfObject(data);
+    }
 
-  if (typeof data === 'number') {
-    return { kind: 'scalar', name: 'number' };
-  }
+    if (typeof data === 'number') {
+      return { kind: 'scalar', name: 'number' };
+    }
 
-  if (typeof data === 'bigint') {
-    return { kind: 'scalar', name: 'bigint' };
-  }
+    if (typeof data === 'bigint') {
+      return { kind: 'scalar', name: 'bigint' };
+    }
 
-  if (typeof data === 'undefined') {
-    return { kind: 'scalar', name: 'null' };
-  }
+    if (typeof data === 'undefined') {
+      return { kind: 'scalar', name: 'null' };
+    }
 
-  if (typeof data === 'boolean') {
-    return { kind: 'scalar', name: 'boolean' };
-  }
+    if (typeof data === 'boolean') {
+      return { kind: 'scalar', name: 'boolean' };
+    }
 
     return { kind: 'scalar', name: 'string' };
   } catch (e) {

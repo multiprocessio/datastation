@@ -3,6 +3,7 @@ import circularSafeStringify from 'json-stringify-safe';
 import * as CSV from 'papaparse';
 import * as React from 'react';
 import { MODE_FEATURES, RPC } from '../shared/constants';
+import { toString } from '../shared/shape';
 import {
   ConnectorInfo,
   FilePanelInfo,
@@ -159,7 +160,7 @@ function PreviewResults({
   }
 
   if (panelOut === 'shape') {
-    return <code>{JSON.stringify(results.shape, null, 2)}</code>;
+    return <code>{toString(results.shape)}</code>;
   }
 
   return <code>{results[panelOut]}</code>;

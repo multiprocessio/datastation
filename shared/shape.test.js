@@ -18,7 +18,9 @@ test('shape', () => {
       { a: 1, b: 2 },
       { a: 3, b: 4 },
     ])
-  ).toBe("Array of\n  Object with\n    'a' of\n      number,\n    'b' of\n      number");
+  ).toBe(
+    "Array of\n  Object with\n    'a' of\n      number,\n    'b' of\n      number"
+  );
 
   expect(
     shapeString([
