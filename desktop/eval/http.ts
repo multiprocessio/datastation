@@ -32,7 +32,7 @@ export const evalHTTPHandler = rpcEvalHandler<HTTPPanelInfo, HTTPConnectorInfo>(
           if (port) {
             tunnelledUrl.port = String(port);
           }
-          return await request(
+          const value = await request(
             fetch,
             hci.connector.http.method,
             tunnelledUrl.toString(),
@@ -40,6 +40,8 @@ export const evalHTTPHandler = rpcEvalHandler<HTTPPanelInfo, HTTPConnectorInfo>(
             hci.connector.http.headers,
             body
           );
+
+return {value};
         }
       );
     },
