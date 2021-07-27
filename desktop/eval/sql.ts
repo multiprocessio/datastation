@@ -4,9 +4,9 @@ import * as sqlite from 'sqlite';
 import sqlite3 from 'sqlite3';
 import Client from 'ssh2-sftp-client';
 import { file as makeTmpFile } from 'tmp-promise';
-import { Proxy, SQLPanelInfo } from '../../shared/state';
-import { getSSHConfig, tunnel } from '../tunnel';
+import { Proxy, SQLConnectorInfo, SQLPanelInfo } from '../../shared/state';
 import { rpcEvalHandler } from './eval';
+import { getSSHConfig, tunnel } from './tunnel';
 
 async function evalPostgreSQL(
   content: string,
@@ -24,7 +24,9 @@ async function evalPostgreSQL(
   try {
     await client.connect();
     const res = await client.query(content);
-    return res.rows;
+    return {
+      value: res.rows,
+    };
   } finally {
     await client.end();
   }
@@ -45,14 +47,17 @@ async function evalMySQL(
   });
 
   try {
-    const [rows] = await connection.execute(content);
-    return rows;
+    const [value] = await connection.execute(content);
+    return { value };
   } finally {
     connection.end();
   }
 }
 
-async function evalSqlite(content: string, info: Proxy<SQLPanelInfo, SQLConnectorInfo>) {
+async function evalSqlite(
+  content: string,
+  info: Proxy<SQLPanelInfo, SQLConnectorInfo>
+) {
   let sqlitefile = info.connector.sql.database;
 
   async function run() {
@@ -73,14 +78,16 @@ async function evalSqlite(content: string, info: Proxy<SQLPanelInfo, SQLConnecto
     try {
       await sftp.fastGet(sqlitefile, localCopy.path);
       sqlitefile = localCopy.path;
-      return await run();
+      const value = await run();
+      return { value };
     } finally {
       localCopy.cleanup();
       await sftp.end();
     }
   }
 
-  return await run();
+  const value = await run();
+  return { value };
 }
 
 const DEFAULT_PORT = {
@@ -94,7 +101,7 @@ export const evalSQLHandler = rpcEvalHandler({
   handler: async function (
     projectId: string,
     content: string,
-    info: Proxy<SQLPanelInfo>
+    info: Proxy<SQLPanelInfo, SQLConnectorInfo>
   ) {
     // TODO: need to handle DM_getPanel here
     // TODO:!!!
@@ -105,8 +112,9 @@ export const evalSQLHandler = rpcEvalHandler({
       return await evalSqlite(content, info);
     }
 
-    const port = +info.connector.address.split(':')[1] || DEFAULT_PORT[info.sql.type];
-    const host = info.connector.address.split(':')[0];
+    const port =
+      +info.connector.sql.address.split(':')[1] || DEFAULT_PORT[info.sql.type];
+    const host = info.connector.sql.address.split(':')[0];
 
     return await tunnel(
       info.server,

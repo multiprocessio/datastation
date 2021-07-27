@@ -19,18 +19,19 @@ export async function evalSQLPanel(
   connectors: Array<ConnectorInfo>,
   servers: Array<ServerInfo>
 ) {
-  const connector =  connectors[
-    +panel.sql.connectorIndex
-    ] as SQLConnectorInfo;
+  const connector = connectors[+panel.sql.connectorIndex] as SQLConnectorInfo;
   return await asyncRPC<
-    Proxy<SQLPanelInfo & { indexIdMap: Record<number, string> }, SQLConnectorInfo>,
+    Proxy<
+      SQLPanelInfo & { indexIdMap: Record<number, string> },
+      SQLConnectorInfo
+    >,
     string,
     PanelResult
   >('evalSQL', panel.content, {
     ...panel,
     server: servers.find(
-    (s) => s.id === (panel.serverId || connector.serverId)
-  ),
+      (s) => s.id === (panel.serverId || connector.serverId)
+    ),
     connector,
     indexIdMap,
   });

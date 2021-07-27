@@ -68,7 +68,7 @@ export class ServerInfo {
   }
 }
 
-export type Proxy<T, S = {}> = T & {
+export type Proxy<T, S> = T & {
   server?: ServerInfo;
   connector?: S;
 };

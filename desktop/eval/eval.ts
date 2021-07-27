@@ -17,7 +17,7 @@ export function rpcEvalHandler<T>({
     body: PanelProxy<T>
   ) => Promise<{
     value: any;
-    stdout: string;
+    stdout?: string;
     skipWrite?: boolean;
   }>;
 }) {
@@ -35,6 +35,7 @@ export function rpcEvalHandler<T>({
 
     return {
       ...res,
+      stdout: res.stdout || '',
       preview: preview(res.value),
       shape: shape(res.value),
     };

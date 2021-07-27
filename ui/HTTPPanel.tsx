@@ -5,8 +5,8 @@ import { request } from '../shared/http';
 import { shape } from '../shared/shape';
 import {
   ContentTypeInfo,
+  HTTPConnectorInfo,
   HTTPConnectorInfoMethod,
-    HTTPConnectorInfo,
   HTTPPanelInfo,
   PanelResult,
   Proxy,
@@ -38,17 +38,17 @@ export async function evalHTTPPanel(
   }
 
   const connector = panel.http;
-  return await asyncRPC<Proxy<HTTPPanelInfo, HTTPConnectorInfo>, string, PanelResult>(
-    'evalHTTP',
-    panel.content,
-    {
-      ...panel,
-      connector,
-      server: servers.find(
-        (s) => s.id === (panel.serverId || connector.serverId)
-      ),
-    }
-  );
+  return await asyncRPC<
+    Proxy<HTTPPanelInfo, HTTPConnectorInfo>,
+    string,
+    PanelResult
+  >('evalHTTP', panel.content, {
+    ...panel,
+    connector,
+    server: servers.find(
+      (s) => s.id === (panel.serverId || connector.serverId)
+    ),
+  });
 }
 
 export function HTTPPanelDetails({

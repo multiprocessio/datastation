@@ -24,7 +24,7 @@ export async function evalFilePanel(
     return { value, preview: preview(value), shape: shape(value), stdout: '' };
   }
 
-  return await asyncRPC<Proxy<FilePanelInfo>, void, PanelResult>(
+  return await asyncRPC<Proxy<FilePanelInfo, void>, void, PanelResult>(
     'evalFile',
     null,
     {

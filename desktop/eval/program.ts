@@ -6,8 +6,8 @@ import { RPC } from '../../shared/constants';
 import { LANGUAGES } from '../../shared/languages';
 import { ProgramPanelInfo } from '../../shared/state';
 import { rpcEvalHandler } from './eval';
-import { SETTINGS } from './settings';
-import { getProjectResultsFile } from './store';
+import { SETTINGS } from '../settings';
+import { getProjectResultsFile } from '../store';
 
 const runningProcesses: Record<string, Set<number>> = {};
 
@@ -18,13 +18,17 @@ function killAllByPanelId(panelId: string) {
   }
 }
 
-export const evalProgramHandler = rpcEvalHandler({
+export const evalProgramHandler = rpcEvalHandler<ProgramPanelInfo & { indexIdMap: Record<number, string>; }> ({
   resource: RPC.EVAL_PROGRAM,
-  handler: async function (
+  handler: async function(
     projectId: string,
     _: string,
-    ppi: ProgramPanelInfo,
-    indexIdMap: Record<number, string>
+    {
+      indexIdMap,
+      ...ppi,
+    }: ProgramPanelInfo & {
+      indexIdMap: Record<number, string>;
+    }
   ) {
     const programTmp = await makeTmpFile();
     const language = LANGUAGES[ppi.program.type];
@@ -37,8 +41,7 @@ export const evalProgramHandler = rpcEvalHandler({
         indexIdMap,
       });
 
-      fs.writeFile(projectResultsFile + ppi.id, JSON.stringify(res.value));
-      return res;
+      return { value: res.value, stdout: res.stdout };
     }
 
     const programPathOrName =

@@ -1,7 +1,7 @@
 import fetch from 'node-fetch';
 import { URL } from 'url';
 import { request } from '../../shared/http';
-import { Proxy } from '../../shared/state';
+import { HTTPConnectorInfo, HTTPPanelInfo, Proxy } from '../../shared/state';
 import { rpcEvalHandler } from './eval';
 import { parseParquet } from './parquet';
 import { tunnel } from './tunnel';
