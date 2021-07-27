@@ -18,6 +18,7 @@ export function rpcEvalHandler<T, S>({
     body: PanelProxy<T, S>
   ) => Promise<{
     value: any;
+    contentType?: string;
     stdout?: string;
     skipWrite?: boolean;
     returnValue?: boolean;
@@ -30,8 +31,9 @@ export function rpcEvalHandler<T, S>({
   ): Promise<any> {
     const projectResultsFile = getProjectResultsFile(projectId);
     const res = await handler(projectId, args, body);
+    const json = jsesc(res.value, { quotes: 'double', json: true });
+    // TODO: is it a problem panels like Program skip this escaping?
     if (!res.skipWrite) {
-      const json = jsesc(res.value, { quotes: 'double', json: true });
       await fs.writeFile(projectResultsFile + body.id, json);
     }
 
@@ -40,6 +42,8 @@ export function rpcEvalHandler<T, S>({
       preview: preview(res.value),
       shape: shape(res.value),
       value: res.returnValue ? res.value : null,
+      size: json.length,
+      contentType: res.contentType || 'application/json',
     };
   }
 

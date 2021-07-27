@@ -83,20 +83,23 @@ export function Pages({
 
     try {
       const indexIdMap: Array<string> = page.panels.map((p) => p.id);
-      const { value, preview, stdout, shape } = await evalPanel(
-        page,
-        panelIndex,
-        indexIdMap,
-        panelResults,
-        connectors,
-        servers
-      );
+      const { value, size, contentType, preview, stdout, shape } =
+        await evalPanel(
+          page,
+          panelIndex,
+          indexIdMap,
+          panelResults,
+          connectors,
+          servers
+        );
       setPanelResults(panelIndex, {
         lastRun: new Date(),
         value,
         preview,
         stdout,
         shape,
+        contentType,
+        size,
         loading: false,
       });
     } catch (e) {
@@ -106,6 +109,8 @@ export function Pages({
         exception: e.stack || e.message,
         stdout: e.stdout,
         preview: '',
+        contentType: 'unknown',
+        size: 0,
         shape: { kind: 'unknown' },
       });
     }

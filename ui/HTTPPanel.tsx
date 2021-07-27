@@ -26,7 +26,7 @@ export async function evalHTTPPanel(
   servers: Array<ServerInfo>
 ) {
   if (MODE === 'browser') {
-    const value = await request(
+    const { value, contentType } = await request(
       (window as any).fetch,
       panel.http.http.method,
       panel.http.http.url,
@@ -34,7 +34,14 @@ export async function evalHTTPPanel(
       panel.http.http.headers,
       panel.content
     );
-    return { value, preview: preview(value), shape: shape(value), stdout: '' };
+    return {
+      value,
+      size: JSON.stringify(value).length,
+      contentType,
+      preview: preview(value),
+      shape: shape(value),
+      stdout: '',
+    };
   }
 
   const connector = panel.http;

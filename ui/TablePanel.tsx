@@ -28,6 +28,8 @@ export async function evalColumnPanel(
       preview: preview(valueWithRequestedColumns),
       shape: shape(valueWithRequestedColumns),
       stdout: '',
+      size: JSON.stringify(value).length,
+      contentType: 'application/json',
     };
   }
 

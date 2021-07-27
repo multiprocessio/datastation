@@ -11,11 +11,15 @@ export class PanelResult {
   preview: string;
   stdout: string;
   shape: Shape;
+  size: number;
+  contentType: string;
 
   constructor() {
     this.stdout = '';
     this.shape = { kind: 'unknown' };
     this.preview = '';
+    this.size = 0;
+    this.contentType = 'unknown';
   }
 }
 

@@ -10,7 +10,7 @@ import { ContentTypePicker } from './ContentTypePicker';
 export async function evalLiteralPanel(panel: LiteralPanelInfo) {
   const literal = panel.literal;
   const array = new TextEncoder().encode(panel.content);
-  const value = await parseArrayBuffer(
+  const { value, contentType } = await parseArrayBuffer(
     panel.literal.contentTypeInfo,
     'literal.' + literal.contentTypeInfo.type,
     array
@@ -27,7 +27,14 @@ export async function evalLiteralPanel(panel: LiteralPanelInfo) {
     );
   }
 
-  return { value, preview: preview(value), shape: shape(value), stdout: '' };
+  return {
+    value,
+    preview: preview(value),
+    shape: shape(value),
+    stdout: '',
+    contentType,
+    size: panel.content.length,
+  };
 }
 
 export function LiteralPanelDetails({

@@ -19,6 +19,7 @@ import {
   SQLPanelInfo,
   TablePanelInfo,
 } from '../shared/state';
+import { humanSize } from '../shared/text';
 import { asyncRPC } from './asyncRPC';
 import { Button } from './component-library/Button';
 import { CodeEditor } from './component-library/CodeEditor';
@@ -170,11 +171,20 @@ function PreviewResults({
   panelOut,
   results,
 }: {
-  panelOut: keyof PanelResult;
+  panelOut: 'preview' | 'stdout' | 'shape' | 'metadata';
   results: PanelResultMeta;
 }) {
   if (!results.lastRun) {
     return <React.Fragment>Panel not yet run.</React.Fragment>;
+  }
+
+  if (panelOut === 'metadata') {
+    return (
+      <div>
+        <div>Size: {humanSize(results.size)}</div>
+        <div>Inferred Content-Type: {results.contentType}</div>
+      </div>
+    );
   }
 
   if (!results[panelOut]) {
@@ -182,10 +192,18 @@ function PreviewResults({
   }
 
   if (panelOut === 'shape') {
-    return <code>{toString(results.shape)}</code>;
+    return (
+      <pre>
+        <code>{toString(results.shape)}</code>
+      </pre>
+    );
   }
 
-  return <code>{results[panelOut]}</code>;
+  return (
+    <pre>
+      <code>{results[panelOut]}</code>
+    </pre>
+  );
 }
 
 export function Panel({
@@ -231,7 +249,7 @@ export function Panel({
   }
 
   const [panelOut, setPanelOut] = React.useState<
-    'preview' | 'stdout' | 'shape'
+    'preview' | 'stdout' | 'shape' | 'metadata'
   >('preview');
   const results = panelResults[panelIndex] || new PanelResultMeta();
   const language =
@@ -585,6 +603,12 @@ export function Panel({
                     >
                       Inferred Schema
                     </Button>
+                    <Button
+                      className={panelOut === 'metadata' ? 'selected' : ''}
+                      onClick={() => setPanelOut('metadata')}
+                    >
+                      Metadata
+                    </Button>
                     {panel.type === 'program' && (
                       <Button
                         className={panelOut === 'stdout' ? 'selected' : ''}
@@ -595,9 +619,9 @@ export function Panel({
                     )}
                   </div>
                   <div className="panel-preview">
-                    <pre className="panel-preview-results">
+                    <div className="panel-preview-results">
                       <PreviewResults results={results} panelOut={panelOut} />
-                    </pre>
+                    </div>
                   </div>
                 </div>
               )}

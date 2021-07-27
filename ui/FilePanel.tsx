@@ -16,12 +16,19 @@ export async function evalFilePanel(
   servers: Array<ServerInfo>
 ): Promise<PanelResult> {
   if (MODE === 'browser') {
-    const value = await parseArrayBuffer(
+    const { value, contentType } = await parseArrayBuffer(
       panel.file.contentTypeInfo,
       panel.file.name,
       panel.file.content
     );
-    return { value, preview: preview(value), shape: shape(value), stdout: '' };
+    return {
+      value,
+      preview: preview(value),
+      shape: shape(value),
+      stdout: '',
+      size: panel.file.content.byteLength,
+      contentType,
+    };
   }
 
   return await asyncRPC<Proxy<FilePanelInfo, void>, void, PanelResult>(

@@ -16,8 +16,7 @@ export const evalFileHandler = rpcEvalHandler<FilePanelInfo, void>({
     const typeInfo = { ...contentTypeInfo, additionalParsers };
     if (!server) {
       const body = await fs.readFile(resolvePath(name));
-      const value = parseArrayBuffer(typeInfo, name, body);
-      return { value };
+      return await parseArrayBuffer(typeInfo, name, body);
     }
 
     const config = await getSSHConfig(server);
@@ -26,8 +25,7 @@ export const evalFileHandler = rpcEvalHandler<FilePanelInfo, void>({
     await sftp.connect(config);
     try {
       const body = (await sftp.get(name)) as ArrayBuffer;
-      const value = await parseArrayBuffer(typeInfo, name, body);
-      return { value };
+      return await parseArrayBuffer(typeInfo, name, body);
     } finally {
       await sftp.end();
     }
