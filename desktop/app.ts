@@ -2,16 +2,16 @@ import { app, ipcMain } from 'electron';
 import { APP_NAME, DEBUG, VERSION } from '../shared/constants';
 import log from '../shared/log';
 import '../shared/polyfill';
-import { evalColumnsHandler } from './eval/columns';
 import { DSPROJ_FLAG } from './constants';
+import { evalColumnsHandler } from './eval/columns';
 import { evalFileHandler } from './eval/file';
 import { evalHTTPHandler } from './eval/http';
-import { configureLogger } from './log';
 import { programHandlers } from './eval/program';
+import { evalSQLHandler } from './eval/sql';
+import { configureLogger } from './log';
 import { openProjectHandler, openWindow } from './project';
 import { registerRPCHandlers, RPCHandler } from './rpc';
 import { loadSettings } from './settings';
-import { evalSQLHandler } from './eval/sql';
 import { storeHandlers } from './store';
 
 configureLogger().then(() => {

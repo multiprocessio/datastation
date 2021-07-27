@@ -4,7 +4,7 @@ import { shape } from '../../shared/shape';
 import { Proxy } from '../../shared/state';
 import { getProjectResultsFile } from '../store';
 
-type PanelProxy<T, S> = Proxy<T,S> & { id: string; };
+type PanelProxy<T, S> = Proxy<T, S> & { id: string };
 
 export function rpcEvalHandler<T, S>({
   resource,
@@ -29,7 +29,10 @@ export function rpcEvalHandler<T, S>({
     const projectResultsFile = getProjectResultsFile(projectId);
     const res = await handler(projectId, args, body);
     if (!res.skipWrite) {
-      await fs.writeFile(projectResultsFile + body.id, JSON.stringify(res.value));
+      await fs.writeFile(
+        projectResultsFile + body.id,
+        JSON.stringify(res.value)
+      );
     }
 
     return {

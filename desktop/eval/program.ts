@@ -4,10 +4,10 @@ import { EOL } from 'os';
 import { file as makeTmpFile } from 'tmp-promise';
 import { RPC } from '../../shared/constants';
 import { LANGUAGES } from '../../shared/languages';
-import { Proxy,ProgramPanelInfo } from '../../shared/state';
-import { rpcEvalHandler } from './eval';
+import { ProgramPanelInfo, Proxy } from '../../shared/state';
 import { SETTINGS } from '../settings';
 import { getProjectResultsFile } from '../store';
+import { rpcEvalHandler } from './eval';
 
 const runningProcesses: Record<string, Set<number>> = {};
 
@@ -18,17 +18,23 @@ function killAllByPanelId(panelId: string) {
   }
 }
 
-export const evalProgramHandler = rpcEvalHandler<ProgramPanelInfo & { indexIdMap: Record<number, string>; }, void> ({
+export const evalProgramHandler = rpcEvalHandler<
+  ProgramPanelInfo & { indexIdMap: Record<number, string> },
+  void
+>({
   resource: RPC.EVAL_PROGRAM,
-  handler: async function(
+  handler: async function (
     projectId: string,
     _: string,
     {
       indexIdMap,
       ...ppi
-    }: Proxy<ProgramPanelInfo & {
-      indexIdMap: Record<number, string>;
-    }, void>
+    }: Proxy<
+      ProgramPanelInfo & {
+        indexIdMap: Record<number, string>;
+      },
+      void
+    >
   ) {
     const programTmp = await makeTmpFile();
     const language = LANGUAGES[ppi.program.type];

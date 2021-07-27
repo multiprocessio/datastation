@@ -19,7 +19,8 @@ export const evalHTTPHandler = rpcEvalHandler<HTTPPanelInfo, HTTPConnectorInfo>(
       hci: Proxy<HTTPPanelInfo, HTTPConnectorInfo>
     ) {
       const url = new URL(
-        (hci.connector.http.url.startsWith('http') ? '' : 'http://') + hci.connector.http.url
+        (hci.connector.http.url.startsWith('http') ? '' : 'http://') +
+          hci.connector.http.url
       );
       return await tunnel(
         hci.server,
@@ -42,4 +43,5 @@ export const evalHTTPHandler = rpcEvalHandler<HTTPPanelInfo, HTTPConnectorInfo>(
         }
       );
     },
-});
+  }
+);
