@@ -4903,8 +4903,8 @@ pretty-format@^27.0.6:
     react-is "^17.0.1"
 
 "preview@https://github.com/multiprocessio/preview":
-  version "0.1.0"
-  resolved "https://github.com/multiprocessio/preview#e2bc00723e741dee767cfed8b01784c033397117"
+  version "0.2.0"
+  resolved "https://github.com/multiprocessio/preview#48846b52e05fe2c35750296335c4aabee78aeb13"
 
 printj@~1.1.0, printj@~1.1.2:
   version "1.1.2"
