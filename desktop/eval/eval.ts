@@ -1,4 +1,5 @@
 import fs from 'fs/promises';
+import jsesc from 'jsesc';
 import { preview } from 'preview';
 import { shape } from '../../shared/shape';
 import { Proxy } from '../../shared/state';
@@ -30,14 +31,7 @@ export function rpcEvalHandler<T, S>({
     const projectResultsFile = getProjectResultsFile(projectId);
     const res = await handler(projectId, args, body);
     if (!res.skipWrite) {
-      // TODO: handle non-ascii better than this
-      // Adapted from https://gist.github.com/mathiasbynens/1243213
-      const json = JSON.stringify(res.value).replace(
-        /[\s\S]/g,
-        function (escape: string) {
-          return '\\u' + ('0000' + escape.charCodeAt(0).toString(16).slice(-4));
-        }
-      );
+      const json = jsesc(res.value, { quotes: 'double', json: true });
       await fs.writeFile(projectResultsFile + body.id, json);
     }
 
