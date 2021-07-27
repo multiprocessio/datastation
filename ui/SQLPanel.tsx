@@ -1,6 +1,7 @@
 import * as React from 'react';
 import {
   ConnectorInfo,
+  PanelResult,
   Proxy,
   ServerInfo,
   SQLConnectorInfo,
@@ -18,19 +19,19 @@ export async function evalSQLPanel(
   connectors: Array<ConnectorInfo>,
   servers: Array<ServerInfo>
 ) {
-  const connector = connectors[
+  const connector =  connectors[
     +panel.sql.connectorIndex
-  ] as Proxy<SQLConnectorInfo>;
-  connector.server = servers.find(
-    (s) => s.id === (panel.serverId || connector.serverId)
-  );
-
+    ] as SQLConnectorInfo;
   return await asyncRPC<
-    Proxy<SQLConnectorInfo & { indexIdMap: Record<number, string> }>,
+    Proxy<SQLPanelInfo & { indexIdMap: Record<number, string> }, SQLConnectorInfo>,
     string,
-    { value: any; preview: string }
+    PanelResult
   >('evalSQL', panel.content, {
-    ...connector,
+    ...panel,
+    server: servers.find(
+    (s) => s.id === (panel.serverId || connector.serverId)
+  ),
+    connector,
     indexIdMap,
   });
 }

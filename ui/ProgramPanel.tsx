@@ -1,23 +1,23 @@
 import * as React from 'react';
 import { MODE, RPC } from '../shared/constants';
 import { LANGUAGES, SupportedLanguages } from '../shared/languages';
-import { Shape } from '../shared/shape';
+import { shape } from '../shared/shape';
 import { PanelResult, ProgramPanelInfo } from '../shared/state';
 import { asyncRPC } from './asyncRPC';
 import { Select } from './component-library/Select';
 
-export function evalProgramPanel(
+export async function evalProgramPanel(
   panel: ProgramPanelInfo,
   panelResults: Array<PanelResult>,
   indexIdMap: Record<number, string>
-): Promise<{ value: any; preview: string; stdout: string; shape: Shape }> {
+): Promise<PanelResult> {
   const program = panel.program;
 
   if (MODE === 'desktop') {
     return asyncRPC<
       ProgramPanelInfo & { indexIdMap: Record<number, string> },
       null,
-      { value: any; preview: string; stdout: string; shape: Shape }
+      PanelResult
     >(RPC.EVAL_PROGRAM, null, {
       ...panel,
       indexIdMap,
@@ -29,7 +29,11 @@ export function evalProgramPanel(
     throw new Error(`Unknown program type: '${program.type}'`);
   }
 
-  return language.inMemoryEval(panel.content, panelResults);
+  const res = await language.inMemoryEval(panel.content, panelResults);
+  return {
+    ...res,
+    shape: shape(res.value),
+  };
 }
 
 export function ProgramPanelDetails({

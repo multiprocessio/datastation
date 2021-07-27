@@ -4,15 +4,15 @@ import * as sqlite from 'sqlite';
 import sqlite3 from 'sqlite3';
 import Client from 'ssh2-sftp-client';
 import { file as makeTmpFile } from 'tmp-promise';
-import { Proxy, SQLConnectorInfo } from '../shared/state';
+import { Proxy, SQLPanelInfo } from '../../shared/state';
+import { getSSHConfig, tunnel } from '../tunnel';
 import { rpcEvalHandler } from './eval';
-import { getSSHConfig, tunnel } from './tunnel';
 
 async function evalPostgreSQL(
   content: string,
   host: string,
   port: number,
-  { sql }: SQLConnectorInfo
+  { connector: { sql } }: Proxy<SQLPanelInfo, SQLConnectorInfo>
 ) {
   const client = new PostgresClient({
     user: sql.username,
@@ -34,7 +34,7 @@ async function evalMySQL(
   content: string,
   host: string,
   port: number,
-  { sql }: SQLConnectorInfo
+  { connector: { sql } }: Proxy<SQLPanelInfo, SQLConnectorInfo>
 ) {
   const connection = await mysql.createConnection({
     host: host,
@@ -52,8 +52,8 @@ async function evalMySQL(
   }
 }
 
-async function evalSqlite(content: string, info: Proxy<SQLConnectorInfo>) {
-  let sqlitefile = info.sql.database;
+async function evalSqlite(content: string, info: Proxy<SQLPanelInfo, SQLConnectorInfo>) {
+  let sqlitefile = info.connector.sql.database;
 
   async function run() {
     const db = await sqlite.open({
@@ -105,8 +105,8 @@ export const evalSQLHandler = rpcEvalHandler({
       return await evalSqlite(content, info);
     }
 
-    const port = +info.sql.address.split(':')[1] || DEFAULT_PORT[info.sql.type];
-    const host = info.sql.address.split(':')[0];
+    const port = +info.connector.address.split(':')[1] || DEFAULT_PORT[info.sql.type];
+    const host = info.connector.address.split(':')[0];
 
     return await tunnel(
       info.server,

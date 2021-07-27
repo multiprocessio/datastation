@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 import Client from 'ssh2-sftp-client';
-import { FilePanelInfo, Proxy } from '../shared/state';
-import { parseArrayBuffer } from '../shared/text';
+import { FilePanelInfo, Proxy } from '../../shared/state';
+import { parseArrayBuffer } from '../../shared/text';
 import { rpcEvalHandler } from './eval';
 import { additionalParsers } from './http';
 import { getSSHConfig, resolvePath } from './tunnel';

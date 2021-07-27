@@ -1,6 +1,7 @@
+import { preview } from 'preview';
 import * as React from 'react';
 import { MODE } from '../shared/constants';
-import { previewObject } from '../shared/preview';
+import { shape } from '../shared/shape';
 import {
   PanelInfo,
   PanelResult,
@@ -23,7 +24,7 @@ export async function evalColumnPanel(
     if (value && !Array.isArray(value)) {
       throw new Error(
         `Expected array input to graph, got (${typeof value}): ` +
-          previewObject(value)
+          preview(value)
       );
     }
     const valueWithRequestedColumns = (value || []).map((row) => {
@@ -39,7 +40,9 @@ export async function evalColumnPanel(
 
     return {
       value: valueWithRequestedColumns,
-      preview: previewObject(valueWithRequestedColumns),
+      preview: preview(valueWithRequestedColumns),
+      shape: shape(valueWithRequestedColumns),
+      stdout: '',
     };
   }
 
@@ -50,7 +53,7 @@ export async function evalColumnPanel(
       indexIdMap: Record<number, string>;
     },
     void,
-    { value: any; preview: string }
+    PanelResult
   >('evalColumns', null, {
     panelSource,
     columns,

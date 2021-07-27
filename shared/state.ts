@@ -1,27 +1,37 @@
-import { shape } from '';
 import * as uuid from 'uuid';
 import { VERSION } from './constants';
 import { SupportedLanguages } from './languages';
 import log from './log';
 import { mergeDeep } from './object';
+import { Shape } from './shape';
 
 export class PanelResult {
   exception?: string;
   value?: Array<any>;
   preview: string;
-  lastRun: Date;
-  loading: boolean;
   stdout: string;
   shape: Shape;
 
   constructor() {
-    this.lastRun = null;
-    this.loading = false;
     this.stdout = '';
+    this.shape = { kind: 'unknown' };
+    this.preview = '';
   }
 }
+
+export class PanelResultMeta extends PanelResult {
+  lastRun: Date;
+  loading: boolean;
+
+  constructor() {
+    super();
+    this.lastRun = null;
+    this.loading = false;
+  }
+}
+
 export type IDDict<T> = { [k: string]: T };
-export type PanelResults = IDDict<Array<PanelResult>>;
+export type PanelResults = IDDict<Array<PanelResultMeta>>;
 
 export type ServerInfoType = 'ssh-agent' | 'password' | 'private-key';
 
@@ -58,8 +68,9 @@ export class ServerInfo {
   }
 }
 
-export type Proxy<T> = T & {
+export type Proxy<T, S = {}> = T & {
   server?: ServerInfo;
+  connector?: S;
 };
 
 export type ConnectorInfoType = 'sql' | 'http';

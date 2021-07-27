@@ -1,5 +1,6 @@
+import { preview } from 'preview';
 import * as React from 'react';
-import { previewObject } from '../shared/preview';
+import { shape } from '../shared/shape';
 import { ContentTypeInfo, LiteralPanelInfo } from '../shared/state';
 import { parseArrayBuffer } from '../shared/text';
 import { ContentTypePicker } from './ContentTypePicker';
@@ -13,7 +14,7 @@ export async function evalLiteralPanel(panel: LiteralPanelInfo) {
     array
   );
 
-  return { value, preview: previewObject(value) };
+  return { value, preview: preview(value), shape: shape(value), stdout: '' };
 }
 
 export function LiteralPanelDetails({

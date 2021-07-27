@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 import preview from 'preview';
-import { shape } from '../shared/shape';
-import { Panel, Proxy } from '../shared/state';
+import { shape } from '../../shared/shape';
+import { Panel, Proxy } from '../../shared/state';
 import { getProjectResultsFile } from './store';
 
 type PanelProxy = Proxy & Panel;

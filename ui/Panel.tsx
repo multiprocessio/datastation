@@ -11,6 +11,7 @@ import {
   LiteralPanelInfo,
   PanelInfo,
   PanelResult,
+  PanelResultMeta,
   ProgramPanelInfo,
   ProjectPage,
   ServerInfo,
@@ -49,7 +50,7 @@ export async function evalPanel(
   panelResults: Array<PanelResult>,
   connectors: Array<ConnectorInfo>,
   servers: Array<ServerInfo>
-): Promise<{ preview: string; value: any; stdout: string }> {
+): Promise<PanelResult> {
   const panel = page.panels[panelId];
   switch (panel.type) {
     case 'program':
@@ -59,55 +60,39 @@ export async function evalPanel(
         indexIdMap
       );
     case 'literal': {
-      const { value, preview } = await evalLiteralPanel(
-        panel as LiteralPanelInfo
-      );
-      return { value, preview, stdout: '' };
+      return await evalLiteralPanel(panel as LiteralPanelInfo);
     }
     case 'sql': {
-      const { value, preview } = await evalSQLPanel(
+      return await evalSQLPanel(
         panel as SQLPanelInfo,
         indexIdMap,
         connectors,
         servers
       );
-      return { value, preview, stdout: '' };
     }
     case 'graph': {
       const { graph } = panel as GraphPanelInfo;
-      const { value, preview } = await evalColumnPanel(
+      return await evalColumnPanel(
         graph.panelSource,
         [graph.x, graph.y.field],
         indexIdMap,
         panelResults
       );
-      return { value, preview, stdout: '' };
     }
     case 'table': {
       const { table } = panel as TablePanelInfo;
-      const { value, preview } = await evalColumnPanel(
+      return await evalColumnPanel(
         table.panelSource,
         table.columns.map((c) => c.field),
         indexIdMap,
         panelResults
       );
-      return { value, preview, stdout: '' };
     }
     case 'http': {
-      const { value, preview } = await evalHTTPPanel(
-        panel as HTTPPanelInfo,
-        null,
-        servers
-      );
-      return { value, preview, stdout: '' };
+      return await evalHTTPPanel(panel as HTTPPanelInfo, null, servers);
     }
     case 'file': {
-      const { value, preview } = await evalFilePanel(
-        panel as FilePanelInfo,
-        null,
-        servers
-      );
-      return { value, preview, stdout: '' };
+      return await evalFilePanel(panel as FilePanelInfo, null, servers);
     }
   }
 }
@@ -158,6 +143,28 @@ function download(filename: string, value: any, isChart = false) {
   document.body.removeChild(element);
 }
 
+function PreviewResults({
+  panelOut,
+  results,
+}: {
+  panelOut: keyof PanelResult;
+  results: PanelResultMeta;
+}) {
+  if (!results.lastRun) {
+    return <React.Fragment>Panel not yet run.</React.Fragment>;
+  }
+
+  if (!results[panelOut]) {
+    return <React.Fragment>Nothing to show.</React.Fragment>;
+  }
+
+  if (panelOut === 'shape') {
+    return <code>{JSON.stringify(results.shape, null, 2)}</code>;
+  }
+
+  return <code>{results[panelOut]}</code>;
+}
+
 export function Panel({
   panel,
   updatePanel,
@@ -170,7 +177,7 @@ export function Panel({
 }: {
   panel: PanelInfo;
   updatePanel: (d: PanelInfo) => void;
-  panelResults: Array<PanelResult>;
+  panelResults: Array<PanelResultMeta>;
   reevalPanel: (i: number) => void;
   panelIndex: number;
   removePanel: (i: number) => void;
@@ -200,15 +207,10 @@ export function Panel({
     body = <span />;
   }
 
-  const [panelOut, setPanelOut] = React.useState('preview');
-  const results: PanelResult = panelResults[panelIndex] || {
-    preview: '',
-    value: null,
-    exception: null,
-    lastRun: null,
-    stdout: '',
-    loading: false,
-  };
+  const [panelOut, setPanelOut] = React.useState<
+    'preview' | 'stdout' | 'shape'
+  >('preview');
+  const results = panelResults[panelIndex] || new PanelResultMeta();
   const language =
     panel.type === 'program' ? (panel as ProgramPanelInfo).program.type : 'sql';
 
@@ -555,16 +557,21 @@ export function Panel({
                 <div className="panel-out">
                   <div className="panel-out-header">
                     <Button
-                      disabled={panel.type !== 'program'}
                       className={panelOut === 'preview' ? 'selected' : ''}
                       onClick={() => setPanelOut('preview')}
                     >
                       Preview
                     </Button>
+                    <Button
+                      className={panelOut === 'shape' ? 'selected' : ''}
+                      onClick={() => setPanelOut('shape')}
+                    >
+                      Inferred Schema
+                    </Button>
                     {panel.type === 'program' && (
                       <Button
-                        className={panelOut === 'output' ? 'selected' : ''}
-                        onClick={() => setPanelOut('output')}
+                        className={panelOut === 'stdout' ? 'selected' : ''}
+                        onClick={() => setPanelOut('stdout')}
                       >
                         Stdout
                       </Button>
@@ -572,21 +579,7 @@ export function Panel({
                   </div>
                   <div className="panel-preview">
                     <pre className="panel-preview-results">
-                      {!(panelOut === 'preview'
-                        ? results.preview
-                        : results.stdout) ? (
-                        results.lastRun ? (
-                          'Nothing to show.'
-                        ) : (
-                          'Panel not yet run.'
-                        )
-                      ) : (
-                        <code>
-                          {panelOut === 'preview'
-                            ? results.preview
-                            : results.stdout}
-                        </code>
-                      )}
+                      <PreviewResults results={results} panelOut={panelOut} />
                     </pre>
                   </div>
                 </div>

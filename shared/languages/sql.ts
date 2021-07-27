@@ -1,7 +1,7 @@
 import alasql from 'alasql';
 import fs from 'fs/promises';
+import { preview } from 'preview';
 import { v4 as uuidv4 } from 'uuid';
-import { previewObject } from '../preview';
 import { PanelResult } from '../state';
 
 function exceptionRewriter(msg: string, _: string) {
@@ -62,7 +62,7 @@ async function inMemoryEval(
     const [value] = await alasql([patchedProgram]);
     return {
       value,
-      preview: previewObject(value),
+      preview: preview(value),
       stdout: '',
     };
   } finally {

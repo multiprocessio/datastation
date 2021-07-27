@@ -4894,7 +4894,7 @@ pretty-format@^27.0.6:
 
 "preview@https://github.com/multiprocessio/preview":
   version "0.1.0"
-  resolved "https://github.com/multiprocessio/preview#a3c0bb021dcb191582c44be507332c0aa543ddd0"
+  resolved "https://github.com/multiprocessio/preview#e2bc00723e741dee767cfed8b01784c033397117"
 
 printj@~1.1.0, printj@~1.1.2:
   version "1.1.2"

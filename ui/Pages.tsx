@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { MODE_FEATURES } from '../shared/constants';
 import {
-  PanelResult,
+  PanelResultMeta,
   PanelResults,
   ProjectPage,
   ProjectState,
@@ -52,7 +52,7 @@ export function Pages({
 
   function setPanelResults(
     panelIndex: number,
-    result: PanelResult,
+    result: PanelResultMeta,
     valueChange: boolean = false
   ) {
     panelResultsByPage[page.id][panelIndex] = result;
@@ -89,7 +89,7 @@ export function Pages({
   async function reevalPanel(panelIndex: number, reset?: boolean) {
     const { connectors, servers } = state;
 
-    let panel = panelResults[panelIndex] || new PanelResult();
+    let panel = panelResults[panelIndex] || new PanelResultMeta();
     panel.lastRun = null;
     panel.loading = !reset;
 

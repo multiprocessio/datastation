@@ -1,5 +1,5 @@
 import circularSafeStringify from 'json-stringify-safe';
-import { previewObject } from '../preview';
+import { preview } from 'preview';
 import { PanelResult } from '../state';
 import { EOL } from './types';
 
@@ -56,7 +56,7 @@ function inMemoryEval(
       const value = convertFromPyodideObjectIfNecessary(v);
       resolve({
         value,
-        preview: previewObject(value),
+        preview: preview(value),
         stdout: stdout.join('\n'),
       });
     };

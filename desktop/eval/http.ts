@@ -1,7 +1,7 @@
 import fetch from 'node-fetch';
 import { URL } from 'url';
-import { request } from '../shared/http';
-import { Proxy } from '../shared/state';
+import { request } from '../../shared/http';
+import { Proxy } from '../../shared/state';
 import { rpcEvalHandler } from './eval';
 import { parseParquet } from './parquet';
 import { tunnel } from './tunnel';
@@ -19,7 +19,7 @@ export const evalHTTPHandler =
       handler: async function (
         _: string,
         body: string,
-        hci: Proxy<HTTPPanelInfo>
+        hci: Proxy<HTTPPanelInfo, HTTPConnectorInfo>
       ) {
         const url = new URL(
           (hci.http.url.startsWith('http') ? '' : 'http://') + hci.http.url

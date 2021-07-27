@@ -1,12 +1,14 @@
+import { preview } from 'preview';
 import * as React from 'react';
 import { MODE } from '../shared/constants';
 import { request } from '../shared/http';
-import { previewObject } from '../shared/preview';
+import { shape } from '../shared/shape';
 import {
   ContentTypeInfo,
-  HTTPConnectorInfo,
   HTTPConnectorInfoMethod,
+    HTTPConnectorInfo,
   HTTPPanelInfo,
+  PanelResult,
   Proxy,
   ServerInfo,
 } from '../shared/state';
@@ -32,18 +34,21 @@ export async function evalHTTPPanel(
       panel.http.http.headers,
       panel.content
     );
-    return { value, preview: previewObject(value) };
+    return { value, preview: preview(value), shape: shape(value), stdout: '' };
   }
 
-  const connector = panel.http as Proxy<HTTPConnectorInfo>;
-  connector.server = servers.find(
-    (s) => s.id === (panel.serverId || connector.serverId)
+  const connector = panel.http;
+  return await asyncRPC<Proxy<HTTPPanelInfo, HTTPConnectorInfo>, string, PanelResult>(
+    'evalHTTP',
+    panel.content,
+    {
+      ...panel,
+      connector,
+      server: servers.find(
+        (s) => s.id === (panel.serverId || connector.serverId)
+      ),
+    }
   );
-  return await asyncRPC<
-    Proxy<HTTPConnectorInfo>,
-    string,
-    { value: any; preview: string }
-  >('evalHTTP', panel.content, connector);
 }
 
 export function HTTPPanelDetails({

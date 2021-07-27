@@ -1,12 +1,8 @@
+import { preview } from 'preview';
 import * as React from 'react';
 import { MODE } from '../shared/constants';
-import { previewObject } from '../shared/preview';
-import {
-  ContentTypeInfo,
-  FilePanelInfo,
-  Proxy,
-  ServerInfo,
-} from '../shared/state';
+import { shape } from '../shared/shape';
+import { FilePanelInfo, PanelResult, Proxy, ServerInfo } from '../shared/state';
 import { parseArrayBuffer } from '../shared/text';
 import { asyncRPC } from './asyncRPC';
 import { FileInput } from './component-library/FileInput';
@@ -18,24 +14,24 @@ export async function evalFilePanel(
   panel: FilePanelInfo,
   _: any,
   servers: Array<ServerInfo>
-) {
+): Promise<PanelResult> {
   if (MODE === 'browser') {
     const value = await parseArrayBuffer(
       panel.file.contentTypeInfo,
       panel.file.name,
       panel.file.content
     );
-    return { value, preview: previewObject(value) };
+    return { value, preview: preview(value), shape: shape(value), stdout: '' };
   }
 
-  return await asyncRPC<
-    Proxy<{ name: string; contentTypeInfo: ContentTypeInfo }>,
-    void,
-    { value: any; preview: string }
-  >('evalFile', null, {
-    ...panel.file,
-    server: servers.find((s) => s.id === panel.serverId),
-  });
+  return await asyncRPC<Proxy<FilePanelInfo>, void, PanelResult>(
+    'evalFile',
+    null,
+    {
+      ...panel,
+      server: servers.find((s) => s.id === panel.serverId),
+    }
+  );
 }
 
 export function FilePanelDetails({

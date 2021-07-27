@@ -1,6 +1,6 @@
 import Chart from 'chart.js/auto';
+import { preview } from 'preview';
 import * as React from 'react';
-import { previewObject } from '../shared/preview';
 import {
   GraphPanelInfo,
   GraphPanelInfoType,
@@ -90,7 +90,7 @@ export function GraphPanel({
     if (!Array.isArray(value)) {
       console.error(
         `Expected array input to graph, got (${typeof value}): ` +
-          previewObject(value)
+          preview(value)
       );
       return;
     }
