@@ -25,3 +25,29 @@ export function deepEquals(a: any, b: any) {
 export function deepClone(a: any) {
   return JSON.parse(JSON.stringify(a));
 }
+
+export function columnsFromObject(value: any, columns: Array<string>) {
+  if (value && !Array.isArray(value)) {
+    throw new Error(
+      `Expected array input to graph, got (${typeof value}): ` + preview(value)
+    );
+  }
+
+  console.log(value, columns);
+  return (value || []).map((row: any) => {
+    // If none specified, select all
+    if (!columns.length) {
+      return row;
+    }
+
+    if (!row) {
+      return null;
+    }
+
+    const cells: Record<string, any> = {};
+    (columns || []).forEach((name) => {
+      cells[name] = row[name];
+    });
+    return cells;
+  });
+}

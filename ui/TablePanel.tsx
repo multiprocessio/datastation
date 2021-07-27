@@ -1,6 +1,7 @@
 import { preview } from 'preview';
 import * as React from 'react';
 import { MODE } from '../shared/constants';
+import { columnsFromObject } from '../shared/object';
 import { shape } from '../shared/shape';
 import {
   PanelInfo,
@@ -8,7 +9,6 @@ import {
   TableColumn,
   TablePanelInfo,
 } from '../shared/state';
-import { columnsFromData } from '../shared/text';
 import { asyncRPC } from './asyncRPC';
 import { Button } from './component-library/Button';
 import { FieldPicker } from './FieldPicker';
@@ -22,7 +22,7 @@ export async function evalColumnPanel(
 ) {
   if (MODE === 'browser') {
     const { value } = panelResults[panelSource];
-    const valueWithRequestedColumns = columnsFromData(value, columns);
+    const valueWithRequestedColumns = columnsFromObject(value, columns);
     return {
       value: valueWithRequestedColumns,
       preview: preview(valueWithRequestedColumns),

@@ -1,6 +1,6 @@
 import fs from 'fs/promises';
 import { RPC } from '../../shared/constants';
-import { columnsFromData } from '../../shared/text';
+import { columnsFromObject } from '../../shared/object';
 import { getProjectResultsFile } from '../store';
 import { rpcEvalHandler } from './eval';
 
@@ -21,7 +21,7 @@ export const evalColumnsHandler = rpcEvalHandler({
     const f = await fs.readFile(projectResultsFile + id);
     const value = JSON.parse(f.toString());
 
-    const valueWithRequestedColumns = columnsFromData(value, columns);
+    const valueWithRequestedColumns = columnsFromObject(value, columns);
 
     return {
       value: valueWithRequestedColumns,

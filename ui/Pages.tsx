@@ -139,11 +139,7 @@ export function Pages({
               )}
             />
           </span>
-          <Input
-            className="page-name page-name--current"
-            onChange={(value: string) => updatePage({ ...page, name: value })}
-            value={page.name}
-          />
+
           <span title="Evaluate all panels sequentially">
             <Button icon onClick={evalAll} type="primary">
               play_arrow
@@ -151,7 +147,13 @@ export function Pages({
           </span>
         </div>
         {state.pages.map((page: ProjectPage, i: number) =>
-          i === currentPage ? undefined : (
+          i === currentPage ? (
+            <Input
+              className="page-name page-name--current"
+              onChange={(value: string) => updatePage({ ...page, name: value })}
+              value={page.name}
+            />
+          ) : (
             <Button
               key={page.id}
               className="page-name"

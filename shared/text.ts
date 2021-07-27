@@ -167,27 +167,3 @@ export async function parseArrayBuffer(
 
   return bodyAsString();
 }
-
-export function columnsFromData(value: any, columns: Array<string>) {
-  if (value && !Array.isArray(value)) {
-    throw new Error(
-      `Expected array input to graph, got (${typeof value}): ` + preview(value)
-    );
-  }
-  return (valueWithRequestedColumns = (value || []).map((row: any) => {
-    // If none specified, select all
-    if (!columns.length) {
-      return row;
-    }
-
-    if (!row) {
-      return null;
-    }
-
-    const cells: Record<string, any> = [];
-    (columns || []).forEach((name) => {
-      cells[name] = row[name];
-    });
-    return cells;
-  }));
-}
