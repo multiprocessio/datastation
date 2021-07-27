@@ -90,15 +90,36 @@ function objectMerge(a: ObjectShape, b: ObjectShape) {
   }
 }
 
-function merge(shapes: Array<Shape>): Shape {
+function getNRandomUniqueElements(arraySize: number, maxSampleSize: number) {
+  if (!maxSampleSize || arraySize <= maxSampleSize) {
+    return new Array(arraySize).map((_, i) => i);
+  }
+
+  const unique = [];
+  while (unique.length < maxSampleSize) {
+    const random = Math.floor(Math.random() * arraySize) + 1;
+    if (unique.indexOf(random) === -1) {
+      unique.push(random);
+    }
+  }
+
+  return unique;
+}
+
+function merge(shapes: Array<Shape>, sampleSizeMax: number): Shape {
   const merged: Shape = { kind: 'array', children: { kind: 'unknown' } };
   if (!shapes.length) {
     return merged;
   }
 
+  const randomUniqueIndexes = getNRandomUniqueElements(
+    shapes.length,
+    sampleSizeMax
+  );
+
   merged.children = shapes[0];
-  for (let i = 0; i < shapes.length; i++) {
-    const shape = shapes[i];
+  for (let i = 0; i < randomUniqueIndexes.length; i++) {
+    const shape = shapes[randomUniqueIndexes[i]];
 
     if (deepEquals(merged.children, shape)) {
       continue;
@@ -130,23 +151,35 @@ function merge(shapes: Array<Shape>): Shape {
   return merged;
 }
 
-function shapeOfArray(data: any[]) {
+function shapeOfArray(data: any[], sampleSizeMax: number) {
   const shapes = data.map(shape);
-  return merge(shapes);
+  return merge(shapes, sampleSizeMax);
 }
 
-function shapeOfObject(data: Record<string, any>): Shape {
+function shapeOfObject(
+  data: Record<string, any>,
+  sampleSizeMax: number
+): Shape {
   const keys = Object.keys(data);
-  return {
-    kind: 'object',
-    children: keys.reduce((agg, k) => ({ ...agg, [k]: shape(data[k]) }), {}),
-  };
+
+  const randomUniqueIndexes = getNRandomUniqueElements(
+    keys.length,
+    sampleSizeMax
+  );
+
+  const os: ObjectShape = { kind: 'object', children: {} };
+  for (let i = 0; i < randomUniqueIndexes.length; i++) {
+    const key = keys[randomUniqueIndexes[i]];
+    os.children[key] = shape(data[key], sampleSizeMax);
+  }
+
+  return os;
 }
 
-export function shape(data: any): Shape {
+export function shape(data: any, sampleSizeMax = 5000): Shape {
   try {
     if (Array.isArray(data)) {
-      return shapeOfArray(data as any[]);
+      return shapeOfArray(data as any[], sampleSizeMax);
     }
 
     if (data === null) {
@@ -154,7 +187,7 @@ export function shape(data: any): Shape {
     }
 
     if (typeof data === 'object') {
-      return shapeOfObject(data);
+      return shapeOfObject(data, sampleSizeMax);
     }
 
     if (typeof data === 'number') {
