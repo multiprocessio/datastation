@@ -1,5 +1,4 @@
 import alasql from 'alasql';
-import fs from 'fs/promises';
 import { preview } from 'preview';
 import { v4 as uuidv4 } from 'uuid';
 import { PanelResult } from '../state';
@@ -44,6 +43,7 @@ async function inMemoryEval(
     if (Array.isArray(resultsOrDiskDetails)) {
       res = resultsOrDiskDetails[n].value;
     } else {
+      const fs = require('fs/promises');
       const f = await fs.readFile(
         resultsOrDiskDetails.resultsFile + resultsOrDiskDetails.indexIdMap[n]
       );
