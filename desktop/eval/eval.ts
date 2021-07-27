@@ -1,12 +1,12 @@
 import fs from 'fs/promises';
-import preview from 'preview';
+import { preview } from 'preview';
 import { shape } from '../../shared/shape';
-import { Panel, Proxy } from '../../shared/state';
-import { getProjectResultsFile } from './store';
+import { Proxy } from '../../shared/state';
+import { getProjectResultsFile } from '../store';
 
-type PanelProxy = Proxy & Panel;
+type PanelProxy<T, S> = Proxy<T,S> & { id: string; };
 
-export function rpcEvalHandler<T>({
+export function rpcEvalHandler<T, S>({
   resource,
   handler,
 }: {
@@ -14,23 +14,22 @@ export function rpcEvalHandler<T>({
   handler: (
     projectId: string,
     args: any,
-    body: PanelProxy<T>
+    body: PanelProxy<T, S>
   ) => Promise<{
     value: any;
     stdout?: string;
     skipWrite?: boolean;
   }>;
 }) {
-  const projectResultsFile = getProjectResultsFile(projectId);
-
   async function wrappedHandler(
     projectId: string,
     args: any,
-    body: PanelProxy<T>
+    body: PanelProxy<T, S>
   ): Promise<any> {
+    const projectResultsFile = getProjectResultsFile(projectId);
     const res = await handler(projectId, args, body);
     if (!res.skipWrite) {
-      await fs.writeFile(projectResultsFile + body.id);
+      await fs.writeFile(projectResultsFile + body.id, JSON.stringify(res.value));
     }
 
     return {
