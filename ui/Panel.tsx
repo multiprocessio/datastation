@@ -361,7 +361,7 @@ export function Panel({
               >
                 <Button
                   icon
-		  disabled={!results.lastRun}
+                  disabled={!results.lastRun}
                   onClick={() =>
                     fetchAndDownloadResults(panel, panelRef, results)
                   }

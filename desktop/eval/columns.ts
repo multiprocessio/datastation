@@ -56,7 +56,7 @@ export const evalColumnsHandler = rpcEvalHandler({
 export const storeLiteralHandler = rpcEvalHandler({
   resource: RPC.STORE_LITERAL,
   handler: function (_: string, _1: string, { value }: { value: any }) {
-    return { value };
+    return Promise.resolve({ value });
   },
 });
 

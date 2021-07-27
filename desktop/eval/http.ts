@@ -41,7 +41,7 @@ export const evalHTTPHandler = rpcEvalHandler<HTTPPanelInfo, HTTPConnectorInfo>(
             body
           );
 
-return {value};
+          return { value };
         }
       );
     },
