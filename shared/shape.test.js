@@ -6,19 +6,19 @@ test('shape', () => {
   expect(shapeString('foo')).toBe('string');
 
   expect(shapeString({ b: 'cat', c: true })).toBe(
-    "object with 'b' of string, 'c' of boolean"
+    "Object with\n  'b' of\n    string,\n  'c' of\n    boolean"
   );
 
-  expect(shapeString(['foo'])).toBe('array of string');
+  expect(shapeString(['foo'])).toBe('Array of\n  string');
 
-  expect(shapeString(['foo', 1])).toBe('array of string or number');
+  expect(shapeString(['foo', 1])).toBe('Array of\n  string or\n  number');
 
   expect(
     shapeString([
       { a: 1, b: 2 },
       { a: 3, b: 4 },
     ])
-  ).toBe("array of object with 'a' of number, 'b' of number");
+  ).toBe("Array of\n  Object with\n    'a' of\n      number,\n    'b' of\n      number");
 
   expect(
     shapeString([
@@ -26,7 +26,7 @@ test('shape', () => {
       { a: 3, b: null, c: 'hey' },
     ])
   ).toBe(
-    "array of object with 'a' of number, 'b' of number or null, 'c' of string"
+    "Array of\n  Object with\n    'a' of\n      number,\n    'b' of\n      number or\n      null,\n    'c' of\n      string"
   );
 
   expect(
@@ -34,9 +34,9 @@ test('shape', () => {
       [1, 2],
       ['x', 'y'],
     ])
-  ).toBe('array of array of unknown');
+  ).toBe('Array of\n  Array of\n    number');
 
-  expect(shapeString([(1)[('x', 'y')]])).toBe(
-    'array of array of unknown or number'
+  expect(shapeString([1, ['x', 'y']])).toBe(
+    'Array of\n  number or\n  Array of\n    string'
   );
 });

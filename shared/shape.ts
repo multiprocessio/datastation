@@ -29,23 +29,27 @@ export type Shape =
       kind: 'unknown';
     };
 
-export function toString(shape: Shape): string {
+export function levelPrefix(level: number) {
+  return [...Array(level*2).keys()].map(c => ' ').join('');
+}
+
+export function toString(shape: Shape, level = 0): string {
   switch (shape.kind) {
     case 'scalar':
-      return shape.name;
+      return levelPrefix(level) + shape.name;
     case 'array':
-      return 'array of ' + toString(shape.children);
+      return levelPrefix(level) + 'Array of\n' + toString(shape.children, level+1);
     case 'object':
-      return (
-        'object with ' +
+      return levelPrefix(level) + (
+        'Object with\n' +
         Object.keys(shape.children)
-          .map((k) => `'${k}' of ${toString(shape.children[k])}`)
-          .join(', ')
+          .map((k) => `${levelPrefix(level+1)}'${k}' of\n${toString(shape.children[k], level+2)}`)
+          .join(',\n')
       );
     case 'varied':
-      return shape.children.map(toString).join(' or ');
+      return shape.children.map(c => toString(c, level)).join(' or\n');
     case 'unknown':
-      return 'unknown';
+      return levelPrefix(level) + 'Unknown';
   }
 }
 
@@ -103,8 +107,7 @@ function merge(shapes: Array<Shape>): Shape {
       }
 
       if (shape.kind === 'array') {
-        // TODO: support this better
-        merged.children = merge([merged.children, shape]);
+        // TODO: support this
         continue;
       }
     }
@@ -132,6 +135,7 @@ function shapeOfObject(data: Record<string, any>): Shape {
 }
 
 export function shape(data: any): Shape {
+  try {
   if (Array.isArray(data)) {
     return shapeOfArray(data as any[]);
   }
@@ -160,5 +164,9 @@ export function shape(data: any): Shape {
     return { kind: 'scalar', name: 'boolean' };
   }
 
-  return { kind: 'scalar', name: 'string' };
+    return { kind: 'scalar', name: 'string' };
+  } catch (e) {
+    console.error(e);
+    return { kind: 'unknown' };
+  }
 }
