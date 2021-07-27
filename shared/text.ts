@@ -160,7 +160,7 @@ export async function parseArrayBuffer(
         .filter(Boolean)
         .map((l) => {
           try {
-            return { value: JSON.parse(l), contentType: realType };
+            return JSON.parse(l);
           } catch (e) {
             log.error(e, l);
           }
