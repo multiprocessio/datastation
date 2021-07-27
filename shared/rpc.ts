@@ -1,2 +1,2 @@
 export const EVAL_PROGRAM = 'evalProgram';
-export type evalProgramHandler 
+export const KILL_PROCESS = 'killProcess';

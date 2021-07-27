@@ -11,7 +11,11 @@ function defaultContent(panelIndex: number) {
   return `previous = DM_getPanel(${panelIndex - 1});\nDM_setPanel(previous);`;
 }
 
-function preamble(resultsFile: string, panelId: string, indexIdMap: Record<number, string>) {
+function preamble(
+  resultsFile: string,
+  panelId: string,
+  indexIdMap: Record<number, string>
+) {
   const file = ``;
   return `
 def DM_getPanel(i):
@@ -26,8 +30,16 @@ def DM_setPanel(v):
 
 function inMemoryEval(
   prog: string,
-  results: Array<PanelResult>
+  results:
+    | Array<PanelResult>
+    | { indexIdMap: Record<number, string>; resultsFile: string }
 ): Promise<{ value: any; preview: string; stdout: string }> {
+  if (!Array.isArray(results)) {
+    throw new Error(
+      'Bad calling convention for in-memory panel. Expected full results object.'
+    );
+  }
+
   const anyWindow = window as any;
 
   // TODO: better deep copy
@@ -71,7 +83,9 @@ function exceptionRewriter(msg: string, _: string) {
   const matcher = /, line ([1-9]*), in <module>/g;
 
   return msg.replace(matcher, function (_: string, line: string) {
-    return `, line ${+line - preamble('', '').split(EOL).length}, in <module>`;
+    return `, line ${
+      +line - preamble('', '', {}).split(EOL).length
+    }, in <module>`;
   });
 }
 

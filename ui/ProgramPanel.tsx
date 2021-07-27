@@ -8,7 +8,7 @@ import { Select } from './component-library/Select';
 export function evalProgramPanel(
   panel: ProgramPanelInfo,
   panelResults: Array<PanelResult>,
-  indexIdMap: Record<number, string>,
+  indexIdMap: Record<number, string>
 ): Promise<{ value: any; preview: string; stdout: string }> {
   const program = panel.program;
 

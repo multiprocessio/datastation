@@ -99,15 +99,14 @@ export function Pages({
     }
 
     try {
-      const indexIdMap: Record<number, string> = page.panels.reduce((agg, { id }, i) => ({
-        ...agg,
-        [i]: id
-      }), {});
-      const {
-        value,
-        preview,
-        stdout,
-      } = await evalPanel(
+      const indexIdMap: Record<number, string> = page.panels.reduce(
+        (agg, { id }, i) => ({
+          ...agg,
+          [i]: id,
+        }),
+        {}
+      );
+      const { value, preview, stdout } = await evalPanel(
         page,
         panelIndex,
         indexIdMap,

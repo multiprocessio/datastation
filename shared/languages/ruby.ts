@@ -6,7 +6,11 @@ function defaultContent(panelIndex: number) {
   return `previous = DM_getPanel(${panelIndex - 1});\nDM_setPanel(previous);`;
 }
 
-function preamble(resultsFile: string, panelId: string, indexIdMap: Record<number, string>) {
+function preamble(
+  resultsFile: string,
+  panelId: string,
+  indexIdMap: Record<number, string>
+) {
   return `
 def DM_getPanel(i)
   require 'json'
@@ -14,7 +18,7 @@ def DM_getPanel(i)
 end
 def DM_setPanel(v)
   require 'json'
-  File.write('${resultsFile+panelId}', v.to_json)
+  File.write('${resultsFile + panelId}', v.to_json)
 end`;
 }
 

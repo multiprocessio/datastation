@@ -5,6 +5,7 @@ import sqlite3 from 'sqlite3';
 import Client from 'ssh2-sftp-client';
 import { file as makeTmpFile } from 'tmp-promise';
 import { Proxy, SQLConnectorInfo } from '../shared/state';
+import { getProjectResultsFile } from './store';
 import { getSSHConfig, tunnel } from './tunnel';
 
 async function evalPostgreSQL(

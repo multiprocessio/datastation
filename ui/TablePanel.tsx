@@ -16,7 +16,7 @@ export async function evalColumnPanel(
   panelSource: number,
   columns: Array<string>,
   indexIdMap: Record<number, string>,
-  panelResults: Array<PanelResult>,
+  panelResults: Array<PanelResult>
 ) {
   if (MODE === 'browser') {
     const { value } = panelResults[panelSource];
@@ -44,7 +44,11 @@ export async function evalColumnPanel(
   }
 
   return await asyncRPC<
-    { panelSource: number; columns: Array<string>, indexIdMap: Record<number, string> },
+    {
+      panelSource: number;
+      columns: Array<string>;
+      indexIdMap: Record<number, string>;
+    },
     void,
     { value: any; preview: string }
   >('evalColumns', null, {

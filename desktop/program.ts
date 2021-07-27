@@ -2,11 +2,10 @@ import { spawn } from 'child_process';
 import fs from 'fs/promises';
 import { EOL } from 'os';
 import { file as makeTmpFile } from 'tmp-promise';
+import { RPC } from '../shared/constants';
 import { LANGUAGES } from '../shared/languages';
-import { PanelResult, ProgramPanelInfo } from '../shared/state';
-import { parseArrayBuffer } from '../shared/text';
-import {previewObject } from '../shared/preview';
-import {RPC} from '../shared/constants';
+import { previewObject } from '../shared/preview';
+import { ProgramPanelInfo } from '../shared/state';
 import { SETTINGS } from './settings';
 import { getProjectResultsFile } from './store';
 
@@ -26,7 +25,7 @@ export const programHandlers = [
       projectId: string,
       _: string,
       ppi: ProgramPanelInfo,
-      indexIdMap: Record<number, string>,
+      indexIdMap: Record<number, string>
     ) {
       const programTmp = await makeTmpFile();
       const language = LANGUAGES[ppi.program.type];
@@ -34,7 +33,13 @@ export const programHandlers = [
       const projectResultsFile = getProjectResultsFile(projectId);
 
       if (!language.defaultPath) {
-        return language.inMemoryEval(ppi.content, projectResultsFile, indexIdMap);
+        const res = await language.inMemoryEval(ppi.content, {
+          resultsFile: projectResultsFile,
+          indexIdMap,
+        });
+
+        fs.writeFile(projectResultsFile + ppi.id, JSON.stringify(res.value));
+        return res;
       }
 
       const programPathOrName =
@@ -43,7 +48,11 @@ export const programHandlers = [
       let out = '';
       let pid = 0;
       try {
-        const preamble = language.preamble(projectResultsFile, panelIndex, indexIdMap);
+        const preamble = language.preamble(
+          projectResultsFile,
+          ppi.id,
+          indexIdMap
+        );
         await fs.writeFile(programTmp.path, [preamble, ppi.content].join(EOL));
         try {
           const child = spawn(programPathOrName, [programTmp.path]);
@@ -87,11 +96,14 @@ export const programHandlers = [
             throw Error(stderr);
           }
 
+          const f = await fs.readFile(projectResultsFile + ppi.id);
+          const value = JSON.parse(f.toString());
+
           return {
             value: '',
-            preview: objectPreview(value)
+            preview: previewObject(value),
             stdout: out,
-          }
+          };
         } catch (e) {
           e.message = language.exceptionRewriter(e.message, programTmp.path);
           e.stdout = out;

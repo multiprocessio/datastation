@@ -2,7 +2,7 @@ import formatDistanceToNow from 'date-fns/formatDistanceToNow';
 import circularSafeStringify from 'json-stringify-safe';
 import * as CSV from 'papaparse';
 import * as React from 'react';
-import { RPC, MODE_FEATURES } from '../shared/constants';
+import { MODE_FEATURES, RPC } from '../shared/constants';
 import {
   ConnectorInfo,
   FilePanelInfo,
@@ -45,7 +45,7 @@ export const PANEL_TYPE_ICON = {
 export async function evalPanel(
   page: ProjectPage,
   panelId: number,
-  indexIdMap: Record<number,string>,
+  indexIdMap: Record<number, string>,
   panelResults: Array<PanelResult>,
   connectors: Array<ConnectorInfo>,
   servers: Array<ServerInfo>
@@ -53,7 +53,11 @@ export async function evalPanel(
   const panel = page.panels[panelId];
   switch (panel.type) {
     case 'program':
-      return await evalProgramPanel(panel as ProgramPanelInfo, panelResults, indexIdMap);
+      return await evalProgramPanel(
+        panel as ProgramPanelInfo,
+        panelResults,
+        indexIdMap
+      );
     case 'literal': {
       const { value, preview } = await evalLiteralPanel(
         panel as LiteralPanelInfo

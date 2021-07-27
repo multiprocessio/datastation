@@ -1,36 +1,45 @@
-type Shape =
-  {
-    kind: 'scalar';
-    name: 'null' | 'string' | 'number' | 'boolean';
-  }
-  |
-  {
-    kind: 'array',
-    children: Shape,
-  }
-  |
-  {
-    kind: 'object',
-    children: Record<string, Shape>,
-  }
-  |
-  {
-    kind: 'varied',
-    children: shape[],
-  }
-  |
-  {
-    kind: 'unknown',
-  }
+type ScalarShape = {
+  kind: 'scalar';
+  name: 'null' | 'string' | 'number' | 'boolean' | 'bigint';
+};
 
-function toString(shape: Shape) {
+type ObjectShape = {
+  kind: 'object';
+  children: Record<string, Shape>;
+};
+
+type ArrayShape = {
+  kind: 'array';
+  children: Shape;
+};
+
+type VariedShape = {
+  kind: 'varied';
+  children: Shape[];
+};
+
+type Shape =
+  | ArrayShape
+  | ObjectShape
+  | VariedShape
+  | ScalarShape
+  | {
+      kind: 'unknown';
+    };
+
+export function toString(shape: Shape): string {
   switch (shape.kind) {
     case 'scalar':
       return shape.name;
     case 'array':
       return 'array of ' + toString(shape.children);
     case 'object':
-      return 'object with ' + shape.children.keys().map(k => `'${k}' of ${toString(shape.children[k])}`).join(', ');
+      return (
+        'object with ' +
+        Object.keys(shape.children)
+          .map((k) => `'${k}' of ${toString(shape.children[k])}`)
+          .join(', ')
+      );
     case 'varied':
       return shape.children.map(toString).join(' or ');
     case 'unknown':
@@ -38,60 +47,97 @@ function toString(shape: Shape) {
   }
 }
 
-function arrayMerge(shapes: Array<Shape>): { kind: 'array', children: Shape } {
-  const merged = { kind: 'array', children: { kind: 'unknown' } };
+function deepEquals(a: any, b: any) {
+  return JSON.stringify(a) === JSON.stringify(b);
+}
+
+function deepClone(a: any) {
+  return JSON.parse(JSON.stringify(a));
+}
+
+function objectMerge(a: ObjectShape, b: ObjectShape) {
+  const aKeys = Object.keys(a.children);
+  const bKeys = Object.keys(b.children);
+
+  // First check all aKeys to see if they differ in b
+  for (let i = 0; i < aKeys.length; i++) {
+    const key = aKeys[i];
+    if (bKeys.includes(key)) {
+      if (!deepEquals(a.children[key], b.children[key])) {
+        a.children[key] = {
+          kind: 'varied',
+          children: [a.children[key], b.children[key]],
+        };
+      }
+
+      // If they're equal that's ok, do nothing.
+    }
+  }
+
+  // Now check all bKeys to see if they are new to a
+  for (let i = 0; i < bKeys.length; i++) {
+    const key = bKeys[i];
+    if (!aKeys.includes(key)) {
+      a.children[key] = b.children[key];
+    }
+  }
+}
+
+function merge(shapes: Array<Shape>): Shape {
+  const merged: Shape = { kind: 'array', children: { kind: 'unknown' } };
   if (!shapes.length) {
     return merged;
   }
 
-  merged.children = shapes[0].kind;
+  merged.children = shapes[0];
   for (let i = 0; i < shapes.length; i++) {
     const shape = shapes[i];
 
-    if (JSON.stringify(merged.children) === JSON.stringify(shape)) {
+    if (deepEquals(merged.children, shape)) {
       continue;
     }
 
     if (merged.children.kind === 'unknown') {
-      merged.children = shape.kind;
+      merged.children = shape;
       continue;
     }
 
     if (merged.children.kind === shape.kind) {
       if (shape.kind === 'object') {
-        const newKeys = shape.children.keys().filter(k => merged.children.keys().indexOf(k) < 0);
-        newKeys.forEach(k => {
-          merged.children.children[k] = shape.children[k];
-        });
+        objectMerge(merged.children as ObjectShape, shape as ObjectShape);
         continue;
       }
 
       if (shape.kind === 'array') {
-        merged.children.children = arrayMerge(merged.children.children, shape.children);
+        // TODO: support this better
+        merged.children = merge([merged.children, shape]);
         continue;
       }
     }
 
     merged.children = {
-      'varied',
-      children: [merged.children, shape.kind],
+      kind: 'varied',
+      children: [deepClone(merged.children), shape],
     };
   }
 
-  return { kind: 'array', children };
+  return merged;
 }
 
 function shapeOfArray(data: any[]) {
   const shapes = data.map(shape);
-  return arrayMerge(shapes);
+  return merge(shapes);
 }
 
-function shapeOfObject(data: object) {
+function shapeOfObject(data: Record<string, any>): Shape {
   const keys = Object.keys(data);
-  return { kind: 'object', keys.reduce((agg, k) => ({ ...agg, [k]: shape(data[k]) }), {}) };
+  return {
+    kind: 'object',
+    children: keys.reduce((agg, k) => ({ ...agg, [k]: shape(data[k]) }), {}),
+  };
 }
 
-export function shape(data: any) {
+export function shape(data: any): Shape {
   if (Array.isArray(data)) {
     return shapeOfArray(data as any[]);
   }
@@ -104,5 +150,21 @@ export function shape(data: any) {
     return shapeOfObject(data);
   }
 
-  return { kind: 'scalar', name: typeof data };
+  if (typeof data === 'number') {
+    return { kind: 'scalar', name: 'number' };
+  }
+
+  if (typeof data === 'bigint') {
+    return { kind: 'scalar', name: 'bigint' };
+  }
+
+  if (typeof data === 'undefined') {
+    return { kind: 'scalar', name: 'null' };
+  }
+
+  if (typeof data === 'boolean') {
+    return { kind: 'scalar', name: 'boolean' };
+  }
+
+  return { kind: 'scalar', name: 'string' };
 }
