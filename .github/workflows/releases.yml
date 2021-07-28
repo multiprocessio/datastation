@@ -45,7 +45,7 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - run: ./scripts/ci/prepare_windows.ps
+    - run: powershell ./scripts/ci/prepare_windows.ps
     - run: yarn release-desktop $Env:GITHUB_REF
     - name: Upload release
       run: |
