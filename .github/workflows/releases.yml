@@ -15,14 +15,14 @@ jobs:
 
     - run: ./scripts/ci/prepare_linux.sh
     - run: echo "GIT_TAG=`git tag --points-at HEAD`" >> $GITHUB_ENV
-    - run: yarn release-desktop $GITHUB_TAG
+    - run: yarn release-desktop $GIT_TAG
     - name: Upload on release
       run: |
         curl \
           -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
           -H "Content-Type: application/zip" \
-          --data-binary @./releases/linux-x64-$GITHUB_TAG.zip \
-          "https://uploads.github.com/repos/multiprocessio/datastation/releases/$GITHUB_TAG/assets?name=linux-x64-$GITHUB_TAG.zip"
+          --data-binary @./releases/linux-x64-$GIT_TAG.zip \
+          "https://uploads.github.com/repos/multiprocessio/datastation/releases/$GIT_TAG/assets?name=linux-x64-$GIT_TAG.zip"
 
   build-macos:
     runs-on: macos-latest
@@ -34,14 +34,14 @@ jobs:
 
     - run: ./scripts/ci/prepare_macos.sh
     - run: echo "GIT_TAG=`git tag --points-at HEAD`" >> $GITHUB_ENV
-    - run: yarn release-desktop $GITHUB_TAG
+    - run: yarn release-desktop $GIT_TAG
     - name: Upload release
       run: |
         curl \
           -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
           -H "Content-Type: application/zip" \
-          --data-binary @./releases/darwin-x64-$GITHUB_TAG.zip \
-          "https://uploads.github.com/repos/multiprocessio/datastation/releases/$GITHUB_TAG/assets?name=darwin-x64-$GITHUB_TAG.zip"
+          --data-binary @./releases/darwin-x64-$GIT_TAG.zip \
+          "https://uploads.github.com/repos/multiprocessio/datastation/releases/$GIT_TAG/assets?name=darwin-x64-$GIT_TAG.zip"
 
   build-windows:
     runs-on: windows-latest
@@ -49,11 +49,11 @@ jobs:
     steps:
     - run: powershell ./scripts/ci/prepare_windows.ps
     - run: echo "GIT_TAG=`git tag --points-at HEAD`" >> $Env:GITHUB_ENV
-    - run: yarn release-desktop $Env:GITHUB_TAG
+    - run: yarn release-desktop $Env:GIT_TAG
     - name: Upload release
       run: |
         curl \
           -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
           -H "Content-Type: application/zip" \
           --data-binary @./releases/win32-x64-$Env:GITHUB_.zip \
-          "https://uploads.github.com/repos/multiprocessio/datastation/releases/$Env:GITHUB_TAG/assets?name=win32-x64-$Env:GITHUB_TAG.zip"
+          "https://uploads.github.com/repos/multiprocessio/datastation/releases/$Env:GIT_TAG/assets?name=win32-x64-$Env:GIT_TAG.zip"
