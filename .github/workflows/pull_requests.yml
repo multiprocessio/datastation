@@ -59,6 +59,7 @@ jobs:
       with:
         ref: ${{ github.ref }}
 
-    - run: powershell ./scripts/ci/prepare_windows.ps
+    - run: ./scripts/ci/prepare_windows.ps1
+      shell: pwsh
     - run: yarn release-desktop 0.0.0-e2etest
     - run: yarn e2e-test
