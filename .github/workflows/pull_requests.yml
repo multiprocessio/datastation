@@ -111,6 +111,7 @@ jobs:
     runs-on: windows-latest
     if: github.event_name == 'release'
 
+    steps:
     - run: ./scripts/ci/prepare_windows.ps
     - run: yarn release-desktop $Env:GITHUB_REF
     - name: Upload release
