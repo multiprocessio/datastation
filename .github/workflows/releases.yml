@@ -1,0 +1,56 @@
+name: Build and publish artifacts
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@master
+      with:
+        ref: ${{ github.ref }}
+
+    - run: ./scripts/ci/prepare_linux.sh
+    - run: yarn release-desktop $GITHUB_REF
+    - name: Upload on release
+      run: |
+        curl \
+          -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+          -H "Content-Type: application/zip" \
+          --data-binary @./releases/linux-x64-$GITHUB_REF.zip \
+          "https://uploads.github.com/repos/multiprocessio/datastation/releases/$GITHUB_REF/assets?name=linux-x64-$GITHUB_REF.zip"
+
+  build-macos:
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@master
+      with:
+        ref: ${{ github.ref }}
+
+    - run: ./scripts/ci/prepare_macos.sh
+    - run: yarn release-desktop $GITHUB_REF
+    - name: Upload release
+      run: |
+        curl \
+          -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+          -H "Content-Type: application/zip" \
+          --data-binary @./releases/darwin-x64-$GITHUB_REF.zip \
+          "https://uploads.github.com/repos/multiprocessio/datastation/releases/$GITHUB_REF/assets?name=darwin-x64-$GITHUB_REF.zip"
+
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+    - run: ./scripts/ci/prepare_windows.ps
+    - run: yarn release-desktop $Env:GITHUB_REF
+    - name: Upload release
+      run: |
+        curl \
+          -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+          -H "Content-Type: application/zip" \
+          --data-binary @./releases/win32-x64-$Env:GITHUB_REF.zip \
+          "https://uploads.github.com/repos/multiprocessio/datastation/releases/$Env:GITHUB_REF/assets?name=win32-x64-$Env:GITHUB_REF.zip"

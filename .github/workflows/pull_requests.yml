@@ -3,14 +3,11 @@ name: Run tests
 on:
   pull_request:
     branches: [master]
-  release:
-    types: [published]
 
 jobs:  
   test:
     runs-on: ubuntu-latest
 
-    if: github.event_name == 'pull_request'
     steps:
     - uses: actions/checkout@master
       with:
@@ -26,7 +23,6 @@ jobs:
     needs: test
 
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
 
     steps:
     - uses: actions/checkout@master
@@ -40,30 +36,10 @@ jobs:
       # https://github.com/juliangruber/browser-run/issues/147
     - run: xvfb-run --auto-servernum yarn e2e-test
 
-  build-linux:
-    runs-on: ubuntu-latest
-    if: github.event_name == 'release'
-
-    steps:
-    - uses: actions/checkout@master
-      with:
-        ref: ${{ github.ref }}
-
-    - run: ./scripts/ci/prepare_linux.sh
-    - run: yarn release-desktop $GITHUB_REF
-    - name: Upload on release
-      run: |
-        curl \
-          -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-          -H "Content-Type: application/zip" \
-          --data-binary @./releases/linux-x64-$GITHUB_REF.zip \
-          "https://uploads.github.com/repos/multiprocessio/datastation/releases/$GITHUB_REF/assets?name=linux-x64-$GITHUB_REF.zip"
-
   e2e-macos:
     needs: test
 
     runs-on: macos-latest
-    if: github.event_name == 'pull_request'
 
     steps:
     - uses: actions/checkout@master
@@ -72,31 +48,11 @@ jobs:
     - run: ./scripts/ci/prepare_macos.sh
     - run: yarn release-desktop 0.0.0-e2etest
     - run: yarn e2e-test
-
-  build-macos:
-    runs-on: macos-latest
-    if: github.event_name == 'release'
-
-    steps:
-    - uses: actions/checkout@master
-      with:
-        ref: ${{ github.ref }}
-
-    - run: ./scripts/ci/prepare_macos.sh
-    - run: yarn release-desktop $GITHUB_REF
-    - name: Upload release
-      run: |
-        curl \
-          -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-          -H "Content-Type: application/zip" \
-          --data-binary @./releases/darwin-x64-$GITHUB_REF.zip \
-          "https://uploads.github.com/repos/multiprocessio/datastation/releases/$GITHUB_REF/assets?name=darwin-x64-$GITHUB_REF.zip"
 
   e2e-windows:
     needs: test
 
     runs-on: windows-latest
-    if: github.event_name == 'pull_request'
 
     steps:
     - uses: actions/checkout@master
@@ -106,18 +62,3 @@ jobs:
     - run: ./scripts/ci/prepare_windows.ps
     - run: yarn release-desktop 0.0.0-e2etest
     - run: yarn e2e-test
-
-  build-windows:
-    runs-on: windows-latest
-    if: github.event_name == 'release'
-
-    steps:
-    - run: ./scripts/ci/prepare_windows.ps
-    - run: yarn release-desktop $Env:GITHUB_REF
-    - name: Upload release
-      run: |
-        curl \
-          -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-          -H "Content-Type: application/zip" \
-          --data-binary @./releases/win32-x64-$Env:GITHUB_REF.zip \
-          "https://uploads.github.com/repos/multiprocessio/datastation/releases/$Env:GITHUB_REF/assets?name=win32-x64-$Env:GITHUB_REF.zip"
