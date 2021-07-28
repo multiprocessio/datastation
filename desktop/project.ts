@@ -93,26 +93,25 @@ const menuTemplate = [
 ];
 
 export async function openWindow(project: string, newProject: boolean = false) {
-  const preload = path.join(__dirname, 'preload.js');
-  const win = new BrowserWindow({
-    width: 1400,
-    height: 800,
-    title: APP_NAME,
-    webPreferences: {
-      preload,
-      devTools: DEBUG,
-    },
-  });
-
   if (!newProject) {
     if (!project) {
       project = SETTINGS.lastProject;
     } else {
       SETTINGS.lastProject = project;
     }
-    (win as any).DS_project = SETTINGS.lastProject;
     await SETTINGS.save();
   }
+
+  const preload = path.join(__dirname, 'preload.js');
+  const win = new BrowserWindow({
+    width: project ? 1400 : 600,
+    height: project ? 800 : 600,
+    title: APP_NAME,
+    webPreferences: {
+      preload,
+      devTools: DEBUG,
+    },
+  });
 
   const menu = Menu.buildFromTemplate(
     menuTemplate as MenuItemConstructorOptions[]
