@@ -126,38 +126,42 @@ export function Pages({
   return (
     <div className="section pages">
       <div className="section-title">
-        <div className="vertical-align-center">
-          <span title="Delete Page">
-            <Confirm
-              right
-              onConfirm={() => {
-                deletePage(currentPage);
-                setCurrentPage(Math.min(state.pages.length - 1, 0));
-              }}
-              message="delete this page"
-              action="Delete"
-              className="page-delete"
-              render={(confirm: () => void) => (
-                <Button icon onClick={confirm}>
-                  delete
-                </Button>
-              )}
-            />
-          </span>
-
-          <span title="Evaluate all panels sequentially">
-            <Button icon onClick={evalAll} type="primary">
-              play_arrow
-            </Button>
-          </span>
-        </div>
         {state.pages.map((page: ProjectPage, i: number) =>
           i === currentPage ? (
-            <Input
-              className="page-name page-name--current"
-              onChange={(value: string) => updatePage({ ...page, name: value })}
-              value={page.name}
-            />
+            <div className="vertical-align-center current-page">
+              <span title="Delete Page">
+                <Confirm
+                  right
+                  onConfirm={() => {
+                    deletePage(currentPage);
+                    setCurrentPage(Math.min(state.pages.length - 1, 0));
+                  }}
+                  message="delete this page"
+                  action="Delete"
+                  className="page-delete"
+                  render={(confirm: () => void) => (
+                    <Button icon onClick={confirm}>
+                      delete
+                    </Button>
+                  )}
+                />
+              </span>
+
+              <Input
+                className="page-name"
+                onChange={(value: string) =>
+                  updatePage({ ...page, name: value })
+                }
+                autoWidth
+                value={page.name}
+              />
+
+              <span title="Evaluate all panels sequentially">
+                <Button icon onClick={evalAll} type="primary">
+                  play_arrow
+                </Button>
+              </span>
+            </div>
           ) : (
             <Button
               key={page.id}
