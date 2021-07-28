@@ -5413,7 +5413,7 @@ set-value@^2.0.0, set-value@^2.0.1:
 
 "shape@https://github.com/multiprocessio/shape":
   version "0.1.0"
-  resolved "https://github.com/multiprocessio/shape#49eb6be3f239f34dfb4ad9c9172fb474a79c43f6"
+  resolved "https://github.com/multiprocessio/shape#d07cec0b47196d59b7610be6f4d5209f0d8f81de"
 
 shebang-command@^1.2.0:
   version "1.2.0"
