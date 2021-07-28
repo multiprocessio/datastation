@@ -1,9 +1,9 @@
+import { Shape } from 'shape';
 import * as uuid from 'uuid';
 import { VERSION } from './constants';
 import { SupportedLanguages } from './languages';
 import log from './log';
 import { mergeDeep } from './object';
-import { Shape } from './shape';
 
 export class PanelResult {
   exception?: string;
