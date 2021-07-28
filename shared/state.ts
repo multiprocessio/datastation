@@ -238,19 +238,19 @@ export class GraphPanelInfo extends PanelInfo {
 export class SQLPanelInfo extends PanelInfo {
   sql: {
     type: SQLConnectorInfoType;
-    connectorIndex: number;
+    connectorId?: string;
   };
 
   constructor(
     name?: string,
     type?: SQLConnectorInfoType,
-    connectorIndex?: number,
+    connectorId?: string,
     content?: string
   ) {
     super('sql', name, content);
     this.sql = {
       type: type || 'postgres',
-      connectorIndex: connectorIndex || 0,
+      connectorId,
     };
   }
 }

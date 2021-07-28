@@ -6,8 +6,11 @@ function preamble(
   return `
 library("rjson")
 DM_getPanel <- function(i) {
-  panelId = fromJSON("${JSON.stringify(indexIdMap)}")[[i+1]]
-  fromJSON(file="${resultsFile}"+panelId)
+  panelId = fromJSON("${JSON.stringify(indexIdMap).replaceAll(
+    '"',
+    '\\"'
+  )}")[[i+1]]
+  fromJSON(file=paste("${resultsFile}", panelId, sep=""))
 }
 DM_setPanel <- function(v) {
   write(toJSON(v), "${resultsFile + panelId}")

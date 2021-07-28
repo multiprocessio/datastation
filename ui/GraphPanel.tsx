@@ -83,7 +83,7 @@ export function GraphPanel({
   const value = (data || {}).value || [];
   const ref = React.useRef(null);
   React.useEffect(() => {
-    if (!ref || !value.length) {
+    if (!ref || !value || !value.length) {
       return;
     }
 
@@ -103,8 +103,6 @@ export function GraphPanel({
           // Pretty ridiculous there's no builtin way to set a background color
           // https://stackoverflow.com/a/38493678/1507139
           beforeDraw: function () {
-            const chartArea = chart.chartArea;
-
             ctx.save();
             ctx.fillStyle = 'white';
             ctx.fillRect(0, 0, ref.current.width, ref.current.height);
@@ -128,7 +126,7 @@ export function GraphPanel({
     return () => chart.destroy();
   }, [ref.current, data, panel.graph.x, panel.graph.y, panel.graph.type]);
 
-  if (!value.length) {
+  if (!value || !value.length) {
     return null;
   }
 
@@ -174,6 +172,7 @@ export function GraphPanelDetails({
       </div>
       <div className="form-row">
         <FieldPicker
+          preferredDefaultType="string"
           label={panel.graph.type === 'pie' ? 'Slice Field' : 'X-Axis Field'}
           panelSourceResult={data}
           value={panel.graph.x}
@@ -188,6 +187,7 @@ export function GraphPanelDetails({
         <div className="form-row">
           <FieldPicker
             label="Field"
+            preferredDefaultType="number"
             panelSourceResult={data}
             value={panel.graph.y.field}
             onChange={(value: string) => {

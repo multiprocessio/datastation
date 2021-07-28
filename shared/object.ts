@@ -35,7 +35,6 @@ export function columnsFromObject(value: any, columns: Array<string>) {
     );
   }
 
-  console.log(value, columns);
   return (value || []).map((row: any) => {
     // If none specified, select all
     if (!columns.length) {

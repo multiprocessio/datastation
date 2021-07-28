@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "noImplicitAny": true,
+    "noUnusedLocals": true,
     "noEmit": true,
     "jsx": "react",
     "target": "esnext",
