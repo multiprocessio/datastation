@@ -15,10 +15,7 @@ jobs:
     - uses: actions/checkout@master
       with:
         ref: ${{ github.ref }}
-    - run: curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
-    - run: sudo apt-get install -y nodejs cmake
-    - run: sudo npm install --global yarn
-    - run: yarn
+    - run: ./scripts/ci/prepare_linux.sh
     - run: yarn format
     - run: yarn tsc
     - run: ./scripts/fail_on_diff.sh
@@ -29,29 +26,32 @@ jobs:
     needs: test
 
     runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
 
     steps:
     - uses: actions/checkout@master
       with:
         ref: ${{ github.ref }}
-    - run: curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
-    - run: sudo apt-get install -y nodejs cmake xvfb
-    - run: sudo npm install --global yarn
 
-    # Build and e2e test if PR
+    - run: ./scripts/ci/prepare_linux.sh
     - run: yarn release-desktop 0.0.0-e2etest
-      if: github.event_name == 'pull_request'
       # Set up a virtual framebuffer so Chrome will start
       # https://www.electronjs.org/docs/tutorial/testing-on-headless-ci
       # https://github.com/juliangruber/browser-run/issues/147
     - run: xvfb-run --auto-servernum yarn e2e-test
-      if: github.event_name == 'pull_request'
 
-    # Build and release if release
+  build-linux:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release'
+
+    steps:
+    - uses: actions/checkout@master
+      with:
+        ref: ${{ github.ref }}
+
+    - run: ./scripts/ci/prepare_linux.sh
     - run: yarn release-desktop $GITHUB_REF
-      if: github.event_name == 'release'
     - name: Upload on release
-      if: github.event_name == 'release'
       run: |
         curl \
           -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
@@ -63,26 +63,28 @@ jobs:
     needs: test
 
     runs-on: macos-latest
+    if: github.event_name == 'pull_request'
 
     steps:
     - uses: actions/checkout@master
       with:
         ref: ${{ github.ref }}
-    - run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    - run: brew install nodejs cmake python3
-    - run: npm install --global yarn
-
-    # Build and e2e test if PR
+    - run: ./scripts/ci/prepare_macos.sh
     - run: yarn release-desktop 0.0.0-e2etest
-      if: github.event_name == 'pull_request'
     - run: yarn e2e-test
-      if: github.event_name == 'pull_request'
 
-    # Build and release if release
+  build-macos:
+    runs-on: macos-latest
+    if: github.event_name == 'release'
+
+    steps:
+    - uses: actions/checkout@master
+      with:
+        ref: ${{ github.ref }}
+
+    - run: ./scripts/ci/prepare_macos.sh
     - run: yarn release-desktop $GITHUB_REF
-      if: github.event_name == 'release'
     - name: Upload release
-      if: github.event_name == 'release'
       run: |
         curl \
           -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
@@ -94,26 +96,24 @@ jobs:
     needs: test
 
     runs-on: windows-latest
+    if: github.event_name == 'pull_request'
 
     steps:
     - uses: actions/checkout@master
       with:
         ref: ${{ github.ref }}
-    - run: Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')
-    - run: Join-Path (Resolve-Path ~).Path "scoop\shims" >> $Env:GITHUB_PATH
-    - run: scoop install nodejs cmake python yarn zip
 
-    # Build and e2e test if PR
+    - run: ./scripts/ci/prepare_windows.ps
     - run: yarn release-desktop 0.0.0-e2etest
-      if: github.event_name == 'pull_request'
     - run: yarn e2e-test
-      if: github.event_name == 'pull_request'
 
-    # Build and release if release
+  build-windows:
+    runs-on: windows-latest
+    if: github.event_name == 'release'
+
+    - run: ./scripts/ci/prepare_windows.ps
     - run: yarn release-desktop $Env:GITHUB_REF
-      if: github.event_name == 'release'
     - name: Upload release
-      if: github.event_name == 'release'
       run: |
         curl \
           -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
