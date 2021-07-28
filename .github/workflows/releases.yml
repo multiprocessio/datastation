@@ -62,8 +62,4 @@ jobs:
     - run: yarn release-desktop $Env:GIT_TAG
     - name: Upload release
       run: |
-        curl `
-          -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" `
-          -H "Content-Type: application/zip" `
-          --data-binary @./releases/win32-x64-$Env:GITHUB_.zip `
-          "https://uploads.github.com/repos/multiprocessio/datastation/releases/$Env:RELEASE_ID/assets?name=win32-x64-$Env:GIT_TAG.zip"
+        curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -H "Content-Type: application/zip" --data-binary @./releases/win32-x64-$Env:GITHUB_.zip "https://uploads.github.com/repos/multiprocessio/datastation/releases/$Env:RELEASE_ID/assets?name=win32-x64-$Env:GIT_TAG.zip"
