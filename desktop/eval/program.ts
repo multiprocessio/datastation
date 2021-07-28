@@ -61,7 +61,6 @@ export const evalProgramHandler = rpcEvalHandler<
         ppi.id,
         indexIdMap
       );
-      console.log(preamble);
       await fs.writeFile(programTmp.path, [preamble, ppi.content].join(EOL));
       try {
         const child = spawn(programPathOrName, [programTmp.path]);
