@@ -51,8 +51,11 @@ jobs:
     runs-on: windows-latest
 
     steps:
+    - uses: actions/checkout@master
+      with:
+        ref: ${{ github.ref }}
+
     - run: ./scripts/ci/prepare_windows.ps1
-      shell: pwsh
     - run: echo "GIT_TAG=`git tag --points-at HEAD`" >> $Env:GITHUB_ENV
     - run: |
         echo "RELEASE_ID=`curl -H 'Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' https://api.github.com/repos/multiprocessio/datastation/releases/tags/$Env:GIT_TAG | jq '.id'`" >> $Env:GITHUB_ENV
