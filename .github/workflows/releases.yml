@@ -15,7 +15,8 @@ jobs:
 
     - run: ./scripts/ci/prepare_linux.sh
     - run: echo "GIT_TAG=`git tag --points-at HEAD`" >> $GITHUB_ENV
-    - run: echo "RELEASE_ID=`curl -H 'Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' https://api.github.com/repos/multiprocessio/datastation/releases/tags/$GIT_TAG | jq '.id'`" >> $GITHUB_ENV
+    - run: |
+        echo "RELEASE_ID=`curl -H 'Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' https://api.github.com/repos/multiprocessio/datastation/releases/tags/$GIT_TAG | jq '.id'`" >> $GITHUB_ENV
     - run: yarn release-desktop $GIT_TAG
     - name: Upload on release
       run: |
@@ -34,7 +35,8 @@ jobs:
         ref: ${{ github.ref }}
 
     - run: ./scripts/ci/prepare_macos.sh
-    - run: echo "RELEASE_ID=`curl -H 'Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' https://api.github.com/repos/multiprocessio/datastation/releases/tags/$GIT_TAG | jq '.id'`" >> $GITHUB_ENV
+    - run: |
+        echo "RELEASE_ID=`curl -H 'Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' https://api.github.com/repos/multiprocessio/datastation/releases/tags/$GIT_TAG | jq '.id'`" >> $GITHUB_ENV
     - run: echo "GIT_TAG=`git tag --points-at HEAD`" >> $GITHUB_ENV
     - run: yarn release-desktop $GIT_TAG
     - name: Upload release
@@ -51,7 +53,8 @@ jobs:
     steps:
     - run: powershell ./scripts/ci/prepare_windows.ps
     - run: echo "GIT_TAG=`git tag --points-at HEAD`" >> $Env:GITHUB_ENV
-    - run: echo "RELEASE_ID=`curl -H 'Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' https://api.github.com/repos/multiprocessio/datastation/releases/tags/$Env:GIT_TAG | jq '.id'`" >> $Env:GITHUB_ENV
+    - run: |
+        echo "RELEASE_ID=`curl -H 'Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' https://api.github.com/repos/multiprocessio/datastation/releases/tags/$Env:GIT_TAG | jq '.id'`" >> $Env:GITHUB_ENV
     - run: yarn release-desktop $Env:GIT_TAG
     - name: Upload release
       run: |
