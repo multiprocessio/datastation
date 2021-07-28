@@ -83,7 +83,7 @@ export function GraphPanel({
   const value = (data || {}).value || [];
   const ref = React.useRef(null);
   React.useEffect(() => {
-    if (!ref || !value.length) {
+    if (!ref || !value || !value.length) {
       return;
     }
 
@@ -128,7 +128,7 @@ export function GraphPanel({
     return () => chart.destroy();
   }, [ref.current, data, panel.graph.x, panel.graph.y, panel.graph.type]);
 
-  if (!value.length) {
+  if (!value || !value.length) {
     return null;
   }
 
@@ -174,6 +174,7 @@ export function GraphPanelDetails({
       </div>
       <div className="form-row">
         <FieldPicker
+          preferredDefaultType="string"
           label={panel.graph.type === 'pie' ? 'Slice Field' : 'X-Axis Field'}
           panelSourceResult={data}
           value={panel.graph.x}
@@ -188,6 +189,7 @@ export function GraphPanelDetails({
         <div className="form-row">
           <FieldPicker
             label="Field"
+            preferredDefaultType="number"
             panelSourceResult={data}
             value={panel.graph.y.field}
             onChange={(value: string) => {

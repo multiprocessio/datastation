@@ -1,8 +1,35 @@
 import * as React from 'react';
+import { ArrayShape, ObjectShape, ScalarShape, toString } from 'shape';
 import { PanelResult } from '../shared/state';
 import { Button } from './component-library/Button';
 import { Input } from './component-library/Input';
 import { Select } from './component-library/Select';
+
+export function orderedObjectFields(
+  o: ObjectShape,
+  preferredDefaultType?: 'number' | 'string'
+) {
+  const fields = Object.entries(o.children);
+  fields.sort(([aName, a], [bName, b]) => {
+    if (a.kind === 'scalar' && b.kind === 'scalar') {
+      const ass = a as ScalarShape;
+      const bss = b as ScalarShape;
+      if (ass.name !== bss.name) {
+        if (ass.name === preferredDefaultType) {
+          return -1;
+        }
+
+        if (bss.name === preferredDefaultType) {
+          return 1;
+        }
+      }
+    }
+
+    return aName > bName ? 1 : -1;
+  });
+
+  return fields;
+}
 
 export function FieldPicker({
   onChange,
@@ -12,6 +39,7 @@ export function FieldPicker({
   labelValue,
   labelOnChange,
   onDelete,
+  preferredDefaultType,
 }: {
   onChange: (v: string) => void;
   label: string;
@@ -20,6 +48,7 @@ export function FieldPicker({
   labelValue?: string;
   labelOnChange?: (v: string) => void;
   onDelete?: () => void;
+  preferredDefaultType?: 'number' | 'string';
 }) {
   // Default the label to the field name
   const [labelModified, setLabelModified] = React.useState(false);
@@ -37,16 +66,19 @@ export function FieldPicker({
   let fieldPicker = null;
   if (
     panelSourceResult &&
-    panelSourceResult.value &&
-    panelSourceResult.value.length
+    panelSourceResult.shape &&
+    panelSourceResult.shape.kind === 'array' &&
+    (panelSourceResult.shape as ArrayShape).children.kind === 'object'
   ) {
-    const fields = Object.keys(panelSourceResult.value[0]);
-    fields.sort();
+    const fields = orderedObjectFields(
+      (panelSourceResult.shape as ArrayShape).children as ObjectShape,
+      preferredDefaultType
+    );
     fieldPicker = (
       <Select label={label} value={value} onChange={onChange}>
-        {fields.map((f) => (
-          <option key={f} value={f}>
-            {f}
+        {fields.map(([name, shape]) => (
+          <option key={name} value={name}>
+            {name} ({toString(shape)})
           </option>
         ))}
       </Select>

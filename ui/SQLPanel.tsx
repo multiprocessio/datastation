@@ -19,7 +19,9 @@ export async function evalSQLPanel(
   connectors: Array<ConnectorInfo>,
   servers: Array<ServerInfo>
 ) {
-  const connector = connectors[+panel.sql.connectorIndex] as SQLConnectorInfo;
+  const connector = connectors.find(
+    (c) => c.id === panel.sql.connectorId
+  ) as SQLConnectorInfo;
   return await asyncRPC<
     Proxy<SQLPanelInfo & { indexIdMap: Array<string> }, SQLConnectorInfo>,
     string,
@@ -62,14 +64,14 @@ export function SQLPanelDetails({
       <div className="form-row">
         <Select
           label="Connector"
-          value={panel.sql.connectorIndex.toString()}
-          onChange={(connectorIndex: string) => {
-            panel.sql.connectorIndex = +connectorIndex;
+          value={panel.sql.connectorId}
+          onChange={(connectorId: string) => {
+            panel.sql.connectorId = connectorId;
             updatePanel(panel);
           }}
         >
           {connectors
-            .map((c: ConnectorInfo, index: number) => {
+            .map((c: ConnectorInfo) => {
               if (
                 c.type !== 'sql' ||
                 (c as SQLConnectorInfo).sql.type !== panel.sql.type
@@ -77,7 +79,11 @@ export function SQLPanelDetails({
                 return null;
               }
 
-              return <option value={index}>{c.name}</option>;
+              return (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              );
             })
             .filter(Boolean)}
         </Select>

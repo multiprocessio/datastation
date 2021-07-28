@@ -450,7 +450,8 @@ export function Panel({
                   <option value="graph">Graph</option>
                   <option value="file">File</option>
                   <option value="literal">Literal</option>
-                  <option value="table">Table</option>
+                  {/* Table panel really isn't valuable and has a bunch of bugs
+                   <option value="table">Table</option> */}
                 </Select>
               </div>
               {panel.type === 'table' && (
