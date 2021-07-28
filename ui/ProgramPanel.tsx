@@ -1,7 +1,7 @@
 import * as React from 'react';
+import { shape } from 'shape';
 import { MODE, RPC } from '../shared/constants';
 import { LANGUAGES, SupportedLanguages } from '../shared/languages';
-import { shape } from '../shared/shape';
 import { PanelResult, ProgramPanelInfo } from '../shared/state';
 import { asyncRPC } from './asyncRPC';
 import { Select } from './component-library/Select';

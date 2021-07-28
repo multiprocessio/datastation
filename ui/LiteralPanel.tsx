@@ -1,7 +1,7 @@
 import { preview } from 'preview';
 import * as React from 'react';
+import { shape } from 'shape';
 import { MODE, RPC } from '../shared/constants';
-import { shape } from '../shared/shape';
 import { ContentTypeInfo, LiteralPanelInfo } from '../shared/state';
 import { parseArrayBuffer } from '../shared/text';
 import { asyncRPC } from './asyncRPC';

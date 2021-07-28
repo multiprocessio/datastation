@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 import jsesc from 'jsesc';
 import { preview } from 'preview';
-import { shape } from '../../shared/shape';
+import { shape } from 'shape';
 import { Proxy } from '../../shared/state';
 import { getProjectResultsFile } from '../store';
 

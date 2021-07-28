@@ -2,8 +2,8 @@ import formatDistanceToNow from 'date-fns/formatDistanceToNow';
 import circularSafeStringify from 'json-stringify-safe';
 import * as CSV from 'papaparse';
 import * as React from 'react';
+import { toString } from 'shape';
 import { MODE, MODE_FEATURES, RPC } from '../shared/constants';
-import { toString } from '../shared/shape';
 import {
   ConnectorInfo,
   FilePanelInfo,

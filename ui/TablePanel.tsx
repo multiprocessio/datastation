@@ -1,8 +1,8 @@
 import { preview } from 'preview';
 import * as React from 'react';
+import { shape } from 'shape';
 import { MODE } from '../shared/constants';
 import { columnsFromObject } from '../shared/object';
-import { shape } from '../shared/shape';
 import {
   PanelInfo,
   PanelResult,

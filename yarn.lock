@@ -5411,6 +5411,10 @@ set-value@^2.0.0, set-value@^2.0.1:
     is-plain-object "^2.0.3"
     split-string "^3.0.1"
 
+"shape@https://github.com/multiprocessio/shape":
+  version "0.1.0"
+  resolved "https://github.com/multiprocessio/shape#d07cec0b47196d59b7610be6f4d5209f0d8f81de"
+
 shebang-command@^1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/shebang-command/-/shebang-command-1.2.0.tgz#44aac65b695b03398968c39f363fee5deafdf1ea"
