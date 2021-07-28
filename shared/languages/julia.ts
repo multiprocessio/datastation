@@ -8,8 +8,11 @@ function preamble(
   return `
 import JSON
 function DM_getPanel(i)
-  panelId = JSON.parse("${JSON.stringify(indexIdMap)}")[i+1]
-  JSON.parsefile("${resultsFile}"+panelId)
+  panelId = JSON.parse("${JSON.stringify(indexIdMap).replaceAll(
+    '"',
+    '\\"'
+  )}")[i+1]
+  JSON.parsefile(string("${resultsFile}", panelId))
 end
 function DM_setPanel(v)
   open("${resultsFile + panelId}", "w") do f

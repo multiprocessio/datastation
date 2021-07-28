@@ -16,7 +16,6 @@ function preamble(
   panelId: string,
   indexIdMap: Array<string>
 ) {
-  const file = ``;
   return `
 def DM_getPanel(i):
   import json

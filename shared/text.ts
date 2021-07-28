@@ -213,3 +213,7 @@ export function humanSize(n: number) {
   const tb = gb / 1000;
   return `${tb.toFixed(2)} TB`;
 }
+
+export function title(s: string) {
+  return s.charAt(0).toUpperCase() + s.slice(1, s.length);
+}

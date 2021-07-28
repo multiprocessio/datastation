@@ -103,8 +103,6 @@ export function GraphPanel({
           // Pretty ridiculous there's no builtin way to set a background color
           // https://stackoverflow.com/a/38493678/1507139
           beforeDraw: function () {
-            const chartArea = chart.chartArea;
-
             ctx.save();
             ctx.fillStyle = 'white';
             ctx.fillRect(0, 0, ref.current.width, ref.current.height);

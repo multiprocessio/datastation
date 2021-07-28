@@ -23,6 +23,11 @@ const menuTemplate = [
     label: 'File',
     submenu: [
       {
+        label: 'New Project',
+        click: () => openWindow('', true),
+        accelerator: 'CmdOrCtrl+N',
+      },
+      {
         label: 'Open Project',
         click: openProject,
         accelerator: 'CmdOrCtrl+O',
@@ -87,7 +92,7 @@ const menuTemplate = [
   },
 ];
 
-export async function openWindow(project: string) {
+export async function openWindow(project: string, newProject: boolean = false) {
   const preload = path.join(__dirname, 'preload.js');
   const win = new BrowserWindow({
     width: 1400,
@@ -99,13 +104,15 @@ export async function openWindow(project: string) {
     },
   });
 
-  if (!project) {
-    project = SETTINGS.lastProject;
-  } else {
-    SETTINGS.lastProject = project;
+  if (!newProject) {
+    if (!project) {
+      project = SETTINGS.lastProject;
+    } else {
+      SETTINGS.lastProject = project;
+    }
+    (win as any).DS_project = SETTINGS.lastProject;
+    await SETTINGS.save();
   }
-  (win as any).DS_project = SETTINGS.lastProject;
-  await SETTINGS.save();
 
   const menu = Menu.buildFromTemplate(
     menuTemplate as MenuItemConstructorOptions[]
@@ -113,7 +120,11 @@ export async function openWindow(project: string) {
   Menu.setApplicationMenu(menu);
 
   win.loadURL(
-    'file://' + path.join(__dirname, 'index.html?project=' + project)
+    'file://' +
+      path.join(
+        __dirname,
+        'index.html' + (project ? '?project=' + project : '')
+      )
   );
 }
 
