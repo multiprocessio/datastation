@@ -36,6 +36,7 @@
     "react": "^17.0.2",
     "react-ace": "^9.4.1",
     "react-dom": "^17.0.2",
+    "shape": "https://github.com/multiprocessio/shape",
     "sqlite": "^4.0.23",
     "sqlite3": "^5.0.2",
     "ssh2-promise": "^1.0.0",
