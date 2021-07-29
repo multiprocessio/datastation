@@ -20,7 +20,7 @@ jobs:
     - run: yarn release-desktop $GIT_TAG
     - name: Upload on release
       run: |
-        curl \
+        curl --fail \
           -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
           -H "Content-Type: application/zip" \
           --data-binary @./releases/linux-x64-$GIT_TAG.zip \
@@ -41,7 +41,7 @@ jobs:
     - run: yarn release-desktop $GIT_TAG
     - name: Upload release
       run: |
-        curl \
+        curl --fail \
           -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
           -H "Content-Type: application/zip" \
           --data-binary @./releases/darwin-x64-$GIT_TAG.zip \
@@ -62,4 +62,4 @@ jobs:
     - run: yarn release-desktop $Env:GIT_TAG
     - name: Upload release
       run: |
-        curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -H "Content-Type: application/zip" --data-binary "@./releases/win32-x64-$Env:GIT_TAG.zip" "https://uploads.github.com/repos/multiprocessio/datastation/releases/$Env:RELEASE_ID/assets?name=win32-x64-$Env:GIT_TAG.zip"
+        curl --fail -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -H "Content-Type: application/zip" --data-binary "@./releases/win32-x64-$Env:GIT_TAG.zip" "https://uploads.github.com/repos/multiprocessio/datastation/releases/$Env:RELEASE_ID/assets?name=win32-x64-$Env:GIT_TAG.zip"
