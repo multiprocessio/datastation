@@ -30,25 +30,24 @@ this will expand to ARM and Linux.
 
 See [here](https://datastation.multiprocess.io/docs/) for details.
 
-## Subscribe to updates
-
-If you want to keep in touch, [sign up
-here](https://forms.gle/wH5fdxrxXwZHoNxk8).
-
 ## Community
 
 [Join us on Discord](https://discord.gg/f2wQBc4bXX).
 
-## Support / Roadmap
+## How can I help?
 
-The open-source app is supported on a best-effort basis. If you're
-interested in commercial support or to partner on the roadmap, please
-[get in touch](mailto:phil@multiprocess.io).
+Download the app and use it! Report bugs on
+[Discord](https://discord.gg/f2wQBc4bXX).
 
-## Contributing
+If you want to make a fix, see [HACKING.md](HACKING.md).
 
-See [HACKING.md](HACKING.md). Before starting on any feature, check in
-on [Discord](https://discord.gg/f2wQBc4bXX).
+Before starting on any new feature though, check in on
+[Discord](https://discord.gg/f2wQBc4bXX)!
+
+## Subscribe
+
+If you want to hear about new features and how DataStation works under
+the hood, [sign up here](https://forms.gle/wH5fdxrxXwZHoNxk8).
 
 ## License
 
