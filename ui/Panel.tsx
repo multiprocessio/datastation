@@ -590,7 +590,7 @@ export function Panel({
                 )}
               </div>
               {previewableTypes.includes(panel.type) && (
-                <div className="panel-out">
+                <div className="panel-out resize resize--left resize--horizontal">
                   <div className="panel-out-header">
                     <Button
                       className={panelOut === 'preview' ? 'selected' : ''}

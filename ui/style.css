@@ -175,6 +175,23 @@ label.input input[type='file'] {
   color: #ccc;
 }
 
+.resize {
+  resize: both;
+  overflow: auto;
+}
+
+.resize--horizontal {
+  resize: horizontal;
+}
+
+.resize--left {
+  direction: rtl;
+}
+
+.resize--left * {
+  direction: ltr;
+}
+
 .flex-right {
   margin-left: auto;
 }
@@ -317,6 +334,11 @@ header > div {
   padding: 15px;
 }
 
+.panel-body-container {
+  overflow: auto;
+  resize: vertical;
+}
+
 .panel-controls .button {
   margin-left: 15px;
 }
@@ -332,17 +354,13 @@ header > div {
   max-width: 100%;
 }
 
-.panel-body-container {
-  overflow: auto;
-  resize: vertical;
-}
-
 .panel-body {
   padding: 15px;
   position: relative;
-  width: 100%;
+  flex: 1;
   display: flex;
   flex-direction: column;
+  flex-grow: 1;
 }
 
 .panel-order {
@@ -356,7 +374,6 @@ header > div {
   padding: 5px;
   color: white;
   width: 400px;
-  max-width: 50%;
   overflow: auto;
   display: flex;
   flex-direction: column;
