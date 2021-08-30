@@ -76,7 +76,7 @@ export async function evalPanel(
       const { graph } = panel as GraphPanelInfo;
       return await evalColumnPanel(
         graph.panelSource,
-        [graph.x, graph.y.field],
+        [graph.x, ...graph.ys.map((y) => y.field)],
         indexIdMap,
         panelResults
       );

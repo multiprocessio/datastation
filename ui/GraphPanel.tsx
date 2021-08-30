@@ -7,6 +7,7 @@ import {
   PanelInfo,
   PanelResult,
 } from '../shared/state';
+import { Button } from './component-library/Button';
 import { Select } from './component-library/Select';
 import { FieldPicker } from './FieldPicker';
 import { PanelSourcePicker } from './PanelSourcePicker';
@@ -95,6 +96,10 @@ export function GraphPanel({
       return;
     }
 
+    const colors = getNDifferentColors(
+      panel.graph.ys.length == 1 ? value.length : panel.graph.ys.length
+    );
+
     const ctx = ref.current.getContext('2d');
     const chart = new Chart(ctx, {
       plugins: [
@@ -113,18 +118,19 @@ export function GraphPanel({
       type: panel.graph.type,
       data: {
         labels: value.map((d) => d[panel.graph.x]),
-        datasets: [
-          {
-            label: panel.graph.y.label,
-            data: value.map((d) => +d[panel.graph.y.field]),
-            backgroundColor: getNDifferentColors(value.length),
-          },
-        ],
+        datasets: panel.graph.ys.map(
+          ({ field, label }, seriesIndex: number) => ({
+            label: label,
+            data: value.map((d) => +d[field]),
+            backgroundColor:
+              panel.graph.ys.length === 1 ? colors : colors[seriesIndex],
+          })
+        ),
       },
     });
 
     return () => chart.destroy();
-  }, [ref.current, data, panel.graph.x, panel.graph.y, panel.graph.type]);
+  }, [ref.current, data, panel.graph.x, panel.graph.ys, panel.graph.type]);
 
   if (!value || !value.length) {
     return null;
@@ -183,24 +189,39 @@ export function GraphPanelDetails({
         />
       </div>
       <div className="form-row">
-        <label>{panel.graph.type === 'pie' ? 'Slice Size' : 'Y-Axis'}</label>
-        <div className="form-row">
-          <FieldPicker
-            label="Field"
-            preferredDefaultType="number"
-            panelSourceResult={data}
-            value={panel.graph.y.field}
-            onChange={(value: string) => {
-              panel.graph.y.field = value;
-              updatePanel(panel);
-            }}
-            labelValue={panel.graph.y.label}
-            labelOnChange={(value: string) => {
-              panel.graph.y.label = value;
-              updatePanel(panel);
-            }}
-          />
-        </div>
+        <label>
+          {panel.graph.type === 'pie' ? 'Slice Size Series' : 'Y-Axis Series'}
+        </label>
+        {panel.graph.ys.map((y, i) => (
+          <div className="form-row" key={y.field}>
+            <FieldPicker
+              onDelete={() => {
+                panel.graph.ys.splice(i, 1);
+                updatePanel(panel);
+              }}
+              label="Field"
+              value={y.field}
+              panelSourceResult={data}
+              onChange={(value: string) => {
+                y.field = value;
+                updatePanel(panel);
+              }}
+              labelValue={y.label}
+              labelOnChange={(value: string) => {
+                y.label = value;
+                updatePanel(panel);
+              }}
+            />
+          </div>
+        ))}
+        <Button
+          onClick={() => {
+            panel.graph.ys.push({ label: '', field: '' });
+            updatePanel(panel);
+          }}
+        >
+          Add Series
+        </Button>
       </div>
     </React.Fragment>
   );
