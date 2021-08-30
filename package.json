@@ -70,6 +70,7 @@
     "typescript": "^4.4.0-beta"
   },
   "resolutions": {
-    "node-gyp": "^5.0.2"
+    "node-gyp": "^5.0.2",
+    "plist": "^3.0.4"
   }
 }
