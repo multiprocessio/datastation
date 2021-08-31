@@ -47,7 +47,7 @@ export function Select({
     if (values.length && !values.includes(value)) {
       let foundUnused = false;
       for (let value of values) {
-        if (used.includes(value)) {
+        if (used && used.includes(value)) {
           continue;
         }
 
