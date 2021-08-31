@@ -21,6 +21,11 @@ export async function evalColumnPanel(
   panelResults: Array<PanelResult>
 ) {
   if (MODE === 'browser') {
+    if (!panelResults || !panelResults[panelSource]) {
+      throw new Error(
+        `Panel source is invalid. Did you run the panel source (panel #${panelSource})?`
+      );
+    }
     const { value } = panelResults[panelSource];
     const valueWithRequestedColumns = columnsFromObject(value, columns);
     return {
@@ -75,6 +80,7 @@ export function TablePanelDetails({
         {panel.table.columns.map((c, i) => (
           <div className="form-row">
             <FieldPicker
+              used={panel.table.columns.map((c) => c.field)}
               onDelete={() => {
                 panel.table.columns.splice(i, 1);
                 updatePanel(panel);

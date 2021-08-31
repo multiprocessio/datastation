@@ -128,7 +128,7 @@ export function Pages({
       <div className="section-title">
         {state.pages.map((page: ProjectPage, i: number) =>
           i === currentPage ? (
-            <div className="vertical-align-center current-page">
+            <div className="vertical-align-center current-page" key={page.id}>
               <span title="Delete Page">
                 <Confirm
                   right

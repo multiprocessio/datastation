@@ -13,6 +13,15 @@ export function useDebouncedLocalState(
 
   const [localValue, setLocalValue] = React.useState(nonLocalValue);
 
+  const [prevNonLocalValue, setPrevNonLocalValue] =
+    React.useState(nonLocalValue);
+  React.useEffect(() => {
+    if (nonLocalValue !== prevNonLocalValue) {
+      setPrevNonLocalValue(nonLocalValue);
+      setLocalValue(nonLocalValue);
+    }
+  }, [nonLocalValue, prevNonLocalValue]);
+
   const debounced = debounce(nonLocalSet, delay);
   function wrapSetLocalValue(v: string) {
     setLocalValue(v);

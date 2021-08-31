@@ -65,10 +65,15 @@ const COLORS = [
   '#a74c28',
   '#d98048',
 ];
-function getNDifferentColors(n: number) {
-  const colors = [];
-  while (n >= 0) {
-    colors.push(COLORS[n % COLORS.length]);
+function getNDifferentColors(
+  n: number,
+  groups: number,
+  group: number
+): Array<string> {
+  const colors: Array<string> = [];
+  const offset = groups * group;
+  while (n) {
+    colors.push(COLORS[(offset + n) % COLORS.length]);
     n--;
   }
   return colors;
@@ -96,8 +101,15 @@ export function GraphPanel({
       return;
     }
 
+    const ys = [...panel.graph.ys];
+    if (panel.graph.type === 'pie') {
+      ys.reverse();
+    }
+
     const colors = getNDifferentColors(
-      panel.graph.ys.length == 1 ? value.length : panel.graph.ys.length
+      ys.length > 1 ? ys.length : value.length,
+      1,
+      0
     );
 
     const ctx = ref.current.getContext('2d');
@@ -115,17 +127,46 @@ export function GraphPanel({
           },
         },
       ],
+      options: {
+        responsive: true,
+      },
       type: panel.graph.type,
       data: {
         labels: value.map((d) => d[panel.graph.x]),
-        datasets: panel.graph.ys.map(
-          ({ field, label }, seriesIndex: number) => ({
-            label: label,
+        datasets: ys.map(({ field, label }, i) => {
+          return {
+            label,
             data: value.map((d) => +d[field]),
             backgroundColor:
-              panel.graph.ys.length === 1 ? colors : colors[seriesIndex],
-          })
-        ),
+              ys.length > 1 && panel.graph.type !== 'pie'
+                ? colors[i]
+                : panel.graph.type
+                ? getNDifferentColors(value.length, ys.length, i)
+                : colors,
+            tooltip: {
+              callbacks:
+                panel.graph.type === 'pie'
+                  ? {
+                      label: (ctx: any) => {
+                        const reversedIndex = ys.length - ctx.datasetIndex - 1;
+                        // Explicitly do read from the not-reversed panel.graph.ys array.
+                        // This library stacks levels in reverse of what you'd expect.
+                        const serieses = panel.graph.ys.slice(
+                          0,
+                          reversedIndex + 1
+                        );
+                        const labels = serieses.map(
+                          ({ label, field }) =>
+                            `${label}: ${+value[ctx.dataIndex][field]}`
+                        );
+                        labels.unshift(ctx.label);
+                        return labels;
+                      },
+                    }
+                  : undefined,
+            },
+          };
+        }),
       },
     });
 
@@ -193,8 +234,9 @@ export function GraphPanelDetails({
           {panel.graph.type === 'pie' ? 'Slice Size Series' : 'Y-Axis Series'}
         </label>
         {panel.graph.ys.map((y, i) => (
-          <div className="form-row" key={y.field}>
+          <div className="form-row" key={y.field + i}>
             <FieldPicker
+              used={[...panel.graph.ys.map((y) => y.field), panel.graph.x]}
               onDelete={() => {
                 panel.graph.ys.splice(i, 1);
                 updatePanel(panel);
