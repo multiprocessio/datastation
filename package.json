@@ -71,6 +71,6 @@
   },
   "resolutions": {
     "node-gyp": "^5.0.2",
-    "xmldom": "npm:@xmldom/xmldom#0.7.1"
+    "plist": "^3.0.4"
   }
 }
