@@ -43,7 +43,11 @@ export function registerRPCHandlers(
         log.error(e);
         event.sender.send(responseChannel, {
           isError: true,
-          body: e,
+          body: {
+            ...e,
+            // Needs to get explicitly copied
+            constructor: { name: e.constructor.name },
+          },
         });
       }
     }
