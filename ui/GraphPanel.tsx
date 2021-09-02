@@ -7,6 +7,7 @@ import {
   PanelInfo,
   PanelResult,
 } from '../shared/state';
+import { Button } from './component-library/Button';
 import { Select } from './component-library/Select';
 import { FieldPicker } from './FieldPicker';
 import { PanelSourcePicker } from './PanelSourcePicker';
@@ -64,10 +65,15 @@ const COLORS = [
   '#a74c28',
   '#d98048',
 ];
-function getNDifferentColors(n: number) {
-  const colors = [];
-  while (n >= 0) {
-    colors.push(COLORS[n % COLORS.length]);
+function getNDifferentColors(
+  n: number,
+  groups: number,
+  group: number
+): Array<string> {
+  const colors: Array<string> = [];
+  const offset = groups * group;
+  while (n) {
+    colors.push(COLORS[(offset + n) % COLORS.length]);
     n--;
   }
   return colors;
@@ -95,6 +101,17 @@ export function GraphPanel({
       return;
     }
 
+    const ys = [...panel.graph.ys];
+    if (panel.graph.type === 'pie') {
+      ys.reverse();
+    }
+
+    const colors = getNDifferentColors(
+      ys.length > 1 ? ys.length : value.length,
+      1,
+      0
+    );
+
     const ctx = ref.current.getContext('2d');
     const chart = new Chart(ctx, {
       plugins: [
@@ -110,21 +127,51 @@ export function GraphPanel({
           },
         },
       ],
+      options: {
+        responsive: true,
+      },
       type: panel.graph.type,
       data: {
         labels: value.map((d) => d[panel.graph.x]),
-        datasets: [
-          {
-            label: panel.graph.y.label,
-            data: value.map((d) => +d[panel.graph.y.field]),
-            backgroundColor: getNDifferentColors(value.length),
-          },
-        ],
+        datasets: ys.map(({ field, label }, i) => {
+          return {
+            label,
+            data: value.map((d) => +d[field]),
+            backgroundColor:
+              ys.length > 1 && panel.graph.type !== 'pie'
+                ? colors[i]
+                : panel.graph.type
+                ? getNDifferentColors(value.length, ys.length, i)
+                : colors,
+            tooltip: {
+              callbacks:
+                panel.graph.type === 'pie'
+                  ? {
+                      label: (ctx: any) => {
+                        const reversedIndex = ys.length - ctx.datasetIndex - 1;
+                        // Explicitly do read from the not-reversed panel.graph.ys array.
+                        // This library stacks levels in reverse of what you'd expect.
+                        const serieses = panel.graph.ys.slice(
+                          0,
+                          reversedIndex + 1
+                        );
+                        const labels = serieses.map(
+                          ({ label, field }) =>
+                            `${label}: ${+value[ctx.dataIndex][field]}`
+                        );
+                        labels.unshift(ctx.label);
+                        return labels;
+                      },
+                    }
+                  : undefined,
+            },
+          };
+        }),
       },
     });
 
     return () => chart.destroy();
-  }, [ref.current, data, panel.graph.x, panel.graph.y, panel.graph.type]);
+  }, [ref.current, data, panel.graph.x, panel.graph.ys, panel.graph.type]);
 
   if (!value || !value.length) {
     return null;
@@ -183,24 +230,40 @@ export function GraphPanelDetails({
         />
       </div>
       <div className="form-row">
-        <label>{panel.graph.type === 'pie' ? 'Slice Size' : 'Y-Axis'}</label>
-        <div className="form-row">
-          <FieldPicker
-            label="Field"
-            preferredDefaultType="number"
-            panelSourceResult={data}
-            value={panel.graph.y.field}
-            onChange={(value: string) => {
-              panel.graph.y.field = value;
-              updatePanel(panel);
-            }}
-            labelValue={panel.graph.y.label}
-            labelOnChange={(value: string) => {
-              panel.graph.y.label = value;
-              updatePanel(panel);
-            }}
-          />
-        </div>
+        <label>
+          {panel.graph.type === 'pie' ? 'Slice Size Series' : 'Y-Axis Series'}
+        </label>
+        {panel.graph.ys.map((y, i) => (
+          <div className="form-row vertical-align-center" key={y.field + i}>
+            <FieldPicker
+              used={[...panel.graph.ys.map((y) => y.field), panel.graph.x]}
+              onDelete={() => {
+                panel.graph.ys.splice(i, 1);
+                updatePanel(panel);
+              }}
+              label="Field"
+              value={y.field}
+              panelSourceResult={data}
+              onChange={(value: string) => {
+                y.field = value;
+                updatePanel(panel);
+              }}
+              labelValue={y.label}
+              labelOnChange={(value: string) => {
+                y.label = value;
+                updatePanel(panel);
+              }}
+            />
+          </div>
+        ))}
+        <Button
+          onClick={() => {
+            panel.graph.ys.push({ label: '', field: '' });
+            updatePanel(panel);
+          }}
+        >
+          Add Series
+        </Button>
       </div>
     </React.Fragment>
   );

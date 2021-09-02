@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { CHAT_LINK } from '../shared/constants';
 
 // SOURCE: https://reactjs.org/docs/error-boundaries.html
 export class ErrorBoundary extends React.Component {
@@ -23,7 +24,7 @@ export class ErrorBoundary extends React.Component {
         <div className="error-boundary">
           <p>
             This section has crashed. Feel free to message the{' '}
-            <a href="https://discord.gg/F9sGquaM7r">
+            <a target="_blank" href={CHAT_LINK}>
               community support channel
             </a>{' '}
             with details about how to reproduce the error.

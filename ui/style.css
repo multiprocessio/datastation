@@ -105,6 +105,7 @@ label.input input[type='file'] {
 }
 
 .flex {
+  max-height: 100%;
   display: flex;
   flex-direction: row;
   justify-content: center;
@@ -361,6 +362,10 @@ header > div {
   display: flex;
   flex-direction: column;
   flex-grow: 1;
+  /* Without this resizing the window smaller doesn't work, a scrollbar appears */
+  max-width: 100%;
+  /* Same for height */
+  max-height: 100%;
 }
 
 .panel-order {
@@ -518,7 +523,7 @@ header > div {
 }
 
 canvas {
-  background: white;
+  max-height: 100%;
 }
 
 .modal {

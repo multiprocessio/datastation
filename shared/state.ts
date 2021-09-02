@@ -6,7 +6,7 @@ import log from './log';
 import { mergeDeep } from './object';
 
 export class PanelResult {
-  exception?: string;
+  exception?: Error;
   value?: Array<any>;
   preview: string;
   stdout: string;
@@ -212,7 +212,7 @@ export type GraphPanelInfoType = 'bar' | 'pie';
 export class GraphPanelInfo extends PanelInfo {
   graph: {
     panelSource: number;
-    y: GraphY;
+    ys: Array<GraphY>;
     x: string;
     type: GraphPanelInfoType;
   };
@@ -220,7 +220,7 @@ export class GraphPanelInfo extends PanelInfo {
   constructor(
     name?: string,
     panelSource?: number,
-    y?: GraphY,
+    ys?: Array<GraphY>,
     x?: string,
     type?: GraphPanelInfoType,
     content?: string
@@ -229,7 +229,7 @@ export class GraphPanelInfo extends PanelInfo {
     this.graph = {
       panelSource: panelSource || 0,
       x: x || '',
-      y: y || { field: '', label: '' },
+      ys: ys || [],
       type: type || 'bar',
     };
   }
@@ -385,7 +385,7 @@ export const DEFAULT_PROJECT: ProjectState = new ProjectState(
       ),
       (() => {
         const panel = new GraphPanelInfo('Display');
-        panel.graph.y = { field: 'age', label: 'Age' };
+        panel.graph.ys = [{ field: 'age', label: 'Age' }];
         panel.graph.x = 'name';
         panel.graph.panelSource = 1;
         return panel;
@@ -416,6 +416,11 @@ export function rawStateToObjects(raw: ProjectState): ProjectState {
           page.panels[i] = mergeDeep(new HTTPPanelInfo(), panel);
           break;
         case 'graph':
+          const graphPanel = panel as GraphPanelInfo;
+          if ((graphPanel.graph as any).y && !graphPanel.graph.ys) {
+            graphPanel.graph.ys = [(graphPanel.graph as any).y];
+            delete (graphPanel.graph as any).y;
+          }
           page.panels[i] = mergeDeep(new GraphPanelInfo(), panel);
           break;
         case 'program':

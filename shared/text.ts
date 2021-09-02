@@ -215,5 +215,9 @@ export function humanSize(n: number) {
 }
 
 export function title(s: string) {
-  return s.charAt(0).toUpperCase() + s.slice(1, s.length);
+  return s.replace(/[^\s`~!@#$%^&+\-*=_()[\]{};:'"\\|,<.>/?]+/g, (match) => {
+    const first = match.charAt(0).toUpperCase();
+    const rest = match.slice(1).toLowerCase();
+    return first + rest;
+  });
 }

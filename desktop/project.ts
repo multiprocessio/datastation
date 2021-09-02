@@ -6,7 +6,7 @@ import {
   shell,
 } from 'electron';
 import path from 'path';
-import { APP_NAME, DEBUG, SITE_ROOT } from '../shared/constants';
+import { APP_NAME, CHAT_LINK, DEBUG, SITE_ROOT } from '../shared/constants';
 import { DISK_ROOT, PROJECT_EXTENSION } from './constants';
 import { SETTINGS } from './settings';
 
@@ -43,8 +43,8 @@ const menuTemplate = [
         click: () => shell.openExternal(`${SITE_ROOT}/docs/`),
       },
       {
-        label: 'Community',
-        click: () => shell.openExternal('https://discord.gg/f2wQBc4bXX'),
+        label: 'Community Chat',
+        click: () => shell.openExternal(CHAT_LINK),
       },
     ],
   },

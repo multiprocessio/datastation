@@ -32,7 +32,7 @@ export async function evalProgramPanel(
   const res = await language.inMemoryEval(panel.content, panelResults);
   return {
     ...res,
-    size: JSON.stringify(res.value).length,
+    size: res.value ? JSON.stringify(res.value).length : 0,
     contentType: 'application/json',
     shape: shape(res.value),
   };

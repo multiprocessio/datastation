@@ -27,6 +27,7 @@ export function Select({
   disabled,
   label,
   className,
+  used,
 }: {
   value: string;
   onChange: (value: string) => void;
@@ -34,6 +35,7 @@ export function Select({
   disabled?: boolean;
   label?: string;
   className?: string;
+  used?: Array<string>;
 }) {
   let selectClass = 'select';
   if (className) {
@@ -43,7 +45,20 @@ export function Select({
   React.useEffect(() => {
     const values = getOptionValues(children);
     if (values.length && !values.includes(value)) {
-      onChange(values[0]);
+      let foundUnused = false;
+      for (let value of values) {
+        if (used && used.includes(value)) {
+          continue;
+        }
+
+        foundUnused = true;
+        onChange(value);
+        break;
+      }
+
+      if (!foundUnused) {
+        onChange(values[0]);
+      }
     }
   }, [value, getOptionValues(children).join(',')]);
 

@@ -27,6 +27,7 @@ import { Confirm } from './component-library/Confirm';
 import { Input } from './component-library/Input';
 import { Select } from './component-library/Select';
 import { ErrorBoundary } from './ErrorBoundary';
+import { PanelPlayWarning } from './errors';
 import { evalFilePanel, FilePanelDetails } from './FilePanel';
 import { GraphPanel, GraphPanelDetails } from './GraphPanel';
 import { evalHTTPPanel, HTTPPanelDetails } from './HTTPPanel';
@@ -76,7 +77,7 @@ export async function evalPanel(
       const { graph } = panel as GraphPanelInfo;
       return await evalColumnPanel(
         graph.panelSource,
-        [graph.x, graph.y.field],
+        [graph.x, ...graph.ys.map((y) => y.field)],
         indexIdMap,
         panelResults
       );
@@ -450,8 +451,7 @@ export function Panel({
                   <option value="graph">Graph</option>
                   <option value="file">File</option>
                   <option value="literal">Literal</option>
-                  {/* Table panel really isn't valuable and has a bunch of bugs
-                   <option value="table">Table</option> */}
+                  <option value="table">Table</option>
                 </Select>
               </div>
               {panel.type === 'table' && (
@@ -527,13 +527,17 @@ export function Panel({
                     className="editor"
                   />
                 )}
-                {exception && (
-                  <div className="alert alert-error">
-                    <div>Error evaluating panel:</div>
-                    <pre>
-                      <code>{exception}</code>
-                    </pre>
-                  </div>
+                {exception instanceof PanelPlayWarning ? (
+                  <div className="alert alert-error">{exception.message}</div>
+                ) : (
+                  exception && (
+                    <div className="alert alert-error">
+                      <div>Error evaluating panel:</div>
+                      <pre>
+                        <code>{exception.stack || exception.message}</code>
+                      </pre>
+                    </div>
+                  )
                 )}
                 {panel.type === 'program' && (
                   <div className="alert alert-info">

@@ -106,7 +106,7 @@ export function Pages({
       setPanelResults(panelIndex, {
         loading: false,
         lastRun: new Date(),
-        exception: e.stack || e.message,
+        exception: e,
         stdout: e.stdout,
         preview: '',
         contentType: 'unknown',
@@ -128,7 +128,7 @@ export function Pages({
       <div className="section-title">
         {state.pages.map((page: ProjectPage, i: number) =>
           i === currentPage ? (
-            <div className="vertical-align-center current-page">
+            <div className="vertical-align-center current-page" key={page.id}>
               <span title="Delete Page">
                 <Confirm
                   right

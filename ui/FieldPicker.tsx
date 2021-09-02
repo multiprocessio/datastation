@@ -96,6 +96,7 @@ export function FieldPicker({
   labelOnChange,
   onDelete,
   preferredDefaultType,
+  used,
 }: {
   onChange: (v: string) => void;
   label: string;
@@ -105,12 +106,18 @@ export function FieldPicker({
   labelOnChange?: (v: string) => void;
   onDelete?: () => void;
   preferredDefaultType?: 'number' | 'string';
+  used?: Array<string>;
 }) {
   // Default the label to the field name
   const [labelModified, setLabelModified] = React.useState(false);
   React.useEffect(() => {
-    if (labelOnChange && labelValue === '' && value !== '' && !labelModified) {
-      labelOnChange(value);
+    if (
+      labelOnChange &&
+      !labelModified &&
+      value &&
+      title(value) !== labelValue
+    ) {
+      labelOnChange(title(value));
     }
   }, [value, labelValue, labelModified, labelOnChange]);
 
@@ -131,7 +138,7 @@ export function FieldPicker({
       preferredDefaultType
     );
     fieldPicker = (
-      <Select label={label} value={value} onChange={onChange}>
+      <Select label={label} value={value} onChange={onChange} used={used}>
         {fieldGroups.length === 1
           ? renderOptions(fieldGroups[0], false)
           : fieldGroups.map((fg) => renderOptions(fg, true))}
@@ -146,7 +153,7 @@ export function FieldPicker({
   }
 
   return (
-    <div>
+    <React.Fragment>
       {onDelete && (
         <Button icon onClick={onDelete}>
           delete
@@ -154,6 +161,6 @@ export function FieldPicker({
       )}
       {fieldPicker}
       <Input label="Label" value={labelValue} onChange={labelOnChangeWrapper} />
-    </div>
+    </React.Fragment>
   );
 }
