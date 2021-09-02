@@ -1,6 +1,6 @@
 export class NotAnArrayOfObjectsError extends Error {
-  constructor(msg: string) {
-    super(msg);
+  constructor() {
+    super();
     this.name = 'NotAnArrayOfObjectsError';
   }
 }
