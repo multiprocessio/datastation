@@ -2,6 +2,7 @@ import { preview } from 'preview';
 import * as React from 'react';
 import { shape } from 'shape';
 import { MODE } from '../shared/constants';
+import { NotAnArrayOfObjectsError } from '../shared/errors';
 import { columnsFromObject } from '../shared/object';
 import {
   PanelInfo,
@@ -11,6 +12,7 @@ import {
 } from '../shared/state';
 import { asyncRPC } from './asyncRPC';
 import { Button } from './component-library/Button';
+import { PanelPlayWarning } from './errors';
 import { FieldPicker } from './FieldPicker';
 import { PanelSourcePicker } from './PanelSourcePicker';
 
@@ -20,35 +22,52 @@ export async function evalColumnPanel(
   indexIdMap: Array<string>,
   panelResults: Array<PanelResult>
 ) {
+  const badInputMessage = `This panel input must be an array of objects. Make sure panel #${panelSource} returns an array of objects.`;
   if (MODE === 'browser') {
     if (!panelResults || !panelResults[panelSource]) {
-      throw new Error(
-        `Panel source is invalid. Did you run the panel source (panel #${panelSource})?`
+      throw new PanelPlayWarning(
+        `Panel source is invalid. Did you run panel #${panelSource}?`
       );
     }
     const { value } = panelResults[panelSource];
-    const valueWithRequestedColumns = columnsFromObject(value, columns);
-    return {
-      value: valueWithRequestedColumns,
-      preview: preview(valueWithRequestedColumns),
-      shape: shape(valueWithRequestedColumns),
-      stdout: '',
-      size: JSON.stringify(value).length,
-      contentType: 'application/json',
-    };
+    try {
+      const valueWithRequestedColumns = columnsFromObject(value, columns);
+      return {
+        value: valueWithRequestedColumns,
+        preview: preview(valueWithRequestedColumns),
+        shape: shape(valueWithRequestedColumns),
+        stdout: '',
+        size: value ? JSON.stringify(value).length : 0,
+        contentType: 'application/json',
+      };
+    } catch (e) {
+      if (e.constructor.name === NotAnArrayOfObjectsError.name) {
+        throw new PanelPlayWarning(badInputMessage);
+      }
+
+      throw e;
+    }
   }
 
-  return await asyncRPC<
-    {
-      columns: Array<string>;
-      id: string;
-    },
-    void,
-    PanelResult
-  >('evalColumns', null, {
-    id: indexIdMap[panelSource],
-    columns,
-  });
+  try {
+    return await asyncRPC<
+      {
+        columns: Array<string>;
+        id: string;
+      },
+      void,
+      PanelResult
+    >('evalColumns', null, {
+      id: indexIdMap[panelSource],
+      columns,
+    });
+  } catch (e) {
+    if (e.constructor.name === NotAnArrayOfObjectsError.name) {
+      throw new PanelPlayWarning(badInputMessage);
+    }
+
+    throw e;
+  }
 }
 
 export function TablePanelDetails({
@@ -78,7 +97,7 @@ export function TablePanelDetails({
       <div className="form-row">
         <label>Columns</label>
         {panel.table.columns.map((c, i) => (
-          <div className="form-row">
+          <div className="form-row vertical-align-center" key={c.field + i}>
             <FieldPicker
               used={panel.table.columns.map((c) => c.field)}
               onDelete={() => {

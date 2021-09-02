@@ -1,4 +1,4 @@
-import { preview } from 'preview';
+import { NotAnArrayOfObjectsError } from './errors';
 
 // SOURCE: https://stackoverflow.com/a/34749873/1507139
 function isObject(item: any) {
@@ -29,10 +29,8 @@ export function deepClone(a: any) {
 }
 
 export function columnsFromObject(value: any, columns: Array<string>) {
-  if (value && !Array.isArray(value)) {
-    throw new Error(
-      `Expected array input to graph, got (${typeof value}): ` + preview(value)
-    );
+  if (!value || !Array.isArray(value)) {
+    throw new NotAnArrayOfObjectsError();
   }
 
   return (value || []).map((row: any) => {

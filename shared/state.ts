@@ -6,7 +6,7 @@ import log from './log';
 import { mergeDeep } from './object';
 
 export class PanelResult {
-  exception?: string;
+  exception?: Error;
   value?: Array<any>;
   preview: string;
   stdout: string;

@@ -27,6 +27,7 @@ import { Confirm } from './component-library/Confirm';
 import { Input } from './component-library/Input';
 import { Select } from './component-library/Select';
 import { ErrorBoundary } from './ErrorBoundary';
+import { PanelPlayWarning } from './errors';
 import { evalFilePanel, FilePanelDetails } from './FilePanel';
 import { GraphPanel, GraphPanelDetails } from './GraphPanel';
 import { evalHTTPPanel, HTTPPanelDetails } from './HTTPPanel';
@@ -526,13 +527,17 @@ export function Panel({
                     className="editor"
                   />
                 )}
-                {exception && (
-                  <div className="alert alert-error">
-                    <div>Error evaluating panel:</div>
-                    <pre>
-                      <code>{exception}</code>
-                    </pre>
-                  </div>
+                {exception instanceof PanelPlayWarning ? (
+                  <div className="alert alert-error">{exception.message}</div>
+                ) : (
+                  exception && (
+                    <div className="alert alert-error">
+                      <div>Error evaluating panel:</div>
+                      <pre>
+                        <code>{exception.stack || exception.message}</code>
+                      </pre>
+                    </div>
+                  )
                 )}
                 {panel.type === 'program' && (
                   <div className="alert alert-info">

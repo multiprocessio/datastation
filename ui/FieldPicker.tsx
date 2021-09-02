@@ -153,7 +153,7 @@ export function FieldPicker({
   }
 
   return (
-    <div>
+    <React.Fragment>
       {onDelete && (
         <Button icon onClick={onDelete}>
           delete
@@ -161,6 +161,6 @@ export function FieldPicker({
       )}
       {fieldPicker}
       <Input label="Label" value={labelValue} onChange={labelOnChangeWrapper} />
-    </div>
+    </React.Fragment>
   );
 }

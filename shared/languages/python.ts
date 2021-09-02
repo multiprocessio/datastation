@@ -48,7 +48,7 @@ function inMemoryEval(
   const stdout: Array<string> = [];
   return new Promise((resolve, reject) => {
     function convertFromPyodideObjectIfNecessary(v: any) {
-      return v.toJs ? v.toJs() : v;
+      return v && v.toJs ? v.toJs() : v;
     }
 
     anyWindow.DM_setPanel = (v: any) => {

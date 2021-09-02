@@ -106,7 +106,7 @@ export function Pages({
       setPanelResults(panelIndex, {
         loading: false,
         lastRun: new Date(),
-        exception: e.stack || e.message,
+        exception: e,
         stdout: e.stdout,
         preview: '',
         contentType: 'unknown',
