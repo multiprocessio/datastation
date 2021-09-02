@@ -2,6 +2,9 @@
 
 set -eux
 
+# Kill all xargs/fswatch children on exit
+trap 'killall xargs' SIGINT SIGTERM EXIT
+
 # Build once up front
 yarn build-ui
 

@@ -50,8 +50,7 @@ function inMemoryEval(
     function convertFromPyodideObjectIfNecessary(v: any) {
       // Without dict_converter this objects in Python get converted to JavaScript Maps which cannot be stringified
       const jsValue =
-        v && v.toJs ? v.toJs({ dict_converter: Object.fromEntries }) : v;
-      console.log(jsValue, v, v.toJs());
+        v && v.toJs ? v.toJs() : v;
       return jsValue;
     }
 
@@ -73,7 +72,7 @@ function inMemoryEval(
       );
     try {
       const fullProgram =
-        'import js as window\nprint = lambda *args: window.DM_print(*args)\nDM_getPanel = window.DM_getPanel\nDM_setPanel = window.DM_setPanel\n' +
+        'import js as window\ntojs = lambda a: to_js(a, dict_converter=Object.fromEntries)\nprint = lambda *args: window.DM_print(*map(tojs, args))\nDM_getPanel = window.DM_getPanel\nDM_setPanel = lambda *args: window.DM_setPanel(*map(tojs, args))\n' +
         prog;
       anyWindow.pyodide.runPython(fullProgram);
     } catch (e) {

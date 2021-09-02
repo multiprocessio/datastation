@@ -445,7 +445,7 @@ header > div {
   max-width: 800px;
 }
 
-.last-run {
+.text-muted {
   font-size: 0.9rem;
   color: #777;
 }

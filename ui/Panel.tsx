@@ -315,6 +315,7 @@ export function Panel({
       <ErrorBoundary>
         <div className="panel-head">
           <div className="panel-header vertical-align-center">
+            <span className="text-muted">#{panelIndex}</span>
             <span title="Move Up">
               <Button
                 icon
@@ -357,7 +358,7 @@ export function Panel({
               </span>
             )}
             <span className="panel-controls vertical-align-center flex-right">
-              <span className="last-run">
+              <span className="text-muted">
                 {results.loading ? (
                   'Running...'
                 ) : results.lastRun ? (
