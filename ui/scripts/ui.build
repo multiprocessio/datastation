@@ -1,5 +1,5 @@
 rm -rf build
 mkdir build
-yarn esbuild ui/app.tsx --loader:.ts=tsx --loader:.js=jsx "--external:fs" --bundle --sourcemap --outfile=build/ui.js
+yarn esbuild --minify ui/app.tsx --loader:.ts=tsx --loader:.js=jsx "--external:fs" --bundle --sourcemap --outfile=build/ui.js
 cp ui/index.html build
 cp ui/style.css build

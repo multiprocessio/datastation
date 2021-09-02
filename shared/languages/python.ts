@@ -1,5 +1,6 @@
 import circularSafeStringify from 'json-stringify-safe';
 import { preview } from 'preview';
+import { InvalidDependentPanelError } from '../errors';
 import { PanelResult } from '../state';
 import { EOL } from './types';
 
@@ -34,6 +35,7 @@ function inMemoryEval(
     | { indexIdMap: Array<string>; resultsFile: string }
 ): Promise<{ value: any; preview: string; stdout: string }> {
   if (!Array.isArray(results)) {
+    // This is not a valid situation. Not sure how it could happen.
     throw new Error(
       'Bad calling convention for in-memory panel. Expected full results object.'
     );
@@ -42,8 +44,12 @@ function inMemoryEval(
   const anyWindow = window as any;
 
   // TODO: better deep copy
-  anyWindow.DM_getPanel = (panelId: number) =>
-    JSON.parse(JSON.stringify((results[panelId] || {}).value));
+  anyWindow.DM_getPanel = (panelId: number) => {
+    if (!results[panelId]) {
+      throw new InvalidDependentPanelError(panelId);
+    }
+    return JSON.parse(JSON.stringify((results[panelId] || {}).value));
+  };
 
   const stdout: Array<string> = [];
   return new Promise((resolve, reject) => {
