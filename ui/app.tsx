@@ -28,8 +28,8 @@ import { Servers } from './Servers';
 import { Sidebar } from './Sidebar';
 import { Updates } from './Updates';
 
-// Load brython on startup if in browser app
-window.onload = function () {
+// Load pyiode on startup if in browser app
+window.addEventListener('load', function () {
   if (MODE !== 'browser') {
     return;
   }
@@ -43,7 +43,7 @@ window.onload = function () {
       indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.17.0/full/',
     });
   };
-};
+});
 
 function getQueryParameter(param: String) {
   const query = window.location.search.substring(1);

@@ -2,17 +2,16 @@ import { preview } from 'preview';
 import * as React from 'react';
 import { shape } from 'shape';
 import { MODE } from '../shared/constants';
-import { NotAnArrayOfObjectsError } from '../shared/errors';
-import { columnsFromObject } from '../shared/object';
+import { InvalidDependentPanelError } from '../shared/errors';
 import {
   PanelInfo,
   PanelResult,
   TableColumn,
   TablePanelInfo,
 } from '../shared/state';
+import { columnsFromObject } from '../shared/table';
 import { asyncRPC } from './asyncRPC';
 import { Button } from './component-library/Button';
-import { PanelPlayWarning } from './errors';
 import { FieldPicker } from './FieldPicker';
 import { PanelSourcePicker } from './PanelSourcePicker';
 
@@ -22,16 +21,17 @@ export async function evalColumnPanel(
   indexIdMap: Array<string>,
   panelResults: Array<PanelResult>
 ) {
-  const badInputMessage = `This panel input must be an array of objects. Make sure panel #${panelSource} returns an array of objects.`;
   if (MODE === 'browser') {
     if (!panelResults || !panelResults[panelSource]) {
-      throw new PanelPlayWarning(
-        `Panel source is invalid. Did you run panel #${panelSource}?`
-      );
+      throw new InvalidDependentPanelError(panelSource);
     }
     const { value } = panelResults[panelSource];
     try {
-      const valueWithRequestedColumns = columnsFromObject(value, columns);
+      const valueWithRequestedColumns = columnsFromObject(
+        value,
+        columns,
+        panelSource
+      );
       return {
         value: valueWithRequestedColumns,
         preview: preview(valueWithRequestedColumns),
@@ -41,33 +41,23 @@ export async function evalColumnPanel(
         contentType: 'application/json',
       };
     } catch (e) {
-      if (e.constructor.name === NotAnArrayOfObjectsError.name) {
-        throw new PanelPlayWarning(badInputMessage);
-      }
-
       throw e;
     }
   }
 
-  try {
-    return await asyncRPC<
-      {
-        columns: Array<string>;
-        id: string;
-      },
-      void,
-      PanelResult
-    >('evalColumns', null, {
-      id: indexIdMap[panelSource],
-      columns,
-    });
-  } catch (e) {
-    if (e.constructor.name === NotAnArrayOfObjectsError.name) {
-      throw new PanelPlayWarning(badInputMessage);
-    }
-
-    throw e;
-  }
+  return await asyncRPC<
+    {
+      columns: Array<string>;
+      panelSource: number;
+      indexIdMap: Array<string>;
+    },
+    void,
+    PanelResult
+  >('evalColumns', null, {
+    panelSource,
+    indexIdMap,
+    columns,
+  });
 }
 
 export function TablePanelDetails({

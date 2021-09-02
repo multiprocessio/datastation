@@ -6,6 +6,13 @@ body {
   height: 100%;
 }
 
+a,
+a:visited,
+a:focus,
+a:hover {
+  color: blue;
+}
+
 .loading {
   text-align: center;
   margin: 100px auto;
@@ -127,7 +134,7 @@ label.input input[type='file'] {
   border-radius: 3px;
 }
 
-.button:not(.material-icons):not(.button--primary) {
+.button:not(.material-icons-outlined):not(.material-icons):not(.button--primary) {
   box-shadow: 0px 1px 0px 0px #ccc;
 }
 
@@ -141,7 +148,7 @@ label.input input[type='file'] {
   color: white;
 }
 
-.button--primary:not(.material-icons) {
+.button--primary:not(.material-icons):not(.material-icons-outlined) {
   box-shadow: 0px 1px 0px 0px #3a005f;
 }
 
@@ -149,7 +156,8 @@ label.input input[type='file'] {
   background: #56008c;
 }
 
-.button.material-icons {
+.button.material-icons,
+.button.material-icons-outlined {
   border: 0;
   background: transparent;
   color: #333;
@@ -157,20 +165,23 @@ label.input input[type='file'] {
   padding: 0;
 }
 
-.button:not(.material-icons):disabled,
-.button:not(.material-icons):disabled:hover {
+.button:not(.material-icons):not(.material-icons-outlined):disabled,
+.button:not(.material-icons):not(.material-icons-outlined):disabled:hover {
   background: #ccc;
   color: #777;
   cursor: not-allowed;
   pointer-events: all !important;
 }
 
-.button.button--primary.material-icons {
+.button.button--primary.material-icons,
+.button.button--primary.material-icons-outlined {
   color: #9f04ff;
 }
 
 .button.material-icons:disabled,
-.button.material-icons:disabled:hover {
+.button.material-icons-outlined:disabled,
+.button.material-icons:disabled:hover,
+.button.material-icons-outlined:disabled:hover {
   cursor: not-allowed;
   pointer-events: all !important;
   color: #ccc;
@@ -441,7 +452,21 @@ header > div {
 
 .alert {
   margin-top: 15px;
-  padding: 15px 5px;
+  padding: 15px;
+}
+
+.alert a {
+  padding: 0 5px;
+}
+
+.alert > .material-icons {
+  padding-right: 15px;
+  color: #555;
+}
+
+.alert-warning {
+  background: #fff4e7;
+  border: 1px solid #ffc0c0;
 }
 
 .alert-error {
@@ -452,6 +477,10 @@ header > div {
 .alert-info {
   background: #e7f7ff;
   border: 1px solid #c0f0ff;
+}
+
+.error-boundary {
+  padding: 0 15px;
 }
 
 .share {
@@ -508,11 +537,22 @@ header > div {
   padding: 5px 0;
 }
 
+.form-row > * {
+  padding-right: 10px;
+}
+
 .form-row label {
   padding-right: 5px;
   color: #777;
   font-size: 0.75rem;
-  text-transform: uppercase;
+}
+
+.form-row label input,
+.form-row label select,
+.form-row label textarea {
+  padding-left: 15px;
+  /* Since many inputs are within label, keep the label font size small and the input font size normal */
+  font-size: initial;
 }
 
 .version {

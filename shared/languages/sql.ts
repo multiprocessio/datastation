@@ -1,6 +1,8 @@
 import alasql from 'alasql';
 import { preview } from 'preview';
 import { v4 as uuidv4 } from 'uuid';
+import { InvalidDependentPanelError } from '../errors';
+import log from '../log';
 import { PanelResult } from '../state';
 
 function exceptionRewriter(msg: string, _: string) {
@@ -32,7 +34,7 @@ async function inMemoryEval(
   // Functions like this can only be declared globally. So we make sure DM_getPanel gets renamed to something unique
   const thisDM_getPanel = 'DM_getPanel_' + uuidv4().replaceAll('-', '_');
   const fromAddons = (alasql as any).from;
-  fromAddons[thisDM_getPanel] = async function (
+  fromAddons[thisDM_getPanel] = function (
     n: number,
     opts: any,
     cb: any,
@@ -41,12 +43,22 @@ async function inMemoryEval(
   ) {
     let res: any;
     if (Array.isArray(resultsOrDiskDetails)) {
+      if (!resultsOrDiskDetails[n]) {
+        throw new InvalidDependentPanelError(n);
+      }
+
       res = resultsOrDiskDetails[n].value;
     } else {
-      const fs = require('fs/promises');
-      const f = await fs.readFile(
-        resultsOrDiskDetails.resultsFile + resultsOrDiskDetails.indexIdMap[n]
-      );
+      const fs = require('fs');
+      let f;
+      try {
+        f = fs.readFileSync(
+          resultsOrDiskDetails.resultsFile + resultsOrDiskDetails.indexIdMap[n]
+        );
+      } catch (e) {
+        log.error(e);
+        throw new InvalidDependentPanelError(n);
+      }
       res = JSON.parse(f.toString());
     }
     if (cb) {
@@ -58,7 +70,8 @@ async function inMemoryEval(
   const patchedProgram = prog.replaceAll(/DM_getPanel/gi, thisDM_getPanel);
 
   try {
-    // It is only asynchronous if you run "multiple" queries.
+    // It is only asynchronous if you run "multiple" queries, so wrap
+    // the one query in an array.
     const [value] = await alasql([patchedProgram]);
     return {
       value,

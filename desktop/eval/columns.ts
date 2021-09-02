@@ -1,6 +1,6 @@
 import fs from 'fs/promises';
 import { RPC } from '../../shared/constants';
-import { columnsFromObject } from '../../shared/object';
+import { columnsFromObject } from '../../shared/table';
 import { getProjectResultsFile } from '../store';
 import { rpcEvalHandler } from './eval';
 
@@ -10,18 +10,25 @@ export const evalColumnsHandler = rpcEvalHandler({
     projectId: string,
     _1: string,
     {
-      id,
+      indexIdMap,
+      panelSource,
       columns,
     }: {
-      id: string;
+      indexIdMap: Array<string>;
       columns: Array<string>;
+      panelSource: number;
     }
   ) {
+    const id = indexIdMap[panelSource];
     const projectResultsFile = getProjectResultsFile(projectId);
     const f = await fs.readFile(projectResultsFile + id);
     const value = JSON.parse(f.toString());
 
-    const valueWithRequestedColumns = columnsFromObject(value, columns);
+    const valueWithRequestedColumns = columnsFromObject(
+      value,
+      columns,
+      panelSource
+    );
 
     return {
       value: valueWithRequestedColumns,

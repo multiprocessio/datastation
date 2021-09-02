@@ -21,9 +21,11 @@ import {
 } from '../shared/state';
 import { humanSize } from '../shared/text';
 import { asyncRPC } from './asyncRPC';
+import { Alert } from './component-library/Alert';
 import { Button } from './component-library/Button';
 import { CodeEditor } from './component-library/CodeEditor';
 import { Confirm } from './component-library/Confirm';
+import { Highlight } from './component-library/Highlight';
 import { Input } from './component-library/Input';
 import { Select } from './component-library/Select';
 import { ErrorBoundary } from './ErrorBoundary';
@@ -173,19 +175,24 @@ function PreviewResults({
   results,
 }: {
   panelOut: 'preview' | 'stdout' | 'shape' | 'metadata';
-  results: PanelResultMeta;
+  results: PanelResultMeta & { metadata?: string };
 }) {
   if (!results.lastRun) {
     return <React.Fragment>Panel not yet run.</React.Fragment>;
   }
 
   if (panelOut === 'metadata') {
-    return (
-      <div>
-        <div>Size: {humanSize(results.size)}</div>
-        <div>Inferred Content-Type: {results.contentType}</div>
-      </div>
-    );
+    results = {
+      ...results,
+      metadata: JSON.stringify(
+        {
+          Size: humanSize(results.size),
+          'Inferred Content-Type': results.contentType,
+        },
+        null,
+        2
+      ),
+    };
   }
 
   if (!results[panelOut]) {
@@ -194,17 +201,28 @@ function PreviewResults({
 
   if (panelOut === 'shape') {
     return (
-      <pre>
-        <code>{toString(results.shape)}</code>
-      </pre>
+      <Highlight language="javascript">{toString(results.shape)}</Highlight>
     );
   }
 
-  return (
-    <pre>
-      <code>{results[panelOut]}</code>
-    </pre>
-  );
+  return <Highlight language="json">{results[panelOut]}</Highlight>;
+}
+
+function PanelPlayWarningWithLinks({ msg }: { msg: string }) {
+  const children = msg.split(/(panel #[0-9]+)/).map((c, i) => {
+    const prefix = 'panel #';
+    if (c.startsWith(prefix)) {
+      return (
+        <a key={i} href={'/#panel-' + c.slice(prefix.length)}>
+          {c}
+        </a>
+      );
+    }
+
+    return c;
+  });
+
+  return <Alert type="warning" children={children} />;
 }
 
 export function Panel({
@@ -286,6 +304,7 @@ export function Panel({
 
   return (
     <div
+      id={`panel-${panelIndex}`}
       className={`panel ${hidden ? 'panel--hidden' : ''} ${
         panel.type === 'file' && !results.exception ? 'panel--empty' : ''
       } ${results.loading ? 'panel--loading' : ''}`}
@@ -399,7 +418,7 @@ export function Panel({
                   message="delete this panel"
                   action="Delete"
                   render={(confirm: () => void) => (
-                    <Button icon onClick={confirm}>
+                    <Button icon onClick={confirm} type="outline">
                       delete
                     </Button>
                   )}
@@ -447,7 +466,7 @@ export function Panel({
                 >
                   <option value="program">Code</option>
                   <option value="http">HTTP Request</option>
-                  <option value="sql">SQL</option>
+                  {MODE === 'desktop' && <option value="sql">SQL</option>}
                   <option value="graph">Graph</option>
                   <option value="file">File</option>
                   <option value="literal">Literal</option>
@@ -528,47 +547,45 @@ export function Panel({
                   />
                 )}
                 {exception instanceof PanelPlayWarning ? (
-                  <div className="alert alert-error">{exception.message}</div>
+                  <PanelPlayWarningWithLinks msg={exception.message} />
                 ) : (
                   exception && (
-                    <div className="alert alert-error">
+                    <Alert type="error">
                       <div>Error evaluating panel:</div>
                       <pre>
                         <code>{exception.stack || exception.message}</code>
                       </pre>
-                    </div>
+                    </Alert>
                   )
                 )}
                 {panel.type === 'program' && (
-                  <div className="alert alert-info">
-                    <p>
-                      Use builtin functions,{' '}
-                      <code>DM_setPanel($some_array_data)</code> and{' '}
-                      <code>DM_getPanel($panel_number)</code>, to interact with
-                      other panels. For example:{' '}
-                      <code>
-                        const passthrough = DM_getPanel(0);
-                        DM_setPanel(passthrough);
-                      </code>
-                      .
-                    </p>
+                  <Alert type="info">
+                    Use builtin functions,{' '}
+                    <code>DM_setPanel($some_array_data)</code> and{' '}
+                    <code>DM_getPanel($panel_number)</code>, to interact with
+                    other panels. For example:{' '}
+                    <code>
+                      const passthrough = DM_getPanel(0);
+                      DM_setPanel(passthrough);
+                    </code>
+                    .
                     {(panel as ProgramPanelInfo).program.type === 'julia' && (
-                      <p>
+                      <React.Fragment>
                         Install{' '}
                         <a href="https://github.com/JuliaIO/JSON.jl">JSON.jl</a>{' '}
                         to script with Julia.
-                      </p>
+                      </React.Fragment>
                     )}
                     {(panel as ProgramPanelInfo).program.type === 'r' && (
-                      <p>
+                      <React.Fragment>
                         Install <a href="https://rdrr.io/cran/rjson/">rjson</a>{' '}
                         to script with R.
-                      </p>
+                      </React.Fragment>
                     )}
-                  </div>
+                  </Alert>
                 )}
                 {panel.type === 'sql' && (
-                  <div className="alert alert-info">
+                  <Alert type="info">
                     Use <code>DM_getPanel($panel_number)</code> to reference
                     other panels. Once you have called this once for one panel,
                     use <code>t$panel_number</code> to refer to it again. For
@@ -577,20 +594,20 @@ export function Panel({
                       SELECT age, name FROM DM_getPanel(0) WHERE t0.age &gt; 1;
                     </code>
                     .
-                  </div>
+                  </Alert>
                 )}
                 {panel.type === 'http' && MODE_FEATURES.corsOnly && (
-                  <div className="alert alert-info">
+                  <Alert type="info">
                     Since this runs in the browser, the server you are talking
                     to must set CORS headers otherwise the request will not
                     work.
-                  </div>
+                  </Alert>
                 )}
                 {panel.type === 'http' && (
-                  <div className="alert alert-info">
+                  <Alert type="info">
                     Use the textarea to supply a HTTP request body. This will be
                     ignored for <code>GET</code> and <code>HEAD</code> requests.
-                  </div>
+                  </Alert>
                 )}
               </div>
               {previewableTypes.includes(panel.type) && (

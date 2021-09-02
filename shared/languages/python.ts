@@ -48,7 +48,11 @@ function inMemoryEval(
   const stdout: Array<string> = [];
   return new Promise((resolve, reject) => {
     function convertFromPyodideObjectIfNecessary(v: any) {
-      return v && v.toJs ? v.toJs() : v;
+      // Without dict_converter this objects in Python get converted to JavaScript Maps which cannot be stringified
+      const jsValue =
+        v && v.toJs ? v.toJs({ dict_converter: Object.fromEntries }) : v;
+      console.log(jsValue, v, v.toJs());
+      return jsValue;
     }
 
     anyWindow.DM_setPanel = (v: any) => {

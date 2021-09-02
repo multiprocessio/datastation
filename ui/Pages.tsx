@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { EVAL_ERRORS } from '../shared/errors';
 import {
   PanelResultMeta,
   PanelResults,
@@ -8,6 +9,7 @@ import {
 import { Button } from './component-library/Button';
 import { Confirm } from './component-library/Confirm';
 import { Input } from './component-library/Input';
+import { PanelPlayWarning } from './errors';
 import { evalPanel } from './Panel';
 import { Panels } from './Panels';
 
@@ -103,6 +105,10 @@ export function Pages({
         loading: false,
       });
     } catch (e) {
+      if (EVAL_ERRORS.map((cls) => cls.name).includes(e.constructor.name)) {
+        e = new PanelPlayWarning(e.message);
+      }
+
       setPanelResults(panelIndex, {
         loading: false,
         lastRun: new Date(),
@@ -140,7 +146,7 @@ export function Pages({
                   action="Delete"
                   className="page-delete"
                   render={(confirm: () => void) => (
-                    <Button icon onClick={confirm}>
+                    <Button icon onClick={confirm} type="outline">
                       delete
                     </Button>
                   )}
