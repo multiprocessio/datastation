@@ -164,7 +164,7 @@ export function Pages({
 
               <span title="Evaluate all panels sequentially">
                 <Button icon onClick={evalAll} type="primary">
-                  play_arrow
+                  play_circle
                 </Button>
               </span>
             </div>

@@ -160,8 +160,7 @@ label.input input[type='file'] {
 .button.material-icons-outlined {
   border: 0;
   background: transparent;
-  color: #333;
-  font-size: 20px;
+  color: #555;
   padding: 0;
 }
 
@@ -447,7 +446,7 @@ header > div {
 
 .text-muted {
   font-size: 0.9rem;
-  color: #777;
+  color: #333;
 }
 
 .alert {

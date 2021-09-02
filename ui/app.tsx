@@ -28,19 +28,19 @@ import { Servers } from './Servers';
 import { Sidebar } from './Sidebar';
 import { Updates } from './Updates';
 
-// Load pyiode on startup if in browser app
+// Load pyodide on startup if in browser app
 window.addEventListener('load', function () {
   if (MODE !== 'browser') {
     return;
   }
 
   const pyodide = document.createElement('script');
-  pyodide.src = 'https://cdn.jsdelivr.net/pyodide/v0.17.0/full/pyodide.js';
+  pyodide.src = 'https://cdn.jsdelivr.net/pyodide/v0.18.0/full/pyodide.js';
   document.body.appendChild(pyodide);
 
-  pyodide.onload = function () {
-    (window as any).loadPyodide({
-      indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.17.0/full/',
+  pyodide.onload = async function () {
+    (window as any).pyodide = await (window as any).loadPyodide({
+      indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.18.0/full/',
     });
   };
 });

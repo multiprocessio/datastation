@@ -74,7 +74,6 @@ export function CodeEditor({
             : undefined,
         ].filter(Boolean)}
         showGutter={!singleLine}
-        keyboardHandler="emacs"
         setOptions={
           singleLine
             ? { showLineNumbers: false, highlightActiveLine: false }

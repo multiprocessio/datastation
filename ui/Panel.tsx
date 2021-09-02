@@ -390,7 +390,7 @@ export function Panel({
                   }
                   type="primary"
                 >
-                  {runningProgram ? 'close' : 'play_arrow'}
+                  {runningProgram ? 'close' : 'play_circle'}
                 </Button>
               </span>
               <span
