@@ -1,8 +1,8 @@
 import * as React from 'react';
 import {
-  LiteralPanelInfo,
   PanelInfo,
   PanelResultMeta,
+  ProgramPanelInfo,
   ProjectPage,
 } from '../shared/state';
 import { Button } from './component-library/Button';
@@ -46,7 +46,10 @@ export function Panels({
       <div className="new-panel">
         <Button
           onClick={() => {
-            const panel = new LiteralPanelInfo('Untitled panel');
+            const panel = new ProgramPanelInfo(
+              'Untitled Python panel',
+              'python'
+            );
             page.panels.splice(panelIndex + 1, 0, panel);
             updatePage(page);
           }}
