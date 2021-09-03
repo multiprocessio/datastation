@@ -45,8 +45,9 @@ export function registerRPCHandlers(
           isError: true,
           body: {
             ...e,
-            // Needs to get explicitly copied
-            constructor: { name: e.constructor.name },
+            // Needs to get passed explicitly or name comes out as Error after rpc
+            message: e.message,
+            name: e.name,
           },
         });
       }

@@ -208,19 +208,35 @@ function PreviewResults({
   return <Highlight language="json">{results[panelOut]}</Highlight>;
 }
 
-function PanelPlayWarningWithLinks({ msg }: { msg: string }) {
-  const children = msg.split(/(panel #[0-9]+)/).map((c, i) => {
-    const prefix = 'panel #';
-    if (c.startsWith(prefix)) {
-      return (
-        <a key={i} href={'/#panel-' + c.slice(prefix.length)}>
-          {c}
-        </a>
-      );
-    }
+function PanelPlayWarningWithLinks({
+  msg,
+  indexNameMap,
+}: {
+  msg: string;
+  indexNameMap: Array<string>;
+}) {
+  const children = msg
+    .split(/(panel #[0-9]+)|(DM_setPanel\([$a-zA-Z]*\))/)
+    .map((c, i) => {
+      if (!c) {
+        return;
+      }
+      const prefix = 'panel #';
+      if (c.startsWith(prefix)) {
+        const index = c.slice(prefix.length);
+        return (
+          <a key={i} href={'#panel-' + index}>
+            [{index}] {indexNameMap[index]}
+          </a>
+        );
+      }
 
-    return c;
-  });
+      if (c.startsWith('DM_setPanel(')) {
+        return <code key={i}>{c}</code>;
+      }
+
+      return c;
+    });
 
   return <Alert type="warning" children={children} />;
 }
@@ -254,7 +270,10 @@ export function Panel({
     panelResults[panelIndex] && panelResults[panelIndex].exception;
   if (panel.type === 'table') {
     body = (
-      <TablePanel panel={panel as TablePanelInfo} panelResults={panelResults} />
+      <TablePanel
+        panel={panel as TablePanelInfo}
+        data={panelResults[panelIndex]}
+      />
     );
   } else if (panel.type === 'graph') {
     body = (
@@ -530,125 +549,135 @@ export function Panel({
         </div>
         {!hidden && (
           <div className="panel-body-container">
-            <div className="flex">
-              <div className="panel-body">
-                {body ? (
-                  body
-                ) : (
-                  <CodeEditor
-                    id={panel.id}
-                    onKeyDown={keyboardShortcuts}
-                    value={panel.content}
-                    onChange={(value: string) => {
-                      panel.content = value;
-                      updatePanel(panel);
-                    }}
-                    language={language}
-                    className="editor"
-                  />
-                )}
-                {exception instanceof PanelPlayWarning ? (
-                  <PanelPlayWarningWithLinks msg={exception.message} />
-                ) : (
-                  exception && (
-                    <Alert type="error">
-                      <div>Error evaluating panel:</div>
-                      <pre>
-                        <code>{exception.stack || exception.message}</code>
-                      </pre>
+            <ErrorBoundary className="panel-body">
+              <div className="flex">
+                <div className="panel-body">
+                  {body ? (
+                    body
+                  ) : (
+                    <CodeEditor
+                      id={panel.id}
+                      onKeyDown={keyboardShortcuts}
+                      value={panel.content}
+                      onChange={(value: string) => {
+                        panel.content = value;
+                        updatePanel(panel);
+                      }}
+                      language={language}
+                      className="editor"
+                    />
+                  )}
+                  {exception instanceof PanelPlayWarning ? (
+                    <PanelPlayWarningWithLinks
+                      msg={exception.message}
+                      indexNameMap={panels.map(({ name }) => name)}
+                    />
+                  ) : (
+                    exception && (
+                      <Alert type="error">
+                        <div>Error evaluating panel:</div>
+                        <pre>
+                          <code>{exception.stack || exception.message}</code>
+                        </pre>
+                      </Alert>
+                    )
+                  )}
+                  {panel.type === 'program' && (
+                    <Alert type="info">
+                      Use builtin functions,{' '}
+                      <code>DM_setPanel($some_array_data)</code> and{' '}
+                      <code>DM_getPanel($panel_number)</code>, to interact with
+                      other panels. For example:{' '}
+                      <code>
+                        const passthrough = DM_getPanel(0);
+                        DM_setPanel(passthrough);
+                      </code>
+                      .
+                      {(panel as ProgramPanelInfo).program.type === 'julia' && (
+                        <React.Fragment>
+                          Install{' '}
+                          <a href="https://github.com/JuliaIO/JSON.jl">
+                            JSON.jl
+                          </a>{' '}
+                          to script with Julia.
+                        </React.Fragment>
+                      )}
+                      {(panel as ProgramPanelInfo).program.type === 'r' && (
+                        <React.Fragment>
+                          Install{' '}
+                          <a href="https://rdrr.io/cran/rjson/">rjson</a> to
+                          script with R.
+                        </React.Fragment>
+                      )}
                     </Alert>
-                  )
-                )}
-                {panel.type === 'program' && (
-                  <Alert type="info">
-                    Use builtin functions,{' '}
-                    <code>DM_setPanel($some_array_data)</code> and{' '}
-                    <code>DM_getPanel($panel_number)</code>, to interact with
-                    other panels. For example:{' '}
-                    <code>
-                      const passthrough = DM_getPanel(0);
-                      DM_setPanel(passthrough);
-                    </code>
-                    .
-                    {(panel as ProgramPanelInfo).program.type === 'julia' && (
-                      <React.Fragment>
-                        Install{' '}
-                        <a href="https://github.com/JuliaIO/JSON.jl">JSON.jl</a>{' '}
-                        to script with Julia.
-                      </React.Fragment>
-                    )}
-                    {(panel as ProgramPanelInfo).program.type === 'r' && (
-                      <React.Fragment>
-                        Install <a href="https://rdrr.io/cran/rjson/">rjson</a>{' '}
-                        to script with R.
-                      </React.Fragment>
-                    )}
-                  </Alert>
-                )}
-                {panel.type === 'sql' && (
-                  <Alert type="info">
-                    Use <code>DM_getPanel($panel_number)</code> to reference
-                    other panels. Once you have called this once for one panel,
-                    use <code>t$panel_number</code> to refer to it again. For
-                    example:{' '}
-                    <code>
-                      SELECT age, name FROM DM_getPanel(0) WHERE t0.age &gt; 1;
-                    </code>
-                    .
-                  </Alert>
-                )}
-                {panel.type === 'http' && MODE_FEATURES.corsOnly && (
-                  <Alert type="info">
-                    Since this runs in the browser, the server you are talking
-                    to must set CORS headers otherwise the request will not
-                    work.
-                  </Alert>
-                )}
-                {panel.type === 'http' && (
-                  <Alert type="info">
-                    Use the textarea to supply a HTTP request body. This will be
-                    ignored for <code>GET</code> and <code>HEAD</code> requests.
-                  </Alert>
-                )}
-              </div>
-              {previewableTypes.includes(panel.type) && (
-                <div className="panel-out resize resize--left resize--horizontal">
-                  <div className="panel-out-header">
-                    <Button
-                      className={panelOut === 'preview' ? 'selected' : ''}
-                      onClick={() => setPanelOut('preview')}
-                    >
-                      Preview
-                    </Button>
-                    <Button
-                      className={panelOut === 'shape' ? 'selected' : ''}
-                      onClick={() => setPanelOut('shape')}
-                    >
-                      Inferred Schema
-                    </Button>
-                    <Button
-                      className={panelOut === 'metadata' ? 'selected' : ''}
-                      onClick={() => setPanelOut('metadata')}
-                    >
-                      Metadata
-                    </Button>
-                    {panel.type === 'program' && (
+                  )}
+                  {panel.type === 'sql' && (
+                    <Alert type="info">
+                      Use <code>DM_getPanel($panel_number)</code> to reference
+                      other panels. Once you have called this once for one
+                      panel, use <code>t$panel_number</code> to refer to it
+                      again. For example:{' '}
+                      <code>
+                        SELECT age, name FROM DM_getPanel(0) WHERE t0.age &gt;
+                        1;
+                      </code>
+                      .
+                    </Alert>
+                  )}
+                  {panel.type === 'http' && MODE_FEATURES.corsOnly && (
+                    <Alert type="info">
+                      Since this runs in the browser, the server you are talking
+                      to must set CORS headers otherwise the request will not
+                      work.
+                    </Alert>
+                  )}
+                  {panel.type === 'http' && (
+                    <Alert type="info">
+                      Use the textarea to supply a HTTP request body. This will
+                      be ignored for <code>GET</code> and <code>HEAD</code>{' '}
+                      requests.
+                    </Alert>
+                  )}
+                </div>
+                {previewableTypes.includes(panel.type) && (
+                  <div className="panel-out resize resize--left resize--horizontal">
+                    <div className="panel-out-header">
                       <Button
-                        className={panelOut === 'stdout' ? 'selected' : ''}
-                        onClick={() => setPanelOut('stdout')}
+                        className={panelOut === 'preview' ? 'selected' : ''}
+                        onClick={() => setPanelOut('preview')}
                       >
-                        Stdout
+                        Preview
                       </Button>
-                    )}
-                  </div>
-                  <div className="panel-preview">
-                    <div className="panel-preview-results">
-                      <PreviewResults results={results} panelOut={panelOut} />
+                      <Button
+                        className={panelOut === 'shape' ? 'selected' : ''}
+                        onClick={() => setPanelOut('shape')}
+                      >
+                        Inferred Schema
+                      </Button>
+                      <Button
+                        className={panelOut === 'metadata' ? 'selected' : ''}
+                        onClick={() => setPanelOut('metadata')}
+                      >
+                        Metadata
+                      </Button>
+                      {panel.type === 'program' && (
+                        <Button
+                          className={panelOut === 'stdout' ? 'selected' : ''}
+                          onClick={() => setPanelOut('stdout')}
+                        >
+                          Stdout
+                        </Button>
+                      )}
+                    </div>
+                    <div className="panel-preview">
+                      <div className="panel-preview-results">
+                        <PreviewResults results={results} panelOut={panelOut} />
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
+            </ErrorBoundary>
           </div>
         )}
       </ErrorBoundary>

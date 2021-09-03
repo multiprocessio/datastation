@@ -1,3 +1,7 @@
+* {
+  box-sizing: border-box;
+}
+
 body {
   font-family: sans-serif;
   padding: 0;
@@ -90,6 +94,12 @@ NOT SURE IF THIS IS STILL NEEDED
   max-width: 100%;
 }
 
+label {
+  padding-right: 15px;
+  color: #777;
+  font-size: 0.75rem;
+}
+
 .editor-container .input,
 input.input,
 label.input input,
@@ -99,6 +109,10 @@ label.select select {
   background: transparent;
   border: 0;
   border-bottom: 1px solid #aaa;
+  /* Since many inputs are within label, keep the label font size small and the input font size normal */
+  font-size: initial;
+  display: inline-block;
+  margin-left: 10px;
 }
 
 input.input[type='file'],
@@ -454,6 +468,10 @@ header > div {
   padding: 15px;
 }
 
+.alert pre {
+  white-space: pre-wrap;
+}
+
 .alert a {
   padding: 0 5px;
 }
@@ -476,10 +494,6 @@ header > div {
 .alert-info {
   background: #e7f7ff;
   border: 1px solid #c0f0ff;
-}
-
-.error-boundary {
-  padding: 0 15px;
 }
 
 .share {
@@ -538,20 +552,6 @@ header > div {
 
 .form-row > * {
   padding-right: 10px;
-}
-
-.form-row label {
-  padding-right: 5px;
-  color: #777;
-  font-size: 0.75rem;
-}
-
-.form-row label input,
-.form-row label select,
-.form-row label textarea {
-  padding-left: 15px;
-  /* Since many inputs are within label, keep the label font size small and the input font size normal */
-  font-size: initial;
 }
 
 .version {

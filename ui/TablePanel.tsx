@@ -124,16 +124,16 @@ export function TablePanelDetails({
 
 export function TablePanel({
   panel,
-  panelResults,
+  data,
 }: {
   panel: TablePanelInfo;
-  panelResults: Array<PanelResult>;
+  data?: { value?: Array<any> };
 }) {
-  let valueAsArray = (panelResults[panel.table.panelSource] || {}).value || [];
-  // Panels don't have to be an array. Don't crash if the currently selected one is not one.
-  if (!Array.isArray(valueAsArray)) {
-    valueAsArray = [];
+  let valueAsArray: Array<any> = [];
+  if (data && data.value && Array.isArray(data.value)) {
+    valueAsArray = data.value;
   }
+
   return (
     <table>
       <thead>
