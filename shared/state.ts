@@ -135,7 +135,12 @@ export class HTTPConnectorInfo extends ConnectorInfo {
   }
 }
 
-export type SQLConnectorInfoType = 'postgres' | 'mysql' | 'sqlite' | 'oracle' | 'sqlserver';
+export type SQLConnectorInfoType =
+  | 'postgres'
+  | 'mysql'
+  | 'sqlite'
+  | 'oracle'
+  | 'sqlserver';
 
 export class SQLConnectorInfo extends ConnectorInfo {
   sql: {

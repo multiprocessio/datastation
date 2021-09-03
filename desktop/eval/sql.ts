@@ -1,3 +1,4 @@
+import sqlserver from 'mssql';
 import mysql from 'mysql2/promise';
 import oracledb from 'oracledb';
 import { Client as PostgresClient } from 'pg';
@@ -5,7 +6,6 @@ import * as sqlite from 'sqlite';
 import sqlite3 from 'sqlite3';
 import Client from 'ssh2-sftp-client';
 import { file as makeTmpFile } from 'tmp-promise';
-import sqlserver from 'mssql';
 import { Proxy, SQLConnectorInfo, SQLPanelInfo } from '../../shared/state';
 import { rpcEvalHandler } from './eval';
 import { getSSHConfig, tunnel } from './tunnel';
@@ -40,7 +40,6 @@ async function evalSQLServer(
   port: number,
   { connector: { sql } }: Proxy<SQLPanelInfo, SQLConnectorInfo>
 ) {
-  try {
   const client = await sqlserver.connect({
     user: sql.username,
     password: sql.password,
@@ -56,6 +55,7 @@ async function evalSQLServer(
     },
     server: `${host}:${port}`,
   });
+  try {
     const res = await client.query(content);
     return res.recordset;
   } finally {
@@ -70,12 +70,12 @@ async function evalOracle(
   { connector: { sql } }: Proxy<SQLPanelInfo, SQLConnectorInfo>
 ) {
   oracledb.outFormat = oracledb.OUT_FORMAT_ARRAY;
+  const client = await oracledb.getConnection({
+    user: sql.username,
+    password: sql.password,
+    connectString: `${host}:${port}/${sql.database}`,
+  });
   try {
-     const connection = await oracledb.getConnection({
-      user: sql.username,
-      password: sql.password,
-      connectString: `${host}:${port}/${sql.database}`,
-    });
     const res = await client.execute(content);
     return res.rows;
   } finally {
