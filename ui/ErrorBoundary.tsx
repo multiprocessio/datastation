@@ -22,9 +22,9 @@ export class ErrorBoundary extends React.Component<Props, State> {
     if (this.state.error) {
       return (
         <div className={this.props.className}>
-          <Alert type="error">
+          <Alert type="fatal">
             <p>
-              This section crashed! Feel free to message the{' '}
+              This section crashed due to a bug. Feel free to message the{' '}
               <a target="_blank" href={CHAT_LINK}>
                 community support channel
               </a>{' '}
