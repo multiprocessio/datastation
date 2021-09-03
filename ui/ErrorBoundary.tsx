@@ -8,6 +8,8 @@ type State = { error?: Error };
 
 // SOURCE: https://reactjs.org/docs/error-boundaries.html
 export class ErrorBoundary extends React.Component<Props, State> {
+  state = {};
+
   static getDerivedStateFromError(error: Error) {
     return { error };
   }

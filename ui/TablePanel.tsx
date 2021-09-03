@@ -11,6 +11,7 @@ import {
 } from '../shared/state';
 import { columnsFromObject } from '../shared/table';
 import { asyncRPC } from './asyncRPC';
+import { Alert } from './component-library/Alert';
 import { Button } from './component-library/Button';
 import { FieldPicker } from './FieldPicker';
 import { PanelSourcePicker } from './PanelSourcePicker';
@@ -132,6 +133,14 @@ export function TablePanel({
   let valueAsArray: Array<any> = [];
   if (data && data.value && Array.isArray(data.value)) {
     valueAsArray = data.value;
+  }
+
+  if (!panel.table.columns || panel.table.columns.length) {
+    return (
+      <Alert type="info">
+        There are no columns to display. Add columns in the panel details.
+      </Alert>
+    );
   }
 
   return (
