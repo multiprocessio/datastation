@@ -1,5 +1,3 @@
-import { NotAnArrayOfObjectsError } from './errors';
-
 // SOURCE: https://stackoverflow.com/a/34749873/1507139
 function isObject(item: any) {
   return item && typeof item === 'object' && !Array.isArray(item);
@@ -26,27 +24,4 @@ export function deepEquals(a: any, b: any) {
 
 export function deepClone(a: any) {
   return JSON.parse(JSON.stringify(a));
-}
-
-export function columnsFromObject(value: any, columns: Array<string>) {
-  if (!value || !Array.isArray(value)) {
-    throw new NotAnArrayOfObjectsError();
-  }
-
-  return (value || []).map((row: any) => {
-    // If none specified, select all
-    if (!columns.length) {
-      return row;
-    }
-
-    if (!row) {
-      return null;
-    }
-
-    const cells: Record<string, any> = {};
-    (columns || []).forEach((name) => {
-      cells[name] = row[name];
-    });
-    return cells;
-  });
 }

@@ -155,7 +155,7 @@ export function FieldPicker({
   return (
     <React.Fragment>
       {onDelete && (
-        <Button icon onClick={onDelete}>
+        <Button icon onClick={onDelete} type="outline">
           delete
         </Button>
       )}

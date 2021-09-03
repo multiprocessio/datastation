@@ -1,8 +1,10 @@
 import { spawn } from 'child_process';
 import fs from 'fs/promises';
 import { EOL } from 'os';
+import path from 'path';
 import { file as makeTmpFile } from 'tmp-promise';
 import { RPC } from '../../shared/constants';
+import { InvalidDependentPanelError, NoResultError } from '../../shared/errors';
 import { LANGUAGES } from '../../shared/languages';
 import { ProgramPanelInfo, Proxy } from '../../shared/state';
 import { SETTINGS } from '../settings';
@@ -102,7 +104,12 @@ export const evalProgramHandler = rpcEvalHandler<
           throw Error(stderr);
         }
 
-        const f = await fs.readFile(projectResultsFile + ppi.id);
+        let f: Buffer;
+        try {
+          f = await fs.readFile(projectResultsFile + ppi.id);
+        } catch (e) {
+          throw new NoResultError();
+        }
         const value = JSON.parse(f.toString());
 
         return {
@@ -111,6 +118,15 @@ export const evalProgramHandler = rpcEvalHandler<
           stdout: out,
         };
       } catch (e) {
+        const resultsFileRE = new RegExp(
+          path.basename(projectResultsFile) +
+            '(?<id>[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12})'
+        );
+        const match = resultsFileRE.exec(e.message);
+        if (match && match.groups && match.groups.id !== ppi.id) {
+          const panelSource = indexIdMap.indexOf(match.groups.id);
+          throw new InvalidDependentPanelError(panelSource);
+        }
         e.message = language.exceptionRewriter(e.message, programTmp.path);
         e.stdout = out;
         throw e;

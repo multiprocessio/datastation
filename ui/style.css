@@ -1,9 +1,20 @@
+* {
+  box-sizing: border-box;
+}
+
 body {
   font-family: sans-serif;
   padding: 0;
   margin: 0;
   background: #fbfbfb;
   height: 100%;
+}
+
+a,
+a:visited,
+a:focus,
+a:hover {
+  color: blue;
 }
 
 .loading {
@@ -83,6 +94,12 @@ NOT SURE IF THIS IS STILL NEEDED
   max-width: 100%;
 }
 
+label {
+  padding-right: 15px;
+  color: #777;
+  font-size: 0.75rem;
+}
+
 .editor-container .input,
 input.input,
 label.input input,
@@ -92,6 +109,10 @@ label.select select {
   background: transparent;
   border: 0;
   border-bottom: 1px solid #aaa;
+  /* Since many inputs are within label, keep the label font size small and the input font size normal */
+  font-size: initial;
+  display: inline-block;
+  margin-left: 10px;
 }
 
 input.input[type='file'],
@@ -127,7 +148,7 @@ label.input input[type='file'] {
   border-radius: 3px;
 }
 
-.button:not(.material-icons):not(.button--primary) {
+.button:not(.material-icons-outlined):not(.material-icons):not(.button--primary) {
   box-shadow: 0px 1px 0px 0px #ccc;
 }
 
@@ -141,7 +162,7 @@ label.input input[type='file'] {
   color: white;
 }
 
-.button--primary:not(.material-icons) {
+.button--primary:not(.material-icons):not(.material-icons-outlined) {
   box-shadow: 0px 1px 0px 0px #3a005f;
 }
 
@@ -149,28 +170,31 @@ label.input input[type='file'] {
   background: #56008c;
 }
 
-.button.material-icons {
+.button.material-icons,
+.button.material-icons-outlined {
   border: 0;
   background: transparent;
-  color: #333;
-  font-size: 20px;
+  color: #555;
   padding: 0;
 }
 
-.button:not(.material-icons):disabled,
-.button:not(.material-icons):disabled:hover {
+.button:not(.material-icons):not(.material-icons-outlined):disabled,
+.button:not(.material-icons):not(.material-icons-outlined):disabled:hover {
   background: #ccc;
   color: #777;
   cursor: not-allowed;
   pointer-events: all !important;
 }
 
-.button.button--primary.material-icons {
+.button.button--primary.material-icons,
+.button.button--primary.material-icons-outlined {
   color: #9f04ff;
 }
 
 .button.material-icons:disabled,
-.button.material-icons:disabled:hover {
+.button.material-icons-outlined:disabled,
+.button.material-icons:disabled:hover,
+.button.material-icons-outlined:disabled:hover {
   cursor: not-allowed;
   pointer-events: all !important;
   color: #ccc;
@@ -434,14 +458,32 @@ header > div {
   max-width: 800px;
 }
 
-.last-run {
+.text-muted {
   font-size: 0.9rem;
-  color: #777;
+  color: #333;
 }
 
 .alert {
   margin-top: 15px;
-  padding: 15px 5px;
+  padding: 15px;
+}
+
+.alert pre {
+  white-space: pre-wrap;
+}
+
+.alert a {
+  padding: 0 5px;
+}
+
+.alert > .material-icons {
+  padding-right: 15px;
+  color: #555;
+}
+
+.alert-warning {
+  background: #fff4e7;
+  border: 1px solid #ffc0c0;
 }
 
 .alert-error {
@@ -508,11 +550,8 @@ header > div {
   padding: 5px 0;
 }
 
-.form-row label {
-  padding-right: 5px;
-  color: #777;
-  font-size: 0.75rem;
-  text-transform: uppercase;
+.form-row > * {
+  padding-right: 10px;
 }
 
 .version {

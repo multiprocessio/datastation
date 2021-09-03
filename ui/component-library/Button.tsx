@@ -7,7 +7,6 @@ export function Button({
   type,
   icon,
   disabled,
-  primary,
 }: {
   className?: string;
   children: string;
@@ -15,7 +14,6 @@ export function Button({
   type?: 'primary' | 'outline';
   icon?: boolean;
   disabled?: boolean;
-  primary?: boolean;
 }) {
   let buttonClass = `button ${className ? ' ' + className : ''}`;
   if (type) {
@@ -23,7 +21,7 @@ export function Button({
   }
 
   if (icon) {
-    buttonClass += ` material-icons`;
+    buttonClass += ' material-icons' + (type === 'outline' ? '-outlined' : '');
   }
 
   return (
