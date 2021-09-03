@@ -1,6 +1,7 @@
 import circularSafeStringify from 'json-stringify-safe';
 import { preview } from 'preview';
 import { InvalidDependentPanelError, NoResultError } from '../errors';
+import log from '../log';
 import { PanelResult } from '../state';
 import { EOL } from './types';
 
@@ -43,16 +44,23 @@ function inMemoryEval(
 
   const anyWindow = window as any;
 
-  // TODO: better deep copy
-  anyWindow.DM_getPanel = (panelId: number) => {
-    if (!results[panelId]) {
-      throw new InvalidDependentPanelError(panelId);
-    }
-    return JSON.parse(JSON.stringify((results[panelId] || {}).value));
-  };
-
   const stdout: Array<string> = [];
   return new Promise((resolve, reject) => {
+    // TODO: better deep copy
+    anyWindow.DM_getPanel = (panelId: number) => {
+      if (!results[panelId]) {
+        reject(new InvalidDependentPanelError(panelId));
+        return;
+      }
+
+      try {
+        return JSON.parse(JSON.stringify((results[panelId] || {}).value));
+      } catch (e) {
+        log.error(e);
+        reject(new InvalidDependentPanelError(panelId));
+      }
+    };
+
     function convertFromPyodideObjectIfNecessary(v: any) {
       // Without dict_converter this objects in Python get converted to JavaScript Maps which cannot be stringified
       const jsValue = v && v.toJs ? v.toJs() : v;
