@@ -53,11 +53,12 @@ async function evalSQLServer(
       encrypt: true,
       trustServerCertificate: host === 'localhost' || host === '127.0.0.1',
     },
-    server: `${host}:${port}`,
+    server: host,
+    port: port,
   });
   try {
     const res = await client.query(content);
-    return res.recordset;
+    return { value: res.recordset };
   } finally {
     await client.close();
   }
@@ -77,7 +78,7 @@ async function evalOracle(
   });
   try {
     const res = await client.execute(content);
-    return res.rows;
+    return { value: res.rows };
   } finally {
     await client.close();
   }
@@ -169,6 +170,16 @@ export const evalSQLHandler = rpcEvalHandler({
       +info.connector.sql.address.split(':')[1] || DEFAULT_PORT[info.sql.type];
     const host = info.connector.sql.address.split(':')[0];
 
+    if (info.sql.type === 'sqlserver') {
+      return await tunnel(
+        info.server,
+        host.split('\\')[0],
+        port,
+        (host: string, port: number): any =>
+          evalSQLServer(content, host, port, info)
+      );
+    }
+
     return await tunnel(
       info.server,
       host,
@@ -178,16 +189,12 @@ export const evalSQLHandler = rpcEvalHandler({
           return evalPostgreSQL(content, host, port, info);
         }
 
-        if (info.sql.type === 'mysql') {
-          return evalMySQL(content, host, port, info);
-        }
-
         if (info.sql.type === 'oracle') {
           return evalOracle(content, host, port, info);
         }
 
-        if (info.sql.type === 'sqlserver') {
-          return evalSQLServer(content, host, port, info);
+        if (info.sql.type === 'mysql') {
+          return evalMySQL(content, host, port, info);
         }
 
         throw new Error(`Unknown SQL type: ${info.sql.type}`);
