@@ -1,9 +1,11 @@
 import mysql from 'mysql2/promise';
+import oracledb from 'oracledb';
 import { Client as PostgresClient } from 'pg';
 import * as sqlite from 'sqlite';
 import sqlite3 from 'sqlite3';
 import Client from 'ssh2-sftp-client';
 import { file as makeTmpFile } from 'tmp-promise';
+import sqlserver from 'mssql';
 import { Proxy, SQLConnectorInfo, SQLPanelInfo } from '../../shared/state';
 import { rpcEvalHandler } from './eval';
 import { getSSHConfig, tunnel } from './tunnel';
@@ -29,6 +31,55 @@ async function evalPostgreSQL(
     };
   } finally {
     await client.end();
+  }
+}
+
+async function evalSQLServer(
+  content: string,
+  host: string,
+  port: number,
+  { connector: { sql } }: Proxy<SQLPanelInfo, SQLConnectorInfo>
+) {
+  try {
+  const client = await sqlserver.connect({
+    user: sql.username,
+    password: sql.password,
+    database: sql.database,
+    pool: {
+      max: 10,
+      min: 0,
+      idleTimeoutMillis: 30000,
+    },
+    options: {
+      encrypt: true,
+      trustServerCertificate: host === 'localhost' || host === '127.0.0.1',
+    },
+    server: `${host}:${port}`,
+  });
+    const res = await client.query(content);
+    return res.recordset;
+  } finally {
+    await client.close();
+  }
+}
+
+async function evalOracle(
+  content: string,
+  host: string,
+  port: number,
+  { connector: { sql } }: Proxy<SQLPanelInfo, SQLConnectorInfo>
+) {
+  oracledb.outFormat = oracledb.OUT_FORMAT_ARRAY;
+  try {
+     const connection = await oracledb.getConnection({
+      user: sql.username,
+      password: sql.password,
+      connectString: `${host}:${port}/${sql.database}`,
+    });
+    const res = await client.execute(content);
+    return res.rows;
+  } finally {
+    await client.close();
   }
 }
 
@@ -94,6 +145,8 @@ const DEFAULT_PORT = {
   postgres: 5432,
   mysql: 3306,
   sqlite: 0,
+  sqlserver: 1433,
+  oracle: 1521,
 };
 
 export const evalSQLHandler = rpcEvalHandler({
@@ -127,6 +180,14 @@ export const evalSQLHandler = rpcEvalHandler({
 
         if (info.sql.type === 'mysql') {
           return evalMySQL(content, host, port, info);
+        }
+
+        if (info.sql.type === 'oracle') {
+          return evalOracle(content, host, port, info);
+        }
+
+        if (info.sql.type === 'sqlserver') {
+          return evalSQLServer(content, host, port, info);
         }
 
         throw new Error(`Unknown SQL type: ${info.sql.type}`);

@@ -58,6 +58,8 @@ export function SQLPanelDetails({
         >
           <option value="postgres">PostgreSQL</option>
           <option value="mysql">MySQL</option>
+          <option value="sqlserver">SQL Server</option>
+          <option value="oracle">Oracle</option>
           <option value="sqlite">SQLite</option>
         </Select>
       </div>
