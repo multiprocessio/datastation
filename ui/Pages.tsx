@@ -105,7 +105,7 @@ export function Pages({
         loading: false,
       });
     } catch (e) {
-      if (EVAL_ERRORS.map((cls) => new cls().name).includes(e.name)) {
+      if (EVAL_ERRORS.map((cls) => new (cls as any)().name).includes(e.name)) {
         e = new PanelPlayWarning(e.message);
       }
 

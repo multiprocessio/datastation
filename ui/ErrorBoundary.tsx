@@ -3,14 +3,11 @@ import { CHAT_LINK } from '../shared/constants';
 import { Alert } from './component-library/Alert';
 import { Highlight } from './component-library/Highlight';
 
+type Props = { children: React.ReactNode; className?: string };
+type State = { error?: Error };
+
 // SOURCE: https://reactjs.org/docs/error-boundaries.html
-export class ErrorBoundary extends React.Component {
-  state: { error?: Error } = { error: null };
-
-  constructor(props: { children: React.ReactNode; className?: string }) {
-    super(props);
-  }
-
+export class ErrorBoundary extends React.Component<Props, State> {
   static getDerivedStateFromError(error: Error) {
     return { error };
   }

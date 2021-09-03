@@ -1,6 +1,6 @@
 import circularSafeStringify from 'json-stringify-safe';
 import { preview } from 'preview';
-import { InvalidDependentPanelError } from '../errors';
+import { InvalidDependentPanelError, NoResultError } from '../errors';
 import { PanelResult } from '../state';
 import { EOL } from './types';
 
@@ -59,8 +59,10 @@ function inMemoryEval(
       return jsValue;
     }
 
+    let returned = false;
     anyWindow.DM_setPanel = (v: any) => {
       const value = convertFromPyodideObjectIfNecessary(v);
+      returned = true;
       resolve({
         value,
         preview: preview(value),
@@ -80,6 +82,9 @@ function inMemoryEval(
         'import pyodide\nimport js as window\ntojs = lambda a: pyodide.to_js(a, dict_converter=window.Object.fromEntries)\nprint = lambda *args: window.DM_print(*map(tojs, args))\nDM_getPanel = window.DM_getPanel\nDM_setPanel = lambda *args: window.DM_setPanel(*map(tojs, args))\n' +
         prog;
       anyWindow.pyodide.runPython(fullProgram);
+      if (!returned) {
+        throw new NoResultError();
+      }
     } catch (e) {
       reject(e);
     }

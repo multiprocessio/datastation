@@ -27,7 +27,7 @@ export function Highlight({
 }: {
   language: string;
   children: React.ReactNode;
-  theme: 'dark' | 'light';
+  theme?: 'dark' | 'light';
 }) {
   const style = {
     dark: vsdpStyle,

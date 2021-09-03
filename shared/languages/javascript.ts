@@ -1,6 +1,6 @@
 import circularSafeStringify from 'json-stringify-safe';
 import { preview } from 'preview';
-import { InvalidDependentPanelError } from '../errors';
+import { InvalidDependentPanelError, NoResultError } from '../errors';
 import { PanelResult } from '../state';
 import { EOL } from './types';
 
@@ -66,7 +66,9 @@ function inMemoryEval(
 
   // TODO: sandbox
   return new Promise((resolve, reject) => {
+    let returned = false;
     anyWindow.DM_setPanel = (value: any) => {
+      returned = true;
       resolve({
         value,
         preview: preview(value),
@@ -78,6 +80,9 @@ function inMemoryEval(
       stdout.push(n.map((v) => circularSafeStringify(v)).join(' '));
     try {
       eval(prog);
+      if (!returned) {
+        throw new NoResultError();
+      }
     } catch (e) {
       reject(e);
     } finally {

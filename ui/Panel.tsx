@@ -226,7 +226,7 @@ function PanelPlayWarningWithLinks({
         const index = c.slice(prefix.length);
         return (
           <a key={i} href={'#panel-' + index}>
-            [{index}] {indexNameMap[index]}
+            [{index}] {indexNameMap[+index]}
           </a>
         );
       }
