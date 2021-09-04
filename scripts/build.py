@@ -13,6 +13,7 @@ import sys
 IS_WINDOWS = os.name == 'nt'
 
 BUILTIN_VARIABLES = {
+    **os.environ,
     'arch': {
         'x86_64': 'x64',
         'amd64': 'x64',
@@ -92,6 +93,10 @@ for command in script:
         # Do basic variable substitition
         line[i] = token.format(**BUILTIN_VARIABLES)
 
+    if line[0] == 'setenv':
+        os.environ[line[1]] = line[2]
+        print(' '.join(line))
+        continue
     if line[0] == 'cp' and IS_WINDOWS:
         line[0] = 'copy'
     elif line[0] == 'rm' and line[1] == '-rf' and IS_WINDOWS:
@@ -124,7 +129,7 @@ for command in script:
 
     print(' '.join(line))
     if 'powershell' in str(os.environ.get('COMSPEC')):
-        subprocess.run(line, check=True, shell=True)
+        subprocess.run(line, check=True, shell=True, env=env)
     else:
         for i, t in enumerate(line):
             if " " in t:
