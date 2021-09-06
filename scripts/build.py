@@ -13,7 +13,6 @@ import sys
 IS_WINDOWS = os.name == 'nt'
 
 BUILTIN_VARIABLES = {
-    **os.environ,
     'arch': {
         'x86_64': 'x64',
         'amd64': 'x64',
@@ -82,6 +81,19 @@ def lex_command(command):
 
     return line
 
+
+def quote_line(line, join=True, show=False):
+    cp = [*line]
+    for i, t in enumerate(cp):
+            if " " in t or (t == "" and show):
+                cp[i] = f'"{t}"'
+    l = cp if not join else ' '.join(cp)
+    if show:
+        print(l)
+    else:
+        return l
+    
+
 for command in script:
     if command.strip().startswith('#') or not command.strip():
         continue
@@ -91,35 +103,39 @@ for command in script:
         if i == 0:
             continue
         # Do basic variable substitition
-        line[i] = token.format(**BUILTIN_VARIABLES)
-
+        line[i] = token.format(**BUILTIN_VARIABLES, **os.environ)
     if line[0] == 'setenv':
         os.environ[line[1]] = line[2]
-        print(' '.join(line))
+        quote_line(line, show=True)
+        continue
+    if line[0] == 'setenv_default':
+        if line[1] not in os.environ:
+            os.environ[line[1]] = line[2]
+        quote_line(line, show=True)
         continue
     if line[0] == 'cp' and IS_WINDOWS:
         line[0] = 'copy'
     elif line[0] == 'rm' and line[1] == '-rf' and IS_WINDOWS:
-        print(' '.join(line))
+        quote_line(line, show=True)
         for todelete in line[2:]:
             shutil.rmtree(todelete, ignore_errors=True)
         continue
     elif line[0] == 'mkdir':
-        print(' '.join(line))
+        quote_line(line, show=True)
         for tomake in line[1:]:
             pathlib.Path(tomake).mkdir(parents=True, exist_ok=True)
         continue
     elif line[0] == 'append':
         what = line[1]
         to = line[2]
-        print(' '.join(line))
+        quote_line(line, show=True)
         with open(to, 'a') as to:
             to.write('\n'+what)
         continue
     elif line[0] == 'prepend':
         what = line[1]
         to = line[2]
-        print(' '.join(line))
+        quote_line(line, show=True)
         with open(to, 'r+') as to:
             current = to.read()
             to.seek(0)
@@ -127,11 +143,9 @@ for command in script:
             to.truncate()
         continue
 
-    print(' '.join(line))
+    quote_line(line, show=True)
     if 'powershell' in str(os.environ.get('COMSPEC')):
         subprocess.run(line, check=True, shell=True, env=env)
     else:
-        for i, t in enumerate(line):
-            if " " in t:
-                line[i] = '"' + t + '"'
-        os.system(' '.join(line))
+        if os.system(quote_line(line)):
+            raise Exception('non-zero exit code')

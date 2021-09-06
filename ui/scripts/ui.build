@@ -1,5 +1,7 @@
 rm -rf build
 mkdir build
-yarn esbuild {UI_ESBUILD_ARGS} ui/app.tsx --loader:.ts=tsx --loader:.js=jsx "--external:fs" --bundle --sourcemap --outfile=build/ui.js
+# This is overwritten in production builds
+setenv_default UI_ESBUILD_ARGS ""
+yarn esbuild ui/app.tsx --loader:.ts=tsx --loader:.js=jsx "--external:fs" --bundle --sourcemap {UI_ESBUILD_ARGS} --outfile=build/ui.js
 cp ui/index.html build
 cp ui/style.css build
