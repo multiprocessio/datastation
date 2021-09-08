@@ -43,7 +43,7 @@ async function inMemoryEval(
   ) {
     let res: any;
     if (Array.isArray(resultsOrDiskDetails)) {
-      if (!resultsOrDiskDetails[n]) {
+      if (!resultsOrDiskDetails[n] || !resultsOrDiskDetails[n].value) {
         throw new InvalidDependentPanelError(n);
       }
 

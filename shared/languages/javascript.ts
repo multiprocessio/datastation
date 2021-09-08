@@ -1,6 +1,7 @@
 import circularSafeStringify from 'json-stringify-safe';
 import { preview } from 'preview';
 import { InvalidDependentPanelError, NoResultError } from '../errors';
+import log from '../log';
 import { PanelResult } from '../state';
 import { EOL } from './types';
 
@@ -59,7 +60,13 @@ function inMemoryEval(
     if (!results[panelId]) {
       throw new InvalidDependentPanelError(panelId);
     }
-    return JSON.parse(JSON.stringify((results[panelId] || {}).value));
+
+    try {
+      return JSON.parse(JSON.stringify((results[panelId] || {}).value));
+    } catch (e) {
+      log.error(e);
+      throw new InvalidDependentPanelError(panelId);
+    }
   };
 
   const stdout: Array<string> = [];

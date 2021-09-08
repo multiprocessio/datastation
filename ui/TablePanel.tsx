@@ -135,7 +135,7 @@ export function TablePanel({
     valueAsArray = data.value;
   }
 
-  if (!panel.table.columns || panel.table.columns.length) {
+  if (!panel.table.columns || !panel.table.columns.length) {
     return (
       <Alert type="info">
         There are no columns to display. Add columns in the panel details.

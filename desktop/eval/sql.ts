@@ -1,4 +1,6 @@
+import sqlserver from 'mssql';
 import mysql from 'mysql2/promise';
+import oracledb from 'oracledb';
 import { Client as PostgresClient } from 'pg';
 import * as sqlite from 'sqlite';
 import sqlite3 from 'sqlite3';
@@ -29,6 +31,56 @@ async function evalPostgreSQL(
     };
   } finally {
     await client.end();
+  }
+}
+
+async function evalSQLServer(
+  content: string,
+  host: string,
+  port: number,
+  { connector: { sql } }: Proxy<SQLPanelInfo, SQLConnectorInfo>
+) {
+  const client = await sqlserver.connect({
+    user: sql.username,
+    password: sql.password,
+    database: sql.database,
+    pool: {
+      max: 10,
+      min: 0,
+      idleTimeoutMillis: 30000,
+    },
+    options: {
+      encrypt: true,
+      trustServerCertificate: host === 'localhost' || host === '127.0.0.1',
+    },
+    server: host,
+    port: port,
+  });
+  try {
+    const res = await client.query(content);
+    return { value: res.recordset };
+  } finally {
+    await client.close();
+  }
+}
+
+async function evalOracle(
+  content: string,
+  host: string,
+  port: number,
+  { connector: { sql } }: Proxy<SQLPanelInfo, SQLConnectorInfo>
+) {
+  oracledb.outFormat = oracledb.OUT_FORMAT_ARRAY;
+  const client = await oracledb.getConnection({
+    user: sql.username,
+    password: sql.password,
+    connectString: `${host}:${port}/${sql.database}`,
+  });
+  try {
+    const res = await client.execute(content);
+    return { value: res.rows };
+  } finally {
+    await client.close();
   }
 }
 
@@ -94,6 +146,8 @@ const DEFAULT_PORT = {
   postgres: 5432,
   mysql: 3306,
   sqlite: 0,
+  sqlserver: 1433,
+  oracle: 1521,
 };
 
 export const evalSQLHandler = rpcEvalHandler({
@@ -116,6 +170,16 @@ export const evalSQLHandler = rpcEvalHandler({
       +info.connector.sql.address.split(':')[1] || DEFAULT_PORT[info.sql.type];
     const host = info.connector.sql.address.split(':')[0];
 
+    if (info.sql.type === 'sqlserver') {
+      return await tunnel(
+        info.server,
+        host.split('\\')[0],
+        port,
+        (host: string, port: number): any =>
+          evalSQLServer(content, host, port, info)
+      );
+    }
+
     return await tunnel(
       info.server,
       host,
@@ -123,6 +187,10 @@ export const evalSQLHandler = rpcEvalHandler({
       (host: string, port: number): any => {
         if (info.sql.type === 'postgres') {
           return evalPostgreSQL(content, host, port, info);
+        }
+
+        if (info.sql.type === 'oracle') {
+          return evalOracle(content, host, port, info);
         }
 
         if (info.sql.type === 'mysql') {

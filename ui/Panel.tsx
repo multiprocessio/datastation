@@ -582,48 +582,49 @@ export function Panel({
                       </Alert>
                     )
                   )}
-                  {panel.type === 'program' && (
-                    <Alert type="info">
-                      Use builtin functions,{' '}
-                      <code>DM_setPanel($some_array_data)</code> and{' '}
-                      <code>DM_getPanel($panel_number)</code>, to interact with
-                      other panels. For example:{' '}
-                      <code>
-                        const passthrough = DM_getPanel(0);
-                        DM_setPanel(passthrough);
-                      </code>
-                      .
-                      {(panel as ProgramPanelInfo).program.type === 'julia' && (
-                        <React.Fragment>
-                          Install{' '}
-                          <a href="https://github.com/JuliaIO/JSON.jl">
-                            JSON.jl
-                          </a>{' '}
-                          to script with Julia.
-                        </React.Fragment>
-                      )}
-                      {(panel as ProgramPanelInfo).program.type === 'r' && (
-                        <React.Fragment>
-                          Install{' '}
-                          <a href="https://rdrr.io/cran/rjson/">rjson</a> to
-                          script with R.
-                        </React.Fragment>
-                      )}
-                    </Alert>
-                  )}
-                  {panel.type === 'sql' && (
-                    <Alert type="info">
-                      Use <code>DM_getPanel($panel_number)</code> to reference
-                      other panels. Once you have called this once for one
-                      panel, use <code>t$panel_number</code> to refer to it
-                      again. For example:{' '}
-                      <code>
-                        SELECT age, name FROM DM_getPanel(0) WHERE t0.age &gt;
-                        1;
-                      </code>
-                      .
-                    </Alert>
-                  )}
+                  {panel.type === 'program' &&
+                    ((panel as ProgramPanelInfo).program.type === 'sql' ? (
+                      <Alert type="info">
+                        Use <code>DM_getPanel($panel_number)</code> to reference
+                        other panels. Once you have called this once for one
+                        panel, use <code>t$panel_number</code> to refer to it
+                        again. For example:{' '}
+                        <code>
+                          SELECT age, name FROM DM_getPanel(0) WHERE t0.age &gt;
+                          1;
+                        </code>
+                        .
+                      </Alert>
+                    ) : (
+                      <Alert type="info">
+                        Use builtin functions,{' '}
+                        <code>DM_setPanel($some_array_data)</code> and{' '}
+                        <code>DM_getPanel($panel_number)</code>, to interact
+                        with other panels. For example:{' '}
+                        <code>
+                          const passthrough = DM_getPanel(0);
+                          DM_setPanel(passthrough);
+                        </code>
+                        .
+                        {(panel as ProgramPanelInfo).program.type ===
+                          'julia' && (
+                          <React.Fragment>
+                            Install{' '}
+                            <a href="https://github.com/JuliaIO/JSON.jl">
+                              JSON.jl
+                            </a>{' '}
+                            to script with Julia.
+                          </React.Fragment>
+                        )}
+                        {(panel as ProgramPanelInfo).program.type === 'r' && (
+                          <React.Fragment>
+                            Install{' '}
+                            <a href="https://rdrr.io/cran/rjson/">rjson</a> to
+                            script with R.
+                          </React.Fragment>
+                        )}
+                      </Alert>
+                    ))}
                   {panel.type === 'http' && MODE_FEATURES.corsOnly && (
                     <Alert type="info">
                       Since this runs in the browser, the server you are talking
