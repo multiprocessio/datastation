@@ -34,6 +34,7 @@ export class PanelResultMeta extends PanelResult {
 
   static fromJSON(raw: any): PanelResultMeta {
     raw = raw || {};
+    raw.loading = false;
     const prm = mergeDeep(new PanelResultMeta(), raw);
     prm.lastRun =
       typeof raw.lastRun === 'string'
