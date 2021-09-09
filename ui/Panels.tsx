@@ -17,15 +17,15 @@ export function Panels({
   page: ProjectPage;
   updatePage: (page: ProjectPage) => void;
   panelResults: Array<PanelResultMeta>;
-  reevalPanel: (panelIndex: number, reset?: boolean) => void;
+  reevalPanel: (panelId: string, reset?: boolean) => void;
 }) {
   function movePanel(from: number, to: number) {
     const panel = page.panels[from];
     page.panels.splice(from, 1);
     page.panels.splice(to, 0, panel);
     updatePage(page);
-    reevalPanel(to, true);
-    reevalPanel(from, true);
+    reevalPanel(page.panels[to].id, true);
+    reevalPanel(page.panels[to].id, true);
   }
 
   function removePanel(at: number) {
@@ -33,11 +33,11 @@ export function Panels({
     updatePage(page);
   }
 
-  function updatePanel(page: ProjectPage, panelIndex: number) {
+  function updatePanel(page: ProjectPage, panelId: string, panelIndex: number) {
     return (panel: PanelInfo) => {
       page.panels[panelIndex] = panel;
       updatePage(page);
-      reevalPanel(panelIndex, true);
+      reevalPanel(panelId, true);
     };
   }
 
@@ -68,7 +68,7 @@ export function Panels({
           <Panel
             key={panel.id}
             panel={panel}
-            updatePanel={updatePanel(page, panelIndex)}
+            updatePanel={updatePanel(page, panel.id, panelIndex)}
             panelResults={panelResults}
             reevalPanel={reevalPanel}
             panelIndex={panelIndex}

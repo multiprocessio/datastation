@@ -254,7 +254,7 @@ export function Panel({
   panel: PanelInfo;
   updatePanel: (d: PanelInfo) => void;
   panelResults: Array<PanelResultMeta>;
-  reevalPanel: (i: number) => void;
+  reevalPanel: (id: string) => void;
   panelIndex: number;
   removePanel: (i: number) => void;
   movePanel: (from: number, to: number) => void;
@@ -304,7 +304,7 @@ export function Panel({
     }
 
     if (e.ctrlKey && e.code === 'Enter') {
-      reevalPanel(panelIndex);
+      reevalPanel(panel.id);
       if (e.preventDefault) {
         e.preventDefault();
       }
@@ -405,7 +405,7 @@ export function Panel({
                 <Button
                   icon
                   onClick={() =>
-                    runningProgram ? killProcess() : reevalPanel(panelIndex)
+                    runningProgram ? killProcess() : reevalPanel(panel.id)
                   }
                   type="primary"
                 >

@@ -34,9 +34,6 @@ export class PanelResultMeta extends PanelResult {
   }
 }
 
-export type IDDict<T> = { [k: string]: T };
-export type PanelResults = IDDict<Array<PanelResultMeta>>;
-
 export type ServerInfoType = 'ssh-agent' | 'password' | 'private-key';
 
 export class ServerInfo {
@@ -185,12 +182,14 @@ export class PanelInfo {
   name: string;
   id: string;
   serverId: string;
+  panelResultMeta: PanelResultMeta;
 
   constructor(type: PanelInfoType, name?: string, content?: string) {
     this.content = content || '';
     this.type = type;
     this.name = name || '';
     this.id = uuid.v4();
+    this.panelResultMeta = new PanelResultMeta();
   }
 }
 
