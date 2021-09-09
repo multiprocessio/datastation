@@ -45,7 +45,7 @@ export function Pages({
     );
   }
 
-  const panelResults = page.panels.map((p) => p.panelResultMeta);
+  const panelResults = page.panels.map((p) => p.resultMeta);
 
   async function reevalPanel(panelId: string, reset?: boolean) {
     const { connectors, servers } = state;
@@ -55,11 +55,11 @@ export function Pages({
       return;
     }
     const panel = page.panels[panelIndex];
-    let resultMeta = panel.panelResultMeta || new PanelResultMeta();
+    let resultMeta = panel.resultMeta || new PanelResultMeta();
     resultMeta.lastRun = null;
     resultMeta.loading = !reset;
 
-    panel.panelResultMeta = resultMeta;
+    panel.resultMeta = resultMeta;
     updatePage(page);
     if (reset) {
       return;
@@ -76,7 +76,7 @@ export function Pages({
           connectors,
           servers
         );
-      panel.panelResultMeta = {
+      panel.resultMeta = {
         lastRun: new Date(),
         value,
         preview,
@@ -92,7 +92,7 @@ export function Pages({
         e = new PanelPlayWarning(e.message);
       }
 
-      panel.panelResultMeta = {
+      panel.resultMeta = {
         loading: false,
         lastRun: new Date(),
         exception: e,

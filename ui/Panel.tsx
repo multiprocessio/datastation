@@ -266,21 +266,14 @@ export function Panel({
   const [hidden, setHidden] = React.useState(false);
 
   let body = null;
-  const exception =
-    panelResults[panelIndex] && panelResults[panelIndex].exception;
+  const exception = panel.resultMeta && panel.resultMeta.exception;
   if (panel.type === 'table') {
     body = (
-      <TablePanel
-        panel={panel as TablePanelInfo}
-        data={panelResults[panelIndex]}
-      />
+      <TablePanel panel={panel as TablePanelInfo} data={panel.resultMeta} />
     );
   } else if (panel.type === 'graph') {
     body = (
-      <GraphPanel
-        panel={panel as GraphPanelInfo}
-        data={panelResults[panelIndex]}
-      />
+      <GraphPanel panel={panel as GraphPanelInfo} data={panel.resultMeta} />
     );
   } else if (panel.type === 'file') {
     body = <span />;
@@ -289,7 +282,7 @@ export function Panel({
   const [panelOut, setPanelOut] = React.useState<
     'preview' | 'stdout' | 'shape' | 'metadata'
   >('preview');
-  const results = panelResults[panelIndex] || new PanelResultMeta();
+  const results = panel.resultMeta || new PanelResultMeta();
   const language =
     panel.type === 'program' ? (panel as ProgramPanelInfo).program.type : 'sql';
 
@@ -389,7 +382,9 @@ export function Panel({
                     >
                       {results.exception ? 'Failed' : 'Succeeded'}
                     </span>{' '}
-                    {formatDistanceToNow(results.lastRun, { addSuffix: true })}
+                    {formatDistanceToNow(results.lastRun, {
+                      addSuffix: true,
+                    })}
                   </>
                 ) : (
                   'Run to apply changes'

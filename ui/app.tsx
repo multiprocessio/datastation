@@ -14,7 +14,6 @@ import {
   DEFAULT_PROJECT,
   ProjectPage,
   ProjectState,
-  rawStateToObjects,
   ServerInfo,
 } from '../shared/state';
 import { asyncRPC } from './asyncRPC';
@@ -80,7 +79,7 @@ function getShareState(): undefined | ProjectState {
       shareState.split(',').map((i) => parseInt(i))
     );
     const uncompressed = JSON.parse(pako.inflate(intArray, { to: 'string' }));
-    shareStateCache.state = rawStateToObjects(uncompressed);
+    shareStateCache.state = ProjectState.fromJSON(uncompressed);
   }
 
   return shareStateCache.state;
@@ -137,7 +136,7 @@ function useProjectState(
         if (!rawState && (!isNewProject || isDefault)) {
           throw new Error();
         } else {
-          state = rawStateToObjects(rawState);
+          state = ProjectState.fromJSON(rawState);
         }
       } catch (e) {
         if (isDefault) {
