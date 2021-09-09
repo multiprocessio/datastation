@@ -2,7 +2,6 @@ import { Shape } from 'shape';
 import * as uuid from 'uuid';
 import { VERSION } from './constants';
 import { SupportedLanguages } from './languages';
-import log from './log';
 import { mergeDeep } from './object';
 
 export class PanelResult {
@@ -32,10 +31,19 @@ export class PanelResultMeta extends PanelResult {
     this.lastRun = null;
     this.loading = false;
   }
-}
 
-export type IDDict<T> = { [k: string]: T };
-export type PanelResults = IDDict<Array<PanelResultMeta>>;
+  static fromJSON(raw: any): PanelResultMeta {
+    const prm = mergeDeep(new PanelResultMeta(), raw);
+    if (!raw) {
+      return prm;
+    }
+    prm.lastRun =
+      typeof raw.lastRun === 'string'
+        ? new Date(raw.lastRun)
+        : raw.lastRun || prm.lastRun;
+    return prm;
+  }
+}
 
 export type ServerInfoType = 'ssh-agent' | 'password' | 'private-key';
 
@@ -70,6 +78,10 @@ export class ServerInfo {
     this.passphrase = passphrase || '';
     this.id = uuid.v4();
   }
+
+  static fromJSON(raw: any): ServerInfo {
+    return mergeDeep(new ServerInfo(), raw);
+  }
 }
 
 export type Proxy<T, S> = T & {
@@ -91,6 +103,18 @@ export class ConnectorInfo {
     this.serverId = serverId;
     this.id = uuid.v4();
   }
+
+  static fromJSON(raw: any): ConnectorInfo {
+    const ci = mergeDeep(new ConnectorInfo(), raw);
+
+    switch (raw.type) {
+      case 'sql':
+        return mergeDeep(new SQLConnectorInfo(), ci);
+      case 'http':
+        return mergeDeep(new HTTPConnectorInfo(), ci);
+    }
+    return ci;
+  }
 }
 
 export type HTTPConnectorInfoMethod =
@@ -107,6 +131,10 @@ export class ContentTypeInfo {
   constructor(type?: string, customLineRegexp?: string) {
     this.type = type || '';
     this.customLineRegexp = customLineRegexp || '';
+  }
+
+  static fromJSON(raw: any): ContentTypeInfo {
+    return mergeDeep(new ContentTypeInfo(), raw);
   }
 }
 
@@ -185,12 +213,38 @@ export class PanelInfo {
   name: string;
   id: string;
   serverId: string;
+  resultMeta: PanelResultMeta;
 
   constructor(type: PanelInfoType, name?: string, content?: string) {
     this.content = content || '';
     this.type = type;
     this.name = name || '';
     this.id = uuid.v4();
+    this.resultMeta = new PanelResultMeta();
+  }
+
+  static fromJSON(raw: any): PanelInfo {
+    let pit: PanelInfo = mergeDeep(new PanelInfo(raw.type || 'literal'), raw);
+
+    switch (pit.type) {
+      case 'table':
+        pit = mergeDeep(new TablePanelInfo(), pit);
+      case 'http':
+        pit = mergeDeep(new HTTPPanelInfo(), pit);
+      case 'graph':
+        pit = mergeDeep(new GraphPanelInfo(), pit);
+      case 'program':
+        pit = mergeDeep(new ProgramPanelInfo(), pit);
+      case 'literal':
+        pit = mergeDeep(new LiteralPanelInfo(), pit);
+      case 'sql':
+        pit = mergeDeep(new SQLPanelInfo(), pit);
+      case 'file':
+        pit = mergeDeep(new FilePanelInfo(), pit);
+    }
+
+    pit.resultMeta = PanelResultMeta.fromJSON(raw.resultMeta);
+    return pit;
   }
 }
 
@@ -345,6 +399,14 @@ export class ProjectPage {
     this.panels = panels || [];
     this.id = uuid.v4();
   }
+
+  static fromJSON(raw: any): ProjectPage {
+    const pp = new ProjectPage();
+    pp.panels = (raw.panels || []).map(PanelInfo.fromJSON);
+    pp.name = raw.name;
+    pp.id = raw.id || uuid.v4();
+    return pp;
+  }
 }
 
 export class ProjectState {
@@ -372,6 +434,18 @@ export class ProjectState {
     this.lastVersion = lastVersion || VERSION;
     this.id = uuid.v4();
   }
+
+  static fromJSON(raw: any): ProjectState {
+    const ps = new ProjectState();
+    ps.projectName = raw.projectName || '';
+    ps.pages = (raw.pages || []).map(ProjectPage.fromJSON);
+    ps.connectors = (raw.connectors || []).map(ConnectorInfo.fromJSON);
+    ps.servers = (raw.servers || []).map(ServerInfo.fromJSON);
+    ps.id = raw.id || uuid.v4();
+    ps.originalVersion = raw.originalVersion || VERSION;
+    ps.lastVersion = raw.lastVersion || VERSION;
+    return ps;
+  }
 }
 
 export const DEFAULT_PROJECT: ProjectState = new ProjectState(
@@ -398,70 +472,3 @@ export const DEFAULT_PROJECT: ProjectState = new ProjectState(
     ]),
   ]
 );
-
-// The point of this is to make sure that (new) defaults get set on
-// existing data.
-//
-export function rawStateToObjects(raw: ProjectState): ProjectState {
-  // Make a deep copy
-  const object = mergeDeep(new ProjectState(), JSON.parse(JSON.stringify(raw)));
-
-  object.pages.forEach((_: ProjectPage, pageI: number) => {
-    const page = (object.pages[pageI] = mergeDeep(
-      new ProjectPage(),
-      object.pages[pageI]
-    ));
-
-    page.panels.forEach((panel: PanelInfo, i: number) => {
-      switch (panel.type) {
-        case 'table':
-          page.panels[i] = mergeDeep(new TablePanelInfo(), panel);
-          break;
-        case 'http':
-          page.panels[i] = mergeDeep(new HTTPPanelInfo(), panel);
-          break;
-        case 'graph':
-          const graphPanel = panel as GraphPanelInfo;
-          if ((graphPanel.graph as any).y && !graphPanel.graph.ys) {
-            graphPanel.graph.ys = [(graphPanel.graph as any).y];
-            delete (graphPanel.graph as any).y;
-          }
-          page.panels[i] = mergeDeep(new GraphPanelInfo(), panel);
-          break;
-        case 'program':
-          page.panels[i] = mergeDeep(new ProgramPanelInfo(), panel);
-          break;
-        case 'literal':
-          page.panels[i] = mergeDeep(new LiteralPanelInfo(), panel);
-          break;
-        case 'sql':
-          page.panels[i] = mergeDeep(new SQLPanelInfo(), panel);
-          break;
-        case 'file':
-          page.panels[i] = mergeDeep(new FilePanelInfo(), panel);
-          break;
-        default:
-          log.info(`Unknown panel type: ${panel.type}`);
-      }
-    });
-  });
-
-  object.servers.forEach((s: ServerInfo, i: number) => {
-    object.servers[i] = mergeDeep(new ServerInfo(), s);
-  });
-
-  object.connectors.forEach((c: ConnectorInfo, i: number) => {
-    switch (c.type) {
-      case 'sql':
-        object.connectors[i] = mergeDeep(new SQLConnectorInfo(), c);
-        break;
-      case 'http':
-        object.connectors[i] = mergeDeep(new HTTPConnectorInfo(), c);
-        break;
-      default:
-        log.info(`Unknown connector type: ${c.type}`);
-    }
-  });
-
-  return object;
-}

@@ -29,7 +29,6 @@
     "mssql": "^7.2.1",
     "mysql2": "^2.2.5",
     "node-fetch": "^2.6.1",
-    "oracledb": "^5.2.0",
     "pako": "^2.0.3",
     "papaparse": "^5.3.1",
     "parquetjs-lite": "^0.8.7",
@@ -48,6 +47,9 @@
     "tmp-promise": "^3.0.2",
     "uuid": "^8.3.2",
     "xlsx": "^0.17.0"
+  },
+  "optionalDependencies": {
+    "oracledb": "^5.2.0"
   },
   "devDependencies": {
     "@types/electron": "^1.6.10",
@@ -80,6 +82,8 @@
   "resolutions": {
     "node-gyp": "^5.0.2",
     "plist": "^3.0.4",
-    "tar": "^4.4.18"
+    "tar": "^4.4.18",
+    "adal-node": "^0.2.3",
+    "axios": "^0.21.4"
   }
 }

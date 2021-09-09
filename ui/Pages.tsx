@@ -1,11 +1,6 @@
 import * as React from 'react';
 import { EVAL_ERRORS } from '../shared/errors';
-import {
-  PanelResultMeta,
-  PanelResults,
-  ProjectPage,
-  ProjectState,
-} from '../shared/state';
+import { PanelResultMeta, ProjectPage, ProjectState } from '../shared/state';
 import { Button } from './component-library/Button';
 import { Confirm } from './component-library/Confirm';
 import { Input } from './component-library/Input';
@@ -29,20 +24,6 @@ export function Pages({
   currentPage: number;
 }) {
   const page: ProjectPage | null = state.pages[currentPage] || null;
-  const [panelResultsByPage, setPanelResultsByPage] =
-    React.useState<PanelResults>({});
-
-  // Make sure panelResults are initialized when page changes.
-  React.useEffect(() => {
-    if (page && !panelResultsByPage[page.id]) {
-      setPanelResultsByPage({ ...panelResultsByPage, [page.id]: [] });
-    }
-  }, [page && page.id]);
-
-  function setPanelResults(panelIndex: number, result: PanelResultMeta) {
-    panelResultsByPage[page.id][panelIndex] = result;
-    setPanelResultsByPage({ ...panelResultsByPage });
-  }
 
   if (!page) {
     return (
@@ -64,21 +45,22 @@ export function Pages({
     );
   }
 
-  // Guard against effect that initializes this per page
-  if (!panelResultsByPage || !panelResultsByPage[page.id]) {
-    return null;
-  }
+  const panelResults = page.panels.map((p) => p.resultMeta);
 
-  const panelResults = panelResultsByPage[page.id];
-
-  async function reevalPanel(panelIndex: number, reset?: boolean) {
+  async function reevalPanel(panelId: string, reset?: boolean) {
     const { connectors, servers } = state;
 
-    let panel = panelResults[panelIndex] || new PanelResultMeta();
-    panel.lastRun = null;
-    panel.loading = !reset;
+    const panelIndex = page.panels.findIndex((p) => p.id === panelId);
+    if (panelIndex === -1) {
+      return;
+    }
+    const panel = page.panels[panelIndex];
+    let resultMeta = panel.resultMeta || new PanelResultMeta();
+    resultMeta.lastRun = null;
+    resultMeta.loading = !reset;
 
-    setPanelResults(panelIndex, panel);
+    panel.resultMeta = resultMeta;
+    updatePage(page);
     if (reset) {
       return;
     }
@@ -94,7 +76,7 @@ export function Pages({
           connectors,
           servers
         );
-      setPanelResults(panelIndex, {
+      panel.resultMeta = {
         lastRun: new Date(),
         value,
         preview,
@@ -103,13 +85,14 @@ export function Pages({
         contentType,
         size,
         loading: false,
-      });
+      };
+      updatePage(page);
     } catch (e) {
       if (EVAL_ERRORS.map((cls) => new (cls as any)().name).includes(e.name)) {
         e = new PanelPlayWarning(e.message);
       }
 
-      setPanelResults(panelIndex, {
+      panel.resultMeta = {
         loading: false,
         lastRun: new Date(),
         exception: e,
@@ -118,13 +101,14 @@ export function Pages({
         contentType: 'unknown',
         size: 0,
         shape: { kind: 'unknown' },
-      });
+      };
+      updatePage(page);
     }
   }
 
   async function evalAll() {
-    for (let i = 0; i < page.panels.length; i++) {
-      await reevalPanel(i);
+    for (let panel of page.panels) {
+      await reevalPanel(panel.id);
       await new Promise((resolve) => setTimeout(resolve, 1500));
     }
   }
