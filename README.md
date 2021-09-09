@@ -5,7 +5,7 @@ scripting, and visualization in a single platform.
 
 ![A screenshot of app.datastation.multiprocess.io](./screenshot.png)
 
-## Major Features
+## Features
 
 * Cross-platform: Windows, macOS, and Linux
 * Query SQLite, SQL Server PostgreSQL- and MySQL-compatible databases
@@ -21,10 +21,7 @@ scripting, and visualization in a single platform.
 
 ## Install
 
-Zip files for the latest release provided on the
-[releases](https://github.com/multiprocessio/datastation/releases)
-page. x86-64 builds for Mac and Windows are available. In the future
-this will expand to ARM and Linux.
+Install instructions are available [on the website here](https://datastation.multiprocess.io/docs/installation.html).
 
 ## Documentation
 
