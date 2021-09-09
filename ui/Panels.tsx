@@ -35,7 +35,7 @@ export function Panels({
 
   function updatePanel(page: ProjectPage, panelId: string) {
     return (panel: PanelInfo) => {
-      const panelIndex = page.panels.findIndex(p => p.id === panelId);
+      const panelIndex = page.panels.findIndex((p) => p.id === panelId);
       page.panels[panelIndex] = panel;
       updatePage(page);
       reevalPanel(panelId, true);
