@@ -8,7 +8,7 @@ scripting, and visualization in a single platform.
 ## Features
 
 * Cross-platform: Windows, macOS, and Linux
-* Query SQLite, SQL Server PostgreSQL- and MySQL-compatible databases
+* Query SQLite, SQL Server, PostgreSQL- and MySQL-compatible databases
   * With builtin support for proxying over SSH
 * Query HTTP servers
   * With builtin support for proxying over SSH
