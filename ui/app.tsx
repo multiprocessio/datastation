@@ -186,7 +186,14 @@ function App() {
     shareState
   );
 
-  const [currentPage, setCurrentPage] = React.useState(0);
+  const currentPageKey = 'currentPage:' + projectId;
+  const [currentPage, _setCurrentPage] = React.useState(
+    +localStorage.getItem(currentPageKey) || 0
+  );
+  function setCurrentPage(p: number) {
+    localStorage.setItem(currentPageKey, String(p) || '0');
+    return _setCurrentPage(p);
+  }
 
   const [shareURL, setShareURL] = React.useState('');
 
