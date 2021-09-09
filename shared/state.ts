@@ -33,10 +33,8 @@ export class PanelResultMeta extends PanelResult {
   }
 
   static fromJSON(raw: any): PanelResultMeta {
+    raw = raw || {};
     const prm = mergeDeep(new PanelResultMeta(), raw);
-    if (!raw) {
-      return prm;
-    }
     prm.lastRun =
       typeof raw.lastRun === 'string'
         ? new Date(raw.lastRun)
@@ -105,6 +103,7 @@ export class ConnectorInfo {
   }
 
   static fromJSON(raw: any): ConnectorInfo {
+    raw = raw || {};
     const ci = mergeDeep(new ConnectorInfo(), raw);
 
     switch (raw.type) {
@@ -224,6 +223,7 @@ export class PanelInfo {
   }
 
   static fromJSON(raw: any): PanelInfo {
+    raw = raw || {};
     let pit: PanelInfo = mergeDeep(new PanelInfo(raw.type || 'literal'), raw);
 
     switch (pit.type) {
@@ -401,6 +401,7 @@ export class ProjectPage {
   }
 
   static fromJSON(raw: any): ProjectPage {
+    raw = raw || {};
     const pp = new ProjectPage();
     pp.panels = (raw.panels || []).map(PanelInfo.fromJSON);
     pp.name = raw.name;
@@ -436,6 +437,7 @@ export class ProjectState {
   }
 
   static fromJSON(raw: any): ProjectState {
+    raw = raw || {};
     const ps = new ProjectState();
     ps.projectName = raw.projectName || '';
     ps.pages = (raw.pages || []).map(ProjectPage.fromJSON);

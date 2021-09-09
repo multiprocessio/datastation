@@ -33,8 +33,9 @@ export function Panels({
     updatePage(page);
   }
 
-  function updatePanel(page: ProjectPage, panelId: string, panelIndex: number) {
+  function updatePanel(page: ProjectPage, panelId: string) {
     return (panel: PanelInfo) => {
+      const panelIndex = page.panels.findIndex(p => p.id === panelId);
       page.panels[panelIndex] = panel;
       updatePage(page);
       reevalPanel(panelId, true);
@@ -66,9 +67,8 @@ export function Panels({
       {page.panels.map((panel, panelIndex) => (
         <React.Fragment key={panel.id}>
           <Panel
-            key={panel.id}
             panel={panel}
-            updatePanel={updatePanel(page, panel.id, panelIndex)}
+            updatePanel={updatePanel(page, panel.id)}
             panelResults={panelResults}
             reevalPanel={reevalPanel}
             panelIndex={panelIndex}

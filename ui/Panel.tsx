@@ -317,9 +317,8 @@ export function Panel({
   return (
     <div
       id={`panel-${panelIndex}`}
-      className={`panel ${hidden ? 'panel--hidden' : ''} ${
-        panel.type === 'file' && !results.exception ? 'panel--empty' : ''
-      } ${results.loading ? 'panel--loading' : ''}`}
+      className={`panel ${hidden ? 'panel--hidden' : ''} ${panel.type === 'file' && !results.exception ? 'panel--empty' : ''
+        } ${results.loading ? 'panel--loading' : ''}`}
       tabIndex={1001}
       ref={panelRef}
       onKeyDown={keyboardShortcuts}
@@ -603,14 +602,14 @@ export function Panel({
                         .
                         {(panel as ProgramPanelInfo).program.type ===
                           'julia' && (
-                          <React.Fragment>
-                            Install{' '}
-                            <a href="https://github.com/JuliaIO/JSON.jl">
-                              JSON.jl
-                            </a>{' '}
-                            to script with Julia.
-                          </React.Fragment>
-                        )}
+                            <React.Fragment>
+                              Install{' '}
+                              <a href="https://github.com/JuliaIO/JSON.jl">
+                                JSON.jl
+                              </a>{' '}
+                              to script with Julia.
+                            </React.Fragment>
+                          )}
                         {(panel as ProgramPanelInfo).program.type === 'r' && (
                           <React.Fragment>
                             Install{' '}
