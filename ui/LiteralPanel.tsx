@@ -24,7 +24,7 @@ export async function evalLiteralPanel(panel: LiteralPanelInfo) {
         id: panel.id,
         value,
       }
-    );    
+    );
   }
 
   return {

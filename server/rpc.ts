@@ -1,13 +1,20 @@
-import { RPC_HANDLERS } from '../desktop/rpc';
+import Hapi from '@hapi/hapi';
+import { RPCHandler } from '../desktop/rpc';
+import log from '../shared/log';
 
-export async function handleRPC(r, h) {
+export async function handleRPC(
+  r: Hapi.Request,
+  h: Hapi.ResponseToolkit,
+  rpcHandlers: RPCHandler[]
+) {
   const payload = {
     ...r.query,
-    ...r.payload,
+    ...(r.payload as any),
   };
+  console.log(payload);
 
   try {
-    const handler = RPC_HANDLERS.filter(
+    const handler = rpcHandlers.filter(
       (h) => h.resource === payload.resource
     )[0];
     if (!handler) {
@@ -25,14 +32,16 @@ export async function handleRPC(r, h) {
     };
   } catch (e) {
     log.error(e);
-    return h.response({
-      isError: true,
-      body: {
-        ...e,
-        // Needs to get passed explicitly or name comes out as Error after rpc
-        message: e.message,
-        name: e.name,
-      },
-    }).code(400);
+    return h
+      .response({
+        isError: true,
+        body: {
+          ...e,
+          // Needs to get passed explicitly or name comes out as Error after rpc
+          message: e.message,
+          name: e.name,
+        },
+      })
+      .code(400);
   }
 }

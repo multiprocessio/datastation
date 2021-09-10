@@ -39,7 +39,11 @@ export const VERSION = getConfig<string>('VERSION', 'development');
 
 export const SERVER_ROOT = getConfig<string>('SERVER_ROOT', '');
 
-export const MODE = IS_DESKTOP_APP ? 'desktop' : (SERVER_ROOT.length ? 'server' : 'browser');
+export const MODE = IS_DESKTOP_APP
+  ? 'desktop'
+  : SERVER_ROOT.length
+  ? 'server'
+  : 'browser';
 
 export const MODE_FEATURES = {
   appHeader: MODE !== 'desktop',
@@ -53,4 +57,3 @@ export const MODE_FEATURES = {
   extraLanguages: MODE !== 'browser',
   killProcess: MODE !== 'browser',
 };
-

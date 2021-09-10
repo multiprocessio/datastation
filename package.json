@@ -21,6 +21,8 @@
     "e2e-test": "node --unhandled-rejections=throw ./e2e/index.js"
   },
   "dependencies": {
+    "@hapi/hapi": "^20.1.5",
+    "@hapi/inert": "^6.0.4",
     "ace-builds": "^1.4.12",
     "alasql": "^1.7.3",
     "chart.js": "^3.3.2",
@@ -55,6 +57,8 @@
   },
   "devDependencies": {
     "@types/electron": "^1.6.10",
+    "@types/hapi__hapi": "^20.0.9",
+    "@types/hapi__inert": "^5.2.3",
     "@types/jsesc": "^3.0.1",
     "@types/json-stringify-safe": "^5.0.0",
     "@types/lodash.debounce": "^4.0.6",

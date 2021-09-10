@@ -18,14 +18,19 @@ export async function asyncRPC<Request, Args, Response>(
     return arpc(resource, projectId, args, body);
   }
 
-  const rsp = await window.fetch(SERVER_ROOT + `/rpc?resource=${resource}&projectId=${projectId}`, {
-    method: 'post',
-    contentType: 'application/json',
-    body: JSON.stringify({
-      args,
-      body,
-    }),
-  });
+  const rsp = await window.fetch(
+    SERVER_ROOT + `/rpc?resource=${resource}&projectId=${projectId}`,
+    {
+      method: 'post',
+      headers: {
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        args,
+        body,
+      }),
+    }
+  );
 
   const j = await rsp.json();
 

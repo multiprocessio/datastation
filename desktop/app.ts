@@ -1,9 +1,12 @@
 import { app, ipcMain } from 'electron';
+import { loadSettings } from '../desktop/settings';
 import { APP_NAME, DEBUG, VERSION } from '../shared/constants';
 import log from '../shared/log';
 import '../shared/polyfill';
 import { DSPROJ_FLAG } from './constants';
-import { registerRPCHandlers } from './rpc';
+import { configureLogger } from './log';
+import { openWindow } from './project';
+import { getRPCHandlers, registerRPCHandlers } from './rpc';
 
 configureLogger().then(() => {
   log.info(APP_NAME, VERSION, DEBUG ? 'DEBUG' : '');
@@ -25,7 +28,7 @@ app.whenReady().then(async () => {
 
   await openWindow(project);
 
-  registerRPCHandlers(ipcMain);
+  registerRPCHandlers(ipcMain, getRPCHandlers(settings));
 });
 
 app.on('window-all-closed', function () {
