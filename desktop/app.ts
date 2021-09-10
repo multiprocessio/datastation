@@ -3,20 +3,7 @@ import { APP_NAME, DEBUG, VERSION } from '../shared/constants';
 import log from '../shared/log';
 import '../shared/polyfill';
 import { DSPROJ_FLAG } from './constants';
-import {
-  evalColumnsHandler,
-  fetchResultsHandler,
-  storeLiteralHandler,
-} from './eval/columns';
-import { evalFileHandler } from './eval/file';
-import { evalHTTPHandler } from './eval/http';
-import { programHandlers } from './eval/program';
-import { evalSQLHandler } from './eval/sql';
-import { configureLogger } from './log';
-import { openProjectHandler, openWindow } from './project';
-import { registerRPCHandlers, RPCHandler } from './rpc';
-import { loadSettings } from './settings';
-import { storeHandlers } from './store';
+import { registerRPCHandlers } from './rpc';
 
 configureLogger().then(() => {
   log.info(APP_NAME, VERSION, DEBUG ? 'DEBUG' : '');
@@ -38,18 +25,7 @@ app.whenReady().then(async () => {
 
   await openWindow(project);
 
-  registerRPCHandlers(ipcMain, [
-    ...storeHandlers,
-    evalColumnsHandler,
-    storeLiteralHandler,
-    evalSQLHandler,
-    evalHTTPHandler,
-    fetchResultsHandler,
-    ...programHandlers,
-    evalFileHandler,
-    openProjectHandler,
-    settings.getUpdateHandler(),
-  ] as RPCHandler[]);
+  registerRPCHandlers(ipcMain);
 });
 
 app.on('window-all-closed', function () {

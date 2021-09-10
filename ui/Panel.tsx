@@ -481,7 +481,7 @@ export function Panel({
                 >
                   <option value="program">Code</option>
                   <option value="http">HTTP Request</option>
-                  {MODE === 'desktop' && <option value="sql">SQL</option>}
+                  {MODE !== 'browser' && <option value="sql">SQL</option>}
                   <option value="graph">Graph</option>
                   <option value="file">File</option>
                   <option value="literal">Literal</option>

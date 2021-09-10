@@ -1,5 +1,18 @@
 import { IpcMain, IpcMainEvent } from 'electron';
 import { RPC_ASYNC_REQUEST, RPC_ASYNC_RESPONSE } from '../shared/constants';
+import {
+  evalColumnsHandler,
+  fetchResultsHandler,
+  storeLiteralHandler,
+} from './eval/columns';
+import { evalFileHandler } from './eval/file';
+import { evalHTTPHandler } from './eval/http';
+import { programHandlers } from './eval/program';
+import { evalSQLHandler } from './eval/sql';
+import { configureLogger } from './log';
+import { openProjectHandler, openWindow } from './project';
+import { loadSettings } from './settings';
+import { storeHandlers } from './store';
 import log from '../shared/log';
 
 interface RPCPayload {
@@ -54,3 +67,16 @@ export function registerRPCHandlers(
     }
   );
 }
+
+export const RPC_HANDLERS = [
+  ...storeHandlers,
+  evalColumnsHandler,
+  storeLiteralHandler,
+  evalSQLHandler,
+  evalHTTPHandler,
+  fetchResultsHandler,
+  ...programHandlers,
+  evalFileHandler,
+  openProjectHandler,
+  settings.getUpdateHandler(),
+] as RPCHandler[];

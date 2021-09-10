@@ -79,7 +79,7 @@ class LocalStorageStore extends ProjectStore {
   }
 }
 
-class DesktopIPCStore extends ProjectStore {
+class RPCStore extends ProjectStore {
   update(projectId: string, newState: ProjectState, addToRestoreBuffer = true) {
     super.update(projectId, newState, addToRestoreBuffer);
     return asyncRPC<ProjectState, string, void>(
@@ -99,8 +99,9 @@ class DesktopIPCStore extends ProjectStore {
 
 export function makeStore(mode: string, restoreBufferSize = 50) {
   const storeClass = {
-    desktop: DesktopIPCStore,
+    desktop: RPCStore,
     browser: LocalStorageStore,
+    server: RPCStore,
   }[mode];
   return new storeClass(restoreBufferSize);
 }

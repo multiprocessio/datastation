@@ -7,22 +7,6 @@ try {
   IS_DESKTOP_APP = navigator.userAgent.toLowerCase().includes('electron');
 } catch (e) {}
 
-// TODO: handle hosted/saas mode
-export const MODE = IS_DESKTOP_APP ? 'desktop' : 'browser';
-
-export const MODE_FEATURES = {
-  appHeader: MODE === 'browser',
-  connectors: MODE !== 'browser',
-  sql: MODE !== 'browser',
-  shareProject: MODE === 'browser',
-  corsOnly: MODE === 'browser',
-  noBodyYOverflow: MODE !== 'browser',
-  storeResults: MODE !== 'browser',
-  useDefaultProject: MODE === 'browser',
-  extraLanguages: MODE !== 'browser',
-  killProcess: MODE !== 'browser',
-};
-
 export const RPC = {
   KILL_PROCESS: 'killProcess',
   EVAL_PROGRAM: 'evalProgram',
@@ -52,3 +36,21 @@ function getConfig<T>(v: string, _default: T) {
 
 export const DEBUG = getConfig<boolean>('DEBUG', true);
 export const VERSION = getConfig<string>('VERSION', 'development');
+
+export const SERVER_ROOT = getConfig<string>('SERVER_ROOT', '');
+
+export const MODE = IS_DESKTOP_APP ? 'desktop' : (SERVER_ROOT.length ? 'server' : 'browser');
+
+export const MODE_FEATURES = {
+  appHeader: MODE !== 'desktop',
+  connectors: MODE !== 'browser',
+  sql: MODE !== 'browser',
+  shareProject: MODE === 'browser',
+  corsOnly: MODE === 'browser',
+  noBodyYOverflow: MODE === 'desktop',
+  storeResults: MODE !== 'browser',
+  useDefaultProject: MODE === 'browser',
+  extraLanguages: MODE !== 'browser',
+  killProcess: MODE !== 'browser',
+};
+
