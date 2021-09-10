@@ -3,8 +3,10 @@ import { EOL } from 'os';
 import util from 'util';
 import { logger } from '../shared/log';
 import { LOG_FILE } from './constants';
+import { ensureFile } from './store';
 
 export async function configureLogger() {
+  await ensureFile(LOG_FILE);
   let logFd: fs.FileHandle;
   async function open() {
     logFd = await fs.open(LOG_FILE, 'a');

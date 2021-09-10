@@ -3,5 +3,9 @@ mkdir build
 # This is overwritten in production builds
 setenv_default UI_ESBUILD_ARGS ""
 yarn esbuild ui/app.tsx --loader:.ts=tsx --loader:.js=jsx "--external:fs" --bundle --sourcemap {UI_ESBUILD_ARGS} --outfile=build/ui.js
+
+setenv_default UI_CONFIG_OVERRIDES ""
+prepend {UI_CONFIG_OVERRIDES} build/ui.js
+
 cp ui/index.html build
 cp ui/style.css build

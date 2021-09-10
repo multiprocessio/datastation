@@ -1,8 +1,6 @@
 import Hapi from '@hapi/hapi';
 import inert from '@hapi/inert';
-import fs from 'fs';
 import path from 'path';
-import { configureLogger } from '../desktop/log';
 import { getRPCHandlers } from '../desktop/rpc';
 import { loadSettings } from '../desktop/settings';
 import { APP_NAME, DEBUG, VERSION } from '../shared/constants';
@@ -10,21 +8,25 @@ import log from '../shared/log';
 import { handleRPC } from './rpc';
 
 process.on('unhandledRejection', (e) => {
-  console.log(e, 'wtf2');
+  log.error(e);
   process.exit(1);
 });
 process.on('uncaughtException', (e) => {
-  console.log('wtf');
-  console.error(e);
+  log.info('here');
+  log.error(e);
 });
-configureLogger().then(() => {
-  log.info(APP_NAME, VERSION, DEBUG ? 'DEBUG' : '');
-});
+log.info(APP_NAME, VERSION, DEBUG ? 'DEBUG' : '');
 
 async function init() {
   const server = Hapi.server({
-    port: 3000,
+    port: 8080,
     host: 'localhost',
+  });
+
+  process.on('SIGINT', async function() {
+    log.info("Gracefully shutting down from SIGINT");
+    await server.stop({ timeout: 10000 });
+    process.exit(1);
   });
 
   const settings = await loadSettings();
@@ -38,10 +40,16 @@ async function init() {
 
   // Serve static files
   // Mask with nginx in production
+  const staticFiles =  ['index.html', 'style.css', 'ui.js', 'ui.js.map'];
   await server.register(inert);
-  fs.readdirSync('build')
-    .filter((f) => ['html', 'css', 'js', 'map'].includes(path.extname(f)))
-    .map((f) => {
+  staticFiles.map((f) => {
+    if (f === 'index.html') {
+      server.route({
+        method: 'GET',
+        path: '/',
+        handler: (request, h) => h.file('build/' + f),
+      });
+    }
       server.route({
         method: 'GET',
         path: '/' + f,
@@ -50,7 +58,7 @@ async function init() {
     });
 
   await server.start();
-  log.info('Server running on %s', server.info.uri);
+  log.info(`Server running on ${server.info.uri}`);
 }
 
 init();

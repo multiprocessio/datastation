@@ -167,9 +167,10 @@ function App() {
   const [projectId, setProjectIdInternal] = React.useState(
     (shareState && shareState.id) ||
       getQueryParameter('project') ||
-      (MODE_FEATURES.useDefaultProject ? DEFAULT_PROJECT.projectName : '')
+      (MODE_FEATURES.useDefaultProject ? DEFAULT_PROJECT.projectName : (localStorage.getItem('projectId') || ''))
   );
   (window as any).projectId = projectId;
+  localStorage.setItem('projectId', projectId);
 
   function setProjectId(projectId: string) {
     setProjectIdInternal(projectId);
