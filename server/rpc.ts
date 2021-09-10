@@ -11,7 +11,6 @@ export async function handleRPC(
     ...r.query,
     ...(r.payload as any),
   };
-  console.log(payload);
 
   try {
     const handler = rpcHandlers.filter(
@@ -27,20 +26,15 @@ export async function handleRPC(
       payload.args,
       payload.body
     );
-    return {
-      body: rsp,
-    };
+    return rsp || { message: 'ok' };
   } catch (e) {
     log.error(e);
     return h
       .response({
-        isError: true,
-        body: {
-          ...e,
-          // Needs to get passed explicitly or name comes out as Error after rpc
-          message: e.message,
-          name: e.name,
-        },
+        ...e,
+        // Needs to get passed explicitly or name comes out as Error after rpc
+        message: e.message,
+        name: e.name,
       })
       .code(400);
   }

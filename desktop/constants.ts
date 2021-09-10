@@ -10,6 +10,6 @@ export const PROJECT_EXTENSION = 'dsproj';
 
 export const DSPROJ_FLAG = '--dsproj';
 
-export const SYNC_PERIOD = 10000; // seconds
+export const SYNC_PERIOD = 1000; // seconds
 
 export const LOG_FILE = path.join(DISK_ROOT, 'log');

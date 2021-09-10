@@ -22,7 +22,6 @@ export function writeFileBuffered(name: string, contents: string) {
   };
   buffers[name].timeout = setTimeout(() => {
     fs.writeFileSync(name, contents);
-    log.info('Wrote ' + name);
     delete buffers[name];
   }, SYNC_PERIOD);
 }
@@ -33,7 +32,6 @@ function flushUnwritten() {
     // Must be a synchronous write in this 'exit' context
     // https://nodejs.org/api/process.html#process_event_exit
     fs.writeFileSync(fileName, buffers[fileName].contents);
-    log.info('Flushed ' + fileName);
     delete buffers[fileName];
   });
 }

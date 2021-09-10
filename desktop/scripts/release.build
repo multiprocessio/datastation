@@ -1,3 +1,4 @@
+rm -rf build
 yarn
 setenv UI_ESBUILD_ARGS "--minify"
 yarn build-ui

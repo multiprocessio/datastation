@@ -164,13 +164,19 @@ const store = makeStore(MODE);
 
 function App() {
   const shareState = getShareState();
+  const requestedProjectId = getQueryParameter('project');
   const [projectId, setProjectIdInternal] = React.useState(
     (shareState && shareState.id) ||
-      getQueryParameter('project') ||
-      (MODE_FEATURES.useDefaultProject ? DEFAULT_PROJECT.projectName : (localStorage.getItem('projectId') || ''))
+      requestedProjectId ||
+      (MODE_FEATURES.useDefaultProject
+        ? DEFAULT_PROJECT.projectName
+        : localStorage.getItem('projectId') || '')
   );
   (window as any).projectId = projectId;
   localStorage.setItem('projectId', projectId);
+  if (!requestedProjectId) {
+    window.location.href = window.location.pathname+"?project="+projectId;
+  }
 
   function setProjectId(projectId: string) {
     setProjectIdInternal(projectId);
@@ -221,6 +227,14 @@ function App() {
   }, [state && state.projectName]);
 
   const [projectNameTmp, setProjectNameTmp] = React.useState('');
+
+  const headerRef = React.useRef<HTMLElement>(null);
+  const [headerHeight, setHeaderHeight] = React.useState(0);
+  React.useEffect(() => {
+    if (headerRef.current) {
+      setHeaderHeight(headerRef.current.offsetHeight);
+    }
+  }, [headerRef.current]);
 
   if (!state && projectId) {
     return (
@@ -285,64 +299,71 @@ function App() {
     <ProjectContext.Provider value={state}>
       <div className={`app app--${MODE}`}>
         {MODE_FEATURES.appHeader && (
-          <header>
+          <header ref={headerRef}>
             <div className="vertical-align-center">
               <span className="logo">{APP_NAME}</span>
               <div className="flex-right vertical-align-center">
-                <span title="Drop all state and load a sample project.">
-                  <Button
-                    onClick={() => {
-                      updateProjectState(DEFAULT_PROJECT);
-                      window.location.reload();
-                    }}
-                  >
-                    Reset
-                  </Button>
-                </span>
-                {MODE_FEATURES.shareProject && (
-                  <div className="share">
-                    <Button onClick={() => computeShareURL()}>Share</Button>
-                    <div className="share-details">
-                      <p>This URL contains the entire project state.</p>
-                      <p>
-                        Project data is not stored on a server. But if you do
-                        use this URL, the data encoded in the URL will appear in
-                        DataStation web server access logs.
-                      </p>
-                      <p>
-                        If you make changes, you will need to click "Share"
-                        again to get a new URL.
-                      </p>
-                      <Input readOnly value={shareURL} onChange={() => {}} />
-                      <p>
-                        <a href="https://tinyurl.com/app">TinyURL</a> is a good
-                        service for shortening these URLs correctly, some other
-                        systems break the URL.
-                      </p>
+                {MODE === 'browser' ? (
+                  <React.Fragment>
+                    <span title="Drop all state and load a sample project.">
+                      <Button
+                        onClick={() => {
+                          updateProjectState(DEFAULT_PROJECT);
+                          window.location.reload();
+                        }}
+                      >
+                        Reset
+                      </Button>
+                    </span>
+                    <div className="share">
+                      <Button onClick={() => computeShareURL()}>Share</Button>
+                      <div className="share-details">
+                        <p>This URL contains the entire project state.</p>
+                        <p>
+                          Project data is not stored on a server. But if you do
+                          use this URL, the data encoded in the URL will appear
+                          in DataStation web server access logs.
+                        </p>
+                        <p>
+                          If you make changes, you will need to click "Share"
+                          again to get a new URL.
+                        </p>
+                        <Input readOnly value={shareURL} onChange={() => {}} />
+                        <p>
+                          <a href="https://tinyurl.com/app">TinyURL</a> is a
+                          good service for shortening these URLs correctly, some
+                          other systems break the URL.
+                        </p>
+                      </div>
                     </div>
-                  </div>
+                    <a
+                      href="https://github.com/multiprocessio/datastation"
+                      target="_blank"
+                    >
+                      <iframe
+                        src="https://ghbtns.com/github-btn.html?user=multiprocessio&repo=datastation&type=star&count=true&size=medium"
+                        frameBorder="0"
+                        scrolling="0"
+                        width="80"
+                        height="20"
+                        title="GitHub"
+                      ></iframe>
+                    </a>
+                    <a
+                      href={`${SITE_ROOT}/#online-environment`}
+                      target="_blank"
+                    >
+                      About
+                    </a>
+                  </React.Fragment>
+                ) : (
+                  <span>{projectId}</span>
                 )}
-                <a
-                  href="https://github.com/multiprocessio/datastation"
-                  target="_blank"
-                >
-                  <iframe
-                    src="https://ghbtns.com/github-btn.html?user=multiprocessio&repo=datastation&type=star&count=true&size=medium"
-                    frameBorder="0"
-                    scrolling="0"
-                    width="80"
-                    height="20"
-                    title="GitHub"
-                  ></iframe>
-                </a>
-                <a href={`${SITE_ROOT}/#online-environment`} target="_blank">
-                  About
-                </a>
               </div>
             </div>
           </header>
         )}
-        <main>
+        <main style={{ marginTop: headerHeight, height: `calc(100% - ${headerHeight}px)` }}>
           {projectId && MODE_FEATURES.connectors && (
             <Sidebar>
               <Connectors

@@ -8,6 +8,7 @@ body {
   margin: 0;
   background: #fbfbfb;
   height: 100%;
+  overflow-y: hidden;
 }
 
 a,
@@ -22,18 +23,14 @@ a:hover {
   margin: 100px auto;
 }
 
-.app--desktop {
+.app--desktop,
+.app--server {
   border-top: 1px solid #ccc;
-  overflow-y: hidden;
 }
 
-.app--desktop main {
+.app--desktop main,
+.app--server main {
   display: flex;
-  height: 100%;
-}
-
-header + main {
-  padding-top: 60px;
 }
 
 header {
