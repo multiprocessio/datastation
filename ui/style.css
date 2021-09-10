@@ -278,6 +278,8 @@ header > div {
 
 .main-body {
   width: 100%;
+  /* Necessary for overflow-y:auto to take effect */
+  height: 100%;
   overflow-y: auto;
 }
 
