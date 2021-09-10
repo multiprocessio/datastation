@@ -175,7 +175,7 @@ function App() {
   (window as any).projectId = projectId;
   localStorage.setItem('projectId', projectId);
   if (!requestedProjectId) {
-    window.location.href = window.location.pathname+"?project="+projectId;
+    window.location.href = window.location.pathname + '?project=' + projectId;
   }
 
   function setProjectId(projectId: string) {
@@ -363,7 +363,12 @@ function App() {
             </div>
           </header>
         )}
-        <main style={{ marginTop: headerHeight, height: `calc(100% - ${headerHeight}px)` }}>
+        <main
+          style={{
+            marginTop: headerHeight,
+            height: `calc(100% - ${headerHeight}px)`,
+          }}
+        >
           {projectId && MODE_FEATURES.connectors && (
             <Sidebar>
               <Connectors
