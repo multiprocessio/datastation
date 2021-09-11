@@ -1,8 +1,7 @@
-import Hapi from '@hapi/hapi';
-import inert from '@hapi/inert';
+import express from 'express';
 import { getRPCHandlers } from '../desktop/rpc';
 import { loadSettings } from '../desktop/settings';
-import { APP_NAME, DEBUG, VERSION } from '../shared/constants';
+import { APP_NAME, DEBUG, SERVER_ROOT, VERSION } from '../shared/constants';
 import log from '../shared/log';
 import '../shared/polyfill';
 import { handleRPC } from './rpc';
@@ -18,47 +17,34 @@ process.on('uncaughtException', (e) => {
 log.info(APP_NAME, VERSION, DEBUG ? 'DEBUG' : '');
 
 async function init() {
-  const server = Hapi.server({
-    port: 8080,
-    host: 'localhost',
-  });
-
-  process.on('SIGINT', async function () {
-    log.info('Gracefully shutting down from SIGINT');
-    await server.stop({ timeout: 10000 });
-    process.exit(1);
-  });
+  const app = express();
 
   const settings = await loadSettings();
   const rpcHandlers = getRPCHandlers(settings);
 
-  server.route({
-    method: 'POST',
-    path: '/rpc',
-    handler: (h, r) => handleRPC(h, r, rpcHandlers),
-  });
+  app.post('/rpc', (req, rsp) => handleRPC(req, rsp, rpcHandlers));
 
   // Serve static files
   // Mask with nginx in production
   const staticFiles = ['index.html', 'style.css', 'ui.js', 'ui.js.map'];
-  await server.register(inert);
   staticFiles.map((f) => {
     if (f === 'index.html') {
-      server.route({
-        method: 'GET',
-        path: '/',
-        handler: (request, h) => h.file('build/' + f),
-      });
+      app.get('/', express.static('build/index.html'));
+      return;
     }
-    server.route({
-      method: 'GET',
-      path: '/' + f,
-      handler: (request, h) => h.file('build/' + f),
-    });
+
+    app.get('/' + f, express.static('build/' + f));
   });
 
-  await server.start();
-  log.info(`Server running on ${server.info.uri}`);
+  const { port, hostname, protocol } = new URL(SERVER_ROOT);
+  const server = app.listen(port, () => {
+    log.info(`Server running on ${protocol}://${hostname}${port}`);
+  });
+
+  process.on('SIGINT', async function () {
+    log.info('Gracefully shutting down from SIGINT');
+    server.close(() => process.exit(1));
+  });
 }
 
 init();

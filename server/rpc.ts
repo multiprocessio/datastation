@@ -1,15 +1,15 @@
-import Hapi from '@hapi/hapi';
+import express from 'express';
 import { RPCHandler } from '../desktop/rpc';
 import log from '../shared/log';
 
 export async function handleRPC(
-  r: Hapi.Request,
-  h: Hapi.ResponseToolkit,
+  req: express.Request,
+  rsp: express.Response,
   rpcHandlers: RPCHandler[]
 ) {
   const payload = {
-    ...r.query,
-    ...(r.payload as any),
+    ...req.query,
+    ...req.body,
   };
 
   try {
@@ -21,21 +21,21 @@ export async function handleRPC(
     }
 
     // TODO: run these in an external process pool
-    const rsp = await handler.handler(
+    const rpcResponse = await handler.handler(
       payload.projectId,
       payload.args,
       payload.body
     );
-    return rsp || { message: 'ok' };
+    rsp.json(rpcResponse || { message: 'ok' });
   } catch (e) {
     log.error(e);
-    return h
-      .response({
+    rsp
+      .json({
         ...e,
         // Needs to get passed explicitly or name comes out as Error after rpc
         message: e.message,
         name: e.name,
       })
-      .code(400);
+      .status(400);
   }
 }
