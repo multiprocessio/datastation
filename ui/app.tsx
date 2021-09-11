@@ -174,7 +174,7 @@ function App() {
   );
   (window as any).projectId = projectId;
   localStorage.setItem('projectId', projectId);
-  if (!requestedProjectId) {
+  if (!requestedProjectId && projectId) {
     window.location.href = window.location.pathname + '?project=' + projectId;
   }
 

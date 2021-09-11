@@ -1,4 +1,6 @@
 import express from 'express';
+import path from 'path';
+import { CODE_ROOT } from '../desktop/constants';
 import { getRPCHandlers } from '../desktop/rpc';
 import { loadSettings } from '../desktop/settings';
 import { APP_NAME, DEBUG, SERVER_ROOT, VERSION } from '../shared/constants';
@@ -11,7 +13,6 @@ process.on('unhandledRejection', (e) => {
   process.exit(1);
 });
 process.on('uncaughtException', (e) => {
-  log.info('here');
   log.error(e);
 });
 log.info(APP_NAME, VERSION, DEBUG ? 'DEBUG' : '');
@@ -29,16 +30,20 @@ async function init() {
   const staticFiles = ['index.html', 'style.css', 'ui.js', 'ui.js.map'];
   staticFiles.map((f) => {
     if (f === 'index.html') {
-      app.get('/', express.static('build/index.html'));
+      app.get('/', (req, rsp) =>
+        rsp.sendFile(path.join(CODE_ROOT, '/build/index.html'))
+      );
       return;
     }
 
-    app.get('/' + f, express.static('build/' + f));
+    app.get('/' + f, (req, rsp) =>
+      rsp.sendFile(path.join(CODE_ROOT, 'build', f))
+    );
   });
 
   const { port, hostname, protocol } = new URL(SERVER_ROOT);
   const server = app.listen(port, () => {
-    log.info(`Server running on ${protocol}://${hostname}${port}`);
+    log.info(`Server running on ${protocol}//${hostname}:${port}`);
   });
 
   process.on('SIGINT', async function () {

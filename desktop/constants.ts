@@ -1,3 +1,4 @@
+import fs from 'fs';
 import os from 'os';
 import path from 'path';
 
@@ -13,3 +14,13 @@ export const DSPROJ_FLAG = '--dsproj';
 export const SYNC_PERIOD = 1000; // seconds
 
 export const LOG_FILE = path.join(DISK_ROOT, 'log');
+
+export const CODE_ROOT = (() => {
+  for (let mpath of module.paths) {
+    if (fs.existsSync(mpath)) {
+      return path.dirname(mpath);
+    }
+  }
+
+  return '';
+})();
