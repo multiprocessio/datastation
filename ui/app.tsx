@@ -133,6 +133,11 @@ function useProjectState(
       let state;
       try {
         let rawState = await store.get(projectId);
+        if (MODE === 'server' && Object.keys(rawState).length === 0) {
+          // Awaiting authorization
+          return;
+        }
+
         if (!rawState && (!isNewProject || isDefault)) {
           throw new Error();
         } else {
