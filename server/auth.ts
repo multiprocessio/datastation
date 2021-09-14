@@ -17,7 +17,7 @@ interface AuthRequestSession extends express.Request {
     Partial<session.SessionData> & {
       tokenSet: TokenSet;
       code: string;
-      project: string;
+      redirect: string;
     };
 }
 
@@ -57,19 +57,15 @@ export class Auth {
       !req.session.tokenSet ||
       new Date(req.session.tokenSet.expires_at) < new Date()
     ) {
-      req.session.project = req.query.projectId as string;
-      console.log('here', req);
-      rsp.status(401);
-      rsp.json({});
+      req.session.redirect = ('/?' + req.query.projectId) as string;
+      rsp.status(401).json({});
       return;
     }
 
-    console.log(req.url, 'passed');
     return next();
   };
 
   doAuth = async (req: AuthRequestSession, rsp: express.Response) => {
-    console.log('what the fuck');
     if (this.openIdClient) {
       const codeVerifier = generators.codeVerifier();
       req.session.code = codeVerifier;
@@ -90,13 +86,15 @@ export class Auth {
   authCallback = async (req: AuthRequestSession, rsp: express.Response) => {
     if (this.openIdClient) {
       const params = this.openIdClient.callbackParams(req);
-      // TODO: what goes in this first argument?
-      const tokenSet = await this.openIdClient.callback(undefined, params, {
-        code_verifier: req.session.code,
-      });
-      console.log(tokenSet, tokenSet && tokenSet.claims());
+      const tokenSet = await this.openIdClient.callback(
+        this.openIdClient.metadata.redirect_uris[0],
+        params,
+        {
+          code_verifier: req.session.code,
+        }
+      );
       req.session.tokenSet = tokenSet;
-      rsp.redirect('/?project=' + req.session.project);
+      rsp.redirect(req.session.redirect);
       return;
     }
 
