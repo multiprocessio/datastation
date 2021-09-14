@@ -105,8 +105,6 @@ function useProjectState(
     MODE_FEATURES.useDefaultProject &&
     projectId === DEFAULT_PROJECT.projectName;
 
-  React.useEffect(() => {}, []);
-
   // Set up undo mechanism
   React.useEffect(() => {
     function handleUndo(e: KeyboardEvent) {
@@ -133,11 +131,6 @@ function useProjectState(
       let state;
       try {
         let rawState = await store.get(projectId);
-        if (MODE === 'server' && Object.keys(rawState).length === 0) {
-          // Awaiting authorization
-          return;
-        }
-
         if (!rawState && (!isNewProject || isDefault)) {
           throw new Error();
         } else {
@@ -241,7 +234,23 @@ function App() {
     }
   }, [headerRef.current]);
 
-  if (!state && projectId) {
+  const [projects, setProjects] = React.useState<
+    Array<{ name: string; createdAt: string }>
+  >([]);
+  React.useEffect(() => {
+    async function load() {
+      const projects = await asyncRPC<
+        void,
+        void,
+        Array<{ name: string; createdAt: string }>
+      >('getProjects');
+      setProjects(projects);
+    }
+
+    load();
+  }, []);
+
+  if ((!state && projectId) || (MODE === 'server' && !projects.length)) {
     return (
       <div className="loading">
         Loading...
@@ -414,12 +423,26 @@ function App() {
                     {projectNameTmp ? 'Go!' : 'Pick a name'}
                   </Button>
                 </div>
-                <div className="project-existing">
-                  <p>Or open an existing project.</p>
-                  <div className="form-row">
-                    <Button onClick={openProject}>Open</Button>
+                {MODE === 'desktop' && (
+                  <div className="project-existing">
+                    <p>Or open an existing project.</p>
+                    <div className="form-row">
+                      <Button onClick={openProject}>Open</Button>
+                    </div>
                   </div>
-                </div>
+                )}
+                {MODE === 'server' && projects.length && (
+                  <div className="project-existing">
+                    <p>Or open an existing project.</p>
+                    {projects.map(({ name, createdAt }) => (
+                      <div className="form-row">
+                        <a href={'/?project=' + name}>
+                          {name} {createdAt}
+                        </a>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             ) : (
               <Pages

@@ -22,6 +22,13 @@ export class Config {
     tlsCert: string;
   };
 
+  database: {
+    address: string;
+    username: string;
+    password: string;
+    database: string;
+  };
+
   constructor() {
     this.auth = {
       sessionSecret: '',
@@ -32,6 +39,13 @@ export class Config {
       publicUrl: 'https://localhost:8080',
       tlsKey: './certs/key.pem',
       tlsCert: './certs/cert.pem',
+    };
+
+    this.database = {
+      address: 'localhost:5432',
+      database: 'datastation',
+      username: 'datastation',
+      password: '',
     };
   }
 }
@@ -49,6 +63,8 @@ export async function readConfig(): Promise<Config> {
     'server.tlsKey',
     'server.tlsCert',
     'server.publicUrl',
+    'database.address',
+    'database.database',
   ];
   validate(cfg, requiredFields, (badKey) => {
     log.fatal(`'${badKey}' is a required field in config.json`);

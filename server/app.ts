@@ -4,19 +4,31 @@ import express from 'express';
 import fs from 'fs/promises';
 import https from 'https';
 import path from 'path';
+import pg from 'pg';
 import { CODE_ROOT } from '../desktop/constants';
-import { getRPCHandlers } from '../desktop/rpc';
+import {
+  evalColumnsHandler,
+  fetchResultsHandler,
+  storeLiteralHandler,
+} from '../desktop/eval/columns';
+import { evalFileHandler } from '../desktop/eval/file';
+import { evalHTTPHandler } from '../desktop/eval/http';
+import { programHandlers } from '../desktop/eval/program';
+import { evalSQLHandler } from '../desktop/eval/sql';
+import { RPCHandler } from '../desktop/rpc';
 import { loadSettings } from '../desktop/settings';
 import '../shared/polyfill';
 import { humanSize } from '../shared/text';
 import { registerAuth } from './auth';
 import { Config, readConfig } from './config';
 import log from './log';
+import { getProjectHandlers } from './project';
 import { handleRPC } from './rpc';
 
 export class App {
   express: express.Express;
   config: Config;
+  dbpool: pg.Pool;
 
   constructor(config: Config) {
     this.express = express();
@@ -48,7 +60,17 @@ export async function init() {
   });
 
   const settings = await loadSettings();
-  const rpcHandlers = getRPCHandlers(settings);
+  const rpcHandlers = [
+    ...getProjectHandlers(app),
+    evalColumnsHandler,
+    storeLiteralHandler,
+    evalSQLHandler,
+    evalHTTPHandler,
+    fetchResultsHandler,
+    ...programHandlers,
+    evalFileHandler,
+    settings.getUpdateHandler(),
+  ] as RPCHandler[];
 
   const auth = await registerAuth('/a/auth', app, config);
 
