@@ -2,11 +2,6 @@ export const APP_NAME = 'DataStation Community Edition';
 export const SITE_ROOT = 'https://datastation.multiprocess.io';
 export const CHAT_LINK = 'https://discord.gg/f2wQBc4bXX';
 
-let IS_DESKTOP_APP = false;
-try {
-  IS_DESKTOP_APP = navigator.userAgent.toLowerCase().includes('electron');
-} catch (e) {}
-
 export const RPC = {
   KILL_PROCESS: 'killProcess',
   EVAL_PROGRAM: 'evalProgram',
@@ -36,14 +31,7 @@ function getConfig<T>(v: string, _default: T) {
 
 export const DEBUG = getConfig<boolean>('DEBUG', true);
 export const VERSION = getConfig<string>('VERSION', 'development');
-
-export const SERVER_ROOT = getConfig<string>('SERVER_ROOT', '');
-
-export const MODE = IS_DESKTOP_APP
-  ? 'desktop'
-  : SERVER_ROOT.length
-  ? 'server'
-  : 'browser';
+export const MODE = getConfig<string>('MODE', 'browser');
 
 export const MODE_FEATURES = {
   appHeader: MODE !== 'desktop',

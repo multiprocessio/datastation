@@ -1,49 +1,62 @@
+import bodyParser from 'body-parser';
+import cookieParser from 'cookie-parser';
 import express from 'express';
 import path from 'path';
 import { CODE_ROOT } from '../desktop/constants';
 import { getRPCHandlers } from '../desktop/rpc';
 import { loadSettings } from '../desktop/settings';
-import { APP_NAME, DEBUG, SERVER_ROOT, VERSION } from '../shared/constants';
-import log from '../shared/log';
 import '../shared/polyfill';
+import { registerAuth } from './auth';
+import { Config, readConfig } from './config';
+import log from './log';
 import { handleRPC } from './rpc';
 
-process.on('unhandledRejection', (e) => {
-  log.error(e);
-  process.exit(1);
-});
-process.on('uncaughtException', (e) => {
-  log.error(e);
-});
-log.info(APP_NAME, VERSION, DEBUG ? 'DEBUG' : '');
+export class App {
+  express: express.Express;
+  config: Config;
 
-async function init() {
-  const app = express();
+  constructor(config: Config) {
+    this.express = express();
+    this.config = config;
+  }
+}
+
+export async function init() {
+  const config = await readConfig();
+  const app = new App(config);
+
+  app.express.use(cookieParser());
+  app.express.use(bodyParser.urlencoded({ extended: true }));
 
   const settings = await loadSettings();
   const rpcHandlers = getRPCHandlers(settings);
 
-  app.post('/rpc', (req, rsp) => handleRPC(req, rsp, rpcHandlers));
+  const auth = await registerAuth('/a/auth', app, config);
+
+  app.express.use('/a/rpc', auth.requireAuth, (req, rsp) =>
+    handleRPC(req, rsp, rpcHandlers)
+  );
 
   // Serve static files
   // Mask with nginx in production
   const staticFiles = ['index.html', 'style.css', 'ui.js', 'ui.js.map'];
   staticFiles.map((f) => {
     if (f === 'index.html') {
-      app.get('/', (req, rsp) =>
+      app.express.get('/', (req, rsp) =>
         rsp.sendFile(path.join(CODE_ROOT, '/build/index.html'))
       );
       return;
     }
 
-    app.get('/' + f, (req, rsp) =>
+    app.express.get('/' + f, (req, rsp) =>
       rsp.sendFile(path.join(CODE_ROOT, 'build', f))
     );
   });
 
-  const { port, hostname, protocol } = new URL(SERVER_ROOT);
-  const server = app.listen(port, () => {
-    log.info(`Server running on ${protocol}//${hostname}:${port}`);
+  const server = app.express.listen(config.server.port, () => {
+    log.info(
+      `Server running on https://${config.server.address}:${config.server.port}, publicly accessible at ${config.server.publicUrl}`
+    );
   });
 
   process.on('SIGINT', async function () {
@@ -51,5 +64,3 @@ async function init() {
     server.close(() => process.exit(1));
   });
 }
-
-init();

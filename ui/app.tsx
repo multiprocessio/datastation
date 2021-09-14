@@ -1,4 +1,4 @@
-import * as pako from 'pako';
+import pako from 'pako';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import {

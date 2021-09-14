@@ -1,4 +1,4 @@
-import { MODE, SERVER_ROOT } from '../shared/constants';
+import { MODE } from '../shared/constants';
 
 // Simple stub for TypeScript as prepared by preload.ts.
 export async function asyncRPC<Request, Args, Response>(
@@ -19,7 +19,7 @@ export async function asyncRPC<Request, Args, Response>(
   }
 
   const rsp = await window.fetch(
-    SERVER_ROOT + `/rpc?resource=${resource}&projectId=${projectId}`,
+    `/a/rpc?resource=${resource}&projectId=${projectId}`,
     {
       method: 'post',
       headers: {
@@ -31,6 +31,11 @@ export async function asyncRPC<Request, Args, Response>(
       }),
     }
   );
+
+  if (rsp.status === 302) {
+    window.location.href = rsp.headers.get('Location');
+    return {} as Response;
+  }
 
   const j = await rsp.json();
 
