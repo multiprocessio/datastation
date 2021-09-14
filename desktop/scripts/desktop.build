@@ -1,4 +1,4 @@
-setenv UI_CONFIG_OVERRIDES="window.DS_CONFIG_MODE = 'desktop';"
+setenv UI_CONFIG_OVERRIDES "window.DS_CONFIG_MODE = 'desktop';"
 yarn build-ui
 
 yarn esbuild desktop/preload.ts --external:electron --sourcemap --bundle --outfile=build/preload.js
