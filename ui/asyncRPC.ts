@@ -32,16 +32,14 @@ export async function asyncRPC<Request, Args, Response>(
     }
   );
 
-  if (rsp.status === 302) {
-    window.location.href = rsp.headers.get('Location');
+  if (rsp.status === 401) {
+    window.location.href = '/a/auth?projectId=' + projectId;
     return {} as Response;
   }
 
-  const j = await rsp.json();
-
   if (rsp.status !== 200) {
-    throw j;
+    throw await rsp.json();
   }
 
-  return j;
+  return await rsp.json();
 }

@@ -1,11 +1,14 @@
 import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 import express from 'express';
+import fs from 'fs/promises';
+import https from 'https';
 import path from 'path';
 import { CODE_ROOT } from '../desktop/constants';
 import { getRPCHandlers } from '../desktop/rpc';
 import { loadSettings } from '../desktop/settings';
 import '../shared/polyfill';
+import { humanSize } from '../shared/text';
 import { registerAuth } from './auth';
 import { Config, readConfig } from './config';
 import log from './log';
@@ -21,6 +24,7 @@ export class App {
   }
 }
 
+let id = 0;
 export async function init() {
   const config = await readConfig();
   const app = new App(config);
@@ -28,12 +32,27 @@ export async function init() {
   app.express.use(cookieParser());
   app.express.use(bodyParser.urlencoded({ extended: true }));
 
+  app.express.use((req, res, next) => {
+    const start = new Date();
+    const reqid = id++;
+    log.info(`${reqid} ${req.method} ${req.url}`);
+    res.on('finish', () => {
+      const end = new Date();
+      log.info(
+        `${reqid} ${res.statusCode} ${req.method} ${req.url} ${humanSize(
+          +res.getHeader('content-length') || 0
+        )} ${end.valueOf() - start.valueOf()}ms`
+      );
+    });
+    next();
+  });
+
   const settings = await loadSettings();
   const rpcHandlers = getRPCHandlers(settings);
 
   const auth = await registerAuth('/a/auth', app, config);
 
-  app.express.use('/a/rpc', auth.requireAuth, (req, rsp) =>
+  app.express.post('/a/rpc', auth.requireAuth, (req, rsp) =>
     handleRPC(req, rsp, rpcHandlers)
   );
 
@@ -53,11 +72,25 @@ export async function init() {
     );
   });
 
-  const server = app.express.listen(config.server.port, () => {
-    log.info(
-      `Server running on https://${config.server.address}:${config.server.port}, publicly accessible at ${config.server.publicUrl}`
-    );
-  });
+  const server = https.createServer(
+    {
+      key: await fs.readFile(config.server.tlsKey),
+      cert: await fs.readFile(config.server.tlsCert),
+    },
+    app.express
+  );
+  const location = config.server.address + ':' + config.server.port;
+  server.listen(
+    {
+      port: config.server.port,
+      host: config.server.address,
+    },
+    () => {
+      log.info(
+        `Server running on https://${location}, publicly accessible at ${config.server.publicUrl}`
+      );
+    }
+  );
 
   process.on('SIGINT', async function () {
     log.info('Gracefully shutting down from SIGINT');

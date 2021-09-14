@@ -17,7 +17,7 @@ interface AuthRequestSession extends express.Request {
     Partial<session.SessionData> & {
       tokenSet: TokenSet;
       code: string;
-      redirect: string;
+      project: string;
     };
 }
 
@@ -34,12 +34,11 @@ export class Auth {
   async init() {
     if (this.config.auth.openId) {
       const issuer = await Issuer.discover(this.config.auth.openId.realm);
+      const callbackUrl = `${this.config.server.publicUrl}${this.path}/callback`;
       this.openIdClient = new issuer.Client({
         client_id: this.config.auth.openId.clientId,
         client_secret: this.config.auth.openId.clientSecret,
-        redirect_uris: [
-          `${this.config.server.publicUrl}/${this.path}/callback`,
-        ],
+        redirect_uris: [callbackUrl],
         response_types: ['code'],
       });
     } else {
@@ -58,27 +57,30 @@ export class Auth {
       !req.session.tokenSet ||
       new Date(req.session.tokenSet.expires_at) < new Date()
     ) {
-      rsp.redirect(this.path + '?redirect=' + encodeURI(req.path));
+      req.session.project = req.query.projectId as string;
+      console.log('here', req);
+      rsp.status(401);
+      rsp.json({});
       return;
     }
 
+    console.log(req.url, 'passed');
     return next();
   };
 
   doAuth = async (req: AuthRequestSession, rsp: express.Response) => {
+    console.log('what the fuck');
     if (this.openIdClient) {
       const codeVerifier = generators.codeVerifier();
       req.session.code = codeVerifier;
-      req.session.redirect = req.params.redirect;
       const codeChallenge = generators.codeChallenge(codeVerifier);
 
-      rsp.redirect(
-        this.openIdClient.authorizationUrl({
-          scope: 'openid profile email',
-          code_challenge: codeChallenge,
-          code_challenge_method: 'S256',
-        })
-      );
+      const externalRedirect = this.openIdClient.authorizationUrl({
+        scope: 'openid profile email',
+        code_challenge: codeChallenge,
+        code_challenge_method: 'S256',
+      });
+      rsp.redirect(externalRedirect);
       return;
     }
 
@@ -94,7 +96,7 @@ export class Auth {
       });
       console.log(tokenSet, tokenSet && tokenSet.claims());
       req.session.tokenSet = tokenSet;
-      rsp.redirect(decodeURI(req.session.redirect));
+      rsp.redirect('/?project=' + req.session.project);
       return;
     }
 
@@ -120,7 +122,7 @@ export async function registerAuth(
   const auth = new Auth(config, path);
   await auth.init();
 
-  app.express.use(path, auth.doAuth);
-  app.express.use(path + '/callback', auth.authCallback);
+  app.express.get(path + '/', auth.doAuth);
+  app.express.get(path + '/callback', auth.authCallback);
   return auth;
 }

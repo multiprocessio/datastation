@@ -29,13 +29,11 @@ export async function handleRPC(
     rsp.json(rpcResponse || { message: 'ok' });
   } catch (e) {
     log.error(e);
-    rsp
-      .json({
-        ...e,
-        // Needs to get passed explicitly or name comes out as Error after rpc
-        message: e.message,
-        name: e.name,
-      })
-      .status(400);
+    rsp.status(400).json({
+      ...e,
+      // Needs to get passed explicitly or name comes out as Error after rpc
+      message: e.message,
+      name: e.name,
+    });
   }
 }

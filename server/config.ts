@@ -30,8 +30,8 @@ export class Config {
       port: 8080,
       address: 'localhost',
       publicUrl: 'https://localhost:8080',
-      tlsKey: './certs/cert.pem',
-      tlsCert: './certs/key.pem',
+      tlsKey: './certs/key.pem',
+      tlsCert: './certs/cert.pem',
     };
   }
 }
@@ -43,6 +43,9 @@ export async function readConfig(): Promise<Config> {
 
   const requiredFields = [
     'auth.sessionSecret',
+    'auth.openId?.realm',
+    'auth.openId?.clientId',
+    'auth.openId?.clientSecret',
     'server.tlsKey',
     'server.tlsCert',
     'server.publicUrl',

@@ -26,16 +26,26 @@ export function deepClone(a: any) {
   return JSON.parse(JSON.stringify(a));
 }
 
-export function getPath(obj: any, path: string): string | undefined {
+export function getPath(obj: any, path: string): any {
   const pieces = path.split('.');
 
   let current = obj;
   for (let i = 0; i < pieces.length; i++) {
-    if (!current || !current[pieces[i]]) {
+    let piece = pieces[i];
+    const optional = piece.endsWith('?');
+    if (optional) {
+      piece = piece.slice(0, piece.length - 1);
+
+      if (current && !current[piece]) {
+        return {};
+      }
+    }
+
+    if (!current || !current[piece]) {
       return undefined;
     }
 
-    current = current[pieces[i]];
+    current = current[piece];
   }
 
   return current;
@@ -48,7 +58,7 @@ export function validate(
 ) {
   requiredFields.forEach((field) => {
     if (!getPath(obj, field)) {
-      handler(field);
+      handler(field.replace('?', ''));
     }
   });
 }

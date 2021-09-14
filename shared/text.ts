@@ -191,27 +191,26 @@ export async function parseArrayBuffer(
 
 export function humanSize(n: number) {
   if (n < 1000) {
-    return `${n} bytes`;
+    return `${n}B`;
   }
 
   const kb = n / 1000;
   if (kb < 1000) {
-    return `${kb.toFixed(2)} KB`;
+    return `${kb.toFixed(2)}KB`;
   }
 
   const mb = kb / 1000;
   if (mb < 1000) {
-    return `${mb.toFixed(2)} MB`;
+    return `${mb.toFixed(2)}MB`;
   }
 
   const gb = mb / 1000;
   if (gb < 1000) {
-    return `${mb.toFixed(2)} GB`;
+    return `${mb.toFixed(2)}GB`;
   }
 
-  // This is kinda aspirational, huh.
   const tb = gb / 1000;
-  return `${tb.toFixed(2)} TB`;
+  return `${tb.toFixed(2)}TB`;
 }
 
 export function title(s: string) {

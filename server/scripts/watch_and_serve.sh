@@ -3,7 +3,7 @@
 set -eux
 
 # Kill all xargs/fswatch children on exit
-trap 'pkill -P $$' SIGINT SIGTERM EXIT
+trap 'killall xargs node fswatch esbuild python3' SIGINT SIGTERM EXIT
 
 # Build once up front
 yarn build-server
