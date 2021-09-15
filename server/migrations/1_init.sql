@@ -12,7 +12,7 @@ CREATE TABLE exports (
        export_name TEXT NOT NULL,
        export_emails TEXT[] NOT NULL,
        export_frequency TEXT NOT NULL,
-       export_created_at TIMESTAMP WITH TIME ZONE
+       export_created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 COMMIT;

@@ -41,7 +41,7 @@ export const getProjectHandlers = (app: App) => {
             'SELECT project_value FROM projects WHERE project_name = $1;',
             [projectId]
           );
-          return res.rows[0].project_value;
+          return ProjectState.fromJSON(JSON.parse(res.rows[0].project_value));
         } finally {
           client.release();
         }

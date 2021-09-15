@@ -1,8 +1,9 @@
 import fs from 'fs';
 import fsPromises from 'fs/promises';
 import path from 'path';
+import { encrypt } from './secret';
 import log from '../shared/log';
-import { ProjectState } from '../shared/state';
+import { ProjectState, SQLConnectorInfo } from '../shared/state';
 import { DISK_ROOT, PROJECT_EXTENSION, SYNC_PERIOD } from './constants';
 
 const buffers: Record<
@@ -47,6 +48,27 @@ export function getProjectResultsFile(projectId: string) {
   return path.join(DISK_ROOT, '.' + fileName + '.results');
 }
 
+async function encryptProjectSecrets(s: ProjectState) {
+  for (let server of s.servers) {
+    if (server.passphrase !== null) {
+      server.passphrase = await encrypt(DISK_ROOT, server.passphrase);
+    }
+
+    if (server.password !== null) {
+      server.password = await encrypt(DISK_ROOT, server.password);
+    }
+  }
+
+  for (let conn of s.connectors) {
+    if (conn.type === 'sql') {
+      const sconn = conn as SQLConnectorInfo;
+      if (sconn.sql.password !== null) {
+         sconn.sql.passphrase = await encrypt(DISK_ROOT, sconn.sql.passphrase);
+      }
+    }
+  }
+}
+
 export const storeHandlers = [
   {
     resource: 'getProjectState',
@@ -64,6 +86,7 @@ export const storeHandlers = [
   {
     resource: 'updateProjectState',
     handler: async (projectId: string, _: string, newState: ProjectState) => {
+      await encryptProjectSecrets(newState);
       const fileName = await ensureProjectFile(projectId);
       return writeFileBuffered(fileName, JSON.stringify(newState));
     },

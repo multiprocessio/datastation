@@ -3,7 +3,7 @@ import { loadSettings } from '../desktop/settings';
 import { APP_NAME, DEBUG, VERSION } from '../shared/constants';
 import log from '../shared/log';
 import '../shared/polyfill';
-import { DSPROJ_FLAG } from './constants';
+import { DISK_ROOT, DSPROJ_FLAG } from './constants';
 import { configureLogger } from './log';
 import { openWindow } from './project';
 import { getRPCHandlers, registerRPCHandlers } from './rpc';
@@ -23,6 +23,8 @@ app.whenReady().then(async () => {
       break;
     }
   }
+
+  await ensureSigningKey(DISK_ROOT);
 
   const settings = await loadSettings();
 
