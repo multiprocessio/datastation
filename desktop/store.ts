@@ -65,11 +65,11 @@ export async function nullProjectSecrets(s: ProjectState) {
 export async function encryptProjectSecrets(s: ProjectState) {
   for (let server of s.servers) {
     if (server.passphrase !== null) {
-      server.passphrase = await encrypt(DISK_ROOT, server.passphrase);
+      server.passphrase = await encrypt(server.passphrase);
     }
 
     if (server.password !== null) {
-      server.password = await encrypt(DISK_ROOT, server.password);
+      server.password = await encrypt(server.password);
     }
   }
 
@@ -77,7 +77,7 @@ export async function encryptProjectSecrets(s: ProjectState) {
     if (conn.type === 'sql') {
       const sconn = conn as SQLConnectorInfo;
       if (sconn.sql.password !== null) {
-        sconn.sql.passphrase = await encrypt(DISK_ROOT, sconn.sql.passphrase);
+        sconn.sql.password = await encrypt(sconn.sql.password);
       }
     }
   }

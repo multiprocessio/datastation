@@ -162,7 +162,9 @@ export const evalSQLHandler = rpcEvalHandler({
     // TODO:!!!
     // TODO:!!!
 
-    info.connector.sql.password = await decrypt(info.connector.sql.password);
+    info.connector.sql.password = info.connector.sql.password
+      ? await decrypt(info.connector.sql.password)
+      : null;
 
     // Sqlite is file, not network based so handle separately.
     if (info.sql.type === 'sqlite') {

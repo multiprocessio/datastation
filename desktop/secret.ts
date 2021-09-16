@@ -15,8 +15,9 @@ function getSigningKeyPath() {
 
 export async function ensureSigningKey() {
   const signingKeyPath = getSigningKeyPath();
-  const exists = await fs.access(signingKeyPath);
-  if (!exists) {
+  try {
+    await fs.access(signingKeyPath);
+  } catch (e) {
     const newKey = encodeBase64(randomBytes(secretbox.keyLength));
     await fs.writeFile(signingKeyPath, newKey);
     await fs.chmod(signingKeyPath, 0o400);
@@ -27,8 +28,8 @@ export async function encrypt(msg: string) {
   const signingKeyPath = getSigningKeyPath();
   const key = await fs.readFile(signingKeyPath);
 
-  const keyUint8Array = decodeBase64(key);
-  const nonce = randomBytes(secretBox.nonceLength);
+  const keyUint8Array = decodeBase64(key.toString());
+  const nonce = randomBytes(secretbox.nonceLength);
   const messageUint8 = decodeUTF8(msg);
   const box = secretbox(messageUint8, nonce, keyUint8Array);
 
@@ -40,13 +41,16 @@ export async function encrypt(msg: string) {
   return base64FullMessage;
 }
 
-export async function decrypt(msgWithNonce: string): string {
-  const keyUint8Array = decodeBase64(key);
+export async function decrypt(msgWithNonce: string) {
+  const signingKeyPath = getSigningKeyPath();
+  const key = await fs.readFile(signingKeyPath);
+
+  const keyUint8Array = decodeBase64(key.toString());
   const messageWithNonceAsUint8Array = decodeBase64(msgWithNonce);
   const nonce = messageWithNonceAsUint8Array.slice(0, secretbox.nonceLength);
   const message = messageWithNonceAsUint8Array.slice(
     secretbox.nonceLength,
-    messageWithNonce.length
+    msgWithNonce.length
   );
 
   const decrypted = secretbox.open(message, nonce, keyUint8Array);
