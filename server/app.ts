@@ -16,6 +16,7 @@ import { evalHTTPHandler } from '../desktop/eval/http';
 import { programHandlers } from '../desktop/eval/program';
 import { evalSQLHandler } from '../desktop/eval/sql';
 import { RPCHandler } from '../desktop/rpc';
+import { ensureSigningKey } from '../desktop/secret';
 import { loadSettings } from '../desktop/settings';
 import '../shared/polyfill';
 import { humanSize } from '../shared/text';
@@ -58,6 +59,8 @@ export async function init() {
     });
     next();
   });
+
+  await ensureSigningKey();
 
   const settings = await loadSettings();
   const rpcHandlers = [
