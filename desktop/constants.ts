@@ -15,6 +15,7 @@ export const SYNC_PERIOD = 1000; // seconds
 
 export const LOG_FILE = path.join(DISK_ROOT, 'log');
 
+// Finds where package.json is in this repo, the repo root.
 export const CODE_ROOT = (() => {
   for (let mpath of module.paths) {
     if (fs.existsSync(mpath)) {

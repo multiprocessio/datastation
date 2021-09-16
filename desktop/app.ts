@@ -3,10 +3,11 @@ import { loadSettings } from '../desktop/settings';
 import { APP_NAME, DEBUG, VERSION } from '../shared/constants';
 import log from '../shared/log';
 import '../shared/polyfill';
-import { DISK_ROOT, DSPROJ_FLAG } from './constants';
+import { DSPROJ_FLAG } from './constants';
 import { configureLogger } from './log';
 import { openWindow } from './project';
 import { getRPCHandlers, registerRPCHandlers } from './rpc';
+import { ensureSigningKey } from './secret';
 
 configureLogger().then(() => {
   log.info(APP_NAME, VERSION, DEBUG ? 'DEBUG' : '');
@@ -24,7 +25,7 @@ app.whenReady().then(async () => {
     }
   }
 
-  await ensureSigningKey(DISK_ROOT);
+  await ensureSigningKey();
 
   const settings = await loadSettings();
 

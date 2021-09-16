@@ -56,8 +56,8 @@ export function registerRPCHandlers(
         event.sender.send(responseChannel, {
           isError: true,
           body: {
-            ...e,
-            // Needs to get passed explicitly or name comes out as Error after rpc
+            // Not all fields get pulled out unless explicitly requested
+            stack: e.stack,
             message: e.message,
             name: e.name,
           },

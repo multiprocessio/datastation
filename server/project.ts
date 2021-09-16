@@ -1,4 +1,5 @@
 import { Pool } from 'pg';
+import { encryptProjectSecrets, nullProjectSecrets } from '../desktop/store';
 import { ProjectState } from '../shared/state';
 import { App } from './app';
 
@@ -41,7 +42,9 @@ export const getProjectHandlers = (app: App) => {
             'SELECT project_value FROM projects WHERE project_name = $1;',
             [projectId]
           );
-          return ProjectState.fromJSON(JSON.parse(res.rows[0].project_value));
+          const ps = JSON.parse(res.rows[0].project_value);
+          nullProjectSecrets(ps);
+          return ps;
         } finally {
           client.release();
         }
@@ -51,6 +54,7 @@ export const getProjectHandlers = (app: App) => {
       resource: 'updateProjectState',
       handler: async (projectId: string, _: string, newState: ProjectState) => {
         const client = await app.dbpool.connect();
+        await encryptProjectSecrets(newState);
         try {
           await app.dbpool.query(
             'INSERT INTO projects (project_name, project_value) VALUES ($1, $2) ON CONFLICT DO UPDATE',

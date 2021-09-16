@@ -1,10 +1,10 @@
 import fs from 'fs';
 import fsPromises from 'fs/promises';
 import path from 'path';
-import { encrypt } from './secret';
 import log from '../shared/log';
 import { ProjectState, SQLConnectorInfo } from '../shared/state';
 import { DISK_ROOT, PROJECT_EXTENSION, SYNC_PERIOD } from './constants';
+import { encrypt } from './secret';
 
 const buffers: Record<
   string,
@@ -48,7 +48,21 @@ export function getProjectResultsFile(projectId: string) {
   return path.join(DISK_ROOT, '.' + fileName + '.results');
 }
 
-async function encryptProjectSecrets(s: ProjectState) {
+export async function nullProjectSecrets(s: ProjectState) {
+  for (let server of s.servers) {
+    server.passphrase = null;
+    server.password = null;
+  }
+
+  for (let conn of s.connectors) {
+    if (conn.type === 'sql') {
+      const sconn = conn as SQLConnectorInfo;
+      sconn.sql.password = null;
+    }
+  }
+}
+
+export async function encryptProjectSecrets(s: ProjectState) {
   for (let server of s.servers) {
     if (server.passphrase !== null) {
       server.passphrase = await encrypt(DISK_ROOT, server.passphrase);
@@ -63,7 +77,7 @@ async function encryptProjectSecrets(s: ProjectState) {
     if (conn.type === 'sql') {
       const sconn = conn as SQLConnectorInfo;
       if (sconn.sql.password !== null) {
-         sconn.sql.passphrase = await encrypt(DISK_ROOT, sconn.sql.passphrase);
+        sconn.sql.passphrase = await encrypt(DISK_ROOT, sconn.sql.passphrase);
       }
     }
   }

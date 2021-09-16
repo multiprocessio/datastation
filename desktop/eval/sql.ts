@@ -6,6 +6,7 @@ import sqlite3 from 'sqlite3';
 import Client from 'ssh2-sftp-client';
 import { file as makeTmpFile } from 'tmp-promise';
 import { Proxy, SQLConnectorInfo, SQLPanelInfo } from '../../shared/state';
+import { decrypt } from '../secret';
 import { rpcEvalHandler } from './eval';
 import { getSSHConfig, tunnel } from './tunnel';
 
@@ -160,6 +161,8 @@ export const evalSQLHandler = rpcEvalHandler({
     // TODO: need to handle DM_getPanel here
     // TODO:!!!
     // TODO:!!!
+
+    info.connector.sql.password = await decrypt(info.connector.sql.password);
 
     // Sqlite is file, not network based so handle separately.
     if (info.sql.type === 'sqlite') {

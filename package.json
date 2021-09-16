@@ -52,6 +52,8 @@
     "ssh2-promise": "^1.0.0",
     "ssh2-sftp-client": "^7.0.0",
     "tmp-promise": "^3.0.2",
+    "tweetnacl": "^1.0.3",
+    "tweetnacl-util": "^0.15.1",
     "uuid": "^8.3.2",
     "xlsx": "^0.17.0"
   },

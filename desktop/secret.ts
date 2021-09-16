@@ -1,34 +1,60 @@
-import sodium from 'sodium';
-import path from 'path';
 import fs from 'fs/promises';
+import path from 'path';
+import { randomBytes, secretbox } from 'tweetnacl';
+import {
+  decodeBase64,
+  decodeUTF8,
+  encodeBase64,
+  encodeUTF8,
+} from 'tweetnacl-util';
+import { DISK_ROOT } from './constants';
 
-function getSigningKeyPath(diskRoot: string) {
-  return path.join(diskRoot, '.signingkey');
+function getSigningKeyPath() {
+  return path.join(DISK_ROOT, '.signingkey');
 }
 
-export async function ensureSigningKey(diskRoot: string) {
-  const signingKeyPath = getSigningKeyPath(diskRoot);
-  const exists = await fs.exists(signingKeyPath);
+export async function ensureSigningKey() {
+  const signingKeyPath = getSigningKeyPath();
+  const exists = await fs.access(signingKeyPath);
   if (!exists) {
-    const newKey = sodium.randombytes_buf(sodium.crypto_shorthash_KEYBYTES);
+    const newKey = encodeBase64(randomBytes(secretbox.keyLength));
     await fs.writeFile(signingKeyPath, newKey);
+    await fs.chmod(signingKeyPath, 0o400);
   }
 }
 
-export async function encrypt(diskRoot: string, msg: string) {
-  const signingKeyPath = getSigningKeyPath(diskRoot);
+export async function encrypt(msg: string) {
+  const signingKeyPath = getSigningKeyPath();
   const key = await fs.readFile(signingKeyPath);
-  const nonce = sodium.randombytes_buf(sodium.crypto_secretbox_NONCEBYTES);
-  return nonce.concat(sodium.crypto_secretbox_easy(msg, nonce, key));
+
+  const keyUint8Array = decodeBase64(key);
+  const nonce = randomBytes(secretBox.nonceLength);
+  const messageUint8 = decodeUTF8(msg);
+  const box = secretbox(messageUint8, nonce, keyUint8Array);
+
+  const fullMessage = new Uint8Array(nonce.length + box.length);
+  fullMessage.set(nonce);
+  fullMessage.set(box, nonce.length);
+
+  const base64FullMessage = encodeBase64(fullMessage);
+  return base64FullMessage;
 }
 
-export async function decrypt(diskRoot: string, msg: string) {
-  if (msg.length < sodium.crypto_secretbox_NONCEBYTES + sodium.crypto_secretbox_MACBYTES) {
-    throw "Short message";
+export async function decrypt(msgWithNonce: string): string {
+  const keyUint8Array = decodeBase64(key);
+  const messageWithNonceAsUint8Array = decodeBase64(msgWithNonce);
+  const nonce = messageWithNonceAsUint8Array.slice(0, secretbox.nonceLength);
+  const message = messageWithNonceAsUint8Array.slice(
+    secretbox.nonceLength,
+    messageWithNonce.length
+  );
+
+  const decrypted = secretbox.open(message, nonce, keyUint8Array);
+
+  if (!decrypted) {
+    throw new Error('Could not decrypt message');
   }
-  const signingKeyPath = getSigningKeyPath(diskRoot);
-  const key = await fs.readFile(signingKeyPath);
-  const nonce = msg.slice(0, sodium.crypto_secretbox_NONCEBYTES);
-  const ciphertext = msg.slice(sodium.crypto_secretbox_NONCEBYTES);
-  return sodium.crypto_secretbox_open_easy(ciphertext, nonce, key);
+
+  const base64DecryptedMessage = encodeUTF8(decrypted);
+  return base64DecryptedMessage;
 }
