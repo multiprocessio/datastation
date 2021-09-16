@@ -135,6 +135,13 @@ export function Server({
                   value={password.passphrase}
                   type="password"
                   onChange={syncPassword.bind(null, 'passphrase')}
+                  onBlur={
+                    () =>
+                      syncPassword(
+                        'passphrase',
+                        null
+                      ) /* Turns off continued attempts to encrypt */
+                  }
                 />
               </div>
             </React.Fragment>
@@ -145,6 +152,13 @@ export function Server({
                 value={password.password}
                 type="password"
                 onChange={syncPassword.bind(null, 'password')}
+                onBlur={
+                  () =>
+                    syncPassword(
+                      'password',
+                      null
+                    ) /* Turns off continued attempts to encrypt */
+                }
               />
             </div>
           ) : null}

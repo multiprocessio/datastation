@@ -29,6 +29,7 @@ export function Input({
   type,
   placeholder,
   className,
+  onBlur,
   onChange,
   value,
   min,
@@ -42,6 +43,7 @@ export function Input({
   placeholder?: string;
   className?: string;
   onChange: (value: string) => void;
+  onBlur?: () => void;
   value: string;
   min?: number;
   max?: number;
@@ -68,6 +70,7 @@ export function Input({
       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
         setLocalValue(e.target.value)
       }
+      onBlur={onBlur}
       disabled={disabled}
       readOnly={readOnly}
       min={min}

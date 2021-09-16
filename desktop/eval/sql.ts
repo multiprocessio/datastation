@@ -1,12 +1,12 @@
 import sqlserver from 'mssql';
 import mysql from 'mysql2/promise';
-import oracledb from 'oracledb';
 import { Client as PostgresClient } from 'pg';
 import * as sqlite from 'sqlite';
 import sqlite3 from 'sqlite3';
 import Client from 'ssh2-sftp-client';
 import { file as makeTmpFile } from 'tmp-promise';
 import { Proxy, SQLConnectorInfo, SQLPanelInfo } from '../../shared/state';
+import { decrypt } from '../secret';
 import { rpcEvalHandler } from './eval';
 import { getSSHConfig, tunnel } from './tunnel';
 
@@ -70,6 +70,7 @@ async function evalOracle(
   port: number,
   { connector: { sql } }: Proxy<SQLPanelInfo, SQLConnectorInfo>
 ) {
+  const oracledb = require('oracledb');
   oracledb.outFormat = oracledb.OUT_FORMAT_ARRAY;
   const client = await oracledb.getConnection({
     user: sql.username,
@@ -160,6 +161,10 @@ export const evalSQLHandler = rpcEvalHandler({
     // TODO: need to handle DM_getPanel here
     // TODO:!!!
     // TODO:!!!
+
+    info.connector.sql.password = info.connector.sql.password
+      ? await decrypt(info.connector.sql.password)
+      : null;
 
     // Sqlite is file, not network based so handle separately.
     if (info.sql.type === 'sqlite') {

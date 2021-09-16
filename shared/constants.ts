@@ -2,27 +2,6 @@ export const APP_NAME = 'DataStation Community Edition';
 export const SITE_ROOT = 'https://datastation.multiprocess.io';
 export const CHAT_LINK = 'https://discord.gg/f2wQBc4bXX';
 
-let IS_DESKTOP_APP = false;
-try {
-  IS_DESKTOP_APP = navigator.userAgent.toLowerCase().includes('electron');
-} catch (e) {}
-
-// TODO: handle hosted/saas mode
-export const MODE = IS_DESKTOP_APP ? 'desktop' : 'browser';
-
-export const MODE_FEATURES = {
-  appHeader: MODE === 'browser',
-  connectors: MODE !== 'browser',
-  sql: MODE !== 'browser',
-  shareProject: MODE === 'browser',
-  corsOnly: MODE === 'browser',
-  noBodyYOverflow: MODE !== 'browser',
-  storeResults: MODE !== 'browser',
-  useDefaultProject: MODE === 'browser',
-  extraLanguages: MODE !== 'browser',
-  killProcess: MODE !== 'browser',
-};
-
 export const RPC = {
   KILL_PROCESS: 'killProcess',
   EVAL_PROGRAM: 'evalProgram',
@@ -52,3 +31,17 @@ function getConfig<T>(v: string, _default: T) {
 
 export const DEBUG = getConfig<boolean>('DEBUG', true);
 export const VERSION = getConfig<string>('VERSION', 'development');
+export const MODE = getConfig<string>('MODE', 'browser');
+
+export const MODE_FEATURES = {
+  appHeader: MODE !== 'desktop',
+  connectors: MODE !== 'browser',
+  sql: MODE !== 'browser',
+  shareProject: MODE === 'browser',
+  corsOnly: MODE === 'browser',
+  noBodyYOverflow: MODE === 'desktop',
+  storeResults: MODE !== 'browser',
+  useDefaultProject: MODE === 'browser',
+  extraLanguages: MODE !== 'browser',
+  killProcess: MODE !== 'browser',
+};

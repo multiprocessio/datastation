@@ -25,3 +25,40 @@ export function deepEquals(a: any, b: any) {
 export function deepClone(a: any) {
   return JSON.parse(JSON.stringify(a));
 }
+
+export function getPath(obj: any, path: string): any {
+  const pieces = path.split('.');
+
+  let current = obj;
+  for (let i = 0; i < pieces.length; i++) {
+    let piece = pieces[i];
+    const optional = piece.endsWith('?');
+    if (optional) {
+      piece = piece.slice(0, piece.length - 1);
+
+      if (current && !current[piece]) {
+        return {};
+      }
+    }
+
+    if (!current || !current[piece]) {
+      return undefined;
+    }
+
+    current = current[piece];
+  }
+
+  return current;
+}
+
+export function validate(
+  obj: any,
+  requiredFields: string[],
+  handler: (arg0: string) => void
+) {
+  requiredFields.forEach((field) => {
+    if (!getPath(obj, field)) {
+      handler(field.replace('?', ''));
+    }
+  });
+}

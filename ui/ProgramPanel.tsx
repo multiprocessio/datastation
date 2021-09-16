@@ -13,7 +13,7 @@ export async function evalProgramPanel(
 ): Promise<PanelResult> {
   const program = panel.program;
 
-  if (MODE === 'desktop') {
+  if (MODE !== 'browser') {
     return asyncRPC<
       ProgramPanelInfo & { indexIdMap: Array<string> },
       null,

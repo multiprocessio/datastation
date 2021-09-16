@@ -6,6 +6,7 @@ import { DEBUG } from '../../shared/constants';
 import log from '../../shared/log';
 import { ServerInfo } from '../../shared/state';
 import { HOME } from '../constants';
+import { decrypt } from '../secret';
 
 interface SSHConfig extends SSH2Config {
   retries: number;
@@ -42,13 +43,13 @@ export async function getSSHConfig(server: ServerInfo): Promise<SSHConfig> {
       config.privateKey = buffer.toString();
     }
     if (server.passphrase) {
-      config.passphrase = server.passphrase;
+      config.passphrase = await decrypt(server.passphrase);
     }
   }
 
   if (server.type === 'password') {
     config.username = server.username;
-    config.password = server.password;
+    config.password = await decrypt(server.password);
   }
 
   return config;

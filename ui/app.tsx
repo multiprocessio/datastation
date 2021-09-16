@@ -1,4 +1,5 @@
-import * as pako from 'pako';
+import formatDistanceToNow from 'date-fns/formatDistanceToNow';
+import pako from 'pako';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import {
@@ -17,6 +18,7 @@ import {
   ServerInfo,
 } from '../shared/state';
 import { asyncRPC } from './asyncRPC';
+import { Alert } from './component-library/Alert';
 import { Button } from './component-library/Button';
 import { Input } from './component-library/Input';
 import { Connectors } from './Connectors';
@@ -105,8 +107,6 @@ function useProjectState(
     MODE_FEATURES.useDefaultProject &&
     projectId === DEFAULT_PROJECT.projectName;
 
-  React.useEffect(() => {}, []);
-
   // Set up undo mechanism
   React.useEffect(() => {
     function handleUndo(e: KeyboardEvent) {
@@ -164,20 +164,27 @@ const store = makeStore(MODE);
 
 function App() {
   const shareState = getShareState();
-  const [projectId, setProjectIdInternal] = React.useState(
+  const requestedProjectId = getQueryParameter('project');
+  const [projectId, setProjectId] = React.useState(
     (shareState && shareState.id) ||
-      getQueryParameter('project') ||
+      requestedProjectId ||
       (MODE_FEATURES.useDefaultProject ? DEFAULT_PROJECT.projectName : '')
   );
   (window as any).projectId = projectId;
+  if (!requestedProjectId && projectId) {
+    window.location.href = window.location.pathname + '?project=' + projectId;
+  }
 
-  function setProjectId(projectId: string) {
-    setProjectIdInternal(projectId);
-    return asyncRPC<{ lastProject: string }, void, void>(
-      'updateSettings',
-      null,
-      { lastProject: projectId }
-    );
+  const [makeProjectError, setMakeProjectError] = React.useState('');
+  async function makeProject(projectId: string) {
+    try {
+      await asyncRPC<{ projectId: string }, void, void>('makeProject', null, {
+        projectId,
+      });
+      setProjectId(projectId);
+    } catch (e) {
+      setMakeProjectError(e.message);
+    }
   }
 
   const [state, updateProjectState] = useProjectState(
@@ -221,7 +228,33 @@ function App() {
 
   const [projectNameTmp, setProjectNameTmp] = React.useState('');
 
-  if (!state && projectId) {
+  const [headerHeight, setHeaderHeightInternal] = React.useState(0);
+  const setHeaderHeight = React.useCallback((e: HTMLElement) => {
+    if (!e) {
+      return;
+    }
+
+    setHeaderHeightInternal(e.offsetHeight);
+  }, []);
+
+  const [projects, setProjects] = React.useState<Array<{
+    name: string;
+    createdAt: string;
+  }> | null>(null);
+  React.useEffect(() => {
+    async function load() {
+      const projects = await asyncRPC<
+        void,
+        void,
+        Array<{ name: string; createdAt: string }>
+      >('getProjects');
+      setProjects(projects);
+    }
+
+    load();
+  }, []);
+
+  if ((!state && projectId) || (MODE === 'server' && !projects)) {
     return (
       <div className="loading">
         Loading...
@@ -229,6 +262,7 @@ function App() {
       </div>
     );
   }
+  console.log(MODE, projects);
 
   function updatePage(page: ProjectPage) {
     state.pages[currentPage] = page;
@@ -284,64 +318,76 @@ function App() {
     <ProjectContext.Provider value={state}>
       <div className={`app app--${MODE}`}>
         {MODE_FEATURES.appHeader && (
-          <header>
+          <header ref={setHeaderHeight}>
             <div className="vertical-align-center">
               <span className="logo">{APP_NAME}</span>
               <div className="flex-right vertical-align-center">
-                <span title="Drop all state and load a sample project.">
-                  <Button
-                    onClick={() => {
-                      updateProjectState(DEFAULT_PROJECT);
-                      window.location.reload();
-                    }}
-                  >
-                    Reset
-                  </Button>
-                </span>
-                {MODE_FEATURES.shareProject && (
-                  <div className="share">
-                    <Button onClick={() => computeShareURL()}>Share</Button>
-                    <div className="share-details">
-                      <p>This URL contains the entire project state.</p>
-                      <p>
-                        Project data is not stored on a server. But if you do
-                        use this URL, the data encoded in the URL will appear in
-                        DataStation web server access logs.
-                      </p>
-                      <p>
-                        If you make changes, you will need to click "Share"
-                        again to get a new URL.
-                      </p>
-                      <Input readOnly value={shareURL} onChange={() => {}} />
-                      <p>
-                        <a href="https://tinyurl.com/app">TinyURL</a> is a good
-                        service for shortening these URLs correctly, some other
-                        systems break the URL.
-                      </p>
+                {MODE === 'browser' ? (
+                  <React.Fragment>
+                    <span title="Drop all state and load a sample project.">
+                      <Button
+                        onClick={() => {
+                          updateProjectState(DEFAULT_PROJECT);
+                          window.location.reload();
+                        }}
+                      >
+                        Reset
+                      </Button>
+                    </span>
+                    <div className="share">
+                      <Button onClick={() => computeShareURL()}>Share</Button>
+                      <div className="share-details">
+                        <p>This URL contains the entire project state.</p>
+                        <p>
+                          Project data is not stored on a server. But if you do
+                          use this URL, the data encoded in the URL will appear
+                          in DataStation web server access logs.
+                        </p>
+                        <p>
+                          If you make changes, you will need to click "Share"
+                          again to get a new URL.
+                        </p>
+                        <Input readOnly value={shareURL} onChange={() => {}} />
+                        <p>
+                          <a href="https://tinyurl.com/app">TinyURL</a> is a
+                          good service for shortening these URLs correctly, some
+                          other systems break the URL.
+                        </p>
+                      </div>
                     </div>
-                  </div>
+                    <a
+                      href="https://github.com/multiprocessio/datastation"
+                      target="_blank"
+                    >
+                      <iframe
+                        src="https://ghbtns.com/github-btn.html?user=multiprocessio&repo=datastation&type=star&count=true&size=medium"
+                        frameBorder="0"
+                        scrolling="0"
+                        width="80"
+                        height="20"
+                        title="GitHub"
+                      ></iframe>
+                    </a>
+                    <a
+                      href={`${SITE_ROOT}/#online-environment`}
+                      target="_blank"
+                    >
+                      About
+                    </a>
+                  </React.Fragment>
+                ) : (
+                  <span>{projectId}</span>
                 )}
-                <a
-                  href="https://github.com/multiprocessio/datastation"
-                  target="_blank"
-                >
-                  <iframe
-                    src="https://ghbtns.com/github-btn.html?user=multiprocessio&repo=datastation&type=star&count=true&size=medium"
-                    frameBorder="0"
-                    scrolling="0"
-                    width="80"
-                    height="20"
-                    title="GitHub"
-                  ></iframe>
-                </a>
-                <a href={`${SITE_ROOT}/#online-environment`} target="_blank">
-                  About
-                </a>
               </div>
             </div>
           </header>
         )}
-        <main>
+        <main
+          style={{
+            marginTop: headerHeight,
+            height: `calc(100% - ${headerHeight}px)`,
+          }}
+        >
           {projectId && MODE_FEATURES.connectors && (
             <Sidebar>
               <Connectors
@@ -377,17 +423,39 @@ function App() {
                   <Button
                     type="primary"
                     disabled={!projectNameTmp}
-                    onClick={() => setProjectId(projectNameTmp)}
+                    onClick={() => makeProject(projectNameTmp)}
                   >
                     {projectNameTmp ? 'Go!' : 'Pick a name'}
                   </Button>
                 </div>
-                <div className="project-existing">
-                  <p>Or open an existing project.</p>
-                  <div className="form-row">
-                    <Button onClick={openProject}>Open</Button>
+                {makeProjectError && (
+                  <Alert type="error" children={makeProjectError} />
+                )}
+                {MODE === 'desktop' && (
+                  <div className="project-existing">
+                    <p>Or open an existing project.</p>
+                    <div className="form-row">
+                      <Button onClick={openProject}>Open</Button>
+                    </div>
                   </div>
-                </div>
+                )}
+                {MODE === 'server' && projects.length ? (
+                  <div className="project-existing">
+                    <p>Or open an existing project.</p>
+                    {projects.map(({ name, createdAt }) => (
+                      <div className="form-row">
+                        <h3>{name}</h3>
+                        <div>
+                          Created{' '}
+                          {formatDistanceToNow(new Date(createdAt), {
+                            addSuffix: true,
+                          })}
+                        </div>
+                        <a href={'/?project=' + name}>Open</a>
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
               </div>
             ) : (
               <Pages
@@ -399,7 +467,7 @@ function App() {
                 setCurrentPage={setCurrentPage}
               />
             )}
-            <div className="version">Version {VERSION}</div>
+            <div className="version">{VERSION}</div>
           </div>
         </main>
       </div>

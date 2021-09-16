@@ -136,6 +136,8 @@ for command in script:
         what = line[1]
         to = line[2]
         quote_line(line, show=True)
+        if not what:
+            continue
         with open(to, 'r+') as to:
             current = to.read()
             to.seek(0)

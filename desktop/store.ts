@@ -2,8 +2,9 @@ import fs from 'fs';
 import fsPromises from 'fs/promises';
 import path from 'path';
 import log from '../shared/log';
-import { ProjectState } from '../shared/state';
+import { ProjectState, SQLConnectorInfo } from '../shared/state';
 import { DISK_ROOT, PROJECT_EXTENSION, SYNC_PERIOD } from './constants';
+import { encrypt } from './secret';
 
 const buffers: Record<
   string,
@@ -22,7 +23,6 @@ export function writeFileBuffered(name: string, contents: string) {
   };
   buffers[name].timeout = setTimeout(() => {
     fs.writeFileSync(name, contents);
-    log.info('Wrote ' + name);
     delete buffers[name];
   }, SYNC_PERIOD);
 }
@@ -33,7 +33,6 @@ function flushUnwritten() {
     // Must be a synchronous write in this 'exit' context
     // https://nodejs.org/api/process.html#process_event_exit
     fs.writeFileSync(fileName, buffers[fileName].contents);
-    log.info('Flushed ' + fileName);
     delete buffers[fileName];
   });
 }
@@ -49,10 +48,45 @@ export function getProjectResultsFile(projectId: string) {
   return path.join(DISK_ROOT, '.' + fileName + '.results');
 }
 
+export async function nullProjectSecrets(s: ProjectState) {
+  for (let server of s.servers) {
+    server.passphrase = null;
+    server.password = null;
+  }
+
+  for (let conn of s.connectors) {
+    if (conn.type === 'sql') {
+      const sconn = conn as SQLConnectorInfo;
+      sconn.sql.password = null;
+    }
+  }
+}
+
+export async function encryptProjectSecrets(s: ProjectState) {
+  for (let server of s.servers) {
+    if (server.passphrase !== null) {
+      server.passphrase = await encrypt(server.passphrase);
+    }
+
+    if (server.password !== null) {
+      server.password = await encrypt(server.password);
+    }
+  }
+
+  for (let conn of s.connectors) {
+    if (conn.type === 'sql') {
+      const sconn = conn as SQLConnectorInfo;
+      if (sconn.sql.password !== null) {
+        sconn.sql.password = await encrypt(sconn.sql.password);
+      }
+    }
+  }
+}
+
 export const storeHandlers = [
   {
     resource: 'getProjectState',
-    handler: async (projectId: string) => {
+    handler: async (_: string, projectId: string) => {
       const fileName = await ensureProjectFile(projectId);
       try {
         const f = await fsPromises.readFile(fileName);
@@ -66,8 +100,20 @@ export const storeHandlers = [
   {
     resource: 'updateProjectState',
     handler: async (projectId: string, _: string, newState: ProjectState) => {
+      await encryptProjectSecrets(newState);
       const fileName = await ensureProjectFile(projectId);
       return writeFileBuffered(fileName, JSON.stringify(newState));
+    },
+  },
+  {
+    resource: 'makeProject',
+    handler: async (
+      _0: string,
+      { projectId }: { projectId: string },
+      _1: void
+    ) => {
+      const fileName = await ensureProjectFile(projectId);
+      return writeFileBuffered(fileName, JSON.stringify(new ProjectState()));
     },
   },
 ];

@@ -8,6 +8,7 @@ body {
   margin: 0;
   background: #fbfbfb;
   height: 100%;
+  overflow-y: hidden;
 }
 
 a,
@@ -22,18 +23,14 @@ a:hover {
   margin: 100px auto;
 }
 
-.app--desktop {
+.app--desktop,
+.app--server {
   border-top: 1px solid #ccc;
-  overflow-y: hidden;
 }
 
-.app--desktop main {
+.app--desktop main,
+.app--server main {
   display: flex;
-  height: 100%;
-}
-
-header + main {
-  padding-top: 60px;
 }
 
 header {
@@ -112,7 +109,6 @@ label.select select {
   /* Since many inputs are within label, keep the label font size small and the input font size normal */
   font-size: initial;
   display: inline-block;
-  margin-left: 10px;
 }
 
 input.input[type='file'],
@@ -281,6 +277,8 @@ header > div {
 
 .main-body {
   width: 100%;
+  /* Necessary for overflow-y:auto to take effect */
+  height: 100%;
   overflow-y: auto;
 }
 

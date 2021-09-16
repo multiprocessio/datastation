@@ -1,6 +1,18 @@
 import { IpcMain, IpcMainEvent } from 'electron';
 import { RPC_ASYNC_REQUEST, RPC_ASYNC_RESPONSE } from '../shared/constants';
 import log from '../shared/log';
+import {
+  evalColumnsHandler,
+  fetchResultsHandler,
+  storeLiteralHandler,
+} from './eval/columns';
+import { evalFileHandler } from './eval/file';
+import { evalHTTPHandler } from './eval/http';
+import { programHandlers } from './eval/program';
+import { evalSQLHandler } from './eval/sql';
+import { openProjectHandler } from './project';
+import { Settings } from './settings';
+import { storeHandlers } from './store';
 
 interface RPCPayload {
   messageNumber: number;
@@ -44,8 +56,8 @@ export function registerRPCHandlers(
         event.sender.send(responseChannel, {
           isError: true,
           body: {
-            ...e,
-            // Needs to get passed explicitly or name comes out as Error after rpc
+            // Not all fields get pulled out unless explicitly requested
+            stack: e.stack,
             message: e.message,
             name: e.name,
           },
@@ -54,3 +66,17 @@ export function registerRPCHandlers(
     }
   );
 }
+
+export const getRPCHandlers = (settings: Settings) =>
+  [
+    ...storeHandlers,
+    evalColumnsHandler,
+    storeLiteralHandler,
+    evalSQLHandler,
+    evalHTTPHandler,
+    fetchResultsHandler,
+    ...programHandlers,
+    evalFileHandler,
+    openProjectHandler,
+    settings.getUpdateHandler(),
+  ] as RPCHandler[];
