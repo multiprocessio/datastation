@@ -109,7 +109,6 @@ label.select select {
   /* Since many inputs are within label, keep the label font size small and the input font size normal */
   font-size: initial;
   display: inline-block;
-  margin-left: 10px;
 }
 
 input.input[type='file'],

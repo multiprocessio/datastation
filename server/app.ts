@@ -1,4 +1,3 @@
-import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 import express from 'express';
 import fs from 'fs/promises';
@@ -43,7 +42,7 @@ export async function init() {
   const app = new App(config);
 
   app.express.use(cookieParser());
-  app.express.use(bodyParser.urlencoded({ extended: true }));
+  app.express.use(express.json());
 
   app.express.use((req, res, next) => {
     const start = new Date();

@@ -35,14 +35,14 @@ export const getProjectHandlers = (app: App) => {
     },
     {
       resource: 'getProjectState',
-      handler: async (projectId: string): Promise<ProjectState> => {
+      handler: async (_: string, projectId: string): Promise<ProjectState> => {
         const client = await app.dbpool.connect();
         try {
           const res = await app.dbpool.query(
             'SELECT project_value FROM projects WHERE project_name = $1;',
             [projectId]
           );
-          const ps = JSON.parse(res.rows[0].project_value);
+          const ps = res.rows[0].project_value;
           nullProjectSecrets(ps);
           return ps;
         } finally {
@@ -52,15 +52,33 @@ export const getProjectHandlers = (app: App) => {
     },
     {
       resource: 'updateProjectState',
-      handler: async (projectId: string, _: string, newState: ProjectState) => {
+      handler: async (_: string, projectId: string, newState: ProjectState) => {
         const client = await app.dbpool.connect();
         await encryptProjectSecrets(newState);
         try {
           await app.dbpool.query(
-            'INSERT INTO projects (project_name, project_value) VALUES ($1, $2) ON CONFLICT DO UPDATE',
+            'INSERT INTO projects (project_name, project_value) VALUES ($1, $2) ON CONFLICT (project_name) DO UPDATE SET project_value = EXCLUDED.project_value',
             [projectId, JSON.stringify(newState)]
           );
           return newState;
+        } finally {
+          client.release();
+        }
+      },
+    },
+    {
+      resource: 'makeProject',
+      handler: async (
+        _0: string,
+        _1: void,
+        { projectId }: { projectId: string }
+      ) => {
+        const client = await app.dbpool.connect();
+        try {
+          await app.dbpool.query(
+            'INSERT INTO projects (project_name, project_value) VALUES ($1, $2)',
+            [projectId, JSON.stringify(new ProjectState())]
+          );
         } finally {
           client.release();
         }

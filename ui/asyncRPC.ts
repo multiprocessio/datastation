@@ -34,7 +34,7 @@ export async function asyncRPC<Request, Args, Response>(
 
   if (rsp.status === 401) {
     window.location.href = '/a/auth?projectId=' + projectId;
-    return {} as Response;
+    return null;
   }
 
   if (rsp.status !== 200) {

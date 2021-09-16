@@ -1,3 +1,4 @@
+import formatDistanceToNow from 'date-fns/formatDistanceToNow';
 import pako from 'pako';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
@@ -17,6 +18,7 @@ import {
   ServerInfo,
 } from '../shared/state';
 import { asyncRPC } from './asyncRPC';
+import { Alert } from './component-library/Alert';
 import { Button } from './component-library/Button';
 import { Input } from './component-library/Input';
 import { Connectors } from './Connectors';
@@ -163,26 +165,26 @@ const store = makeStore(MODE);
 function App() {
   const shareState = getShareState();
   const requestedProjectId = getQueryParameter('project');
-  const [projectId, setProjectIdInternal] = React.useState(
+  const [projectId, setProjectId] = React.useState(
     (shareState && shareState.id) ||
       requestedProjectId ||
-      (MODE_FEATURES.useDefaultProject
-        ? DEFAULT_PROJECT.projectName
-        : localStorage.getItem('projectId') || '')
+      (MODE_FEATURES.useDefaultProject ? DEFAULT_PROJECT.projectName : '')
   );
   (window as any).projectId = projectId;
-  localStorage.setItem('projectId', projectId);
   if (!requestedProjectId && projectId) {
     window.location.href = window.location.pathname + '?project=' + projectId;
   }
 
-  function setProjectId(projectId: string) {
-    setProjectIdInternal(projectId);
-    return asyncRPC<{ lastProject: string }, void, void>(
-      'updateSettings',
-      null,
-      { lastProject: projectId }
-    );
+  const [makeProjectError, setMakeProjectError] = React.useState('');
+  async function makeProject(projectId: string) {
+    try {
+      await asyncRPC<{ projectId: string }, void, void>('makeProject', null, {
+        projectId,
+      });
+      setProjectId(projectId);
+    } catch (e) {
+      setMakeProjectError(e.message);
+    }
   }
 
   const [state, updateProjectState] = useProjectState(
@@ -226,17 +228,19 @@ function App() {
 
   const [projectNameTmp, setProjectNameTmp] = React.useState('');
 
-  const headerRef = React.useRef<HTMLElement>(null);
-  const [headerHeight, setHeaderHeight] = React.useState(0);
-  React.useEffect(() => {
-    if (headerRef.current) {
-      setHeaderHeight(headerRef.current.offsetHeight);
+  const [headerHeight, setHeaderHeightInternal] = React.useState(0);
+  const setHeaderHeight = React.useCallback((e: HTMLElement) => {
+    if (!e) {
+      return;
     }
-  }, [headerRef.current]);
 
-  const [projects, setProjects] = React.useState<
-    Array<{ name: string; createdAt: string }>
-  >([]);
+    setHeaderHeightInternal(e.offsetHeight);
+  }, []);
+
+  const [projects, setProjects] = React.useState<Array<{
+    name: string;
+    createdAt: string;
+  }> | null>(null);
   React.useEffect(() => {
     async function load() {
       const projects = await asyncRPC<
@@ -250,7 +254,7 @@ function App() {
     load();
   }, []);
 
-  if ((!state && projectId) || (MODE === 'server' && !projects.length)) {
+  if ((!state && projectId) || (MODE === 'server' && !projects)) {
     return (
       <div className="loading">
         Loading...
@@ -258,6 +262,7 @@ function App() {
       </div>
     );
   }
+  console.log(MODE, projects);
 
   function updatePage(page: ProjectPage) {
     state.pages[currentPage] = page;
@@ -313,7 +318,7 @@ function App() {
     <ProjectContext.Provider value={state}>
       <div className={`app app--${MODE}`}>
         {MODE_FEATURES.appHeader && (
-          <header ref={headerRef}>
+          <header ref={setHeaderHeight}>
             <div className="vertical-align-center">
               <span className="logo">{APP_NAME}</span>
               <div className="flex-right vertical-align-center">
@@ -418,11 +423,14 @@ function App() {
                   <Button
                     type="primary"
                     disabled={!projectNameTmp}
-                    onClick={() => setProjectId(projectNameTmp)}
+                    onClick={() => makeProject(projectNameTmp)}
                   >
                     {projectNameTmp ? 'Go!' : 'Pick a name'}
                   </Button>
                 </div>
+                {makeProjectError && (
+                  <Alert type="error" children={makeProjectError} />
+                )}
                 {MODE === 'desktop' && (
                   <div className="project-existing">
                     <p>Or open an existing project.</p>
@@ -431,18 +439,23 @@ function App() {
                     </div>
                   </div>
                 )}
-                {MODE === 'server' && projects.length && (
+                {MODE === 'server' && projects.length ? (
                   <div className="project-existing">
                     <p>Or open an existing project.</p>
                     {projects.map(({ name, createdAt }) => (
                       <div className="form-row">
-                        <a href={'/?project=' + name}>
-                          {name} {createdAt}
-                        </a>
+                        <h3>{name}</h3>
+                        <div>
+                          Created{' '}
+                          {formatDistanceToNow(new Date(createdAt), {
+                            addSuffix: true,
+                          })}
+                        </div>
+                        <a href={'/?project=' + name}>Open</a>
                       </div>
                     ))}
                   </div>
-                )}
+                ) : null}
               </div>
             ) : (
               <Pages
@@ -454,7 +467,7 @@ function App() {
                 setCurrentPage={setCurrentPage}
               />
             )}
-            <div className="version">Version {VERSION}</div>
+            <div className="version">{VERSION}</div>
           </div>
         </main>
       </div>

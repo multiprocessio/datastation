@@ -86,7 +86,7 @@ export async function encryptProjectSecrets(s: ProjectState) {
 export const storeHandlers = [
   {
     resource: 'getProjectState',
-    handler: async (projectId: string) => {
+    handler: async (_: string, projectId: string) => {
       const fileName = await ensureProjectFile(projectId);
       try {
         const f = await fsPromises.readFile(fileName);
@@ -103,6 +103,17 @@ export const storeHandlers = [
       await encryptProjectSecrets(newState);
       const fileName = await ensureProjectFile(projectId);
       return writeFileBuffered(fileName, JSON.stringify(newState));
+    },
+  },
+  {
+    resource: 'makeProject',
+    handler: async (
+      _0: string,
+      { projectId }: { projectId: string },
+      _1: void
+    ) => {
+      const fileName = await ensureProjectFile(projectId);
+      return writeFileBuffered(fileName, JSON.stringify(new ProjectState()));
     },
   },
 ];
