@@ -26,9 +26,9 @@ export async function ensureSigningKey() {
 
 export async function encrypt(msg: string) {
   const signingKeyPath = getSigningKeyPath();
-  const key = await fs.readFile(signingKeyPath);
+  const key = await fs.readFile(signingKeyPath, { encoding: 'utf-8' });
 
-  const keyUint8Array = decodeBase64(key.toString());
+  const keyUint8Array = decodeBase64(key);
   const nonce = randomBytes(secretbox.nonceLength);
   const messageUint8 = decodeUTF8(msg);
   const box = secretbox(messageUint8, nonce, keyUint8Array);
@@ -43,9 +43,9 @@ export async function encrypt(msg: string) {
 
 export async function decrypt(msgWithNonce: string) {
   const signingKeyPath = getSigningKeyPath();
-  const key = await fs.readFile(signingKeyPath);
+  const key = await fs.readFile(signingKeyPath, { encoding: 'utf-8' });
 
-  const keyUint8Array = decodeBase64(key.toString());
+  const keyUint8Array = decodeBase64(key);
   const messageWithNonceAsUint8Array = decodeBase64(msgWithNonce);
   const nonce = messageWithNonceAsUint8Array.slice(0, secretbox.nonceLength);
   const message = messageWithNonceAsUint8Array.slice(

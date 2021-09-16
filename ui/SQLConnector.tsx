@@ -92,6 +92,12 @@ export function SQLConnector({
               type="password"
               value={password}
               onChange={(value: string) => syncPassword(value)}
+              onBlur={
+                () =>
+                  syncPassword(
+                    null
+                  ) /* Turns off continued attempts to encrypt */
+              }
             />
           </div>
         </React.Fragment>
