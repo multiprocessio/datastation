@@ -68,7 +68,7 @@ export class ServerInfo {
     passphrase?: string
   ) {
     this.type = type || 'private-key';
-    this.name = name || 'Untitled server';
+    this.name = name || 'Untitled Server';
     this.address = address || '';
     this.port = port || 22;
     this.username = username || '';
