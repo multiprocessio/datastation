@@ -9,6 +9,8 @@ export const RPC = {
   STORE_LITERAL: 'storeLiteral',
   FETCH_RESULTS: 'fetchResults',
   EVAL_COLUMNS: 'evalColumns',
+
+  EVAL_FILTER_AGGREGATE: 'evalFilterAggregate',
 };
 
 export const RPC_ASYNC_REQUEST = 'rpcAsyncRequest';

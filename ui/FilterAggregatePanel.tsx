@@ -1,8 +1,9 @@
 import React from 'react';
-import { shape } from 'shape';
-import { MODE } from '../shared/constants';
+import { shape, Shape } from 'shape';
+import { MODE, RPC } from '../shared/constants';
 import { InvalidDependentPanelError } from '../shared/errors';
 import { LANGUAGES } from '../shared/languages';
+import { FilterAggregateEvalBody } from '../shared/rpc';
 import {
   AggregateType,
   FilterAggregatePanelInfo,
@@ -20,33 +21,35 @@ import { PanelSourcePicker } from './PanelSourcePicker';
 export async function evalFilterAggregatePanel(
   panel: FilterAggregatePanelInfo,
   indexIdMap: Array<string>,
-  panelResults: Array<PanelResult>
+  panelResults: Array<PanelResult>,
+  indexShapeMap: Array<Shape>
 ) {
-  const {
-    panelSource,
-    aggregateType,
-    aggregateOn,
-    groupBy,
-    filter,
-    sortOn,
-    sortAsc,
-  } = panel.filagg;
-  let columns = '*';
-  let groupByClause = '';
-  if (aggregateType !== 'none') {
-    columns = `${groupBy}, ${aggregateType.toUpperCase()}(${
-      aggregateOn || 1
-    }) AS \`${aggregateType}\``;
-    groupByClause = `GROUP BY ${groupBy}`;
-  }
-  const whereClause = filter ? 'WHERE ' + filter : '';
-  const orderByClause = `ORDER BY ${sortOn} ${sortAsc ? 'ASC' : 'DESC'}`;
-  const query = `SELECT ${columns} FROM DM_getPanel(${panelSource}) ${whereClause} ${groupByClause} ${orderByClause}`;
-
   if (MODE === 'browser') {
+    const {
+      panelSource,
+      aggregateType,
+      aggregateOn,
+      groupBy,
+      filter,
+      sortOn,
+      sortAsc,
+    } = panel.filagg;
+
     if (!panelResults || !panelResults[panelSource]) {
       throw new InvalidDependentPanelError(panelSource);
     }
+
+    let columns = '*';
+    let groupByClause = '';
+    if (aggregateType !== 'none') {
+      columns = `\`${groupBy}\`, ${aggregateType.toUpperCase()}(${
+        aggregateOn ? '`' + aggregateOn + '`' : 1
+      }) AS \`${aggregateType}\``;
+      groupByClause = `GROUP BY \`${groupBy}\``;
+    }
+    const whereClause = filter ? 'WHERE ' + filter : '';
+    const orderByClause = `ORDER BY ${sortOn} ${sortAsc ? 'ASC' : 'DESC'}`;
+    const query = `SELECT ${columns} FROM DM_getPanel(${panelSource}) ${whereClause} ${groupByClause} ${orderByClause}`;
 
     const language = LANGUAGES.sql;
     const res = await language.inMemoryEval(query, panelResults);
@@ -58,14 +61,15 @@ export async function evalFilterAggregatePanel(
     };
   }
 
-  return await asyncRPC<
-    FilterAggregatePanelInfo & { indexIdMap: Array<string> },
-    void,
-    PanelResult
-  >('evalFilterAggregate', null, {
-    ...panel,
-    indexIdMap,
-  });
+  return await asyncRPC<FilterAggregateEvalBody, void, PanelResult>(
+    RPC.EVAL_FILTER_AGGREGATE,
+    null,
+    {
+      ...panel,
+      indexIdMap,
+      indexShapeMap,
+    }
+  );
 }
 
 export function FilterAggregatePanelDetails({
@@ -81,17 +85,19 @@ export function FilterAggregatePanelDetails({
 }) {
   return (
     <React.Fragment>
-      <div className="form-row">
-        <PanelSourcePicker
-          currentPanel={panel.id}
-          panels={panels}
-          value={panel.filagg.panelSource}
-          onChange={(value: number) => {
-            panel.filagg.panelSource = value;
-            updatePanel(panel);
-          }}
-        />
-      </div>
+      <FormGroup label="General">
+        <div className="form-row">
+          <PanelSourcePicker
+            currentPanel={panel.id}
+            panels={panels}
+            value={panel.filagg.panelSource}
+            onChange={(value: number) => {
+              panel.filagg.panelSource = value;
+              updatePanel(panel);
+            }}
+          />
+        </div>
+      </FormGroup>
       <FormGroup label="Filter">
         <div className="form-row">
           <CodeEditor

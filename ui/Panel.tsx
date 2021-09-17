@@ -78,7 +78,8 @@ export async function evalPanel(
         panel as SQLPanelInfo,
         indexIdMap,
         connectors,
-        servers
+        servers,
+        panelResults.map((r) => r.shape)
       );
     }
     case 'graph': {
@@ -109,7 +110,8 @@ export async function evalPanel(
       return await evalFilterAggregatePanel(
         panel as FilterAggregatePanelInfo,
         indexIdMap,
-        panelResults
+        panelResults,
+        panelResults.map((c) => c.shape)
       );
     }
   }
@@ -415,7 +417,7 @@ export function Panel({
               }}
             >
               <option value="program">Code</option>
-              <option value="filagg">Filter, Aggregate, Sort</option>
+              <option value="filagg">Transform</option>
               <option value="http">HTTP Request</option>
               {MODE !== 'browser' && <option value="sql">SQL</option>}
               <option value="graph">Graph</option>

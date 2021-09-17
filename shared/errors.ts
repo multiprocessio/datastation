@@ -23,8 +23,17 @@ export class NoResultError extends Error {
   }
 }
 
+export class UnsupportedError extends Error {
+  constructor(msg: string) {
+    super();
+    this.name = 'UnsupportedError';
+    this.message = msg;
+  }
+}
+
 export const EVAL_ERRORS = [
   NotAnArrayOfObjectsError,
   InvalidDependentPanelError,
   NoResultError,
+  UnsupportedError,
 ];

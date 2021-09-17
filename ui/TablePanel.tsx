@@ -76,17 +76,17 @@ export function TablePanelDetails({
   return (
     <React.Fragment>
       <FormGroup label="General">
-      <div className="form-row">
-        <PanelSourcePicker
-          currentPanel={panel.id}
-          panels={panels}
-          value={panel.table.panelSource}
-          onChange={(value: number) => {
-            panel.table.panelSource = value;
-            updatePanel(panel);
-          }}
-        />
-      </div>
+        <div className="form-row">
+          <PanelSourcePicker
+            currentPanel={panel.id}
+            panels={panels}
+            value={panel.table.panelSource}
+            onChange={(value: number) => {
+              panel.table.panelSource = value;
+              updatePanel(panel);
+            }}
+          />
+        </div>
       </FormGroup>
       <FormGroup label="Columns">
         {panel.table.columns.map((c, i) => (

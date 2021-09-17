@@ -10,6 +10,7 @@ import {
   fetchResultsHandler,
   storeLiteralHandler,
 } from '../desktop/eval/columns';
+import { evalFilterAggregateHandler } from '../desktop/eval/filagg';
 import { evalFileHandler } from '../desktop/eval/file';
 import { evalHTTPHandler } from '../desktop/eval/http';
 import { programHandlers } from '../desktop/eval/program';
@@ -71,6 +72,7 @@ export async function init() {
     fetchResultsHandler,
     ...programHandlers,
     evalFileHandler,
+    evalFilterAggregateHandler,
     settings.getUpdateHandler(),
   ] as RPCHandler[];
 
