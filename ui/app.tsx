@@ -262,7 +262,6 @@ function App() {
       </div>
     );
   }
-  console.log(MODE, projects);
 
   function updatePage(page: ProjectPage) {
     state.pages[currentPage] = page;

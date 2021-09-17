@@ -63,23 +63,24 @@ header a {
   font-style: italic;
 }
 
-/*
-NOT SURE IF THIS IS STILL NEEDED
-.editor-container {
-  resize: vertical;
-  overflow: auto;
-  flex: 1;
-}
-*/
-
 .editor {
   width: 100%;
-  min-height: 350px;
-  height: 100% !important;
   border: 0;
   font-family: monospace;
   font-size: 1.1rem;
   counter-reset: line;
+  min-height: 350px;
+  height: 100% !important;
+}
+
+.editor-container--singleLine .editor.input {
+  height: initial !important;
+  min-height: initial !important;
+  padding: 15px;
+}
+
+.editor-container--singleLine .ace_hidden-cursors {
+  opacity: 0;
 }
 
 .textarea {
@@ -357,6 +358,11 @@ header > div {
   padding: 15px;
 }
 
+.panel-header--open {
+  padding-bottom: 15px;
+  border-bottom: 1px solid #ccc;
+}
+
 .panel-body-container {
   overflow: auto;
   resize: vertical;
@@ -542,6 +548,18 @@ header > div {
 
 .text-failure {
   color: #a00505;
+}
+
+.form-group {
+  padding: 10px 0;
+}
+
+.form-group-label {
+  font-size: initial;
+}
+
+.form-group-children {
+  padding: 10px;
 }
 
 .form-row {

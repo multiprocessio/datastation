@@ -13,6 +13,7 @@ import { columnsFromObject } from '../shared/table';
 import { asyncRPC } from './asyncRPC';
 import { Alert } from './component-library/Alert';
 import { Button } from './component-library/Button';
+import { FormGroup } from './component-library/FormGroup';
 import { FieldPicker } from './FieldPicker';
 import { PanelSourcePicker } from './PanelSourcePicker';
 
@@ -74,6 +75,7 @@ export function TablePanelDetails({
 }) {
   return (
     <React.Fragment>
+      <FormGroup label="General">
       <div className="form-row">
         <PanelSourcePicker
           currentPanel={panel.id}
@@ -85,8 +87,8 @@ export function TablePanelDetails({
           }}
         />
       </div>
-      <div className="form-row">
-        <label>Columns</label>
+      </FormGroup>
+      <FormGroup label="Columns">
         {panel.table.columns.map((c, i) => (
           <div className="form-row vertical-align-center" key={c.field + i}>
             <FieldPicker
@@ -118,7 +120,7 @@ export function TablePanelDetails({
         >
           Add Column
         </Button>
-      </div>
+      </FormGroup>
     </React.Fragment>
   );
 }

@@ -7,6 +7,7 @@ import { MODE, MODE_FEATURES, RPC } from '../shared/constants';
 import {
   ConnectorInfo,
   FilePanelInfo,
+  FilterAggregatePanelInfo,
   GraphPanelInfo,
   HTTPPanelInfo,
   LiteralPanelInfo,
@@ -31,6 +32,10 @@ import { Select } from './component-library/Select';
 import { ErrorBoundary } from './ErrorBoundary';
 import { PanelPlayWarning } from './errors';
 import { evalFilePanel, FilePanelDetails } from './FilePanel';
+import {
+  evalFilterAggregatePanel,
+  FilterAggregatePanelDetails,
+} from './FilterAggregatePanel';
 import { GraphPanel, GraphPanelDetails } from './GraphPanel';
 import { evalHTTPPanel, HTTPPanelDetails } from './HTTPPanel';
 import { evalLiteralPanel, LiteralPanelDetails } from './LiteralPanel';
@@ -46,6 +51,7 @@ export const PANEL_TYPE_ICON = {
   http: 'http',
   sql: 'table_rows',
   file: 'description',
+  filagg: 'search',
 };
 
 export async function evalPanel(
@@ -98,6 +104,13 @@ export async function evalPanel(
     }
     case 'file': {
       return await evalFilePanel(panel as FilePanelInfo, null, servers);
+    }
+    case 'filagg': {
+      return await evalFilterAggregatePanel(
+        panel as FilterAggregatePanelInfo,
+        indexIdMap,
+        panelResults
+      );
     }
   }
 }
@@ -260,7 +273,14 @@ export function Panel({
   movePanel: (from: number, to: number) => void;
   panels: Array<PanelInfo>;
 }) {
-  const previewableTypes = ['http', 'sql', 'program', 'file', 'literal'];
+  const previewableTypes = [
+    'http',
+    'sql',
+    'program',
+    'file',
+    'literal',
+    'filagg',
+  ];
   const alwaysOpenTypes = ['table', 'graph', 'http', 'file'];
   const [details, setDetails] = React.useState(true);
   const [hidden, setHidden] = React.useState(false);
@@ -275,7 +295,7 @@ export function Panel({
     body = (
       <GraphPanel panel={panel as GraphPanelInfo} data={panel.resultMeta} />
     );
-  } else if (panel.type === 'file') {
+  } else if (panel.type === 'file' || panel.type === 'filagg') {
     body = <span />;
   }
 
@@ -318,7 +338,9 @@ export function Panel({
     <div
       id={`panel-${panelIndex}`}
       className={`panel ${hidden ? 'panel--hidden' : ''} ${
-        panel.type === 'file' && !results.exception ? 'panel--empty' : ''
+        (panel.type === 'file' || panel.type === 'filagg') && !results.exception
+          ? 'panel--empty'
+          : ''
       } ${results.loading ? 'panel--loading' : ''}`}
       tabIndex={1001}
       ref={panelRef}
@@ -326,7 +348,11 @@ export function Panel({
     >
       <ErrorBoundary>
         <div className="panel-head">
-          <div className="panel-header vertical-align-center">
+          <div
+            className={`panel-header ${
+              details ? 'panel-header--open' : ''
+            } vertical-align-center`}
+          >
             <span className="text-muted">#{panelIndex}</span>
             <span title="Move Up">
               <Button
@@ -350,6 +376,58 @@ export function Panel({
                 keyboard_arrow_down
               </Button>
             </span>
+            <Select
+              label="Type"
+              value={panel.type}
+              onChange={(value: string) => {
+                let newPanel;
+                switch (value) {
+                  case 'sql':
+                    newPanel = new SQLPanelInfo(panel.name);
+                    break;
+                  case 'literal':
+                    newPanel = new LiteralPanelInfo(panel.name);
+                    break;
+                  case 'program':
+                    newPanel = new ProgramPanelInfo(panel.name);
+                    break;
+                  case 'table':
+                    newPanel = new TablePanelInfo(panel.name);
+                    break;
+                  case 'graph':
+                    newPanel = new GraphPanelInfo(panel.name);
+                    break;
+                  case 'http':
+                    newPanel = new HTTPPanelInfo(panel.name);
+                    break;
+                  case 'file':
+                    newPanel = new FilePanelInfo(panel.name);
+                    break;
+                  case 'filagg':
+                    newPanel = new FilterAggregatePanelInfo(panel.name);
+                    break;
+                  default:
+                    throw new Error(`Invalid panel type: ${value}`);
+                }
+
+                newPanel.content = panel.content;
+                updatePanel(newPanel);
+              }}
+            >
+              <option value="program">Code</option>
+              <option value="filagg">Filter, Aggregate, Sort</option>
+              <option value="http">HTTP Request</option>
+              {MODE !== 'browser' && <option value="sql">SQL</option>}
+              <option value="graph">Graph</option>
+              <option value="file">File</option>
+              <option value="literal">Literal</option>
+              <option value="table">Table</option>
+            </Select>
+
+            <span className="material-icons">
+              {PANEL_TYPE_ICON[panel.type]}
+            </span>
+
             <Input
               className="panel-name"
               autoWidth
@@ -359,9 +437,7 @@ export function Panel({
               }}
               value={panel.name}
             />
-            <span className="material-icons">
-              {PANEL_TYPE_ICON[panel.type]}
-            </span>
+
             {!alwaysOpenTypes.includes(panel.type) && (
               <span title={details ? 'Hide Details' : 'Show Details'}>
                 <Button icon onClick={() => setDetails(!details)}>
@@ -369,6 +445,7 @@ export function Panel({
                 </Button>
               </span>
             )}
+
             <span className="panel-controls vertical-align-center flex-right">
               <span className="text-muted">
                 {results.loading ? (
@@ -443,51 +520,6 @@ export function Panel({
           </div>
           {details && (
             <div className="panel-details">
-              <div className="form-row">
-                <Select
-                  label="Type"
-                  value={panel.type}
-                  onChange={(value: string) => {
-                    let newPanel;
-                    switch (value) {
-                      case 'sql':
-                        newPanel = new SQLPanelInfo(panel.name);
-                        break;
-                      case 'literal':
-                        newPanel = new LiteralPanelInfo(panel.name);
-                        break;
-                      case 'program':
-                        newPanel = new ProgramPanelInfo(panel.name);
-                        break;
-                      case 'table':
-                        newPanel = new TablePanelInfo(panel.name);
-                        break;
-                      case 'graph':
-                        newPanel = new GraphPanelInfo(panel.name);
-                        break;
-                      case 'http':
-                        newPanel = new HTTPPanelInfo(panel.name);
-                        break;
-                      case 'file':
-                        newPanel = new FilePanelInfo(panel.name);
-                        break;
-                      default:
-                        throw new Error(`Invalid panel type: ${value}`);
-                    }
-
-                    newPanel.content = panel.content;
-                    updatePanel(newPanel);
-                  }}
-                >
-                  <option value="program">Code</option>
-                  <option value="http">HTTP Request</option>
-                  {MODE !== 'browser' && <option value="sql">SQL</option>}
-                  <option value="graph">Graph</option>
-                  <option value="file">File</option>
-                  <option value="literal">Literal</option>
-                  <option value="table">Table</option>
-                </Select>
-              </div>
               {panel.type === 'table' && (
                 <TablePanelDetails
                   panel={panel as TablePanelInfo}
@@ -537,6 +569,18 @@ export function Panel({
                 <FilePanelDetails
                   panel={panel as FilePanelInfo}
                   updatePanel={updatePanel}
+                />
+              )}
+              {panel.type === 'filagg' && (
+                <FilterAggregatePanelDetails
+                  panel={panel as FilterAggregatePanelInfo}
+                  updatePanel={updatePanel}
+                  panels={panels}
+                  data={
+                    panelResults[
+                      (panel as FilterAggregatePanelInfo).filagg.panelSource
+                    ]
+                  }
                 />
               )}
             </div>

@@ -8,6 +8,7 @@ import {
   PanelResult,
 } from '../shared/state';
 import { Button } from './component-library/Button';
+import { FormGroup } from './component-library/FormGroup';
 import { Select } from './component-library/Select';
 import { FieldPicker } from './FieldPicker';
 import { PanelSourcePicker } from './PanelSourcePicker';
@@ -193,46 +194,51 @@ export function GraphPanelDetails({
 }) {
   return (
     <React.Fragment>
-      <div className="form-row">
-        <Select
-          label="Graph"
-          value={panel.graph.type}
-          onChange={(value: string) => {
-            panel.graph.type = value as GraphPanelInfoType;
-            updatePanel(panel);
-          }}
-        >
-          <option value="bar">Bar</option>
-          <option value="pie">Pie</option>
-        </Select>
-      </div>
-      <div className="form-row">
-        <PanelSourcePicker
-          currentPanel={panel.id}
-          panels={panels}
-          value={panel.graph.panelSource}
-          onChange={(value: number) => {
-            panel.graph.panelSource = value;
-            updatePanel(panel);
-          }}
-        />
-      </div>
-      <div className="form-row">
-        <FieldPicker
-          preferredDefaultType="string"
-          label={panel.graph.type === 'pie' ? 'Slice Field' : 'X-Axis Field'}
-          panelSourceResult={data}
-          value={panel.graph.x}
-          onChange={(value: string) => {
-            panel.graph.x = value;
-            updatePanel(panel);
-          }}
-        />
-      </div>
-      <div className="form-row">
-        <label>
-          {panel.graph.type === 'pie' ? 'Slice Size Series' : 'Y-Axis Series'}
-        </label>
+      <FormGroup label="General">
+        <div className="form-row">
+          <Select
+            label="Graph"
+            value={panel.graph.type}
+            onChange={(value: string) => {
+              panel.graph.type = value as GraphPanelInfoType;
+              updatePanel(panel);
+            }}
+          >
+            <option value="bar">Bar</option>
+            <option value="pie">Pie</option>
+          </Select>
+        </div>
+        <div className="form-row">
+          <PanelSourcePicker
+            currentPanel={panel.id}
+            panels={panels}
+            value={panel.graph.panelSource}
+            onChange={(value: number) => {
+              panel.graph.panelSource = value;
+              updatePanel(panel);
+            }}
+          />
+        </div>
+      </FormGroup>
+      <FormGroup label={panel.graph.type === 'pie' ? 'Slice' : 'X-Axis'}>
+        <div className="form-row">
+          <FieldPicker
+            preferredDefaultType="string"
+            label="Field"
+            panelSourceResult={data}
+            value={panel.graph.x}
+            onChange={(value: string) => {
+              panel.graph.x = value;
+              updatePanel(panel);
+            }}
+          />
+        </div>
+      </FormGroup>
+      <FormGroup
+        label={
+          panel.graph.type === 'pie' ? 'Slice Size Series' : 'Y-Axis Series'
+        }
+      >
         {panel.graph.ys.map((y, i) => (
           <div className="form-row vertical-align-center" key={y.field + i}>
             <FieldPicker
@@ -264,7 +270,7 @@ export function GraphPanelDetails({
         >
           Add Series
         </Button>
-      </div>
+      </FormGroup>
     </React.Fragment>
   );
 }
