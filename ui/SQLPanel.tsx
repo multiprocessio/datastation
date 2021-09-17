@@ -1,8 +1,9 @@
 import * as React from 'react';
+import { Shape } from 'shape';
+import { SQLEvalBody } from '../shared/rpc';
 import {
   ConnectorInfo,
   PanelResult,
-  Proxy,
   ServerInfo,
   SQLConnectorInfo,
   SQLConnectorInfoType,
@@ -17,23 +18,25 @@ export async function evalSQLPanel(
   panel: SQLPanelInfo,
   indexIdMap: Array<string>,
   connectors: Array<ConnectorInfo>,
-  servers: Array<ServerInfo>
+  servers: Array<ServerInfo>,
+  indexShapeMap: Array<Shape>
 ) {
   const connector = connectors.find(
     (c) => c.id === panel.sql.connectorId
   ) as SQLConnectorInfo;
-  return await asyncRPC<
-    Proxy<SQLPanelInfo & { indexIdMap: Array<string> }, SQLConnectorInfo>,
-    string,
-    PanelResult
-  >('evalSQL', panel.content, {
-    ...panel,
-    server: servers.find(
-      (s) => s.id === (panel.serverId || connector.serverId)
-    ),
-    connector,
-    indexIdMap,
-  });
+  return await asyncRPC<SQLEvalBody, string, PanelResult>(
+    'evalSQL',
+    panel.content,
+    {
+      ...panel,
+      server: servers.find(
+        (s) => s.id === (panel.serverId || connector.serverId)
+      ),
+      connector,
+      indexShapeMap,
+      indexIdMap,
+    }
+  );
 }
 
 export function SQLPanelDetails({

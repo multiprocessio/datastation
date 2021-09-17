@@ -6,6 +6,7 @@ import { FilePanelInfo, PanelResult, Proxy, ServerInfo } from '../shared/state';
 import { parseArrayBuffer } from '../shared/text';
 import { asyncRPC } from './asyncRPC';
 import { FileInput } from './component-library/FileInput';
+import { FormGroup } from './component-library/FormGroup';
 import { ContentTypePicker } from './ContentTypePicker';
 import { ProjectContext } from './ProjectStore';
 import { ServerPicker } from './ServerPicker';
@@ -51,34 +52,36 @@ export function FilePanelDetails({
   const { servers } = React.useContext(ProjectContext);
   return (
     <div className="FilePanel">
-      <div className="form-row">
-        <FileInput
-          label="File"
-          value={panel.file.name}
-          allowManualEntry={MODE !== 'browser' ? true : false}
-          allowFilePicker={!panel.serverId ? true : false}
-          onRead={
-            MODE !== 'desktop'
-              ? (value: ArrayBuffer) => {
-                  panel.file.content = value;
-                  updatePanel(panel);
-                }
-              : null
-          }
-          onChange={(fileName: string) => {
-            panel.file.name = fileName;
+      <FormGroup label="General">
+        <div className="form-row">
+          <FileInput
+            label="File"
+            value={panel.file.name}
+            allowManualEntry={MODE !== 'browser' ? true : false}
+            allowFilePicker={!panel.serverId ? true : false}
+            onRead={
+              MODE !== 'desktop'
+                ? (value: ArrayBuffer) => {
+                    panel.file.content = value;
+                    updatePanel(panel);
+                  }
+                : null
+            }
+            onChange={(fileName: string) => {
+              panel.file.name = fileName;
+              updatePanel(panel);
+            }}
+          />
+        </div>
+        <ContentTypePicker
+          inMemoryEval={MODE !== 'browser'}
+          value={panel.file.contentTypeInfo}
+          onChange={(cti: { type: string; customLineRegexp: string }) => {
+            panel.file.contentTypeInfo = cti;
             updatePanel(panel);
           }}
         />
-      </div>
-      <ContentTypePicker
-        inMemoryEval={MODE !== 'browser'}
-        value={panel.file.contentTypeInfo}
-        onChange={(cti: { type: string; customLineRegexp: string }) => {
-          panel.file.contentTypeInfo = cti;
-          updatePanel(panel);
-        }}
-      />
+      </FormGroup>
       <ServerPicker
         servers={servers}
         serverId={panel.serverId}

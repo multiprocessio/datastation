@@ -13,7 +13,8 @@ import { columnsFromObject } from '../shared/table';
 import { asyncRPC } from './asyncRPC';
 import { Alert } from './component-library/Alert';
 import { Button } from './component-library/Button';
-import { FieldPicker } from './FieldPicker';
+import { FormGroup } from './component-library/FormGroup';
+import { FieldPicker, unusedFields } from './FieldPicker';
 import { PanelSourcePicker } from './PanelSourcePicker';
 
 export async function evalColumnPanel(
@@ -72,21 +73,34 @@ export function TablePanelDetails({
   panels: Array<PanelInfo>;
   data: PanelResult;
 }) {
+  React.useEffect(() => {
+    const fields = unusedFields(
+      data,
+      ...panel.table.columns.map((c) => c.field)
+    );
+
+    if (fields) {
+      panel.table.columns.push({ label: '', field: '' });
+      updatePanel(panel);
+    }
+  }, [panel.table.panelSource, data]);
+
   return (
     <React.Fragment>
-      <div className="form-row">
-        <PanelSourcePicker
-          currentPanel={panel.id}
-          panels={panels}
-          value={panel.table.panelSource}
-          onChange={(value: number) => {
-            panel.table.panelSource = value;
-            updatePanel(panel);
-          }}
-        />
-      </div>
-      <div className="form-row">
-        <label>Columns</label>
+      <FormGroup label="General">
+        <div className="form-row">
+          <PanelSourcePicker
+            currentPanel={panel.id}
+            panels={panels}
+            value={panel.table.panelSource}
+            onChange={(value: number) => {
+              panel.table.panelSource = value;
+              updatePanel(panel);
+            }}
+          />
+        </div>
+      </FormGroup>
+      <FormGroup label="Columns">
         {panel.table.columns.map((c, i) => (
           <div className="form-row vertical-align-center" key={c.field + i}>
             <FieldPicker
@@ -118,7 +132,7 @@ export function TablePanelDetails({
         >
           Add Column
         </Button>
-      </div>
+      </FormGroup>
     </React.Fragment>
   );
 }

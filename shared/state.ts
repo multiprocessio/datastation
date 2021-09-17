@@ -68,7 +68,7 @@ export class ServerInfo {
     passphrase?: string
   ) {
     this.type = type || 'private-key';
-    this.name = name || 'Untitled server';
+    this.name = name || 'Untitled Server';
     this.address = address || '';
     this.port = port || 22;
     this.username = username || '';
@@ -205,7 +205,8 @@ export type PanelInfoType =
   | 'program'
   | 'literal'
   | 'sql'
-  | 'file';
+  | 'file'
+  | 'filagg';
 
 export class PanelInfo {
   content: string;
@@ -242,6 +243,8 @@ export class PanelInfo {
         pit = mergeDeep(new SQLPanelInfo(), pit);
       case 'file':
         pit = mergeDeep(new FilePanelInfo(), pit);
+      case 'filagg':
+        pit = mergeDeep(new FilterAggregatePanelInfo(), pit);
     }
 
     pit.resultMeta = PanelResultMeta.fromJSON(raw.resultMeta);
@@ -347,6 +350,49 @@ export class TablePanelInfo extends PanelInfo {
     this.table = {
       columns,
       panelSource,
+    };
+  }
+}
+
+export type AggregateType =
+  | 'none'
+  | 'count'
+  | 'sum'
+  | 'average'
+  | 'min'
+  | 'max';
+
+export class FilterAggregatePanelInfo extends PanelInfo {
+  filagg: {
+    panelSource: number;
+    filter: string;
+    aggregateType: AggregateType;
+    groupBy: string;
+    aggregateOn: string;
+    sortOn: string;
+    sortAsc: boolean;
+  };
+
+  constructor(
+    name?: string,
+    panelSource?: number,
+    filter?: string,
+    aggregateType?: AggregateType,
+    groupBy?: string,
+    aggregateOn?: string,
+    sortOn?: string,
+    sortAsc?: boolean,
+    content?: string
+  ) {
+    super('filagg', name, content);
+    this.filagg = {
+      panelSource: panelSource || 0,
+      filter: filter || '',
+      aggregateType: aggregateType || 'none',
+      groupBy: groupBy || '',
+      aggregateOn: aggregateOn || '',
+      sortOn: sortOn || '',
+      sortAsc: sortAsc || false,
     };
   }
 }

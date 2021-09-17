@@ -22,25 +22,34 @@ export function CodeEditor({
   value,
   onChange,
   className,
+  placeholder,
   disabled,
   onKeyDown,
   language,
   id,
   singleLine,
+  label,
 }: {
   value: string;
   onChange: (value: string) => void;
   className?: string;
   disabled?: boolean;
   onKeyDown?: (e: React.KeyboardEvent) => void;
+  placeholder?: string;
   language: string;
   id: string;
   singleLine?: boolean;
+  label?: string;
 }) {
   const [localValue, setLocalValue] = useDebouncedLocalState(value, onChange);
 
   return (
-    <div className="editor-container">
+    <div
+      className={`editor-container ${
+        singleLine ? 'editor-container--singleLine vertical-align-center' : ''
+      }`}
+    >
+      {label && <label className="label">{label}</label>}
       <AceEditor
         mode={language}
         theme="github"
@@ -48,9 +57,14 @@ export function CodeEditor({
         onChange={setLocalValue}
         name={id}
         value={localValue}
+        placeholder={placeholder}
         className={`${className} ${singleLine ? 'input' : ''}`}
         readOnly={disabled}
-        width="100%"
+        width={
+          singleLine
+            ? String(Math.max(300, localValue.length * 10)) + 'px'
+            : '100%'
+        }
         fontSize="1rem"
         commands={[
           // AceEditor wants commands in this way but outside here we

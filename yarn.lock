@@ -1210,6 +1210,21 @@
   dependencies:
     "@types/node" "*"
 
+"@types/stream-chain@*", "@types/stream-chain@^2.0.1":
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/@types/stream-chain/-/stream-chain-2.0.1.tgz#4d3cc47a32609878bc188de0bae420bcfd3bf1f5"
+  integrity sha512-D+Id9XpcBpampptkegH7WMsEk6fUdf9LlCIX7UhLydILsqDin4L0QT7ryJR0oycwC7OqohIzdfcMHVZ34ezNGg==
+  dependencies:
+    "@types/node" "*"
+
+"@types/stream-json@^1.7.1":
+  version "1.7.1"
+  resolved "https://registry.yarnpkg.com/@types/stream-json/-/stream-json-1.7.1.tgz#58b82a41161f2936c9bfc6c725a30e956bbd443b"
+  integrity sha512-BNIK/ix6iJvWvoXbDVVJhw5LNG1wie/rXcUo7jw4hBqY3FhIrg0e+RMXFN5UreKclBIStl9FDEHNSDLuuQ9/MQ==
+  dependencies:
+    "@types/node" "*"
+    "@types/stream-chain" "*"
+
 "@types/tedious@*":
   version "4.0.5"
   resolved "https://registry.yarnpkg.com/@types/tedious/-/tedious-4.0.5.tgz#388c4b4fb14b18e282ffecff70a9a160750c44b1"
@@ -6953,6 +6968,18 @@ stoppable@^1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/stoppable/-/stoppable-1.1.0.tgz#32da568e83ea488b08e4d7ea2c3bcc9d75015d5b"
   integrity sha512-KXDYZ9dszj6bzvnEMRYvxgeTHU74QBFL54XKtP3nyMuJ81CFYtABZ3bAzL2EdFUaEwJOBOgENyFj3R7oTzDyyw==
+
+stream-chain@^2.2.4:
+  version "2.2.4"
+  resolved "https://registry.yarnpkg.com/stream-chain/-/stream-chain-2.2.4.tgz#2e5e9858e00d25ebaf7e4339e8328ddcab5facad"
+  integrity sha512-9lsl3YM53V5N/I1C2uJtc3Kavyi3kNYN83VkKb/bMWRk7D9imiFyUPYa0PoZbLohSVOX1mYE9YsmwObZUsth6Q==
+
+stream-json@^1.7.3:
+  version "1.7.3"
+  resolved "https://registry.yarnpkg.com/stream-json/-/stream-json-1.7.3.tgz#8a2abe8b51a2e84ffbc8d09bca9d01dc70facae3"
+  integrity sha512-Y6dXn9KKWSwxOqnvHGcdZy1PK+J+7alBwHCeU3W9oRqm4ilLRA0XSPmd1tWwhg7tv9EIxJTMWh7KF15tYelKJg==
+  dependencies:
+    stream-chain "^2.2.4"
 
 string-length@^4.0.1:
   version "4.0.2"

@@ -10,6 +10,7 @@ import {
   fetchResultsHandler,
   storeLiteralHandler,
 } from '../desktop/eval/columns';
+import { evalFilterAggregateHandler } from '../desktop/eval/filagg';
 import { evalFileHandler } from '../desktop/eval/file';
 import { evalHTTPHandler } from '../desktop/eval/http';
 import { programHandlers } from '../desktop/eval/program';
@@ -36,7 +37,6 @@ export class App {
   }
 }
 
-let id = 0;
 export async function init() {
   const config = await readConfig();
   const app = new App(config);
@@ -46,12 +46,10 @@ export async function init() {
 
   app.express.use((req, res, next) => {
     const start = new Date();
-    const reqid = id++;
-    log.info(`${reqid} ${req.method} ${req.url}`);
     res.on('finish', () => {
       const end = new Date();
       log.info(
-        `${reqid} ${res.statusCode} ${req.method} ${req.url} ${humanSize(
+        `${res.statusCode} ${req.method} ${req.url} ${humanSize(
           +res.getHeader('content-length') || 0
         )} ${end.valueOf() - start.valueOf()}ms`
       );
@@ -71,6 +69,7 @@ export async function init() {
     fetchResultsHandler,
     ...programHandlers,
     evalFileHandler,
+    evalFilterAggregateHandler,
     settings.getUpdateHandler(),
   ] as RPCHandler[];
 

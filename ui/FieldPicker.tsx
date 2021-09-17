@@ -74,17 +74,41 @@ export function orderedObjectFields(
 }
 
 function renderOptions(group: FieldGroup, grouped: boolean) {
-  const options = group.elements.map(([name, shape]) => (
+  const options = group.elements.map(([name]) => (
     <option key={name} value={name}>
       {name}
     </option>
   ));
 
   if (grouped) {
-    return <optgroup label={group.name}>{options}</optgroup>;
+    return (
+      <optgroup key={group.name} label={group.name}>
+        {options}
+      </optgroup>
+    );
   }
 
   return options;
+}
+
+function wellFormedGraphInput(panelSourceResult: PanelResult) {
+  return (
+    panelSourceResult &&
+    panelSourceResult.shape &&
+    panelSourceResult.shape.kind === 'array' &&
+    (panelSourceResult.shape as ArrayShape).children.kind === 'object'
+  );
+}
+
+export function unusedFields(data: PanelResult, ...fields: Array<string>) {
+  if (!wellFormedGraphInput(data)) {
+    return 0;
+  }
+
+  const os = (data.shape as ArrayShape).children as ObjectShape;
+  return Object.keys(os.children).filter((field) => {
+    return !fields.includes(field);
+  }).length;
 }
 
 export function FieldPicker({
@@ -127,12 +151,7 @@ export function FieldPicker({
   };
 
   let fieldPicker = null;
-  if (
-    panelSourceResult &&
-    panelSourceResult.shape &&
-    panelSourceResult.shape.kind === 'array' &&
-    (panelSourceResult.shape as ArrayShape).children.kind === 'object'
-  ) {
+  if (wellFormedGraphInput(panelSourceResult)) {
     const fieldGroups = orderedObjectFields(
       (panelSourceResult.shape as ArrayShape).children as ObjectShape,
       preferredDefaultType

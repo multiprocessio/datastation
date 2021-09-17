@@ -6,6 +6,7 @@ import {
   fetchResultsHandler,
   storeLiteralHandler,
 } from './eval/columns';
+import { evalFilterAggregateHandler } from './eval/filagg';
 import { evalFileHandler } from './eval/file';
 import { evalHTTPHandler } from './eval/http';
 import { programHandlers } from './eval/program';
@@ -71,6 +72,7 @@ export const getRPCHandlers = (settings: Settings) =>
   [
     ...storeHandlers,
     evalColumnsHandler,
+    evalFilterAggregateHandler,
     storeLiteralHandler,
     evalSQLHandler,
     evalHTTPHandler,
