@@ -14,7 +14,8 @@ import sqlite3 from 'sqlite3';
 import Client from 'ssh2-sftp-client';
 import { chain } from 'stream-chain';
 import * as json from 'stream-json';
-import { streamValues } from 'stream-json/streamers/StreamValues';
+import { streamArray } from 'stream-json/streamers/StreamArray';
+import Batch from 'stream-json/utils/Batch';
 import { file as makeTmpFile } from 'tmp-promise';
 import {
   NotAnArrayOfObjectsError,
@@ -230,25 +231,34 @@ async function evalSqlite(
         try {
           const pipeline = chain([
             fs.createReadStream(panelResultsFile),
-            json.parser,
-            streamValues,
-            async (row) => {
+            json.parser(),
+            streamArray(),
+            new Batch({ batchSize: 100 }),
+            async (data: Array<{ value: any }>) => {
+              log.info('Inserting into temp table ' + panel.tableName);
               try {
                 const columns = panel.columns
                   .map((c) => `'${c.name}'`)
                   .join(', ');
-                const values = panel.columns
-                  .map((c) => `"${row[c.name]}"`)
+                const values = data
+                  .map(
+                    ({ value: row }) =>
+                      '(' +
+                      panel.columns.map((c) => `"${row[c.name]}"`).join(', ') +
+                      ')'
+                  )
                   .join(', ');
-                await db.exec(
-                  `INSERT INTO ${panel.tableName} (${columns}) VALUES (${values});`
-                );
+                const query = `INSERT INTO ${panel.tableName} (${columns}) VALUES ${values};`;
+                await db.exec(query);
               } catch (e) {
                 reject(e);
+              } finally {
+                return data;
               }
             },
           ]);
-          pipeline.on('end', resolve);
+          pipeline.on('error', reject);
+          pipeline.on('finish', resolve);
         } catch (e) {
           reject(e);
         }
