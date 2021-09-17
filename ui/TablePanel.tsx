@@ -14,7 +14,7 @@ import { asyncRPC } from './asyncRPC';
 import { Alert } from './component-library/Alert';
 import { Button } from './component-library/Button';
 import { FormGroup } from './component-library/FormGroup';
-import { FieldPicker } from './FieldPicker';
+import { FieldPicker, unusedFields } from './FieldPicker';
 import { PanelSourcePicker } from './PanelSourcePicker';
 
 export async function evalColumnPanel(
@@ -73,6 +73,18 @@ export function TablePanelDetails({
   panels: Array<PanelInfo>;
   data: PanelResult;
 }) {
+  React.useEffect(() => {
+    const fields = unusedFields(
+      data,
+      ...panel.table.columns.map((c) => c.field)
+    );
+
+    if (fields) {
+      panel.table.columns.push({ label: '', field: '' });
+      updatePanel(panel);
+    }
+  }, [panel.table.panelSource, data]);
+
   return (
     <React.Fragment>
       <FormGroup label="General">

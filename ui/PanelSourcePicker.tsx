@@ -13,20 +13,22 @@ export function PanelSourcePicker({
   panels: Array<PanelInfo>;
   currentPanel: string;
 }) {
+  const reversed = panels.slice().reverse();
   return (
     <Select
       label="Panel Source"
       onChange={(value: string) => onChange(+value)}
       value={value.toString()}
     >
-      {panels
-        .map((panel, i) =>
-          panel.id === currentPanel ? null : (
-            <option key={panel.id} value={i.toString()}>
-              [#{i}] {panel.name}
+      {reversed
+        .map((panel, i) => {
+          const originalIndex = panels.length - (i + 1);
+          return panel.id === currentPanel ? null : (
+            <option key={panel.id} value={originalIndex.toString()}>
+              [#{originalIndex}] {panel.name}
             </option>
-          )
-        )
+          );
+        })
         .filter(Boolean)}
     </Select>
   );
