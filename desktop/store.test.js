@@ -43,7 +43,7 @@ test('write project with encrypted secrets, read with nulled secrets', async () 
     await updateProject.handler(projectId, null, testProject);
 
     // Wait to make sure file has been written
-    await new Promise((resolve) => setTimeout(SYNC_PERIOD + 1000, resolve));
+    await new Promise((resolve) => setTimeout(resolve, SYNC_PERIOD + 1000));
 
     const f = await fs.readFile(projectPath);
     const onDisk = JSON.parse(f.toString());
