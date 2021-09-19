@@ -1,3 +1,4 @@
+import { ClickHouse } from 'clickhouse';
 import fs from 'fs';
 import sqlserver from 'mssql';
 import mysql from 'mysql2/promise';
@@ -9,6 +10,7 @@ import {
   Shape,
   VariedShape,
 } from 'shape';
+import snowflake from 'snowflake-sdk';
 import * as sqlite from 'sqlite';
 import sqlite3 from 'sqlite3';
 import Client from 'ssh2-sftp-client';
@@ -202,6 +204,81 @@ async function evalMySQL(
   }
 }
 
+async function evalClickHouse(
+  content: string,
+  host: string,
+  port: number,
+  { connector: { sql } }: SQLEvalBody
+) {
+  const connection = new ClickHouse({
+    url: host,
+    port: port,
+    basicAuth: sql.username
+      ? {
+          username: sql.username,
+          password: sql.password,
+        }
+      : null,
+    config: {
+      database: sql.database,
+    },
+  });
+
+  const rows = await connection.query(content).toPromise();
+  return { value: rows };
+}
+
+async function evalSnowflake(
+  content: string,
+  { connector: { sql } }: SQLEvalBody
+) {
+  const connection = snowflake.createConnection({
+    account: sql.extra.account,
+    database: sql.database,
+    username: sql.username,
+    password: sql.password,
+  });
+
+  const conn: snowflake.Connection = await new Promise((resolve, reject) => {
+    try {
+      connection.connect((err, conn) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+
+        resolve(conn);
+      });
+    } catch (e) {
+      reject(e);
+    }
+  });
+
+  const rows = await new Promise((resolve, reject) => {
+    try {
+      conn.execute({
+        sqlText: content,
+        complete: (
+          err: Error,
+          stmt: snowflake.Statement,
+          rows: Array<any> | undefined
+        ) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+
+          resolve(rows);
+        },
+      });
+    } catch (e) {
+      reject(e);
+    }
+  });
+
+  return { value: rows };
+}
+
 async function evalSqlite(
   content: string,
   info: SQLEvalBody,
@@ -300,6 +377,10 @@ const DEFAULT_PORT = {
   sqlite: 0,
   sqlserver: 1433,
   oracle: 1521,
+  clickhouse: 8123,
+  cassandra: 9160,
+  snowflake: 443,
+  presto: 8080,
 };
 
 export async function evalSQLHandlerInternal(
@@ -328,10 +409,16 @@ export async function evalSQLHandlerInternal(
     ? await decrypt(info.connector.sql.password)
     : null;
 
+  if (info.sql.type === 'snowflake') {
+    return await evalSnowflake(content, info);
+  }
+
+  // TODO: this needs to be more robust. Not all systems format ports the same way
   const port =
     +info.connector.sql.address.split(':')[1] || DEFAULT_PORT[info.sql.type];
   const host = info.connector.sql.address.split(':')[0];
 
+  // The way hosts are formatted is unique so have sqlserver manage its own call to tunnel()
   if (info.sql.type === 'sqlserver') {
     return await tunnel(
       info.server,
@@ -357,6 +444,10 @@ export async function evalSQLHandlerInternal(
 
       if (info.sql.type === 'mysql') {
         return evalMySQL(content, host, port, info);
+      }
+
+      if (info.sql.type === 'clickhouse') {
+        return evalClickHouse(content, host, port, info);
       }
 
       throw new Error(`Unknown SQL type: ${info.sql.type}`);

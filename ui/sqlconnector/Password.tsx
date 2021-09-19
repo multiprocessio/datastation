@@ -1,0 +1,35 @@
+import * as React from 'react';
+import { SQLConnectorInfo } from '../../shared/state';
+import { Input } from '../component-library/Input';
+
+export function Password({
+  connector,
+  updateConnector,
+}: {
+  connector: SQLConnectorInfo;
+  updateConnector: (c: SQLConnectorInfo) => void;
+}) {
+  // Don't try to show initial password
+  const [password, setPassword] = React.useState('');
+  function syncPassword(p: string) {
+    setPassword(p);
+
+    // Sync typed password to state on change
+    connector.sql.password = p;
+    updateConnector(connector);
+  }
+
+  return (
+    <div className="form-row">
+      <Input
+        label="Password"
+        type="password"
+        value={password}
+        onChange={(value: string) => syncPassword(value)}
+        onBlur={
+          () => syncPassword(null) /* Turns off continued attempts to encrypt */
+        }
+      />
+    </div>
+  );
+}

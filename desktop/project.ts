@@ -32,6 +32,11 @@ const menuTemplate = [
         click: openProject,
         accelerator: 'CmdOrCtrl+O',
       },
+      {
+        label: 'Close Project',
+        accelerator: 'CmdOrCtrl+W',
+        role: process.platform === 'darwin' ? 'close' : 'quit',
+      },
     ],
   },
   {
@@ -71,14 +76,7 @@ const menuTemplate = [
   {
     label: 'View',
     submenu: [
-      ...(DEBUG
-        ? [
-            { role: 'reload' },
-            { role: 'forceReload' },
-            { role: 'toggleDevTools' },
-            { type: 'separator' },
-          ]
-        : []),
+      ...(DEBUG ? [{ role: 'toggleDevTools' }, { type: 'separator' }] : []),
       { role: 'resetZoom' },
       { role: 'zoomIn' },
       { role: 'zoomOut' },

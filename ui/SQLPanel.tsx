@@ -59,11 +59,19 @@ export function SQLPanelDetails({
             updatePanel(panel);
           }}
         >
-          <option value="postgres">PostgreSQL</option>
-          <option value="mysql">MySQL</option>
-          <option value="sqlserver">SQL Server</option>
-          {/* <option value="oracle">Oracle</option> */}
-          <option value="sqlite">SQLite</option>
+          <optgroup label="Traditional">
+            <option value="postgres">PostgreSQL</option>
+            <option value="mysql">MySQL</option>
+            <option value="sqlserver">SQL Server</option>
+            <option value="oracle">Oracle</option>
+            <option value="sqlite">SQLite</option>
+          </optgroup>
+          <optgroup label="Analytics">
+            <option value="clickhouse">Clickhouse</option>
+            <option value="snowflake">Snowflake</option>
+            <option value="cassandra">Cassandra</option>
+            {/* <option value="presto">Presto / Trino</option> */}
+          </optgroup>
         </Select>
       </div>
       <div className="form-row">

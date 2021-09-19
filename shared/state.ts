@@ -168,7 +168,11 @@ export type SQLConnectorInfoType =
   | 'mysql'
   | 'sqlite'
   | 'oracle'
-  | 'sqlserver';
+  | 'sqlserver'
+  | 'presto'
+  | 'clickhouse'
+  | 'snowflake'
+  | 'cassandra';
 
 export class SQLConnectorInfo extends ConnectorInfo {
   sql: {
@@ -177,6 +181,8 @@ export class SQLConnectorInfo extends ConnectorInfo {
     username: string;
     password: string;
     address: string;
+
+    extra: Record<string, string>;
   };
 
   constructor(
@@ -194,6 +200,7 @@ export class SQLConnectorInfo extends ConnectorInfo {
       username: username || '',
       password: password || '',
       address: address || '',
+      extra: {},
     };
   }
 }
