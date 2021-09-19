@@ -1,4 +1,5 @@
 const { SYNC_PERIOD } = require('./constants');
+const { deepClone } = require('../shared/object');
 const path = require('path');
 const os = require('os');
 const fs = require('fs/promises');
@@ -26,10 +27,13 @@ test('write project with encrypted secrets, read with nulled secrets', async () 
 
   const testProject = new ProjectState();
   const testServer = new ServerInfo();
-  testServer.password = 'taffy';
-  testServer.passphrase = 'kewl';
+  const testServerPassword = 'taffy';
+  testServer.password = testServerPassword;
+  const testServerPassphrase = 'kewl';
+  testServer.passphrase = testServerPassphrase;
   const testDatabase = new SQLConnectorInfo();
-  testDatabase.sql.password = 'kevin';
+  const testDatabasePassword = 'kevin';
+  testDatabase.sql.password = testDatabasePassword;
   testProject.servers.push(testServer);
   testProject.connectors.push(testDatabase);
 
@@ -50,13 +54,11 @@ test('write project with encrypted secrets, read with nulled secrets', async () 
 
     // Passwords are encrypted
     expect(onDisk.servers[0].password.length).not.toBe(0);
-    expect(onDisk.servers[0].password).not.toBe(testServer.password);
+    expect(onDisk.servers[0].password).not.toBe(testServerPassword);
     expect(onDisk.servers[0].passphrase.length).not.toBe(0);
-    expect(onDisk.servers[0].passphrase).not.toBe(testServer.passphrase);
+    expect(onDisk.servers[0].passphrase).not.toBe(testServerPassphrase);
     expect(onDisk.connectors[0].sql.password.length).not.toBe(0);
-    expect(onDisk.connectors[0].sql.password).not.toBe(
-      testDatabase.sql.password
-    );
+    expect(onDisk.connectors[0].sql.password).not.toBe(testDatabasePassword);
 
     // Passwords come back as null
     const readProject = await getProject.handler(null, projectId);
