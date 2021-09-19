@@ -45,7 +45,8 @@ test('write project with encrypted secrets, read with nulled secrets', async () 
     await updateProject.handler(projectId, null, testProject);
     console.log(4);
 
-    const onDisk = JSON.parse((await fs.readFile(projectPath)).toString());
+    const f = await fs.readFile(projectPath);
+    const onDisk = JSON.parse(f.toString());
     console.log(5);
     // Passwords are encrypted
     expect(onDisk.servers[0].password.length).not.toBe(0);
