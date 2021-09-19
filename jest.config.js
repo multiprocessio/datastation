@@ -1,13 +1,18 @@
 module.exports = {
   transform: {
-    '^.+\\.tsx?$': [
+    '\\.[jt]sx?$': [
       'esbuild-jest',
       {
         sourcemap: true,
+        loaders: {
+          '.test.js': 'jsx',
+        },
       },
     ],
   },
-  setupFiles: ['./shared/polyfill.ts'],
+  setupFiles: ['./shared/polyfill.ts', './testsetup.js'],
+  testURL: 'http://localhost/',
+  testEnvironment: 'node',
   collectCoverageFrom: [
     'ui/**/*.ts',
     'ui/**/*.tsx',

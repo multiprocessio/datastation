@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { EVAL_ERRORS } from '../shared/errors';
+import { wait } from '../shared/promise';
 import { PanelResultMeta, ProjectPage, ProjectState } from '../shared/state';
 import { Button } from './component-library/Button';
 import { Confirm } from './component-library/Confirm';
@@ -109,7 +110,7 @@ export function Pages({
   async function evalAll() {
     for (let panel of page.panels) {
       await reevalPanel(panel.id);
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      await wait(1500);
     }
   }
 

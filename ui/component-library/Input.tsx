@@ -1,11 +1,13 @@
 import debounce from 'lodash.debounce';
 import * as React from 'react';
 
+export const INPUT_SYNC_PERIOD = 125;
+
 export function useDebouncedLocalState(
   nonLocalValue: string,
   nonLocalSet: (v: string) => void,
   isText: boolean = true,
-  delay: number = 125
+  delay: number = INPUT_SYNC_PERIOD
 ): [string, (v: string) => void] {
   if (!isText) {
     return [nonLocalValue, nonLocalSet];

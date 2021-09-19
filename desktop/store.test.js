@@ -1,4 +1,5 @@
 const { SYNC_PERIOD } = require('./constants');
+const { wait } = require('../shared/promise');
 const { deepClone } = require('../shared/object');
 const path = require('path');
 const os = require('os');
@@ -47,7 +48,7 @@ test('write project with encrypted secrets, read with nulled secrets', async () 
     await updateProject.handler(projectId, null, testProject);
 
     // Wait to make sure file has been written
-    await new Promise((resolve) => setTimeout(resolve, SYNC_PERIOD + 1000));
+    await wait(SYNC_PERIOD + 1000);
 
     const f = await fs.readFile(projectPath);
     const onDisk = JSON.parse(f.toString());

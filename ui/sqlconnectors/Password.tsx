@@ -12,7 +12,9 @@ export function Password({
   // Don't try to show initial password
   const [password, setPassword] = React.useState('');
   function syncPassword(p: string) {
-    setPassword(p);
+    if (p !== null) {
+      setPassword(p);
+    }
 
     // Sync typed password to state on change
     connector.sql.password = p;
