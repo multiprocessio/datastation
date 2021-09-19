@@ -15,7 +15,7 @@
     "start-ui": "./ui/scripts/watch_and_serve.sh",
     "release-desktop": "python3 ./scripts/build.py ./desktop/scripts/release.build",
     "format": "yarn prettier --write \"**/*.js\" \"**/*.ts\" \"**/*.tsx\" \"**/*.css\" \"**/*.json\"",
-    "test-licenses": "yarn license-checker --production --onlyAllow 'AFLv2.1;BSD;MIT;Apache-2.0;ISC;BSD-3-Clause;MIT*;BSD-2-Clause;Unlicense'",
+    "test-licenses": "yarn license-checker --production --onlyAllow 'AFLv2.1;BSD;MIT;Apache-2.0;Apache 2.0;Apache*;ISC;BSD-3-Clause;MIT*;BSD-2-Clause;Unlicense'",
     "test": "yarn jest --passWithNoTests",
     "test-coverage": "yarn jest --passWithNoTests --coverage",
     "e2e-test": "node --unhandled-rejections=throw ./e2e/index.js"
