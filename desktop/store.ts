@@ -104,7 +104,9 @@ export const storeHandlers = [
     resource: 'updateProjectState',
     handler: async (projectId: string, _: string, newState: ProjectState) => {
       await encryptProjectSecrets(newState);
+      console.log('before ensure in handler');
       const fileName = await ensureProjectFile(projectId);
+      console.log('after ensure in handler', fileName);
       return writeFileBuffered(fileName, JSON.stringify(newState));
     },
   },

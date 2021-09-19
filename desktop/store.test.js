@@ -1,3 +1,4 @@
+const { SYNC_PERIOD } = require('./constants')
 const path = require('path');
 const os = require('os');
 const fs = require('fs/promises');
@@ -33,22 +34,20 @@ test('write project with encrypted secrets, read with nulled secrets', async () 
   testProject.connectors.push(testDatabase);
 
   const projectId = 'unittestproject';
-  console.log(1);
   const projectPath = await ensureProjectFile(projectId);
-  console.log(2);
   expect(projectPath).toBe(
     path.join(os.homedir(), 'DataStationProjects', projectId + '.dsproj')
   );
 
   try {
-    await fs.readFile(projectPath);
-    console.log(3, 'read before update?');
     await updateProject.handler(projectId, null, testProject);
-    console.log(4);
+
+    // Wait to make sure file has been written
+    await new Promise((resolve) => setTimeout(SYNC_PERIOD + 1000, resolve));
 
     const f = await fs.readFile(projectPath);
     const onDisk = JSON.parse(f.toString());
-    console.log(5);
+
     // Passwords are encrypted
     expect(onDisk.servers[0].password.length).not.toBe(0);
     expect(onDisk.servers[0].password).not.toBe(testServer.password);
@@ -61,7 +60,6 @@ test('write project with encrypted secrets, read with nulled secrets', async () 
 
     // Passwords come back as null
     const readProject = await getProject.handler(null, projectId);
-    console.log(6);
     testServer.id = onDisk.servers[0].id; // id is generated newly on every instantiation which is ok
     testServer.password = null;
     testServer.passphrase = null;
