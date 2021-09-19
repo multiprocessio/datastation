@@ -4,6 +4,7 @@ import path from 'path';
 import log from '../shared/log';
 import { ProjectState, SQLConnectorInfo } from '../shared/state';
 import { DISK_ROOT, PROJECT_EXTENSION, SYNC_PERIOD } from './constants';
+import { ensureFile } from './fs';
 import { encrypt } from './secret';
 
 const buffers: Record<
@@ -129,10 +130,4 @@ export function ensureProjectFile(projectId: string) {
   }
 
   return ensureFile(projectId + '.' + PROJECT_EXTENSION);
-}
-
-export async function ensureFile(f: string) {
-  let root = path.isAbsolute(f) ? path.dirname(f) : DISK_ROOT;
-  await fsPromises.mkdir(root, { recursive: true });
-  return path.isAbsolute(f) ? f : path.join(DISK_ROOT, f);
 }

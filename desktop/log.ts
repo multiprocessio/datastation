@@ -3,7 +3,7 @@ import { EOL } from 'os';
 import util from 'util';
 import { logger } from '../shared/log';
 import { LOG_FILE } from './constants';
-import { ensureFile } from './store';
+import { ensureFile } from './fs';
 
 export async function configureLogger() {
   await ensureFile(LOG_FILE);

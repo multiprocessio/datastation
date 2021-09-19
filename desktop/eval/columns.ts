@@ -39,8 +39,13 @@ export const evalColumnsHandler = rpcEvalHandler({
 
 export const storeLiteralHandler = rpcEvalHandler({
   resource: RPC.STORE_LITERAL,
-  handler: function (_: string, _1: string, { value }: { value: any }) {
-    return Promise.resolve({ value });
+  handler: async function (
+    projectId: string,
+    _1: string,
+    { id, value }: { id: string; value: any }
+  ) {
+    // This should get written to disk by rpcEvalHandler
+    return { value };
   },
 });
 
