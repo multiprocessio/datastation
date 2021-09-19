@@ -41,7 +41,8 @@ test('write project with encrypted secrets, read with nulled secrets', async () 
   );
 
   try {
-    console.log(3);
+    await fs.readFile(projectPath);
+    console.log(3, 'read before update?');
     await updateProject.handler(projectId, null, testProject);
     console.log(4);
 
