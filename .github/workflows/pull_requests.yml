@@ -17,7 +17,11 @@ jobs:
     - run: yarn tsc
     - run: ./scripts/fail_on_diff.sh
     - run: yarn test-licenses
-    - run: yarn test-coverage
+    - run: yarn test
+    - uses: artiomtr/jest-coverage-report-action@v2.0-rc.1
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        threshold: 14
 
   e2e-linux:
     needs: test
@@ -46,6 +50,7 @@ jobs:
       with:
         ref: ${{ github.ref }}
     - run: ./scripts/ci/prepare_macos.sh
+    - run: yarn test
     - run: yarn release-desktop 0.0.0-e2etest
     - run: yarn e2e-test
 
@@ -61,5 +66,6 @@ jobs:
 
     - run: ./scripts/ci/prepare_windows.ps1
       shell: pwsh
+    - run: yarn test
     - run: yarn release-desktop 0.0.0-e2etest
     - run: yarn e2e-test
