@@ -1,4 +1,4 @@
-const { SYNC_PERIOD } = require('./constants')
+const { SYNC_PERIOD } = require('./constants');
 const path = require('path');
 const os = require('os');
 const fs = require('fs/promises');
