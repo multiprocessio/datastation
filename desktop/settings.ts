@@ -58,9 +58,9 @@ export class Settings {
       try {
         existingSettings = JSON.parse(s);
         // Migrate from .uid to .id
-        if (existingSettings.uid) {
-          existingSettings.id = existingSettings.uid;
-          delete existingSettings.uid;
+        if ((existingSettings as any).uid) {
+          existingSettings.id = (existingSettings as any).uid;
+          delete (existingSettings as any).uid;
         }
       } catch (e) {
         const backupFile = settingsFile + '.bak';

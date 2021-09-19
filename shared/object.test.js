@@ -27,7 +27,12 @@ test('validate rejects missing fields', () => {
 });
 
 test('mergeDeep', () => {
-  expect(mergeDeep({a: 1, c: { b: 3 }, e: { f: 9 }}, { d: 12, c: { g: 22 }, e: { f: 10 } })).toStrictEqual({
+  expect(
+    mergeDeep(
+      { a: 1, c: { b: 3 }, e: { f: 9 } },
+      { d: 12, c: { g: 22 }, e: { f: 10 } }
+    )
+  ).toStrictEqual({
     a: 1,
     d: 12,
     c: { b: 3, g: 22 },
