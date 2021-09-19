@@ -8,5 +8,11 @@ module.exports = {
     ],
   },
   setupFiles: ['./shared/polyfill.ts'],
-  collectCoverageFrom: ['ui/**/*.ts', 'ui/**/*.tsx'],
+  collectCoverageFrom: [
+    'ui/**/*.ts',
+    'ui/**/*.tsx',
+    'shared/**/*.ts',
+    'desktop/**/*.ts',
+    'server/**/*.ts',
+  ],
 };

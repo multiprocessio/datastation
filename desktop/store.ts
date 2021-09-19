@@ -90,7 +90,9 @@ export const storeHandlers = [
       const fileName = await ensureProjectFile(projectId);
       try {
         const f = await fsPromises.readFile(fileName);
-        return JSON.parse(f.toString());
+        const d = JSON.parse(f.toString());
+        nullProjectSecrets(d);
+        return d;
       } catch (e) {
         log.error(e);
         return null;
@@ -113,7 +115,9 @@ export const storeHandlers = [
       _1: void
     ) => {
       const fileName = await ensureProjectFile(projectId);
-      return writeFileBuffered(fileName, JSON.stringify(new ProjectState()));
+      const newProject = new ProjectState();
+      newProject.projectName = projectId;
+      return fsPromises.writeFile(fileName, JSON.stringify(newProject));
     },
   },
 ];

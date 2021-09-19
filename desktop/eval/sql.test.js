@@ -22,7 +22,7 @@ const panel0Shape = shape(panel0Data);
 
 const query1 = 'SELECT * FROM DM_getPanel(0) WHERE x >= 2';
 
-test('TBD', () => {
+test('transform DM_getPanel calls', () => {
   const { query, panelsToImport } = transformDM_getPanelCalls(
     query1,
     [panel0Shape],
