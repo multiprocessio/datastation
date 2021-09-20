@@ -35,6 +35,7 @@ export function FileInput({
   accept,
   value,
   allowManualEntry,
+  allowFilePicker,
 }: Props) {
   let inputClass = `input ${className ? ' ' + className : ''}`;
 
@@ -76,7 +77,7 @@ export function FileInput({
     <label className={inputClass}>
       {label}
       {allowManualEntry && manualInput}
-      {input}
+      {allowFilePicker && input}
     </label>
   );
 }
