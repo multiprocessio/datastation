@@ -140,9 +140,10 @@ export function Pages({
 
               <Input
                 className="page-name"
-                onChange={(value: string) =>
-                  updatePage({ ...page, name: value })
-                }
+                onChange={(value: string) => {
+                  page.name = value;
+                  updatePage(page);
+                }}
                 autoWidth
                 value={page.name}
               />

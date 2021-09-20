@@ -54,9 +54,10 @@ export function Server({
           {expanded ? (
             <Input
               className="server-name"
-              onChange={(value: string) =>
-                updateServer({ ...server, name: value })
-              }
+              onChange={(value: string) => {
+                server.name = name;
+                updateServer(server);
+              }}
               value={server.name}
             />
           ) : (

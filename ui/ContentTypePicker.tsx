@@ -26,7 +26,8 @@ export function ContentTypePicker({
               type = '';
             }
 
-            return onChange({ ...value, type });
+            value.type = type;
+            return onChange(value);
           }}
         >
           {!disableAutoDetect && <option value="null">Auto-detect</option>}
@@ -57,9 +58,10 @@ export function ContentTypePicker({
             autoWidth
             type="text"
             value={value.customLineRegexp}
-            onChange={(customLineRegexp: string) =>
-              onChange({ ...value, customLineRegexp })
-            }
+            onChange={(customLineRegexp: string) => {
+              value.customLineRegexp = value;
+              onChange(value);
+            }}
           />
           <p>
             Enter a custom ECMAScript-flavor regular expression to be evaluated
