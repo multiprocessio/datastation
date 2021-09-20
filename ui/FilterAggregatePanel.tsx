@@ -35,7 +35,7 @@ function withAggregateShape(
   const obj = array.children as ObjectShape;
   if (p.filagg.aggregateType !== 'none') {
     return {
-      ...p,
+      ...r,
       shape: {
         ...array,
         children: {
@@ -52,7 +52,7 @@ function withAggregateShape(
     };
   }
 
-  return p;
+  return r;
 }
 
 export async function evalFilterAggregatePanel(

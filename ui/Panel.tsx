@@ -417,14 +417,20 @@ export function Panel({
                 updatePanel(newPanel);
               }}
             >
-              <option value="program">Code</option>
-              <option value="filagg">Transform</option>
-              <option value="http">HTTP Request</option>
-              {MODE !== 'browser' && <option value="sql">SQL</option>}
-              <option value="graph">Graph</option>
-              <option value="file">File</option>
-              <option value="literal">Literal</option>
-              <option value="table">Table</option>
+              <optgroup label="Import">
+                {MODE !== 'browser' && <option value="sql">SQL</option>}
+                <option value="http">HTTP Request</option>
+                <option value="file">File</option>
+                <option value="literal">Literal</option>
+              </optgroup>
+              <optgroup label="Operate">
+                <option value="program">Code</option>
+                <option value="filagg">Visual Transform</option>
+              </optgroup>
+              <optgroup label="Display">
+                <option value="graph">Graph</option>
+                <option value="table">Table</option>
+              </optgroup>
             </Select>
 
             <span className="material-icons">
