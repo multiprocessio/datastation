@@ -178,7 +178,7 @@ function App() {
   const [makeProjectError, setMakeProjectError] = React.useState('');
   async function makeProject(projectId: string) {
     try {
-      await asyncRPC<{ projectId: string }, void, void>('makeProject', null, {
+      await asyncRPC<void, { projectId: string }, void>('makeProject', {
         projectId,
       });
       setProjectId(projectId);
