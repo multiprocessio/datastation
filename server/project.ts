@@ -52,7 +52,12 @@ export const getProjectHandlers = (app: App) => {
       resource: 'updateProjectState',
       handler: async (_: string, projectId: string, newState: ProjectState) => {
         const client = await app.dbpool.connect();
-        await encryptProjectSecrets(newState);
+        const res = await app.dbpool.query(
+          'SELECT project_value FROM projects WHERE project_name = $1;',
+          [projectId]
+        );
+        const existingState = res.rows[0].project_value;
+        await encryptProjectSecrets(newState, existingState);
         try {
           await app.dbpool.query(
             'INSERT INTO projects (project_name, project_value) VALUES ($1, $2) ON CONFLICT (project_name) DO UPDATE SET project_value = EXCLUDED.project_value',

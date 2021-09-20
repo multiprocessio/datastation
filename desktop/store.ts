@@ -5,7 +5,7 @@ import log from '../shared/log';
 import { Encrypt, ProjectState, SQLConnectorInfo } from '../shared/state';
 import { DISK_ROOT, PROJECT_EXTENSION, SYNC_PERIOD } from './constants';
 import { ensureFile } from './fs';
-import { Dispatch} from '../rpc';
+import { Dispatch } from './rpc';
 import { encrypt } from './secret';
 
 const buffers: Record<
