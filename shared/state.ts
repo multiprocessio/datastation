@@ -124,7 +124,7 @@ export class ConnectorInfo {
     switch (raw.type) {
       case 'sql':
         const base = mergeDeep(new SQLConnectorInfo(), ci);
-        base.password = Encrypt.fromJSON(base.sql.password);
+        base.sql.password = Encrypt.fromJSON(base.sql.password);
         return base;
       case 'http':
         return mergeDeep(new HTTPConnectorInfo(), ci);

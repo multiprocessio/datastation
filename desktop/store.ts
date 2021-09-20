@@ -65,7 +65,7 @@ export async function encryptProjectSecrets(s: ProjectState) {
   for (let conn of s.connectors) {
     if (conn.type === 'sql') {
       const sconn = conn as SQLConnectorInfo;
-      checkAndEncrypt(sconn.sql.password);
+      await checkAndEncrypt(sconn.sql.password);
     }
   }
 }

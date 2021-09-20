@@ -29,7 +29,10 @@ export const evalColumnsHandler = rpcEvalHandler<EvalColumnsBody>({
   },
 });
 
-export const storeLiteralHandler = rpcEvalHandler<{ value: string; id: string; }>({
+export const storeLiteralHandler = rpcEvalHandler<{
+  value: string;
+  id: string;
+}>({
   resource: RPC.STORE_LITERAL,
   handler: async function (
     projectId: string,
