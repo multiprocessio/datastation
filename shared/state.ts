@@ -44,6 +44,22 @@ export class PanelResultMeta extends PanelResult {
   }
 }
 
+export class Encrypt {
+  value: string;
+  encrypted: boolean;
+
+  constructor(value: string) {
+    this.value = value;
+    this.encrypted = false;
+  }
+
+  static fromJSON(value: any) {
+    const e = new Encrypt(null);
+    e.encrypted = true;
+    return e;
+  }
+}
+
 export type ServerInfoType = 'ssh-agent' | 'password' | 'private-key';
 
 export class ServerInfo {
@@ -52,9 +68,9 @@ export class ServerInfo {
   port: number;
   type: ServerInfoType;
   username: string;
-  password: string;
+  password: Encrypt;
   privateKeyFile: string;
-  passphrase: string;
+  passphrase: Encrypt;
   id: string;
 
   constructor(
@@ -63,30 +79,28 @@ export class ServerInfo {
     port?: number,
     type?: ServerInfoType,
     username?: string,
-    password?: string,
+    password?: Encrypt,
     privateKeyFile?: string,
-    passphrase?: string
+    passphrase?: Encrypt
   ) {
     this.type = type || 'private-key';
     this.name = name || 'Untitled Server';
     this.address = address || '';
     this.port = port || 22;
     this.username = username || '';
-    this.password = password || '';
+    this.password = password || new Encrypt('');
     this.privateKeyFile = privateKeyFile || '~/.ssh/id_rsa';
-    this.passphrase = passphrase || '';
+    this.passphrase = passphrase || new Encrypt('');
     this.id = uuid.v4();
   }
 
   static fromJSON(raw: any): ServerInfo {
-    return mergeDeep(new ServerInfo(), raw);
+    const base = mergeDeep(new ServerInfo(), raw);
+    base.password = Encrypt.fromJSON(base.password);
+    base.passphrase = Encrypt.fromJSON(base.passphrase);
+    return base;
   }
 }
-
-export type Proxy<T, S> = T & {
-  server?: ServerInfo;
-  connector?: S;
-};
 
 export type ConnectorInfoType = 'sql' | 'http';
 
@@ -109,7 +123,9 @@ export class ConnectorInfo {
 
     switch (raw.type) {
       case 'sql':
-        return mergeDeep(new SQLConnectorInfo(), ci);
+        const base = mergeDeep(new SQLConnectorInfo(), ci);
+        base.password = Encrypt.fromJSON(base.sql.password);
+        return base;
       case 'http':
         return mergeDeep(new HTTPConnectorInfo(), ci);
     }
@@ -179,7 +195,7 @@ export class SQLConnectorInfo extends ConnectorInfo {
     type: SQLConnectorInfoType;
     database: string;
     username: string;
-    password: string;
+    password: Encrypt;
     address: string;
 
     extra: Record<string, string>;
@@ -190,7 +206,7 @@ export class SQLConnectorInfo extends ConnectorInfo {
     type?: SQLConnectorInfoType,
     database?: string,
     username?: string,
-    password?: string,
+    password?: Encrypt,
     address?: string
   ) {
     super('sql', name);
@@ -198,7 +214,7 @@ export class SQLConnectorInfo extends ConnectorInfo {
       type: type || 'postgres',
       database: database || '',
       username: username || '',
-      password: password || '',
+      password: password || new Encrypt(''),
       address: address || '',
       extra: {},
     };

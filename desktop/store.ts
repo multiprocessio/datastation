@@ -2,7 +2,7 @@ import fs from 'fs';
 import fsPromises from 'fs/promises';
 import path from 'path';
 import log from '../shared/log';
-import { ProjectState, SQLConnectorInfo } from '../shared/state';
+import { Encrypt, ProjectState, SQLConnectorInfo } from '../shared/state';
 import { DISK_ROOT, PROJECT_EXTENSION, SYNC_PERIOD } from './constants';
 import { ensureFile } from './fs';
 import { encrypt } from './secret';
@@ -49,37 +49,23 @@ export function getProjectResultsFile(projectId: string) {
   return path.join(DISK_ROOT, '.' + fileName + '.results');
 }
 
-export async function nullProjectSecrets(s: ProjectState) {
-  for (let server of s.servers) {
-    server.passphrase = null;
-    server.password = null;
-  }
-
-  for (let conn of s.connectors) {
-    if (conn.type === 'sql') {
-      const sconn = conn as SQLConnectorInfo;
-      sconn.sql.password = null;
-    }
+async function checkAndEncrypt(e: Encrypt) {
+  if (!e.encrypted) {
+    e.value = await encrypt(e.value);
+    e.encrypted = true;
   }
 }
 
 export async function encryptProjectSecrets(s: ProjectState) {
   for (let server of s.servers) {
-    if (server.passphrase !== null) {
-      server.passphrase = await encrypt(server.passphrase);
-    }
-
-    if (server.password !== null) {
-      server.password = await encrypt(server.password);
-    }
+    await checkAndEncrypt(server.passphrase);
+    await checkAndEncrypt(server.password);
   }
 
   for (let conn of s.connectors) {
     if (conn.type === 'sql') {
       const sconn = conn as SQLConnectorInfo;
-      if (sconn.sql.password !== null) {
-        sconn.sql.password = await encrypt(sconn.sql.password);
-      }
+      checkAndEncrypt(sconn.sql.password);
     }
   }
 }
@@ -91,9 +77,7 @@ export const storeHandlers = [
       const fileName = await ensureProjectFile(projectId);
       try {
         const f = await fsPromises.readFile(fileName);
-        const d = JSON.parse(f.toString());
-        nullProjectSecrets(d);
-        return d;
+        return ProjectState.fromJSON(JSON.parse(f.toString()));
       } catch (e) {
         log.error(e);
         return null;

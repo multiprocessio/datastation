@@ -11,7 +11,7 @@ test('Password shows input and changes', async () => {
   const changeTo = 'my-great-password';
   let changed = '';
   const updateConnector = jest.fn((conn) => {
-    changed = conn.sql.password;
+    changed = conn.sql.password.value;
   });
   const component = enzyme.mount(
     <Password connector={connector} updateConnector={updateConnector} />
@@ -23,7 +23,4 @@ test('Password shows input and changes', async () => {
     .simulate('change', { target: { value: changeTo } });
   await wait(INPUT_SYNC_PERIOD + 100); // Allow local state buffer to propagate
   expect(changed).toBe(changeTo);
-
-  await component.find('input').simulate('blur');
-  expect(changed).toBe(null);
 });

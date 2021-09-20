@@ -4,8 +4,9 @@ import SSH2Promise from 'ssh2-promise';
 import SSH2Config from 'ssh2-promise/lib/sshConfig';
 import { DEBUG } from '../../shared/constants';
 import log from '../../shared/log';
-import { ServerInfo } from '../../shared/state';
+import { ProjectState } from '../../shared/state';
 import { HOME } from '../constants';
+import { Dispatch } from '../rpc';
 import { decrypt } from '../secret';
 
 interface SSHConfig extends SSH2Config {
@@ -21,7 +22,22 @@ export function resolvePath(name: string) {
   return path.resolve(name);
 }
 
-export async function getSSHConfig(server: ServerInfo): Promise<SSHConfig> {
+export async function getSSHConfig(
+  dispatch: Dispatch,
+  projectId: string,
+  serverId: string
+): Promise<SSHConfig> {
+  const project = (await dispatch({
+    resource: 'getProjectState',
+    projectId,
+    args: projectId,
+  })) as ProjectState;
+  const servers = (project.servers || []).filter((s) => s.id === serverId);
+  if (!servers.length) {
+    throw new Error('No such server.');
+  }
+  const server = servers[0];
+
   const config: SSHConfig = {
     host: server.address,
     port: server.port,
@@ -43,29 +59,31 @@ export async function getSSHConfig(server: ServerInfo): Promise<SSHConfig> {
       config.privateKey = buffer.toString();
     }
     if (server.passphrase) {
-      config.passphrase = await decrypt(server.passphrase);
+      config.passphrase = await decrypt(server.passphrase.value);
     }
   }
 
   if (server.type === 'password') {
     config.username = server.username;
-    config.password = await decrypt(server.password);
+    config.password = await decrypt(server.password.value);
   }
 
   return config;
 }
 
 export async function tunnel<T>(
-  server: ServerInfo | null,
+  dispatch: Dispatch,
+  projectId: string,
+  serverId: string,
   destAddress: string,
   destPort: number,
   callback: (host: string, port: number) => Promise<T>
 ) {
-  if (!server) {
+  if (!serverId) {
     return callback(destAddress, destPort);
   }
 
-  const config = await getSSHConfig(server);
+  const config = await getSSHConfig(dispatch, projectId, serverId);
 
   const ssh = new SSH2Promise(config);
   const tunnel = await ssh.addTunnel({

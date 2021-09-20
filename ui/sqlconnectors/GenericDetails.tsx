@@ -6,16 +6,19 @@ import { Host } from './Host';
 import { Password } from './Password';
 import { Username } from './Username';
 
-export function GenericDetails(props: {
+export interface GenericDetailsProps {
   connector: SQLConnectorInfo;
   updateConnector: (c: SQLConnectorInfo) => void;
   servers: Array<ServerInfo>;
-}) {
+  skipDatabase?: boolean;
+}
+
+export function GenericDetails(props: GenericDetailsProps) {
   const { servers, connector, updateConnector } = props;
   return (
     <React.Fragment>
       <Host {...props} />
-      <Database {...props} />
+      {props.skipDatabase ? null : <Database {...props} />}
       <Username {...props} />
       <Password {...props} />
       <ServerPicker

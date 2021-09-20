@@ -2,7 +2,7 @@ import { preview } from 'preview';
 import * as React from 'react';
 import { shape } from 'shape';
 import { MODE } from '../shared/constants';
-import { FilePanelInfo, PanelResult, Proxy, ServerInfo } from '../shared/state';
+import { FilePanelInfo, PanelResult } from '../shared/state';
 import { parseArrayBuffer } from '../shared/text';
 import { asyncRPC } from './asyncRPC';
 import { FileInput } from './component-library/FileInput';
@@ -12,9 +12,7 @@ import { ProjectContext } from './ProjectStore';
 import { ServerPicker } from './ServerPicker';
 
 export async function evalFilePanel(
-  panel: FilePanelInfo,
-  _: any,
-  servers: Array<ServerInfo>
+  panel: FilePanelInfo
 ): Promise<PanelResult> {
   if (MODE === 'browser') {
     const { value, contentType } = await parseArrayBuffer(
@@ -32,13 +30,10 @@ export async function evalFilePanel(
     };
   }
 
-  return await asyncRPC<Proxy<FilePanelInfo, void>, void, PanelResult>(
+  return await asyncRPC<FilePanelInfo, void, PanelResult>(
     'evalFile',
     null,
-    {
-      ...panel,
-      server: servers.find((s) => s.id === panel.serverId),
-    }
+    panel
   );
 }
 

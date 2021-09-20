@@ -101,10 +101,10 @@ export async function evalPanel(
       );
     }
     case 'http': {
-      return await evalHTTPPanel(panel as HTTPPanelInfo, null, servers);
+      return await evalHTTPPanel(panel as HTTPPanelInfo);
     }
     case 'file': {
-      return await evalFilePanel(panel as FilePanelInfo, null, servers);
+      return await evalFilePanel(panel as FilePanelInfo);
     }
     case 'filagg': {
       return await evalFilterAggregatePanel(

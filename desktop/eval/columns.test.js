@@ -44,7 +44,7 @@ test('store and retrieve literal, specific columns', async () => {
       tmp.path,
       null,
       {
-        indexIdMap: { [id]: id },
+        id,
         panelSource: id,
         columns: ['a'],
       }

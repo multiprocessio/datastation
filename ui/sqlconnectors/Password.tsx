@@ -12,12 +12,10 @@ export function Password({
   // Don't try to show initial password
   const [password, setPassword] = React.useState('');
   function syncPassword(p: string) {
-    if (p !== null) {
-      setPassword(p);
-    }
-
+    setPassword(p);
     // Sync typed password to state on change
-    connector.sql.password = p;
+    connector.sql.password.value = p;
+    connector.sql.password.encrypted = false;
     updateConnector(connector);
   }
 
@@ -28,9 +26,6 @@ export function Password({
         type="password"
         value={password}
         onChange={(value: string) => syncPassword(value)}
-        onBlur={
-          () => syncPassword(null) /* Turns off continued attempts to encrypt */
-        }
       />
     </div>
   );

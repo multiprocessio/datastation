@@ -1,5 +1,5 @@
 import express from 'express';
-import { RPCHandler } from '../desktop/rpc';
+import { DispatchPayload, RPCHandler } from '../desktop/rpc';
 import log from '../shared/log';
 
 export async function handleRPC(
@@ -12,7 +12,7 @@ export async function handleRPC(
     ...req.body,
   };
 
-  try {
+  async function dispatch(payload: DispatchPayload) {
     const handler = rpcHandlers.filter(
       (h) => h.resource === payload.resource
     )[0];
@@ -21,11 +21,16 @@ export async function handleRPC(
     }
 
     // TODO: run these in an external process pool
-    const rpcResponse = await handler.handler(
+    return await handler.handler(
       payload.projectId,
       payload.args,
-      payload.body
+      payload.body,
+      dispatch
     );
+  }
+
+  try {
+    const rpcResponse = await dispatch(payload);
     rsp.json(rpcResponse || { message: 'ok' });
   } catch (e) {
     log.error(e);

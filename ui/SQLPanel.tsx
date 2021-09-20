@@ -13,12 +13,13 @@ import { asyncRPC } from './asyncRPC';
 import { Select } from './component-library/Select';
 import { ProjectContext } from './ProjectStore';
 import { ServerPicker } from './ServerPicker';
+import { VENDORS } from './sqlconnectors';
 
 export async function evalSQLPanel(
   panel: SQLPanelInfo,
   indexIdMap: Array<string>,
   connectors: Array<ConnectorInfo>,
-  servers: Array<ServerInfo>,
+  _: Array<ServerInfo>,
   indexShapeMap: Array<Shape>
 ) {
   const connector = connectors.find(
@@ -29,10 +30,7 @@ export async function evalSQLPanel(
     panel.content,
     {
       ...panel,
-      server: servers.find(
-        (s) => s.id === (panel.serverId || connector.serverId)
-      ),
-      connector,
+      serverId: panel.serverId || connector.serverId,
       indexShapeMap,
       indexIdMap,
     }
@@ -59,19 +57,14 @@ export function SQLPanelDetails({
             updatePanel(panel);
           }}
         >
-          <optgroup label="Traditional">
-            <option value="postgres">PostgreSQL</option>
-            <option value="mysql">MySQL</option>
-            <option value="sqlserver">SQL Server</option>
-            <option value="oracle">Oracle</option>
-            <option value="sqlite">SQLite</option>
-          </optgroup>
-          <optgroup label="Analytics">
-            <option value="clickhouse">Clickhouse</option>
-            <option value="snowflake">Snowflake</option>
-            <option value="cassandra">Cassandra</option>
-            {/* <option value="presto">Presto / Trino</option> */}
-          </optgroup>
+          {VENDORS.map((group) => (
+            <optgroup
+              label={group.group}
+              children={group.vendors.map((v) => (
+                <option value={v.id}>{v.name}</option>
+              ))}
+            />
+          ))}
         </Select>
       </div>
       <div className="form-row">

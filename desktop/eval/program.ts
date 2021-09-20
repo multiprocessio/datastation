@@ -6,7 +6,8 @@ import { file as makeTmpFile } from 'tmp-promise';
 import { RPC } from '../../shared/constants';
 import { InvalidDependentPanelError, NoResultError } from '../../shared/errors';
 import { LANGUAGES } from '../../shared/languages';
-import { ProgramPanelInfo, Proxy } from '../../shared/state';
+import { ProgramPanelInfo } from '../../shared/state';
+import { Dispatch } from '../rpc';
 import { SETTINGS } from '../settings';
 import { getProjectResultsFile } from '../store';
 import { rpcEvalHandler } from './eval';
@@ -21,22 +22,14 @@ function killAllByPanelId(panelId: string) {
 }
 
 export const evalProgramHandler = rpcEvalHandler<
-  ProgramPanelInfo & { indexIdMap: Array<string> },
-  void
+  ProgramPanelInfo & { indexIdMap: Array<string> }
 >({
   resource: RPC.EVAL_PROGRAM,
   handler: async function (
     projectId: string,
     _: string,
-    {
-      indexIdMap,
-      ...ppi
-    }: Proxy<
-      ProgramPanelInfo & {
-        indexIdMap: Array<string>;
-      },
-      void
-    >
+    { indexIdMap, ...ppi }: ProgramPanelInfo & { indexIdMap: Array<string> },
+    dispatch: Dispatch
   ) {
     const programTmp = await makeTmpFile();
     const language = LANGUAGES[ppi.program.type];

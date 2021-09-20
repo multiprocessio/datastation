@@ -1,5 +1,5 @@
 import { Pool } from 'pg';
-import { encryptProjectSecrets, nullProjectSecrets } from '../desktop/store';
+import { encryptProjectSecrets } from '../desktop/store';
 import { ProjectState } from '../shared/state';
 import { App } from './app';
 
@@ -42,9 +42,7 @@ export const getProjectHandlers = (app: App) => {
             'SELECT project_value FROM projects WHERE project_name = $1;',
             [projectId]
           );
-          const ps = res.rows[0].project_value;
-          nullProjectSecrets(ps);
-          return ps;
+          return ProjectState.fromJSON(res.rows[0].project_value);
         } finally {
           client.release();
         }

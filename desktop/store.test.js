@@ -7,6 +7,7 @@ const fs = require('fs/promises');
 const { storeHandlers, ensureProjectFile } = require('./store');
 const {
   ProjectState,
+  Encrypt,
   SQLConnectorInfo,
   ServerInfo,
 } = require('../shared/state');
@@ -29,12 +30,12 @@ test('write project with encrypted secrets, read with nulled secrets', async () 
   const testProject = new ProjectState();
   const testServer = new ServerInfo();
   const testServerPassword = 'taffy';
-  testServer.password = testServerPassword;
+  testServer.password = new Encrypt(testServerPassword);
   const testServerPassphrase = 'kewl';
-  testServer.passphrase = testServerPassphrase;
+  testServer.passphrase = new Encrypt(testServerPassphrase);
   const testDatabase = new SQLConnectorInfo();
   const testDatabasePassword = 'kevin';
-  testDatabase.sql.password = testDatabasePassword;
+  testDatabase.sql.password = new Encrypt(testDatabasePassword);
   testProject.servers.push(testServer);
   testProject.connectors.push(testDatabase);
 
@@ -54,22 +55,28 @@ test('write project with encrypted secrets, read with nulled secrets', async () 
     const onDisk = JSON.parse(f.toString());
 
     // Passwords are encrypted
-    expect(onDisk.servers[0].password.length).not.toBe(0);
-    expect(onDisk.servers[0].password).not.toBe(testServerPassword);
-    expect(onDisk.servers[0].passphrase.length).not.toBe(0);
-    expect(onDisk.servers[0].passphrase).not.toBe(testServerPassphrase);
-    expect(onDisk.connectors[0].sql.password.length).not.toBe(0);
+    expect(onDisk.servers[0].password.value.length).not.toBe(0);
+    expect(onDisk.servers[0].password.value).not.toBe(testServerPassword);
+    expect(onDisk.servers[0].password.encrypted).toBe(true);
+    expect(onDisk.servers[0].passphrase.value.length).not.toBe(0);
+    expect(onDisk.servers[0].passphrase.value).not.toBe(testServerPassphrase);
+    expect(onDisk.servers[0].passphrase.encrypted).toBe(true);
+    expect(onDisk.connectors[0].sql.password.value.length).not.toBe(0);
     expect(onDisk.connectors[0].sql.password).not.toBe(testDatabasePassword);
+    expect(onDisk.connectors[0].sql.password.encrypted).toBe(true);
 
     // Passwords come back as null
     const readProject = await getProject.handler(null, projectId);
     testServer.id = onDisk.servers[0].id; // id is generated newly on every instantiation which is ok
-    testServer.password = null;
-    testServer.passphrase = null;
-    testDatabase.sql.password = null;
+    testServer.password.value = null;
+    testServer.password.encrypted = true;
+    testServer.passphrase.value = null;
+    testServer.passphrase.encrypted = true;
+    testDatabase.sql.password.value = null;
+    testDatabase.sql.password.encrypted = true;
     testDatabase.id = onDisk.connectors[0].id; // id is generated newly on every instantiation which is ok
     testProject.id = readProject.id; // id is generated newly on every instantiation which is ok
-    expect(ProjectState.fromJSON(readProject)).toStrictEqual(testProject);
+    expect(readProject).toStrictEqual(testProject);
   } finally {
     try {
       await fs.unlink(projectPath);
@@ -94,7 +101,7 @@ test('write project with encrypted secrets, read with nulled secrets', async () 
     await makeProject.handler(null, { projectId: testProject.projectName });
     const read = await getProject.handler(null, testProject.projectName);
     read.id = testProject.id; // id is generated newly on every instantiation which is ok
-    expect(ProjectState.fromJSON(read)).toStrictEqual(testProject);
+    expect(read).toStrictEqual(testProject);
   } finally {
     const projectPath = await ensureProjectFile(testProject.projectName);
     try {

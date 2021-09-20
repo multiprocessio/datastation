@@ -28,7 +28,8 @@ export function Server({
     });
 
     // Sync typed password to state on change
-    server[which] = p;
+    server[which].value = p;
+    server[which].encrypted = false;
     updateServer(server);
   }
 

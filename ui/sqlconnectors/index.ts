@@ -1,3 +1,4 @@
+import { ClickhouseDetails } from './ClickhouseDetails';
 import { GenericDetails } from './GenericDetails';
 import { SnowflakeDetails } from './SnowflakeDetails';
 
@@ -36,9 +37,9 @@ export const VENDORS = [
     group: 'Analytics',
     vendors: [
       {
-        name: 'Clickhouse',
+        name: 'ClickHouse',
         id: 'clickhouse',
-        details: GenericDetails,
+        details: ClickhouseDetails,
       },
       {
         name: 'Snowflake',

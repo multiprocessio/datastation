@@ -5,12 +5,9 @@ import { MODE } from '../shared/constants';
 import { request } from '../shared/http';
 import {
   ContentTypeInfo,
-  HTTPConnectorInfo,
   HTTPConnectorInfoMethod,
   HTTPPanelInfo,
   PanelResult,
-  Proxy,
-  ServerInfo,
 } from '../shared/state';
 import { asyncRPC } from './asyncRPC';
 import { Button } from './component-library/Button';
@@ -21,11 +18,7 @@ import { ContentTypePicker } from './ContentTypePicker';
 import { ProjectContext } from './ProjectStore';
 import { ServerPicker } from './ServerPicker';
 
-export async function evalHTTPPanel(
-  panel: HTTPPanelInfo,
-  _: any,
-  servers: Array<ServerInfo>
-) {
+export async function evalHTTPPanel(panel: HTTPPanelInfo) {
   if (MODE === 'browser') {
     const { value, contentType } = await request(
       (window as any).fetch,
@@ -46,17 +39,14 @@ export async function evalHTTPPanel(
   }
 
   const connector = panel.http;
-  return await asyncRPC<
-    Proxy<HTTPPanelInfo, HTTPConnectorInfo>,
-    string,
-    PanelResult
-  >('evalHTTP', panel.content, {
-    ...panel,
-    connector,
-    server: servers.find(
-      (s) => s.id === (panel.serverId || connector.serverId)
-    ),
-  });
+  return await asyncRPC<HTTPPanelInfo, string, PanelResult>(
+    'evalHTTP',
+    panel.content,
+    {
+      ...panel,
+      serverId: panel.serverId || connector.serverId,
+    }
+  );
 }
 
 export function HTTPPanelDetails({

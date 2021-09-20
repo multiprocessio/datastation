@@ -38,9 +38,10 @@ export function Connector({
           {expanded ? (
             <Input
               className="connector-name"
-              onChange={(value: string) =>
-                updateConnector({ ...connector, name: value })
-              }
+              onChange={(value: string) => {
+                connector.name = value;
+                updateConnector(connector);
+              }}
               value={connector.name}
             />
           ) : (
