@@ -101,10 +101,10 @@ export async function evalPanel(
       );
     }
     case 'http': {
-      return await evalHTTPPanel(panel as HTTPPanelInfo, null, servers);
+      return await evalHTTPPanel(panel as HTTPPanelInfo);
     }
     case 'file': {
-      return await evalFilePanel(panel as FilePanelInfo, null, servers);
+      return await evalFilePanel(panel as FilePanelInfo);
     }
     case 'filagg': {
       return await evalFilterAggregatePanel(
@@ -618,7 +618,11 @@ export function Panel({
                       <Alert type="error">
                         <div>Error evaluating panel:</div>
                         <pre>
-                          <code>{exception.stack || exception.message}</code>
+                          <code>
+                            {exception.stack ||
+                              exception.message ||
+                              String(exception)}
+                          </code>
                         </pre>
                       </Alert>
                     )

@@ -1,8 +1,9 @@
 import { preview } from 'preview';
 import * as React from 'react';
 import { shape } from 'shape';
-import { MODE } from '../shared/constants';
+import { MODE, RPC } from '../shared/constants';
 import { InvalidDependentPanelError } from '../shared/errors';
+import { EvalColumnsBody } from '../shared/rpc';
 import {
   PanelInfo,
   PanelResult,
@@ -47,19 +48,15 @@ export async function evalColumnPanel(
     }
   }
 
-  return await asyncRPC<
+  return await asyncRPC<EvalColumnsBody, void, PanelResult>(
+    RPC.EVAL_COLUMNS,
+    null,
     {
-      columns: Array<string>;
-      panelSource: number;
-      indexIdMap: Array<string>;
-    },
-    void,
-    PanelResult
-  >('evalColumns', null, {
-    panelSource,
-    indexIdMap,
-    columns,
-  });
+      id: indexIdMap[panelSource],
+      columns,
+      panelSource,
+    }
+  );
 }
 
 export function TablePanelDetails({

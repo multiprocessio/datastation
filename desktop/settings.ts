@@ -3,7 +3,7 @@ import * as uuid from 'uuid';
 import { LANGUAGES, SupportedLanguages } from '../shared/languages';
 import log from '../shared/log';
 import { mergeDeep } from '../shared/object';
-import { ensureFile } from './store';
+import { ensureFile } from './fs';
 
 export class LanguageSettings {
   path: string;
@@ -14,7 +14,7 @@ export class LanguageSettings {
 }
 
 export class Settings {
-  uid: string;
+  id: string;
   lastProject?: string;
   languages: Record<SupportedLanguages, LanguageSettings>;
   file: string;
@@ -22,12 +22,12 @@ export class Settings {
 
   constructor(
     file: string,
-    uid?: string,
+    id?: string,
     lastProject?: string,
     languages?: Record<SupportedLanguages, LanguageSettings>,
     stdoutMaxSize?: number
   ) {
-    this.uid = uid || uuid.v4();
+    this.id = id || uuid.v4();
     this.lastProject = lastProject || '';
     this.languages =
       languages ||
@@ -53,9 +53,15 @@ export class Settings {
     let existingSettings: Partial<Settings> = {
       file: settingsFile,
     };
-    if (existingSettingsString) {
+    let s: string = '';
+    if (existingSettingsString && (s = existingSettingsString.toString())) {
       try {
-        existingSettings = JSON.parse(existingSettingsString.toString());
+        existingSettings = JSON.parse(s);
+        // Migrate from .uid to .id
+        if ((existingSettings as any).uid) {
+          existingSettings.id = (existingSettings as any).uid;
+          delete (existingSettings as any).uid;
+        }
       } catch (e) {
         const backupFile = settingsFile + '.bak';
         log.error(
@@ -86,8 +92,10 @@ export class Settings {
 
 export let SETTINGS: Settings = null;
 
-export async function loadSettings(): Promise<Settings> {
-  const settingsFile = '.settings';
+export async function loadSettings(settingsFile?: string): Promise<Settings> {
+  if (!settingsFile) {
+    settingsFile = '.settings';
+  }
   const fullName = await ensureFile(settingsFile);
   SETTINGS = await Settings.fromFile(fullName);
   return SETTINGS;

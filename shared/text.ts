@@ -90,7 +90,13 @@ export async function parseArrayBuffer(
     return { value: null, contentType: 'unknown' };
   }
 
-  const bodyAsString = () => new TextDecoder('utf-8').decode(body);
+  const bodyAsString = () => {
+    if (typeof body === 'string') {
+      return body;
+    }
+
+    return new TextDecoder('utf-8').decode(body);
+  };
   let realType = type.split(';')[0];
   if (realType === '') {
     const fileBits = fileName.split('.');
@@ -206,7 +212,7 @@ export function humanSize(n: number) {
 
   const gb = mb / 1000;
   if (gb < 1000) {
-    return `${mb.toFixed(2)}GB`;
+    return `${gb.toFixed(2)}GB`;
   }
 
   const tb = gb / 1000;
@@ -214,9 +220,12 @@ export function humanSize(n: number) {
 }
 
 export function title(s: string) {
-  return s.replace(/[^\s`~!@#$%^&+\-*=_()[\]{};:'"\\|,<.>/?]+/g, (match) => {
-    const first = match.charAt(0).toUpperCase();
-    const rest = match.slice(1).toLowerCase();
-    return first + rest;
-  });
+  return s
+    .split(/[_\-\ ]+/g)
+    .map((match) => {
+      const first = match.charAt(0).toUpperCase();
+      const rest = match.slice(1).toLowerCase();
+      return first + rest;
+    })
+    .join(' ');
 }

@@ -1,5 +1,4 @@
 import fs from 'fs/promises';
-import path from 'path';
 import { randomBytes, secretbox } from 'tweetnacl';
 import {
   decodeBase64,
@@ -7,16 +6,20 @@ import {
   encodeBase64,
   encodeUTF8,
 } from 'tweetnacl-util';
-import { DISK_ROOT } from './constants';
+import { ensureFile } from './fs';
 
-function getSigningKeyPath() {
-  return path.join(DISK_ROOT, '.signingkey');
+function getSigningKeyPath(signingKeyPath?: string) {
+  return ensureFile(signingKeyPath || '.signingKey');
 }
 
-export async function ensureSigningKey() {
-  const signingKeyPath = getSigningKeyPath();
+export async function ensureSigningKey(signingKeyPath?: string) {
+  signingKeyPath = await getSigningKeyPath(signingKeyPath);
+
   try {
-    await fs.access(signingKeyPath);
+    const current = await fs.readFile(signingKeyPath);
+    if (!current.length) {
+      throw new Error();
+    }
   } catch (e) {
     const newKey = encodeBase64(randomBytes(secretbox.keyLength));
     await fs.writeFile(signingKeyPath, newKey);
@@ -24,8 +27,8 @@ export async function ensureSigningKey() {
   }
 }
 
-export async function encrypt(msg: string) {
-  const signingKeyPath = getSigningKeyPath();
+export async function encrypt(msg: string, signingKeyPath?: string) {
+  signingKeyPath = await getSigningKeyPath(signingKeyPath);
   const key = await fs.readFile(signingKeyPath, { encoding: 'utf-8' });
 
   const keyUint8Array = decodeBase64(key);
@@ -41,8 +44,12 @@ export async function encrypt(msg: string) {
   return base64FullMessage;
 }
 
-export async function decrypt(msgWithNonce: string) {
-  const signingKeyPath = getSigningKeyPath();
+export async function decrypt(msgWithNonce: string, signingKeyPath?: string) {
+  if (msgWithNonce === null) {
+    return '';
+  }
+
+  signingKeyPath = await getSigningKeyPath(signingKeyPath);
   const key = await fs.readFile(signingKeyPath, { encoding: 'utf-8' });
 
   const keyUint8Array = decodeBase64(key);

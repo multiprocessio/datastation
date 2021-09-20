@@ -2,8 +2,15 @@ import fs from 'fs';
 import fsPromises from 'fs/promises';
 import path from 'path';
 import log from '../shared/log';
-import { ProjectState, SQLConnectorInfo } from '../shared/state';
+import {
+  Encrypt,
+  ProjectState,
+  ServerInfo,
+  SQLConnectorInfo,
+} from '../shared/state';
 import { DISK_ROOT, PROJECT_EXTENSION, SYNC_PERIOD } from './constants';
+import { ensureFile } from './fs';
+import { Dispatch } from './rpc';
 import { encrypt } from './secret';
 
 const buffers: Record<
@@ -48,37 +55,36 @@ export function getProjectResultsFile(projectId: string) {
   return path.join(DISK_ROOT, '.' + fileName + '.results');
 }
 
-export async function nullProjectSecrets(s: ProjectState) {
-  for (let server of s.servers) {
-    server.passphrase = null;
-    server.password = null;
-  }
-
-  for (let conn of s.connectors) {
-    if (conn.type === 'sql') {
-      const sconn = conn as SQLConnectorInfo;
-      sconn.sql.password = null;
-    }
+async function checkAndEncrypt(e: Encrypt, existing: Encrypt) {
+  if (e.value === null) {
+    e.value = existing.value;
+    e.encrypted = true;
+  } else if (!e.encrypted) {
+    e.value = await encrypt(e.value);
+    e.encrypted = true;
   }
 }
 
-export async function encryptProjectSecrets(s: ProjectState) {
-  for (let server of s.servers) {
-    if (server.passphrase !== null) {
-      server.passphrase = await encrypt(server.passphrase);
-    }
-
-    if (server.password !== null) {
-      server.password = await encrypt(server.password);
-    }
+export async function encryptProjectSecrets(
+  s: ProjectState,
+  existingState: ProjectState
+) {
+  for (const server of s.servers) {
+    const existingServer =
+      existingState.servers.filter((s) => s.id === server.id)[0] ||
+      new ServerInfo();
+    await checkAndEncrypt(server.passphrase, existingServer.passphrase);
+    await checkAndEncrypt(server.password, existingServer.password);
   }
 
-  for (let conn of s.connectors) {
+  for (const conn of s.connectors) {
     if (conn.type === 'sql') {
       const sconn = conn as SQLConnectorInfo;
-      if (sconn.sql.password !== null) {
-        sconn.sql.password = await encrypt(sconn.sql.password);
-      }
+      const existingSConn =
+        (existingState.connectors.filter(
+          (c) => c.id === sconn.id
+        )[0] as SQLConnectorInfo) || new SQLConnectorInfo();
+      await checkAndEncrypt(sconn.sql.password, existingSConn.sql.password);
     }
   }
 }
@@ -86,11 +92,19 @@ export async function encryptProjectSecrets(s: ProjectState) {
 export const storeHandlers = [
   {
     resource: 'getProjectState',
-    handler: async (_: string, projectId: string) => {
+    handler: async (
+      _: string,
+      projectId: string,
+      { internal }: { internal?: boolean } = {}
+    ) => {
       const fileName = await ensureProjectFile(projectId);
       try {
         const f = await fsPromises.readFile(fileName);
-        return JSON.parse(f.toString());
+        const ps = JSON.parse(f.toString()) as ProjectState;
+        if (internal) {
+          return ps;
+        }
+        return ProjectState.fromJSON(ps);
       } catch (e) {
         log.error(e);
         return null;
@@ -99,9 +113,16 @@ export const storeHandlers = [
   },
   {
     resource: 'updateProjectState',
-    handler: async (projectId: string, _: string, newState: ProjectState) => {
-      await encryptProjectSecrets(newState);
+    handler: async (
+      projectId: string,
+      _: string,
+      newState: ProjectState,
+      dispatch: Dispatch
+    ) => {
       const fileName = await ensureProjectFile(projectId);
+      const f = await fsPromises.readFile(fileName);
+      const existingState = JSON.parse(f.toString());
+      await encryptProjectSecrets(newState, existingState);
       return writeFileBuffered(fileName, JSON.stringify(newState));
     },
   },
@@ -113,7 +134,9 @@ export const storeHandlers = [
       _1: void
     ) => {
       const fileName = await ensureProjectFile(projectId);
-      return writeFileBuffered(fileName, JSON.stringify(new ProjectState()));
+      const newProject = new ProjectState();
+      newProject.projectName = projectId;
+      return fsPromises.writeFile(fileName, JSON.stringify(newProject));
     },
   },
 ];
@@ -125,10 +148,4 @@ export function ensureProjectFile(projectId: string) {
   }
 
   return ensureFile(projectId + '.' + PROJECT_EXTENSION);
-}
-
-export async function ensureFile(f: string) {
-  let root = path.isAbsolute(f) ? path.dirname(f) : DISK_ROOT;
-  await fsPromises.mkdir(root, { recursive: true });
-  return path.isAbsolute(f) ? f : path.join(DISK_ROOT, f);
 }

@@ -1,25 +1,17 @@
 import fs from 'fs/promises';
 import { RPC } from '../../shared/constants';
+import { EvalColumnsBody } from '../../shared/rpc';
 import { columnsFromObject } from '../../shared/table';
 import { getProjectResultsFile } from '../store';
 import { rpcEvalHandler } from './eval';
 
-export const evalColumnsHandler = rpcEvalHandler({
+export const evalColumnsHandler = rpcEvalHandler<EvalColumnsBody>({
   resource: RPC.EVAL_COLUMNS,
   handler: async function (
     projectId: string,
     _1: string,
-    {
-      indexIdMap,
-      panelSource,
-      columns,
-    }: {
-      indexIdMap: Array<string>;
-      columns: Array<string>;
-      panelSource: number;
-    }
+    { id, columns, panelSource }: EvalColumnsBody
   ) {
-    const id = indexIdMap[panelSource];
     const projectResultsFile = getProjectResultsFile(projectId);
     const f = await fs.readFile(projectResultsFile + id);
     const value = JSON.parse(f.toString());
@@ -37,10 +29,18 @@ export const evalColumnsHandler = rpcEvalHandler({
   },
 });
 
-export const storeLiteralHandler = rpcEvalHandler({
+export const storeLiteralHandler = rpcEvalHandler<{
+  value: string;
+  id: string;
+}>({
   resource: RPC.STORE_LITERAL,
-  handler: function (_: string, _1: string, { value }: { value: any }) {
-    return Promise.resolve({ value });
+  handler: async function (
+    projectId: string,
+    _1: string,
+    { value }: { value: any }
+  ) {
+    // This should get written to disk by rpcEvalHandler
+    return { value };
   },
 });
 
