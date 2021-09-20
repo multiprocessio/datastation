@@ -418,7 +418,7 @@ export async function evalSQLHandlerInternal(
     throw new Error('No such connector.');
   }
 
-  const connector = project.connectors[0] as SQLConnectorInfo;
+  const connector = connectors[0] as SQLConnectorInfo;
 
   // SQLite is file, not network based so handle separately.
   if (info.sql.type === 'sqlite') {
