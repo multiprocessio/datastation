@@ -1,6 +1,7 @@
 import fs from 'fs/promises';
 import { EOL } from 'os';
 import util from 'util';
+import { DEBUG } from '../shared/constants';
 import { logger } from '../shared/log';
 import { LOG_FILE } from './constants';
 import { ensureFile } from './fs';
@@ -16,7 +17,9 @@ export async function configureLogger() {
   logger.INFO = (...args: any[]) => {
     try {
       const msg = util.format(...args);
-      console.log(msg);
+      if (DEBUG) {
+        console.log(msg);
+      }
       logFd.appendFile(msg + EOL);
     } catch (e) {
       console.error(e);
@@ -28,7 +31,9 @@ export async function configureLogger() {
     try {
       const e = new Error();
       const msg = util.format(...args) + EOL + e.stack;
-      console.log(msg);
+      if (DEBUG) {
+        console.log(msg);
+      }
       logFd.appendFile(msg + EOL);
     } catch (e) {
       console.error(e);
