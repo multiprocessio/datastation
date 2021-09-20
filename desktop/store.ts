@@ -135,7 +135,7 @@ export const storeHandlers = [
     ) => {
       const fileName = await ensureProjectFile(projectId);
       const newProject = new ProjectState();
-      newProject.projectName = projectId;
+      newProject.projectName = fileName;
       return fsPromises.writeFile(fileName, JSON.stringify(newProject));
     },
   },

@@ -92,7 +92,7 @@ test('write project with encrypted secrets, read with nulled secrets', async () 
 
 test('write project with encrypted secrets, read with nulled secrets', async () => {
   const testProject = new ProjectState();
-  testProject.projectName = 'unittestproject2';
+  testProject.projectName = path.join(os.homedir(), 'unittestproject2.dsproj');
 
   try {
     await makeProject.handler(null, { projectId: testProject.projectName });
