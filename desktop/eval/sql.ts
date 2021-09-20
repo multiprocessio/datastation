@@ -24,7 +24,11 @@ import {
 } from '../../shared/errors';
 import log from '../../shared/log';
 import { SQLEvalBody } from '../../shared/rpc';
-import { ProjectState, SQLConnectorInfo } from '../../shared/state';
+import {
+  ProjectState,
+  SQLConnectorInfo,
+  SQLPanelInfo,
+} from '../../shared/state';
 import { Dispatch } from '../rpc';
 import { decrypt } from '../secret';
 import { getProjectResultsFile } from '../store';
@@ -292,8 +296,71 @@ async function evalSnowflake(content: string, { sql }: SQLConnectorInfo) {
   return { value: rows };
 }
 
+export function formatSQLiteImportQueryAndRows(
+  tableName: string,
+  columns: Array<{ name: string }>,
+  data: Array<{ value: any }>
+): [string, Array<any>] {
+  const columnsDDL = columns.map((c) => `'${c.name}'`).join(', ');
+  const values = data
+    .map(({ value: row }) => '(' + columns.map((c) => '?') + ')')
+    .join(', ');
+  const query = `INSERT INTO ${tableName} (${columnsDDL}) VALUES ${values};`;
+  const rows = data
+    .map(({ value: row }) => columns.map((c) => row[c.name]))
+    .flat();
+  return [query, rows];
+}
+
+async function sqliteImportAndRun(
+  db: sqlite.Database,
+  projectId: string,
+  panel: SQLPanelInfo,
+  query: string,
+  panelsToImport: Array<PanelToImport>
+) {
+  for (const panel of panelsToImport) {
+    const ddlColumns = panel.columns
+      .map((c) => `${c.name} ${c.type}`)
+      .join(', ');
+    log.info('Creating temp table ' + panel.tableName);
+    await db.exec(`CREATE TEMPORARY TABLE ${panel.tableName} (${ddlColumns});`);
+
+    const panelResultsFile = getProjectResultsFile(projectId) + panel.panelId;
+
+    await new Promise((resolve, reject) => {
+      try {
+        const pipeline = chain([
+          fs.createReadStream(panelResultsFile),
+          json.parser(),
+          streamArray(),
+          new Batch({ batchSize: 1000 }),
+          async (data: Array<{ value: any }>) => {
+            const [query, rows] = formatSQLiteImportQueryAndRows(
+              panel.tableName,
+              panel.columns,
+              data
+            );
+            await db.run(query, ...rows);
+          },
+        ]);
+        pipeline.on('error', reject);
+        pipeline.on('finish', resolve);
+      } catch (e) {
+        reject(e);
+      }
+    });
+  }
+
+  if (panelsToImport.length) {
+    log.info('Done ingestion');
+  }
+
+  return db.all(query);
+}
+
 async function evalSQLite(
-  content: string,
+  query: string,
   info: SQLEvalBody,
   connector: SQLConnectorInfo,
   projectId: string,
@@ -308,60 +375,21 @@ async function evalSQLite(
       driver: sqlite3.Database,
     });
 
-    for (const panel of panelsToImport) {
-      const ddlColumns = panel.columns
-        .map((c) => `${c.name} ${c.type}`)
-        .join(', ');
-      log.info('Creating temp table ' + panel.tableName);
-      await db.exec(
-        `CREATE TEMPORARY TABLE ${panel.tableName} (${ddlColumns});`
+    try {
+      return await sqliteImportAndRun(
+        db,
+        projectId,
+        info,
+        query,
+        panelsToImport
       );
-
-      const panelResultsFile = getProjectResultsFile(projectId) + panel.panelId;
-
-      await new Promise((resolve, reject) => {
-        try {
-          const pipeline = chain([
-            fs.createReadStream(panelResultsFile),
-            json.parser(),
-            streamArray(),
-            new Batch({ batchSize: 100 }),
-            async (data: Array<{ value: any }>) => {
-              log.info('Inserting into temp table ' + panel.tableName);
-              try {
-                const columns = panel.columns
-                  .map((c) => `'${c.name}'`)
-                  .join(', ');
-                const values = data
-                  .map(
-                    ({ value: row }) =>
-                      '(' +
-                      panel.columns.map((c) => `"${row[c.name]}"`).join(', ') +
-                      ')'
-                  )
-                  .join(', ');
-                const query = `INSERT INTO ${panel.tableName} (${columns}) VALUES ${values};`;
-                await db.exec(query);
-              } catch (e) {
-                reject(e);
-              } finally {
-                return data;
-              }
-            },
-          ]);
-          pipeline.on('error', reject);
-          pipeline.on('finish', resolve);
-        } catch (e) {
-          reject(e);
-        }
-      });
+    } finally {
+      try {
+        await db.close();
+      } catch (e) {
+        console.error(e);
+      }
     }
-
-    if (panelsToImport.length) {
-      log.info('Done ingestion');
-    }
-
-    return db.all(content);
   }
 
   if (info.serverId) {

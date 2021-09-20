@@ -12,6 +12,7 @@ export class PanelResult {
   shape: Shape;
   size: number;
   contentType: string;
+  elapsed?: number;
 
   constructor() {
     this.stdout = '';
@@ -19,6 +20,7 @@ export class PanelResult {
     this.preview = '';
     this.size = 0;
     this.contentType = 'unknown';
+    this.elapsed = 0;
   }
 }
 
@@ -394,6 +396,7 @@ export class FilterAggregatePanelInfo extends PanelInfo {
     aggregateOn: string;
     sortOn: string;
     sortAsc: boolean;
+    limit: number;
   };
 
   constructor(
@@ -405,7 +408,8 @@ export class FilterAggregatePanelInfo extends PanelInfo {
     aggregateOn?: string,
     sortOn?: string,
     sortAsc?: boolean,
-    content?: string
+    content?: string,
+    limit?: number
   ) {
     super('filagg', name, content);
     this.filagg = {
@@ -416,6 +420,7 @@ export class FilterAggregatePanelInfo extends PanelInfo {
       aggregateOn: aggregateOn || '',
       sortOn: sortOn || '',
       sortAsc: sortAsc || false,
+      limit: 100,
     };
   }
 }

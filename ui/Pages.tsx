@@ -50,6 +50,7 @@ export function Pages({
 
   async function reevalPanel(panelId: string, reset?: boolean) {
     const { connectors, servers } = state;
+    const start = new Date();
 
     const panelIndex = page.panels.findIndex((p) => p.id === panelId);
     if (panelIndex === -1) {
@@ -79,6 +80,7 @@ export function Pages({
         );
       panel.resultMeta = {
         lastRun: new Date(),
+        elapsed: new Date().valueOf() - start.valueOf(),
         value,
         preview,
         stdout,
@@ -95,6 +97,7 @@ export function Pages({
 
       panel.resultMeta = {
         loading: false,
+        elapsed: new Date().valueOf() - start.valueOf(),
         lastRun: new Date(),
         exception: e,
         stdout: e.stdout,
