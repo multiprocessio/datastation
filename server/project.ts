@@ -81,7 +81,6 @@ export const getProjectHandlers = (app: App) => {
       resource: 'makeProject',
       handler: async (
         _0: string,
-        _1: void,
         { projectId }: { projectId: string }
       ) => {
         const client = await app.dbpool.connect();
