@@ -108,19 +108,19 @@ function useProjectState(
     projectId === DEFAULT_PROJECT.projectName;
 
   // Set up undo mechanism
-  React.useEffect(() => {
-    function handleUndo(e: KeyboardEvent) {
-      if ((e.ctrlKey || e.metaKey) && e.code === 'KeyZ') {
-        const prevState = store.undo(projectId);
-        if (prevState) {
-          setState(prevState, false);
-        }
-      }
-    }
+  /* React.useEffect(() => {
+   *   function handleUndo(e: KeyboardEvent) {
+   *     if ((e.ctrlKey || e.metaKey) && e.code === 'KeyZ') {
+   *       const prevState = store.undo(projectId);
+   *       if (prevState) {
+   *         setState(prevState, false);
+   *       }
+   *     }
+   *   }
 
-    document.addEventListener('keydown', handleUndo);
-    return () => document.removeEventListener('keydown', handleUndo);
-  }, []);
+   *   document.addEventListener('keydown', handleUndo);
+   *   return () => document.removeEventListener('keydown', handleUndo);
+   * }, []); */
 
   // Re-read state when projectId changes
   React.useEffect(() => {
