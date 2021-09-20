@@ -12,6 +12,7 @@ type Base = {
   onRead?: (value: ArrayBuffer) => void;
   allowManualEntry?: boolean;
   allowFilePicker?: boolean;
+  placeholder?: string;
 };
 
 // SOURCE: https://stackoverflow.com/a/49725198/1507139
@@ -36,11 +37,17 @@ export function FileInput({
   value,
   allowManualEntry,
   allowFilePicker,
+  placeholder,
 }: Props) {
   let inputClass = `input ${className ? ' ' + className : ''}`;
 
   const manualInput = (
-    <Input autoWidth={true} value={value} onChange={onChange} />
+    <Input
+      placeholder={placeholder}
+      autoWidth={true}
+      value={value}
+      onChange={onChange}
+    />
   );
 
   const input = (

@@ -1,7 +1,9 @@
 import * as React from 'react';
+import { MODE } from '../shared/constants';
 import { ServerInfo, ServerInfoType } from '../shared/state';
 import { Button } from './component-library/Button';
 import { Confirm } from './component-library/Confirm';
+import { FileInput } from './component-library/FileInput';
 import { Input } from './component-library/Input';
 import { Select } from './component-library/Select';
 
@@ -121,12 +123,14 @@ export function Server({
           {server.type === 'private-key' ? (
             <React.Fragment>
               <div className="form-row">
-                <Input
+                <FileInput
                   label="Private Key"
                   value={server.privateKeyFile}
                   placeholder="~/.ssh/id_rsa"
-                  onChange={(value: string) => {
-                    server.privateKeyFile = value;
+                  allowManualEntry
+                  allowFilePicker={MODE === 'desktop'}
+                  onChange={(fileName: string) => {
+                    server.privateKeyFile = fileName;
                     updateServer(server);
                   }}
                 />
