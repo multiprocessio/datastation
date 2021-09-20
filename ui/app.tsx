@@ -251,7 +251,9 @@ function App() {
       setProjects(projects);
     }
 
-    load();
+    if (MODE === 'server' && !projects) {
+      load();
+    }
   }, []);
 
   if ((!state && projectId) || (MODE === 'server' && !projects)) {
