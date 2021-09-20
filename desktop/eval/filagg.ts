@@ -35,7 +35,13 @@ export const evalFilterAggregateHandler =
         groupByClause = `GROUP BY ${groupBy}`;
       }
       const whereClause = filter ? 'WHERE ' + filter : '';
-      const orderByClause = `ORDER BY "${sortOn}" ${sortAsc ? 'ASC' : 'DESC'}`;
+          let sort = sortOn;
+    if ((sortOn || '').startsWith('Aggregate: ')) {
+      sort = `${aggregateType.toUpperCase()}(${
+        aggregateOn ? '`' + aggregateOn + '`' : 1
+      })`;
+    }
+    const orderByClause = `ORDER BY ${sort} ${sortAsc ? 'ASC' : 'DESC'}`;
       const query = `SELECT ${columns} FROM DM_getPanel(${panelSource}) ${whereClause} ${groupByClause} ${orderByClause} LIMIT ${limit}`;
 
       const tmp = await makeTmpFile();

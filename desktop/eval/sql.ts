@@ -322,7 +322,6 @@ async function evalSQLite(
             streamArray(),
             new Batch({ batchSize: 1000 }),
             async (data: Array<{ value: any }>) => {
-              log.info('Inserting into temp table ' + panel.tableName);
               const columns = panel.columns
                 .map((c) => `'${c.name}'`)
                 .join(', ');

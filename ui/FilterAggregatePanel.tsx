@@ -1,5 +1,5 @@
 import React from 'react';
-import { shape, Shape } from 'shape';
+import { shape, Shape, ArrayShape, ObjectShape } from 'shape';
 import { MODE, RPC } from '../shared/constants';
 import { InvalidDependentPanelError } from '../shared/errors';
 import { LANGUAGES } from '../shared/languages';
@@ -18,6 +18,24 @@ import { Select } from './component-library/Select';
 import { Input } from './component-library/Input';
 import { FieldPicker } from './FieldPicker';
 import { PanelSourcePicker } from './PanelSourcePicker';
+
+function withAggregateShape(r: PanelResult, p: FilterAggregatePanelInfo): PanelResult {
+  if (r.shape.kind !== 'array') {
+    return r;
+  }
+
+  const array = r.shape as ArrayShape;
+  if (array.children.kind !== 'object') {
+    return r;
+  }
+
+  const obj = array.children as ObjectShape;
+  if (p.filagg.aggregateType !== 'none') {
+    return { ...p, shape: { ...array, children: { ...obj, children: { ...obj.children, ['Aggregate: ' + title(p.filagg.aggregateType)]: { kind: 'scalar', name: 'number' } } } } };
+  }
+
+  return p;
+}
 
 export async function evalFilterAggregatePanel(
   panel: FilterAggregatePanelInfo,
@@ -50,7 +68,13 @@ export async function evalFilterAggregatePanel(
       groupByClause = `GROUP BY \`${groupBy}\``;
     }
     const whereClause = filter ? 'WHERE ' + filter : '';
-    const orderByClause = `ORDER BY ${sortOn} ${sortAsc ? 'ASC' : 'DESC'}`;
+    let sort = sortOn;
+    if ((sortOn || '').startsWith('Aggregate: ')) {
+      sort = `${aggregateType.toUpperCase()}(${
+        aggregateOn ? '`' + aggregateOn + '`' : 1
+      })`;
+    }
+    const orderByClause = `ORDER BY ${sort} ${sortAsc ? 'ASC' : 'DESC'}`;
     const query = `SELECT ${columns} FROM DM_getPanel(${panelSource}) ${whereClause} ${groupByClause} ${orderByClause} LIMIT ${limit}`;
 
     const language = LANGUAGES.sql;
@@ -175,7 +199,7 @@ export function FilterAggregatePanelDetails({
           <FieldPicker
             preferredDefaultType="number"
             label="Field"
-            panelSourceResult={data}
+            panelSourceResult={withAggregateShape(data, panel)}
             value={panel.filagg.sortOn}
             onChange={(value: string) => {
               panel.filagg.sortOn = value;

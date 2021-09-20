@@ -1,3 +1,4 @@
+import intervalToDuration from 'date-fns/intervalToDuration';
 import * as CSV from 'papaparse';
 import * as XLSX from 'xlsx';
 import log from './log';

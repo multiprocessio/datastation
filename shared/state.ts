@@ -12,6 +12,7 @@ export class PanelResult {
   shape: Shape;
   size: number;
   contentType: string;
+  elapsed: number;
 
   constructor() {
     this.stdout = '';
@@ -19,6 +20,7 @@ export class PanelResult {
     this.preview = '';
     this.size = 0;
     this.contentType = 'unknown';
+    this.elapsed = 0;
   }
 }
 
