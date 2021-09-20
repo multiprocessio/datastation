@@ -420,7 +420,7 @@ export async function evalSQLHandlerInternal(
   const connectors = (project.connectors || []).filter(
     (c) => c.id === info.sql.connectorId
   );
-  if (!connectors.length) {
+  if (!connectors.length && !(info as any).connector) {
     throw new Error('No such connector.');
   }
 
