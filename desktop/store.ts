@@ -49,23 +49,34 @@ export function getProjectResultsFile(projectId: string) {
   return path.join(DISK_ROOT, '.' + fileName + '.results');
 }
 
-async function checkAndEncrypt(e: Encrypt) {
-  if (!e.encrypted) {
+async function checkAndEncrypt(e: Encrypt, existing: Encrypt) {
+  if (e.value === null) {
+    e.value = existing.value;
+    e.encrypted = true;
+  } else if (!e.encrypted) {
     e.value = await encrypt(e.value);
     e.encrypted = true;
   }
 }
 
-export async function encryptProjectSecrets(s: ProjectState) {
-  for (let server of s.servers) {
-    await checkAndEncrypt(server.passphrase);
-    await checkAndEncrypt(server.password);
+export async function encryptProjectSecrets(
+  s: ProjectState,
+  existingState: ProjectState
+) {
+  for (let i = 0; i < s.servers.length; i++) {
+    const server = s.servers[i];
+    await checkAndEncrypt(
+      server.passphrase,
+      existingState.servers[i].passphrase
+    );
+    await checkAndEncrypt(server.password, existingState.servers[i].password);
   }
 
-  for (let conn of s.connectors) {
+  for (let i = 0; i < s.connectors.length; i++) {
     if (conn.type === 'sql') {
       const sconn = conn as SQLConnectorInfo;
-      await checkAndEncrypt(sconn.sql.password);
+      const existingSConn = existingState.connectors[i] as SQLConnectorInfo;
+      await checkAndEncrypt(sconn.sql.password, existingSConn.sql.password);
     }
   }
 }
@@ -86,8 +97,18 @@ export const storeHandlers = [
   },
   {
     resource: 'updateProjectState',
-    handler: async (projectId: string, _: string, newState: ProjectState) => {
-      await encryptProjectSecrets(newState);
+    handler: async (
+      projectId: string,
+      _: string,
+      newState: ProjectState,
+      dispatch: Dispatch
+    ) => {
+      const existingState = (await dispatch({
+        resource: 'getProjectState',
+        projectId,
+        args: projectId,
+      })) as ProjectState;
+      await encryptProjectSecrets(newState, existingState);
       const fileName = await ensureProjectFile(projectId);
       return writeFileBuffered(fileName, JSON.stringify(newState));
     },
