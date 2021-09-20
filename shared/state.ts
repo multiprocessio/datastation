@@ -394,6 +394,7 @@ export class FilterAggregatePanelInfo extends PanelInfo {
     aggregateOn: string;
     sortOn: string;
     sortAsc: boolean;
+    limit: number;
   };
 
   constructor(
@@ -405,7 +406,8 @@ export class FilterAggregatePanelInfo extends PanelInfo {
     aggregateOn?: string,
     sortOn?: string,
     sortAsc?: boolean,
-    content?: string
+    content?: string,
+    limit?: number
   ) {
     super('filagg', name, content);
     this.filagg = {
@@ -416,6 +418,7 @@ export class FilterAggregatePanelInfo extends PanelInfo {
       aggregateOn: aggregateOn || '',
       sortOn: sortOn || '',
       sortAsc: sortAsc || false,
+      limit: 100,
     };
   }
 }

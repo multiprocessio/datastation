@@ -15,6 +15,7 @@ import { asyncRPC } from './asyncRPC';
 import { CodeEditor } from './component-library/CodeEditor';
 import { FormGroup } from './component-library/FormGroup';
 import { Select } from './component-library/Select';
+import { Input } from './component-library/Input';
 import { FieldPicker } from './FieldPicker';
 import { PanelSourcePicker } from './PanelSourcePicker';
 
@@ -33,6 +34,7 @@ export async function evalFilterAggregatePanel(
       filter,
       sortOn,
       sortAsc,
+      limit,
     } = panel.filagg;
 
     if (!panelResults || !panelResults[panelSource]) {
@@ -49,7 +51,7 @@ export async function evalFilterAggregatePanel(
     }
     const whereClause = filter ? 'WHERE ' + filter : '';
     const orderByClause = `ORDER BY ${sortOn} ${sortAsc ? 'ASC' : 'DESC'}`;
-    const query = `SELECT ${columns} FROM DM_getPanel(${panelSource}) ${whereClause} ${groupByClause} ${orderByClause}`;
+    const query = `SELECT ${columns} FROM DM_getPanel(${panelSource}) ${whereClause} ${groupByClause} ${orderByClause} LIMIT ${limit}`;
 
     const language = LANGUAGES.sql;
     const res = await language.inMemoryEval(query, panelResults);
@@ -174,7 +176,7 @@ export function FilterAggregatePanelDetails({
             preferredDefaultType="number"
             label="Field"
             panelSourceResult={data}
-            value={panel.filagg.aggregateOn}
+            value={panel.filagg.sortOn}
             onChange={(value: string) => {
               panel.filagg.sortOn = value;
               updatePanel(panel);
@@ -192,6 +194,19 @@ export function FilterAggregatePanelDetails({
             <option value="asc">Ascending</option>
           </Select>
         </div>
+      </FormGroup>
+      <FormGroup label="Limit">
+        <div className="form-row">
+          <Input
+	  onChange={(value: string) => {
+	  panel.filagg.limit = +value;
+	  updatePanel(panel);
+}}
+value={panel.filagg.limit}
+min={1}
+	  type="number"
+          />
+</div>
       </FormGroup>
     </React.Fragment>
   );

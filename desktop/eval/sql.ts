@@ -302,12 +302,7 @@ async function evalSQLite(
 ) {
   let sqlitefile = connector.sql.database;
 
-  async function run() {
-    const db = await sqlite.open({
-      filename: sqlitefile,
-      driver: sqlite3.Database,
-    });
-
+  async function runAndImport(db: sqlite.Database) {
     for (const panel of panelsToImport) {
       const ddlColumns = panel.columns
         .map((c) => `${c.name} ${c.type}`)
@@ -325,28 +320,23 @@ async function evalSQLite(
             fs.createReadStream(panelResultsFile),
             json.parser(),
             streamArray(),
-            new Batch({ batchSize: 100 }),
+            new Batch({ batchSize: 1000 }),
             async (data: Array<{ value: any }>) => {
               log.info('Inserting into temp table ' + panel.tableName);
-              try {
-                const columns = panel.columns
-                  .map((c) => `'${c.name}'`)
-                  .join(', ');
-                const values = data
-                  .map(
-                    ({ value: row }) =>
-                      '(' +
-                      panel.columns.map((c) => `"${row[c.name]}"`).join(', ') +
-                      ')'
-                  )
-                  .join(', ');
-                const query = `INSERT INTO ${panel.tableName} (${columns}) VALUES ${values};`;
-                await db.exec(query);
-              } catch (e) {
-                reject(e);
-              } finally {
-                return data;
-              }
+              const columns = panel.columns
+                .map((c) => `'${c.name}'`)
+                .join(', ');
+              const values = data
+                .map(
+                  ({ value: row }) =>
+                    '(' +
+                    panel.columns.map((c) => '?') +
+                    ')'
+                )
+                .join(', ');
+              const query = `INSERT INTO ${panel.tableName} (${columns}) VALUES ${values};`;
+	      const rows = data.map(({ value: row }) => panel.columns.map(c => row[c.name])).flat();
+              await db.run(query, ...rows);
             },
           ]);
           pipeline.on('error', reject);
@@ -363,6 +353,24 @@ async function evalSQLite(
 
     return db.all(content);
   }
+
+  async function run() {
+  
+    const db = await sqlite.open({
+      filename: sqlitefile,
+      driver: sqlite3.Database,
+    });
+
+    try {
+    return await runAndImport(db);
+} finally {
+try {
+await db.close();
+} catch (e) {
+console.error(e);
+}
+}
+}
 
   if (info.serverId) {
     const localCopy = await makeTmpFile();

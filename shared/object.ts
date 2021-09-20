@@ -58,7 +58,7 @@ export function validate(
 ) {
   requiredFields.forEach((field) => {
     if (!getPath(obj, field)) {
-      handler(field.replace('?', ''));
+      handler(field.replaceAll('?', ''));
     }
   });
 }

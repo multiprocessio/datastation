@@ -1,5 +1,6 @@
 import { file as makeTmpFile } from 'tmp-promise';
 import { RPC } from '../../shared/constants';
+import log from '../../shared/log';
 import { FilterAggregateEvalBody } from '../../shared/rpc';
 import { SQLConnectorInfo, SQLPanelInfo } from '../../shared/state';
 import { Dispatch } from '../rpc';
@@ -23,6 +24,7 @@ export const evalFilterAggregateHandler =
         filter,
         sortOn,
         sortAsc,
+	limit,
       } = panel.filagg;
       let columns = '*';
       let groupByClause = '';
@@ -34,9 +36,10 @@ export const evalFilterAggregateHandler =
       }
       const whereClause = filter ? 'WHERE ' + filter : '';
       const orderByClause = `ORDER BY "${sortOn}" ${sortAsc ? 'ASC' : 'DESC'}`;
-      const query = `SELECT ${columns} FROM DM_getPanel(${panelSource}) ${whereClause} ${groupByClause} ${orderByClause}`;
+      const query = `SELECT ${columns} FROM DM_getPanel(${panelSource}) ${whereClause} ${groupByClause} ${orderByClause} LIMIT ${limit}`;
 
       const tmp = await makeTmpFile();
+      log.info('Filagg loading into ' + tmp.path);
       try {
         const body = {
           indexIdMap,
@@ -46,7 +49,11 @@ export const evalFilterAggregateHandler =
         };
         return await evalSQLHandlerInternal(projectId, query, body, dispatch);
       } finally {
+      try {
         await tmp.cleanup();
+	} catch (e) {
+	log.error(e);
+}
       }
     },
   });
