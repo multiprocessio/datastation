@@ -169,12 +169,17 @@ async function evalOracle(
   { sql }: SQLConnectorInfo
 ) {
   const oracledb = require('oracledb');
-  oracledb.outFormat = oracledb.OUT_FORMAT_ARRAY;
+  oracledb.outFormat = oracledb.OBJECT;
   const client = await oracledb.getConnection({
     user: sql.username,
     password: sql.password.value,
     connectString: `${host}:${port}/${sql.database}`,
   });
+
+while (content.endsWith(';')) {
+content = content.slice(0, -1);
+}
+
   try {
     const res = await client.execute(content);
     return { value: res.rows };
