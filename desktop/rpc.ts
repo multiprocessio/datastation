@@ -59,6 +59,7 @@ export function registerRPCHandlers(
           isError: true,
           body: {
             // Not all fields get pulled out unless explicitly requested
+            ...e,
             stack: e.stack,
             message: e.message,
             name: e.name,

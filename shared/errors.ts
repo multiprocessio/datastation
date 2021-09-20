@@ -23,6 +23,14 @@ export class NoResultError extends Error {
   }
 }
 
+export class NoConnectorError extends Error {
+  constructor() {
+    super();
+    this.name = 'NoConnectorError';
+    this.message = 'Without a connector this panel cannot be run.';
+  }
+}
+
 export class UnsupportedError extends Error {
   constructor(msg: string) {
     super();
@@ -36,4 +44,5 @@ export const EVAL_ERRORS = [
   InvalidDependentPanelError,
   NoResultError,
   UnsupportedError,
+  NoConnectorError,
 ];

@@ -618,7 +618,11 @@ export function Panel({
                       <Alert type="error">
                         <div>Error evaluating panel:</div>
                         <pre>
-                          <code>{exception.stack || exception.message}</code>
+                          <code>
+                            {exception.stack ||
+                              exception.message ||
+                              String(exception)}
+                          </code>
                         </pre>
                       </Alert>
                     )

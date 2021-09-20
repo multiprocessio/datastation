@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { Shape } from 'shape';
+import { NoConnectorError } from '../shared/errors';
 import { SQLEvalBody } from '../shared/rpc';
 import {
   ConnectorInfo,
@@ -25,6 +26,10 @@ export async function evalSQLPanel(
   const connector = connectors.find(
     (c) => c.id === panel.sql.connectorId
   ) as SQLConnectorInfo;
+  if (!connector) {
+    throw new NoConnectorError();
+  }
+
   return await asyncRPC<SQLEvalBody, string, PanelResult>(
     'evalSQL',
     panel.content,
@@ -45,6 +50,25 @@ export function SQLPanelDetails({
   updatePanel: (d: SQLPanelInfo) => void;
 }) {
   const { connectors, servers } = React.useContext(ProjectContext);
+
+  const vendorConnectors = connectors
+    .map((c: ConnectorInfo) => {
+      if (
+        c.type !== 'sql' ||
+        (c as SQLConnectorInfo).sql.type !== panel.sql.type
+      ) {
+        return null;
+      }
+
+      return c;
+    })
+    .filter(Boolean);
+
+  React.useEffect(() => {
+    if (!vendorConnectors.length && panel.sql.connectorId) {
+      panel.sql.connectorId = '';
+    }
+  });
 
   return (
     <React.Fragment>
@@ -68,31 +92,24 @@ export function SQLPanelDetails({
         </Select>
       </div>
       <div className="form-row">
-        <Select
-          label="Connector"
-          value={panel.sql.connectorId}
-          onChange={(connectorId: string) => {
-            panel.sql.connectorId = connectorId;
-            updatePanel(panel);
-          }}
-        >
-          {connectors
-            .map((c: ConnectorInfo) => {
-              if (
-                c.type !== 'sql' ||
-                (c as SQLConnectorInfo).sql.type !== panel.sql.type
-              ) {
-                return null;
-              }
-
-              return (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              );
-            })
-            .filter(Boolean)}
-        </Select>
+        {vendorConnectors.length === 0 ? (
+          'No connectors have been created for this vendor yet.'
+        ) : (
+          <Select
+            label="Connector"
+            value={panel.sql.connectorId}
+            onChange={(connectorId: string) => {
+              panel.sql.connectorId = connectorId;
+              updatePanel(panel);
+            }}
+          >
+            {vendorConnectors.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
+          </Select>
+        )}
       </div>
       <ServerPicker
         servers={servers}

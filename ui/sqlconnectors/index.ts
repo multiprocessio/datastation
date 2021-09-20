@@ -9,7 +9,7 @@ export const VENDORS: Array<{
     name: string;
     id: SQLConnectorInfoType;
     details: typeof GenericDetails;
-  }>
+  }>;
 }> = [
   {
     group: 'Traditional',
