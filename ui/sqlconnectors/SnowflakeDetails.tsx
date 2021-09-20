@@ -19,8 +19,9 @@ export function SnowflakeDetails(props: {
           connector.sql.extra.account = value;
           updateConnector(connector);
         }}
+        placeholder="qqlavcs-aa92002"
       />
-      <Database {...props} />
+      <Database {...props} placeholder="SNOWFLAKE_SAMPLE_DATA" />
       <Username {...props} />
       <Password {...props} />
     </React.Fragment>

@@ -5,9 +5,11 @@ import { Input } from '../component-library/Input';
 export function Database({
   connector,
   updateConnector,
+  placeholder,
 }: {
   connector: SQLConnectorInfo;
   updateConnector: (c: SQLConnectorInfo) => void;
+  placeholder?: string;
 }) {
   return (
     <div className="form-row">
@@ -18,6 +20,7 @@ export function Database({
           connector.sql.database = value;
           updateConnector(connector);
         }}
+        placeholder={placeholder}
       />
     </div>
   );
