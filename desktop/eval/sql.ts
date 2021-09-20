@@ -24,7 +24,11 @@ import {
 } from '../../shared/errors';
 import log from '../../shared/log';
 import { SQLEvalBody } from '../../shared/rpc';
-import { ProjectState, SQLConnectorInfo } from '../../shared/state';
+import {
+  ProjectState,
+  SQLConnectorInfo,
+  SQLPanelInfo,
+} from '../../shared/state';
 import { Dispatch } from '../rpc';
 import { decrypt } from '../secret';
 import { getProjectResultsFile } from '../store';
@@ -296,7 +300,7 @@ export function formatSQLiteImportQueryAndRows(
   tableName: string,
   columns: Array<{ name: string }>,
   data: Array<{ value: any }>
-) {
+): [string, Array<any>] {
   const columnsDDL = columns.map((c) => `'${c.name}'`).join(', ');
   const values = data
     .map(({ value: row }) => '(' + columns.map((c) => '?') + ')')
@@ -310,8 +314,10 @@ export function formatSQLiteImportQueryAndRows(
 
 async function sqliteImportAndRun(
   db: sqlite.Database,
+  projectId: string,
+  panel: SQLPanelInfo,
   query: string,
-  panelsToImport: Array<PanelsToImport>
+  panelsToImport: Array<PanelToImport>
 ) {
   for (const panel of panelsToImport) {
     const ddlColumns = panel.columns
@@ -370,7 +376,13 @@ async function evalSQLite(
     });
 
     try {
-      return await sqliteImportAndRun(db, query, panelsToImport);
+      return await sqliteImportAndRun(
+        db,
+        projectId,
+        info,
+        query,
+        panelsToImport
+      );
     } finally {
       try {
         await db.close();
