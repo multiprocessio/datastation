@@ -105,7 +105,7 @@ export function FilterAggregatePanelDetails({
             id={panel.id + 'filter'}
             label="Expression"
             placeholder="x LIKE '%town%' AND y IN (1, 2)"
-            value={panel.content}
+            value={panel.filagg.filter}
             onChange={(value: string) => {
               panel.filagg.filter = value;
               updatePanel(panel);
