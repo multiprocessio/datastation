@@ -409,6 +409,7 @@ export async function evalSQLHandlerInternal(
     resource: 'getProjectState',
     projectId,
     args: projectId,
+    body: { internal: true },
   })) as ProjectState;
 
   const connectors = (project.connectors || []).filter(

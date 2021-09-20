@@ -31,6 +31,7 @@ export async function getSSHConfig(
     resource: 'getProjectState',
     projectId,
     args: projectId,
+    body: { internal: true, },
   })) as ProjectState;
   const servers = (project.servers || []).filter((s) => s.id === serverId);
   if (!servers.length) {

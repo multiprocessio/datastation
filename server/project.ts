@@ -35,14 +35,18 @@ export const getProjectHandlers = (app: App) => {
     },
     {
       resource: 'getProjectState',
-      handler: async (_: string, projectId: string): Promise<ProjectState> => {
+      handler: async (_: string, projectId: string, { internal?: boolean }): Promise<ProjectState> => {
         const client = await app.dbpool.connect();
         try {
           const res = await app.dbpool.query(
             'SELECT project_value FROM projects WHERE project_name = $1;',
             [projectId]
           );
-          return ProjectState.fromJSON(res.rows[0].project_value);
+          const ps = res.rows[0].project_value;
+          if (internal) {
+            return ps
+          }
+          return ProjectState.fromJSON(ps);
         } finally {
           client.release();
         }

@@ -86,11 +86,15 @@ export async function encryptProjectSecrets(
 export const storeHandlers = [
   {
     resource: 'getProjectState',
-    handler: async (_: string, projectId: string) => {
+    handler: async (_: string, projectId: string, { internal?: boolean }) => {
       const fileName = await ensureProjectFile(projectId);
       try {
         const f = await fsPromises.readFile(fileName);
-        return ProjectState.fromJSON(JSON.parse(f.toString()));
+        const ps = JSON.parse(f.toString()) as ProjectState;
+        if (internal) {
+          return ps;
+        };
+        return ProjectState.fromJSON(ps);
       } catch (e) {
         log.error(e);
         return null;
