@@ -58,8 +58,8 @@ export function ContentTypePicker({
             autoWidth
             type="text"
             value={value.customLineRegexp}
-            onChange={(customLineRegexp: string) => {
-              value.customLineRegexp = value;
+            onChange={(clr: string) => {
+              value.customLineRegexp = clr;
               onChange(value);
             }}
           />
