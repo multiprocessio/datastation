@@ -79,10 +79,7 @@ export const getProjectHandlers = (app: App) => {
     },
     {
       resource: 'makeProject',
-      handler: async (
-        _0: string,
-        { projectId }: { projectId: string }
-      ) => {
+      handler: async (_0: string, { projectId }: { projectId: string }) => {
         const client = await app.dbpool.connect();
         try {
           await app.dbpool.query(
