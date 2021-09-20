@@ -2,7 +2,12 @@ import fs from 'fs';
 import fsPromises from 'fs/promises';
 import path from 'path';
 import log from '../shared/log';
-import { Encrypt, ProjectState, SQLConnectorInfo } from '../shared/state';
+import {
+  Encrypt,
+  ProjectState,
+  ServerInfo,
+  SQLConnectorInfo,
+} from '../shared/state';
 import { DISK_ROOT, PROJECT_EXTENSION, SYNC_PERIOD } from './constants';
 import { ensureFile } from './fs';
 import { Dispatch } from './rpc';
@@ -64,20 +69,21 @@ export async function encryptProjectSecrets(
   s: ProjectState,
   existingState: ProjectState
 ) {
-  for (let i = 0; i < s.servers.length; i++) {
-    const server = s.servers[i];
-    await checkAndEncrypt(
-      server.passphrase,
-      existingState.servers[i].passphrase
-    );
-    await checkAndEncrypt(server.password, existingState.servers[i].password);
+  for (const server of s.servers) {
+    const existingServer =
+      existingState.servers.filter((s) => s.id === server.id)[0] ||
+      new ServerInfo();
+    await checkAndEncrypt(server.passphrase, existingServer.passphrase);
+    await checkAndEncrypt(server.password, existingServer.password);
   }
 
-  for (let i = 0; i < s.connectors.length; i++) {
-    const conn = s.connectors[i];
+  for (const conn of s.connectors) {
     if (conn.type === 'sql') {
       const sconn = conn as SQLConnectorInfo;
-      const existingSConn = existingState.connectors[i] as SQLConnectorInfo;
+      const existingSConn =
+        (existingState.connectors.filter(
+          (c) => c.id === sconn.id
+        )[0] as SQLConnectorInfo) || new SQLConnectorInfo();
       await checkAndEncrypt(sconn.sql.password, existingSConn.sql.password);
     }
   }

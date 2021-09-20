@@ -13,14 +13,17 @@ const {
 } = require('../shared/state');
 const { ensureSigningKey } = require('./secret');
 
-test('write project with encrypted secrets, read with nulled secrets', async () => {
-  const updateProject = storeHandlers.filter(
-    (r) => r.resource === 'updateProjectState'
-  )[0];
-  const getProject = storeHandlers.filter(
-    (r) => r.resource === 'getProjectState'
-  )[0];
+const makeProject = storeHandlers.filter(
+  (r) => r.resource === 'makeProject'
+)[0];
+const getProject = storeHandlers.filter(
+  (r) => r.resource === 'getProjectState'
+)[0];
+const updateProject = storeHandlers.filter(
+  (r) => r.resource === 'updateProjectState'
+)[0];
 
+test('write project with encrypted secrets, read with nulled secrets', async () => {
   // Shouldn't be harmful even though it is potentially creating a new
   // real file. It's value is valid and wouldn't overwrite an existing
   // one. Just necessary to call so that in tests this is definitely
@@ -46,6 +49,7 @@ test('write project with encrypted secrets, read with nulled secrets', async () 
   );
 
   try {
+    await makeProject.handler(null, { projectId });
     await updateProject.handler(projectId, null, testProject);
 
     // Wait to make sure file has been written
@@ -87,13 +91,6 @@ test('write project with encrypted secrets, read with nulled secrets', async () 
 });
 
 test('write project with encrypted secrets, read with nulled secrets', async () => {
-  const makeProject = storeHandlers.filter(
-    (r) => r.resource === 'makeProject'
-  )[0];
-  const getProject = storeHandlers.filter(
-    (r) => r.resource === 'getProjectState'
-  )[0];
-
   const testProject = new ProjectState();
   testProject.projectName = 'unittestproject2';
 
