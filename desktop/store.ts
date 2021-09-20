@@ -5,6 +5,7 @@ import log from '../shared/log';
 import { Encrypt, ProjectState, SQLConnectorInfo } from '../shared/state';
 import { DISK_ROOT, PROJECT_EXTENSION, SYNC_PERIOD } from './constants';
 import { ensureFile } from './fs';
+import { Dispatch} from '../rpc';
 import { encrypt } from './secret';
 
 const buffers: Record<
@@ -73,6 +74,7 @@ export async function encryptProjectSecrets(
   }
 
   for (let i = 0; i < s.connectors.length; i++) {
+    const conn = s.connectors[i];
     if (conn.type === 'sql') {
       const sconn = conn as SQLConnectorInfo;
       const existingSConn = existingState.connectors[i] as SQLConnectorInfo;
