@@ -24,7 +24,7 @@ export const evalFilterAggregateHandler =
         filter,
         sortOn,
         sortAsc,
-	limit,
+        limit,
       } = panel.filagg;
       let columns = '*';
       let groupByClause = '';
@@ -35,13 +35,13 @@ export const evalFilterAggregateHandler =
         groupByClause = `GROUP BY ${groupBy}`;
       }
       const whereClause = filter ? 'WHERE ' + filter : '';
-          let sort = sortOn;
-    if ((sortOn || '').startsWith('Aggregate: ')) {
-      sort = `${aggregateType.toUpperCase()}(${
-        aggregateOn ? '`' + aggregateOn + '`' : 1
-      })`;
-    }
-    const orderByClause = `ORDER BY ${sort} ${sortAsc ? 'ASC' : 'DESC'}`;
+      let sort = sortOn;
+      if ((sortOn || '').startsWith('Aggregate: ')) {
+        sort = `${aggregateType.toUpperCase()}(${
+          aggregateOn ? '`' + aggregateOn + '`' : 1
+        })`;
+      }
+      const orderByClause = `ORDER BY ${sort} ${sortAsc ? 'ASC' : 'DESC'}`;
       const query = `SELECT ${columns} FROM DM_getPanel(${panelSource}) ${whereClause} ${groupByClause} ${orderByClause} LIMIT ${limit}`;
 
       const tmp = await makeTmpFile();
@@ -55,11 +55,11 @@ export const evalFilterAggregateHandler =
         };
         return await evalSQLHandlerInternal(projectId, query, body, dispatch);
       } finally {
-      try {
-        await tmp.cleanup();
-	} catch (e) {
-	log.error(e);
-}
+        try {
+          await tmp.cleanup();
+        } catch (e) {
+          log.error(e);
+        }
       }
     },
   });

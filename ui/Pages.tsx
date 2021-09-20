@@ -80,7 +80,7 @@ export function Pages({
         );
       panel.resultMeta = {
         lastRun: new Date(),
-	elapsed: start.valueOf() - (new Date()).valueOf(),
+        elapsed: new Date().valueOf() - start.valueOf(),
         value,
         preview,
         stdout,
@@ -97,7 +97,7 @@ export function Pages({
 
       panel.resultMeta = {
         loading: false,
-	elapsed: start.valueOf() - (new Date()).valueOf(),
+        elapsed: new Date().valueOf() - start.valueOf(),
         lastRun: new Date(),
         exception: e,
         stdout: e.stdout,

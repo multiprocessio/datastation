@@ -1,5 +1,5 @@
 import React from 'react';
-import { shape, Shape, ArrayShape, ObjectShape } from 'shape';
+import { ArrayShape, ObjectShape, shape, Shape } from 'shape';
 import { MODE, RPC } from '../shared/constants';
 import { InvalidDependentPanelError } from '../shared/errors';
 import { LANGUAGES } from '../shared/languages';
@@ -14,12 +14,15 @@ import { title } from '../shared/text';
 import { asyncRPC } from './asyncRPC';
 import { CodeEditor } from './component-library/CodeEditor';
 import { FormGroup } from './component-library/FormGroup';
-import { Select } from './component-library/Select';
 import { Input } from './component-library/Input';
+import { Select } from './component-library/Select';
 import { FieldPicker } from './FieldPicker';
 import { PanelSourcePicker } from './PanelSourcePicker';
 
-function withAggregateShape(r: PanelResult, p: FilterAggregatePanelInfo): PanelResult {
+function withAggregateShape(
+  r: PanelResult,
+  p: FilterAggregatePanelInfo
+): PanelResult {
   if (r.shape.kind !== 'array') {
     return r;
   }
@@ -31,7 +34,22 @@ function withAggregateShape(r: PanelResult, p: FilterAggregatePanelInfo): PanelR
 
   const obj = array.children as ObjectShape;
   if (p.filagg.aggregateType !== 'none') {
-    return { ...p, shape: { ...array, children: { ...obj, children: { ...obj.children, ['Aggregate: ' + title(p.filagg.aggregateType)]: { kind: 'scalar', name: 'number' } } } } };
+    return {
+      ...p,
+      shape: {
+        ...array,
+        children: {
+          ...obj,
+          children: {
+            ...obj.children,
+            ['Aggregate: ' + title(p.filagg.aggregateType)]: {
+              kind: 'scalar',
+              name: 'number',
+            },
+          },
+        },
+      },
+    };
   }
 
   return p;
@@ -222,15 +240,15 @@ export function FilterAggregatePanelDetails({
       <FormGroup label="Limit">
         <div className="form-row">
           <Input
-	  onChange={(value: string) => {
-	  panel.filagg.limit = +value;
-	  updatePanel(panel);
-}}
-value={panel.filagg.limit}
-min={1}
-	  type="number"
+            onChange={(value: string) => {
+              panel.filagg.limit = +value;
+              updatePanel(panel);
+            }}
+            value={String(panel.filagg.limit)}
+            min={1}
+            type="number"
           />
-</div>
+        </div>
       </FormGroup>
     </React.Fragment>
   );

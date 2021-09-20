@@ -327,14 +327,13 @@ async function evalSQLite(
                 .join(', ');
               const values = data
                 .map(
-                  ({ value: row }) =>
-                    '(' +
-                    panel.columns.map((c) => '?') +
-                    ')'
+                  ({ value: row }) => '(' + panel.columns.map((c) => '?') + ')'
                 )
                 .join(', ');
               const query = `INSERT INTO ${panel.tableName} (${columns}) VALUES ${values};`;
-	      const rows = data.map(({ value: row }) => panel.columns.map(c => row[c.name])).flat();
+              const rows = data
+                .map(({ value: row }) => panel.columns.map((c) => row[c.name]))
+                .flat();
               await db.run(query, ...rows);
             },
           ]);
@@ -354,22 +353,21 @@ async function evalSQLite(
   }
 
   async function run() {
-  
     const db = await sqlite.open({
       filename: sqlitefile,
       driver: sqlite3.Database,
     });
 
     try {
-    return await runAndImport(db);
-} finally {
-try {
-await db.close();
-} catch (e) {
-console.error(e);
-}
-}
-}
+      return await runAndImport(db);
+    } finally {
+      try {
+        await db.close();
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  }
 
   if (info.serverId) {
     const localCopy = await makeTmpFile();

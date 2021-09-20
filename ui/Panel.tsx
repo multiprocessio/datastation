@@ -1,5 +1,5 @@
-import formatDistanceToNow from 'date-fns/formatDistanceToNow';
 import formatDistanceStrict from 'date-fns/formatDistanceStrict';
+import formatDistanceToNow from 'date-fns/formatDistanceToNow';
 import circularSafeStringify from 'json-stringify-safe';
 import * as CSV from 'papaparse';
 import * as React from 'react';
@@ -464,7 +464,15 @@ export function Panel({
                     </span>{' '}
                     {formatDistanceToNow(results.lastRun, {
                       addSuffix: true,
-                    })}<div><small>{formatDistanceStrict(results.lastRun.valueOf() - results.elapsed, results.lastRun.valueOf())}</small></div>
+                    })}
+                    <div>
+                      <small>
+                        {formatDistanceStrict(
+                          results.lastRun.valueOf() - (results.elapsed || 0),
+                          results.lastRun.valueOf()
+                        )}
+                      </small>
+                    </div>
                   </>
                 ) : (
                   'Run to apply changes'
