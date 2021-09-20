@@ -1,14 +1,22 @@
+import { SQLConnectorInfoType } from '../../shared/state';
 import { ClickhouseDetails } from './ClickhouseDetails';
 import { GenericDetails } from './GenericDetails';
 import { SnowflakeDetails } from './SnowflakeDetails';
 
-export const VENDORS = [
+export const VENDORS: Array<{
+  group: string;
+  vendors: Array<{
+    name: string;
+    id: SQLConnectorInfoType;
+    details: typeof GenericDetails;
+  }>
+}> = [
   {
     group: 'Traditional',
     vendors: [
       {
         name: 'PostgreSQL',
-        id: 'postgresql',
+        id: 'postgres',
         details: GenericDetails,
       },
       {
