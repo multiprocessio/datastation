@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { SQLConnectorInfo } from '../../shared/state';
 import { Input } from '../component-library/Input';
-import { Host } from './Host';
+import { Database } from './Database';
 import { Password } from './Password';
 import { Username } from './Username';
 
@@ -13,14 +13,14 @@ export function SnowflakeDetails(props: {
   return (
     <React.Fragment>
       <Input
-        label="Account"
+        label="Account ID"
         value={connector.sql.extra.account}
         onChange={(value: string) => {
           connector.sql.extra.account = value;
           updateConnector(connector);
         }}
       />
-      <Host {...props} />
+      <Database {...props} />
       <Username {...props} />
       <Password {...props} />
     </React.Fragment>

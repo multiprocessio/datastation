@@ -15,7 +15,9 @@ export async function configureLogger() {
 
   logger.INFO = (...args: any[]) => {
     try {
-      logFd.appendFile(util.format(...args) + EOL);
+      const msg = util.format(...args);
+      console.log(msg);
+      logFd.appendFile(msg + EOL);
     } catch (e) {
       console.error(e);
       open();
@@ -25,7 +27,9 @@ export async function configureLogger() {
   logger.ERROR = (...args: any[]) => {
     try {
       const e = new Error();
-      logFd.appendFile(util.format(...args) + EOL + e.stack + EOL);
+      const msg = util.format(...args) + EOL + e.stack;
+      console.log(msg);
+      logFd.appendFile(msg + EOL);
     } catch (e) {
       console.error(e);
       open();
