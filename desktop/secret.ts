@@ -45,6 +45,10 @@ export async function encrypt(msg: string, signingKeyPath?: string) {
 }
 
 export async function decrypt(msgWithNonce: string, signingKeyPath?: string) {
+  if (msgWithNonce === null) {
+    return '';
+  }
+
   signingKeyPath = await getSigningKeyPath(signingKeyPath);
   const key = await fs.readFile(signingKeyPath, { encoding: 'utf-8' });
 

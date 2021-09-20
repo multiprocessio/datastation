@@ -176,9 +176,9 @@ async function evalOracle(
     connectString: `${host}:${port}/${sql.database}`,
   });
 
-while (content.endsWith(';')) {
-content = content.slice(0, -1);
-}
+  while (content.endsWith(';')) {
+    content = content.slice(0, -1);
+  }
 
   try {
     const res = await client.execute(content);
