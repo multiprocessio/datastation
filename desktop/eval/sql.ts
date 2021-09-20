@@ -292,8 +292,69 @@ async function evalSnowflake(content: string, { sql }: SQLConnectorInfo) {
   return { value: rows };
 }
 
+export function formatSQLiteImportQueryAndRows(
+  tableName: string,
+  columns: Array<{ name: string }>,
+  data: Array<{ value: any }>
+) {
+  const columnsDDL = columns.map((c) => `'${c.name}'`).join(', ');
+  const values = data
+    .map(({ value: row }) => '(' + columns.map((c) => '?') + ')')
+    .join(', ');
+  const query = `INSERT INTO ${tableName} (${columnsDDL}) VALUES ${values};`;
+  const rows = data
+    .map(({ value: row }) => columns.map((c) => row[c.name]))
+    .flat();
+  return [query, rows];
+}
+
+async function sqliteImportAndRun(
+  db: sqlite.Database,
+  query: string,
+  panelsToImport: Array<PanelsToImport>
+) {
+  for (const panel of panelsToImport) {
+    const ddlColumns = panel.columns
+      .map((c) => `${c.name} ${c.type}`)
+      .join(', ');
+    log.info('Creating temp table ' + panel.tableName);
+    await db.exec(`CREATE TEMPORARY TABLE ${panel.tableName} (${ddlColumns});`);
+
+    const panelResultsFile = getProjectResultsFile(projectId) + panel.panelId;
+
+    await new Promise((resolve, reject) => {
+      try {
+        const pipeline = chain([
+          fs.createReadStream(panelResultsFile),
+          json.parser(),
+          streamArray(),
+          new Batch({ batchSize: 1000 }),
+          async (data: Array<{ value: any }>) => {
+            const [query, rows] = formatSQLiteImportQueryAndRows(
+              panel.tableName,
+              panel.columns,
+              data
+            );
+            await db.run(query, ...rows);
+          },
+        ]);
+        pipeline.on('error', reject);
+        pipeline.on('finish', resolve);
+      } catch (e) {
+        reject(e);
+      }
+    });
+  }
+
+  if (panelsToImport.length) {
+    log.info('Done ingestion');
+  }
+
+  return db.all(query);
+}
+
 async function evalSQLite(
-  content: string,
+  query: string,
   info: SQLEvalBody,
   connector: SQLConnectorInfo,
   projectId: string,
@@ -302,56 +363,6 @@ async function evalSQLite(
 ) {
   let sqlitefile = connector.sql.database;
 
-  async function runAndImport(db: sqlite.Database) {
-    for (const panel of panelsToImport) {
-      const ddlColumns = panel.columns
-        .map((c) => `${c.name} ${c.type}`)
-        .join(', ');
-      log.info('Creating temp table ' + panel.tableName);
-      await db.exec(
-        `CREATE TEMPORARY TABLE ${panel.tableName} (${ddlColumns});`
-      );
-
-      const panelResultsFile = getProjectResultsFile(projectId) + panel.panelId;
-
-      await new Promise((resolve, reject) => {
-        try {
-          const pipeline = chain([
-            fs.createReadStream(panelResultsFile),
-            json.parser(),
-            streamArray(),
-            new Batch({ batchSize: 1000 }),
-            async (data: Array<{ value: any }>) => {
-              const columns = panel.columns
-                .map((c) => `'${c.name}'`)
-                .join(', ');
-              const values = data
-                .map(
-                  ({ value: row }) => '(' + panel.columns.map((c) => '?') + ')'
-                )
-                .join(', ');
-              const query = `INSERT INTO ${panel.tableName} (${columns}) VALUES ${values};`;
-              const rows = data
-                .map(({ value: row }) => panel.columns.map((c) => row[c.name]))
-                .flat();
-              await db.run(query, ...rows);
-            },
-          ]);
-          pipeline.on('error', reject);
-          pipeline.on('finish', resolve);
-        } catch (e) {
-          reject(e);
-        }
-      });
-    }
-
-    if (panelsToImport.length) {
-      log.info('Done ingestion');
-    }
-
-    return db.all(content);
-  }
-
   async function run() {
     const db = await sqlite.open({
       filename: sqlitefile,
@@ -359,7 +370,7 @@ async function evalSQLite(
     });
 
     try {
-      return await runAndImport(db);
+      return await sqliteImportAndRun(db, query, panelsToImport);
     } finally {
       try {
         await db.close();

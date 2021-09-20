@@ -1,5 +1,8 @@
 const { shape } = require('shape');
-const { transformDM_getPanelCalls } = require('./sql');
+const {
+  formatSQLiteImportQueryAndRows,
+  transformDM_getPanelCalls,
+} = require('./sql');
 
 const panel0Data = [
   {
@@ -42,4 +45,14 @@ test('transform DM_getPanel calls', () => {
       ],
     },
   ]);
+});
+
+test('format sqlite import query and rows', () => {
+  const [query, rows] = formatSQLiteImportQueryAndRows(
+    't1',
+    [{ name: 'a' }, { name: 'x' }],
+    panel0Data.map((d) => ({ value: d }))
+  );
+  expect(query).toBe("INSERT INTO t1 ('a', 'x') VALUES (?,?), (?,?);");
+  expect(rows).toStrictEqual(['cara', 1, 'demi', 2]);
 });
