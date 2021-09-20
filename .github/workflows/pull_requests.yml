@@ -24,8 +24,6 @@ jobs:
         threshold: 24
 
   e2e-linux:
-    needs: test
-
     runs-on: ubuntu-latest
 
     steps:
@@ -41,8 +39,6 @@ jobs:
     - run: xvfb-run --auto-servernum yarn e2e-test
 
   e2e-macos:
-    needs: test
-
     runs-on: macos-latest
 
     steps:
@@ -55,8 +51,6 @@ jobs:
     - run: yarn e2e-test
 
   e2e-windows:
-    needs: test
-
     runs-on: windows-latest
 
     steps:
