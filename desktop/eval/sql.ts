@@ -431,7 +431,8 @@ export async function evalSQLHandlerInternal(
     return await evalSQLite(
       query,
       info,
-      connector,
+      // ./filagg.ts doesn't add a connector to the project. Just passes info in directly
+      (info as any).connector || connector,
       projectId,
       panelsToImport,
       dispatch

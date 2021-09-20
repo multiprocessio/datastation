@@ -52,8 +52,8 @@ export function FilePanelDetails({
           <FileInput
             label="File"
             value={panel.file.name}
-            allowManualEntry={MODE !== 'browser' ? true : false}
-            allowFilePicker={!panel.serverId ? true : false}
+            allowManualEntry={MODE !== 'browser'}
+            allowFilePicker={!panel.serverId}
             onRead={
               MODE !== 'desktop'
                 ? (value: ArrayBuffer) => {
