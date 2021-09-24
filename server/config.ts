@@ -2,7 +2,7 @@ import fs from 'fs/promises';
 import { mergeDeep, validate } from '../shared/object';
 import log from './log';
 
-const CONFIG_PATH = '/usr/local/datastation/config.json';
+const CONFIG_PATH = '/usr/local/etc/datastation/config.json';
 
 export class Config {
   auth: {
