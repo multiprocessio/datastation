@@ -6758,8 +6758,8 @@ pretty-format@^27.2.0:
     react-is "^17.0.1"
 
 "preview@https://github.com/multiprocessio/preview":
-  version "0.2.0"
-  resolved "https://github.com/multiprocessio/preview#9f7d47a26f171061119d40cb1b1f8f17c9c592dd"
+  version "0.2.1"
+  resolved "https://github.com/multiprocessio/preview#4ee2c2dd84bd6b89847e9db03a34ef17d28c0998"
 
 printj@~1.1.0, printj@~1.1.2:
   version "1.1.2"
@@ -7494,8 +7494,8 @@ setprototypeof@1.1.1:
   integrity sha512-JvdAWfbXeIGaZ9cILp38HntZSFSo3mWg6xGcJJsd+d4aRMOqauag1C63dJfDw7OaMYwEbHMOxEZ1lqVRYP2OAw==
 
 "shape@https://github.com/multiprocessio/shape":
-  version "0.1.0"
-  resolved "https://github.com/multiprocessio/shape#8bb4e602b3a762534393c6e1ea7a5ff24c88e5df"
+  version "0.1.1"
+  resolved "https://github.com/multiprocessio/shape#ded167d15515fa7dc73f68ad9b56de8568d82456"
 
 shebang-command@^1.2.0:
   version "1.2.0"
