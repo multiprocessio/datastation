@@ -7,6 +7,7 @@ import {
   ProjectState,
   ServerInfo,
   SQLConnectorInfo,
+  doOnAllEncryptFields,
 } from '../shared/state';
 import { DISK_ROOT, PROJECT_EXTENSION, SYNC_PERIOD } from './constants';
 import { ensureFile } from './fs';
@@ -65,28 +66,12 @@ async function checkAndEncrypt(e: Encrypt, existing: Encrypt) {
   }
 }
 
-export async function encryptProjectSecrets(
+export function encryptProjectSecrets(
   s: ProjectState,
   existingState: ProjectState
 ) {
-  for (const server of s.servers) {
-    const existingServer =
-      existingState.servers.filter((s) => s.id === server.id)[0] ||
-      new ServerInfo();
-    await checkAndEncrypt(server.passphrase, existingServer.passphrase);
-    await checkAndEncrypt(server.password, existingServer.password);
-  }
-
-  for (const conn of s.connectors) {
-    if (conn.type === 'sql') {
-      const sconn = conn as SQLConnectorInfo;
-      const existingSConn =
-        (existingState.connectors.filter(
-          (c) => c.id === sconn.id
-        )[0] as SQLConnectorInfo) || new SQLConnectorInfo();
-      await checkAndEncrypt(sconn.sql.password, existingSConn.sql.password);
-    }
-  }
+  return doOnAllEncryptFields(s, (field, path) =>
+    checkAndEncrypt(top, getObject(existingServer, path.join('.'))));
 }
 
 export const storeHandlers = [

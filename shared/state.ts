@@ -54,12 +54,6 @@ export class Encrypt {
     this.value = value;
     this.encrypted = false;
   }
-
-  static fromJSON(value: any) {
-    const e = new Encrypt(null);
-    e.encrypted = true;
-    return e;
-  }
 }
 
 export type ServerInfoType = 'ssh-agent' | 'password' | 'private-key';
@@ -94,13 +88,6 @@ export class ServerInfo {
     this.privateKeyFile = privateKeyFile || '~/.ssh/id_rsa';
     this.passphrase = passphrase || new Encrypt('');
     this.id = uuid.v4();
-  }
-
-  static fromJSON(raw: any): ServerInfo {
-    const base = mergeDeep(new ServerInfo(), raw);
-    base.password = Encrypt.fromJSON(base.password);
-    base.passphrase = Encrypt.fromJSON(base.passphrase);
-    return base;
   }
 }
 
@@ -178,6 +165,22 @@ export class HTTPConnectorInfo extends ConnectorInfo {
       method: method || 'GET',
       contentTypeInfo: contentTypeInfo || new ContentTypeInfo(),
     };
+  }
+}
+
+export type TimeSeriesConnectorInfoType =
+  | 'elasticsearch'
+  | 'splunk'
+  | 'prometheus'
+  | 'influx';
+
+export class TimeSeriesConnectorInfo extends ConnectorInfo {
+  timeseries: {
+    type: TimeSeriesConnectorInfoType;
+    database: string;
+    username: string;
+    password: Encrypted;
+    extra: Record<string, string>;
   }
 }
 
@@ -319,6 +322,26 @@ export class GraphPanelInfo extends PanelInfo {
       x: x || '',
       ys: ys || [],
       type: type || 'bar',
+    };
+  }
+}
+
+export class TimeSeriesPanelInfo extends PanelInfo {
+  timeseries: {
+    type: TimeSeriesConnectorInfoType;
+    connectorId?: string;
+  }
+
+  constructor(
+    name?: string,
+    type?: SQLConnectorInfoType,
+    connectorId?: string,
+    content?: string
+  ) {
+    super('timeseries', name, content);
+    this.timeseries = {
+      type: type || 'elasticsearch',
+      connectorId,
     };
   }
 }
@@ -485,6 +508,22 @@ export class ProjectPage {
   }
 }
 
+export async doOnAllEncryptFields(s: ProjectState, cb: (field: Encrypt, path: string) => Promise<void>) {
+  const stack = [[s, []];
+
+  while (stack.length) {
+    const [top, path] = stack.pop();
+
+    for (const [elPath, el] of Object.entries(top)) {
+      stack.push([el, [...path, elPath]]);
+    }
+
+    if (top instanceof Encrypt) {
+      await cb(s, path.join());
+    }
+  }
+}
+
 export class ProjectState {
   pages: Array<ProjectPage>;
   projectName: string;
@@ -521,6 +560,10 @@ export class ProjectState {
     ps.id = raw.id || uuid.v4();
     ps.originalVersion = raw.originalVersion || VERSION;
     ps.lastVersion = raw.lastVersion || VERSION;
+    doOnAllEncryptFields(ps, (f) => {
+      f.value = null;
+      f.encrypted = true;
+    });
     return ps;
   }
 }
