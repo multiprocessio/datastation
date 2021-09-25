@@ -20,12 +20,7 @@ import { Select } from '../component-library/Select';
 import { ServerPicker } from '../component-library/ServerPicker';
 import { ProjectContext } from '../ProjectStore';
 import { VENDORS, VENDOR_GROUPS } from '../tsconnectors';
-import {
-  guardPanel,
-  PanelBodyProps,
-  PanelDetailsProps,
-  PanelUIDetails,
-} from './types';
+import { PanelBodyProps, PanelDetailsProps, PanelUIDetails } from './types';
 
 export async function evalTimeSeriesPanel(
   panel: TimeSeriesPanelInfo,
@@ -46,15 +41,14 @@ export async function evalTimeSeriesPanel(
 export function TimeSeriesPanelDetails({
   panel,
   updatePanel,
-}: PanelDetailsProps) {
-  const tsp = guardPanel<TimeSeriesPanelInfo>(panel, 'timeseries');
+}: PanelDetailsProps<TimeSeriesPanelInfo>) {
   const { connectors, servers } = React.useContext(ProjectContext);
 
   const vendorConnectors = connectors
     .map((c: ConnectorInfo) => {
       if (
         c.type !== 'timeseries' ||
-        (c as TimeSeriesConnectorInfo).timeseries.type !== tsp.timeseries.type
+        (c as TimeSeriesConnectorInfo).timeseries.type !== panel.timeseries.type
       ) {
         return null;
       }
@@ -64,27 +58,27 @@ export function TimeSeriesPanelDetails({
     .filter(Boolean);
 
   React.useEffect(() => {
-    if (!vendorConnectors.length && tsp.timeseries.connectorId) {
-      tsp.timeseries.connectorId = '';
+    if (!vendorConnectors.length && panel.timeseries.connectorId) {
+      panel.timeseries.connectorId = '';
     }
   });
 
   const setTab = React.useCallback((value: string) => {
     switch (value) {
       case 'relative':
-        tsp.timeseries.range = {
+        panel.timeseries.range = {
           rangeType: value,
           relative: 'last-hour',
         };
         break;
       case 'fixed':
-        tsp.timeseries.range = {
+        panel.timeseries.range = {
           rangeType: value,
           fixed: 'this-hour',
         };
         break;
       case 'absolute':
-        tsp.timeseries.range = {
+        panel.timeseries.range = {
           rangeType: value,
           absolute: {
             begin: subMinutes(new Date(), 15),
@@ -93,7 +87,7 @@ export function TimeSeriesPanelDetails({
         };
         break;
     }
-    updatePanel(tsp);
+    updatePanel(panel);
   }, []);
 
   const relativeOptions: Array<{
@@ -146,17 +140,17 @@ export function TimeSeriesPanelDetails({
     'previous-year',
   ];
 
-  const { range } = tsp.timeseries;
+  const { range } = panel.timeseries;
 
   return (
     <React.Fragment>
       <div className="form-row">
         <Select
           label="Vendor"
-          value={tsp.timeseries.type}
+          value={panel.timeseries.type}
           onChange={(value: string) => {
-            tsp.timeseries.type = value as TimeSeriesConnectorInfoType;
-            updatePanel(tsp);
+            panel.timeseries.type = value as TimeSeriesConnectorInfoType;
+            updatePanel(panel);
           }}
         >
           {VENDOR_GROUPS.map((group) => (
@@ -176,10 +170,10 @@ export function TimeSeriesPanelDetails({
         ) : (
           <Select
             label="Connector"
-            value={tsp.timeseries.connectorId}
+            value={panel.timeseries.connectorId}
             onChange={(connectorId: string) => {
-              tsp.timeseries.connectorId = connectorId;
-              updatePanel(tsp);
+              panel.timeseries.connectorId = connectorId;
+              updatePanel(panel);
             }}
           >
             {vendorConnectors.map((c) => (
@@ -192,10 +186,10 @@ export function TimeSeriesPanelDetails({
       </div>
       <ServerPicker
         servers={servers}
-        serverId={tsp.serverId}
+        serverId={panel.serverId}
         onChange={(serverId: string) => {
-          tsp.serverId = serverId;
-          updatePanel(tsp);
+          panel.serverId = serverId;
+          updatePanel(panel);
         }}
       />
       <FormGroup label="Time Range">
@@ -203,21 +197,21 @@ export function TimeSeriesPanelDetails({
           type="radio"
           label="Relative"
           name="range-type"
-          value={tsp.timeseries.range.rangeType}
+          value={panel.timeseries.range.rangeType}
           onChange={setTab}
         />
         <Input
           type="radio"
           label="Fixed"
           name="range-type"
-          value={tsp.timeseries.range.rangeType}
+          value={panel.timeseries.range.rangeType}
           onChange={setTab}
         />
         <Input
           type="radio"
           label="Absolute"
           name="range-type"
-          value={tsp.timeseries.range.rangeType}
+          value={panel.timeseries.range.rangeType}
           onChange={setTab}
         />
         {range.rangeType === 'absolute' && (
@@ -229,7 +223,7 @@ export function TimeSeriesPanelDetails({
                 value={range.absolute.end}
                 onChange={(v) => {
                   range.absolute.begin = v;
-                  updatePanel(tsp);
+                  updatePanel(panel);
                 }}
               />
               <Datetime
@@ -237,7 +231,7 @@ export function TimeSeriesPanelDetails({
                 value={range.absolute.end}
                 onChange={(v) => {
                   range.absolute.end = v;
-                  updatePanel(tsp);
+                  updatePanel(panel);
                 }}
               />
             </div>
@@ -250,7 +244,7 @@ export function TimeSeriesPanelDetails({
               value={range.relative}
               onChange={(id) => {
                 range.relative = id as TimeSeriesRelativeTimes;
-                updatePanel(tsp);
+                updatePanel(panel);
               }}
               children={relativeOptions.map((group) => (
                 <optgroup label={group.label}>
@@ -269,7 +263,7 @@ export function TimeSeriesPanelDetails({
             <Select
               onChange={(id) => {
                 range.fixed = id as TimeSeriesFixedTimes;
-                updatePanel(tsp);
+                updatePanel(panel);
               }}
               value={range.fixed}
               children={fixedOptions.map((id) => (
@@ -287,17 +281,15 @@ export function TimeSeriesPanelBody({
   updatePanel,
   panel,
   keyboardShortcuts,
-}: PanelBodyProps) {
-  const sp = guardPanel<TimeSeriesPanelInfo>(panel, 'sql');
-
+}: PanelBodyProps<TimeSeriesPanelInfo>) {
   return (
     <CodeEditor
-      id={sp.id}
+      id={panel.id}
       onKeyDown={keyboardShortcuts}
-      value={sp.content}
+      value={panel.content}
       onChange={(value: string) => {
-        sp.content = value;
-        updatePanel(sp);
+        panel.content = value;
+        updatePanel(panel);
       }}
       language=""
       className="editor"
@@ -305,7 +297,7 @@ export function TimeSeriesPanelBody({
   );
 }
 
-export const timeseriesPanel: PanelUIDetails = {
+export const timeseriesPanel: PanelUIDetails<TimeSeriesPanelInfo> = {
   icon: 'calender_view_week',
   eval: evalTimeSeriesPanel,
   id: 'timeseries',

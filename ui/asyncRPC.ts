@@ -1,4 +1,5 @@
 import { MODE } from '../shared/constants';
+import { PanelResult } from '../shared/state';
 
 // Simple stub for TypeScript as prepared by preload.ts.
 export async function asyncRPC<Request, Args, Response>(

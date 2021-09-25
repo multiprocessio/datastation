@@ -6,24 +6,24 @@ import {
   ServerInfo,
 } from '../../shared/state';
 
-export interface PanelDetailsProps {
-  panel: PanelInfo;
+export interface PanelDetailsProps<T extends PanelInfo> {
+  panel: T;
   panels: Array<PanelInfo>;
-  updatePanel: (d: PanelInfo) => void;
+  updatePanel: (d: T) => void;
   panelIndex: number;
 }
 
-export interface PanelBodyProps {
-  panel: PanelInfo;
+export interface PanelBodyProps<T extends PanelInfo> {
+  panel: T;
   panels: Array<PanelInfo>;
-  updatePanel: (d: PanelInfo) => void;
+  updatePanel: (d: T) => void;
   keyboardShortcuts: (e: React.KeyboardEvent) => void;
 }
 
-export interface PanelUIDetails {
+export interface PanelUIDetails<T extends PanelInfo> {
   icon: string;
   eval(
-    panel: PanelInfo,
+    panel: T,
     panelResults: Array<PanelResult>,
     indexIdMap: Array<string>,
     connectors: Array<ConnectorInfo>,
@@ -31,23 +31,12 @@ export interface PanelUIDetails {
   ): Promise<PanelResult>;
   id: PanelInfoType;
   label: string;
-  details: React.ElementType<PanelDetailsProps>;
-  body: React.ElementType<PanelBodyProps> | null;
+  details: React.ElementType<PanelDetailsProps<T>>;
+  body: React.ElementType<PanelBodyProps<T>> | null;
   alwaysOpen: boolean;
   previewable: boolean;
   hasStdout: boolean;
-  info: React.ElementType<{ panel: PanelInfo }> | null;
-  factory: () => PanelInfo;
+  info: React.ElementType<{ panel: T }> | null;
+  factory: () => T;
   killable: boolean;
-}
-
-export function guardPanel<T extends PanelInfo>(
-  panel: PanelInfo,
-  t: PanelInfoType
-): T {
-  if (panel.type !== t) {
-    throw new Error(`Panel type mismatch. Expected ${t}.`);
-  }
-
-  return panel as T;
 }

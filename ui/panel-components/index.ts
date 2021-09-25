@@ -11,18 +11,19 @@ import { tablePanel } from './TablePanel';
 import { timeseriesPanel } from './TimeSeriesPanel';
 import { PanelUIDetails } from './types';
 
-export const PANEL_UI_DETAILS: { [Property in PanelInfoType]: PanelUIDetails } =
-  {
-    table: tablePanel,
-    http: httpPanel,
-    graph: graphPanel,
-    program: programPanel,
-    literal: literalPanel,
-    sql: sqlPanel,
-    file: filePanel,
-    filagg: filaggPanel,
-    timeseries: timeseriesPanel,
-  };
+export const PANEL_UI_DETAILS: {
+  [Property in PanelInfoType]: PanelUIDetails<any>;
+} = {
+  table: tablePanel,
+  http: httpPanel,
+  graph: graphPanel,
+  program: programPanel,
+  literal: literalPanel,
+  sql: sqlPanel,
+  file: filePanel,
+  filagg: filaggPanel,
+  timeseries: timeseriesPanel,
+};
 
 export const PANEL_GROUPS: Array<{
   label: string;

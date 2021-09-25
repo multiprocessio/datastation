@@ -12,12 +12,7 @@ import { FormGroup } from '../component-library/FormGroup';
 import { PanelSourcePicker } from '../component-library/PanelSourcePicker';
 import { Select } from '../component-library/Select';
 import { evalColumnPanel } from './TablePanel';
-import {
-  guardPanel,
-  PanelBodyProps,
-  PanelDetailsProps,
-  PanelUIDetails,
-} from './types';
+import { PanelBodyProps, PanelDetailsProps, PanelUIDetails } from './types';
 
 export function evalGraphPanel(
   panel: GraphPanelInfo,
@@ -99,10 +94,9 @@ function getNDifferentColors(
   return colors;
 }
 
-export function GraphPanel({ panel, panels }: PanelBodyProps) {
-  const gp = guardPanel<GraphPanelInfo>(panel, 'graph');
+export function GraphPanel({ panel, panels }: PanelBodyProps<GraphPanelInfo>) {
   const data =
-    (panels[gp.graph.panelSource] || {}).resultMeta || new PanelResult();
+    (panels[panel.graph.panelSource] || {}).resultMeta || new PanelResult();
   const value = (data || {}).value || [];
   const ref = React.useRef(null);
   React.useEffect(() => {
@@ -118,8 +112,8 @@ export function GraphPanel({ panel, panels }: PanelBodyProps) {
       return;
     }
 
-    const ys = [...gp.graph.ys];
-    if (gp.graph.type === 'pie') {
+    const ys = [...panel.graph.ys];
+    if (panel.graph.type === 'pie') {
       ys.reverse();
     }
 
@@ -147,28 +141,28 @@ export function GraphPanel({ panel, panels }: PanelBodyProps) {
       options: {
         responsive: true,
       },
-      type: gp.graph.type,
+      type: panel.graph.type,
       data: {
-        labels: value.map((d) => d[gp.graph.x]),
+        labels: value.map((d) => d[panel.graph.x]),
         datasets: ys.map(({ field, label }, i) => {
           return {
             label,
             data: value.map((d) => +d[field]),
             backgroundColor:
-              ys.length > 1 && gp.graph.type !== 'pie'
+              ys.length > 1 && panel.graph.type !== 'pie'
                 ? colors[i]
-                : gp.graph.type
+                : panel.graph.type
                 ? getNDifferentColors(value.length, ys.length, i)
                 : colors,
             tooltip: {
               callbacks:
-                gp.graph.type === 'pie'
+                panel.graph.type === 'pie'
                   ? {
                       label: (ctx: any) => {
                         const reversedIndex = ys.length - ctx.datasetIndex - 1;
-                        // Explicitly do read from the not-reversed gp.graph.ys array.
+                        // Explicitly do read from the not-reversed panel.graph.ys array.
                         // This library stacks levels in reverse of what you'd expect.
-                        const serieses = gp.graph.ys.slice(
+                        const serieses = panel.graph.ys.slice(
                           0,
                           reversedIndex + 1
                         );
@@ -188,7 +182,7 @@ export function GraphPanel({ panel, panels }: PanelBodyProps) {
     });
 
     return () => chart.destroy();
-  }, [ref.current, data, gp.graph.x, gp.graph.ys, gp.graph.type]);
+  }, [ref.current, data, panel.graph.x, panel.graph.ys, panel.graph.type]);
 
   if (!value || !value.length) {
     return null;
@@ -201,23 +195,22 @@ export function GraphPanelDetails({
   panel,
   panels,
   updatePanel,
-}: PanelDetailsProps) {
-  const gp = guardPanel<GraphPanelInfo>(panel, 'graph');
+}: PanelDetailsProps<GraphPanelInfo>) {
   const data =
-    (panels[gp.graph.panelSource] || {}).resultMeta || new PanelResult();
+    (panels[panel.graph.panelSource] || {}).resultMeta || new PanelResult();
 
   React.useEffect(() => {
-    if (gp.graph.ys.length) {
+    if (panel.graph.ys.length) {
       return;
     }
 
     const fields = unusedFields(
       data,
-      gp.graph.x,
-      ...gp.graph.ys.map((y) => y.field)
+      panel.graph.x,
+      ...panel.graph.ys.map((y) => y.field)
     );
     if (fields) {
-      gp.graph.ys.push({ label: '', field: '' });
+      panel.graph.ys.push({ label: '', field: '' });
       updatePanel(panel);
     }
   });
@@ -228,9 +221,9 @@ export function GraphPanelDetails({
         <div className="form-row">
           <Select
             label="Graph"
-            value={gp.graph.type}
+            value={panel.graph.type}
             onChange={(value: string) => {
-              gp.graph.type = value as GraphPanelInfoType;
+              panel.graph.type = value as GraphPanelInfoType;
               updatePanel(panel);
             }}
           >
@@ -240,38 +233,40 @@ export function GraphPanelDetails({
         </div>
         <div className="form-row">
           <PanelSourcePicker
-            currentPanel={gp.id}
+            currentPanel={panel.id}
             panels={panels}
-            value={gp.graph.panelSource}
+            value={panel.graph.panelSource}
             onChange={(value: number) => {
-              gp.graph.panelSource = value;
+              panel.graph.panelSource = value;
               updatePanel(panel);
             }}
           />
         </div>
       </FormGroup>
-      <FormGroup label={gp.graph.type === 'pie' ? 'Slice' : 'X-Axis'}>
+      <FormGroup label={panel.graph.type === 'pie' ? 'Slice' : 'X-Axis'}>
         <div className="form-row">
           <FieldPicker
             label="Field"
             panelSourceResult={data}
-            value={gp.graph.x}
+            value={panel.graph.x}
             onChange={(value: string) => {
-              gp.graph.x = value;
+              panel.graph.x = value;
               updatePanel(panel);
             }}
           />
         </div>
       </FormGroup>
       <FormGroup
-        label={gp.graph.type === 'pie' ? 'Slice Size Series' : 'Y-Axis Series'}
+        label={
+          panel.graph.type === 'pie' ? 'Slice Size Series' : 'Y-Axis Series'
+        }
       >
-        {gp.graph.ys.map((y, i) => (
+        {panel.graph.ys.map((y, i) => (
           <div className="form-row vertical-align-center" key={y.field + i}>
             <FieldPicker
-              used={[...gp.graph.ys.map((y) => y.field), gp.graph.x]}
+              used={[...panel.graph.ys.map((y) => y.field), panel.graph.x]}
               onDelete={() => {
-                gp.graph.ys.splice(i, 1);
+                panel.graph.ys.splice(i, 1);
                 updatePanel(panel);
               }}
               preferredDefaultType="number"
@@ -292,7 +287,7 @@ export function GraphPanelDetails({
         ))}
         <Button
           onClick={() => {
-            gp.graph.ys.push({ label: '', field: '' });
+            panel.graph.ys.push({ label: '', field: '' });
             updatePanel(panel);
           }}
         >
@@ -303,7 +298,7 @@ export function GraphPanelDetails({
   );
 }
 
-export const graphPanel: PanelUIDetails = {
+export const graphPanel: PanelUIDetails<GraphPanelInfo> = {
   icon: 'bar_chart',
   eval: evalGraphPanel,
   id: 'graph',
@@ -315,5 +310,5 @@ export const graphPanel: PanelUIDetails = {
   factory: () => new GraphPanelInfo(),
   hasStdout: false,
   info: null,
-  killable: true,
+  killable: false,
 };

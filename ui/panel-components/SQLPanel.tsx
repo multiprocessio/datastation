@@ -15,12 +15,7 @@ import { Select } from '../component-library/Select';
 import { ServerPicker } from '../component-library/ServerPicker';
 import { ProjectContext } from '../ProjectStore';
 import { VENDORS } from '../sqlconnectors';
-import {
-  guardPanel,
-  PanelBodyProps,
-  PanelDetailsProps,
-  PanelUIDetails,
-} from './types';
+import { PanelBodyProps, PanelDetailsProps, PanelUIDetails } from './types';
 
 export async function evalSQLPanel(
   panel: SQLPanelInfo,
@@ -50,15 +45,17 @@ export async function evalSQLPanel(
   );
 }
 
-export function SQLPanelDetails({ panel, updatePanel }: PanelDetailsProps) {
-  const sp = guardPanel<SQLPanelInfo>(panel, 'sql');
+export function SQLPanelDetails({
+  panel,
+  updatePanel,
+}: PanelDetailsProps<SQLPanelInfo>) {
   const { connectors, servers } = React.useContext(ProjectContext);
 
   const vendorConnectors = connectors
     .map((c: ConnectorInfo) => {
       if (
         c.type !== 'sql' ||
-        (c as SQLConnectorInfo).sql.type !== sp.sql.type
+        (c as SQLConnectorInfo).sql.type !== panel.sql.type
       ) {
         return null;
       }
@@ -68,8 +65,8 @@ export function SQLPanelDetails({ panel, updatePanel }: PanelDetailsProps) {
     .filter(Boolean);
 
   React.useEffect(() => {
-    if (!vendorConnectors.length && sp.sql.connectorId) {
-      sp.sql.connectorId = '';
+    if (!vendorConnectors.length && panel.sql.connectorId) {
+      panel.sql.connectorId = '';
     }
   });
 
@@ -78,10 +75,10 @@ export function SQLPanelDetails({ panel, updatePanel }: PanelDetailsProps) {
       <div className="form-row">
         <Select
           label="Vendor"
-          value={sp.sql.type}
+          value={panel.sql.type}
           onChange={(value: string) => {
-            sp.sql.type = value as SQLConnectorInfoType;
-            updatePanel(sp);
+            panel.sql.type = value as SQLConnectorInfoType;
+            updatePanel(panel);
           }}
         >
           {VENDORS.map((group) => (
@@ -100,10 +97,10 @@ export function SQLPanelDetails({ panel, updatePanel }: PanelDetailsProps) {
         ) : (
           <Select
             label="Connector"
-            value={sp.sql.connectorId}
+            value={panel.sql.connectorId}
             onChange={(connectorId: string) => {
-              sp.sql.connectorId = connectorId;
-              updatePanel(sp);
+              panel.sql.connectorId = connectorId;
+              updatePanel(panel);
             }}
           >
             {vendorConnectors.map((c) => (
@@ -116,10 +113,10 @@ export function SQLPanelDetails({ panel, updatePanel }: PanelDetailsProps) {
       </div>
       <ServerPicker
         servers={servers}
-        serverId={sp.serverId}
+        serverId={panel.serverId}
         onChange={(serverId: string) => {
-          sp.serverId = serverId;
-          updatePanel(sp);
+          panel.serverId = serverId;
+          updatePanel(panel);
         }}
       />
     </React.Fragment>
@@ -130,17 +127,15 @@ export function SQLPanelBody({
   updatePanel,
   panel,
   keyboardShortcuts,
-}: PanelBodyProps) {
-  const sp = guardPanel<SQLPanelInfo>(panel, 'sql');
-
+}: PanelBodyProps<SQLPanelInfo>) {
   return (
     <CodeEditor
-      id={sp.id}
+      id={panel.id}
       onKeyDown={keyboardShortcuts}
-      value={sp.content}
+      value={panel.content}
       onChange={(value: string) => {
-        sp.content = value;
-        updatePanel(sp);
+        panel.content = value;
+        updatePanel(panel);
       }}
       language="sql"
       className="editor"
@@ -148,7 +143,7 @@ export function SQLPanelBody({
   );
 }
 
-export const sqlPanel: PanelUIDetails = {
+export const sqlPanel: PanelUIDetails<SQLPanelInfo> = {
   icon: 'table_rows',
   eval: evalSQLPanel,
   id: 'sql',
@@ -160,5 +155,5 @@ export const sqlPanel: PanelUIDetails = {
   factory: () => new SQLPanelInfo(),
   hasStdout: false,
   info: null,
-  killable: true,
+  killable: false,
 };

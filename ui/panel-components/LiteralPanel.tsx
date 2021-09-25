@@ -8,12 +8,7 @@ import { parseArrayBuffer } from '../../shared/text';
 import { asyncRPC } from '../asyncRPC';
 import { CodeEditor } from '../component-library/CodeEditor';
 import { ContentTypePicker } from '../component-library/ContentTypePicker';
-import {
-  guardPanel,
-  PanelBodyProps,
-  PanelDetailsProps,
-  PanelUIDetails,
-} from './types';
+import { PanelBodyProps, PanelDetailsProps, PanelUIDetails } from './types';
 
 export async function evalLiteralPanel(panel: LiteralPanelInfo) {
   const literal = panel.literal;
@@ -45,18 +40,19 @@ export async function evalLiteralPanel(panel: LiteralPanelInfo) {
   };
 }
 
-export function LiteralPanelDetails({ panel, updatePanel }: PanelDetailsProps) {
-  const lp = guardPanel<LiteralPanelInfo>(panel, 'literal');
-
+export function LiteralPanelDetails({
+  panel,
+  updatePanel,
+}: PanelDetailsProps<LiteralPanelInfo>) {
   return (
     <React.Fragment>
       <div className="form-row">
         <ContentTypePicker
           disableAutoDetect
           inMemoryEval={false}
-          value={lp.literal.contentTypeInfo}
+          value={panel.literal.contentTypeInfo}
           onChange={(cti: ContentTypeInfo) => {
-            lp.literal.contentTypeInfo = cti;
+            panel.literal.contentTypeInfo = cti;
             updatePanel(panel);
           }}
         />
@@ -69,25 +65,30 @@ export function LiteralPanelBody({
   updatePanel,
   panel,
   keyboardShortcuts,
-}: PanelBodyProps) {
-  const lp = guardPanel<LiteralPanelInfo>(panel, 'literal');
+}: PanelBodyProps<LiteralPanelInfo>) {
+  const { type } = panel.literal.contentTypeInfo;
+  let language = type.split('/').pop();
+  if (!['json', 'csv'].includes(language)) {
+    // dunno
+    language = 'javascript';
+  }
 
   return (
     <CodeEditor
-      id={lp.id}
+      id={panel.id}
       onKeyDown={keyboardShortcuts}
-      value={lp.content}
+      value={panel.content}
       onChange={(value: string) => {
-        lp.content = value;
-        updatePanel(lp);
+        panel.content = value;
+        updatePanel(panel);
       }}
-      language={lp.literal.type}
+      language={language}
       className="editor"
     />
   );
 }
 
-export const literalPanel: PanelUIDetails = {
+export const literalPanel: PanelUIDetails<LiteralPanelInfo> = {
   icon: 'format_quote',
   eval: evalLiteralPanel,
   id: 'literal',
@@ -99,5 +100,5 @@ export const literalPanel: PanelUIDetails = {
   factory: () => new LiteralPanelInfo(),
   info: null,
   hasStdout: false,
-  killable: true,
+  killable: false,
 };

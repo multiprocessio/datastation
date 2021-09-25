@@ -2,6 +2,7 @@ import fs from 'fs';
 import fsPromises from 'fs/promises';
 import path from 'path';
 import log from '../shared/log';
+import { getPath } from '../shared/object';
 import { doOnAllEncryptFields, Encrypt, ProjectState } from '../shared/state';
 import { DISK_ROOT, PROJECT_EXTENSION, SYNC_PERIOD } from './constants';
 import { ensureFile } from './fs';
@@ -65,7 +66,7 @@ export function encryptProjectSecrets(
   existingState: ProjectState
 ) {
   return doOnAllEncryptFields(s, (field, path) =>
-    checkAndEncrypt(top, getObject(existingServer, path.join('.')))
+    checkAndEncrypt(field, getPath(existingState, path))
   );
 }
 

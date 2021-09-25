@@ -56,13 +56,13 @@ export function CodeEditor({
         maxLines={singleLine ? 1 : undefined}
         onChange={setLocalValue}
         name={id}
-        value={localValue}
+        value={String(localValue)}
         placeholder={placeholder}
         className={`${className} ${singleLine ? 'input' : ''}`}
         readOnly={disabled}
         width={
           singleLine
-            ? String(Math.max(300, localValue.length * 10)) + 'px'
+            ? String(Math.max(300, String(localValue).length * 10)) + 'px'
             : '100%'
         }
         fontSize="1rem"

@@ -12,12 +12,7 @@ import { Button } from '../component-library/Button';
 import { FieldPicker, unusedFields } from '../component-library/FieldPicker';
 import { FormGroup } from '../component-library/FormGroup';
 import { PanelSourcePicker } from '../component-library/PanelSourcePicker';
-import {
-  guardPanel,
-  PanelBodyProps,
-  PanelDetailsProps,
-  PanelUIDetails,
-} from './types';
+import { PanelBodyProps, PanelDetailsProps, PanelUIDetails } from './types';
 
 export async function evalColumnPanel(
   panelSource: number,
@@ -77,62 +72,64 @@ export function TablePanelDetails({
   panel,
   panels,
   updatePanel,
-}: PanelDetailsProps) {
-  const tp = guardPanel<TablePanelInfo>(panel, 'table');
+}: PanelDetailsProps<TablePanelInfo>) {
   const data =
-    (panels[tp.table.panelSource] || {}).resultMeta || new PanelResult();
+    (panels[panel.table.panelSource] || {}).resultMeta || new PanelResult();
   React.useEffect(() => {
-    const fields = unusedFields(data, ...tp.table.columns.map((c) => c.field));
+    const fields = unusedFields(
+      data,
+      ...panel.table.columns.map((c) => c.field)
+    );
 
     if (fields) {
-      tp.table.columns.push({ label: '', field: '' });
-      updatePanel(tp);
+      panel.table.columns.push({ label: '', field: '' });
+      updatePanel(panel);
     }
-  }, [tp.table.panelSource, data]);
+  }, [panel.table.panelSource, data]);
 
   return (
     <React.Fragment>
       <FormGroup label="General">
         <div className="form-row">
           <PanelSourcePicker
-            currentPanel={tp.id}
+            currentPanel={panel.id}
             panels={panels}
-            value={tp.table.panelSource}
+            value={panel.table.panelSource}
             onChange={(value: number) => {
-              tp.table.panelSource = value;
-              updatePanel(tp);
+              panel.table.panelSource = value;
+              updatePanel(panel);
             }}
           />
         </div>
       </FormGroup>
       <FormGroup label="Columns">
-        {tp.table.columns.map((c, i) => (
+        {panel.table.columns.map((c, i) => (
           <div className="form-row vertical-align-center" key={c.field + i}>
             <FieldPicker
-              used={tp.table.columns.map((c) => c.field)}
+              used={panel.table.columns.map((c) => c.field)}
               onDelete={() => {
-                tp.table.columns.splice(i, 1);
-                updatePanel(tp);
+                panel.table.columns.splice(i, 1);
+                updatePanel(panel);
               }}
               label="Field"
               value={c.field}
               panelSourceResult={data}
               onChange={(value: string) => {
                 c.field = value;
-                updatePanel(tp);
+                updatePanel(panel);
               }}
               labelValue={c.label}
               labelOnChange={(value: string) => {
                 c.label = value;
-                updatePanel(tp);
+                updatePanel(panel);
               }}
             />
           </div>
         ))}
         <Button
           onClick={() => {
-            tp.table.columns.push({ label: '', field: '' });
-            updatePanel(tp);
+            panel.table.columns.push({ label: '', field: '' });
+            updatePanel(panel);
           }}
         >
           Add Column
@@ -142,17 +139,16 @@ export function TablePanelDetails({
   );
 }
 
-export function TablePanel({ panel, panels }: PanelBodyProps) {
-  const tp = guardPanel<TablePanelInfo>(panel, 'table');
+export function TablePanel({ panel, panels }: PanelBodyProps<TablePanelInfo>) {
   const data =
-    (panels[tp.table.panelSource] || {}).resultMeta || new PanelResult();
+    (panels[panel.table.panelSource] || {}).resultMeta || new PanelResult();
 
   let valueAsArray: Array<any> = [];
   if (data && data.value && Array.isArray(data.value)) {
     valueAsArray = data.value;
   }
 
-  if (!tp.table.columns || !tp.table.columns.length) {
+  if (!panel.table.columns || !panel.table.columns.length) {
     return (
       <Alert type="info">
         There are no columns to display. Add columns in the panel details.
@@ -164,7 +160,7 @@ export function TablePanel({ panel, panels }: PanelBodyProps) {
     <table>
       <thead>
         <tr>
-          {tp.table.columns.map((column: TableColumn) => (
+          {panel.table.columns.map((column: TableColumn) => (
             <th key={column.field}>{column.label}</th>
           ))}
         </tr>
@@ -172,7 +168,7 @@ export function TablePanel({ panel, panels }: PanelBodyProps) {
       <tbody>
         {valueAsArray.map((row: any, i: number) => (
           <tr key={i}>
-            {tp.table.columns.map((column: TableColumn) => (
+            {panel.table.columns.map((column: TableColumn) => (
               <td key={column.field}>{row[column.field]}</td>
             ))}
           </tr>
@@ -182,7 +178,7 @@ export function TablePanel({ panel, panels }: PanelBodyProps) {
   );
 }
 
-export const tablePanel: PanelUIDetails = {
+export const tablePanel: PanelUIDetails<TablePanelInfo> = {
   icon: 'table_chart',
   eval: evalTablePanel,
   id: 'table',
@@ -194,5 +190,5 @@ export const tablePanel: PanelUIDetails = {
   factory: () => new TablePanelInfo(),
   hasStdout: false,
   info: null,
-  killable: true,
+  killable: false,
 };

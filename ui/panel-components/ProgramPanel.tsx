@@ -3,24 +3,18 @@ import { shape } from 'shape';
 import { MODE } from '../../shared/constants';
 import { LANGUAGES, SupportedLanguages } from '../../shared/languages';
 import { ENDPOINTS } from '../../shared/rpc';
-import { PanelInfo, PanelResult, ProgramPanelInfo } from '../../shared/state';
+import { PanelResult, ProgramPanelInfo } from '../../shared/state';
 import { asyncRPC } from '../asyncRPC';
 import { CodeEditor } from '../component-library/CodeEditor';
 import { Select } from '../component-library/Select';
-import {
-  guardPanel,
-  PanelBodyProps,
-  PanelDetailsProps,
-  PanelUIDetails,
-} from './types';
+import { PanelBodyProps, PanelDetailsProps, PanelUIDetails } from './types';
 
 export async function evalProgramPanel(
-  panel: PanelInfo,
+  panel: ProgramPanelInfo,
   panelResults: Array<PanelResult>,
   indexIdMap: Array<string>
 ): Promise<PanelResult> {
-  const pp = guardPanel<ProgramPanelInfo>(panel, 'program');
-  const program = pp.program;
+  const program = panel.program;
 
   if (MODE !== 'browser') {
     return asyncRPC<
@@ -38,7 +32,7 @@ export async function evalProgramPanel(
     throw new Error(`Unknown program type: '${program.type}'`);
   }
 
-  const res = await language.inMemoryEval(pp.content, panelResults);
+  const res = await language.inMemoryEval(panel.content, panelResults);
   return {
     ...res,
     size: res.value ? JSON.stringify(res.value).length : 0,
@@ -51,12 +45,7 @@ export function ProgramPanelDetails({
   panel,
   updatePanel,
   panelIndex,
-}: PanelDetailsProps) {
-  if (panel.type !== 'program') {
-    return null;
-  }
-  const pp = panel as ProgramPanelInfo;
-
+}: PanelDetailsProps<ProgramPanelInfo>) {
   const options = Object.keys(LANGUAGES)
     .map((k) => {
       const l = LANGUAGES[k];
@@ -73,12 +62,12 @@ export function ProgramPanelDetails({
       <div className="form-row">
         <Select
           label="Language"
-          value={pp.program.type}
+          value={panel.program.type}
           onChange={(value: string) => {
-            pp.program.type = value as SupportedLanguages;
-            if (pp.content === '') {
-              pp.content =
-                LANGUAGES[pp.program.type].defaultContent(panelIndex);
+            panel.program.type = value as SupportedLanguages;
+            if (panel.content === '') {
+              panel.content =
+                LANGUAGES[panel.program.type].defaultContent(panelIndex);
             }
 
             updatePanel(panel);
@@ -99,18 +88,17 @@ export function ProgramPanelBody({
   updatePanel,
   panel,
   keyboardShortcuts,
-}: PanelBodyProps) {
-  const pp = guardPanel<ProgramPanelInfo>(panel, 'program');
-  const language = pp.program.type;
+}: PanelBodyProps<ProgramPanelInfo>) {
+  const language = panel.program.type;
 
   return (
     <CodeEditor
-      id={pp.id}
+      id={panel.id}
       onKeyDown={keyboardShortcuts}
-      value={pp.content}
+      value={panel.content}
       onChange={(value: string) => {
-        pp.content = value;
-        updatePanel(pp);
+        panel.content = value;
+        updatePanel(panel);
       }}
       language={language}
       className="editor"
@@ -118,9 +106,8 @@ export function ProgramPanelBody({
   );
 }
 
-export function ProgramInfo({ panel }: { panel: PanelInfo }) {
-  const pp = guardPanel<ProgramPanelInfo>(panel, 'program');
-  if (pp.program.type === 'sql') {
+export function ProgramInfo({ panel }: { panel: ProgramPanelInfo }) {
+  if (panel.program.type === 'sql') {
     return (
       <React.Fragment>
         Use <code>DM_getPanel($panel_number)</code> to reference other panels.
@@ -137,7 +124,7 @@ export function ProgramInfo({ panel }: { panel: PanelInfo }) {
       <code>DM_getPanel($panel_number)</code>, to interact with other panels.
       For example:{' '}
       <code>const passthrough = DM_getPanel(0); DM_setPanel(passthrough);</code>
-      {pp.program.type === 'julia' && (
+      {panel.program.type === 'julia' && (
         <React.Fragment>
           <br />
           <br />
@@ -145,7 +132,7 @@ export function ProgramInfo({ panel }: { panel: PanelInfo }) {
           script with Julia.
         </React.Fragment>
       )}
-      {pp.program.type === 'r' && (
+      {panel.program.type === 'r' && (
         <React.Fragment>
           <br />
           <br />
@@ -157,7 +144,7 @@ export function ProgramInfo({ panel }: { panel: PanelInfo }) {
   );
 }
 
-export const programPanel: PanelUIDetails = {
+export const programPanel: PanelUIDetails<ProgramPanelInfo> = {
   icon: 'code',
   eval: evalProgramPanel,
   id: 'program',

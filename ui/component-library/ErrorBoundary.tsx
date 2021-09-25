@@ -1,7 +1,7 @@
 import * as React from 'react';
-import { CHAT_LINK } from '../shared/constants';
-import { Alert } from './component-library/Alert';
-import { Highlight } from './component-library/Highlight';
+import { CHAT_LINK } from '../../shared/constants';
+import { Alert } from './Alert';
+import { Highlight } from './Highlight';
 
 type Props = { children: React.ReactNode; className?: string };
 type State = { error?: Error };

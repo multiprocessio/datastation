@@ -166,7 +166,6 @@ function PanelPlayWarningWithLinks({
 export function Panel({
   panel,
   updatePanel,
-  panelResults,
   reevalPanel,
   panelIndex,
   removePanel,
@@ -400,22 +399,23 @@ export function Panel({
                       panel={panel}
                       keyboardShortcuts={keyboardShortcuts}
                       panels={panels}
+                      updatePanel={updatePanel}
                     />
                   )}
-                  {exception instanceof PanelPlayWarning ? (
+                  {results.exception instanceof PanelPlayWarning ? (
                     <PanelPlayWarningWithLinks
-                      msg={exception.message}
+                      msg={results.exception.message}
                       indexNameMap={panels.map(({ name }) => name)}
                     />
                   ) : (
-                    exception && (
+                    results.exception && (
                       <Alert type="error">
                         <div>Error evaluating panel:</div>
                         <pre>
                           <code>
-                            {exception.stack ||
-                              exception.message ||
-                              String(exception)}
+                            {results.exception.stack ||
+                              results.exception.message ||
+                              String(results.exception)}
                           </code>
                         </pre>
                       </Alert>

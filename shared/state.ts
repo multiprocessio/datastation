@@ -89,6 +89,11 @@ export class ServerInfo {
     this.passphrase = passphrase || new Encrypt('');
     this.id = uuid.v4();
   }
+
+  static fromJSON(raw: any): ServerInfo {
+    raw = raw || {};
+    return mergeDeep(new ServerInfo(), raw);
+  }
 }
 
 export type ConnectorInfoType = 'sql' | 'http' | 'timeseries';
@@ -112,9 +117,7 @@ export class ConnectorInfo {
 
     switch (raw.type) {
       case 'sql':
-        const base = mergeDeep(new SQLConnectorInfo(), ci);
-        base.sql.password = Encrypt.fromJSON(base.sql.password);
-        return base;
+        return mergeDeep(new SQLConnectorInfo(), ci);
       case 'http':
         return mergeDeep(new HTTPConnectorInfo(), ci);
       case 'timeseries':
@@ -181,21 +184,21 @@ export class TimeSeriesConnectorInfo extends ConnectorInfo {
     type: TimeSeriesConnectorInfoType;
     database: string;
     username: string;
-    password: Encrypted;
+    password: Encrypt;
     address: string;
     extra: Record<string, string>;
   };
 
   constructor(
     name?: string,
-    type?: SQLConnectorInfoType,
+    type?: TimeSeriesConnectorInfoType,
     database?: string,
     username?: string,
     password?: Encrypt,
     address?: string
   ) {
     super('timeseries', name);
-    this.sql = {
+    this.timeseries = {
       type: type || 'elasticsearch',
       database: database || '',
       username: username || '',
@@ -411,7 +414,7 @@ export class TimeSeriesPanelInfo extends PanelInfo {
 
   constructor(
     name?: string,
-    type?: SQLConnectorInfoType,
+    type?: TimeSeriesConnectorInfoType,
     connectorId?: string,
     range?: TimeSeriesRange,
     content?: string
@@ -611,7 +614,7 @@ export async function doOnAllEncryptFields(
   s: ProjectState,
   cb: (field: Encrypt, path: string) => Promise<void>
 ) {
-  const stack = [[s, []]];
+  const stack: Array<[any, Array<string>]> = [[s, []]];
 
   while (stack.length) {
     const [top, path] = stack.pop();
@@ -621,7 +624,7 @@ export async function doOnAllEncryptFields(
     }
 
     if (top instanceof Encrypt) {
-      await cb(s, path.join());
+      await cb(top, path.join('.'));
     }
   }
 }
@@ -665,6 +668,7 @@ export class ProjectState {
     doOnAllEncryptFields(ps, (f) => {
       f.value = null;
       f.encrypted = true;
+      return Promise.resolve();
     });
     return ps;
   }
