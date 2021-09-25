@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { Shape } from 'shape';
 import { NoConnectorError } from '../../shared/errors';
 import { SQLEvalBody } from '../../shared/rpc';
 import {
@@ -11,18 +10,27 @@ import {
   SQLPanelInfo,
 } from '../../shared/state';
 import { asyncRPC } from '../asyncRPC';
+import { CodeEditor } from '../component-library/CodeEditor';
 import { Select } from '../component-library/Select';
-import { ProjectContext } from '../ProjectStore';
 import { ServerPicker } from '../component-library/ServerPicker';
+import { ProjectContext } from '../ProjectStore';
 import { VENDORS } from '../sqlconnectors';
+import {
+  guardPanel,
+  PanelBodyProps,
+  PanelDetailsProps,
+  PanelUIDetails,
+} from './types';
 
 export async function evalSQLPanel(
   panel: SQLPanelInfo,
+  panelResults: Array<PanelResult>,
   indexIdMap: Array<string>,
   connectors: Array<ConnectorInfo>,
-  _: Array<ServerInfo>,
-  indexShapeMap: Array<Shape>
+  _1: Array<ServerInfo>
 ) {
+  const indexShapeMap = panelResults.map((r) => r.shape);
+
   const connector = connectors.find(
     (c) => c.id === panel.sql.connectorId
   ) as SQLConnectorInfo;
@@ -42,20 +50,15 @@ export async function evalSQLPanel(
   );
 }
 
-export function SQLPanelDetails({
-  panel,
-  updatePanel,
-}: {
-  panel: SQLPanelInfo;
-  updatePanel: (d: SQLPanelInfo) => void;
-}) {
+export function SQLPanelDetails({ panel, updatePanel }: PanelDetailsProps) {
+  const sp = guardPanel<SQLPanelInfo>(panel, 'sql');
   const { connectors, servers } = React.useContext(ProjectContext);
 
   const vendorConnectors = connectors
     .map((c: ConnectorInfo) => {
       if (
         c.type !== 'sql' ||
-        (c as SQLConnectorInfo).sql.type !== panel.sql.type
+        (c as SQLConnectorInfo).sql.type !== sp.sql.type
       ) {
         return null;
       }
@@ -65,8 +68,8 @@ export function SQLPanelDetails({
     .filter(Boolean);
 
   React.useEffect(() => {
-    if (!vendorConnectors.length && panel.sql.connectorId) {
-      panel.sql.connectorId = '';
+    if (!vendorConnectors.length && sp.sql.connectorId) {
+      sp.sql.connectorId = '';
     }
   });
 
@@ -123,6 +126,27 @@ export function SQLPanelDetails({
   );
 }
 
+export function SQLPanelBody({
+  updatePanel,
+  panel,
+  keyboardShortcuts,
+}: PanelBodyProps) {
+  const sp = guardPanel(panel, 'sql');
+
+  return (
+    <CodeEditor
+      id={sp.id}
+      onKeyDown={keyboardShortcuts}
+      value={sp.content}
+      onChange={(value: string) => {
+        sp.content = value;
+        updatePanel(sp);
+      }}
+      language="sql"
+      className="editor"
+    />
+  );
+}
 
 export const sqlPanel: PanelUIDetails = {
   icon: 'table_rows',
@@ -133,5 +157,5 @@ export const sqlPanel: PanelUIDetails = {
   body: SQLPanelBody,
   alwaysOpen: false,
   previewable: true,
-  factory: () => new SQLPanelInfo,
+  factory: () => new SQLPanelInfo(),
 };

@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrayShape, ObjectShape, shape, Shape } from 'shape';
+import { ArrayShape, ObjectShape, shape } from 'shape';
 import { MODE, RPC } from '../../shared/constants';
 import { InvalidDependentPanelError } from '../../shared/errors';
 import { LANGUAGES } from '../../shared/languages';
@@ -7,17 +7,17 @@ import { FilterAggregateEvalBody } from '../../shared/rpc';
 import {
   AggregateType,
   FilterAggregatePanelInfo,
-  PanelInfo,
   PanelResult,
 } from '../../shared/state';
 import { title } from '../../shared/text';
 import { asyncRPC } from '../asyncRPC';
 import { CodeEditor } from '../component-library/CodeEditor';
+import { FieldPicker } from '../component-library/FieldPicker';
 import { FormGroup } from '../component-library/FormGroup';
 import { Input } from '../component-library/Input';
-import { Select } from '../component-library/Select';
-import { FieldPicker } from '../component-library/FieldPicker';
 import { PanelSourcePicker } from '../component-library/PanelSourcePicker';
+import { Select } from '../component-library/Select';
+import { guardPanel, PanelDetailsProps, PanelUIDetails } from './types';
 
 function withAggregateShape(
   r: PanelResult,
@@ -57,10 +57,11 @@ function withAggregateShape(
 
 export async function evalFilterAggregatePanel(
   panel: FilterAggregatePanelInfo,
-  indexIdMap: Array<string>,
   panelResults: Array<PanelResult>,
-  indexShapeMap: Array<Shape>
+  indexIdMap: Array<string>
 ) {
+  const indexShapeMap = panelResults.map((c) => c.shape);
+
   if (MODE === 'browser') {
     const {
       panelSource,
@@ -120,23 +121,21 @@ export function FilterAggregatePanelDetails({
   panel,
   panels,
   updatePanel,
-  data,
-}: {
-  panel: FilterAggregatePanelInfo;
-  panels: Array<PanelInfo>;
-  updatePanel: (d: FilterAggregatePanelInfo) => void;
-  data: PanelResult;
-}) {
+}: PanelDetailsProps) {
+  const fap = guardPanel<FilterAggregatePanelInfo>(panel, 'filagg');
+  const data =
+    (panels[fap.filagg.panelSource] || {}).resultMeta || new PanelResult();
+
   return (
     <React.Fragment>
       <FormGroup label="General">
         <div className="form-row">
           <PanelSourcePicker
-            currentPanel={panel.id}
+            currentPanel={fap.id}
             panels={panels}
-            value={panel.filagg.panelSource}
+            value={fap.filagg.panelSource}
             onChange={(value: number) => {
-              panel.filagg.panelSource = value;
+              fap.filagg.panelSource = value;
               updatePanel(panel);
             }}
           />
@@ -146,12 +145,12 @@ export function FilterAggregatePanelDetails({
         <div className="form-row">
           <CodeEditor
             singleLine
-            id={panel.id + 'filter'}
+            id={fap.id + 'filter'}
             label="Expression"
             placeholder="x LIKE '%town%' AND y IN (1, 2)"
-            value={panel.filagg.filter}
+            value={fap.filagg.filter}
             onChange={(value: string) => {
-              panel.filagg.filter = value;
+              fap.filagg.filter = value;
               updatePanel(panel);
             }}
             language="sql"
@@ -163,9 +162,9 @@ export function FilterAggregatePanelDetails({
         <div className="form-row">
           <Select
             label="Function"
-            value={panel.filagg.aggregateType}
+            value={fap.filagg.aggregateType}
             onChange={(value: string) => {
-              panel.filagg.aggregateType = value as AggregateType;
+              fap.filagg.aggregateType = value as AggregateType;
               updatePanel(panel);
             }}
           >
@@ -181,29 +180,29 @@ export function FilterAggregatePanelDetails({
             </optgroup>
           </Select>
         </div>
-        {panel.filagg.aggregateType !== 'none' && (
+        {fap.filagg.aggregateType !== 'none' && (
           <React.Fragment>
             <div className="form-row">
               <FieldPicker
                 preferredDefaultType="string"
                 label="Group by"
                 panelSourceResult={data}
-                value={panel.filagg.groupBy}
+                value={fap.filagg.groupBy}
                 onChange={(value: string) => {
-                  panel.filagg.groupBy = value;
+                  fap.filagg.groupBy = value;
                   updatePanel(panel);
                 }}
               />
             </div>
-            {panel.filagg.aggregateType !== 'count' && (
+            {fap.filagg.aggregateType !== 'count' && (
               <div className="form-row">
                 <FieldPicker
                   preferredDefaultType="number"
-                  label={title(panel.filagg.aggregateType) + ' on'}
+                  label={title(fap.filagg.aggregateType) + ' on'}
                   panelSourceResult={data}
-                  value={panel.filagg.aggregateOn}
+                  value={fap.filagg.aggregateOn}
                   onChange={(value: string) => {
-                    panel.filagg.aggregateOn = value;
+                    fap.filagg.aggregateOn = value;
                     updatePanel(panel);
                   }}
                 />
@@ -217,18 +216,18 @@ export function FilterAggregatePanelDetails({
           <FieldPicker
             preferredDefaultType="number"
             label="Field"
-            panelSourceResult={withAggregateShape(data, panel)}
-            value={panel.filagg.sortOn}
+            panelSourceResult={withAggregateShape(data, fap)}
+            value={fap.filagg.sortOn}
             onChange={(value: string) => {
-              panel.filagg.sortOn = value;
+              fap.filagg.sortOn = value;
               updatePanel(panel);
             }}
           />
           <Select
             label="Direction"
-            value={panel.filagg.aggregateType}
+            value={fap.filagg.aggregateType}
             onChange={(value: string) => {
-              panel.filagg.sortAsc = value === 'asc';
+              fap.filagg.sortAsc = value === 'asc';
               updatePanel(panel);
             }}
           >
@@ -241,10 +240,10 @@ export function FilterAggregatePanelDetails({
         <div className="form-row">
           <Input
             onChange={(value: string) => {
-              panel.filagg.limit = +value;
+              fap.filagg.limit = +value;
               updatePanel(panel);
             }}
-            value={String(panel.filagg.limit)}
+            value={String(fap.filagg.limit)}
             min={1}
             type="number"
           />
@@ -263,5 +262,5 @@ export const filaggPanel: PanelUIDetails = {
   body: null,
   alwaysOpen: false,
   previewable: true,
-  factory: () => new FilterAggregatePanelInfo,
+  factory: () => new FilterAggregatePanelInfo(),
 };

@@ -1,27 +1,41 @@
-import {PanelInfo, PanelResultMeta} from '../../shared/state';
+import { PanelInfo, PanelResult } from '../../shared/state';
 
 export interface PanelDetailsProps {
   panel: PanelInfo;
   panels: Array<PanelInfo>;
-  panelResults: Array<PanelResultMeta>;
   updatePanel: (d: PanelInfo) => void;
   panelIndex: number;
 }
 
 export interface PanelBodyProps {
   panel: PanelInfo;
+  panels: Array<PanelInfo>;
   updatePanel: (d: PanelInfo) => void;
   keyboardShortcuts: (e: React.KeyboardEvent) => void;
 }
 
 export interface PanelUIDetails {
   icon: string;
-  eval: () => Promise<PanelResult>;
+  eval(
+    panel: PanelInfo,
+    panelResults: Array<PanelResult>,
+    indexIdMap: Array<string>,
+    connectors: Array<ConnectorInfo>,
+    servers: Array<ServerInfo>
+  ): Promise<PanelResult>;
   id: PanelInfoType;
   label: string;
-  details: React.Component<PanelDetailsProps>;
-  body: React.Component<PanelBodyProps> | null;
+  details: React.ElementType<PanelDetailsProps>;
+  body: React.ElementType<PanelBodyProps> | null;
   alwaysOpen: boolean;
   previewable: boolean;
   factory: () => PanelInfo;
-};
+}
+
+export function guardPanel<T>(panel: PanelInfo, t: PanelInfoType): T {
+  if (panel.type !== t) {
+    throw new Error(`Panel type mismatch. Expected ${t}.`);
+  }
+
+  return panel as T;
+}

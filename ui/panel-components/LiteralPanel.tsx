@@ -5,7 +5,14 @@ import { MODE, RPC } from '../../shared/constants';
 import { ContentTypeInfo, LiteralPanelInfo } from '../../shared/state';
 import { parseArrayBuffer } from '../../shared/text';
 import { asyncRPC } from '../asyncRPC';
+import { CodeEditor } from '../component-library/CodeEditor';
 import { ContentTypePicker } from '../component-library/ContentTypePicker';
+import {
+  guardPanel,
+  PanelBodyProps,
+  PanelDetailsProps,
+  PanelUIDetails,
+} from './types';
 
 export async function evalLiteralPanel(panel: LiteralPanelInfo) {
   const literal = panel.literal;
@@ -37,27 +44,45 @@ export async function evalLiteralPanel(panel: LiteralPanelInfo) {
   };
 }
 
-export function LiteralPanelDetails({
-  panel,
-  updatePanel,
-}: {
-  panel: LiteralPanelInfo;
-  updatePanel: (d: LiteralPanelInfo) => void;
-}) {
+export function LiteralPanelDetails({ panel, updatePanel }: PanelDetailsProps) {
+  const lp = guardPanel<LiteralPanelInfo>(panel, 'literal');
+
   return (
     <React.Fragment>
       <div className="form-row">
         <ContentTypePicker
           disableAutoDetect
           inMemoryEval={false}
-          value={panel.literal.contentTypeInfo}
+          value={lp.literal.contentTypeInfo}
           onChange={(cti: ContentTypeInfo) => {
-            panel.literal.contentTypeInfo = cti;
+            lp.literal.contentTypeInfo = cti;
             updatePanel(panel);
           }}
         />
       </div>
     </React.Fragment>
+  );
+}
+
+export function LiteralPanelBody({
+  updatePanel,
+  panel,
+  keyboardShortcuts,
+}: PanelBodyProps) {
+  const lp = guardPanel<LiteralPanelInfo>(panel, 'literal');
+
+  return (
+    <CodeEditor
+      id={lp.id}
+      onKeyDown={keyboardShortcuts}
+      value={lp.content}
+      onChange={(value: string) => {
+        lp.content = value;
+        updatePanel(lp);
+      }}
+      language={lp.literal.type}
+      className="editor"
+    />
   );
 }
 
@@ -70,5 +95,5 @@ export const literalPanel: PanelUIDetails = {
   body: LiteralPanelBody,
   alwaysOpen: false,
   previewable: true,
-  factory: () => new LiteralPanelInfo,
+  factory: () => new LiteralPanelInfo(),
 };

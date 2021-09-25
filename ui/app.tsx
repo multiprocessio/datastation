@@ -20,9 +20,9 @@ import {
 import { asyncRPC } from './asyncRPC';
 import { Alert } from './component-library/Alert';
 import { Button } from './component-library/Button';
+import { ErrorBoundary } from './component-library/ErrorBoundary';
 import { Input } from './component-library/Input';
 import { Connectors } from './Connectors';
-import { ErrorBoundary } from './ErrorBoundary';
 import { Pages } from './Pages';
 import { makeStore, ProjectContext, ProjectStore } from './ProjectStore';
 import { Servers } from './Servers';

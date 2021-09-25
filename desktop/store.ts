@@ -2,13 +2,7 @@ import fs from 'fs';
 import fsPromises from 'fs/promises';
 import path from 'path';
 import log from '../shared/log';
-import {
-  Encrypt,
-  ProjectState,
-  ServerInfo,
-  SQLConnectorInfo,
-  doOnAllEncryptFields,
-} from '../shared/state';
+import { doOnAllEncryptFields, Encrypt, ProjectState } from '../shared/state';
 import { DISK_ROOT, PROJECT_EXTENSION, SYNC_PERIOD } from './constants';
 import { ensureFile } from './fs';
 import { Dispatch } from './rpc';
@@ -71,7 +65,8 @@ export function encryptProjectSecrets(
   existingState: ProjectState
 ) {
   return doOnAllEncryptFields(s, (field, path) =>
-    checkAndEncrypt(top, getObject(existingServer, path.join('.'))));
+    checkAndEncrypt(top, getObject(existingServer, path.join('.')))
+  );
 }
 
 export const storeHandlers = [

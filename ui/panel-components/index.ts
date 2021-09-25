@@ -1,12 +1,12 @@
 import { MODE } from '../../shared/constants';
 import { PanelInfoType } from '../../shared/state';
-import { sqlPanel } from './SQLPanel';
 import { filePanel } from './FilePanel';
 import { filaggPanel } from './FilterAggregatePanel';
 import { graphPanel } from './GraphPanel';
 import { httpPanel } from './HTTPPanel';
 import { literalPanel } from './LiteralPanel';
 import { programPanel } from './ProgramPanel';
+import { sqlPanel } from './SQLPanel';
 import { tablePanel } from './TablePanel';
 
 export const PANEL_UI_DETAILS: Record<PanelInfoType, PanelUIDetails> = {
@@ -21,10 +21,18 @@ export const PANEL_UI_DETAILS: Record<PanelInfoType, PanelUIDetails> = {
   timeseries: timeseriesPanel,
 };
 
-export const PANEL_GROUPS: Array<{ label: string; panels: Array<PanelInfoType> }> = [
+export const PANEL_GROUPS: Array<{
+  label: string;
+  panels: Array<PanelInfoType>;
+}> = [
   {
     label: 'Import',
-    panels: [...(MODE !== 'browser' ? ['sql', 'timeseries'] : []), 'http', 'file', 'literal'],
+    panels: [
+      ...(MODE !== 'browser' ? ['sql', 'timeseries'] : []),
+      'http',
+      'file',
+      'literal',
+    ],
   },
   {
     label: 'Operate',

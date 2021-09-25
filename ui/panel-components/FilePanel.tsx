@@ -5,11 +5,11 @@ import { MODE } from '../../shared/constants';
 import { FilePanelInfo, PanelResult } from '../../shared/state';
 import { parseArrayBuffer } from '../../shared/text';
 import { asyncRPC } from '../asyncRPC';
+import { ContentTypePicker } from '../component-library/ContentTypePicker';
 import { FileInput } from '../component-library/FileInput';
 import { FormGroup } from '../component-library/FormGroup';
-import { ContentTypePicker } from '../component-library/ContentTypePicker';
-import { ProjectContext } from '../ProjectStore';
 import { ServerPicker } from '../component-library/ServerPicker';
+import { ProjectContext } from '../ProjectStore';
 
 export async function evalFilePanel(
   panel: FilePanelInfo
@@ -89,7 +89,6 @@ export function FilePanelDetails({
   );
 }
 
-
 export const filePanel: PanelUIDetails = {
   icon: 'description',
   eval: evalFilePanel,
@@ -99,5 +98,5 @@ export const filePanel: PanelUIDetails = {
   body: null,
   alwaysOpen: false,
   previewable: true,
-  factory: () => new FilePanelInfo,
+  factory: () => new FilePanelInfo(),
 };

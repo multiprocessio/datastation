@@ -6,7 +6,7 @@ import { Button } from './component-library/Button';
 import { Confirm } from './component-library/Confirm';
 import { Input } from './component-library/Input';
 import { PanelPlayWarning } from './errors';
-import { evalPanel } from './Panel';
+import { PANEL_UI_DETAILS } from './panel-components';
 import { Panels } from './Panels';
 
 export function Pages({
@@ -69,12 +69,12 @@ export function Pages({
 
     try {
       const indexIdMap: Array<string> = page.panels.map((p) => p.id);
+      const panelUIDetails = PANEL_UI_DETAILS[panel.type];
       const { value, size, contentType, preview, stdout, shape } =
-        await evalPanel(
-          page,
-          panelIndex,
-          indexIdMap,
+        await panelUIDetails.eval(
+          panel,
           panelResults,
+          indexIdMap,
           connectors,
           servers
         );

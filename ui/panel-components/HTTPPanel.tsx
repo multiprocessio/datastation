@@ -11,12 +11,12 @@ import {
 } from '../../shared/state';
 import { asyncRPC } from '../asyncRPC';
 import { Button } from '../component-library/Button';
+import { ContentTypePicker } from '../component-library/ContentTypePicker';
 import { FormGroup } from '../component-library/FormGroup';
 import { Input } from '../component-library/Input';
 import { Select } from '../component-library/Select';
-import { ContentTypePicker } from '../component-library/ContentTypePicker';
-import { ProjectContext } from '../ProjectStore';
 import { ServerPicker } from '../component-library/ServerPicker';
+import { ProjectContext } from '../ProjectStore';
 
 export async function evalHTTPPanel(panel: HTTPPanelInfo) {
   if (MODE === 'browser') {
@@ -162,5 +162,5 @@ export const httpPanel: PanelUIDetails = {
   body: HTTPPanelBody,
   alwaysOpen: true,
   previewable: true,
-  factory: () => new HTTPPanelInfo,
+  factory: () => new HTTPPanelInfo(),
 };

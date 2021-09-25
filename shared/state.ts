@@ -181,7 +181,7 @@ export class TimeSeriesConnectorInfo extends ConnectorInfo {
     username: string;
     password: Encrypted;
     extra: Record<string, string>;
-  }
+  };
 }
 
 export type SQLConnectorInfoType =
@@ -331,7 +331,7 @@ export class TimeSeriesPanelInfo extends PanelInfo {
   timeseries: {
     type: TimeSeriesConnectorInfoType;
     connectorId?: string;
-  }
+  };
 
   constructor(
     name?: string,
@@ -509,7 +509,10 @@ export class ProjectPage {
   }
 }
 
-export async function doOnAllEncryptFields(s: ProjectState, cb: (field: Encrypt, path: string) => Promise<void>) {
+export async function doOnAllEncryptFields(
+  s: ProjectState,
+  cb: (field: Encrypt, path: string) => Promise<void>
+) {
   const stack = [[s, []]];
 
   while (stack.length) {

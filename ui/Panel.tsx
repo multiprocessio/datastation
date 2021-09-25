@@ -6,96 +6,23 @@ import * as React from 'react';
 import { toString } from 'shape';
 import { MODE, MODE_FEATURES, RPC } from '../shared/constants';
 import {
-  ConnectorInfo,
-  PanelInfoType,
-  FilePanelInfo,
-  FilterAggregatePanelInfo,
-  GraphPanelInfo,
-  HTTPPanelInfo,
-  LiteralPanelInfo,
   PanelInfo,
+  PanelInfoType,
   PanelResult,
   PanelResultMeta,
   ProgramPanelInfo,
-  ProjectPage,
-  ServerInfo,
-  SQLPanelInfo,
-  TablePanelInfo,
 } from '../shared/state';
 import { humanSize } from '../shared/text';
 import { asyncRPC } from './asyncRPC';
 import { Alert } from './component-library/Alert';
 import { Button } from './component-library/Button';
-import { PANEL_UI_DETAILS, PANEL_GROUPS } from './panel-components';
 import { Confirm } from './component-library/Confirm';
+import { ErrorBoundary } from './component-library/ErrorBoundary';
 import { Highlight } from './component-library/Highlight';
 import { Input } from './component-library/Input';
 import { Select } from './component-library/Select';
-import { ErrorBoundary } from './ErrorBoundary';
 import { PanelPlayWarning } from './errors';
-
-export async function evalPanel(
-  page: ProjectPage,
-  panelId: number,
-  indexIdMap: Array<string>,
-  panelResults: Array<PanelResult>,
-  connectors: Array<ConnectorInfo>,
-  servers: Array<ServerInfo>
-): Promise<PanelResult> {
-  const panel = page.panels[panelId];
-  switch (panel.type) {
-    case 'program':
-      return await evalProgramPanel(
-        panel as ProgramPanelInfo,
-        panelResults,
-        indexIdMap
-      );
-    case 'literal': {
-      return await evalLiteralPanel(panel as LiteralPanelInfo);
-    }
-    case 'sql': {
-      return await evalSQLPanel(
-        panel as SQLPanelInfo,
-        indexIdMap,
-        connectors,
-        servers,
-        panelResults.map((r) => r.shape)
-      );
-    }
-    case 'graph': {
-      const { graph } = panel as GraphPanelInfo;
-      return await evalColumnPanel(
-        graph.panelSource,
-        [graph.x, ...graph.ys.map((y) => y.field)],
-        indexIdMap,
-        panelResults
-      );
-    }
-    case 'table': {
-      const { table } = panel as TablePanelInfo;
-      return await evalColumnPanel(
-        table.panelSource,
-        table.columns.map((c) => c.field),
-        indexIdMap,
-        panelResults
-      );
-    }
-    case 'http': {
-      return await evalHTTPPanel(panel as HTTPPanelInfo);
-    }
-    case 'file': {
-      return await evalFilePanel(panel as FilePanelInfo);
-    }
-    case 'filagg': {
-      return await evalFilterAggregatePanel(
-        panel as FilterAggregatePanelInfo,
-        indexIdMap,
-        panelResults,
-        panelResults.map((c) => c.shape)
-      );
-    }
-  }
-}
+import { PANEL_GROUPS, PANEL_UI_DETAILS } from './panel-components';
 
 function valueAsString(value: any) {
   try {
@@ -337,26 +264,28 @@ export function Panel({
             <Select
               label="Type"
               value={panel.type}
-    onChange={(value: string) => {
-      const panelType = value as PanelInfoType;
-      const newPanel = PANEL_UI_DETAILS[panelType].factory();
-      panel[panelType] = newPanel[panelType];
-      updatePanel(newPanel);
+              onChange={(value: string) => {
+                const panelType = value as PanelInfoType;
+                const newPanel = PANEL_UI_DETAILS[panelType].factory();
+                panel[panelType] = newPanel[panelType];
+                updatePanel(newPanel);
               }}
-    >
-    {PANEL_GROUPS.map(group => 
-      <optgroup label={group.label} key={group.label}>
-      {group.panels.map(name => {
-        const panelDetails = PANEL_UI_DETAILS[name];
-        return <option value={panelDetails.id}>{panelDetails.label}</option>;
-        })}
-      </optgroup>
-    )}
+            >
+              {PANEL_GROUPS.map((group) => (
+                <optgroup label={group.label} key={group.label}>
+                  {group.panels.map((name) => {
+                    const panelDetails = PANEL_UI_DETAILS[name];
+                    return (
+                      <option value={panelDetails.id}>
+                        {panelDetails.label}
+                      </option>
+                    );
+                  })}
+                </optgroup>
+              ))}
             </Select>
 
-    <span className="material-icons">
-    {panelUIDetails.icon}
-            </span>
+            <span className="material-icons">{panelUIDetails.icon}</span>
 
             <Input
               className="panel-name"
@@ -382,7 +311,7 @@ export function Panel({
                   'Running...'
                 ) : results.lastRun ? (
                   <>
-                   <span
+                    <span
                       className={
                         results.exception ? 'text-failure' : 'text-success'
                       }
@@ -458,7 +387,12 @@ export function Panel({
           </div>
           {details && (
             <div className="panel-details">
-              <panelUIDetails.details panelIndex={panelIndex} panel={panel} updatePanel={updatePanel} panels={panels} data={panelResults} />
+              <panelUIDetails.details
+                panelIndex={panelIndex}
+                panel={panel}
+                updatePanel={updatePanel}
+                panels={panels}
+              />
             </div>
           )}
         </div>
@@ -467,7 +401,13 @@ export function Panel({
             <ErrorBoundary className="panel-body">
               <div className="flex">
                 <div className="panel-body">
-                  {panelUIDetails.body && <panelUIDetails.body panel={panel} keyboardShortcuts={keyboardShortcuts} />}
+                  {panelUIDetails.body && (
+                    <panelUIDetails.body
+                      panel={panel}
+                      keyboardShortcuts={keyboardShortcuts}
+                      panels={panels}
+                    />
+                  )}
                   {exception instanceof PanelPlayWarning ? (
                     <PanelPlayWarningWithLinks
                       msg={exception.message}

@@ -42,7 +42,14 @@ export function Input({
   readOnly,
   autoWidth,
 }: {
-  type?: 'text' | 'number' | 'email' | 'password' | 'url' | 'checkbox' | 'radio';
+  type?:
+    | 'text'
+    | 'number'
+    | 'email'
+    | 'password'
+    | 'url'
+    | 'checkbox'
+    | 'radio';
   placeholder?: string;
   className?: string;
   onChange: (value: string) => void;
@@ -73,8 +80,8 @@ export function Input({
       type={type}
       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
         setLocalValue(e.target.value)
-	       }
-    name={name}
+      }
+      name={name}
       onBlur={onBlur}
       disabled={disabled}
       readOnly={readOnly}

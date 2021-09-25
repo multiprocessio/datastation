@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { ServerInfo, SQLConnectorInfo } from '../../shared/state';
-import { ServerPicker } from '../ServerPicker';
+import { ServerPicker } from '../component-library/ServerPicker';
 import { Database } from './Database';
 import { Host } from './Host';
 import { Password } from './Password';

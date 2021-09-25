@@ -74,39 +74,39 @@ export function TimeSeriesPanelDetails({
     {
       label: 'Within day',
       options: [
-	{ label: 'Last 5 minutes', minutes: 5 },
-	{ label: 'Last 15 minutes', minutes: 15 },
-	{ label: 'Last 30 minutes', minutes: 30 },
-	{ label: 'Last hour', minutes: 60 },
-	{ label: 'Last 3 hours', minutes: 180 },
-	{ label: 'Last 6 hours', minutes: 360 },
-	{ label: 'Last 12 hours', minutes: 720 },
+        { label: 'Last 5 minutes', minutes: 5 },
+        { label: 'Last 15 minutes', minutes: 15 },
+        { label: 'Last 30 minutes', minutes: 30 },
+        { label: 'Last hour', minutes: 60 },
+        { label: 'Last 3 hours', minutes: 180 },
+        { label: 'Last 6 hours', minutes: 360 },
+        { label: 'Last 12 hours', minutes: 720 },
       ],
     },
     {
       label: 'Within month',
       options: [
-	{ label: 'Last day', minutes: 60*24 },
-	{ label: 'Last 3 days', minutes: 60*24*3 },
-	{ label: 'Last week', minutes: 60*24*7 },
-	{ label: 'Last 2 weeks', minutes: 60*24*14 },
-	{ label: 'Last 30 days', minutes: 60*24*7*30 },	
-      ]
+        { label: 'Last day', minutes: 60 * 24 },
+        { label: 'Last 3 days', minutes: 60 * 24 * 3 },
+        { label: 'Last week', minutes: 60 * 24 * 7 },
+        { label: 'Last 2 weeks', minutes: 60 * 24 * 14 },
+        { label: 'Last 30 days', minutes: 60 * 24 * 7 * 30 },
+      ],
     },
     {
       label: 'Within year',
       options: [
-	{ label: 'Last 2 months', minutes: 60*24*7*60 },
-	{ label: 'Last 3 months', minutes: 60*24*7*90 },
-	{ label: 'Last 6 months', minutes: 60*24*7*180 },
+        { label: 'Last 2 months', minutes: 60 * 24 * 7 * 60 },
+        { label: 'Last 3 months', minutes: 60 * 24 * 7 * 90 },
+        { label: 'Last 6 months', minutes: 60 * 24 * 7 * 180 },
       ],
     },
     {
       label: 'Rest of time',
       options: [
-	{ label: 'Last year', minutes: 60*24*7*365 },
-	{ label: 'Last 2 years', minutes: 60*24*7*365*2 },
-	{ label: 'All time', minutes: 60*24*7*365*100 },
+        { label: 'Last year', minutes: 60 * 24 * 7 * 365 },
+        { label: 'Last 2 years', minutes: 60 * 24 * 7 * 365 * 2 },
+        { label: 'All time', minutes: 60 * 24 * 7 * 365 * 100 },
       ],
     },
   ];
@@ -161,37 +161,46 @@ export function TimeSeriesPanelDetails({
         }}
       />
       <FormGroup label="Time Range">
-      <Tab>
-      {tab === 'absolute' ? (
-	<React.Fragment>
-	  <div className="tab-name">Absolute</div>
-	<div className="flex">
-	  <Datetime label="Begin" onChange={(v) => {
-	    panel.timeseries.range.begin = v;
-	    updatePanel(panel);
-	  }} />
-	  <Datetime label="End" onChange={(v) => {
-	    panel.timeseries.range.end = v;
-	    updatePanel(panel);
-	  }} />
-	  </div>
-	  </React.Fragment>) : (
-	<React.Fragment>
-	  <div className="tab-name">Relative</div>
-	  <Select
-	onChange={() => {
-	  panel.timeseries.range.begin = new Date() - diff;
-	  panel.timeseries.range.end = new Date();
-	  updatePanel(panel);
-	}}
-	children={relativeOptions.map(group =>
-	  <optgroup label={group.label}>
-	  {group.options.map(({ label, diff }) =>
-	    <option>{label}</option>)}
-				      </optgroup>)}
-	  />
-	</React.Fragment>)}
-    </FormGroup>
+        {tab === 'absolute' ? (
+          <React.Fragment>
+            <div className="tab-name">Absolute</div>
+            <div className="flex">
+              <Datetime
+                label="Begin"
+                onChange={(v) => {
+                  panel.timeseries.range.begin = v;
+                  updatePanel(panel);
+                }}
+              />
+              <Datetime
+                label="End"
+                onChange={(v) => {
+                  panel.timeseries.range.end = v;
+                  updatePanel(panel);
+                }}
+              />
+            </div>
+          </React.Fragment>
+        ) : (
+          <React.Fragment>
+            <div className="tab-name">Relative</div>
+            <Select
+              onChange={() => {
+                panel.timeseries.range.begin = new Date() - diff;
+                panel.timeseries.range.end = new Date();
+                updatePanel(panel);
+              }}
+              children={relativeOptions.map((group) => (
+                <optgroup label={group.label}>
+                  {group.options.map(({ label, diff }) => (
+                    <option>{label}</option>
+                  ))}
+                </optgroup>
+              ))}
+            />
+          </React.Fragment>
+        )}
+      </FormGroup>
       <Editor label="Query" />
     </React.Fragment>
   );
@@ -206,5 +215,5 @@ export const timeseriesPanel: PanelUIDetails = {
   body: null,
   alwaysOpen: false,
   previewable: true,
-  factory: () => new TimeSeriesPanelInfo,
+  factory: () => new TimeSeriesPanelInfo(),
 };

@@ -1,19 +1,25 @@
 import React from 'react';
 import { shape } from 'shape';
-import { CodeEditor } from '../component-library/CodeEditor';
 import { MODE, RPC } from '../../shared/constants';
 import { LANGUAGES, SupportedLanguages } from '../../shared/languages';
-import { PanelResult, ProgramPanelInfo } from '../../shared/state';
+import { PanelInfo, PanelResult, ProgramPanelInfo } from '../../shared/state';
 import { asyncRPC } from '../asyncRPC';
+import { CodeEditor } from '../component-library/CodeEditor';
 import { Select } from '../component-library/Select';
-import {PanelUIDetails, PanelBodyProps, PanelDetailsProps } from './types';
+import {
+  guardPanel,
+  PanelBodyProps,
+  PanelDetailsProps,
+  PanelUIDetails,
+} from './types';
 
 export async function evalProgramPanel(
-  panel: ProgramPanelInfo,
+  panel: PanelInfo,
   panelResults: Array<PanelResult>,
   indexIdMap: Array<string>
 ): Promise<PanelResult> {
-  const program = panel.program;
+  const pp = guardPanel<ProgramPanelInfo>(panel, 'program');
+  const program = pp.program;
 
   if (MODE !== 'browser') {
     return asyncRPC<
@@ -31,7 +37,7 @@ export async function evalProgramPanel(
     throw new Error(`Unknown program type: '${program.type}'`);
   }
 
-  const res = await language.inMemoryEval(panel.content, panelResults);
+  const res = await language.inMemoryEval(pp.content, panelResults);
   return {
     ...res,
     size: res.value ? JSON.stringify(res.value).length : 0,
@@ -45,7 +51,9 @@ export function ProgramPanelDetails({
   updatePanel,
   panelIndex,
 }: PanelDetailsProps) {
-  if (panel.type !== 'program') { return null; }
+  if (panel.type !== 'program') {
+    return null;
+  }
   const pp = panel as ProgramPanelInfo;
 
   const options = Object.keys(LANGUAGES)
@@ -91,8 +99,7 @@ export function ProgramPanelBody({
   panel,
   keyboardShortcuts,
 }: PanelBodyProps) {
-  if (panel.type !== 'program') { return null; }
-  const pp = panel as ProgramPanelInfo;
+  const pp = guardPanel<ProgramPanelInfo>(panel, 'program');
   const language = pp.program.type;
 
   return (
@@ -119,6 +126,5 @@ export const programPanel: PanelUIDetails = {
   body: ProgramPanelBody,
   alwaysOpen: false,
   previewable: true,
-  factory: () => new ProgramPanelInfo,
+  factory: () => new ProgramPanelInfo(),
 };
-

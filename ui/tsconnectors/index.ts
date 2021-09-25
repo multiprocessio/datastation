@@ -1,9 +1,9 @@
 import { TimeSeriesConnectorInfoType } from '../../shared/state';
-import { DetailsProps } from './types';
 import { ElasticSearchDetails } from './ElasticSearchDetails';
-import { SplunkDetails } from './SplunkDetails';
-import { PrometheusDetails } from './PrometheusDetails';
 import { InfluxDetails } from './InfluxDetails';
+import { PrometheusDetails } from './PrometheusDetails';
+import { SplunkDetails } from './SplunkDetails';
+import { DetailsProps } from './types';
 
 export const VENDORS: Array<{
   group: string;
