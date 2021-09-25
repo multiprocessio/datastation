@@ -1,15 +1,15 @@
 import { preview } from 'preview';
 import * as React from 'react';
 import { shape } from 'shape';
-import { MODE } from '../shared/constants';
-import { FilePanelInfo, PanelResult } from '../shared/state';
-import { parseArrayBuffer } from '../shared/text';
-import { asyncRPC } from './asyncRPC';
-import { FileInput } from './component-library/FileInput';
-import { FormGroup } from './component-library/FormGroup';
-import { ContentTypePicker } from './ContentTypePicker';
-import { ProjectContext } from './ProjectStore';
-import { ServerPicker } from './ServerPicker';
+import { MODE } from '../../shared/constants';
+import { FilePanelInfo, PanelResult } from '../../shared/state';
+import { parseArrayBuffer } from '../../shared/text';
+import { asyncRPC } from '../asyncRPC';
+import { FileInput } from '../component-library/FileInput';
+import { FormGroup } from '../component-library/FormGroup';
+import { ContentTypePicker } from '../component-library/ContentTypePicker';
+import { ProjectContext } from '../ProjectStore';
+import { ServerPicker } from '../component-library/ServerPicker';
 
 export async function evalFilePanel(
   panel: FilePanelInfo

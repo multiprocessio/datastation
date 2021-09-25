@@ -234,7 +234,8 @@ export type PanelInfoType =
   | 'literal'
   | 'sql'
   | 'file'
-  | 'filagg';
+  | 'filagg'
+  | 'timeseries';
 
 export class PanelInfo {
   content: string;
@@ -508,8 +509,8 @@ export class ProjectPage {
   }
 }
 
-export async doOnAllEncryptFields(s: ProjectState, cb: (field: Encrypt, path: string) => Promise<void>) {
-  const stack = [[s, []];
+export async function doOnAllEncryptFields(s: ProjectState, cb: (field: Encrypt, path: string) => Promise<void>) {
+  const stack = [[s, []]];
 
   while (stack.length) {
     const [top, path] = stack.pop();

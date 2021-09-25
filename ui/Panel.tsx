@@ -7,6 +7,7 @@ import { toString } from 'shape';
 import { MODE, MODE_FEATURES, RPC } from '../shared/constants';
 import {
   ConnectorInfo,
+  PanelInfoType,
   FilePanelInfo,
   FilterAggregatePanelInfo,
   GraphPanelInfo,
@@ -25,35 +26,13 @@ import { humanSize } from '../shared/text';
 import { asyncRPC } from './asyncRPC';
 import { Alert } from './component-library/Alert';
 import { Button } from './component-library/Button';
-import { CodeEditor } from './component-library/CodeEditor';
+import { PANEL_UI_DETAILS, PANEL_GROUPS } from './panel-components';
 import { Confirm } from './component-library/Confirm';
 import { Highlight } from './component-library/Highlight';
 import { Input } from './component-library/Input';
 import { Select } from './component-library/Select';
 import { ErrorBoundary } from './ErrorBoundary';
 import { PanelPlayWarning } from './errors';
-import { evalFilePanel, FilePanelDetails } from './FilePanel';
-import {
-  evalFilterAggregatePanel,
-  FilterAggregatePanelDetails,
-} from './FilterAggregatePanel';
-import { GraphPanel, GraphPanelDetails } from './GraphPanel';
-import { evalHTTPPanel, HTTPPanelDetails } from './HTTPPanel';
-import { evalLiteralPanel, LiteralPanelDetails } from './LiteralPanel';
-import { evalProgramPanel, ProgramPanelDetails } from './ProgramPanel';
-import { evalSQLPanel, SQLPanelDetails } from './SQLPanel';
-import { evalColumnPanel, TablePanel, TablePanelDetails } from './TablePanel';
-
-export const PANEL_TYPE_ICON = {
-  literal: 'format_quote',
-  program: 'code',
-  table: 'table_chart',
-  graph: 'bar_chart',
-  http: 'http',
-  sql: 'table_rows',
-  file: 'description',
-  filagg: 'search',
-};
 
 export async function evalPanel(
   page: ProjectPage,
@@ -276,38 +255,14 @@ export function Panel({
   movePanel: (from: number, to: number) => void;
   panels: Array<PanelInfo>;
 }) {
-  const previewableTypes = [
-    'http',
-    'sql',
-    'program',
-    'file',
-    'literal',
-    'filagg',
-  ];
-  const alwaysOpenTypes = ['table', 'graph', 'http', 'file'];
+  const panelUIDetails = PANEL_UI_DETAILS[panel.type];
   const [details, setDetails] = React.useState(true);
   const [hidden, setHidden] = React.useState(false);
-
-  let body = null;
-  const exception = panel.resultMeta && panel.resultMeta.exception;
-  if (panel.type === 'table') {
-    body = (
-      <TablePanel panel={panel as TablePanelInfo} data={panel.resultMeta} />
-    );
-  } else if (panel.type === 'graph') {
-    body = (
-      <GraphPanel panel={panel as GraphPanelInfo} data={panel.resultMeta} />
-    );
-  } else if (panel.type === 'file' || panel.type === 'filagg') {
-    body = <span />;
-  }
 
   const [panelOut, setPanelOut] = React.useState<
     'preview' | 'stdout' | 'shape' | 'metadata'
   >('preview');
   const results = panel.resultMeta || new PanelResultMeta();
-  const language =
-    panel.type === 'program' ? (panel as ProgramPanelInfo).program.type : 'sql';
 
   const panelRef = React.useRef(null);
   function keyboardShortcuts(e: React.KeyboardEvent) {
@@ -382,59 +337,25 @@ export function Panel({
             <Select
               label="Type"
               value={panel.type}
-              onChange={(value: string) => {
-                let newPanel;
-                switch (value) {
-                  case 'sql':
-                    newPanel = new SQLPanelInfo(panel.name);
-                    break;
-                  case 'literal':
-                    newPanel = new LiteralPanelInfo(panel.name);
-                    break;
-                  case 'program':
-                    newPanel = new ProgramPanelInfo(panel.name);
-                    break;
-                  case 'table':
-                    newPanel = new TablePanelInfo(panel.name);
-                    break;
-                  case 'graph':
-                    newPanel = new GraphPanelInfo(panel.name);
-                    break;
-                  case 'http':
-                    newPanel = new HTTPPanelInfo(panel.name);
-                    break;
-                  case 'file':
-                    newPanel = new FilePanelInfo(panel.name);
-                    break;
-                  case 'filagg':
-                    newPanel = new FilterAggregatePanelInfo(panel.name);
-                    break;
-                  default:
-                    throw new Error(`Invalid panel type: ${value}`);
-                }
-
-                newPanel.content = panel.content;
-                updatePanel(newPanel);
+    onChange={(value: string) => {
+      const panelType = value as PanelInfoType;
+      const newPanel = PANEL_UI_DETAILS[panelType].factory();
+      panel[panelType] = newPanel[panelType];
+      updatePanel(newPanel);
               }}
-            >
-              <optgroup label="Import">
-                {MODE !== 'browser' && <option value="sql">SQL</option>}
-                <option value="http">HTTP Request</option>
-                <option value="file">File</option>
-                <option value="literal">Literal</option>
-              </optgroup>
-              <optgroup label="Operate">
-                <option value="program">Code</option>
-                <option value="filagg">Visual Transform</option>
-              </optgroup>
-              <optgroup label="Display">
-                <option value="graph">Graph</option>
-                <option value="table">Table</option>
-              </optgroup>
+    >
+    {PANEL_GROUPS.map(group => 
+      <optgroup label={group.label} key={group.label}>
+      {group.panels.map(name => {
+        const panelDetails = PANEL_UI_DETAILS[name];
+        return <option value={panelDetails.id}>{panelDetails.label}</option>;
+        })}
+      </optgroup>
+    )}
             </Select>
 
-            <span className="material-icons">
-              {PANEL_TYPE_ICON[panel.type]}
+    <span className="material-icons">
+    {panelUIDetails.icon}
             </span>
 
             <Input
@@ -447,7 +368,7 @@ export function Panel({
               value={panel.name}
             />
 
-            {!alwaysOpenTypes.includes(panel.type) && (
+            {!panelUIDetails.alwaysOpen && (
               <span title={details ? 'Hide Details' : 'Show Details'}>
                 <Button icon onClick={() => setDetails(!details)}>
                   {details ? 'unfold_less' : 'unfold_more'}
@@ -461,7 +382,7 @@ export function Panel({
                   'Running...'
                 ) : results.lastRun ? (
                   <>
-                    <span
+                   <span
                       className={
                         results.exception ? 'text-failure' : 'text-success'
                       }
@@ -537,69 +458,7 @@ export function Panel({
           </div>
           {details && (
             <div className="panel-details">
-              {panel.type === 'table' && (
-                <TablePanelDetails
-                  panel={panel as TablePanelInfo}
-                  updatePanel={updatePanel}
-                  panels={panels}
-                  data={
-                    panelResults[(panel as TablePanelInfo).table.panelSource]
-                  }
-                />
-              )}
-              {panel.type === 'sql' && (
-                <SQLPanelDetails
-                  panel={panel as SQLPanelInfo}
-                  updatePanel={updatePanel}
-                />
-              )}
-              {panel.type === 'literal' && (
-                <LiteralPanelDetails
-                  panel={panel as LiteralPanelInfo}
-                  updatePanel={updatePanel}
-                />
-              )}
-              {panel.type === 'http' && (
-                <HTTPPanelDetails
-                  panel={panel as HTTPPanelInfo}
-                  updatePanel={updatePanel}
-                />
-              )}
-              {panel.type === 'graph' && (
-                <GraphPanelDetails
-                  panel={panel as GraphPanelInfo}
-                  updatePanel={updatePanel}
-                  panels={panels}
-                  data={
-                    panelResults[(panel as GraphPanelInfo).graph.panelSource]
-                  }
-                />
-              )}
-              {panel.type === 'program' && (
-                <ProgramPanelDetails
-                  panel={panel as ProgramPanelInfo}
-                  updatePanel={updatePanel}
-                  panelIndex={panelIndex}
-                />
-              )}
-              {panel.type === 'file' && (
-                <FilePanelDetails
-                  panel={panel as FilePanelInfo}
-                  updatePanel={updatePanel}
-                />
-              )}
-              {panel.type === 'filagg' && (
-                <FilterAggregatePanelDetails
-                  panel={panel as FilterAggregatePanelInfo}
-                  updatePanel={updatePanel}
-                  panels={panels}
-                  data={
-                    panelResults[
-                      (panel as FilterAggregatePanelInfo).filagg.panelSource
-                    ]
-                  }
-                />
-              )}
+              <panelUIDetails.details panel={panel} updatePanel={updatePanel} panels={panels} data={panelResults} />
             </div>
           )}
         </div>
@@ -608,21 +467,7 @@ export function Panel({
             <ErrorBoundary className="panel-body">
               <div className="flex">
                 <div className="panel-body">
-                  {body ? (
-                    body
-                  ) : (
-                    <CodeEditor
-                      id={panel.id}
-                      onKeyDown={keyboardShortcuts}
-                      value={panel.content}
-                      onChange={(value: string) => {
-                        panel.content = value;
-                        updatePanel(panel);
-                      }}
-                      language={language}
-                      className="editor"
-                    />
-                  )}
+                  {panelUIDetails.body && <panelUIDetails.body panel={panel} keyboardShortcuts={keyboardShortcuts} />}
                   {exception instanceof PanelPlayWarning ? (
                     <PanelPlayWarningWithLinks
                       msg={exception.message}
@@ -700,7 +545,7 @@ export function Panel({
                     </Alert>
                   )}
                 </div>
-                {previewableTypes.includes(panel.type) && (
+                {panelUIDetails.previewable && (
                   <div className="panel-out resize resize--left resize--horizontal">
                     <div className="panel-out-header">
                       <Button
