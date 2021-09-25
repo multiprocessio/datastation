@@ -10,6 +10,7 @@ import { FileInput } from '../component-library/FileInput';
 import { FormGroup } from '../component-library/FormGroup';
 import { ServerPicker } from '../component-library/ServerPicker';
 import { ProjectContext } from '../ProjectStore';
+import { guardPanel, PanelUIDetails } from './types';
 
 export async function evalFilePanel(
   panel: FilePanelInfo
@@ -37,13 +38,8 @@ export async function evalFilePanel(
   );
 }
 
-export function FilePanelDetails({
-  panel,
-  updatePanel,
-}: {
-  panel: FilePanelInfo;
-  updatePanel: (d: FilePanelInfo) => void;
-}) {
+export function FilePanelDetails({ panel, updatePanel }: PanelDetailProps) {
+  const fp = guardPanel<FilePanelInfo>(panel, 'file');
   const { servers } = React.useContext(ProjectContext);
   return (
     <div className="FilePanel">
@@ -51,38 +47,38 @@ export function FilePanelDetails({
         <div className="form-row">
           <FileInput
             label="File"
-            value={panel.file.name}
+            value={fp.file.name}
             allowManualEntry={MODE !== 'browser'}
-            allowFilePicker={!panel.serverId}
+            allowFilePicker={!fp.serverId}
             onRead={
               MODE !== 'desktop'
                 ? (value: ArrayBuffer) => {
-                    panel.file.content = value;
-                    updatePanel(panel);
+                    fp.file.content = value;
+                    updatePanel(fp);
                   }
                 : null
             }
             onChange={(fileName: string) => {
-              panel.file.name = fileName;
-              updatePanel(panel);
+              fp.file.name = fileName;
+              updatePanel(fp);
             }}
           />
         </div>
         <ContentTypePicker
           inMemoryEval={MODE !== 'browser'}
-          value={panel.file.contentTypeInfo}
+          value={fp.file.contentTypeInfo}
           onChange={(cti: { type: string; customLineRegexp: string }) => {
-            panel.file.contentTypeInfo = cti;
-            updatePanel(panel);
+            fp.file.contentTypeInfo = cti;
+            updatePanel(fp);
           }}
         />
       </FormGroup>
       <ServerPicker
         servers={servers}
-        serverId={panel.serverId}
+        serverId={fp.serverId}
         onChange={(serverId: string) => {
-          panel.serverId = serverId;
-          updatePanel(panel);
+          fp.serverId = serverId;
+          updatePanel(fp);
         }}
       />
     </div>
@@ -99,4 +95,7 @@ export const filePanel: PanelUIDetails = {
   alwaysOpen: false,
   previewable: true,
   factory: () => new FilePanelInfo(),
+  hasStdout: false,
+  info: null,
+  killable: true,
 };

@@ -1,7 +1,7 @@
 import { preview } from 'preview';
 import * as React from 'react';
 import { shape } from 'shape';
-import { MODE } from '../../shared/constants';
+import { MODE, MODE_FEATURES } from '../../shared/constants';
 import { request } from '../../shared/http';
 import {
   ContentTypeInfo,
@@ -17,6 +17,7 @@ import { Input } from '../component-library/Input';
 import { Select } from '../component-library/Select';
 import { ServerPicker } from '../component-library/ServerPicker';
 import { ProjectContext } from '../ProjectStore';
+import { guardPanel, PanelDetailsProps, PanelUIDetails } from './types';
 
 export async function evalHTTPPanel(panel: HTTPPanelInfo) {
   if (MODE === 'browser') {
@@ -49,13 +50,9 @@ export async function evalHTTPPanel(panel: HTTPPanelInfo) {
   );
 }
 
-export function HTTPPanelDetails({
-  panel,
-  updatePanel,
-}: {
-  panel: HTTPPanelInfo;
-  updatePanel: (d: HTTPPanelInfo) => void;
-}) {
+export function HTTPPanelDetails({ panel, updatePanel }: PanelDetailsProps) {
+  const hp = guardPanel<HTTPPanelInfo>(panel, 'http');
+
   const { servers } = React.useContext(ProjectContext);
   return (
     <React.Fragment>
@@ -63,10 +60,10 @@ export function HTTPPanelDetails({
         <div className="form-row">
           <Select
             label="Method"
-            value={panel.http.http.method}
+            value={hp.http.http.method}
             onChange={(value: string) => {
-              panel.http.http.method = value as HTTPConnectorInfoMethod;
-              updatePanel(panel);
+              hp.http.http.method = value as HTTPConnectorInfoMethod;
+              updatePanel(hp);
             }}
           >
             <option value="GET">Get</option>
@@ -79,10 +76,10 @@ export function HTTPPanelDetails({
         <div className="form-row">
           <Input
             label="URL"
-            value={panel.http.http.url}
+            value={hp.http.http.url}
             onChange={(value: string) => {
-              panel.http.http.url = value;
-              updatePanel(panel);
+              hp.http.http.url = value;
+              updatePanel(hp);
             }}
             type="url"
             autoWidth={true}
@@ -90,23 +87,23 @@ export function HTTPPanelDetails({
         </div>
         <ContentTypePicker
           inMemoryEval={MODE !== 'browser'}
-          value={panel.http.http.contentTypeInfo}
+          value={hp.http.http.contentTypeInfo}
           onChange={(type: ContentTypeInfo) => {
-            panel.http.http.contentTypeInfo = type;
-            updatePanel(panel);
+            hp.http.http.contentTypeInfo = type;
+            updatePanel(hp);
           }}
         />
       </FormGroup>
 
       <FormGroup label="Headers">
-        {panel.http.http.headers.map(
+        {hp.http.http.headers.map(
           (header: { value: string; name: string }, headerIndex: number) => (
             <div className="form-row vertical-align-center">
               <Button
                 icon
                 onClick={() => {
-                  panel.http.http.headers.splice(headerIndex, 1);
-                  updatePanel(panel);
+                  hp.http.http.headers.splice(headerIndex, 1);
+                  updatePanel(hp);
                 }}
                 type="outline"
               >
@@ -117,7 +114,7 @@ export function HTTPPanelDetails({
                 value={header.name}
                 onChange={(value: string) => {
                   header.name = value;
-                  updatePanel(panel);
+                  updatePanel(hp);
                 }}
               />
               <Input
@@ -125,7 +122,7 @@ export function HTTPPanelDetails({
                 value={header.value}
                 onChange={(value: string) => {
                   header.value = value;
-                  updatePanel(panel);
+                  updatePanel(hp);
                 }}
               />
             </div>
@@ -133,8 +130,8 @@ export function HTTPPanelDetails({
         )}
         <Button
           onClick={() => {
-            panel.http.http.headers.push({ name: '', value: '' });
-            updatePanel(panel);
+            hp.http.http.headers.push({ name: '', value: '' });
+            updatePanel(hp);
           }}
         >
           Add Header
@@ -143,12 +140,29 @@ export function HTTPPanelDetails({
 
       <ServerPicker
         servers={servers}
-        serverId={panel.serverId}
+        serverId={hp.serverId}
         onChange={(serverId: string) => {
-          panel.serverId = serverId;
-          updatePanel(panel);
+          hp.serverId = serverId;
+          updatePanel(hp);
         }}
       />
+    </React.Fragment>
+  );
+}
+
+export function HTTPInfo() {
+  return (
+    <React.Fragment>
+      {MODE_FEATURES.corsOnly && (
+        <React.Fragment>
+          Since this runs in the browser, the server you are talking to must set
+          CORS headers otherwise the request will not work.
+          <br />
+          <br />
+        </React.Fragment>
+      )}
+      Use the textarea to supply a HTTP request body. This will be ignored for{' '}
+      <code>GET</code> and <code>HEAD</code> requests.
     </React.Fragment>
   );
 }
@@ -159,8 +173,10 @@ export const httpPanel: PanelUIDetails = {
   id: 'http',
   label: 'HTTP',
   details: HTTPPanelDetails,
-  body: HTTPPanelBody,
+  body: null,
   alwaysOpen: true,
   previewable: true,
   factory: () => new HTTPPanelInfo(),
+  info: HTTPInfo,
+  hasStdout: false,
 };

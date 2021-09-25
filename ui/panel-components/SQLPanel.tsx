@@ -78,10 +78,10 @@ export function SQLPanelDetails({ panel, updatePanel }: PanelDetailsProps) {
       <div className="form-row">
         <Select
           label="Vendor"
-          value={panel.sql.type}
+          value={sp.sql.type}
           onChange={(value: string) => {
-            panel.sql.type = value as SQLConnectorInfoType;
-            updatePanel(panel);
+            sp.sql.type = value as SQLConnectorInfoType;
+            updatePanel(sp);
           }}
         >
           {VENDORS.map((group) => (
@@ -100,10 +100,10 @@ export function SQLPanelDetails({ panel, updatePanel }: PanelDetailsProps) {
         ) : (
           <Select
             label="Connector"
-            value={panel.sql.connectorId}
+            value={sp.sql.connectorId}
             onChange={(connectorId: string) => {
-              panel.sql.connectorId = connectorId;
-              updatePanel(panel);
+              sp.sql.connectorId = connectorId;
+              updatePanel(sp);
             }}
           >
             {vendorConnectors.map((c) => (
@@ -116,10 +116,10 @@ export function SQLPanelDetails({ panel, updatePanel }: PanelDetailsProps) {
       </div>
       <ServerPicker
         servers={servers}
-        serverId={panel.serverId}
+        serverId={sp.serverId}
         onChange={(serverId: string) => {
-          panel.serverId = serverId;
-          updatePanel(panel);
+          sp.serverId = serverId;
+          updatePanel(sp);
         }}
       />
     </React.Fragment>
@@ -131,7 +131,7 @@ export function SQLPanelBody({
   panel,
   keyboardShortcuts,
 }: PanelBodyProps) {
-  const sp = guardPanel(panel, 'sql');
+  const sp = guardPanel<SQLPanelInfo>(panel, 'sql');
 
   return (
     <CodeEditor
@@ -158,4 +158,7 @@ export const sqlPanel: PanelUIDetails = {
   alwaysOpen: false,
   previewable: true,
   factory: () => new SQLPanelInfo(),
+  hasStdout: false,
+  info: null,
+  killable: true,
 };

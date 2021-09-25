@@ -10,7 +10,6 @@ import {
   PanelInfoType,
   PanelResult,
   PanelResultMeta,
-  ProgramPanelInfo,
 } from '../shared/state';
 import { humanSize } from '../shared/text';
 import { asyncRPC } from './asyncRPC';
@@ -210,22 +209,16 @@ export function Panel({
   }
 
   const runningProgram =
-    results.loading && panel.type === 'program' && MODE_FEATURES.killProcess;
+    results.loading && panelUIDetails.killable && MODE_FEATURES.killProcess;
   function killProcess() {
-    return asyncRPC<ProgramPanelInfo, void, void>(
-      RPC.KILL_PROCESS,
-      null,
-      panel as ProgramPanelInfo
-    );
+    return asyncRPC<PanelInfo, void, void>(RPC.KILL_PROCESS, null, panel);
   }
 
   return (
     <div
       id={`panel-${panelIndex}`}
       className={`panel ${hidden ? 'panel--hidden' : ''} ${
-        (panel.type === 'file' || panel.type === 'filagg') && !results.exception
-          ? 'panel--empty'
-          : ''
+        panelUIDetails.body === null && !results.exception ? 'panel--empty' : ''
       } ${results.loading ? 'panel--loading' : ''}`}
       tabIndex={1001}
       ref={panelRef}
@@ -267,7 +260,7 @@ export function Panel({
               onChange={(value: string) => {
                 const panelType = value as PanelInfoType;
                 const newPanel = PANEL_UI_DETAILS[panelType].factory();
-                panel[panelType] = newPanel[panelType];
+                (panel as any)[panelType] = newPanel[panelType];
                 updatePanel(newPanel);
               }}
             >
@@ -427,61 +420,9 @@ export function Panel({
                       </Alert>
                     )
                   )}
-                  {panel.type === 'program' &&
-                    ((panel as ProgramPanelInfo).program.type === 'sql' ? (
-                      <Alert type="info">
-                        Use <code>DM_getPanel($panel_number)</code> to reference
-                        other panels. Once you have called this once for one
-                        panel, use <code>t$panel_number</code> to refer to it
-                        again. For example:{' '}
-                        <code>
-                          SELECT age, name FROM DM_getPanel(0) WHERE t0.age &gt;
-                          1;
-                        </code>
-                        .
-                      </Alert>
-                    ) : (
-                      <Alert type="info">
-                        Use builtin functions,{' '}
-                        <code>DM_setPanel($some_array_data)</code> and{' '}
-                        <code>DM_getPanel($panel_number)</code>, to interact
-                        with other panels. For example:{' '}
-                        <code>
-                          const passthrough = DM_getPanel(0);
-                          DM_setPanel(passthrough);
-                        </code>
-                        .
-                        {(panel as ProgramPanelInfo).program.type ===
-                          'julia' && (
-                          <React.Fragment>
-                            Install{' '}
-                            <a href="https://github.com/JuliaIO/JSON.jl">
-                              JSON.jl
-                            </a>{' '}
-                            to script with Julia.
-                          </React.Fragment>
-                        )}
-                        {(panel as ProgramPanelInfo).program.type === 'r' && (
-                          <React.Fragment>
-                            Install{' '}
-                            <a href="https://rdrr.io/cran/rjson/">rjson</a> to
-                            script with R.
-                          </React.Fragment>
-                        )}
-                      </Alert>
-                    ))}
-                  {panel.type === 'http' && MODE_FEATURES.corsOnly && (
+                  {panelUIDetails.info && (
                     <Alert type="info">
-                      Since this runs in the browser, the server you are talking
-                      to must set CORS headers otherwise the request will not
-                      work.
-                    </Alert>
-                  )}
-                  {panel.type === 'http' && (
-                    <Alert type="info">
-                      Use the textarea to supply a HTTP request body. This will
-                      be ignored for <code>GET</code> and <code>HEAD</code>{' '}
-                      requests.
+                      <panelUIDetails.info panel={panel} />
                     </Alert>
                   )}
                 </div>
@@ -506,7 +447,7 @@ export function Panel({
                       >
                         Metadata
                       </Button>
-                      {panel.type === 'program' && (
+                      {panelUIDetails.hasStdout && (
                         <Button
                           className={panelOut === 'stdout' ? 'selected' : ''}
                           onClick={() => setPanelOut('stdout')}

@@ -29,7 +29,10 @@ export interface PanelUIDetails {
   body: React.ElementType<PanelBodyProps> | null;
   alwaysOpen: boolean;
   previewable: boolean;
+  hasStdout: boolean;
+  info: React.ElementType<{ panel: PanelInfo }> | null;
   factory: () => PanelInfo;
+  killable: boolean;
 }
 
 export function guardPanel<T>(panel: PanelInfo, t: PanelInfoType): T {

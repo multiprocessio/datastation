@@ -263,4 +263,7 @@ export const filaggPanel: PanelUIDetails = {
   alwaysOpen: false,
   previewable: true,
   factory: () => new FilterAggregatePanelInfo(),
+  info: null,
+  hasStdout: false,
+  killable: true,
 };

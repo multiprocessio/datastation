@@ -96,4 +96,7 @@ export const literalPanel: PanelUIDetails = {
   alwaysOpen: false,
   previewable: true,
   factory: () => new LiteralPanelInfo(),
+  info: null,
+  hasStdout: false,
+  killable: true,
 };

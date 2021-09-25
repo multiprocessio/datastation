@@ -1,7 +1,6 @@
 import * as React from 'react';
-import { Shape } from 'shape';
-import { NoConnectorError } from '../shared/errors';
-import { TimeSeriesEvalBody } from '../shared/rpc';
+import { NoConnectorError } from '../../shared/errors';
+import { TimeSeriesEvalBody } from '../../shared/rpc';
 import {
   ConnectorInfo,
   PanelResult,
@@ -9,20 +8,29 @@ import {
   TimeSeriesConnectorInfo,
   TimeSeriesConnectorInfoType,
   TimeSeriesPanelInfo,
-} from '../shared/state';
-import { asyncRPC } from './asyncRPC';
-import { Select } from './component-library/Select';
-import { ProjectContext } from './ProjectStore';
-import { ServerPicker } from './ServerPicker';
-import { VENDORS } from './timeseriesconnectors';
+} from '../../shared/state';
+import { asyncRPC } from '../asyncRPC';
+import { FormGroup } from '../component-library/FormGroup';
+import { Select } from '../component-library/Select';
+import { ServerPicker } from '../component-library/ServerPicker';
+import { ProjectContext } from '../ProjectStore';
+import { VENDORS } from '../timeseriesconnectors';
+import {
+  guardPanel,
+  PanelBodyProps,
+  PanelDetailsProps,
+  PanelUIDetails,
+} from './types';
 
 export async function evalTimeSeriesPanel(
   panel: TimeSeriesPanelInfo,
+  panelResults: Array<PanelResult>,
   indexIdMap: Array<string>,
   connectors: Array<ConnectorInfo>,
-  _: Array<ServerInfo>,
-  indexShapeMap: Array<Shape>
+  _1: Array<ServerInfo>
 ) {
+  const indexShapeMap = panelResults.map((r) => r.shape);
+
   const connector = connectors.find(
     (c) => c.id === panel.timeseries.connectorId
   ) as TimeSeriesConnectorInfo;
@@ -45,17 +53,15 @@ export async function evalTimeSeriesPanel(
 export function TimeSeriesPanelDetails({
   panel,
   updatePanel,
-}: {
-  panel: TimeSeriesPanelInfo;
-  updatePanel: (d: TimeSeriesPanelInfo) => void;
-}) {
+}: PanelDetailsProps) {
+  const tsp = guardPanel<TimeSeriesPanelInfo>(panel, 'timeseries');
   const { connectors, servers } = React.useContext(ProjectContext);
 
   const vendorConnectors = connectors
     .map((c: ConnectorInfo) => {
       if (
         c.type !== 'timeseries' ||
-        (c as TimeSeriesConnectorInfo).timeseries.type !== panel.timeseries.type
+        (c as TimeSeriesConnectorInfo).timeseries.type !== tsp.timeseries.type
       ) {
         return null;
       }
@@ -65,8 +71,8 @@ export function TimeSeriesPanelDetails({
     .filter(Boolean);
 
   React.useEffect(() => {
-    if (!vendorConnectors.length && panel.timeseries.connectorId) {
-      panel.timeseries.connectorId = '';
+    if (!vendorConnectors.length && tsp.timeseries.connectorId) {
+      tsp.timeseries.connectorId = '';
     }
   });
 
@@ -116,10 +122,10 @@ export function TimeSeriesPanelDetails({
       <div className="form-row">
         <Select
           label="Vendor"
-          value={panel.timeseries.type}
+          value={tsp.timeseries.type}
           onChange={(value: string) => {
-            panel.timeseries.type = value as TimeSeriesConnectorInfoType;
-            updatePanel(panel);
+            tsp.timeseries.type = value as TimeSeriesConnectorInfoType;
+            updatePanel(tsp);
           }}
         >
           {VENDORS.map((group) => (
@@ -138,10 +144,10 @@ export function TimeSeriesPanelDetails({
         ) : (
           <Select
             label="Connector"
-            value={panel.timeseries.connectorId}
+            value={tsp.timeseries.connectorId}
             onChange={(connectorId: string) => {
-              panel.timeseries.connectorId = connectorId;
-              updatePanel(panel);
+              tsp.timeseries.connectorId = connectorId;
+              updatePanel(tsp);
             }}
           >
             {vendorConnectors.map((c) => (
@@ -154,10 +160,10 @@ export function TimeSeriesPanelDetails({
       </div>
       <ServerPicker
         servers={servers}
-        serverId={panel.serverId}
+        serverId={tsp.serverId}
         onChange={(serverId: string) => {
-          panel.serverId = serverId;
-          updatePanel(panel);
+          tsp.serverId = serverId;
+          updatePanel(tsp);
         }}
       />
       <FormGroup label="Time Range">
@@ -168,15 +174,15 @@ export function TimeSeriesPanelDetails({
               <Datetime
                 label="Begin"
                 onChange={(v) => {
-                  panel.timeseries.range.begin = v;
-                  updatePanel(panel);
+                  tsp.timeseries.range.begin = v;
+                  updatePanel(tsp);
                 }}
               />
               <Datetime
                 label="End"
                 onChange={(v) => {
-                  panel.timeseries.range.end = v;
-                  updatePanel(panel);
+                  tsp.timeseries.range.end = v;
+                  updatePanel(tsp);
                 }}
               />
             </div>
@@ -186,9 +192,9 @@ export function TimeSeriesPanelDetails({
             <div className="tab-name">Relative</div>
             <Select
               onChange={() => {
-                panel.timeseries.range.begin = new Date() - diff;
-                panel.timeseries.range.end = new Date();
-                updatePanel(panel);
+                tsp.timeseries.range.begin = new Date() - diff;
+                tsp.timeseries.range.end = new Date();
+                updatePanel(tsp);
               }}
               children={relativeOptions.map((group) => (
                 <optgroup label={group.label}>
@@ -201,8 +207,29 @@ export function TimeSeriesPanelDetails({
           </React.Fragment>
         )}
       </FormGroup>
-      <Editor label="Query" />
     </React.Fragment>
+  );
+}
+
+export function TimeSeriesPanelBody({
+  updatePanel,
+  panel,
+  keyboardShortcuts,
+}: PanelBodyProps) {
+  const sp = guardPanel<TimeSeriesPanelInfo>(panel, 'sql');
+
+  return (
+    <CodeEditor
+      id={sp.id}
+      onKeyDown={keyboardShortcuts}
+      value={sp.content}
+      onChange={(value: string) => {
+        sp.content = value;
+        updatePanel(sp);
+      }}
+      language=""
+      className="editor"
+    />
   );
 }
 
@@ -216,4 +243,7 @@ export const timeseriesPanel: PanelUIDetails = {
   alwaysOpen: false,
   previewable: true,
   factory: () => new TimeSeriesPanelInfo(),
+  info: null,
+  hasStdout: false,
+  killable: false,
 };

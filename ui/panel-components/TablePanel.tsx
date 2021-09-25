@@ -192,4 +192,7 @@ export const tablePanel: PanelUIDetails = {
   alwaysOpen: true,
   previewable: false,
   factory: () => new TablePanelInfo(),
+  hasStdout: false,
+  info: null,
+  killable: true,
 };

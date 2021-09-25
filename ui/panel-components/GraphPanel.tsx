@@ -313,4 +313,7 @@ export const graphPanel: PanelUIDetails = {
   alwaysOpen: true,
   previewable: false,
   factory: () => new GraphPanelInfo(),
+  hasStdout: false,
+  info: null,
+  killable: true,
 };
