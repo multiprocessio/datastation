@@ -196,3 +196,15 @@ export function TimeSeriesPanelDetails({
     </React.Fragment>
   );
 }
+
+export const timeseriesPanel: PanelUIDetails = {
+  icon: 'calender_view_week',
+  eval: evalTimeSeriesPanel,
+  id: 'timeseries',
+  label: 'Time Series',
+  details: TimeSeriesPanelDetails,
+  body: null,
+  alwaysOpen: false,
+  previewable: true,
+  factory: () => new TimeSeriesPanelInfo,
+};

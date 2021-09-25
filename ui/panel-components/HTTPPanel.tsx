@@ -1,22 +1,22 @@
 import { preview } from 'preview';
 import * as React from 'react';
 import { shape } from 'shape';
-import { MODE } from '../shared/constants';
-import { request } from '../shared/http';
+import { MODE } from '../../shared/constants';
+import { request } from '../../shared/http';
 import {
   ContentTypeInfo,
   HTTPConnectorInfoMethod,
   HTTPPanelInfo,
   PanelResult,
-} from '../shared/state';
-import { asyncRPC } from './asyncRPC';
-import { Button } from './component-library/Button';
-import { FormGroup } from './component-library/FormGroup';
-import { Input } from './component-library/Input';
-import { Select } from './component-library/Select';
-import { ContentTypePicker } from './ContentTypePicker';
-import { ProjectContext } from './ProjectStore';
-import { ServerPicker } from './ServerPicker';
+} from '../../shared/state';
+import { asyncRPC } from '../asyncRPC';
+import { Button } from '../component-library/Button';
+import { FormGroup } from '../component-library/FormGroup';
+import { Input } from '../component-library/Input';
+import { Select } from '../component-library/Select';
+import { ContentTypePicker } from '../component-library/ContentTypePicker';
+import { ProjectContext } from '../ProjectStore';
+import { ServerPicker } from '../component-library/ServerPicker';
 
 export async function evalHTTPPanel(panel: HTTPPanelInfo) {
   if (MODE === 'browser') {
@@ -152,3 +152,15 @@ export function HTTPPanelDetails({
     </React.Fragment>
   );
 }
+
+export const httpPanel: PanelUIDetails = {
+  icon: 'http',
+  eval: evalHTTPPanel,
+  id: 'http',
+  label: 'HTTP',
+  details: HTTPPanelDetails,
+  body: HTTPPanelBody,
+  alwaysOpen: true,
+  previewable: true,
+  factory: () => new HTTPPanelInfo,
+};

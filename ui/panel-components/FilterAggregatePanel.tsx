@@ -1,23 +1,23 @@
 import React from 'react';
 import { ArrayShape, ObjectShape, shape, Shape } from 'shape';
-import { MODE, RPC } from '../shared/constants';
-import { InvalidDependentPanelError } from '../shared/errors';
-import { LANGUAGES } from '../shared/languages';
-import { FilterAggregateEvalBody } from '../shared/rpc';
+import { MODE, RPC } from '../../shared/constants';
+import { InvalidDependentPanelError } from '../../shared/errors';
+import { LANGUAGES } from '../../shared/languages';
+import { FilterAggregateEvalBody } from '../../shared/rpc';
 import {
   AggregateType,
   FilterAggregatePanelInfo,
   PanelInfo,
   PanelResult,
-} from '../shared/state';
-import { title } from '../shared/text';
-import { asyncRPC } from './asyncRPC';
-import { CodeEditor } from './component-library/CodeEditor';
-import { FormGroup } from './component-library/FormGroup';
-import { Input } from './component-library/Input';
-import { Select } from './component-library/Select';
-import { FieldPicker } from './FieldPicker';
-import { PanelSourcePicker } from './PanelSourcePicker';
+} from '../../shared/state';
+import { title } from '../../shared/text';
+import { asyncRPC } from '../asyncRPC';
+import { CodeEditor } from '../component-library/CodeEditor';
+import { FormGroup } from '../component-library/FormGroup';
+import { Input } from '../component-library/Input';
+import { Select } from '../component-library/Select';
+import { FieldPicker } from '../component-library/FieldPicker';
+import { PanelSourcePicker } from '../component-library/PanelSourcePicker';
 
 function withAggregateShape(
   r: PanelResult,
@@ -253,3 +253,15 @@ export function FilterAggregatePanelDetails({
     </React.Fragment>
   );
 }
+
+export const filaggPanel: PanelUIDetails = {
+  icon: 'search',
+  eval: evalFilterAggregatePanel,
+  id: 'filagg',
+  label: 'Visual Transform',
+  details: FilterAggregatePanelDetails,
+  body: null,
+  alwaysOpen: false,
+  previewable: true,
+  factory: () => new FilterAggregatePanelInfo,
+};

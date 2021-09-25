@@ -1,22 +1,22 @@
 import { preview } from 'preview';
 import * as React from 'react';
 import { shape } from 'shape';
-import { MODE, RPC } from '../shared/constants';
-import { InvalidDependentPanelError } from '../shared/errors';
-import { EvalColumnsBody } from '../shared/rpc';
+import { MODE, RPC } from '../../shared/constants';
+import { InvalidDependentPanelError } from '../../shared/errors';
+import { EvalColumnsBody } from '../../shared/rpc';
 import {
   PanelInfo,
   PanelResult,
   TableColumn,
   TablePanelInfo,
-} from '../shared/state';
-import { columnsFromObject } from '../shared/table';
-import { asyncRPC } from './asyncRPC';
-import { Alert } from './component-library/Alert';
-import { Button } from './component-library/Button';
-import { FormGroup } from './component-library/FormGroup';
-import { FieldPicker, unusedFields } from './FieldPicker';
-import { PanelSourcePicker } from './PanelSourcePicker';
+} from '../../shared/state';
+import { columnsFromObject } from '../../shared/table';
+import { asyncRPC } from '../asyncRPC';
+import { Alert } from '../component-library/Alert';
+import { Button } from '../component-library/Button';
+import { FormGroup } from '../component-library/FormGroup';
+import { FieldPicker, unusedFields } from '../component-library/FieldPicker';
+import { PanelSourcePicker } from '../component-library/PanelSourcePicker';
 
 export async function evalColumnPanel(
   panelSource: number,
@@ -175,3 +175,15 @@ export function TablePanel({
     </table>
   );
 }
+
+export const tablePanel: PanelUIDetails = {
+  icon: 'table_chart',
+  eval: evalTablePanel,
+  id: 'table',
+  label: 'Table',
+  details: TablePanelDetails,
+  body: TablePanel,
+  alwaysOpen: true,
+  previewable: false,
+  factory: () => new TablePanelInfo,
+};

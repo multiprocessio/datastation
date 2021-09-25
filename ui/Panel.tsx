@@ -458,7 +458,7 @@ export function Panel({
           </div>
           {details && (
             <div className="panel-details">
-              <panelUIDetails.details panel={panel} updatePanel={updatePanel} panels={panels} data={panelResults} />
+              <panelUIDetails.details panelIndex={panelIndex} panel={panel} updatePanel={updatePanel} panels={panels} data={panelResults} />
             </div>
           )}
         </div>

@@ -1,10 +1,12 @@
-import * as React from 'react';
+import React from 'react';
 import { shape } from 'shape';
-import { MODE, RPC } from '../shared/constants';
-import { LANGUAGES, SupportedLanguages } from '../shared/languages';
-import { PanelResult, ProgramPanelInfo } from '../shared/state';
-import { asyncRPC } from './asyncRPC';
-import { Select } from './component-library/Select';
+import { CodeEditor } from '../component-library/CodeEditor';
+import { MODE, RPC } from '../../shared/constants';
+import { LANGUAGES, SupportedLanguages } from '../../shared/languages';
+import { PanelResult, ProgramPanelInfo } from '../../shared/state';
+import { asyncRPC } from '../asyncRPC';
+import { Select } from '../component-library/Select';
+import {PanelUIDetails, PanelBodyProps, PanelDetailsProps } from './types';
 
 export async function evalProgramPanel(
   panel: ProgramPanelInfo,
@@ -42,11 +44,10 @@ export function ProgramPanelDetails({
   panel,
   updatePanel,
   panelIndex,
-}: {
-  panel: ProgramPanelInfo;
-  updatePanel: (d: ProgramPanelInfo) => void;
-  panelIndex: number;
-}) {
+}: PanelDetailsProps) {
+  if (panel.type !== 'program') { return null; }
+  const pp = panel as ProgramPanelInfo;
+
   const options = Object.keys(LANGUAGES)
     .map((k) => {
       const l = LANGUAGES[k];
@@ -63,12 +64,12 @@ export function ProgramPanelDetails({
       <div className="form-row">
         <Select
           label="Language"
-          value={panel.program.type}
+          value={pp.program.type}
           onChange={(value: string) => {
-            panel.program.type = value as SupportedLanguages;
-            if (panel.content === '') {
-              panel.content =
-                LANGUAGES[panel.program.type].defaultContent(panelIndex);
+            pp.program.type = value as SupportedLanguages;
+            if (pp.content === '') {
+              pp.content =
+                LANGUAGES[pp.program.type].defaultContent(panelIndex);
             }
 
             updatePanel(panel);
@@ -84,3 +85,40 @@ export function ProgramPanelDetails({
     </React.Fragment>
   );
 }
+
+export function ProgramPanelBody({
+  updatePanel,
+  panel,
+  keyboardShortcuts,
+}: PanelBodyProps) {
+  if (panel.type !== 'program') { return null; }
+  const pp = panel as ProgramPanelInfo;
+  const language = pp.program.type;
+
+  return (
+    <CodeEditor
+      id={pp.id}
+      onKeyDown={keyboardShortcuts}
+      value={pp.content}
+      onChange={(value: string) => {
+        pp.content = value;
+        updatePanel(pp);
+      }}
+      language={language}
+      className="editor"
+    />
+  );
+}
+
+export const programPanel: PanelUIDetails = {
+  icon: 'code',
+  eval: evalProgramPanel,
+  id: 'program',
+  label: 'Code',
+  details: ProgramPanelDetails,
+  body: ProgramPanelBody,
+  alwaysOpen: false,
+  previewable: true,
+  factory: () => new ProgramPanelInfo,
+};
+

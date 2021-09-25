@@ -1,11 +1,11 @@
 import { preview } from 'preview';
 import * as React from 'react';
 import { shape } from 'shape';
-import { MODE, RPC } from '../shared/constants';
-import { ContentTypeInfo, LiteralPanelInfo } from '../shared/state';
-import { parseArrayBuffer } from '../shared/text';
-import { asyncRPC } from './asyncRPC';
-import { ContentTypePicker } from './ContentTypePicker';
+import { MODE, RPC } from '../../shared/constants';
+import { ContentTypeInfo, LiteralPanelInfo } from '../../shared/state';
+import { parseArrayBuffer } from '../../shared/text';
+import { asyncRPC } from '../asyncRPC';
+import { ContentTypePicker } from '../component-library/ContentTypePicker';
 
 export async function evalLiteralPanel(panel: LiteralPanelInfo) {
   const literal = panel.literal;
@@ -60,3 +60,15 @@ export function LiteralPanelDetails({
     </React.Fragment>
   );
 }
+
+export const literalPanel: PanelUIDetails = {
+  icon: 'format_quote',
+  eval: evalLiteralPanel,
+  id: 'literal',
+  label: 'Literal',
+  details: LiteralPanelDetails,
+  body: LiteralPanelBody,
+  alwaysOpen: false,
+  previewable: true,
+  factory: () => new LiteralPanelInfo,
+};

@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { PanelInfo } from '../shared/state';
-import { Select } from './component-library/Select';
+import { PanelInfo } from '../../shared/state';
+import { Select } from './Select';
 
 export function PanelSourcePicker({
   value,

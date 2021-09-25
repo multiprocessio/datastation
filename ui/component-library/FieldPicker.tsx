@@ -1,10 +1,10 @@
 import * as React from 'react';
 import { ArrayShape, ObjectShape, ScalarShape, Shape } from 'shape';
-import { PanelResult } from '../shared/state';
-import { title } from '../shared/text';
-import { Button } from './component-library/Button';
-import { Input } from './component-library/Input';
-import { Select } from './component-library/Select';
+import { PanelResult } from '../../shared/state';
+import { title } from '../../shared/text';
+import { Button } from './Button';
+import { Input } from './Input';
+import { Select } from './Select';
 
 export type FieldGroup = { name: string; elements: Array<[string, Shape]> };
 

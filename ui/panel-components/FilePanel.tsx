@@ -88,3 +88,16 @@ export function FilePanelDetails({
     </div>
   );
 }
+
+
+export const filePanel: PanelUIDetails = {
+  icon: 'description',
+  eval: evalFilePanel,
+  id: 'file',
+  label: 'File',
+  details: FilePanelDetails,
+  body: null,
+  alwaysOpen: false,
+  previewable: true,
+  factory: () => new FilePanelInfo,
+};

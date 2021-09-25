@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Shape } from 'shape';
-import { NoConnectorError } from '../shared/errors';
-import { SQLEvalBody } from '../shared/rpc';
+import { NoConnectorError } from '../../shared/errors';
+import { SQLEvalBody } from '../../shared/rpc';
 import {
   ConnectorInfo,
   PanelResult,
@@ -9,12 +9,12 @@ import {
   SQLConnectorInfo,
   SQLConnectorInfoType,
   SQLPanelInfo,
-} from '../shared/state';
-import { asyncRPC } from './asyncRPC';
-import { Select } from './component-library/Select';
-import { ProjectContext } from './ProjectStore';
-import { ServerPicker } from './ServerPicker';
-import { VENDORS } from './sqlconnectors';
+} from '../../shared/state';
+import { asyncRPC } from '../asyncRPC';
+import { Select } from '../component-library/Select';
+import { ProjectContext } from '../ProjectStore';
+import { ServerPicker } from '../component-library/ServerPicker';
+import { VENDORS } from '../sqlconnectors';
 
 export async function evalSQLPanel(
   panel: SQLPanelInfo,
@@ -122,3 +122,16 @@ export function SQLPanelDetails({
     </React.Fragment>
   );
 }
+
+
+export const sqlPanel: PanelUIDetails = {
+  icon: 'table_rows',
+  eval: evalSQLPanel,
+  id: 'sql',
+  label: 'SQL',
+  details: SQLPanelDetails,
+  body: SQLPanelBody,
+  alwaysOpen: false,
+  previewable: true,
+  factory: () => new SQLPanelInfo,
+};

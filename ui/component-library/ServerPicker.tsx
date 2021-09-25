@@ -1,7 +1,7 @@
 import * as React from 'react';
-import { ServerInfo } from '../shared/state';
-import { FormGroup } from './component-library/FormGroup';
-import { Select } from './component-library/Select';
+import { ServerInfo } from '../../shared/state';
+import { FormGroup } from './FormGroup';
+import { Select } from './Select';
 
 export function ServerPicker({
   serverId,
