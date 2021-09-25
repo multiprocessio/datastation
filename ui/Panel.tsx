@@ -4,7 +4,8 @@ import circularSafeStringify from 'json-stringify-safe';
 import * as CSV from 'papaparse';
 import * as React from 'react';
 import { toString } from 'shape';
-import { MODE, MODE_FEATURES, RPC } from '../shared/constants';
+import { MODE, MODE_FEATURES } from '../shared/constants';
+import { ENDPOINTS } from '../shared/rpc';
 import {
   PanelInfo,
   PanelInfoType,
@@ -77,7 +78,7 @@ async function fetchAndDownloadResults(
   let value = results.value;
   if (MODE !== 'browser') {
     const res = await asyncRPC<{ id: string }, void, { value: any }>(
-      RPC.FETCH_RESULTS,
+      ENDPOINTS.FETCH_RESULTS,
       null,
       { id: panel.id }
     );
@@ -211,7 +212,7 @@ export function Panel({
   const runningProgram =
     results.loading && panelUIDetails.killable && MODE_FEATURES.killProcess;
   function killProcess() {
-    return asyncRPC<PanelInfo, void, void>(RPC.KILL_PROCESS, null, panel);
+    return asyncRPC<PanelInfo, void, void>(ENDPOINTS.KILL_PROCESS, null, panel);
   }
 
   return (

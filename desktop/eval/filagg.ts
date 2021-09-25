@@ -1,7 +1,6 @@
 import { file as makeTmpFile } from 'tmp-promise';
-import { RPC } from '../../shared/constants';
 import log from '../../shared/log';
-import { FilterAggregateEvalBody } from '../../shared/rpc';
+import { ENDPOINTS, FilterAggregateEvalBody } from '../../shared/rpc';
 import { SQLConnectorInfo, SQLPanelInfo } from '../../shared/state';
 import { Dispatch } from '../rpc';
 import { rpcEvalHandler } from './eval';
@@ -9,7 +8,7 @@ import { evalSQLHandlerInternal } from './sql';
 
 export const evalFilterAggregateHandler =
   rpcEvalHandler<FilterAggregateEvalBody>({
-    resource: RPC.EVAL_FILTER_AGGREGATE,
+    resource: ENDPOINTS.EVAL_FILTER_AGGREGATE,
     handler: async function (
       projectId: string,
       _: string,

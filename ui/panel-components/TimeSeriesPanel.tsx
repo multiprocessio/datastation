@@ -1,20 +1,25 @@
+import subMinutes from 'date-fns/subMinutes';
 import * as React from 'react';
 import { NoConnectorError } from '../../shared/errors';
-import { TimeSeriesEvalBody } from '../../shared/rpc';
+import { ENDPOINTS } from '../../shared/rpc';
 import {
   ConnectorInfo,
-  PanelResult,
-  ServerInfo,
   TimeSeriesConnectorInfo,
   TimeSeriesConnectorInfoType,
+  TimeSeriesFixedTimes,
   TimeSeriesPanelInfo,
+  TimeSeriesRelativeTimes,
 } from '../../shared/state';
-import { asyncRPC } from '../asyncRPC';
+import { title } from '../../shared/text';
+import { evalRPC } from '../asyncRPC';
+import { CodeEditor } from '../component-library/CodeEditor';
+import { Datetime } from '../component-library/Datetime';
 import { FormGroup } from '../component-library/FormGroup';
+import { Input } from '../component-library/Input';
 import { Select } from '../component-library/Select';
 import { ServerPicker } from '../component-library/ServerPicker';
 import { ProjectContext } from '../ProjectStore';
-import { VENDORS } from '../timeseriesconnectors';
+import { VENDORS, VENDOR_GROUPS } from '../tsconnectors';
 import {
   guardPanel,
   PanelBodyProps,
@@ -24,13 +29,10 @@ import {
 
 export async function evalTimeSeriesPanel(
   panel: TimeSeriesPanelInfo,
-  panelResults: Array<PanelResult>,
-  indexIdMap: Array<string>,
-  connectors: Array<ConnectorInfo>,
-  _1: Array<ServerInfo>
+  _1: unknown,
+  _2: unknown,
+  connectors: Array<ConnectorInfo>
 ) {
-  const indexShapeMap = panelResults.map((r) => r.shape);
-
   const connector = connectors.find(
     (c) => c.id === panel.timeseries.connectorId
   ) as TimeSeriesConnectorInfo;
@@ -38,16 +40,7 @@ export async function evalTimeSeriesPanel(
     throw new NoConnectorError();
   }
 
-  return await asyncRPC<TimeSeriesEvalBody, string, PanelResult>(
-    'evalTimeSeries',
-    panel.content,
-    {
-      ...panel,
-      serverId: panel.serverId || connector.serverId,
-      indexShapeMap,
-      indexIdMap,
-    }
-  );
+  return await evalRPC(ENDPOINTS.EVAL_TIME_SERIES, panel.id);
 }
 
 export function TimeSeriesPanelDetails({
@@ -76,46 +69,84 @@ export function TimeSeriesPanelDetails({
     }
   });
 
-  const relativeOptions = [
+  const setTab = React.useCallback((value: string) => {
+    switch (value) {
+      case 'relative':
+        tsp.timeseries.range = {
+          rangeType: value,
+          relative: 'last-hour',
+        };
+        break;
+      case 'fixed':
+        tsp.timeseries.range = {
+          rangeType: value,
+          fixed: 'this-hour',
+        };
+        break;
+      case 'absolute':
+        tsp.timeseries.range = {
+          rangeType: value,
+          absolute: {
+            begin: subMinutes(new Date(), 15),
+            end: new Date(),
+          },
+        };
+        break;
+    }
+    updatePanel(tsp);
+  }, []);
+
+  const relativeOptions: Array<{
+    label: string;
+    options: Array<TimeSeriesRelativeTimes>;
+  }> = [
     {
       label: 'Within day',
       options: [
-        { label: 'Last 5 minutes', minutes: 5 },
-        { label: 'Last 15 minutes', minutes: 15 },
-        { label: 'Last 30 minutes', minutes: 30 },
-        { label: 'Last hour', minutes: 60 },
-        { label: 'Last 3 hours', minutes: 180 },
-        { label: 'Last 6 hours', minutes: 360 },
-        { label: 'Last 12 hours', minutes: 720 },
+        'last-5-minutes',
+        'last-15-minutes',
+        'last-30-minutes',
+        'last-hour',
+        'last-3-hours',
+        'last-6-hours',
+        'last-12-hours',
       ],
     },
     {
       label: 'Within month',
-      options: [
-        { label: 'Last day', minutes: 60 * 24 },
-        { label: 'Last 3 days', minutes: 60 * 24 * 3 },
-        { label: 'Last week', minutes: 60 * 24 * 7 },
-        { label: 'Last 2 weeks', minutes: 60 * 24 * 14 },
-        { label: 'Last 30 days', minutes: 60 * 24 * 7 * 30 },
-      ],
+      options: ['last-day', 'last-3-days', 'last-week', 'last-2-weeks'],
     },
     {
       label: 'Within year',
       options: [
-        { label: 'Last 2 months', minutes: 60 * 24 * 7 * 60 },
-        { label: 'Last 3 months', minutes: 60 * 24 * 7 * 90 },
-        { label: 'Last 6 months', minutes: 60 * 24 * 7 * 180 },
+        'last-month',
+        'last-2-months',
+        'last-3-months',
+        'last-6-months',
       ],
     },
     {
       label: 'Rest of time',
-      options: [
-        { label: 'Last year', minutes: 60 * 24 * 7 * 365 },
-        { label: 'Last 2 years', minutes: 60 * 24 * 7 * 365 * 2 },
-        { label: 'All time', minutes: 60 * 24 * 7 * 365 * 100 },
-      ],
+      options: ['last-year', 'last-2-years', 'all-time'],
     },
   ];
+
+  const fixedOptions: Array<TimeSeriesFixedTimes> = [
+    'this-hour',
+    'previous-hour',
+    'today',
+    'yesterday',
+    'week-to-date',
+    'previous-week',
+    'month-to-date',
+    'previous-month',
+    'quarter-to-date',
+    'previous-quarter',
+    'year-to-date',
+    'previous-year',
+  ];
+
+  const { range } = tsp.timeseries;
 
   return (
     <React.Fragment>
@@ -128,12 +159,13 @@ export function TimeSeriesPanelDetails({
             updatePanel(tsp);
           }}
         >
-          {VENDORS.map((group) => (
+          {VENDOR_GROUPS.map((group) => (
             <optgroup
-              label={group.group}
-              children={group.vendors.map((v) => (
-                <option value={v.id}>{v.name}</option>
-              ))}
+              label={group.label}
+              children={group.vendors.map((v) => {
+                const { name } = VENDORS[v];
+                return <option value={v}>{name}</option>;
+              })}
             />
           ))}
         </Select>
@@ -167,41 +199,81 @@ export function TimeSeriesPanelDetails({
         }}
       />
       <FormGroup label="Time Range">
-        {tab === 'absolute' ? (
+        <Input
+          type="radio"
+          label="Relative"
+          name="range-type"
+          value={tsp.timeseries.range.rangeType}
+          onChange={setTab}
+        />
+        <Input
+          type="radio"
+          label="Fixed"
+          name="range-type"
+          value={tsp.timeseries.range.rangeType}
+          onChange={setTab}
+        />
+        <Input
+          type="radio"
+          label="Absolute"
+          name="range-type"
+          value={tsp.timeseries.range.rangeType}
+          onChange={setTab}
+        />
+        {range.rangeType === 'absolute' && (
           <React.Fragment>
             <div className="tab-name">Absolute</div>
             <div className="flex">
               <Datetime
                 label="Begin"
+                value={range.absolute.end}
                 onChange={(v) => {
-                  tsp.timeseries.range.begin = v;
+                  range.absolute.begin = v;
                   updatePanel(tsp);
                 }}
               />
               <Datetime
                 label="End"
+                value={range.absolute.end}
                 onChange={(v) => {
-                  tsp.timeseries.range.end = v;
+                  range.absolute.end = v;
                   updatePanel(tsp);
                 }}
               />
             </div>
           </React.Fragment>
-        ) : (
+        )}
+        {range.rangeType === 'relative' && (
           <React.Fragment>
             <div className="tab-name">Relative</div>
             <Select
-              onChange={() => {
-                tsp.timeseries.range.begin = new Date() - diff;
-                tsp.timeseries.range.end = new Date();
+              value={range.relative}
+              onChange={(id) => {
+                range.relative = id as TimeSeriesRelativeTimes;
                 updatePanel(tsp);
               }}
               children={relativeOptions.map((group) => (
                 <optgroup label={group.label}>
-                  {group.options.map(({ label, diff }) => (
-                    <option>{label}</option>
+                  {group.options.map((id) => (
+                    <option value={id}>{title(id)}</option>
                   ))}
                 </optgroup>
+              ))}
+            />
+          </React.Fragment>
+        )}
+
+        {range.rangeType === 'fixed' && (
+          <React.Fragment>
+            <div className="tab-name">Fixed</div>
+            <Select
+              onChange={(id) => {
+                range.fixed = id as TimeSeriesFixedTimes;
+                updatePanel(tsp);
+              }}
+              value={range.fixed}
+              children={fixedOptions.map((id) => (
+                <option value={id}>{title(id)}</option>
               ))}
             />
           </React.Fragment>

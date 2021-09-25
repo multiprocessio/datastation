@@ -1,7 +1,8 @@
 import React from 'react';
 import { shape } from 'shape';
-import { MODE, RPC } from '../../shared/constants';
+import { MODE } from '../../shared/constants';
 import { LANGUAGES, SupportedLanguages } from '../../shared/languages';
+import { ENDPOINTS } from '../../shared/rpc';
 import { PanelInfo, PanelResult, ProgramPanelInfo } from '../../shared/state';
 import { asyncRPC } from '../asyncRPC';
 import { CodeEditor } from '../component-library/CodeEditor';
@@ -26,7 +27,7 @@ export async function evalProgramPanel(
       ProgramPanelInfo & { indexIdMap: Array<string> },
       null,
       PanelResult
-    >(RPC.EVAL_PROGRAM, null, {
+    >(ENDPOINTS.EVAL_PROGRAM, null, {
       ...panel,
       indexIdMap,
     });

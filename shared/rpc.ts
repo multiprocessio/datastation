@@ -16,3 +16,16 @@ export type EvalColumnsBody = {
   columns: Array<string>;
   panelSource: number;
 };
+
+export const ENDPOINTS = {
+  KILL_PROCESS: 'killProcess',
+  EVAL_PROGRAM: 'evalProgram',
+
+  STORE_LITERAL: 'storeLiteral',
+  FETCH_RESULTS: 'fetchResults',
+  EVAL_COLUMNS: 'evalColumns',
+
+  EVAL_FILTER_AGGREGATE: 'evalFilterAggregate',
+
+  EVAL_TIME_SERIES: 'evalTimeSeries',
+};

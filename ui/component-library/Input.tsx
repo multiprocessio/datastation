@@ -4,11 +4,11 @@ import * as React from 'react';
 export const INPUT_SYNC_PERIOD = 125;
 
 export function useDebouncedLocalState(
-  nonLocalValue: string,
+  nonLocalValue: string | number | readonly string[],
   nonLocalSet: (v: string) => void,
   isText: boolean = true,
   delay: number = INPUT_SYNC_PERIOD
-): [string, (v: string) => void] {
+): [string | number | readonly string[], (v: string) => void] {
   if (!isText) {
     return [nonLocalValue, nonLocalSet];
   }
@@ -27,42 +27,22 @@ export function useDebouncedLocalState(
   return [localValue, wrapSetLocalValue];
 }
 
+export interface InputProps
+  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'> {
+  onChange: (value: string) => void;
+  label?: string;
+  autoWidth?: boolean;
+}
+
 export function Input({
-  type,
-  placeholder,
   className,
-  onBlur,
   onChange,
   value,
-  min,
-  max,
   label,
-  name,
-  disabled,
-  readOnly,
   autoWidth,
-}: {
-  type?:
-    | 'text'
-    | 'number'
-    | 'email'
-    | 'password'
-    | 'url'
-    | 'checkbox'
-    | 'radio';
-  placeholder?: string;
-  className?: string;
-  onChange: (value: string) => void;
-  onBlur?: () => void;
-  value: string;
-  min?: number;
-  max?: number;
-  label?: string;
-  name?: string;
-  disabled?: boolean;
-  readOnly?: boolean;
-  autoWidth?: boolean;
-}) {
+  type,
+  ...props
+}: InputProps) {
   let inputClass = `input ${className ? ' ' + className : ''}`;
 
   const [localValue, setLocalValue] = useDebouncedLocalState(
@@ -77,18 +57,11 @@ export function Input({
         ? { checked: value === 'true' }
         : { value: localValue })}
       className={label ? '' : inputClass}
-      type={type}
       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-        setLocalValue(e.target.value)
+        setLocalValue(String(e.target.value))
       }
-      name={name}
-      onBlur={onBlur}
-      disabled={disabled}
-      readOnly={readOnly}
-      min={min}
-      max={max}
-      placeholder={placeholder}
-      size={autoWidth ? Math.min(100, localValue.length) : undefined}
+      {...props}
+      size={autoWidth ? Math.min(100, String(localValue).length) : undefined}
     />
   );
 

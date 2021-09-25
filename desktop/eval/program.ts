@@ -3,9 +3,9 @@ import fs from 'fs/promises';
 import { EOL } from 'os';
 import path from 'path';
 import { file as makeTmpFile } from 'tmp-promise';
-import { RPC } from '../../shared/constants';
 import { InvalidDependentPanelError, NoResultError } from '../../shared/errors';
 import { LANGUAGES } from '../../shared/languages';
+import { ENDPOINTS } from '../../shared/rpc';
 import { ProgramPanelInfo } from '../../shared/state';
 import { Dispatch } from '../rpc';
 import { SETTINGS } from '../settings';
@@ -24,7 +24,7 @@ function killAllByPanelId(panelId: string) {
 export const evalProgramHandler = rpcEvalHandler<
   ProgramPanelInfo & { indexIdMap: Array<string> }
 >({
-  resource: RPC.EVAL_PROGRAM,
+  resource: ENDPOINTS.EVAL_PROGRAM,
   handler: async function (
     projectId: string,
     _: string,
@@ -136,7 +136,7 @@ export const evalProgramHandler = rpcEvalHandler<
 export const programHandlers = [
   evalProgramHandler,
   {
-    resource: RPC.KILL_PROCESS,
+    resource: ENDPOINTS.KILL_PROCESS,
     handler: async function (_: string, _1: string, ppi: ProgramPanelInfo) {
       killAllByPanelId(ppi.id);
     },

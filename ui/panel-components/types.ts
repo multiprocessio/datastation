@@ -1,4 +1,10 @@
-import { PanelInfo, PanelResult } from '../../shared/state';
+import {
+  ConnectorInfo,
+  PanelInfo,
+  PanelInfoType,
+  PanelResult,
+  ServerInfo,
+} from '../../shared/state';
 
 export interface PanelDetailsProps {
   panel: PanelInfo;
@@ -35,7 +41,10 @@ export interface PanelUIDetails {
   killable: boolean;
 }
 
-export function guardPanel<T>(panel: PanelInfo, t: PanelInfoType): T {
+export function guardPanel<T extends PanelInfo>(
+  panel: PanelInfo,
+  t: PanelInfoType
+): T {
   if (panel.type !== t) {
     throw new Error(`Panel type mismatch. Expected ${t}.`);
   }

@@ -1,12 +1,11 @@
 import fs from 'fs/promises';
-import { RPC } from '../../shared/constants';
-import { EvalColumnsBody } from '../../shared/rpc';
+import { ENDPOINTS, EvalColumnsBody } from '../../shared/rpc';
 import { columnsFromObject } from '../../shared/table';
 import { getProjectResultsFile } from '../store';
 import { rpcEvalHandler } from './eval';
 
 export const evalColumnsHandler = rpcEvalHandler<EvalColumnsBody>({
-  resource: RPC.EVAL_COLUMNS,
+  resource: ENDPOINTS.EVAL_COLUMNS,
   handler: async function (
     projectId: string,
     _1: string,
@@ -33,7 +32,7 @@ export const storeLiteralHandler = rpcEvalHandler<{
   value: string;
   id: string;
 }>({
-  resource: RPC.STORE_LITERAL,
+  resource: ENDPOINTS.STORE_LITERAL,
   handler: async function (
     projectId: string,
     _1: string,
@@ -45,7 +44,7 @@ export const storeLiteralHandler = rpcEvalHandler<{
 });
 
 export const fetchResultsHandler = {
-  resource: RPC.FETCH_RESULTS,
+  resource: ENDPOINTS.FETCH_RESULTS,
   handler: async function (
     projectId: string,
     _1: string,

@@ -91,7 +91,7 @@ export class ServerInfo {
   }
 }
 
-export type ConnectorInfoType = 'sql' | 'http';
+export type ConnectorInfoType = 'sql' | 'http' | 'timeseries';
 
 export class ConnectorInfo {
   name: string;
@@ -117,6 +117,8 @@ export class ConnectorInfo {
         return base;
       case 'http':
         return mergeDeep(new HTTPConnectorInfo(), ci);
+      case 'timeseries':
+        return mergeDeep(new TimeSeriesConnectorInfo(), ci);
     }
     return ci;
   }
@@ -180,8 +182,28 @@ export class TimeSeriesConnectorInfo extends ConnectorInfo {
     database: string;
     username: string;
     password: Encrypted;
+    address: string;
     extra: Record<string, string>;
   };
+
+  constructor(
+    name?: string,
+    type?: SQLConnectorInfoType,
+    database?: string,
+    username?: string,
+    password?: Encrypt,
+    address?: string
+  ) {
+    super('timeseries', name);
+    this.sql = {
+      type: type || 'elasticsearch',
+      database: database || '',
+      username: username || '',
+      password: password || new Encrypt(''),
+      address: address || '',
+      extra: {},
+    };
+  }
 }
 
 export type SQLConnectorInfoType =
@@ -260,6 +282,8 @@ export class PanelInfo {
     switch (pit.type) {
       case 'table':
         pit = mergeDeep(new TablePanelInfo(), pit);
+      case 'timeseries':
+        pit = TimeSeriesPanelInfo.fromJSON(raw);
       case 'http':
         pit = mergeDeep(new HTTPPanelInfo(), pit);
       case 'graph':
@@ -327,23 +351,97 @@ export class GraphPanelInfo extends PanelInfo {
   }
 }
 
+export type TimeSeriesRelativeTimes =
+  | 'last-5-minutes'
+  | 'last-15-minutes'
+  | 'last-30-minutes'
+  | 'last-hour'
+  | 'last-3-hours'
+  | 'last-6-hours'
+  | 'last-12-hours'
+  | 'last-day'
+  | 'last-3-days'
+  | 'last-week'
+  | 'last-2-weeks'
+  | 'last-month'
+  | 'last-2-months'
+  | 'last-3-months'
+  | 'last-6-months'
+  | 'last-year'
+  | 'last-2-years'
+  | 'all-time';
+
+export type TimeSeriesFixedTimes =
+  | 'this-hour'
+  | 'previous-hour'
+  | 'today'
+  | 'yesterday'
+  | 'week-to-date'
+  | 'previous-week'
+  | 'month-to-date'
+  | 'previous-month'
+  | 'quarter-to-date'
+  | 'previous-quarter'
+  | 'year-to-date'
+  | 'previous-year';
+
+export type TimeSeriesRange =
+  | {
+      rangeType: 'absolute';
+      absolute: {
+        begin: Date;
+        end: Date;
+      };
+    }
+  | {
+      rangeType: 'relative';
+      relative: TimeSeriesRelativeTimes;
+    }
+  | {
+      rangeType: 'fixed';
+      fixed: TimeSeriesFixedTimes;
+    };
+
 export class TimeSeriesPanelInfo extends PanelInfo {
   timeseries: {
     type: TimeSeriesConnectorInfoType;
     connectorId?: string;
+    range: TimeSeriesRange;
   };
 
   constructor(
     name?: string,
     type?: SQLConnectorInfoType,
     connectorId?: string,
+    range?: TimeSeriesRange,
     content?: string
   ) {
     super('timeseries', name, content);
     this.timeseries = {
       type: type || 'elasticsearch',
       connectorId,
+      range: range || {
+        rangeType: 'relative',
+        relative: 'last-hour',
+      },
     };
+  }
+
+  static fromJSON(raw: any): TimeSeriesPanelInfo {
+    raw = raw || {};
+    const tsp = mergeDeep(new TimeSeriesPanelInfo(), raw);
+    if (tsp.timeseries.range.rangeType === 'absolute') {
+      if (!tsp.timeseries.range.absolute) {
+        tsp.timeseries.range.absolute = { begin: new Date(), end: new Date() };
+      }
+      tsp.timeseries.range.absolute.begin = new Date(
+        raw.timeseries.range.absolute?.begin
+      );
+      tsp.timeseries.range.absolute.end = new Date(
+        raw.timeseries.range.absolute?.end
+      );
+    }
+    return tsp;
   }
 }
 

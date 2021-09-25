@@ -43,3 +43,12 @@ export async function asyncRPC<Request, Args, Response>(
 
   return await rsp.json();
 }
+
+export function evalRPC(
+  endpoint: string,
+  panelId: string
+): Promise<PanelResult> {
+  return asyncRPC<{ panelId: string }, void, PanelResult>(endpoint, null, {
+    panelId,
+  });
+}

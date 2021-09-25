@@ -1,9 +1,9 @@
 import React from 'react';
 import { ArrayShape, ObjectShape, shape } from 'shape';
-import { MODE, RPC } from '../../shared/constants';
+import { MODE } from '../../shared/constants';
 import { InvalidDependentPanelError } from '../../shared/errors';
 import { LANGUAGES } from '../../shared/languages';
-import { FilterAggregateEvalBody } from '../../shared/rpc';
+import { ENDPOINTS, FilterAggregateEvalBody } from '../../shared/rpc';
 import {
   AggregateType,
   FilterAggregatePanelInfo,
@@ -107,7 +107,7 @@ export async function evalFilterAggregatePanel(
   }
 
   return await asyncRPC<FilterAggregateEvalBody, void, PanelResult>(
-    RPC.EVAL_FILTER_AGGREGATE,
+    ENDPOINTS.EVAL_FILTER_AGGREGATE,
     null,
     {
       ...panel,

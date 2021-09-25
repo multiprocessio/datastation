@@ -1,7 +1,8 @@
 import { preview } from 'preview';
 import * as React from 'react';
 import { shape } from 'shape';
-import { MODE, RPC } from '../../shared/constants';
+import { MODE } from '../../shared/constants';
+import { ENDPOINTS } from '../../shared/rpc';
 import { ContentTypeInfo, LiteralPanelInfo } from '../../shared/state';
 import { parseArrayBuffer } from '../../shared/text';
 import { asyncRPC } from '../asyncRPC';
@@ -25,7 +26,7 @@ export async function evalLiteralPanel(panel: LiteralPanelInfo) {
 
   if (MODE !== 'browser') {
     await asyncRPC<{ id: string; value: any }, void, void>(
-      RPC.STORE_LITERAL,
+      ENDPOINTS.STORE_LITERAL,
       null,
       {
         id: panel.id,

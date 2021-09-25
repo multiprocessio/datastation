@@ -1,46 +1,29 @@
 import { TimeSeriesConnectorInfoType } from '../../shared/state';
-import { ElasticSearchDetails } from './ElasticSearchDetails';
-import { InfluxDetails } from './InfluxDetails';
-import { PrometheusDetails } from './PrometheusDetails';
-import { SplunkDetails } from './SplunkDetails';
-import { DetailsProps } from './types';
+import { elasticsearchDetails } from './ElasticSearchDetails';
+import { influxDetails } from './InfluxDetails';
+import { prometheusDetails } from './PrometheusDetails';
+import { splunkDetails } from './SplunkDetails';
+import { TimeSeriesPanelUIDetails } from './types';
 
-export const VENDORS: Array<{
-  group: string;
-  vendors: Array<{
-    name: string;
-    id: TimeSeriesConnectorInfoType;
-    details: React.Component<DetailsProps>;
-  }>;
+export const VENDORS: {
+  [Property in TimeSeriesConnectorInfoType]: TimeSeriesPanelUIDetails;
+} = {
+  elasticsearch: elasticsearchDetails,
+  splunk: splunkDetails,
+  prometheus: prometheusDetails,
+  influx: influxDetails,
+};
+
+export const VENDOR_GROUPS: Array<{
+  label: string;
+  vendors: Array<TimeSeriesConnectorInfoType>;
 }> = [
   {
-    group: 'Log Databases',
-    vendors: [
-      {
-        name: 'ElasticSearch',
-        id: 'elasticsearch',
-        details: ElasticSearchDetails,
-      },
-      {
-        name: 'Splunk',
-        id: 'splunk',
-        details: SplunkDetails,
-      },
-    ],
+    label: 'Log Databases',
+    vendors: ['elasticsearch', 'splunk'],
   },
   {
-    group: 'Metrics Databases',
-    vendors: [
-      {
-        name: 'Prometheus',
-        id: 'prometheus',
-        details: PrometheusDetails,
-      },
-      {
-        name: 'InfluxDB',
-        id: 'influx',
-        details: InfluxDetails,
-      },
-    ],
+    label: 'Metrics Databases',
+    vendors: ['prometheus', 'influx'],
   },
 ];

@@ -1,9 +1,9 @@
 import { preview } from 'preview';
 import * as React from 'react';
 import { shape } from 'shape';
-import { MODE, RPC } from '../../shared/constants';
+import { MODE } from '../../shared/constants';
 import { InvalidDependentPanelError } from '../../shared/errors';
-import { EvalColumnsBody } from '../../shared/rpc';
+import { ENDPOINTS, EvalColumnsBody } from '../../shared/rpc';
 import { PanelResult, TableColumn, TablePanelInfo } from '../../shared/state';
 import { columnsFromObject } from '../../shared/table';
 import { asyncRPC } from '../asyncRPC';
@@ -50,7 +50,7 @@ export async function evalColumnPanel(
   }
 
   return await asyncRPC<EvalColumnsBody, void, PanelResult>(
-    RPC.EVAL_COLUMNS,
+    ENDPOINTS.EVAL_COLUMNS,
     null,
     {
       id: indexIdMap[panelSource],
@@ -80,7 +80,7 @@ export function TablePanelDetails({
 }: PanelDetailsProps) {
   const tp = guardPanel<TablePanelInfo>(panel, 'table');
   const data =
-    (panels[tp.graph.panelSource] || {}).resultMeta || new PanelResult();
+    (panels[tp.table.panelSource] || {}).resultMeta || new PanelResult();
   React.useEffect(() => {
     const fields = unusedFields(data, ...tp.table.columns.map((c) => c.field));
 
@@ -145,7 +145,7 @@ export function TablePanelDetails({
 export function TablePanel({ panel, panels }: PanelBodyProps) {
   const tp = guardPanel<TablePanelInfo>(panel, 'table');
   const data =
-    (panels[tp.graph.panelSource] || {}).resultMeta || new PanelResult();
+    (panels[tp.table.panelSource] || {}).resultMeta || new PanelResult();
 
   let valueAsArray: Array<any> = [];
   if (data && data.value && Array.isArray(data.value)) {
