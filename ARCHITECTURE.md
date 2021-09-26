@@ -19,6 +19,18 @@ This directory contains the Electron app and code that runs RPC
 calls. It loads the entire UI bundle and responds to RPC requests from
 it.
 
+### ./desktop/project.ts
+
+All state in the desktop app is stored in JSON files on disk at the
+moment. The result of panel evals is stored on disk.
+
+It would be ideal to store state in a database (especially for the
+server use case) but that complicates the install for all supported
+languages that would then depend not just on a JSON library but also
+on a database library. Still, this may be the right way to go at the
+same time as making language setup easier by providing a button or
+something to install all missing dependencies.
+
 ### ./desktop/eval
 
 This is where eval handlers for each panel type are defined.
@@ -29,6 +41,11 @@ This directory contains the server (Express) app and code that proxies
 RPC calls over HTTP to "desktop" implementations. Really, the code is
 just located in the ./desktop/eval/ directory but it is run in/by the
 server process at the moment.
+
+All state in the server app is stored in PostgreSQL. The result of
+panel evals is still stored on disk however. So it isn't currently
+possible to run more than one instance of the server without something
+like sticky sessions.
 
 ## ./ui
 
