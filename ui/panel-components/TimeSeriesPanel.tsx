@@ -194,7 +194,16 @@ export function TimeSeriesPanelDetails({
         }}
       />
       <FormGroup label="Time Range">
-        <Radio name="range-type" value={range.rangeType} onChange={setTab} options={[{ value: 'relative', label: 'Relative' }, {value: 'fixed', label:'Fixed'},{value:'absolute', label:'Absolute'}]} />
+        <Radio
+          name="range-type"
+          value={range.rangeType}
+          onChange={setTab}
+          options={[
+            { value: 'relative', label: 'Relative' },
+            { value: 'fixed', label: 'Fixed' },
+            { value: 'absolute', label: 'Absolute' },
+          ]}
+        />
         {range.rangeType === 'absolute' && (
           <React.Fragment>
             <div className="tab-name">Absolute</div>
