@@ -619,8 +619,10 @@ export async function doOnAllEncryptFields(
   while (stack.length) {
     const [top, path] = stack.pop();
 
-    for (const [elPath, el] of Object.entries(top)) {
-      stack.push([el, [...path, elPath]]);
+    if (top && typeof top === 'object') {
+      for (const [elPath, el] of Object.entries(top)) {
+        stack.push([el, [...path, elPath]]);
+      }
     }
 
     if (top instanceof Encrypt) {

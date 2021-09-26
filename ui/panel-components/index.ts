@@ -32,7 +32,12 @@ export const PANEL_GROUPS: Array<{
   {
     label: 'Import',
     panels: (() => {
-      const panels: Array<PanelInfoType> = ['http', 'file', 'literal'];
+      const panels: Array<PanelInfoType> = [
+        'timeseries',
+        'http',
+        'file',
+        'literal',
+      ];
 
       // Weird way to make sure TypeScript type checks these strings.
       if (MODE !== 'browser') {

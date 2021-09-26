@@ -53,6 +53,7 @@ export function Input({
 
   const input = (
     <input
+      type={type}
       {...(type === 'checkbox'
         ? { checked: value === 'true' }
         : { value: localValue })}

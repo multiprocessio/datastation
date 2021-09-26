@@ -171,9 +171,11 @@ function App() {
       (MODE_FEATURES.useDefaultProject ? DEFAULT_PROJECT.projectName : '')
   );
   (window as any).projectId = projectId;
-  if (!requestedProjectId && projectId) {
-    window.location.href = window.location.pathname + '?project=' + projectId;
-  }
+  React.useEffect(() => {
+    if (!requestedProjectId && projectId) {
+      window.location.href = window.location.pathname + '?project=' + projectId;
+    }
+  }, [requestedProjectId, projectId]);
 
   const [makeProjectError, setMakeProjectError] = React.useState('');
   async function makeProject(projectId: string) {

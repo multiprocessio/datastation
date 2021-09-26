@@ -15,7 +15,7 @@ import { evalRPC } from '../asyncRPC';
 import { CodeEditor } from '../component-library/CodeEditor';
 import { Datetime } from '../component-library/Datetime';
 import { FormGroup } from '../component-library/FormGroup';
-import { Input } from '../component-library/Input';
+import { Radio } from '../component-library/Radio';
 import { Select } from '../component-library/Select';
 import { ServerPicker } from '../component-library/ServerPicker';
 import { ProjectContext } from '../ProjectStore';
@@ -63,7 +63,7 @@ export function TimeSeriesPanelDetails({
     }
   });
 
-  const setTab = React.useCallback((value: string) => {
+  const setTab = (value: string) => {
     switch (value) {
       case 'relative':
         panel.timeseries.range = {
@@ -87,8 +87,9 @@ export function TimeSeriesPanelDetails({
         };
         break;
     }
+    console.log(panel.timeseries.range);
     updatePanel(panel);
-  }, []);
+  };
 
   const relativeOptions: Array<{
     label: string;
@@ -193,27 +194,7 @@ export function TimeSeriesPanelDetails({
         }}
       />
       <FormGroup label="Time Range">
-        <Input
-          type="radio"
-          label="Relative"
-          name="range-type"
-          value={panel.timeseries.range.rangeType}
-          onChange={setTab}
-        />
-        <Input
-          type="radio"
-          label="Fixed"
-          name="range-type"
-          value={panel.timeseries.range.rangeType}
-          onChange={setTab}
-        />
-        <Input
-          type="radio"
-          label="Absolute"
-          name="range-type"
-          value={panel.timeseries.range.rangeType}
-          onChange={setTab}
-        />
+        <Radio name="range-type" value={range.rangeType} onChange={setTab} options={[{ value: 'relative', label: 'Relative' }, {value: 'fixed', label:'Fixed'},{value:'absolute', label:'Absolute'}]} />
         {range.rangeType === 'absolute' && (
           <React.Fragment>
             <div className="tab-name">Absolute</div>
