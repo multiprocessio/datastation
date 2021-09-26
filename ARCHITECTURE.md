@@ -1,0 +1,76 @@
+# Architecture
+
+DataStation has three modes: browser, desktop, and server. Browser
+panel eval happens in-browser. Desktop and server panel eval happen on
+the desktop or server. Each panel's eval has logic that decides
+whether to evaluate the panel in-memory or to pass over RPC to the
+backend (the desktop or server process).
+
+Desktop RPC happens through Node's builtin RPC and Server RPC happens
+over HTTP. RPC logic from the UI is defined in ui/asyncRPC.ts and also
+desktop/preload.ts (for some Electron RPC helpers on desktop only).
+
+The results of panel evals are kept only on disk. Only metadata
+(preview, shape, size, etc.) from panel evals are returned in RPC.
+
+## ./desktop
+
+This directory contains the Electron app and code that runs RPC
+calls. It loads the entire UI bundle and responds to RPC requests from
+it.
+
+### ./desktop/eval
+
+This is where eval handlers for each panel type are defined.
+
+## ./server
+
+This directory contains the server (Express) app and code that proxies
+RPC calls over HTTP to "desktop" implementations. Really, the code is
+just located in the ./desktop/eval/ directory but it is run in/by the
+server process at the moment.
+
+## ./ui
+
+This contains the in-browser UI that makes RPC calls to handle project
+state and panel evals.
+
+### ./ui/asyncRPC.ts
+
+This contains the code the client uses to make RPC calls to either the
+desktop process or the server process.
+
+### ./ui/panel-components
+
+This is where all logic for each panel is contained. If you wanted to
+add a new panel type, you could copy an existing panel and register it
+in ./ui/panel-components/index.ts. You would also need to declare it in
+./shared/state.ts.
+
+### ./ui/tsconnectors
+
+This is where Time Series connectors are defined. If you wanted to add
+a new Time Series connector, you could copy an existing connector and
+register it in./ui/index.ts. You would also need to
+declare it in ./shared/state.ts.
+
+### ./ui/sqlconnectors
+
+This is where SQL connectors are defined. If you wanted to add
+a new SQL connector, you could copy an existing connector and
+register it in ./ui/sqlconnectors/index.ts. You would also need to
+declare it in ./shared/state.ts.
+
+### ./shared
+
+This contains helper utilities used all over the place.
+
+### ./shared/state.ts
+
+This is where types for all entities in state are described. Any time
+you want to add a new panel or connector, etc. you'll need to add it
+here.
+
+### ./shared/languages
+
+This is where all supported languages are defined.
