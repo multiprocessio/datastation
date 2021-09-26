@@ -3,9 +3,10 @@ import { Input, InputProps } from './Input';
 
 export interface RadioProps extends InputProps {
   options: Array<{ label: string; value: string }>;
+  vertical?: boolean;
 }
 
-export function Radio({ options, value, ...props }: RadioProps) {
+export function Radio({ options, value, vertical, ...props }: RadioProps) {
   React.useEffect(() => {
     if (!options.length) {
       return;
@@ -17,9 +18,11 @@ export function Radio({ options, value, ...props }: RadioProps) {
   });
 
   return (
-    <React.Fragment>
+    <span className={`radio ${vertical ? 'radio--vertical' : ''}`}>
       {options.map((o) => (
         <Input
+          className="radio-element"
+          key={o.value}
           type="radio"
           {...props}
           value={o.value}
@@ -27,6 +30,6 @@ export function Radio({ options, value, ...props }: RadioProps) {
           label={o.label}
         />
       ))}
-    </React.Fragment>
+    </span>
   );
 }

@@ -14,8 +14,8 @@ export function Datetime({
   onChange,
   ...props
 }: Datetime) {
-  const date = format(value, 'yyyy-mm-dd');
-  const time = format(value, 'yyyy-mm-dd');
+  const date = format(new Date(value), 'yyyy-MM-dd');
+  const time = format(new Date(value), 'HH:mm');
 
   function onDateChange(newDate: string) {
     const copy = new Date(value);
@@ -35,7 +35,7 @@ export function Datetime({
   }
 
   return (
-    <div className={`flex ${className}`}>
+    <div className={`flex ${className || ''}`}>
       <Input
         onChange={onDateChange}
         label={label}

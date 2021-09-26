@@ -2,7 +2,7 @@ import { Shape } from 'shape';
 import * as uuid from 'uuid';
 import { VERSION } from './constants';
 import { SupportedLanguages } from './languages';
-import { mergeDeep } from './object';
+import { getPath, mergeDeep } from './object';
 
 export class PanelResult {
   exception?: Error;
@@ -286,7 +286,7 @@ export class PanelInfo {
       case 'table':
         pit = mergeDeep(new TablePanelInfo(), pit);
       case 'timeseries':
-        pit = TimeSeriesPanelInfo.fromJSON(raw);
+        pit = mergeDeep(new TimeSeriesPanelInfo(), pit);
       case 'http':
         pit = mergeDeep(new HTTPPanelInfo(), pit);
       case 'graph':
@@ -391,10 +391,8 @@ export type TimeSeriesFixedTimes =
 export type TimeSeriesRange =
   | {
       rangeType: 'absolute';
-      absolute: {
-        begin: Date;
-        end: Date;
-      };
+      begin: Date;
+      end: Date;
     }
   | {
       rangeType: 'relative';
@@ -428,23 +426,6 @@ export class TimeSeriesPanelInfo extends PanelInfo {
         relative: 'last-hour',
       },
     };
-  }
-
-  static fromJSON(raw: any): TimeSeriesPanelInfo {
-    raw = raw || {};
-    const tsp = mergeDeep(new TimeSeriesPanelInfo(), raw);
-    if (tsp.timeseries.range.rangeType === 'absolute') {
-      if (!tsp.timeseries.range.absolute) {
-        tsp.timeseries.range.absolute = { begin: new Date(), end: new Date() };
-      }
-      tsp.timeseries.range.absolute.begin = new Date(
-        raw.timeseries.range.absolute?.begin
-      );
-      tsp.timeseries.range.absolute.end = new Date(
-        raw.timeseries.range.absolute?.end
-      );
-    }
-    return tsp;
   }
 }
 
@@ -610,11 +591,14 @@ export class ProjectPage {
   }
 }
 
-export async function doOnAllEncryptFields(
+export async function doOnAllInstanceFields<T>(
   s: ProjectState,
-  cb: (field: Encrypt, path: string) => Promise<void>
+  guard: (a: any) => x is T,
+  cb: (field: T, path: string) => Promise<void>
 ) {
-  const stack: Array<[any, Array<string>]> = [[s, []]];
+  // Only trust prototype on a real object.
+  const referenceObject = new ProjectState();
+  const stack: Array<[any, Array<string>]> = [[referenceObject, []]];
 
   while (stack.length) {
     const [top, path] = stack.pop();
@@ -625,10 +609,40 @@ export async function doOnAllEncryptFields(
       }
     }
 
-    if (top instanceof Encrypt) {
-      await cb(top, path.join('.'));
+    const realTop = getPath(s, path.join('.'));
+    if (guard(realTop)) {
+      await cb(realTop, path.join('.'));
     }
   }
+}
+
+export function doOnAllEncryptFields(
+  s: ProjectState,
+  cb: (field: Encrypt, path: string) => Promise<void>
+) {
+  return doOnAllInstanceFields<Encrypt>(
+    s,
+    (field) => field instanceof Encrypt,
+    cb
+  );
+}
+
+export function doOnAllDateFields(
+  s: ProjectState,
+  cb: (field: Date) => Promise<void>
+) {
+  return doOnAllInstanceFields<Date>(
+    s,
+    (field: any) => field instanceof Date,
+    (d: any) => {
+      const nd = new Date(d);
+      if (String(nd) === 'Invalid Date') {
+        return new Date();
+      }
+
+      return nd;
+    }
+  );
 }
 
 export class ProjectState {

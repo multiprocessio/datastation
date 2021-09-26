@@ -93,7 +93,7 @@ export function SQLPanelDetails({
       </div>
       <div className="form-row">
         {vendorConnectors.length === 0 ? (
-          'No connectors have been created for this vendor yet.'
+          <small>No connectors have been created for this vendor yet.</small>
         ) : (
           <Select
             label="Connector"

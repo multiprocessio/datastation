@@ -23,7 +23,12 @@ export function deepEquals(a: any, b: any) {
 }
 
 export function deepClone(a: any) {
-  return JSON.parse(JSON.stringify(a));
+  // https://twitter.com/DasSurma/status/955484341358022657
+  const oldState = history.state;
+  history.replaceState(a, window.title);
+  const copy = history.state;
+  history.replaceState(oldState, window.title);
+  return copy;
 }
 
 export function getPath(obj: any, path: string): any {

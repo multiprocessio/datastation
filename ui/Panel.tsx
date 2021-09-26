@@ -261,7 +261,8 @@ export function Panel({
                 const panelType = value as PanelInfoType;
                 const newPanel = PANEL_UI_DETAILS[panelType].factory();
                 (panel as any)[panelType] = newPanel[panelType];
-                updatePanel(newPanel);
+                panel.type = panelType;
+                updatePanel(panel);
               }}
             >
               {PANEL_GROUPS.map((group) => (
@@ -269,7 +270,7 @@ export function Panel({
                   {group.panels.map((name) => {
                     const panelDetails = PANEL_UI_DETAILS[name];
                     return (
-                      <option value={panelDetails.id}>
+                      <option value={panelDetails.id} key={panelDetails.id}>
                         {panelDetails.label}
                       </option>
                     );
@@ -283,6 +284,7 @@ export function Panel({
             <Input
               className="panel-name"
               autoWidth
+              placeholder={`Untitled panel #${panelIndex}`}
               onChange={(value: string) => {
                 panel.name = value;
                 updatePanel(panel);

@@ -100,7 +100,9 @@ function useProjectState(
 
   function setState(newState: ProjectState, addToRestoreBuffer = true) {
     store.update(projectId, newState, addToRestoreBuffer);
-    setProjectState(newState);
+    const c = { ...newState };
+    Object.setPrototypeOf(c, ProjectState.prototype);
+    setProjectState(c);
   }
 
   const isDefault =
@@ -139,7 +141,7 @@ function useProjectState(
           state = ProjectState.fromJSON(rawState);
         }
       } catch (e) {
-        if (isDefault) {
+        if (isDefault && e.message === '') {
           state = DEFAULT_PROJECT;
         } else {
           console.error(e);
@@ -172,7 +174,7 @@ function App() {
   );
   (window as any).projectId = projectId;
   React.useEffect(() => {
-    if (!requestedProjectId && projectId) {
+    if (!requestedProjectId && projectId && MODE !== 'browser') {
       window.location.href = window.location.pathname + '?project=' + projectId;
     }
   }, [requestedProjectId, projectId]);
@@ -269,47 +271,47 @@ function App() {
 
   function updatePage(page: ProjectPage) {
     state.pages[currentPage] = page;
-    updateProjectState({ ...state });
+    updateProjectState(state);
   }
 
   function addPage(page: ProjectPage) {
     state.pages.push(page);
-    updateProjectState({ ...state });
+    updateProjectState(state);
   }
 
   function deletePage(at: number) {
     state.pages.splice(at, 1);
-    updateProjectState({ ...state });
+    updateProjectState(state);
   }
 
   function updateConnector(dcIndex: number, dc: ConnectorInfo) {
     state.connectors[dcIndex] = dc;
-    updateProjectState({ ...state });
+    updateProjectState(state);
   }
 
   function addConnector(dc: ConnectorInfo) {
     state.connectors.push(dc);
-    updateProjectState({ ...state });
+    updateProjectState(state);
   }
 
   function deleteConnector(at: number) {
     state.connectors.splice(at, 1);
-    updateProjectState({ ...state });
+    updateProjectState(state);
   }
 
   function updateServer(dcIndex: number, dc: ServerInfo) {
     state.servers[dcIndex] = dc;
-    updateProjectState({ ...state });
+    updateProjectState(state);
   }
 
   function addServer(dc: ServerInfo) {
     state.servers.push(dc);
-    updateProjectState({ ...state });
+    updateProjectState(state);
   }
 
   function deleteServer(at: number) {
     state.servers.splice(at, 1);
-    updateProjectState({ ...state });
+    updateProjectState(state);
   }
 
   async function openProject() {

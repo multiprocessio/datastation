@@ -80,14 +80,11 @@ export function TimeSeriesPanelDetails({
       case 'absolute':
         panel.timeseries.range = {
           rangeType: value,
-          absolute: {
-            begin: subMinutes(new Date(), 15),
-            end: new Date(),
-          },
+          begin: subMinutes(new Date(), 15),
+          end: new Date(),
         };
         break;
     }
-    console.log(panel.timeseries.range);
     updatePanel(panel);
   };
 
@@ -126,19 +123,34 @@ export function TimeSeriesPanelDetails({
     },
   ];
 
-  const fixedOptions: Array<TimeSeriesFixedTimes> = [
-    'this-hour',
-    'previous-hour',
-    'today',
-    'yesterday',
-    'week-to-date',
-    'previous-week',
-    'month-to-date',
-    'previous-month',
-    'quarter-to-date',
-    'previous-quarter',
-    'year-to-date',
-    'previous-year',
+  const fixedOptions: Array<{
+    label: string;
+    options: Array<TimeSeriesFixedTimes>;
+  }> = [
+    {
+      label: 'Within day',
+      options: ['this-hour', 'previous-hour'],
+    },
+    {
+      label: 'Within month',
+      options: [
+        'today',
+        'yesterday',
+        'week-to-date',
+        'previous-week',
+        'month-to-date',
+      ],
+    },
+    {
+      label: 'Rest of time',
+      options: [
+        'previous-month',
+        'quarter-to-date',
+        'previous-quarter',
+        'year-to-date',
+        'previous-year',
+      ],
+    },
   ];
 
   const { range } = panel.timeseries;
@@ -157,6 +169,7 @@ export function TimeSeriesPanelDetails({
           {VENDOR_GROUPS.map((group) => (
             <optgroup
               label={group.label}
+              key={group.label}
               children={group.vendors.map((v) => {
                 const { name } = VENDORS[v];
                 return <option value={v}>{name}</option>;
@@ -167,7 +180,7 @@ export function TimeSeriesPanelDetails({
       </div>
       <div className="form-row">
         {vendorConnectors.length === 0 ? (
-          'No connectors have been created for this vendor yet.'
+          <small>No connectors have been created for this vendor yet.</small>
         ) : (
           <Select
             label="Connector"
@@ -194,74 +207,89 @@ export function TimeSeriesPanelDetails({
         }}
       />
       <FormGroup label="Time Range">
-        <Radio
-          name="range-type"
-          value={range.rangeType}
-          onChange={setTab}
-          options={[
-            { value: 'relative', label: 'Relative' },
-            { value: 'fixed', label: 'Fixed' },
-            { value: 'absolute', label: 'Absolute' },
-          ]}
-        />
-        {range.rangeType === 'absolute' && (
-          <React.Fragment>
-            <div className="tab-name">Absolute</div>
-            <div className="flex">
-              <Datetime
-                label="Begin"
-                value={range.absolute.end}
-                onChange={(v) => {
-                  range.absolute.begin = v;
-                  updatePanel(panel);
-                }}
-              />
-              <Datetime
-                label="End"
-                value={range.absolute.end}
-                onChange={(v) => {
-                  range.absolute.end = v;
-                  updatePanel(panel);
-                }}
-              />
-            </div>
-          </React.Fragment>
-        )}
-        {range.rangeType === 'relative' && (
-          <React.Fragment>
-            <div className="tab-name">Relative</div>
-            <Select
-              value={range.relative}
-              onChange={(id) => {
-                range.relative = id as TimeSeriesRelativeTimes;
-                updatePanel(panel);
-              }}
-              children={relativeOptions.map((group) => (
-                <optgroup label={group.label}>
-                  {group.options.map((id) => (
-                    <option value={id}>{title(id)}</option>
-                  ))}
-                </optgroup>
-              ))}
+        <div className="flex">
+          <div className="form-row">
+            <Radio
+              vertical
+              name="range-type"
+              value={range.rangeType}
+              onChange={setTab}
+              options={[
+                { value: 'relative', label: 'Relative' },
+                { value: 'fixed', label: 'Fixed' },
+                { value: 'absolute', label: 'Absolute' },
+              ]}
             />
-          </React.Fragment>
-        )}
+          </div>
 
-        {range.rangeType === 'fixed' && (
-          <React.Fragment>
-            <div className="tab-name">Fixed</div>
-            <Select
-              onChange={(id) => {
-                range.fixed = id as TimeSeriesFixedTimes;
-                updatePanel(panel);
-              }}
-              value={range.fixed}
-              children={fixedOptions.map((id) => (
-                <option value={id}>{title(id)}</option>
-              ))}
-            />
-          </React.Fragment>
-        )}
+          <div className="form-row flex flex--vertical items-flex-end">
+            {range.rangeType === 'absolute' && (
+              <React.Fragment>
+                <div className="form-row">
+                  <Datetime
+                    label="Begin"
+                    value={range.end}
+                    onChange={(v) => {
+                      range.begin = v;
+                      updatePanel(panel);
+                    }}
+                  />
+                </div>
+                <div className="form-row">
+                  <Datetime
+                    label="End"
+                    value={range.end}
+                    onChange={(v) => {
+                      range.end = v;
+                      updatePanel(panel);
+                    }}
+                  />
+                </div>
+              </React.Fragment>
+            )}
+            {range.rangeType === 'relative' && (
+              <React.Fragment>
+                <Select
+                  value={range.relative}
+                  onChange={(id) => {
+                    range.relative = id as TimeSeriesRelativeTimes;
+                    updatePanel(panel);
+                  }}
+                  children={relativeOptions.map((group) => (
+                    <optgroup label={group.label} key={group.label}>
+                      {group.options.map((id) => (
+                        <option value={id} key={id}>
+                          {title(id)}
+                        </option>
+                      ))}
+                    </optgroup>
+                  ))}
+                />
+              </React.Fragment>
+            )}
+
+            {range.rangeType === 'fixed' && (
+              <React.Fragment>
+                <Select
+                  onChange={(id) => {
+                    range.fixed = id as TimeSeriesFixedTimes;
+                    updatePanel(panel);
+                  }}
+                  value={range.fixed}
+                  children={fixedOptions.map((group) => (
+                    <optgroup label={group.label} key={group.label}>
+                      {group.options.map((id) => (
+                        <option value={id} key={id}>
+                          {title(id)}
+                        </option>
+                      ))}
+                    </optgroup>
+                  ))}
+                />
+              </React.Fragment>
+            )}
+          </div>
+        </div>
       </FormGroup>
     </React.Fragment>
   );
@@ -288,12 +316,12 @@ export function TimeSeriesPanelBody({
 }
 
 export const timeseriesPanel: PanelUIDetails<TimeSeriesPanelInfo> = {
-  icon: 'calender_view_week',
+  icon: 'events',
   eval: evalTimeSeriesPanel,
   id: 'timeseries',
   label: 'Time Series',
   details: TimeSeriesPanelDetails,
-  body: null,
+  body: TimeSeriesPanelBody,
   alwaysOpen: false,
   previewable: true,
   factory: () => new TimeSeriesPanelInfo(),
