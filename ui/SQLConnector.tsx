@@ -1,15 +1,15 @@
 import * as React from 'react';
-import { SQLConnectorInfo, SQLConnectorInfoType } from '../shared/state';
+import { DatabaseConnectorInfo } from '../shared/state';
 import { Select } from './components/Select';
 import { VENDORS } from './connectors';
 import { ProjectContext } from './ProjectStore';
 
-export function SQLConnector({
+export function DatabaseConnector({
   connector,
   updateConnector,
 }: {
-  connector: SQLConnectorInfo;
-  updateConnector: (dc: SQLConnectorInfo) => void;
+  connector: DatabaseConnectorInfo;
+  updateConnector: (dc: DatabaseConnectorInfo) => void;
 }) {
   const { servers } = React.useContext(ProjectContext);
 
@@ -20,7 +20,7 @@ export function SQLConnector({
           label="Vendor"
           value={connector.sql.type}
           onChange={(value: string) => {
-            connector.sql.type = value as SQLConnectorInfoType;
+            connector.sql.type = value as DatabaseConnectorInfoType;
             updateConnector(connector);
           }}
         >

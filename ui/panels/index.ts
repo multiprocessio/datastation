@@ -1,14 +1,13 @@
 import { MODE } from '../../shared/constants';
 import { PanelInfoType } from '../../shared/state';
+import { databasePanel } from './DatabasePanel';
 import { filePanel } from './FilePanel';
 import { filaggPanel } from './FilterAggregatePanel';
 import { graphPanel } from './GraphPanel';
 import { httpPanel } from './HTTPPanel';
 import { literalPanel } from './LiteralPanel';
 import { programPanel } from './ProgramPanel';
-import { sqlPanel } from './SQLPanel';
 import { tablePanel } from './TablePanel';
-import { timeseriesPanel } from './TimeSeriesPanel';
 import { PanelUIDetails } from './types';
 
 export const PANEL_UI_DETAILS: {
@@ -19,10 +18,9 @@ export const PANEL_UI_DETAILS: {
   graph: graphPanel,
   program: programPanel,
   literal: literalPanel,
-  sql: sqlPanel,
+  database: databasePanel,
   file: filePanel,
   filagg: filaggPanel,
-  timeseries: timeseriesPanel,
 };
 
 export const PANEL_GROUPS: Array<{
@@ -33,7 +31,8 @@ export const PANEL_GROUPS: Array<{
     label: 'Import',
     panels: (() => {
       const panels: Array<PanelInfoType> = [
-        'timeseries',
+        // TODO: remove DATABASE
+        'database',
         'http',
         'file',
         'literal',
@@ -41,8 +40,7 @@ export const PANEL_GROUPS: Array<{
 
       // Weird way to make sure TypeScript type checks these strings.
       if (MODE !== 'browser') {
-        panels.unshift('timeseries');
-        panels.unshift('sql');
+        panels.unshift('database');
       }
 
       return panels;

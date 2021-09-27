@@ -1,13 +1,13 @@
 import * as React from 'react';
-import { SQLConnectorInfo } from '../../shared/state';
+import { DatabaseConnectorInfo } from '../../shared/state';
 import { Input } from '../components/Input';
 import { Database } from './Database';
 import { Password } from './Password';
 import { Username } from './Username';
 
 export function SnowflakeDetails(props: {
-  connector: SQLConnectorInfo;
-  updateConnector: (c: SQLConnectorInfo) => void;
+  connector: DatabaseConnectorInfo;
+  updateConnector: (c: DatabaseConnectorInfo) => void;
 }) {
   const { connector, updateConnector } = props;
   return (

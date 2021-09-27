@@ -446,6 +446,7 @@ export class FilterAggregatePanelInfo extends PanelInfo {
   filagg: {
     panelSource: number;
     filter: string;
+    range: TimeSeriesRange;
     aggregateType: AggregateType;
     groupBy: string;
     aggregateOn: string;
@@ -464,7 +465,8 @@ export class FilterAggregatePanelInfo extends PanelInfo {
     sortOn?: string,
     sortAsc?: boolean,
     content?: string,
-    limit?: number
+    limit?: number,
+    range?: TimeSeriesRange
   ) {
     super('filagg', name, content);
     this.filagg = {
@@ -476,6 +478,11 @@ export class FilterAggregatePanelInfo extends PanelInfo {
       sortOn: sortOn || '',
       sortAsc: sortAsc || false,
       limit: 100,
+      range: range || {
+        field: '',
+        rangeType: 'relative',
+        relative: 'last-hour',
+      },
     };
   }
 }

@@ -206,7 +206,7 @@ export function GraphPanelDetails({
     }
 
     const fields = unusedFields(
-      data,
+      data?.shape,
       panel.graph.x,
       ...panel.graph.ys.map((y) => y.field)
     );
@@ -248,7 +248,7 @@ export function GraphPanelDetails({
         <div className="form-row">
           <FieldPicker
             label="Field"
-            panelSourceResult={data}
+            shape={data?.shape}
             value={panel.graph.x}
             onChange={(value: string) => {
               panel.graph.x = value;
@@ -273,7 +273,7 @@ export function GraphPanelDetails({
               preferredDefaultType="number"
               label="Field"
               value={y.field}
-              panelSourceResult={data}
+              shape={data?.shape}
               onChange={(value: string) => {
                 y.field = value;
                 updatePanel(panel);

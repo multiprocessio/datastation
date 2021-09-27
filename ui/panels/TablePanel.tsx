@@ -70,7 +70,7 @@ export function TablePanelDetails({
     (panels[panel.table.panelSource] || {}).resultMeta || new PanelResult();
   React.useEffect(() => {
     const fields = unusedFields(
-      data,
+      data?.shape,
       ...panel.table.columns.map((c) => c.field)
     );
 
@@ -106,7 +106,7 @@ export function TablePanelDetails({
               }}
               label="Field"
               value={c.field}
-              panelSourceResult={data}
+              shape={data?.shape}
               onChange={(value: string) => {
                 c.field = value;
                 updatePanel(panel);

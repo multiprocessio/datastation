@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { ServerInfo, SQLConnectorInfo } from '../../shared/state';
+import { DatabaseConnectorInfo, ServerInfo } from '../../shared/state';
 import { FileInput } from '../components/FileInput';
 import { ServerPicker } from '../components/ServerPicker';
 
@@ -8,8 +8,8 @@ export function SQLiteDetails({
   updateConnector,
   servers,
 }: {
-  connector: SQLConnectorInfo;
-  updateConnector: (c: SQLConnectorInfo) => void;
+  connector: DatabaseConnectorInfo;
+  updateConnector: (c: DatabaseConnectorInfo) => void;
   servers: Array<ServerInfo>;
 }) {
   return (

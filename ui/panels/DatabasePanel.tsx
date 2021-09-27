@@ -119,7 +119,7 @@ export function DatabasePanelBody({
   );
 }
 
-export const sqlPanel: PanelUIDetails<DatabasePanelInfo> = {
+export const databasePanel: PanelUIDetails<DatabasePanelInfo> = {
   icon: 'table_rows',
   eval: evalDatabasePanel,
   id: 'database',

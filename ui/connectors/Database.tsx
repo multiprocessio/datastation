@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { SQLConnectorInfo } from '../../shared/state';
+import { DatabaseConnectorInfo } from '../../shared/state';
 import { Input } from '../components/Input';
 
 export function Database({
@@ -7,8 +7,8 @@ export function Database({
   updateConnector,
   placeholder,
 }: {
-  connector: SQLConnectorInfo;
-  updateConnector: (c: SQLConnectorInfo) => void;
+  connector: DatabaseConnectorInfo;
+  updateConnector: (c: DatabaseConnectorInfo) => void;
   placeholder?: string;
 }) {
   return (

@@ -1,5 +1,9 @@
 import * as React from 'react';
-import { ConnectorInfo, ProjectState, SQLConnectorInfo } from '../shared/state';
+import {
+  ConnectorInfo,
+  DatabaseConnectorInfo,
+  ProjectState,
+} from '../shared/state';
 import { Button } from './components/Button';
 import { Connector } from './Connector';
 
@@ -29,7 +33,7 @@ export function ConnectorList({
         <Button
           type="primary"
           onClick={() => {
-            addConnector(new SQLConnectorInfo());
+            addConnector(new DatabaseConnectorInfo());
           }}
         >
           New Connector

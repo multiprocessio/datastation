@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrayShape, ObjectShape, shape } from 'shape';
+import { ArrayShape, ObjectShape, Shape, shape } from 'shape';
 import { MODE } from '../../shared/constants';
 import { InvalidDependentPanelError } from '../../shared/errors';
 import { LANGUAGES } from '../../shared/languages';
@@ -23,37 +23,38 @@ import { PanelDetailsProps, PanelUIDetails } from './types';
 function withAggregateShape(
   r: PanelResult,
   p: FilterAggregatePanelInfo
-): PanelResult {
+): Shape | null {
+  if (!r.shape) {
+    return null;
+  }
+
   if (r.shape.kind !== 'array') {
-    return r;
+    return r.shape;
   }
 
   const array = r.shape as ArrayShape;
   if (array.children.kind !== 'object') {
-    return r;
+    return r.shape;
   }
 
   const obj = array.children as ObjectShape;
   if (p.filagg.aggregateType !== 'none') {
     return {
-      ...r,
-      shape: {
-        ...array,
+      ...array,
+      children: {
+        ...obj,
         children: {
-          ...obj,
-          children: {
-            ...obj.children,
-            ['Aggregate: ' + title(p.filagg.aggregateType)]: {
-              kind: 'scalar',
-              name: 'number',
-            },
+          ...obj.children,
+          ['Aggregate: ' + title(p.filagg.aggregateType)]: {
+            kind: 'scalar',
+            name: 'number',
           },
         },
       },
     };
   }
 
-  return r;
+  return r.shape;
 }
 
 export async function evalFilterAggregatePanel(
@@ -185,7 +186,7 @@ export function FilterAggregatePanelDetails({
               <FieldPicker
                 preferredDefaultType="string"
                 label="Group by"
-                panelSourceResult={data}
+                shape={data?.shape}
                 value={panel.filagg.groupBy}
                 onChange={(value: string) => {
                   panel.filagg.groupBy = value;
@@ -198,7 +199,7 @@ export function FilterAggregatePanelDetails({
                 <FieldPicker
                   preferredDefaultType="number"
                   label={title(panel.filagg.aggregateType) + ' on'}
-                  panelSourceResult={data}
+                  shape={data?.shape}
                   value={panel.filagg.aggregateOn}
                   onChange={(value: string) => {
                     panel.filagg.aggregateOn = value;
@@ -215,7 +216,7 @@ export function FilterAggregatePanelDetails({
           <FieldPicker
             preferredDefaultType="number"
             label="Field"
-            panelSourceResult={withAggregateShape(data, panel)}
+            shape={withAggregateShape(data, panel)}
             value={panel.filagg.sortOn}
             onChange={(value: string) => {
               panel.filagg.sortOn = value;

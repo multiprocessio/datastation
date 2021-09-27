@@ -1,13 +1,13 @@
 import * as React from 'react';
-import { SQLConnectorInfo } from '../../shared/state';
+import { DatabaseConnectorInfo } from '../../shared/state';
 import { Input } from '../components/Input';
 
 export function Password({
   connector,
   updateConnector,
 }: {
-  connector: SQLConnectorInfo;
-  updateConnector: (c: SQLConnectorInfo) => void;
+  connector: DatabaseConnectorInfo;
+  updateConnector: (c: DatabaseConnectorInfo) => void;
 }) {
   // Don't try to show initial password
   const [password, setPassword] = React.useState('');
