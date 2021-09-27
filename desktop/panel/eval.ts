@@ -46,10 +46,9 @@ export const evalHandler = {
   ): Promise<PanelResult> {
     const project =
       ((await dispatch({
-        resource: 'getProjectState',
+        resource: 'getProject',
         projectId,
-        args: projectId,
-        body: { internal: true },
+        body: { projectId, internal: true },
       })) as ProjectState) || new ProjectState();
     let panelPage = 0;
     let panel: PanelInfo;

@@ -6,7 +6,6 @@ import { DEBUG } from '../../shared/constants';
 import log from '../../shared/log';
 import { ProjectState } from '../../shared/state';
 import { HOME } from '../constants';
-import { Dispatch } from '../rpc';
 import { decrypt } from '../secret';
 
 interface SSHConfig extends SSH2Config {
@@ -23,17 +22,9 @@ export function resolvePath(name: string) {
 }
 
 export async function getSSHConfig(
-  dispatch: Dispatch,
-  projectId: string,
+  project: ProjectState,
   serverId: string
 ): Promise<SSHConfig> {
-  // TODO: drop this unnecessary state lookup. We already have state
-  // at this point from every caller
-  const project = (await dispatch({
-    resource: 'getProject',
-    projectId,
-    body: { projectId, internal: true },
-  })) as ProjectState;
   const servers = (project.servers || []).filter((s) => s.id === serverId);
   if (!servers.length) {
     throw new Error('No such server.');
@@ -74,8 +65,7 @@ export async function getSSHConfig(
 }
 
 export async function tunnel<T>(
-  dispatch: Dispatch,
-  projectId: string,
+  project: ProjectState,
   serverId: string,
   destAddress: string,
   destPort: number,
@@ -85,7 +75,7 @@ export async function tunnel<T>(
     return callback(destAddress, destPort);
   }
 
-  const config = await getSSHConfig(dispatch, projectId, serverId);
+  const config = await getSSHConfig(project, serverId);
 
   const ssh = new SSH2Promise(config);
   const tunnel = await ssh.addTunnel({

@@ -37,7 +37,7 @@ export const getProjectHandlers = (app: App) => {
       resource: 'getProject',
       handler: async (
         _: string,
-        { internal, projectId }: { projectId: string; internal?: boolean } = {}
+        { internal, projectId }: { projectId: string; internal?: boolean }
       ): Promise<ProjectState> => {
         const client = await app.dbpool.connect();
         try {

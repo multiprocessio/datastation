@@ -23,8 +23,7 @@ export async function evalHTTP(
     (hci.http.http.url.startsWith('http') ? '' : 'http://') + hci.http.http.url
   );
   return await tunnel(
-    dispatch,
-    projectId,
+    project,
     hci.serverId,
     url.hostname,
     +url.port,

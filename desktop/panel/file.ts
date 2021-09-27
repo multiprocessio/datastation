@@ -24,7 +24,7 @@ export async function evalFile(
     return await parseArrayBuffer(typeInfo, name, body);
   }
 
-  const config = await getSSHConfig(dispatch, projectId, serverId);
+  const config = await getSSHConfig(project, serverId);
 
   const sftp = new Client();
   await sftp.connect(config);

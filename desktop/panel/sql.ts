@@ -362,7 +362,7 @@ async function evalSQLite(
   query: string,
   info: SQLPanelInfo,
   connector: SQLConnectorInfo,
-  projectId: string,
+  project: ProjectState,
   panelsToImport: Array<PanelToImport>,
   dispatch: Dispatch
 ) {
@@ -377,7 +377,7 @@ async function evalSQLite(
     try {
       return await sqliteImportAndRun(
         db,
-        projectId,
+        project.id,
         info,
         query,
         panelsToImport
@@ -393,7 +393,7 @@ async function evalSQLite(
 
   if (info.serverId) {
     const localCopy = await makeTmpFile();
-    const config = await getSSHConfig(dispatch, projectId, info.serverId);
+    const config = await getSSHConfig(project, info.serverId);
 
     const sftp = new Client();
     await sftp.connect(config);
@@ -455,7 +455,7 @@ export async function evalSQL(
       info,
       // ./filagg.ts doesn't add a connector to the project. Just passes info in directly
       connector,
-      projectId,
+      project,
       panelsToImport,
       dispatch
     );
@@ -488,8 +488,7 @@ export async function evalSQL(
   // The way hosts are formatted is unique so have sqlserver manage its own call to tunnel()
   if (info.sql.type === 'sqlserver') {
     return await tunnel(
-      dispatch,
-      projectId,
+      project,
       info.serverId,
       host.split('\\')[0],
       port,
@@ -499,8 +498,7 @@ export async function evalSQL(
   }
 
   return await tunnel(
-    dispatch,
-    projectId,
+    project,
     info.serverId,
     host,
     port,
