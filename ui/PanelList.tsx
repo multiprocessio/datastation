@@ -8,7 +8,7 @@ import {
 import { Button } from './components/Button';
 import { Panel } from './Panel';
 
-export function Panels({
+export function PanelList({
   page,
   updatePage,
   reevalPanel,

@@ -22,10 +22,10 @@ import { Alert } from './components/Alert';
 import { Button } from './components/Button';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { Input } from './components/Input';
-import { Connectors } from './Connectors';
+import { ConnectorList } from './ConnectorList';
 import { Pages } from './Pages';
 import { makeStore, ProjectContext, ProjectStore } from './ProjectStore';
-import { Servers } from './Servers';
+import { ServerList } from './ServerList';
 import { Sidebar } from './Sidebar';
 import { Updates } from './Updates';
 
@@ -394,13 +394,13 @@ function App() {
         >
           {projectId && MODE_FEATURES.connectors && (
             <Sidebar>
-              <Connectors
+              <ConnectorList
                 state={state}
                 updateConnector={updateConnector}
                 addConnector={addConnector}
                 deleteConnector={deleteConnector}
               />
-              <Servers
+              <ServerList
                 state={state}
                 updateServer={updateServer}
                 addServer={addServer}

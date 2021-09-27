@@ -3,7 +3,7 @@ import { ProjectState, ServerInfo } from '../shared/state';
 import { Button } from './components/Button';
 import { Server } from './Server';
 
-export function Servers({
+export function ServerList({
   state,
   addServer,
   updateServer,

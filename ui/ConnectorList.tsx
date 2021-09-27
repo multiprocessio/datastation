@@ -3,7 +3,7 @@ import { ConnectorInfo, ProjectState, SQLConnectorInfo } from '../shared/state';
 import { Button } from './components/Button';
 import { Connector } from './Connector';
 
-export function Connectors({
+export function ConnectorList({
   state,
   addConnector,
   updateConnector,
