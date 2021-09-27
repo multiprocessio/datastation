@@ -1,7 +1,6 @@
 import subMinutes from 'date-fns/subMinutes';
 import * as React from 'react';
 import { NoConnectorError } from '../../shared/errors';
-import { ENDPOINTS } from '../../shared/rpc';
 import {
   ConnectorInfo,
   TimeSeriesConnectorInfo,
@@ -35,7 +34,7 @@ export async function evalTimeSeriesPanel(
     throw new NoConnectorError();
   }
 
-  return await evalRPC(ENDPOINTS.EVAL_TIME_SERIES, panel.id);
+  return await evalRPC('evalTimeSeries', panel.id);
 }
 
 export function TimeSeriesPanelDetails({

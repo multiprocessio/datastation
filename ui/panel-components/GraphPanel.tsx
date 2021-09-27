@@ -20,6 +20,7 @@ export function evalGraphPanel(
   indexIdMap: Array<string>
 ) {
   return evalColumnPanel(
+    panel.id,
     panel.graph.panelSource,
     [panel.graph.x, ...panel.graph.ys.map((y) => y.field)],
     indexIdMap,

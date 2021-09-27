@@ -2,7 +2,7 @@ import { Shape } from 'shape';
 import * as uuid from 'uuid';
 import { VERSION } from './constants';
 import { SupportedLanguages } from './languages';
-import { getPath, mergeDeep } from './object';
+import { getPath, mergeDeep, setPath } from './object';
 
 export class PanelResult {
   exception?: Error;
@@ -593,8 +593,8 @@ export class ProjectPage {
 
 export async function doOnAllInstanceFields<T>(
   s: ProjectState,
-  guard: (a: any) => x is T,
-  cb: (field: T, path: string) => Promise<void>
+  guard: (a: any) => a is T,
+  cb: (field: T, path: string) => Promise<T>
 ) {
   // Only trust prototype on a real object.
   const referenceObject = new ProjectState();
@@ -611,36 +611,36 @@ export async function doOnAllInstanceFields<T>(
 
     const realTop = getPath(s, path.join('.'));
     if (guard(realTop)) {
-      await cb(realTop, path.join('.'));
+      setPath(s, path.join('.'), await cb(realTop, path.join('.')));
     }
   }
 }
 
 export function doOnAllEncryptFields(
   s: ProjectState,
-  cb: (field: Encrypt, path: string) => Promise<void>
+  cb: (field: Encrypt, path: string) => Promise<Encrypt>
 ) {
   return doOnAllInstanceFields<Encrypt>(
     s,
-    (field) => field instanceof Encrypt,
+    (field: any): field is Encrypt => field instanceof Encrypt,
     cb
   );
 }
 
 export function doOnAllDateFields(
   s: ProjectState,
-  cb: (field: Date) => Promise<void>
+  cb: (field: Date) => Promise<Date>
 ) {
   return doOnAllInstanceFields<Date>(
     s,
-    (field: any) => field instanceof Date,
-    (d: any) => {
+    (field: any): field is Date => field instanceof Date,
+    (d: Date) => {
       const nd = new Date(d);
       if (String(nd) === 'Invalid Date') {
-        return new Date();
+        return Promise.resolve(new Date());
       }
 
-      return nd;
+      return Promise.resolve(nd);
     }
   );
 }
@@ -682,9 +682,9 @@ export class ProjectState {
     ps.originalVersion = raw.originalVersion || VERSION;
     ps.lastVersion = raw.lastVersion || VERSION;
     doOnAllEncryptFields(ps, (f) => {
-      f.value = null;
-      f.encrypted = true;
-      return Promise.resolve();
+      const new_ = new Encrypt(null);
+      new_.encrypted = true;
+      return Promise.resolve(new_);
     });
     return ps;
   }

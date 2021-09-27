@@ -2,29 +2,20 @@ import React from 'react';
 import { shape } from 'shape';
 import { MODE } from '../../shared/constants';
 import { LANGUAGES, SupportedLanguages } from '../../shared/languages';
-import { ENDPOINTS } from '../../shared/rpc';
 import { PanelResult, ProgramPanelInfo } from '../../shared/state';
-import { asyncRPC } from '../asyncRPC';
+import { evalRPC } from '../asyncRPC';
 import { CodeEditor } from '../component-library/CodeEditor';
 import { Select } from '../component-library/Select';
 import { PanelBodyProps, PanelDetailsProps, PanelUIDetails } from './types';
 
 export async function evalProgramPanel(
   panel: ProgramPanelInfo,
-  panelResults: Array<PanelResult>,
-  indexIdMap: Array<string>
+  panelResults: Array<PanelResult>
 ): Promise<PanelResult> {
   const program = panel.program;
 
   if (MODE !== 'browser') {
-    return asyncRPC<
-      ProgramPanelInfo & { indexIdMap: Array<string> },
-      null,
-      PanelResult
-    >(ENDPOINTS.EVAL_PROGRAM, null, {
-      ...panel,
-      indexIdMap,
-    });
+    return evalRPC('evalProgram', panel.id);
   }
 
   const language = LANGUAGES[program.type];

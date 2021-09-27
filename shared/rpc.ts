@@ -1,31 +1,33 @@
-import { Shape } from 'shape';
-import { FilterAggregatePanelInfo, SQLPanelInfo } from './state';
+export type EvalBody = string;
 
-export type FilterAggregateEvalBody = FilterAggregatePanelInfo & {
-  indexIdMap: Array<string>;
-  indexShapeMap: Array<Shape>;
-};
+export type StoreEndpoint =
+  | 'getProjects'
+  | 'makeProject'
+  | 'updateProject'
+  | 'getProject'
+  | 'openProject';
 
-export type SQLEvalBody = SQLPanelInfo & {
-  indexShapeMap: Array<Shape>;
-  indexIdMap: Array<string>;
-};
+export type EvalEndpoint =
+  | 'killProcess'
+  | 'evalProgram'
+  | 'storeLiteral'
+  | 'fetchResults'
+  | 'evalColumns'
+  | 'evalFilterAggregate'
+  | 'evalTimeSeries'
+  | 'evalFile'
+  | 'evalHTTP'
+  | 'evalProgram'
+  | 'evalSQL';
 
-export type EvalColumnsBody = {
-  id: string;
-  columns: Array<string>;
-  panelSource: number;
-};
+export type Endpoint = EvalEndpoint | StoreEndpoint;
 
-export const ENDPOINTS = {
-  KILL_PROCESS: 'killProcess',
-  EVAL_PROGRAM: 'evalProgram',
+export type WindowAsyncRPC = <Request, Response = void>(
+  resource: Endpoint,
+  projectId: string,
+  body: Request
+) => Promise<Response>;
 
-  STORE_LITERAL: 'storeLiteral',
-  FETCH_RESULTS: 'fetchResults',
-  EVAL_COLUMNS: 'evalColumns',
-
-  EVAL_FILTER_AGGREGATE: 'evalFilterAggregate',
-
-  EVAL_TIME_SERIES: 'evalTimeSeries',
-};
+export type IPCRendererResponse<T> =
+  | { kind: 'error'; error: Error }
+  | { kind: 'response'; body: T };

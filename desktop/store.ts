@@ -52,13 +52,16 @@ export function getProjectResultsFile(projectId: string) {
 }
 
 async function checkAndEncrypt(e: Encrypt, existing: Encrypt) {
+  const new_ = new Encrypt('');
   if (e.value === null) {
-    e.value = existing.value;
-    e.encrypted = true;
+    new_.value = existing.value;
+    new_.encrypted = true;
   } else if (!e.encrypted) {
-    e.value = await encrypt(e.value);
-    e.encrypted = true;
+    new_.value = await encrypt(e.value);
+    new_.encrypted = true;
   }
+
+  return new_;
 }
 
 export function encryptProjectSecrets(

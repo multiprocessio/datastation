@@ -182,7 +182,7 @@ function App() {
   const [makeProjectError, setMakeProjectError] = React.useState('');
   async function makeProject(projectId: string) {
     try {
-      await asyncRPC<void, { projectId: string }, void>('makeProject', {
+      await asyncRPC<{ projectId: string }>('makeProject', {
         projectId,
       });
       setProjectId(projectId);
@@ -249,9 +249,8 @@ function App() {
     async function load() {
       const projects = await asyncRPC<
         void,
-        void,
         Array<{ name: string; createdAt: string }>
-      >('getProjects');
+      >('getProjects', null);
       setProjects(projects);
     }
 
@@ -315,7 +314,7 @@ function App() {
   }
 
   async function openProject() {
-    await asyncRPC<void, void, void>('openProject');
+    await asyncRPC('openProject', null);
     window.close();
   }
 

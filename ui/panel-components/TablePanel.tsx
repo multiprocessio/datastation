@@ -3,10 +3,9 @@ import * as React from 'react';
 import { shape } from 'shape';
 import { MODE } from '../../shared/constants';
 import { InvalidDependentPanelError } from '../../shared/errors';
-import { ENDPOINTS, EvalColumnsBody } from '../../shared/rpc';
 import { PanelResult, TableColumn, TablePanelInfo } from '../../shared/state';
 import { columnsFromObject } from '../../shared/table';
-import { asyncRPC } from '../asyncRPC';
+import { evalRPC } from '../asyncRPC';
 import { Alert } from '../component-library/Alert';
 import { Button } from '../component-library/Button';
 import { FieldPicker, unusedFields } from '../component-library/FieldPicker';
@@ -15,9 +14,10 @@ import { PanelSourcePicker } from '../component-library/PanelSourcePicker';
 import { PanelBodyProps, PanelDetailsProps, PanelUIDetails } from './types';
 
 export async function evalColumnPanel(
+  panelId: string,
   panelSource: number,
   columns: Array<string>,
-  indexIdMap: Array<string>,
+  _: Array<string>,
   panelResults: Array<PanelResult>
 ) {
   if (MODE === 'browser') {
@@ -44,15 +44,7 @@ export async function evalColumnPanel(
     }
   }
 
-  return await asyncRPC<EvalColumnsBody, void, PanelResult>(
-    ENDPOINTS.EVAL_COLUMNS,
-    null,
-    {
-      id: indexIdMap[panelSource],
-      columns,
-      panelSource,
-    }
-  );
+  return await evalRPC('evalColumns', panelId);
 }
 
 export function evalTablePanel(
@@ -61,6 +53,7 @@ export function evalTablePanel(
   indexIdMap: Array<string>
 ) {
   return evalColumnPanel(
+    panel.id,
     panel.table.panelSource,
     panel.table.columns.map((c) => c.field),
     indexIdMap,

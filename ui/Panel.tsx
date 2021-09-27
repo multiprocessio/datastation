@@ -5,7 +5,6 @@ import * as CSV from 'papaparse';
 import * as React from 'react';
 import { toString } from 'shape';
 import { MODE, MODE_FEATURES } from '../shared/constants';
-import { ENDPOINTS } from '../shared/rpc';
 import {
   PanelInfo,
   PanelInfoType,
@@ -13,7 +12,7 @@ import {
   PanelResultMeta,
 } from '../shared/state';
 import { humanSize } from '../shared/text';
-import { asyncRPC } from './asyncRPC';
+import { evalRPC } from './asyncRPC';
 import { Alert } from './component-library/Alert';
 import { Button } from './component-library/Button';
 import { Confirm } from './component-library/Confirm';
@@ -77,11 +76,7 @@ async function fetchAndDownloadResults(
 ) {
   let value = results.value;
   if (MODE !== 'browser') {
-    const res = await asyncRPC<{ id: string }, void, { value: any }>(
-      ENDPOINTS.FETCH_RESULTS,
-      null,
-      { id: panel.id }
-    );
+    const res = await evalRPC('fetchResults', panel.id);
     value = res.value;
   }
 
@@ -211,7 +206,7 @@ export function Panel({
   const runningProgram =
     results.loading && panelUIDetails.killable && MODE_FEATURES.killProcess;
   function killProcess() {
-    return asyncRPC<PanelInfo, void, void>(ENDPOINTS.KILL_PROCESS, null, panel);
+    return evalRPC('killProcess', panel.id);
   }
 
   return (

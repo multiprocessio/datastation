@@ -25,9 +25,9 @@ export function deepEquals(a: any, b: any) {
 export function deepClone(a: any) {
   // https://twitter.com/DasSurma/status/955484341358022657
   const oldState = history.state;
-  history.replaceState(a, window.title);
+  history.replaceState(a, (window as any).title);
   const copy = history.state;
-  history.replaceState(oldState, window.title);
+  history.replaceState(oldState, (window as any).title);
   return copy;
 }
 
@@ -54,6 +54,17 @@ export function getPath(obj: any, path: string): any {
   }
 
   return current;
+}
+
+export function setPath(obj: any, path: string, v: any) {
+  const parentPath = path.split('.');
+  const lastPath = parentPath.pop();
+  const parent = getPath(obj, parentPath.join('.'));
+  if (!parent) {
+    throw new Error('Invalid set path: ' + path);
+  }
+
+  parent[lastPath] = v;
 }
 
 export function validate(

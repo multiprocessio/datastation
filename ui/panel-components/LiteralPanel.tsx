@@ -2,10 +2,9 @@ import { preview } from 'preview';
 import * as React from 'react';
 import { shape } from 'shape';
 import { MODE } from '../../shared/constants';
-import { ENDPOINTS } from '../../shared/rpc';
 import { ContentTypeInfo, LiteralPanelInfo } from '../../shared/state';
 import { parseArrayBuffer } from '../../shared/text';
-import { asyncRPC } from '../asyncRPC';
+import { evalRPC } from '../asyncRPC';
 import { CodeEditor } from '../component-library/CodeEditor';
 import { ContentTypePicker } from '../component-library/ContentTypePicker';
 import { PanelBodyProps, PanelDetailsProps, PanelUIDetails } from './types';
@@ -20,14 +19,7 @@ export async function evalLiteralPanel(panel: LiteralPanelInfo) {
   );
 
   if (MODE !== 'browser') {
-    await asyncRPC<{ id: string; value: any }, void, void>(
-      ENDPOINTS.STORE_LITERAL,
-      null,
-      {
-        id: panel.id,
-        value,
-      }
-    );
+    await evalRPC('storeLiteral', panel.id);
   }
 
   return {

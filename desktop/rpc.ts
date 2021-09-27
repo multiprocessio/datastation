@@ -1,6 +1,7 @@
 import { IpcMain, IpcMainEvent } from 'electron';
 import { RPC_ASYNC_REQUEST, RPC_ASYNC_RESPONSE } from '../shared/constants';
 import log from '../shared/log';
+import { IPCRendererResponse } from '../shared/rpc';
 
 export interface RPCPayload {
   messageNumber: number;
@@ -24,6 +25,15 @@ export interface RPCHandler {
     body: any,
     dispatch: Dispatch
   ) => Promise<any>;
+}
+
+// Stub to ensure msg is always typed
+function sendIPCRendererResponse(
+  event: IpcMainEvent,
+  channel: string,
+  msg: IPCRendererResponse<any>
+) {
+  event.sender.send(channel, msg);
 }
 
 export function registerRPCHandlers(
@@ -50,14 +60,15 @@ export function registerRPCHandlers(
       const responseChannel = `${RPC_ASYNC_RESPONSE}:${payload.messageNumber}`;
       try {
         const rsp = await dispatch(payload);
-        event.sender.send(responseChannel, {
+        sendIPCRendererResponse(event, responseChannel, {
+          kind: 'response',
           body: rsp,
         });
       } catch (e) {
         log.error(e);
-        event.sender.send(responseChannel, {
-          isError: true,
-          body: {
+        sendIPCRendererResponse(event, responseChannel, {
+          kind: 'error',
+          error: {
             // Not all fields get pulled out unless explicitly requested
             ...e,
             stack: e.stack,

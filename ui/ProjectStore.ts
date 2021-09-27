@@ -82,18 +82,11 @@ class LocalStorageStore extends ProjectStore {
 class RPCStore extends ProjectStore {
   update(projectId: string, newState: ProjectState, addToRestoreBuffer = true) {
     super.update(projectId, newState, addToRestoreBuffer);
-    return asyncRPC<ProjectState, string, void>(
-      'updateProjectState',
-      projectId,
-      newState
-    );
+    return asyncRPC<ProjectState>('updateProject', newState);
   }
 
   get(projectId: string) {
-    return asyncRPC<ProjectState, string, ProjectState>(
-      'getProjectState',
-      projectId
-    );
+    return asyncRPC<string, ProjectState>('getProject', projectId);
   }
 }
 

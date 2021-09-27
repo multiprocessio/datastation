@@ -2,6 +2,7 @@ import fs from 'fs/promises';
 import jsesc from 'jsesc';
 import { preview } from 'preview';
 import { shape } from 'shape';
+import { EvalEndpoint } from '../../shared/rpc';
 import { Dispatch } from '../rpc';
 import { getProjectResultsFile } from '../store';
 
@@ -9,15 +10,14 @@ interface Body {
   id: string;
 }
 
-export function rpcEvalHandler<T extends Body>({
+export function rpcEvalHandler({
   resource,
   handler,
 }: {
-  resource: string;
+  resource: EvalEndpoint;
   handler: (
     projectId: string,
-    args: any,
-    body: T,
+    body: Body,
     dispatch: Dispatch
   ) => Promise<{
     value: any;
@@ -29,16 +29,15 @@ export function rpcEvalHandler<T extends Body>({
 }) {
   async function wrappedHandler(
     projectId: string,
-    args: any,
-    body: T,
+    body: Body,
     dispatch: Dispatch
   ): Promise<any> {
     const projectResultsFile = getProjectResultsFile(projectId);
-    const res = await handler(projectId, args, body, dispatch);
+    const res = await handler(projectId, args, panelId, dispatch);
     const json = jsesc(res.value, { quotes: 'double', json: true });
     // TODO: is it a problem panels like Program skip this escaping?
     if (!res.skipWrite) {
-      await fs.writeFile(projectResultsFile + body.id, json);
+      await fs.writeFile(projectResultsFile + panelId, json);
     }
 
     return {

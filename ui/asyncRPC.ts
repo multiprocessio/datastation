@@ -1,22 +1,22 @@
 import { MODE } from '../shared/constants';
+import {
+  Endpoint,
+  EvalBody,
+  EvalEndpoint,
+  WindowAsyncRPC,
+} from '../shared/rpc';
 import { PanelResult } from '../shared/state';
 
-// Simple stub for TypeScript as prepared by preload.ts.
-export async function asyncRPC<Request, Args, Response>(
-  resource: string,
-  args?: Args,
-  body?: Request
+export async function asyncRPC<Request = void, Response = void>(
+  resource: Endpoint,
+  body: Request
 ): Promise<Response> {
-  const arpc = (window as any).asyncRPC as <Request, Args, Response>(
-    resource: string,
-    projectId: string,
-    args?: Args,
-    body?: Request
-  ) => Promise<Response>;
   const projectId = (window as any).projectId;
 
   if (MODE === 'desktop') {
-    return arpc(resource, projectId, args, body);
+    // this method is exposed by ./desktop/preload.ts in Electron environments
+    const arpc = (window as any).asyncRPC as WindowAsyncRPC;
+    return arpc(resource, projectId, body);
   }
 
   const rsp = await window.fetch(
@@ -27,7 +27,6 @@ export async function asyncRPC<Request, Args, Response>(
         'content-type': 'application/json',
       },
       body: JSON.stringify({
-        args,
         body,
       }),
     }
@@ -46,10 +45,8 @@ export async function asyncRPC<Request, Args, Response>(
 }
 
 export function evalRPC(
-  endpoint: string,
+  endpoint: EvalEndpoint,
   panelId: string
 ): Promise<PanelResult> {
-  return asyncRPC<{ panelId: string }, void, PanelResult>(endpoint, null, {
-    panelId,
-  });
+  return asyncRPC<EvalBody, PanelResult>(endpoint, panelId);
 }

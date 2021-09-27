@@ -3,14 +3,13 @@ import { ArrayShape, ObjectShape, shape } from 'shape';
 import { MODE } from '../../shared/constants';
 import { InvalidDependentPanelError } from '../../shared/errors';
 import { LANGUAGES } from '../../shared/languages';
-import { ENDPOINTS, FilterAggregateEvalBody } from '../../shared/rpc';
 import {
   AggregateType,
   FilterAggregatePanelInfo,
   PanelResult,
 } from '../../shared/state';
 import { title } from '../../shared/text';
-import { asyncRPC } from '../asyncRPC';
+import { evalRPC } from '../asyncRPC';
 import { CodeEditor } from '../component-library/CodeEditor';
 import { FieldPicker } from '../component-library/FieldPicker';
 import { FormGroup } from '../component-library/FormGroup';
@@ -60,8 +59,6 @@ export async function evalFilterAggregatePanel(
   panelResults: Array<PanelResult>,
   indexIdMap: Array<string>
 ) {
-  const indexShapeMap = panelResults.map((c) => c.shape);
-
   if (MODE === 'browser') {
     const {
       panelSource,
@@ -106,15 +103,7 @@ export async function evalFilterAggregatePanel(
     };
   }
 
-  return await asyncRPC<FilterAggregateEvalBody, void, PanelResult>(
-    ENDPOINTS.EVAL_FILTER_AGGREGATE,
-    null,
-    {
-      ...panel,
-      indexIdMap,
-      indexShapeMap,
-    }
-  );
+  return await evalRPC('evalFilterAggregate', panel.id);
 }
 
 export function FilterAggregatePanelDetails({

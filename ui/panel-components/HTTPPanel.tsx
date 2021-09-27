@@ -7,9 +7,8 @@ import {
   ContentTypeInfo,
   HTTPConnectorInfoMethod,
   HTTPPanelInfo,
-  PanelResult,
 } from '../../shared/state';
-import { asyncRPC } from '../asyncRPC';
+import { evalRPC } from '../asyncRPC';
 import { Button } from '../component-library/Button';
 import { ContentTypePicker } from '../component-library/ContentTypePicker';
 import { FormGroup } from '../component-library/FormGroup';
@@ -39,15 +38,7 @@ export async function evalHTTPPanel(panel: HTTPPanelInfo) {
     };
   }
 
-  const connector = panel.http;
-  return await asyncRPC<HTTPPanelInfo, string, PanelResult>(
-    'evalHTTP',
-    panel.content,
-    {
-      ...panel,
-      serverId: panel.serverId || connector.serverId,
-    }
-  );
+  return await evalRPC('evalHTTP', panel.id);
 }
 
 export function HTTPPanelDetails({

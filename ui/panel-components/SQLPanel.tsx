@@ -1,15 +1,13 @@
 import * as React from 'react';
 import { NoConnectorError } from '../../shared/errors';
-import { SQLEvalBody } from '../../shared/rpc';
 import {
   ConnectorInfo,
   PanelResult,
-  ServerInfo,
   SQLConnectorInfo,
   SQLConnectorInfoType,
   SQLPanelInfo,
 } from '../../shared/state';
-import { asyncRPC } from '../asyncRPC';
+import { evalRPC } from '../asyncRPC';
 import { CodeEditor } from '../component-library/CodeEditor';
 import { Select } from '../component-library/Select';
 import { ServerPicker } from '../component-library/ServerPicker';
@@ -19,13 +17,10 @@ import { PanelBodyProps, PanelDetailsProps, PanelUIDetails } from './types';
 
 export async function evalSQLPanel(
   panel: SQLPanelInfo,
-  panelResults: Array<PanelResult>,
-  indexIdMap: Array<string>,
-  connectors: Array<ConnectorInfo>,
-  _1: Array<ServerInfo>
+  _1: Array<PanelResult>,
+  _2: Array<string>,
+  connectors: Array<ConnectorInfo>
 ) {
-  const indexShapeMap = panelResults.map((r) => r.shape);
-
   const connector = connectors.find(
     (c) => c.id === panel.sql.connectorId
   ) as SQLConnectorInfo;
@@ -33,16 +28,7 @@ export async function evalSQLPanel(
     throw new NoConnectorError();
   }
 
-  return await asyncRPC<SQLEvalBody, string, PanelResult>(
-    'evalSQL',
-    panel.content,
-    {
-      ...panel,
-      serverId: panel.serverId || connector.serverId,
-      indexShapeMap,
-      indexIdMap,
-    }
-  );
+  return await evalRPC('evalSQL', panel.id);
 }
 
 export function SQLPanelDetails({
