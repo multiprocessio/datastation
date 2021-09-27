@@ -6,8 +6,8 @@ import { Button } from './components/Button';
 import { Confirm } from './components/Confirm';
 import { Input } from './components/Input';
 import { PanelPlayWarning } from './errors';
+import { PanelList } from './PanelList';
 import { PANEL_UI_DETAILS } from './panels';
-import { Panels } from './Panels';
 
 export function Pages({
   state,
@@ -179,7 +179,7 @@ export function Pages({
         </Button>
       </div>
 
-      <Panels
+      <PanelList
         page={page}
         updatePage={updatePage}
         reevalPanel={reevalPanel}

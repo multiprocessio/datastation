@@ -90,7 +90,7 @@ export async function parseArrayBuffer(
   if (
     !body ||
     (typeof body === 'string' && body.length === 0) ||
-    (typeof body === 'ArrayBuffer' && body.byteLength === 0)
+    (body instanceof ArrayBuffer && body.byteLength === 0)
   ) {
     return { value: null, contentType: 'unknown' };
   }

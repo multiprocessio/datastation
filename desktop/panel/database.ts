@@ -368,7 +368,7 @@ async function evalSQLite(
   project: ProjectState,
   panelsToImport: Array<PanelToImport>
 ) {
-  let sqlitefile = connector.sql.database;
+  let sqlitefile = connector.database.database;
 
   async function run() {
     const db = await sqlite.open({
@@ -419,15 +419,19 @@ const DEFAULT_PORT = {
   postgres: 5432,
   mysql: 3306,
   sqlite: 0,
-  sqlerver: 1433,
+  sqlserver: 1433,
   oracle: 1521,
   clickhouse: 8123,
   cassandra: 9160,
   snowflake: 443,
   presto: 8080,
+  elasticsearch: 9200,
+  influx: 8086,
+  splunk: 443,
+  prometheus: 9090,
 };
 
-export async function evalSQL(
+export async function evalDatabase(
   project: ProjectState,
   panel: PanelInfo,
   extra: EvalHandlerExtra
@@ -473,7 +477,7 @@ export async function evalSQL(
       connector.database.password.encrypted = true;
     }
     connector.database.password.value = await decrypt(
-      connector.sql.password.value
+      connector.database.password.value
     );
     connector.database.password.encrypted = false;
   }
@@ -484,10 +488,11 @@ export async function evalSQL(
 
   // TODO: this needs to be more robust. Not all systems format ports the same way
   const port =
-    +connector.database.address.split(':')[1] || DEFAULT_PORT[info.sql.type];
+    +connector.database.address.split(':')[1] ||
+    DEFAULT_PORT[info.database.type];
   const host = connector.database.address.split(':')[0];
 
-  // The way hosts are formatted is unique so have sqlerver manage its own call to tunnel()
+  // The way hosts are formatted is unique so have sqlserver manage its own call to tunnel()
   if (info.database.type === 'sqlserver') {
     return await tunnel(
       project,

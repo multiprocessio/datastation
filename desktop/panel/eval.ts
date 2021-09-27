@@ -2,7 +2,7 @@ import fs from 'fs/promises';
 import jsesc from 'jsesc';
 import { preview } from 'preview';
 import { shape } from 'shape';
-import { EvalBody } from '../../shared/rpc';
+import { PanelBody } from '../../shared/rpc';
 import {
   PanelInfo,
   PanelInfoType,
@@ -12,6 +12,7 @@ import {
 import { Dispatch } from '../rpc';
 import { getProjectResultsFile } from '../store';
 import { evalColumns, evalLiteral } from './columns';
+import { evalDatabase } from './database';
 import { evalFilterAggregate } from './filagg';
 import { evalFile } from './file';
 import { evalHTTP } from './http';
@@ -29,7 +30,7 @@ const EVAL_HANDLERS: { [k in PanelInfoType]: EvalHandler } = {
   file: evalFile,
   http: evalHTTP,
   program: evalProgram,
-  database: evaldatabase,
+  database: evalDatabase,
   table: evalColumns,
   graph: evalColumns,
   literal: evalLiteral,
@@ -39,7 +40,7 @@ export const evalHandler = {
   resource: 'eval',
   handler: async function (
     projectId: string,
-    body: EvalBody,
+    body: PanelBody,
     dispatch: Dispatch
   ): Promise<PanelResult> {
     const project =
@@ -52,7 +53,7 @@ export const evalHandler = {
     let panel: PanelInfo;
     for (; !panel && panelPage < (project.pages || []).length; panelPage++) {
       for (const p of project.pages[panelPage].panels || []) {
-        if (p.id === body.panel.id) {
+        if (p.id === body.id) {
           panel = p;
           break;
         }

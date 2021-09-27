@@ -179,10 +179,10 @@ export type TimeSeriesConnectorInfoType =
 
 export type DatabaseConnectorInfoType =
   | 'postgres'
-  | 'mydatabase'
+  | 'mysql'
   | 'sqlite'
   | 'oracle'
-  | 'databaseserver'
+  | 'sqlserver'
   | 'presto'
   | 'clickhouse'
   | 'snowflake'
@@ -196,7 +196,6 @@ export class DatabaseConnectorInfo extends ConnectorInfo {
     username: string;
     password: Encrypt;
     address: string;
-    range: TimeSeriesRange;
     extra: Record<string, string>;
   };
 
@@ -376,6 +375,7 @@ export class DatabasePanelInfo extends PanelInfo {
   database: {
     type: DatabaseConnectorInfoType;
     connectorId?: string;
+    range: TimeSeriesRange;
   };
 
   constructor(

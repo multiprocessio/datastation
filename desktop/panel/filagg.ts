@@ -23,6 +23,7 @@ export async function evalFilterAggregate(
     filter,
     sortOn,
     sortAsc,
+    range,
     limit,
   } = guardPanel<FilterAggregatePanelInfo>(panel, 'filagg').filagg;
   let columns = '*';
@@ -46,7 +47,7 @@ export async function evalFilterAggregate(
   const tmp = await makeTmpFile();
   log.info('Filagg loading into ' + tmp.path);
   try {
-    const metaPanel = new DatabasePanelInfo('', 'sqlite', '', query);
+    const metaPanel = new DatabasePanelInfo('', 'sqlite', '', range, query);
     const metaConnector = new DatabaseConnectorInfo('', 'sqlite', tmp.path);
     // Register connector in project
     if (!project.connectors) {

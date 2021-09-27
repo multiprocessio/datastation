@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { DatabaseConnectorInfo } from '../shared/state';
 import { Select } from './components/Select';
-import { VENDORS } from './connectors';
+import { VENDORS, VENDOR_GROUPS } from './connectors';
 import { ProjectContext } from './ProjectStore';
 
 export function DatabaseConnector({
@@ -12,7 +12,7 @@ export function DatabaseConnector({
   updateConnector: (dc: DatabaseConnectorInfo) => void;
 }) {
   const { servers } = React.useContext(ProjectContext);
-
+  const { details: Details } = VENDORS[connector.database.type];
   return (
     <React.Fragment>
       <div className="form-row">
@@ -24,23 +24,21 @@ export function DatabaseConnector({
             updateConnector(connector);
           }}
         >
-          {VENDORS.map((group) => (
+          {VENDOR_GROUPS.map((group) => (
             <optgroup
               label={group.group}
               children={group.vendors.map((v) => (
-                <option value={v.id}>{v.name}</option>
+                <option value={v}>{VENDORS[v].name}</option>
               ))}
             />
           ))}
         </Select>
       </div>
-      {VENDORS.map((g) =>
-        g.vendors.map((v) =>
-          v.id === connector.database.type
-            ? v.details({ connector, updateConnector, servers })
-            : null
-        )
-      )}
+      <Details
+        connector={connector}
+        updateConnector={updateConnector}
+        servers={servers}
+      />
     </React.Fragment>
   );
 }
