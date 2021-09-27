@@ -354,11 +354,10 @@ export type TimeSeriesFixedTimes =
   | 'year-to-date'
   | 'previous-year';
 
-export type TimeSeriesRange =
-  {
-    field: string;
-  } &
-  ({
+export type TimeSeriesRange = {
+  field: string;
+} & (
+  | {
       rangeType: 'absolute';
       begin: Date;
       end: Date;
@@ -370,7 +369,8 @@ export type TimeSeriesRange =
   | {
       rangeType: 'fixed';
       fixed: TimeSeriesFixedTimes;
-    });
+    }
+);
 
 export class DatabasePanelInfo extends PanelInfo {
   database: {

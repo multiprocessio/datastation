@@ -4,10 +4,10 @@ import { MODE } from '../../shared/constants';
 import { InvalidDependentPanelError } from '../../shared/errors';
 import { LANGUAGES } from '../../shared/languages';
 import {
-  TimeSeriesRange as TimeSeriesRangeT
   AggregateType,
   FilterAggregatePanelInfo,
   PanelResult,
+  TimeSeriesRange as TimeSeriesRangeT,
 } from '../../shared/state';
 import { title } from '../../shared/text';
 import { panelRPC } from '../asyncRPC';
@@ -129,7 +129,8 @@ export function FilterAggregatePanelDetails({
               updatePanel(panel);
             }}
           />
-4        </div>
+          4{' '}
+        </div>
       </FormGroup>
       <FormGroup label="Filter">
         <div className="form-row">
@@ -154,7 +155,7 @@ export function FilterAggregatePanelDetails({
         updateRange={(r: TimeSeriesRangeT) => {
           panel.filagg.range = r;
           updatePanel(panel);
-      }}
+        }}
       />
       <FormGroup label="Aggregate">
         <div className="form-row">

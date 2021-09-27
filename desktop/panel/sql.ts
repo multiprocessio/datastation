@@ -363,7 +363,7 @@ async function evalSQLite(
   info: SQLPanelInfo,
   connector: SQLConnectorInfo,
   project: ProjectState,
-  panelsToImport: Array<PanelToImport>,
+  panelsToImport: Array<PanelToImport>
 ) {
   let sqlitefile = connector.sql.database;
 
@@ -427,7 +427,7 @@ const DEFAULT_PORT = {
 export async function evalSQL(
   project: ProjectState,
   panel: PanelInfo,
-  extra: EvalHandlerExtra,
+  extra: EvalHandlerExtra
 ): Promise<EvalHandlerResponse> {
   const { content } = panel;
   const info = guardPanel<SQLPanelInfo>(panel, 'sql');
@@ -454,7 +454,7 @@ export async function evalSQL(
       // ./filagg.ts doesn't add a connector to the project. Just passes info in directly
       connector,
       project,
-      panelsToImport,
+      panelsToImport
     );
   }
 

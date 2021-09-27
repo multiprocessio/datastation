@@ -62,7 +62,11 @@ export async function fetchResultsHandler(
 ): Promise<EvalHandlerResponse> {
   const projectResultsFile = getProjectResultsFile(project.id);
   const f = await fs.readFile(projectResultsFile + panel.id);
-  return await parseArrayBuffer({
-    type: panel.resultMeta.contentType,
-  }, '', f);
+  return await parseArrayBuffer(
+    {
+      type: panel.resultMeta.contentType,
+    },
+    '',
+    f
+  );
 }

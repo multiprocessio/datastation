@@ -47,7 +47,10 @@ export function Select({
   }
 
   React.useEffect(() => {
-    const values = [allowNone ? NONE : null, ...getOptionValues(children)].filter(Boolean);
+    const values = [
+      allowNone ? NONE : null,
+      ...getOptionValues(children),
+    ].filter(Boolean);
     if (values.length && !values.includes(value)) {
       let foundUnused = false;
       for (let value of values) {
@@ -80,8 +83,8 @@ export function Select({
       }
       disabled={disabled}
     >
-    {allowNone ? <option value={NONE}>{allowNone}</option> : null}
-    {children}
+      {allowNone ? <option value={NONE}>{allowNone}</option> : null}
+      {children}
     </select>
   );
   if (label) {

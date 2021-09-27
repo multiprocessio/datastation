@@ -22,7 +22,7 @@ function killAllByPanelId(panelId: string) {
 export async function evalProgram(
   project: ProjectState,
   panel: PanelInfo,
-  { indexIdMap }: EvalHandlerExtra,
+  { indexIdMap }: EvalHandlerExtra
 ): Promise<EvalHandlerResponse> {
   const ppi = guardPanel<ProgramPanelInfo>(panel, 'program');
   const programTmp = await makeTmpFile();

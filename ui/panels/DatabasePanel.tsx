@@ -2,18 +2,18 @@ import * as React from 'react';
 import { NoConnectorError } from '../../shared/errors';
 import {
   ConnectorInfo,
-  PanelResult,
-  DatabasePanelInfo,
   DatabaseConnectorInfo,
+  DatabasePanelInfo,
+  PanelResult,
   TimeSeriesRange as TimeSeriesRangeT,
 } from '../../shared/state';
 import { panelRPC } from '../asyncRPC';
 import { CodeEditor } from '../components/CodeEditor';
 import { Select } from '../components/Select';
 import { ServerPicker } from '../components/ServerPicker';
-import { ProjectContext } from '../ProjectStore';
-import { VENDORS } from '../connectors';
 import { TimeSeriesRange } from '../components/TimeSeriesRange';
+import { VENDORS } from '../connectors';
+import { ProjectContext } from '../ProjectStore';
 import { PanelBodyProps, PanelDetailsProps, PanelUIDetails } from './types';
 
 export async function evalDatabasePanel(
@@ -44,12 +44,15 @@ export function DatabasePanelDetails({
     }
   });
 
-  const vendorsWithConnectors = VENDORS.map(group => {
+  const vendorsWithConnectors = VENDORS.map((group) => {
     return {
       label: group.group,
-      options: group.vendors.map(({ id }) => connectors.filter(c => c.type === id)).flat().sort((a, b) => a.name < b.name ? 1 : -1),
+      options: group.vendors
+        .map(({ id }) => connectors.filter((c) => c.type === id))
+        .flat()
+        .sort((a, b) => (a.name < b.name ? 1 : -1)),
     };
-  }).filter(g => g.options.length);
+  }).filter((g) => g.options.length);
 
   return (
     <React.Fragment>
@@ -65,10 +68,14 @@ export function DatabasePanelDetails({
               updatePanel(panel);
             }}
           >
-          {vendorsWithConnectors.map(g => {
-            <optgroup label={g.label} key={g.label}>
-              {g.options.map(o => <option key={o.name} value={o.id}>{o.name}</option>)}
-            </optgroup>
+            {vendorsWithConnectors.map((g) => {
+              <optgroup label={g.label} key={g.label}>
+                {g.options.map((o) => (
+                  <option key={o.name} value={o.id}>
+                    {o.name}
+                  </option>
+                ))}
+              </optgroup>;
             })}
           </Select>
         )}

@@ -2,13 +2,13 @@ import fs from 'fs/promises';
 import jsesc from 'jsesc';
 import { preview } from 'preview';
 import { shape } from 'shape';
+import { EvalBody } from '../../shared/rpc';
 import {
   PanelInfo,
   PanelInfoType,
   PanelResult,
   ProjectState,
 } from '../../shared/state';
-import {EvalBody} from '../../shared/rpc';
 import { Dispatch } from '../rpc';
 import { getProjectResultsFile } from '../store';
 import { evalColumns, evalLiteral } from './columns';
@@ -22,7 +22,7 @@ import { EvalHandlerExtra, EvalHandlerResponse } from './types';
 type EvalHandler = (
   project: ProjectState,
   panel: PanelInfo,
-  extra: EvalHandlerExtra,
+  extra: EvalHandlerExtra
 ) => Promise<EvalHandlerResponse>;
 
 const EVAL_HANDLERS: { [k in PanelInfoType]: EvalHandler } = {
@@ -69,11 +69,10 @@ export const evalHandler = {
     );
 
     const evalHandler = EVAL_HANDLERS[panel.type];
-    const res = await evalHandler(
-      project,
-      panel,
-      { indexIdMap, indexShapeMap },
-    );
+    const res = await evalHandler(project, panel, {
+      indexIdMap,
+      indexShapeMap,
+    });
 
     // TODO: is it a problem panels like Program skip this escaping?
     // This library is important for escaping responses otherwise some

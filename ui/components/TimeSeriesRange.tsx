@@ -1,17 +1,17 @@
 import subMinutes from 'date-fns/subMinutes';
 import * as React from 'react';
-import {Shape } from 'shape';
+import { Shape } from 'shape';
 import {
-  TimeSeriesRange as TimeSeriesRangeT,
   TimeSeriesFixedTimes,
+  TimeSeriesRange as TimeSeriesRangeT,
   TimeSeriesRelativeTimes,
 } from '../../shared/state';
 import { title } from '../../shared/text';
 import { Datetime } from './Datetime';
-import { FormGroup } from './FormGroup';
 import { FieldPicker } from './FieldPicker';
+import { FormGroup } from './FormGroup';
 import { Radio } from './Radio';
-import { Select, NONE } from './Select';
+import { NONE, Select } from './Select';
 
 export function TimeSeriesRange({
   range,
@@ -126,90 +126,90 @@ export function TimeSeriesRange({
           }}
         />
       </div>
-        <div className="flex">
-          <div className="form-row">
-            <Radio
+      <div className="flex">
+        <div className="form-row">
+          <Radio
             disabled={Boolean(range.field)}
-              vertical
-              name="range-type"
-              value={range.rangeType}
-              onChange={setTab}
-              options={[
-                { value: 'relative', label: 'Relative' },
-                { value: 'fixed', label: 'Fixed' },
-                { value: 'absolute', label: 'Absolute' },
-              ]}
-            />
-          </div>
-
-          <div className="form-row flex flex--vertical items-flex-end">
-            {range.rangeType === 'absolute' && (
-              <React.Fragment>
-                <div className="form-row">
-                  <Datetime
-                    label="Begin"
-                    value={range.end}
-                    onChange={(v) => {
-                      range.begin = v;
-                      updateRange(range);
-                    }}
-                  />
-                </div>
-                <div className="form-row">
-                  <Datetime
-                    label="End"
-                    value={range.end}
-                    onChange={(v) => {
-                      range.end = v;
-                      updateRange(range);
-                    }}
-                  />
-                </div>
-              </React.Fragment>
-            )}
-            {range.rangeType === 'relative' && (
-              <React.Fragment>
-                <Select
-                  value={range.relative}
-                  onChange={(id) => {
-                    range.relative = id as TimeSeriesRelativeTimes;
-                    updateRange(range);
-                  }}
-                  children={relativeOptions.map((group) => (
-                    <optgroup label={group.label} key={group.label}>
-                      {group.options.map((id) => (
-                        <option value={id} key={id}>
-                          {title(id)}
-                        </option>
-                      ))}
-                    </optgroup>
-                  ))}
-                />
-              </React.Fragment>
-            )}
-
-            {range.rangeType === 'fixed' && (
-              <React.Fragment>
-                <Select
-                  onChange={(id) => {
-                    range.fixed = id as TimeSeriesFixedTimes;
-                    updateRange(range);
-                  }}
-                  value={range.fixed}
-                  children={fixedOptions.map((group) => (
-                    <optgroup label={group.label} key={group.label}>
-                      {group.options.map((id) => (
-                        <option value={id} key={id}>
-                          {title(id)}
-                        </option>
-                      ))}
-                    </optgroup>
-                  ))}
-                />
-              </React.Fragment>
-            )}
-          </div>
+            vertical
+            name="range-type"
+            value={range.rangeType}
+            onChange={setTab}
+            options={[
+              { value: 'relative', label: 'Relative' },
+              { value: 'fixed', label: 'Fixed' },
+              { value: 'absolute', label: 'Absolute' },
+            ]}
+          />
         </div>
-      </FormGroup>
+
+        <div className="form-row flex flex--vertical items-flex-end">
+          {range.rangeType === 'absolute' && (
+            <React.Fragment>
+              <div className="form-row">
+                <Datetime
+                  label="Begin"
+                  value={range.end}
+                  onChange={(v) => {
+                    range.begin = v;
+                    updateRange(range);
+                  }}
+                />
+              </div>
+              <div className="form-row">
+                <Datetime
+                  label="End"
+                  value={range.end}
+                  onChange={(v) => {
+                    range.end = v;
+                    updateRange(range);
+                  }}
+                />
+              </div>
+            </React.Fragment>
+          )}
+          {range.rangeType === 'relative' && (
+            <React.Fragment>
+              <Select
+                value={range.relative}
+                onChange={(id) => {
+                  range.relative = id as TimeSeriesRelativeTimes;
+                  updateRange(range);
+                }}
+                children={relativeOptions.map((group) => (
+                  <optgroup label={group.label} key={group.label}>
+                    {group.options.map((id) => (
+                      <option value={id} key={id}>
+                        {title(id)}
+                      </option>
+                    ))}
+                  </optgroup>
+                ))}
+              />
+            </React.Fragment>
+          )}
+
+          {range.rangeType === 'fixed' && (
+            <React.Fragment>
+              <Select
+                onChange={(id) => {
+                  range.fixed = id as TimeSeriesFixedTimes;
+                  updateRange(range);
+                }}
+                value={range.fixed}
+                children={fixedOptions.map((group) => (
+                  <optgroup label={group.label} key={group.label}>
+                    {group.options.map((id) => (
+                      <option value={id} key={id}>
+                        {title(id)}
+                      </option>
+                    ))}
+                  </optgroup>
+                ))}
+              />
+            </React.Fragment>
+          )}
+        </div>
+      </div>
+    </FormGroup>
   );
 }

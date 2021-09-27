@@ -2,7 +2,9 @@ import * as CSV from 'papaparse';
 import * as XLSX from 'xlsx';
 import log from './log';
 
-export type Parsers = { [type: string]: (a: ArrayBuffer | string) => Promise<any> };
+export type Parsers = {
+  [type: string]: (a: ArrayBuffer | string) => Promise<any>;
+};
 
 export interface ContentTypeInfoPlusParsers {
   additionalParsers?: Parsers;
@@ -85,7 +87,11 @@ export async function parseArrayBuffer(
   fileName: string,
   body: ArrayBuffer | string
 ): Promise<{ value: any; contentType: string }> {
-  if (!body || (typeof body === 'string' && body.length === 0) || (typeof body === 'ArrayBuffer' && body.byteLength === 0)) {
+  if (
+    !body ||
+    (typeof body === 'string' && body.length === 0) ||
+    (typeof body === 'ArrayBuffer' && body.byteLength === 0)
+  ) {
     return { value: null, contentType: 'unknown' };
   }
 

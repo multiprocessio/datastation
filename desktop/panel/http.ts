@@ -1,10 +1,10 @@
 import fetch from 'node-fetch';
 import { URL } from 'url';
 import { request } from '../../shared/http';
-import { ProjectState, HTTPPanelInfo, PanelInfo } from '../../shared/state';
+import { HTTPPanelInfo, PanelInfo, ProjectState } from '../../shared/state';
 import { parseParquet } from './parquet';
 import { tunnel } from './tunnel';
-import { EvalHandlerExtra, EvalHandlerResponse, guardPanel } from './types';
+import { EvalHandlerResponse, guardPanel } from './types';
 
 export const additionalParsers = {
   parquet: parseParquet,
@@ -12,7 +12,7 @@ export const additionalParsers = {
 
 export async function evalHTTP(
   project: ProjectState,
-  panel: PanelInfo,
+  panel: PanelInfo
 ): Promise<EvalHandlerResponse> {
   const hci = guardPanel<HTTPPanelInfo>(panel, 'http');
 

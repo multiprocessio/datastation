@@ -13,7 +13,7 @@ import { EvalHandlerExtra, guardPanel } from './types';
 export async function evalFilterAggregate(
   project: ProjectState,
   panel: PanelInfo,
-  extra: EvalHandlerExtra,
+  extra: EvalHandlerExtra
 ) {
   const {
     panelSource,

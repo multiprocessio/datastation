@@ -1,8 +1,8 @@
 import * as React from 'react';
 import { SQLConnectorInfo, SQLConnectorInfoType } from '../shared/state';
 import { Select } from './components/Select';
-import { ProjectContext } from './ProjectStore';
 import { VENDORS } from './connectors';
+import { ProjectContext } from './ProjectStore';
 
 export function SQLConnector({
   connector,

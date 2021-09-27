@@ -157,14 +157,27 @@ export function FieldPicker({
       preferredDefaultType
     );
     fieldPicker = (
-      <Select label={label} value={value} onChange={onChange} used={used} allowNone={allowNone}>
+      <Select
+        label={label}
+        value={value}
+        onChange={onChange}
+        used={used}
+        allowNone={allowNone}
+      >
         {fieldGroups.length === 1
           ? renderOptions(fieldGroups[0], false)
           : fieldGroups.map((fg) => renderOptions(fg, true))}
       </Select>
     );
   } else {
-    fieldPicker = <Input placeholder={allowNone} label={label} value={value} onChange={onChange} />;
+    fieldPicker = (
+      <Input
+        placeholder={allowNone}
+        label={label}
+        value={value}
+        onChange={onChange}
+      />
+    );
   }
 
   if (!labelOnChange) {

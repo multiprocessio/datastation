@@ -4,11 +4,11 @@ import { FilePanelInfo, PanelInfo, ProjectState } from '../../shared/state';
 import { parseArrayBuffer } from '../../shared/text';
 import { additionalParsers } from './http';
 import { getSSHConfig, resolvePath } from './tunnel';
-import { EvalHandlerExtra, EvalHandlerResponse, guardPanel } from './types';
+import { EvalHandlerResponse, guardPanel } from './types';
 
 export async function evalFile(
   project: ProjectState,
-  panel: PanelInfo,
+  panel: PanelInfo
 ): Promise<EvalHandlerResponse> {
   const {
     file: { contentTypeInfo, name },
