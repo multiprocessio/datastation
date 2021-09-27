@@ -23,7 +23,6 @@ import {
   UnsupportedError,
 } from '../../shared/errors';
 import log from '../../shared/log';
-import { SQLEvalBody } from '../../shared/rpc';
 import {
   ProjectState,
   SQLConnectorInfo,
@@ -32,8 +31,8 @@ import {
 import { Dispatch } from '../rpc';
 import { decrypt } from '../secret';
 import { getProjectResultsFile } from '../store';
-import { rpcEvalHandler } from './eval';
 import { getSSHConfig, tunnel } from './tunnel';
+import { EvalHandlerExtra, EvalHandlerResponse, guardPanel } from './types';
 
 const JSON_SQL_TYPE_MAP: Record<ScalarShape['name'], string> = {
   number: 'REAL',
@@ -361,7 +360,7 @@ async function sqliteImportAndRun(
 
 async function evalSQLite(
   query: string,
-  info: SQLEvalBody,
+  info: SQLPanelInfo,
   connector: SQLConnectorInfo,
   projectId: string,
   panelsToImport: Array<PanelToImport>,
@@ -426,32 +425,27 @@ const DEFAULT_PORT = {
   presto: 8080,
 };
 
-export async function evalSQLHandlerInternal(
-  projectId: string,
-  content: string,
-  info: SQLEvalBody,
+export async function evalSQL(
+  project: ProjectState,
+  panel: PanelInfo,
+  extra: EvalHandlerExtra,
   dispatch: Dispatch
-): Promise<{ value: any }> {
+): Promise<EvalHandlerResponse> {
+  const { content: query } = panel;
+  const info = guardPanel<SQLPanelInfo>(panel, 'sql');
+
   const { query, panelsToImport } = transformDM_getPanelCalls(
     content,
-    info.indexShapeMap,
-    info.indexIdMap
+    extra.indexShapeMap,
+    extra.indexIdMap
   );
-
-  const project = (await dispatch({
-    resource: 'getProjectState',
-    projectId,
-    args: projectId,
-    body: { internal: true },
-  })) as ProjectState;
 
   const connectors = (project.connectors || []).filter(
     (c) => c.id === info.sql.connectorId
   );
-  if (!connectors.length && !(info as any).connector) {
-    throw new Error('No such connector.');
+  if (!connectors.length) {
+    throw new Error(`No such connector: ${info.sql.connectorId}.`);
   }
-
   const connector = connectors[0] as SQLConnectorInfo;
 
   // SQLite is file, not network based so handle separately.
@@ -460,7 +454,7 @@ export async function evalSQLHandlerInternal(
       query,
       info,
       // ./filagg.ts doesn't add a connector to the project. Just passes info in directly
-      (info as any).connector || connector,
+      connector,
       projectId,
       panelsToImport,
       dispatch
@@ -531,8 +525,3 @@ export async function evalSQLHandlerInternal(
     }
   );
 }
-
-export const evalSQLHandler = rpcEvalHandler({
-  resource: 'evalSQL',
-  handler: evalSQLHandlerInternal,
-});

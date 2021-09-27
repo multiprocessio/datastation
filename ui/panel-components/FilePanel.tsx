@@ -4,7 +4,7 @@ import { shape } from 'shape';
 import { MODE } from '../../shared/constants';
 import { FilePanelInfo, PanelResult } from '../../shared/state';
 import { parseArrayBuffer } from '../../shared/text';
-import { evalRPC } from '../asyncRPC';
+import { panelRPC } from '../asyncRPC';
 import { ContentTypePicker } from '../component-library/ContentTypePicker';
 import { FileInput } from '../component-library/FileInput';
 import { FormGroup } from '../component-library/FormGroup';
@@ -31,7 +31,7 @@ export async function evalFilePanel(
     };
   }
 
-  return await evalRPC('evalFile', panel.id);
+  return await panelRPC('eval', panel.id);
 }
 
 export function FilePanelDetails({

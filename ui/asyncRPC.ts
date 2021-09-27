@@ -1,8 +1,8 @@
 import { MODE } from '../shared/constants';
 import {
   Endpoint,
-  EvalBody,
-  EvalEndpoint,
+  PanelBody,
+  PanelEndpoint,
   WindowAsyncRPC,
 } from '../shared/rpc';
 import { PanelResult } from '../shared/state';
@@ -44,9 +44,9 @@ export async function asyncRPC<Request = void, Response = void>(
   return await rsp.json();
 }
 
-export function evalRPC(
-  endpoint: EvalEndpoint,
+export function panelRPC(
+  endpoint: PanelEndpoint,
   panelId: string
 ): Promise<PanelResult> {
-  return asyncRPC<EvalBody, PanelResult>(endpoint, panelId);
+  return asyncRPC<PanelBody, PanelResult>(endpoint, { panelId });
 }

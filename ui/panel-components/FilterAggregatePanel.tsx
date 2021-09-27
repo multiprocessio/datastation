@@ -9,7 +9,7 @@ import {
   PanelResult,
 } from '../../shared/state';
 import { title } from '../../shared/text';
-import { evalRPC } from '../asyncRPC';
+import { panelRPC } from '../asyncRPC';
 import { CodeEditor } from '../component-library/CodeEditor';
 import { FieldPicker } from '../component-library/FieldPicker';
 import { FormGroup } from '../component-library/FormGroup';
@@ -103,7 +103,7 @@ export async function evalFilterAggregatePanel(
     };
   }
 
-  return await evalRPC('evalFilterAggregate', panel.id);
+  return await panelRPC('eval', panel.id);
 }
 
 export function FilterAggregatePanelDetails({

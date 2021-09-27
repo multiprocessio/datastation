@@ -10,7 +10,7 @@ import {
   TimeSeriesRelativeTimes,
 } from '../../shared/state';
 import { title } from '../../shared/text';
-import { evalRPC } from '../asyncRPC';
+import { panelRPC } from '../asyncRPC';
 import { CodeEditor } from '../component-library/CodeEditor';
 import { Datetime } from '../component-library/Datetime';
 import { FormGroup } from '../component-library/FormGroup';
@@ -34,7 +34,7 @@ export async function evalTimeSeriesPanel(
     throw new NoConnectorError();
   }
 
-  return await evalRPC('evalTimeSeries', panel.id);
+  return await panelRPC('eval', panel.id);
 }
 
 export function TimeSeriesPanelDetails({

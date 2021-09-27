@@ -5,7 +5,7 @@ import { MODE } from '../../shared/constants';
 import { InvalidDependentPanelError } from '../../shared/errors';
 import { PanelResult, TableColumn, TablePanelInfo } from '../../shared/state';
 import { columnsFromObject } from '../../shared/table';
-import { evalRPC } from '../asyncRPC';
+import { panelRPC } from '../asyncRPC';
 import { Alert } from '../component-library/Alert';
 import { Button } from '../component-library/Button';
 import { FieldPicker, unusedFields } from '../component-library/FieldPicker';
@@ -44,7 +44,7 @@ export async function evalColumnPanel(
     }
   }
 
-  return await evalRPC('evalColumns', panelId);
+  return await panelRPC('eval', panelId);
 }
 
 export function evalTablePanel(

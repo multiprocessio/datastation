@@ -4,7 +4,7 @@ import { shape } from 'shape';
 import { MODE } from '../../shared/constants';
 import { ContentTypeInfo, LiteralPanelInfo } from '../../shared/state';
 import { parseArrayBuffer } from '../../shared/text';
-import { evalRPC } from '../asyncRPC';
+import { panelRPC } from '../asyncRPC';
 import { CodeEditor } from '../component-library/CodeEditor';
 import { ContentTypePicker } from '../component-library/ContentTypePicker';
 import { PanelBodyProps, PanelDetailsProps, PanelUIDetails } from './types';
@@ -19,7 +19,7 @@ export async function evalLiteralPanel(panel: LiteralPanelInfo) {
   );
 
   if (MODE !== 'browser') {
-    await evalRPC('storeLiteral', panel.id);
+    await panelRPC('storeLiteral', panel.id);
   }
 
   return {

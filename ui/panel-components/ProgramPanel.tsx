@@ -3,7 +3,7 @@ import { shape } from 'shape';
 import { MODE } from '../../shared/constants';
 import { LANGUAGES, SupportedLanguages } from '../../shared/languages';
 import { PanelResult, ProgramPanelInfo } from '../../shared/state';
-import { evalRPC } from '../asyncRPC';
+import { panelRPC } from '../asyncRPC';
 import { CodeEditor } from '../component-library/CodeEditor';
 import { Select } from '../component-library/Select';
 import { PanelBodyProps, PanelDetailsProps, PanelUIDetails } from './types';
@@ -15,7 +15,7 @@ export async function evalProgramPanel(
   const program = panel.program;
 
   if (MODE !== 'browser') {
-    return evalRPC('evalProgram', panel.id);
+    return panelRPC('eval', panel.id);
   }
 
   const language = LANGUAGES[program.type];

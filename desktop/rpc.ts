@@ -1,11 +1,11 @@
 import { IpcMain, IpcMainEvent } from 'electron';
 import { RPC_ASYNC_REQUEST, RPC_ASYNC_RESPONSE } from '../shared/constants';
 import log from '../shared/log';
-import { IPCRendererResponse } from '../shared/rpc';
+import { Endpoint, IPCRendererResponse } from '../shared/rpc';
 
 export interface RPCPayload {
   messageNumber: number;
-  resource: string;
+  resource: Endpoint;
   projectId: string;
   body: any;
   args: any;
@@ -18,7 +18,7 @@ export type DispatchPayload = Omit<RPCPayload, 'messageNumber' | 'body'> & {
 export type Dispatch = (payload: DispatchPayload) => Promise<any>;
 
 export interface RPCHandler {
-  resource: string;
+  resource: Endpoint;
   handler: (
     projectId: string,
     args: any,

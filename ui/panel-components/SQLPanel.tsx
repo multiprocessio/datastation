@@ -7,7 +7,7 @@ import {
   SQLConnectorInfoType,
   SQLPanelInfo,
 } from '../../shared/state';
-import { evalRPC } from '../asyncRPC';
+import { panelRPC } from '../asyncRPC';
 import { CodeEditor } from '../component-library/CodeEditor';
 import { Select } from '../component-library/Select';
 import { ServerPicker } from '../component-library/ServerPicker';
@@ -28,7 +28,7 @@ export async function evalSQLPanel(
     throw new NoConnectorError();
   }
 
-  return await evalRPC('evalSQL', panel.id);
+  return await panelRPC('eval', panel.id);
 }
 
 export function SQLPanelDetails({

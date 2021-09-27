@@ -1,4 +1,4 @@
-export type EvalBody = string;
+export type PanelBody = { panelId: string };
 
 export type StoreEndpoint =
   | 'getProjects'
@@ -7,20 +7,13 @@ export type StoreEndpoint =
   | 'getProject'
   | 'openProject';
 
-export type EvalEndpoint =
+export type PanelEndpoint =
   | 'killProcess'
-  | 'evalProgram'
   | 'storeLiteral'
   | 'fetchResults'
-  | 'evalColumns'
-  | 'evalFilterAggregate'
-  | 'evalTimeSeries'
-  | 'evalFile'
-  | 'evalHTTP'
-  | 'evalProgram'
-  | 'evalSQL';
+  | 'eval';
 
-export type Endpoint = EvalEndpoint | StoreEndpoint;
+export type Endpoint = PanelEndpoint | StoreEndpoint;
 
 export type WindowAsyncRPC = <Request, Response = void>(
   resource: Endpoint,

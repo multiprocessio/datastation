@@ -8,7 +8,7 @@ import {
   HTTPConnectorInfoMethod,
   HTTPPanelInfo,
 } from '../../shared/state';
-import { evalRPC } from '../asyncRPC';
+import { panelRPC } from '../asyncRPC';
 import { Button } from '../component-library/Button';
 import { ContentTypePicker } from '../component-library/ContentTypePicker';
 import { FormGroup } from '../component-library/FormGroup';
@@ -38,7 +38,7 @@ export async function evalHTTPPanel(panel: HTTPPanelInfo) {
     };
   }
 
-  return await evalRPC('evalHTTP', panel.id);
+  return await panelRPC('eval', panel.id);
 }
 
 export function HTTPPanelDetails({

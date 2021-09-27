@@ -12,7 +12,7 @@ import {
   PanelResultMeta,
 } from '../shared/state';
 import { humanSize } from '../shared/text';
-import { evalRPC } from './asyncRPC';
+import { panelRPC } from './asyncRPC';
 import { Alert } from './component-library/Alert';
 import { Button } from './component-library/Button';
 import { Confirm } from './component-library/Confirm';
@@ -76,7 +76,7 @@ async function fetchAndDownloadResults(
 ) {
   let value = results.value;
   if (MODE !== 'browser') {
-    const res = await evalRPC('fetchResults', panel.id);
+    const res = await panelRPC('fetchResults', panel.id);
     value = res.value;
   }
 
@@ -206,7 +206,7 @@ export function Panel({
   const runningProgram =
     results.loading && panelUIDetails.killable && MODE_FEATURES.killProcess;
   function killProcess() {
-    return evalRPC('killProcess', panel.id);
+    return panelRPC('killProcess', panel.id);
   }
 
   return (
