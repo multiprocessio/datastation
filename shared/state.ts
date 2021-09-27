@@ -196,7 +196,7 @@ export class DatabaseConnectorInfo extends ConnectorInfo {
     username: string;
     password: Encrypt;
     address: string;
-
+    range: TimeSeriesRange;
     extra: Record<string, string>;
   };
 
