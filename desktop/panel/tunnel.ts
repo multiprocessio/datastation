@@ -27,11 +27,12 @@ export async function getSSHConfig(
   projectId: string,
   serverId: string
 ): Promise<SSHConfig> {
+  // TODO: drop this unnecessary state lookup. We already have state
+  // at this point from every caller
   const project = (await dispatch({
-    resource: 'getProjectState',
+    resource: 'getProject',
     projectId,
-    args: projectId,
-    body: { internal: true },
+    body: { projectId, internal: true },
   })) as ProjectState;
   const servers = (project.servers || []).filter((s) => s.id === serverId);
   if (!servers.length) {

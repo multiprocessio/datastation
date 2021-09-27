@@ -431,7 +431,7 @@ export async function evalSQL(
   extra: EvalHandlerExtra,
   dispatch: Dispatch
 ): Promise<EvalHandlerResponse> {
-  const { content: query } = panel;
+  const { content } = panel;
   const info = guardPanel<SQLPanelInfo>(panel, 'sql');
 
   const { query, panelsToImport } = transformDM_getPanelCalls(

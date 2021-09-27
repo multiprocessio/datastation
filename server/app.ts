@@ -5,16 +5,7 @@ import https from 'https';
 import path from 'path';
 import pg from 'pg';
 import { CODE_ROOT } from '../desktop/constants';
-import {
-  evalColumnsHandler,
-  fetchResultsHandler,
-  storeLiteralHandler,
-} from '../desktop/eval/columns';
-import { evalFilterAggregateHandler } from '../desktop/eval/filagg';
-import { evalFileHandler } from '../desktop/eval/file';
-import { evalHTTPHandler } from '../desktop/eval/http';
-import { programHandlers } from '../desktop/eval/program';
-import { evalSQLHandler } from '../desktop/eval/sql';
+import { panelHandlers } from '../desktop/panel';
 import { RPCHandler } from '../desktop/rpc';
 import { ensureSigningKey } from '../desktop/secret';
 import { loadSettings } from '../desktop/settings';
@@ -62,14 +53,7 @@ export async function init() {
   const settings = await loadSettings();
   const rpcHandlers = [
     ...getProjectHandlers(app),
-    evalColumnsHandler,
-    storeLiteralHandler,
-    evalSQLHandler,
-    evalHTTPHandler,
-    fetchResultsHandler,
-    ...programHandlers,
-    evalFileHandler,
-    evalFilterAggregateHandler,
+    ...panelHandlers,
     settings.getUpdateHandler(),
   ] as RPCHandler[];
 

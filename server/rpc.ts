@@ -21,12 +21,7 @@ export async function handleRPC(
     }
 
     // TODO: run these in an external process pool
-    return await handler.handler(
-      payload.projectId,
-      payload.args,
-      payload.body,
-      dispatch
-    );
+    return await handler.handler(payload.projectId, payload.body, dispatch);
   }
 
   try {

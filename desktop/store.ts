@@ -75,11 +75,10 @@ export function encryptProjectSecrets(
 
 export const storeHandlers = [
   {
-    resource: 'getProjectState',
+    resource: 'getProject',
     handler: async (
       _: string,
-      projectId: string,
-      { internal }: { internal?: boolean } = {}
+      { internal, projectId }: { internal?: boolean; projectId: string } = {}
     ) => {
       const fileName = await ensureProjectFile(projectId);
       try {
@@ -96,10 +95,9 @@ export const storeHandlers = [
     },
   },
   {
-    resource: 'updateProjectState',
+    resource: 'updateProject',
     handler: async (
       projectId: string,
-      _: string,
       newState: ProjectState,
       dispatch: Dispatch
     ) => {

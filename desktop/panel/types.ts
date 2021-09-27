@@ -1,3 +1,4 @@
+import { Shape } from 'shape';
 import { PanelInfo, PanelInfoType } from '../../shared/state';
 
 export type EvalHandlerResponse = {
@@ -11,7 +12,10 @@ export type EvalHandlerExtra = {
   indexShapeMap: Array<Shape>;
 };
 
-export function guardPanel<T>(panel: PanelInfo, type: PanelInfoType): T {
+export function guardPanel<T extends PanelInfo>(
+  panel: PanelInfo,
+  type: PanelInfoType
+): T {
   if (panel.type !== type) {
     throw new Error(`Trying to eval http on ${panel.type} panel ${panel.id}.`);
   }

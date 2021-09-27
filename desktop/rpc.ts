@@ -8,7 +8,6 @@ export interface RPCPayload {
   resource: Endpoint;
   projectId: string;
   body: any;
-  args: any;
 }
 
 export type DispatchPayload = Omit<RPCPayload, 'messageNumber' | 'body'> & {
@@ -19,12 +18,7 @@ export type Dispatch = (payload: DispatchPayload) => Promise<any>;
 
 export interface RPCHandler {
   resource: Endpoint;
-  handler: (
-    projectId: string,
-    args: any,
-    body: any,
-    dispatch: Dispatch
-  ) => Promise<any>;
+  handler: (projectId: string, body: any, dispatch: Dispatch) => Promise<any>;
 }
 
 // Stub to ensure msg is always typed
@@ -46,12 +40,7 @@ export function registerRPCHandlers(
       throw new Error(`No RPC handler for resource: ${payload.resource}`);
     }
 
-    return handler.handler(
-      payload.projectId,
-      payload.args,
-      payload.body,
-      dispatch
-    );
+    return handler.handler(payload.projectId, payload.body, dispatch);
   }
 
   ipcMain.on(
