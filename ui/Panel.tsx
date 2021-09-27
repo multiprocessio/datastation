@@ -13,15 +13,15 @@ import {
 } from '../shared/state';
 import { humanSize } from '../shared/text';
 import { panelRPC } from './asyncRPC';
-import { Alert } from './component-library/Alert';
-import { Button } from './component-library/Button';
-import { Confirm } from './component-library/Confirm';
-import { ErrorBoundary } from './component-library/ErrorBoundary';
-import { Highlight } from './component-library/Highlight';
-import { Input } from './component-library/Input';
-import { Select } from './component-library/Select';
+import { Alert } from './components/Alert';
+import { Button } from './components/Button';
+import { Confirm } from './components/Confirm';
+import { ErrorBoundary } from './components/ErrorBoundary';
+import { Highlight } from './components/Highlight';
+import { Input } from './components/Input';
+import { Select } from './components/Select';
 import { PanelPlayWarning } from './errors';
-import { PANEL_GROUPS, PANEL_UI_DETAILS } from './panel-components';
+import { PANEL_GROUPS, PANEL_UI_DETAILS } from './panels';
 
 function valueAsString(value: any) {
   try {

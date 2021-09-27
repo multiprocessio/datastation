@@ -5,9 +5,7 @@ import path from 'path';
 import { file as makeTmpFile } from 'tmp-promise';
 import { InvalidDependentPanelError, NoResultError } from '../../shared/errors';
 import { LANGUAGES } from '../../shared/languages';
-import { ENDPOINTS } from '../../shared/rpc';
-import { ProgramPanelInfo } from '../../shared/state';
-import { Dispatch } from '../rpc';
+import { PanelInfo, ProgramPanelInfo, ProjectState } from '../../shared/state';
 import { SETTINGS } from '../settings';
 import { getProjectResultsFile } from '../store';
 import { EvalHandlerExtra, EvalHandlerResponse, guardPanel } from './types';
@@ -25,13 +23,12 @@ export async function evalProgram(
   project: ProjectState,
   panel: PanelInfo,
   { indexIdMap }: EvalHandlerExtra,
-  dispatch: Dispatch
 ): Promise<EvalHandlerResponse> {
   const ppi = guardPanel<ProgramPanelInfo>(panel, 'program');
   const programTmp = await makeTmpFile();
   const language = LANGUAGES[ppi.program.type];
 
-  const projectResultsFile = getProjectResultsFile(projectId);
+  const projectResultsFile = getProjectResultsFile(project.id);
 
   if (!language.defaultPath) {
     const res = await language.inMemoryEval(ppi.content, {
@@ -126,7 +123,7 @@ export async function evalProgram(
 }
 
 export const killProcessHandler = {
-  resource: ENDPOINTS.KILL_PROCESS,
+  resource: 'killProcess',
   handler: async function (_: string, _1: string, ppi: ProgramPanelInfo) {
     killAllByPanelId(ppi.id);
   },

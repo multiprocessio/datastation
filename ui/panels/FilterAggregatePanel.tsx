@@ -4,18 +4,20 @@ import { MODE } from '../../shared/constants';
 import { InvalidDependentPanelError } from '../../shared/errors';
 import { LANGUAGES } from '../../shared/languages';
 import {
+  TimeSeriesRange as TimeSeriesRangeT
   AggregateType,
   FilterAggregatePanelInfo,
   PanelResult,
 } from '../../shared/state';
 import { title } from '../../shared/text';
 import { panelRPC } from '../asyncRPC';
-import { CodeEditor } from '../component-library/CodeEditor';
-import { FieldPicker } from '../component-library/FieldPicker';
-import { FormGroup } from '../component-library/FormGroup';
-import { Input } from '../component-library/Input';
-import { PanelSourcePicker } from '../component-library/PanelSourcePicker';
-import { Select } from '../component-library/Select';
+import { CodeEditor } from '../components/CodeEditor';
+import { FieldPicker } from '../components/FieldPicker';
+import { FormGroup } from '../components/FormGroup';
+import { Input } from '../components/Input';
+import { PanelSourcePicker } from '../components/PanelSourcePicker';
+import { Select } from '../components/Select';
+import { TimeSeriesRange } from '../components/TimeSeriesRange';
 import { PanelDetailsProps, PanelUIDetails } from './types';
 
 function withAggregateShape(
@@ -56,8 +58,7 @@ function withAggregateShape(
 
 export async function evalFilterAggregatePanel(
   panel: FilterAggregatePanelInfo,
-  panelResults: Array<PanelResult>,
-  indexIdMap: Array<string>
+  panelResults: Array<PanelResult>
 ) {
   if (MODE === 'browser') {
     const {
@@ -84,6 +85,7 @@ export async function evalFilterAggregatePanel(
       groupByClause = `GROUP BY \`${groupBy}\``;
     }
     const whereClause = filter ? 'WHERE ' + filter : '';
+    // TODO: implement range support
     let sort = sortOn;
     if ((sortOn || '').startsWith('Aggregate: ')) {
       sort = `${aggregateType.toUpperCase()}(${
@@ -127,7 +129,7 @@ export function FilterAggregatePanelDetails({
               updatePanel(panel);
             }}
           />
-        </div>
+4        </div>
       </FormGroup>
       <FormGroup label="Filter">
         <div className="form-row">
@@ -146,6 +148,14 @@ export function FilterAggregatePanelDetails({
           />
         </div>
       </FormGroup>
+      <TimeSeriesRange
+        shape={data.shape}
+        range={panel.filagg.range}
+        updateRange={(r: TimeSeriesRangeT) => {
+          panel.filagg.range = r;
+          updatePanel(panel);
+      }}
+      />
       <FormGroup label="Aggregate">
         <div className="form-row">
           <Select

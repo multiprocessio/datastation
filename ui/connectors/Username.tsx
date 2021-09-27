@@ -1,8 +1,8 @@
 import * as React from 'react';
 import { SQLConnectorInfo } from '../../shared/state';
-import { Input } from '../component-library/Input';
+import { Input } from '../components/Input';
 
-export function Host({
+export function Username({
   connector,
   updateConnector,
 }: {
@@ -12,10 +12,10 @@ export function Host({
   return (
     <div className="form-row">
       <Input
-        label="Host"
-        value={connector.sql.address}
+        label="Username"
+        value={connector.sql.username}
         onChange={(value: string) => {
-          connector.sql.address = value;
+          connector.sql.username = value;
           updateConnector(connector);
         }}
       />

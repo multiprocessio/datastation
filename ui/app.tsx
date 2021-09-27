@@ -18,10 +18,10 @@ import {
   ServerInfo,
 } from '../shared/state';
 import { asyncRPC } from './asyncRPC';
-import { Alert } from './component-library/Alert';
-import { Button } from './component-library/Button';
-import { ErrorBoundary } from './component-library/ErrorBoundary';
-import { Input } from './component-library/Input';
+import { Alert } from './components/Alert';
+import { Button } from './components/Button';
+import { ErrorBoundary } from './components/ErrorBoundary';
+import { Input } from './components/Input';
 import { Connectors } from './Connectors';
 import { Pages } from './Pages';
 import { makeStore, ProjectContext, ProjectStore } from './ProjectStore';

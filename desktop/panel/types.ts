@@ -4,6 +4,8 @@ import { PanelInfo, PanelInfoType } from '../../shared/state';
 export type EvalHandlerResponse = {
   returnValue?: boolean;
   skipWrite?: boolean;
+  stdout?: string;
+  contentType?: string;
   value: any;
 };
 

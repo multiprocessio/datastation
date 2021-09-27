@@ -78,7 +78,7 @@ export const storeHandlers = [
     resource: 'getProject',
     handler: async (
       _: string,
-      { internal, projectId }: { internal?: boolean; projectId: string } = {}
+      { internal, projectId }: { internal?: boolean; projectId: string }
     ) => {
       const fileName = await ensureProjectFile(projectId);
       try {

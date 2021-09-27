@@ -4,8 +4,8 @@ import { MODE } from '../../shared/constants';
 import { LANGUAGES, SupportedLanguages } from '../../shared/languages';
 import { PanelResult, ProgramPanelInfo } from '../../shared/state';
 import { panelRPC } from '../asyncRPC';
-import { CodeEditor } from '../component-library/CodeEditor';
-import { Select } from '../component-library/Select';
+import { CodeEditor } from '../components/CodeEditor';
+import { Select } from '../components/Select';
 import { PanelBodyProps, PanelDetailsProps, PanelUIDetails } from './types';
 
 export async function evalProgramPanel(

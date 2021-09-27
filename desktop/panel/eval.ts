@@ -2,13 +2,13 @@ import fs from 'fs/promises';
 import jsesc from 'jsesc';
 import { preview } from 'preview';
 import { shape } from 'shape';
-import { EvalBody } from '../../shared/rpc';
 import {
   PanelInfo,
   PanelInfoType,
   PanelResult,
   ProjectState,
 } from '../../shared/state';
+import {EvalBody} from '../../shared/rpc';
 import { Dispatch } from '../rpc';
 import { getProjectResultsFile } from '../store';
 import { evalColumns, evalLiteral } from './columns';
@@ -23,10 +23,9 @@ type EvalHandler = (
   project: ProjectState,
   panel: PanelInfo,
   extra: EvalHandlerExtra,
-  dispatch: Dispatch
 ) => Promise<EvalHandlerResponse>;
 
-const EVAL_HANDLERS: { [k in PanelInfoType]: Handler } = {
+const EVAL_HANDLERS: { [k in PanelInfoType]: EvalHandler } = {
   filagg: evalFilterAggregate,
   file: evalFile,
   http: evalHTTP,
@@ -53,8 +52,8 @@ export const evalHandler = {
     let panelPage = 0;
     let panel: PanelInfo;
     for (; !panel && panelPage < (project.pages || []).length; panelPage++) {
-      for (const p of page.panels || []) {
-        if (p.id === body.panelId) {
+      for (const p of project.pages[panelPage].panels || []) {
+        if (p.id === body.panel.id) {
           panel = p;
           break;
         }
@@ -74,7 +73,6 @@ export const evalHandler = {
       project,
       panel,
       { indexIdMap, indexShapeMap },
-      dispatch
     );
 
     // TODO: is it a problem panels like Program skip this escaping?
@@ -84,7 +82,7 @@ export const evalHandler = {
 
     if (!res.skipWrite) {
       const projectResultsFile = getProjectResultsFile(projectId);
-      await fs.writeFile(projectResultsFile + panelId, json);
+      await fs.writeFile(projectResultsFile + panel.id, json);
     }
 
     return {

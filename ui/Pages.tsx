@@ -2,11 +2,11 @@ import * as React from 'react';
 import { EVAL_ERRORS } from '../shared/errors';
 import { wait } from '../shared/promise';
 import { PanelResultMeta, ProjectPage, ProjectState } from '../shared/state';
-import { Button } from './component-library/Button';
-import { Confirm } from './component-library/Confirm';
-import { Input } from './component-library/Input';
+import { Button } from './components/Button';
+import { Confirm } from './components/Confirm';
+import { Input } from './components/Input';
 import { PanelPlayWarning } from './errors';
-import { PANEL_UI_DETAILS } from './panel-components';
+import { PANEL_UI_DETAILS } from './panels';
 import { Panels } from './Panels';
 
 export function Pages({

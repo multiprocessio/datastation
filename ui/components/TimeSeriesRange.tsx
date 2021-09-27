@@ -1,90 +1,46 @@
 import subMinutes from 'date-fns/subMinutes';
 import * as React from 'react';
-import { NoConnectorError } from '../../shared/errors';
+import {Shape } from 'shape';
 import {
-  ConnectorInfo,
-  TimeSeriesConnectorInfo,
-  TimeSeriesConnectorInfoType,
+  TimeSeriesRange as TimeSeriesRangeT,
   TimeSeriesFixedTimes,
-  TimeSeriesPanelInfo,
   TimeSeriesRelativeTimes,
 } from '../../shared/state';
 import { title } from '../../shared/text';
-import { panelRPC } from '../asyncRPC';
-import { CodeEditor } from '../component-library/CodeEditor';
-import { Datetime } from '../component-library/Datetime';
-import { FormGroup } from '../component-library/FormGroup';
-import { Radio } from '../component-library/Radio';
-import { Select } from '../component-library/Select';
-import { ServerPicker } from '../component-library/ServerPicker';
-import { ProjectContext } from '../ProjectStore';
-import { VENDORS, VENDOR_GROUPS } from '../tsconnectors';
-import { PanelBodyProps, PanelDetailsProps, PanelUIDetails } from './types';
+import { Datetime } from './Datetime';
+import { FormGroup } from './FormGroup';
+import { FieldPicker } from './FieldPicker';
+import { Radio } from './Radio';
+import { Select, NONE } from './Select';
 
-export async function evalTimeSeriesPanel(
-  panel: TimeSeriesPanelInfo,
-  _1: unknown,
-  _2: unknown,
-  connectors: Array<ConnectorInfo>
-) {
-  const connector = connectors.find(
-    (c) => c.id === panel.timeseries.connectorId
-  ) as TimeSeriesConnectorInfo;
-  if (!connector) {
-    throw new NoConnectorError();
-  }
-
-  return await panelRPC('eval', panel.id);
-}
-
-export function TimeSeriesPanelDetails({
-  panel,
-  updatePanel,
-}: PanelDetailsProps<TimeSeriesPanelInfo>) {
-  const { connectors, servers } = React.useContext(ProjectContext);
-
-  const vendorConnectors = connectors
-    .map((c: ConnectorInfo) => {
-      if (
-        c.type !== 'timeseries' ||
-        (c as TimeSeriesConnectorInfo).timeseries.type !== panel.timeseries.type
-      ) {
-        return null;
-      }
-
-      return c;
-    })
-    .filter(Boolean);
-
-  React.useEffect(() => {
-    if (!vendorConnectors.length && panel.timeseries.connectorId) {
-      panel.timeseries.connectorId = '';
-    }
-  });
-
+export function TimeSeriesRange({
+  range,
+  shape,
+  updateRange,
+}: {
+  range: TimeSeriesRangeT;
+  shape?: Shape;
+  updateRange: (r: TimeSeriesRangeT) => void;
+}) {
   const setTab = (value: string) => {
     switch (value) {
       case 'relative':
-        panel.timeseries.range = {
+        return updateRange({
           rangeType: value,
           relative: 'last-hour',
-        };
-        break;
+        });
       case 'fixed':
-        panel.timeseries.range = {
+        return updateRange({
           rangeType: value,
           fixed: 'this-hour',
-        };
-        break;
+        });
       case 'absolute':
-        panel.timeseries.range = {
+        return updateRange({
           rangeType: value,
           begin: subMinutes(new Date(), 15),
           end: new Date(),
-        };
-        break;
+        });
     }
-    updatePanel(panel);
   };
 
   const relativeOptions: Array<{
@@ -152,63 +108,28 @@ export function TimeSeriesPanelDetails({
     },
   ];
 
-  const { range } = panel.timeseries;
-
   return (
-    <React.Fragment>
+    <FormGroup label="Time Range">
       <div className="form-row">
-        <Select
-          label="Vendor"
-          value={panel.timeseries.type}
+        <FieldPicker
+          label="Timestamp Field"
+          value={range.field}
+          shape={shape}
+          allowNone="None"
           onChange={(value: string) => {
-            panel.timeseries.type = value as TimeSeriesConnectorInfoType;
-            updatePanel(panel);
+            if (range.field === NONE) {
+              range.field = '';
+            } else {
+              range.field = value;
+            }
+            updateRange(range);
           }}
-        >
-          {VENDOR_GROUPS.map((group) => (
-            <optgroup
-              label={group.label}
-              key={group.label}
-              children={group.vendors.map((v) => {
-                const { name } = VENDORS[v];
-                return <option value={v}>{name}</option>;
-              })}
-            />
-          ))}
-        </Select>
+        />
       </div>
-      <div className="form-row">
-        {vendorConnectors.length === 0 ? (
-          <small>No connectors have been created for this vendor yet.</small>
-        ) : (
-          <Select
-            label="Connector"
-            value={panel.timeseries.connectorId}
-            onChange={(connectorId: string) => {
-              panel.timeseries.connectorId = connectorId;
-              updatePanel(panel);
-            }}
-          >
-            {vendorConnectors.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </Select>
-        )}
-      </div>
-      <ServerPicker
-        servers={servers}
-        serverId={panel.serverId}
-        onChange={(serverId: string) => {
-          panel.serverId = serverId;
-          updatePanel(panel);
-        }}
-      />
-      <FormGroup label="Time Range">
         <div className="flex">
           <div className="form-row">
             <Radio
+            disabled={Boolean(range.field)}
               vertical
               name="range-type"
               value={range.rangeType}
@@ -230,7 +151,7 @@ export function TimeSeriesPanelDetails({
                     value={range.end}
                     onChange={(v) => {
                       range.begin = v;
-                      updatePanel(panel);
+                      updateRange(range);
                     }}
                   />
                 </div>
@@ -240,7 +161,7 @@ export function TimeSeriesPanelDetails({
                     value={range.end}
                     onChange={(v) => {
                       range.end = v;
-                      updatePanel(panel);
+                      updateRange(range);
                     }}
                   />
                 </div>
@@ -252,7 +173,7 @@ export function TimeSeriesPanelDetails({
                   value={range.relative}
                   onChange={(id) => {
                     range.relative = id as TimeSeriesRelativeTimes;
-                    updatePanel(panel);
+                    updateRange(range);
                   }}
                   children={relativeOptions.map((group) => (
                     <optgroup label={group.label} key={group.label}>
@@ -272,7 +193,7 @@ export function TimeSeriesPanelDetails({
                 <Select
                   onChange={(id) => {
                     range.fixed = id as TimeSeriesFixedTimes;
-                    updatePanel(panel);
+                    updateRange(range);
                   }}
                   value={range.fixed}
                   children={fixedOptions.map((group) => (
@@ -290,41 +211,5 @@ export function TimeSeriesPanelDetails({
           </div>
         </div>
       </FormGroup>
-    </React.Fragment>
   );
 }
-
-export function TimeSeriesPanelBody({
-  updatePanel,
-  panel,
-  keyboardShortcuts,
-}: PanelBodyProps<TimeSeriesPanelInfo>) {
-  return (
-    <CodeEditor
-      id={panel.id}
-      onKeyDown={keyboardShortcuts}
-      value={panel.content}
-      onChange={(value: string) => {
-        panel.content = value;
-        updatePanel(panel);
-      }}
-      language=""
-      className="editor"
-    />
-  );
-}
-
-export const timeseriesPanel: PanelUIDetails<TimeSeriesPanelInfo> = {
-  icon: 'events',
-  eval: evalTimeSeriesPanel,
-  id: 'timeseries',
-  label: 'Time Series',
-  details: TimeSeriesPanelDetails,
-  body: TimeSeriesPanelBody,
-  alwaysOpen: false,
-  previewable: true,
-  factory: () => new TimeSeriesPanelInfo(),
-  info: null,
-  hasStdout: false,
-  killable: false,
-};

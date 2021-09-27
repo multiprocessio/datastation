@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { ServerInfo, SQLConnectorInfo } from '../../shared/state';
-import { FileInput } from '../component-library/FileInput';
-import { ServerPicker } from '../component-library/ServerPicker';
+import { FileInput } from '../components/FileInput';
+import { ServerPicker } from '../components/ServerPicker';
 
 export function SQLiteDetails({
   connector,

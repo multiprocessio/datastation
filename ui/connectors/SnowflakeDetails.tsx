@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { SQLConnectorInfo } from '../../shared/state';
-import { Input } from '../component-library/Input';
+import { Input } from '../components/Input';
 import { Database } from './Database';
 import { Password } from './Password';
 import { Username } from './Username';

@@ -1,8 +1,7 @@
 import fs from 'fs/promises';
 import Client from 'ssh2-sftp-client';
-import { FilePanelInfo } from '../../shared/state';
+import { FilePanelInfo, PanelInfo, ProjectState } from '../../shared/state';
 import { parseArrayBuffer } from '../../shared/text';
-import { Dispatch } from '../rpc';
 import { additionalParsers } from './http';
 import { getSSHConfig, resolvePath } from './tunnel';
 import { EvalHandlerExtra, EvalHandlerResponse, guardPanel } from './types';
@@ -10,12 +9,9 @@ import { EvalHandlerExtra, EvalHandlerResponse, guardPanel } from './types';
 export async function evalFile(
   project: ProjectState,
   panel: PanelInfo,
-  extra: EvalHandlerExtra,
-  dispatch: Dispatch
 ): Promise<EvalHandlerResponse> {
   const {
     file: { contentTypeInfo, name },
-    id,
     serverId,
   } = guardPanel<FilePanelInfo>(panel, 'file');
   const typeInfo = { ...contentTypeInfo, additionalParsers };

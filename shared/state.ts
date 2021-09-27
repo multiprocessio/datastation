@@ -96,7 +96,7 @@ export class ServerInfo {
   }
 }
 
-export type ConnectorInfoType = 'sql' | 'http' | 'timeseries';
+export type ConnectorInfoType = 'database' | 'http';
 
 export class ConnectorInfo {
   name: string;
@@ -106,7 +106,7 @@ export class ConnectorInfo {
 
   constructor(type?: ConnectorInfoType, name?: string, serverId?: string) {
     this.name = name || 'Untitled Connector';
-    this.type = type || 'sql';
+    this.type = type || 'database';
     this.serverId = serverId;
     this.id = uuid.v4();
   }
@@ -116,12 +116,10 @@ export class ConnectorInfo {
     const ci = mergeDeep(new ConnectorInfo(), raw);
 
     switch (raw.type) {
-      case 'sql':
-        return mergeDeep(new SQLConnectorInfo(), ci);
+      case 'database':
+        return mergeDeep(new DatabaseConnectorInfo(), ci);
       case 'http':
         return mergeDeep(new HTTPConnectorInfo(), ci);
-      case 'timeseries':
-        return mergeDeep(new TimeSeriesConnectorInfo(), ci);
     }
     return ci;
   }
@@ -179,50 +177,21 @@ export type TimeSeriesConnectorInfoType =
   | 'prometheus'
   | 'influx';
 
-export class TimeSeriesConnectorInfo extends ConnectorInfo {
-  timeseries: {
-    type: TimeSeriesConnectorInfoType;
-    database: string;
-    username: string;
-    password: Encrypt;
-    address: string;
-    extra: Record<string, string>;
-  };
-
-  constructor(
-    name?: string,
-    type?: TimeSeriesConnectorInfoType,
-    database?: string,
-    username?: string,
-    password?: Encrypt,
-    address?: string
-  ) {
-    super('timeseries', name);
-    this.timeseries = {
-      type: type || 'elasticsearch',
-      database: database || '',
-      username: username || '',
-      password: password || new Encrypt(''),
-      address: address || '',
-      extra: {},
-    };
-  }
-}
-
-export type SQLConnectorInfoType =
+export type DatabaseConnectorInfoType =
   | 'postgres'
-  | 'mysql'
+  | 'mydatabase'
   | 'sqlite'
   | 'oracle'
-  | 'sqlserver'
+  | 'databaseserver'
   | 'presto'
   | 'clickhouse'
   | 'snowflake'
-  | 'cassandra';
+  | 'cassandra'
+  | TimeSeriesConnectorInfoType;
 
-export class SQLConnectorInfo extends ConnectorInfo {
-  sql: {
-    type: SQLConnectorInfoType;
+export class DatabaseConnectorInfo extends ConnectorInfo {
+  database: {
+    type: DatabaseConnectorInfoType;
     database: string;
     username: string;
     password: Encrypt;
@@ -233,14 +202,14 @@ export class SQLConnectorInfo extends ConnectorInfo {
 
   constructor(
     name?: string,
-    type?: SQLConnectorInfoType,
+    type?: DatabaseConnectorInfoType,
     database?: string,
     username?: string,
     password?: Encrypt,
     address?: string
   ) {
-    super('sql', name);
-    this.sql = {
+    super('database', name);
+    this.database = {
       type: type || 'postgres',
       database: database || '',
       username: username || '',
@@ -257,10 +226,9 @@ export type PanelInfoType =
   | 'graph'
   | 'program'
   | 'literal'
-  | 'sql'
+  | 'database'
   | 'file'
-  | 'filagg'
-  | 'timeseries';
+  | 'filagg';
 
 export class PanelInfo {
   content: string;
@@ -285,8 +253,6 @@ export class PanelInfo {
     switch (pit.type) {
       case 'table':
         pit = mergeDeep(new TablePanelInfo(), pit);
-      case 'timeseries':
-        pit = mergeDeep(new TimeSeriesPanelInfo(), pit);
       case 'http':
         pit = mergeDeep(new HTTPPanelInfo(), pit);
       case 'graph':
@@ -295,8 +261,8 @@ export class PanelInfo {
         pit = mergeDeep(new ProgramPanelInfo(), pit);
       case 'literal':
         pit = mergeDeep(new LiteralPanelInfo(), pit);
-      case 'sql':
-        pit = mergeDeep(new SQLPanelInfo(), pit);
+      case 'database':
+        pit = mergeDeep(new DatabasePanelInfo(), pit);
       case 'file':
         pit = mergeDeep(new FilePanelInfo(), pit);
       case 'filagg':
@@ -389,7 +355,10 @@ export type TimeSeriesFixedTimes =
   | 'previous-year';
 
 export type TimeSeriesRange =
-  | {
+  {
+    field: string;
+  } &
+  ({
       rangeType: 'absolute';
       begin: Date;
       end: Date;
@@ -401,50 +370,30 @@ export type TimeSeriesRange =
   | {
       rangeType: 'fixed';
       fixed: TimeSeriesFixedTimes;
-    };
+    });
 
-export class TimeSeriesPanelInfo extends PanelInfo {
-  timeseries: {
-    type: TimeSeriesConnectorInfoType;
+export class DatabasePanelInfo extends PanelInfo {
+  database: {
+    type: DatabaseConnectorInfoType;
     connectorId?: string;
-    range: TimeSeriesRange;
   };
 
   constructor(
     name?: string,
-    type?: TimeSeriesConnectorInfoType,
+    type?: DatabaseConnectorInfoType,
     connectorId?: string,
     range?: TimeSeriesRange,
     content?: string
   ) {
-    super('timeseries', name, content);
-    this.timeseries = {
-      type: type || 'elasticsearch',
+    super('database', name, content);
+    this.database = {
+      type: type || 'postgres',
       connectorId,
       range: range || {
+        field: '',
         rangeType: 'relative',
         relative: 'last-hour',
       },
-    };
-  }
-}
-
-export class SQLPanelInfo extends PanelInfo {
-  sql: {
-    type: SQLConnectorInfoType;
-    connectorId?: string;
-  };
-
-  constructor(
-    name?: string,
-    type?: SQLConnectorInfoType,
-    connectorId?: string,
-    content?: string
-  ) {
-    super('sql', name, content);
-    this.sql = {
-      type: type || 'postgres',
-      connectorId,
     };
   }
 }

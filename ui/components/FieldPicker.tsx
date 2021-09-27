@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { ArrayShape, ObjectShape, ScalarShape, Shape } from 'shape';
-import { PanelResult } from '../../shared/state';
 import { title } from '../../shared/text';
 import { Button } from './Button';
 import { Input } from './Input';
@@ -91,21 +90,20 @@ function renderOptions(group: FieldGroup, grouped: boolean) {
   return options;
 }
 
-function wellFormedGraphInput(panelSourceResult: PanelResult) {
+function wellFormedGraphInput(shape: Shape) {
   return (
-    panelSourceResult &&
-    panelSourceResult.shape &&
-    panelSourceResult.shape.kind === 'array' &&
-    (panelSourceResult.shape as ArrayShape).children.kind === 'object'
+    shape &&
+    shape.kind === 'array' &&
+    (shape as ArrayShape).children.kind === 'object'
   );
 }
 
-export function unusedFields(data: PanelResult, ...fields: Array<string>) {
-  if (!wellFormedGraphInput(data)) {
+export function unusedFields(shape: Shape, ...fields: Array<string>) {
+  if (!wellFormedGraphInput(shape)) {
     return 0;
   }
 
-  const os = (data.shape as ArrayShape).children as ObjectShape;
+  const os = (shape as ArrayShape).children as ObjectShape;
   return Object.keys(os.children).filter((field) => {
     return !fields.includes(field);
   }).length;
@@ -115,22 +113,24 @@ export function FieldPicker({
   onChange,
   label,
   value,
-  panelSourceResult,
+  shape,
   labelValue,
   labelOnChange,
   onDelete,
   preferredDefaultType,
   used,
+  allowNone,
 }: {
   onChange: (v: string) => void;
   label: string;
   value: string;
-  panelSourceResult: PanelResult;
+  shape?: Shape;
   labelValue?: string;
   labelOnChange?: (v: string) => void;
   onDelete?: () => void;
   preferredDefaultType?: 'number' | 'string';
   used?: Array<string>;
+  allowNone?: string;
 }) {
   // Default the label to the field name
   const [labelModified, setLabelModified] = React.useState(false);
@@ -151,20 +151,20 @@ export function FieldPicker({
   };
 
   let fieldPicker = null;
-  if (wellFormedGraphInput(panelSourceResult)) {
+  if (wellFormedGraphInput(shape)) {
     const fieldGroups = orderedObjectFields(
-      (panelSourceResult.shape as ArrayShape).children as ObjectShape,
+      (shape as ArrayShape).children as ObjectShape,
       preferredDefaultType
     );
     fieldPicker = (
-      <Select label={label} value={value} onChange={onChange} used={used}>
+      <Select label={label} value={value} onChange={onChange} used={used} allowNone={allowNone}>
         {fieldGroups.length === 1
           ? renderOptions(fieldGroups[0], false)
           : fieldGroups.map((fg) => renderOptions(fg, true))}
       </Select>
     );
   } else {
-    fieldPicker = <Input label={label} value={value} onChange={onChange} />;
+    fieldPicker = <Input placeholder={allowNone} label={label} value={value} onChange={onChange} />;
   }
 
   if (!labelOnChange) {

@@ -5,10 +5,10 @@ import { MODE } from '../../shared/constants';
 import { FilePanelInfo, PanelResult } from '../../shared/state';
 import { parseArrayBuffer } from '../../shared/text';
 import { panelRPC } from '../asyncRPC';
-import { ContentTypePicker } from '../component-library/ContentTypePicker';
-import { FileInput } from '../component-library/FileInput';
-import { FormGroup } from '../component-library/FormGroup';
-import { ServerPicker } from '../component-library/ServerPicker';
+import { ContentTypePicker } from '../components/ContentTypePicker';
+import { FileInput } from '../components/FileInput';
+import { FormGroup } from '../components/FormGroup';
+import { ServerPicker } from '../components/ServerPicker';
 import { ProjectContext } from '../ProjectStore';
 import { PanelDetailsProps, PanelUIDetails } from './types';
 

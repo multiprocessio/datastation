@@ -1,8 +1,7 @@
 import fetch from 'node-fetch';
 import { URL } from 'url';
 import { request } from '../../shared/http';
-import { HTTPPanelInfo } from '../../shared/state';
-import { Dispatch } from '../rpc';
+import { ProjectState, HTTPPanelInfo, PanelInfo } from '../../shared/state';
 import { parseParquet } from './parquet';
 import { tunnel } from './tunnel';
 import { EvalHandlerExtra, EvalHandlerResponse, guardPanel } from './types';
@@ -14,8 +13,6 @@ export const additionalParsers = {
 export async function evalHTTP(
   project: ProjectState,
   panel: PanelInfo,
-  extra: EvalHandlerExtra,
-  dispatch: Dispatch
 ): Promise<EvalHandlerResponse> {
   const hci = guardPanel<HTTPPanelInfo>(panel, 'http');
 
@@ -39,7 +36,7 @@ export async function evalHTTP(
         tunnelledUrl.toString(),
         { ...hci.http.http.contentTypeInfo, additionalParsers },
         hci.http.http.headers,
-        body
+        hci.content
       );
     }
   );

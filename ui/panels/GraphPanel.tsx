@@ -6,11 +6,11 @@ import {
   GraphPanelInfoType,
   PanelResult,
 } from '../../shared/state';
-import { Button } from '../component-library/Button';
-import { FieldPicker, unusedFields } from '../component-library/FieldPicker';
-import { FormGroup } from '../component-library/FormGroup';
-import { PanelSourcePicker } from '../component-library/PanelSourcePicker';
-import { Select } from '../component-library/Select';
+import { Button } from '../components/Button';
+import { FieldPicker, unusedFields } from '../components/FieldPicker';
+import { FormGroup } from '../components/FormGroup';
+import { PanelSourcePicker } from '../components/PanelSourcePicker';
+import { Select } from '../components/Select';
 import { evalColumnPanel } from './TablePanel';
 import { PanelBodyProps, PanelDetailsProps, PanelUIDetails } from './types';
 

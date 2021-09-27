@@ -5,7 +5,7 @@ import {
   ProgramPanelInfo,
   ProjectPage,
 } from '../shared/state';
-import { Button } from './component-library/Button';
+import { Button } from './components/Button';
 import { Panel } from './Panel';
 
 export function Panels({

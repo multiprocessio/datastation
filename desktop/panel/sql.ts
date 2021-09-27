@@ -24,11 +24,11 @@ import {
 } from '../../shared/errors';
 import log from '../../shared/log';
 import {
+  PanelInfo,
   ProjectState,
   SQLConnectorInfo,
   SQLPanelInfo,
 } from '../../shared/state';
-import { Dispatch } from '../rpc';
 import { decrypt } from '../secret';
 import { getProjectResultsFile } from '../store';
 import { getSSHConfig, tunnel } from './tunnel';
@@ -364,7 +364,6 @@ async function evalSQLite(
   connector: SQLConnectorInfo,
   project: ProjectState,
   panelsToImport: Array<PanelToImport>,
-  dispatch: Dispatch
 ) {
   let sqlitefile = connector.sql.database;
 
@@ -429,7 +428,6 @@ export async function evalSQL(
   project: ProjectState,
   panel: PanelInfo,
   extra: EvalHandlerExtra,
-  dispatch: Dispatch
 ): Promise<EvalHandlerResponse> {
   const { content } = panel;
   const info = guardPanel<SQLPanelInfo>(panel, 'sql');
@@ -457,7 +455,6 @@ export async function evalSQL(
       connector,
       project,
       panelsToImport,
-      dispatch
     );
   }
 

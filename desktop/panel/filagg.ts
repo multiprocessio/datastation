@@ -7,14 +7,13 @@ import {
   SQLConnectorInfo,
   SQLPanelInfo,
 } from '../../shared/state';
-import { Dispatch } from '../rpc';
-import { EvalHandlerExtra } from './types';
+import { evalSQL } from './sql';
+import { EvalHandlerExtra, guardPanel } from './types';
 
 export async function evalFilterAggregate(
   project: ProjectState,
   panel: PanelInfo,
   extra: EvalHandlerExtra,
-  dispatch: Dispatch
 ) {
   const {
     panelSource,
@@ -54,7 +53,7 @@ export async function evalFilterAggregate(
       project.connectors = [];
     }
     project.connectors.push(metaConnector);
-    return await evalSQL(project, metaPanel, extra, dispatch);
+    return await evalSQL(project, metaPanel, extra);
   } finally {
     try {
       await tmp.cleanup();

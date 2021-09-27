@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { ConnectorInfo, ProjectState, SQLConnectorInfo } from '../shared/state';
-import { Button } from './component-library/Button';
+import { Button } from './components/Button';
 import { Connector } from './Connector';
 
 export function Connectors({

@@ -1,11 +1,11 @@
 import * as React from 'react';
 import { MODE } from '../shared/constants';
 import { ServerInfo, ServerInfoType } from '../shared/state';
-import { Button } from './component-library/Button';
-import { Confirm } from './component-library/Confirm';
-import { FileInput } from './component-library/FileInput';
-import { Input } from './component-library/Input';
-import { Select } from './component-library/Select';
+import { Button } from './components/Button';
+import { Confirm } from './components/Confirm';
+import { FileInput } from './components/FileInput';
+import { Input } from './components/Input';
+import { Select } from './components/Select';
 
 export function Server({
   server,

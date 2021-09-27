@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { ProjectState, ServerInfo } from '../shared/state';
-import { Button } from './component-library/Button';
+import { Button } from './components/Button';
 import { Server } from './Server';
 
 export function Servers({

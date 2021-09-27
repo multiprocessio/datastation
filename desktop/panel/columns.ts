@@ -1,32 +1,37 @@
 import fs from 'fs/promises';
-import { LiteralPanelInfo } from '../../shared/state';
+import {
+  GraphPanelInfo,
+  LiteralPanelInfo,
+  PanelInfo,
+  ProjectState,
+  TablePanelInfo,
+} from '../../shared/state';
 import { columnsFromObject } from '../../shared/table';
 import { parseArrayBuffer } from '../../shared/text';
 import { getProjectResultsFile } from '../store';
-import { additionalParsers } from './http';
-import { EvalHandlerExtra, EvalHandlerResponse, guardPanel } from './types';
+import { EvalHandlerResponse, guardPanel } from './types';
 
 export async function evalColumns(
   project: ProjectState,
-  panel: PanelInfo,
-  extra: EvalHandlerExtra,
-  dispatch: Dispatch
+  panel: PanelInfo
 ): Promise<EvalHandlerResponse> {
   let columns: Array<string>;
   let panelSource: number;
   if (panel.type === 'graph') {
-    columns = [panel.graph.x.field, ...panel.graph.ys.map((y) => y.field)];
-    panelSource = panel.graph.panelSource;
+    const gp = panel as GraphPanelInfo;
+    columns = [gp.graph.x, ...gp.graph.ys.map((y) => y.field)];
+    panelSource = gp.graph.panelSource;
   } else if (panel.type === 'table') {
-    columns = panel.table.columns.map((c) => c.field);
-    panelSource = panel.table.panelSource;
+    const tp = panel as TablePanelInfo;
+    columns = tp.table.columns.map((c) => c.field);
+    panelSource = tp.table.panelSource;
   } else {
     // Let guardPanel throw a nice error.
-    guardPanel<void>(panel, 'graph');
+    guardPanel<GraphPanelInfo>(panel, 'graph');
   }
 
   const projectResultsFile = getProjectResultsFile(project.id);
-  const f = await fs.readFile(projectResultsFile + id);
+  const f = await fs.readFile(projectResultsFile + panel.id);
   const value = JSON.parse(f.toString());
 
   const valueWithRequestedColumns = columnsFromObject(
@@ -41,30 +46,23 @@ export async function evalColumns(
   };
 }
 
-export function evalLiteral(
+export async function evalLiteral(
   project: ProjectState,
-  panel: PanelInfo,
-  extra: EvalHandlerExtra,
-  dispatch: Dispatch
+  panel: PanelInfo
 ): Promise<EvalHandlerResponse> {
   const {
     literal: { contentTypeInfo },
   } = guardPanel<LiteralPanelInfo>(panel, 'literal');
-  // This should get written to disk by rpcEvalHandler
-  // Who handles setting content-type and whatnot here, actually parsing it?
-  const typeInfo = { ...contentTypeInfo, additionalParsers };
-  return await parseArrayBuffer(typeInfo, name, body);
-  return { value: panel.content };
+  return await parseArrayBuffer(contentTypeInfo, '', panel.content);
 }
 
-export function fetchResultsHandler(
+export async function fetchResultsHandler(
   project: ProjectState,
-  panel: PanelInfo,
-  extra: EvalHandlerExtra,
-  dispatch: Dispatch
+  panel: PanelInfo
 ): Promise<EvalHandlerResponse> {
   const projectResultsFile = getProjectResultsFile(project.id);
   const f = await fs.readFile(projectResultsFile + panel.id);
-  const value = await parseArrayBuffer(panel.resultMeta.contentType, '', f);
-  return { value };
+  return await parseArrayBuffer({
+    type: panel.resultMeta.contentType,
+  }, '', f);
 }

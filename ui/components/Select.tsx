@@ -20,6 +20,8 @@ function getOptionValues(children: React.ReactNode): Array<string> {
     .flat();
 }
 
+export const NONE = '----none----';
+
 export function Select({
   value,
   onChange,
@@ -28,6 +30,7 @@ export function Select({
   label,
   className,
   used,
+  allowNone,
 }: {
   value: string;
   onChange: (value: string) => void;
@@ -36,6 +39,7 @@ export function Select({
   label?: string;
   className?: string;
   used?: Array<string>;
+  allowNone?: string;
 }) {
   let selectClass = 'select';
   if (className) {
@@ -43,17 +47,22 @@ export function Select({
   }
 
   React.useEffect(() => {
-    const values = getOptionValues(children);
+    const values = [allowNone ? NONE : null, ...getOptionValues(children)].filter(Boolean);
     if (values.length && !values.includes(value)) {
       let foundUnused = false;
       for (let value of values) {
-        if (used && used.includes(value)) {
+        if ((used && used.includes(value)) || allowNone) {
           continue;
         }
 
         foundUnused = true;
         onChange(value);
         break;
+      }
+
+      if (allowNone) {
+        onChange(NONE);
+        return;
       }
 
       if (!foundUnused) {
@@ -70,8 +79,10 @@ export function Select({
         onChange(e.target.value)
       }
       disabled={disabled}
-      children={children}
-    />
+    >
+    {allowNone ? <option value={NONE}>{allowNone}</option> : null}
+    {children}
+    </select>
   );
   if (label) {
     return (

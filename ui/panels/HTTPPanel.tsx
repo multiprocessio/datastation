@@ -9,12 +9,12 @@ import {
   HTTPPanelInfo,
 } from '../../shared/state';
 import { panelRPC } from '../asyncRPC';
-import { Button } from '../component-library/Button';
-import { ContentTypePicker } from '../component-library/ContentTypePicker';
-import { FormGroup } from '../component-library/FormGroup';
-import { Input } from '../component-library/Input';
-import { Select } from '../component-library/Select';
-import { ServerPicker } from '../component-library/ServerPicker';
+import { Button } from '../components/Button';
+import { ContentTypePicker } from '../components/ContentTypePicker';
+import { FormGroup } from '../components/FormGroup';
+import { Input } from '../components/Input';
+import { Select } from '../components/Select';
+import { ServerPicker } from '../components/ServerPicker';
 import { ProjectContext } from '../ProjectStore';
 import { PanelDetailsProps, PanelUIDetails } from './types';
 

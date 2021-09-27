@@ -5,8 +5,8 @@ import { MODE } from '../../shared/constants';
 import { ContentTypeInfo, LiteralPanelInfo } from '../../shared/state';
 import { parseArrayBuffer } from '../../shared/text';
 import { panelRPC } from '../asyncRPC';
-import { CodeEditor } from '../component-library/CodeEditor';
-import { ContentTypePicker } from '../component-library/ContentTypePicker';
+import { CodeEditor } from '../components/CodeEditor';
+import { ContentTypePicker } from '../components/ContentTypePicker';
 import { PanelBodyProps, PanelDetailsProps, PanelUIDetails } from './types';
 
 export async function evalLiteralPanel(panel: LiteralPanelInfo) {

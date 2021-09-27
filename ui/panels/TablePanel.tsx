@@ -6,11 +6,11 @@ import { InvalidDependentPanelError } from '../../shared/errors';
 import { PanelResult, TableColumn, TablePanelInfo } from '../../shared/state';
 import { columnsFromObject } from '../../shared/table';
 import { panelRPC } from '../asyncRPC';
-import { Alert } from '../component-library/Alert';
-import { Button } from '../component-library/Button';
-import { FieldPicker, unusedFields } from '../component-library/FieldPicker';
-import { FormGroup } from '../component-library/FormGroup';
-import { PanelSourcePicker } from '../component-library/PanelSourcePicker';
+import { Alert } from '../components/Alert';
+import { Button } from '../components/Button';
+import { FieldPicker, unusedFields } from '../components/FieldPicker';
+import { FormGroup } from '../components/FormGroup';
+import { PanelSourcePicker } from '../components/PanelSourcePicker';
 import { PanelBodyProps, PanelDetailsProps, PanelUIDetails } from './types';
 
 export async function evalColumnPanel(

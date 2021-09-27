@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Button } from './component-library/Button';
+import { Button } from './components/Button';
 
 export function Sidebar({ children }: { children: React.ReactNode }) {
   const [expanded, setExpanded] = React.useState(true);
