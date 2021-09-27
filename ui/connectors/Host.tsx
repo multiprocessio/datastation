@@ -13,9 +13,9 @@ export function Host({
     <div className="form-row">
       <Input
         label="Host"
-        value={connector.sql.address}
+        value={connector.database.address}
         onChange={(value: string) => {
-          connector.sql.address = value;
+          connector.database.address = value;
           updateConnector(connector);
         }}
       />

@@ -16,7 +16,6 @@ import { evalFilterAggregate } from './filagg';
 import { evalFile } from './file';
 import { evalHTTP } from './http';
 import { evalProgram } from './program';
-import { evalSQL } from './sql';
 import { EvalHandlerExtra, EvalHandlerResponse } from './types';
 
 type EvalHandler = (
@@ -30,7 +29,7 @@ const EVAL_HANDLERS: { [k in PanelInfoType]: EvalHandler } = {
   file: evalFile,
   http: evalHTTP,
   program: evalProgram,
-  sql: evalSQL,
+  database: evaldatabase,
   table: evalColumns,
   graph: evalColumns,
   literal: evalLiteral,

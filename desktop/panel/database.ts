@@ -24,10 +24,10 @@ import {
 } from '../../shared/errors';
 import log from '../../shared/log';
 import {
+  DatabaseConnectorInfo,
+  DatabasePanelInfo,
   PanelInfo,
   ProjectState,
-  SQLConnectorInfo,
-  SQLPanelInfo,
 } from '../../shared/state';
 import { decrypt } from '../secret';
 import { getProjectResultsFile } from '../store';
@@ -115,12 +115,12 @@ async function evalPostgreSQL(
   content: string,
   host: string,
   port: number,
-  { sql }: SQLConnectorInfo
+  { database }: DatabaseConnectorInfo
 ) {
   const client = new PostgresClient({
-    user: sql.username,
-    password: sql.password.value,
-    database: sql.database,
+    user: database.username,
+    password: database.password.value,
+    database: database.database,
     host,
     port,
   });
@@ -139,12 +139,12 @@ async function evalSQLServer(
   content: string,
   host: string,
   port: number,
-  { sql }: SQLConnectorInfo
+  { database }: DatabaseConnectorInfo
 ) {
   const client = await sqlserver.connect({
-    user: sql.username,
-    password: sql.password.value,
-    database: sql.database,
+    user: database.username,
+    password: database.password.value,
+    database: database.database,
     pool: {
       max: 10,
       min: 0,
@@ -169,14 +169,14 @@ async function evalOracle(
   content: string,
   host: string,
   port: number,
-  { sql }: SQLConnectorInfo
+  { database }: DatabaseConnectorInfo
 ) {
   const oracledb = require('oracledb');
   oracledb.outFormat = oracledb.OBJECT;
   const client = await oracledb.getConnection({
-    user: sql.username,
-    password: sql.password.value,
-    connectString: `${host}:${port}/${sql.database}`,
+    user: database.username,
+    password: database.password.value,
+    connectString: `${host}:${port}/${database.database}`,
   });
 
   while (content.endsWith(';')) {
@@ -195,13 +195,13 @@ async function evalMySQL(
   content: string,
   host: string,
   port: number,
-  { sql }: SQLConnectorInfo
+  { database }: DatabaseConnectorInfo
 ) {
   const connection = await mysql.createConnection({
     host: host,
-    user: sql.username,
-    password: sql.password.value,
-    database: sql.database,
+    user: database.username,
+    password: database.password.value,
+    database: database.database,
     port: port,
   });
 
@@ -217,7 +217,7 @@ async function evalClickHouse(
   content: string,
   host: string,
   port: number,
-  { sql }: SQLConnectorInfo
+  { database }: DatabaseConnectorInfo
 ) {
   let protocol = 'http:';
   if (host.startsWith('http://')) {
@@ -232,14 +232,14 @@ async function evalClickHouse(
     port,
     protocol,
     dataObjects: true,
-    basicAuth: sql.username
+    basicAuth: database.username
       ? {
-          username: sql.username,
-          password: sql.password.value,
+          username: database.username,
+          password: database.password.value,
         }
       : null,
     config: {
-      database: sql.database,
+      database: database.database,
     },
   });
 
@@ -247,16 +247,19 @@ async function evalClickHouse(
   return { value: rows };
 }
 
-async function evalSnowflake(content: string, { sql }: SQLConnectorInfo) {
+async function evalSnowflake(
+  content: string,
+  { database }: DatabaseConnectorInfo
+) {
   // Bundling this in creates issues with openid-connect
   // https://github.com/sindresorhus/got/issues/1018
   // So import it dynamically.
   const snowflake = require('snowflake-sdk');
   const connection = snowflake.createConnection({
-    account: sql.extra.account,
-    database: sql.database,
-    username: sql.username,
-    password: sql.password.value,
+    account: database.extra.account,
+    database: database.database,
+    username: database.username,
+    password: database.password.value,
   });
 
   const conn: any = await new Promise((resolve, reject) => {
@@ -314,7 +317,7 @@ export function formatSQLiteImportQueryAndRows(
 async function sqliteImportAndRun(
   db: sqlite.Database,
   projectId: string,
-  panel: SQLPanelInfo,
+  panel: DatabasePanelInfo,
   query: string,
   panelsToImport: Array<PanelToImport>
 ) {
@@ -360,8 +363,8 @@ async function sqliteImportAndRun(
 
 async function evalSQLite(
   query: string,
-  info: SQLPanelInfo,
-  connector: SQLConnectorInfo,
+  info: DatabasePanelInfo,
+  connector: DatabaseConnectorInfo,
   project: ProjectState,
   panelsToImport: Array<PanelToImport>
 ) {
@@ -416,7 +419,7 @@ const DEFAULT_PORT = {
   postgres: 5432,
   mysql: 3306,
   sqlite: 0,
-  sqlserver: 1433,
+  sqlerver: 1433,
   oracle: 1521,
   clickhouse: 8123,
   cassandra: 9160,
@@ -430,7 +433,7 @@ export async function evalSQL(
   extra: EvalHandlerExtra
 ): Promise<EvalHandlerResponse> {
   const { content } = panel;
-  const info = guardPanel<SQLPanelInfo>(panel, 'sql');
+  const info = guardPanel<DatabasePanelInfo>(panel, 'database');
 
   const { query, panelsToImport } = transformDM_getPanelCalls(
     content,
@@ -439,15 +442,15 @@ export async function evalSQL(
   );
 
   const connectors = (project.connectors || []).filter(
-    (c) => c.id === info.sql.connectorId
+    (c) => c.id === info.database.connectorId
   );
   if (!connectors.length) {
-    throw new Error(`No such connector: ${info.sql.connectorId}.`);
+    throw new Error(`No such connector: ${info.database.connectorId}.`);
   }
-  const connector = connectors[0] as SQLConnectorInfo;
+  const connector = connectors[0] as DatabaseConnectorInfo;
 
   // SQLite is file, not network based so handle separately.
-  if (info.sql.type === 'sqlite') {
+  if (info.database.type === 'sqlite') {
     return await evalSQLite(
       query,
       info,
@@ -464,26 +467,28 @@ export async function evalSQL(
     );
   }
 
-  if (connector.sql.password.encrypted) {
-    if (!connector.sql.password.value) {
-      connector.sql.password.value = undefined;
-      connector.sql.password.encrypted = true;
+  if (connector.database.password.encrypted) {
+    if (!connector.database.password.value) {
+      connector.database.password.value = undefined;
+      connector.database.password.encrypted = true;
     }
-    connector.sql.password.value = await decrypt(connector.sql.password.value);
-    connector.sql.password.encrypted = false;
+    connector.database.password.value = await decrypt(
+      connector.sql.password.value
+    );
+    connector.database.password.encrypted = false;
   }
 
-  if (info.sql.type === 'snowflake') {
+  if (info.database.type === 'snowflake') {
     return await evalSnowflake(content, connector);
   }
 
   // TODO: this needs to be more robust. Not all systems format ports the same way
   const port =
-    +connector.sql.address.split(':')[1] || DEFAULT_PORT[info.sql.type];
-  const host = connector.sql.address.split(':')[0];
+    +connector.database.address.split(':')[1] || DEFAULT_PORT[info.sql.type];
+  const host = connector.database.address.split(':')[0];
 
-  // The way hosts are formatted is unique so have sqlserver manage its own call to tunnel()
-  if (info.sql.type === 'sqlserver') {
+  // The way hosts are formatted is unique so have sqlerver manage its own call to tunnel()
+  if (info.database.type === 'sqlserver') {
     return await tunnel(
       project,
       info.serverId,
@@ -500,23 +505,23 @@ export async function evalSQL(
     host,
     port,
     (host: string, port: number): any => {
-      if (info.sql.type === 'postgres') {
+      if (info.database.type === 'postgres') {
         return evalPostgreSQL(content, host, port, connector);
       }
 
-      if (info.sql.type === 'oracle') {
+      if (info.database.type === 'oracle') {
         return evalOracle(content, host, port, connector);
       }
 
-      if (info.sql.type === 'mysql') {
+      if (info.database.type === 'mysql') {
         return evalMySQL(content, host, port, connector);
       }
 
-      if (info.sql.type === 'clickhouse') {
+      if (info.database.type === 'clickhouse') {
         return evalClickHouse(content, host, port, connector);
       }
 
-      throw new Error(`Unknown SQL type: ${info.sql.type}`);
+      throw new Error(`Unknown SQL type: ${info.database.type}`);
     }
   );
 }

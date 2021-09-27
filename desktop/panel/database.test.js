@@ -2,7 +2,7 @@ const { shape } = require('shape');
 const {
   formatSQLiteImportQueryAndRows,
   transformDM_getPanelCalls,
-} = require('./sql');
+} = require('./database');
 
 const panel0Data = [
   {

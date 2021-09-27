@@ -1,17 +1,17 @@
 const React = require('react');
 const enzyme = require('enzyme');
-const { SQLConnectorInfo } = require('../../shared/state');
+const { DatabaseConnectorInfo } = require('../../shared/state');
 const { wait } = require('../../shared/promise');
 const { Database } = require('./Database');
 const { INPUT_SYNC_PERIOD } = require('../component-library/Input');
 
 test('Database shows input and changes', async () => {
-  const connector = new SQLConnectorInfo();
+  const connector = new DatabaseConnectorInfo();
 
   const changeTo = 'localhost:9090';
   let changed = '';
   const updateConnector = jest.fn((conn) => {
-    changed = conn.sql.database;
+    changed = conn.database.database;
   });
   const component = enzyme.mount(
     <Database connector={connector} updateConnector={updateConnector} />

@@ -18,9 +18,9 @@ export function DatabaseConnector({
       <div className="form-row">
         <Select
           label="Vendor"
-          value={connector.sql.type}
+          value={connector.database.type}
           onChange={(value: string) => {
-            connector.sql.type = value as DatabaseConnectorInfoType;
+            connector.database.type = value as DatabaseConnectorInfoType;
             updateConnector(connector);
           }}
         >
@@ -36,7 +36,7 @@ export function DatabaseConnector({
       </div>
       {VENDORS.map((g) =>
         g.vendors.map((v) =>
-          v.id === connector.sql.type
+          v.id === connector.database.type
             ? v.details({ connector, updateConnector, servers })
             : null
         )

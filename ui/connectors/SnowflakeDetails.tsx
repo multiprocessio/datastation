@@ -14,9 +14,9 @@ export function SnowflakeDetails(props: {
     <React.Fragment>
       <Input
         label="Account ID"
-        value={connector.sql.extra.account}
+        value={connector.database.extra.account}
         onChange={(value: string) => {
-          connector.sql.extra.account = value;
+          connector.database.extra.account = value;
           updateConnector(connector);
         }}
         placeholder="qqlavcs-aa92002"

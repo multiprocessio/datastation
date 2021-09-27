@@ -1,13 +1,13 @@
 import { file as makeTmpFile } from 'tmp-promise';
 import log from '../../shared/log';
 import {
+  DatabaseConnectorInfo,
+  DatabasePanelInfo,
   FilterAggregatePanelInfo,
   PanelInfo,
   ProjectState,
-  SQLConnectorInfo,
-  SQLPanelInfo,
 } from '../../shared/state';
-import { evalSQL } from './sql';
+import { evalDatabase } from './database';
 import { EvalHandlerExtra, guardPanel } from './types';
 
 export async function evalFilterAggregate(
@@ -46,14 +46,14 @@ export async function evalFilterAggregate(
   const tmp = await makeTmpFile();
   log.info('Filagg loading into ' + tmp.path);
   try {
-    const metaPanel = new SQLPanelInfo('', 'sqlite', '', query);
-    const metaConnector = new SQLConnectorInfo('', 'sqlite', tmp.path);
+    const metaPanel = new DatabasePanelInfo('', 'sqlite', '', query);
+    const metaConnector = new DatabaseConnectorInfo('', 'sqlite', tmp.path);
     // Register connector in project
     if (!project.connectors) {
       project.connectors = [];
     }
     project.connectors.push(metaConnector);
-    return await evalSQL(project, metaPanel, extra);
+    return await evalDatabase(project, metaPanel, extra);
   } finally {
     try {
       await tmp.cleanup();

@@ -13,9 +13,9 @@ export function Username({
     <div className="form-row">
       <Input
         label="Username"
-        value={connector.sql.username}
+        value={connector.database.username}
         onChange={(value: string) => {
-          connector.sql.username = value;
+          connector.database.username = value;
           updateConnector(connector);
         }}
       />

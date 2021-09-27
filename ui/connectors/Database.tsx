@@ -15,9 +15,9 @@ export function Database({
     <div className="form-row">
       <Input
         label="Database"
-        value={connector.sql.database}
+        value={connector.database.database}
         onChange={(value: string) => {
-          connector.sql.database = value;
+          connector.database.database = value;
           updateConnector(connector);
         }}
         placeholder={placeholder}

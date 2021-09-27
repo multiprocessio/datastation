@@ -1,4 +1,4 @@
-import { SQLConnectorInfoType } from '../../shared/state';
+import { DatabaseConnectorInfoType } from '../../shared/state';
 import { ClickhouseDetails } from './ClickhouseDetails';
 import { GenericDetails } from './GenericDetails';
 import { SnowflakeDetails } from './SnowflakeDetails';
@@ -7,7 +7,7 @@ export const VENDORS: Array<{
   group: string;
   vendors: Array<{
     name: string;
-    id: SQLConnectorInfoType;
+    id: DatabaseConnectorInfoType;
     details: typeof GenericDetails;
   }>;
 }> = [
@@ -26,7 +26,7 @@ export const VENDORS: Array<{
       },
       {
         name: 'SQL Server',
-        id: 'sqlserver',
+        id: 'sqlerver',
         details: GenericDetails,
       },
       {

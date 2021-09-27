@@ -16,11 +16,11 @@ export function SQLiteDetails({
     <React.Fragment>
       <FileInput
         label="File"
-        value={connector.sql.database}
+        value={connector.database.database}
         allowManualEntry
         allowFilePicker={!connector.serverId ? true : false}
         onChange={(fileName: string) => {
-          connector.sql.database = fileName;
+          connector.database.database = fileName;
           updateConnector(connector);
         }}
       />

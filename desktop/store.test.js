@@ -8,7 +8,7 @@ const { storeHandlers, ensureProjectFile } = require('./store');
 const {
   ProjectState,
   Encrypt,
-  SQLConnectorInfo,
+  DatabaseConnectorInfo,
   ServerInfo,
 } = require('../shared/state');
 const { ensureSigningKey } = require('./secret');
@@ -36,9 +36,9 @@ test('write project with encrypted secrets, read with nulled secrets', async () 
   testServer.password = new Encrypt(testServerPassword);
   const testServerPassphrase = 'kewl';
   testServer.passphrase = new Encrypt(testServerPassphrase);
-  const testDatabase = new SQLConnectorInfo();
+  const testDatabase = new DatabaseConnectorInfo();
   const testDatabasePassword = 'kevin';
-  testDatabase.sql.password = new Encrypt(testDatabasePassword);
+  testDatabase.database.password = new Encrypt(testDatabasePassword);
   testProject.servers.push(testServer);
   testProject.connectors.push(testDatabase);
 
@@ -65,9 +65,11 @@ test('write project with encrypted secrets, read with nulled secrets', async () 
     expect(onDisk.servers[0].passphrase.value.length).not.toBe(0);
     expect(onDisk.servers[0].passphrase.value).not.toBe(testServerPassphrase);
     expect(onDisk.servers[0].passphrase.encrypted).toBe(true);
-    expect(onDisk.connectors[0].sql.password.value.length).not.toBe(0);
-    expect(onDisk.connectors[0].sql.password).not.toBe(testDatabasePassword);
-    expect(onDisk.connectors[0].sql.password.encrypted).toBe(true);
+    expect(onDisk.connectors[0].database.password.value.length).not.toBe(0);
+    expect(onDisk.connectors[0].database.password).not.toBe(
+      testDatabasePassword
+    );
+    expect(onDisk.connectors[0].database.password.encrypted).toBe(true);
 
     // Passwords come back as null
     const readProject = await getProject.handler(null, projectId);
@@ -76,8 +78,8 @@ test('write project with encrypted secrets, read with nulled secrets', async () 
     testServer.password.encrypted = true;
     testServer.passphrase.value = null;
     testServer.passphrase.encrypted = true;
-    testDatabase.sql.password.value = null;
-    testDatabase.sql.password.encrypted = true;
+    testDatabase.database.password.value = null;
+    testDatabase.database.password.encrypted = true;
     testDatabase.id = onDisk.connectors[0].id; // id is generated newly on every instantiation which is ok
     testProject.id = readProject.id; // id is generated newly on every instantiation which is ok
     expect(readProject).toStrictEqual(testProject);

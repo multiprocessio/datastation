@@ -31,7 +31,7 @@ on a database library. Still, this may be the right way to go at the
 same time as making language setup easier by providing a button or
 something to install all missing dependencies.
 
-### ./desktop/eval
+### ./desktop/panel
 
 This is where eval handlers for each panel type are defined.
 
@@ -39,7 +39,7 @@ This is where eval handlers for each panel type are defined.
 
 This directory contains the server (Express) app and code that proxies
 RPC calls over HTTP to "desktop" implementations. Really, the code is
-just located in the ./desktop/eval/ directory but it is run in/by the
+just located in the ./desktop/panel/ directory but it is run in/by the
 server process at the moment.
 
 All state in the server app is stored in PostgreSQL. The result of
@@ -57,26 +57,19 @@ state and panel evals.
 This contains the code the client uses to make RPC calls to either the
 desktop process or the server process.
 
-### ./ui/panel-components
+### ./ui/panels
 
 This is where all logic for each panel is contained. If you wanted to
 add a new panel type, you could copy an existing panel and register it
-in ./ui/panel-components/index.ts. You would also need to declare it in
+in ./ui/panels/index.ts. You would also need to declare it in
 ./shared/state.ts.
 
-### ./ui/tsconnectors
+### ./ui/connectors
 
-This is where Time Series connectors are defined. If you wanted to add
-a new Time Series connector, you could copy an existing connector and
-register it in./ui/index.ts. You would also need to
-declare it in ./shared/state.ts.
-
-### ./ui/sqlconnectors
-
-This is where SQL connectors are defined. If you wanted to add
-a new SQL connector, you could copy an existing connector and
-register it in ./ui/sqlconnectors/index.ts. You would also need to
-declare it in ./shared/state.ts.
+This is where all data connectors are defined. If you wanted to add a
+new connector, you could copy an existing connector and register it in
+./ui/connectors/index.ts. You would also need to declare it in
+./shared/state.ts.
 
 ### ./shared
 
