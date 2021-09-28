@@ -2,7 +2,7 @@ import { Shape } from 'shape';
 import * as uuid from 'uuid';
 import { VERSION } from './constants';
 import { SupportedLanguages } from './languages';
-import { getPath, mergeDeep, setPath } from './object';
+import { mergeDeep, setPath } from './object';
 
 export class PanelResult {
   exception?: Error;
@@ -64,9 +64,9 @@ export class ServerInfo {
   port: number;
   type: ServerInfoType;
   username: string;
-  password: Encrypt;
+  password_encrypt: Encrypt;
   privateKeyFile: string;
-  passphrase: Encrypt;
+  passphrase_encrypt: Encrypt;
   id: string;
 
   constructor(
@@ -84,9 +84,9 @@ export class ServerInfo {
     this.address = address || '';
     this.port = port || 22;
     this.username = username || '';
-    this.password = password || new Encrypt('');
+    this.password_encrypt = password || new Encrypt('');
     this.privateKeyFile = privateKeyFile || '~/.ssh/id_rsa';
-    this.passphrase = passphrase || new Encrypt('');
+    this.passphrase_encrypt = passphrase || new Encrypt('');
     this.id = uuid.v4();
   }
 
@@ -171,12 +171,6 @@ export class HTTPConnectorInfo extends ConnectorInfo {
   }
 }
 
-export type TimeSeriesConnectorInfoType =
-  | 'elasticsearch'
-  | 'splunk'
-  | 'prometheus'
-  | 'influx';
-
 export type DatabaseConnectorInfoType =
   | 'postgres'
   | 'mysql'
@@ -187,14 +181,17 @@ export type DatabaseConnectorInfoType =
   | 'clickhouse'
   | 'snowflake'
   | 'cassandra'
-  | TimeSeriesConnectorInfoType;
+  | 'elasticsearch'
+  | 'splunk'
+  | 'prometheus'
+  | 'influx';
 
 export class DatabaseConnectorInfo extends ConnectorInfo {
   database: {
     type: DatabaseConnectorInfoType;
     database: string;
     username: string;
-    password: Encrypt;
+    password_encrypt: Encrypt;
     address: string;
     extra: Record<string, string>;
   };
@@ -212,7 +209,7 @@ export class DatabaseConnectorInfo extends ConnectorInfo {
       type: type || 'postgres',
       database: database || '',
       username: username || '',
-      password: password || new Encrypt(''),
+      password_encrypt: password || new Encrypt(''),
       address: address || '',
       extra: {},
     };
@@ -358,8 +355,8 @@ export type TimeSeriesRange = {
 } & (
   | {
       rangeType: 'absolute';
-      begin: Date;
-      end: Date;
+      begin_date: Date;
+      end_date: Date;
     }
   | {
       rangeType: 'relative';
@@ -547,14 +544,12 @@ export class ProjectPage {
   }
 }
 
-export async function doOnAllInstanceFields<T>(
-  s: ProjectState,
-  guard: (a: any) => a is T,
-  cb: (field: T, path: string) => Promise<T>
+export async function doOnMatchingFields<T>(
+  ps: ProjectState,
+  check: (key: string) => boolean,
+  cb: (f: T, path: string) => Promise<T>
 ) {
-  // Only trust prototype on a real object.
-  const referenceObject = new ProjectState();
-  const stack: Array<[any, Array<string>]> = [[referenceObject, []]];
+  const stack: Array<[any, Array<string>]> = [[ps, []]];
 
   while (stack.length) {
     const [top, path] = stack.pop();
@@ -565,40 +560,18 @@ export async function doOnAllInstanceFields<T>(
       }
     }
 
-    const realTop = getPath(s, path.join('.'));
-    if (guard(realTop)) {
-      setPath(s, path.join('.'), await cb(realTop, path.join('.')));
+    const p = path.filter(Boolean).join('.');
+    if (check(p)) {
+      setPath(ps, p, await cb(top, p));
     }
   }
 }
 
-export function doOnAllEncryptFields(
-  s: ProjectState,
-  cb: (field: Encrypt, path: string) => Promise<Encrypt>
+export function doOnEncryptFields(
+  ps: ProjectState,
+  cb: (f: Encrypt, path: string) => Promise<Encrypt>
 ) {
-  return doOnAllInstanceFields<Encrypt>(
-    s,
-    (field: any): field is Encrypt => field instanceof Encrypt,
-    cb
-  );
-}
-
-export function doOnAllDateFields(
-  s: ProjectState,
-  cb: (field: Date) => Promise<Date>
-) {
-  return doOnAllInstanceFields<Date>(
-    s,
-    (field: any): field is Date => field instanceof Date,
-    (d: Date) => {
-      const nd = new Date(d);
-      if (String(nd) === 'Invalid Date') {
-        return Promise.resolve(new Date());
-      }
-
-      return Promise.resolve(nd);
-    }
-  );
+  return doOnMatchingFields(ps, (f) => f.endsWith('_encrypt'), cb);
 }
 
 export class ProjectState {
@@ -637,11 +610,23 @@ export class ProjectState {
     ps.id = raw.id || uuid.v4();
     ps.originalVersion = raw.originalVersion || VERSION;
     ps.lastVersion = raw.lastVersion || VERSION;
-    doOnAllEncryptFields(ps, (f) => {
+    doOnEncryptFields(ps, (f) => {
       const new_ = new Encrypt(null);
       new_.encrypted = true;
       return Promise.resolve(new_);
     });
+    doOnMatchingFields<Date>(
+      ps,
+      (path) => path.endsWith('_date'),
+      (d) => {
+        const nd = new Date(d);
+        if (String(nd) === 'Invalid Date') {
+          return Promise.resolve(new Date());
+        }
+
+        return Promise.resolve(nd);
+      }
+    );
     return ps;
   }
 }

@@ -51,14 +51,14 @@ export async function getSSHConfig(
       const buffer = await fs.readFile(resolvePath(server.privateKeyFile));
       config.privateKey = buffer.toString();
     }
-    if (server.passphrase) {
-      config.passphrase = await decrypt(server.passphrase.value);
+    if (server.passphrase_encrypt) {
+      config.passphrase = await decrypt(server.passphrase_encrypt.value);
     }
   }
 
   if (server.type === 'password') {
     config.username = server.username;
-    config.password = await decrypt(server.password.value);
+    config.password = await decrypt(server.password_encrypt.value);
   }
 
   return config;

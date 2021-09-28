@@ -30,8 +30,11 @@ export function Server({
     });
 
     // Sync typed password to state on change
-    server[which].value = p;
-    server[which].encrypted = false;
+    const fieldKey = (which + '_encrypt') as
+      | 'passphrase_encrypt'
+      | 'password_encrypt';
+    server[fieldKey].value = p;
+    server[fieldKey].encrypted = false;
     updateServer(server);
   }
 

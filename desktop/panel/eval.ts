@@ -53,7 +53,7 @@ export const evalHandler = {
     let panel: PanelInfo;
     for (; !panel && panelPage < (project.pages || []).length; panelPage++) {
       for (const p of project.pages[panelPage].panels || []) {
-        if (p.id === body.id) {
+        if (p.id === body.panelId) {
           panel = p;
           break;
         }

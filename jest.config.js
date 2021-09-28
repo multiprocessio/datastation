@@ -1,6 +1,6 @@
 module.exports = {
   transform: {
-    '\\.[jt]sx?$': [
+    '.[jt]sx?$': [
       'esbuild-jest',
       {
         sourcemap: true,

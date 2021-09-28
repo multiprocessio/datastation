@@ -23,7 +23,7 @@ import { Button } from './components/Button';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { Input } from './components/Input';
 import { ConnectorList } from './ConnectorList';
-import { Pages } from './Pages';
+import { PageList } from './PageList';
 import { makeStore, ProjectContext, ProjectStore } from './ProjectStore';
 import { ServerList } from './ServerList';
 import { Sidebar } from './Sidebar';
@@ -462,7 +462,7 @@ function App() {
                 ) : null}
               </div>
             ) : (
-              <Pages
+              <PageList
                 state={state}
                 updatePage={updatePage}
                 addPage={addPage}

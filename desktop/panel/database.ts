@@ -119,7 +119,7 @@ async function evalPostgreSQL(
 ) {
   const client = new PostgresClient({
     user: database.username,
-    password: database.password.value,
+    password: database.password_encrypt.value,
     database: database.database,
     host,
     port,
@@ -143,7 +143,7 @@ async function evalSQLServer(
 ) {
   const client = await sqlserver.connect({
     user: database.username,
-    password: database.password.value,
+    password: database.password_encrypt.value,
     database: database.database,
     pool: {
       max: 10,
@@ -175,7 +175,7 @@ async function evalOracle(
   oracledb.outFormat = oracledb.OBJECT;
   const client = await oracledb.getConnection({
     user: database.username,
-    password: database.password.value,
+    password: database.password_encrypt.value,
     connectString: `${host}:${port}/${database.database}`,
   });
 
@@ -200,7 +200,7 @@ async function evalMySQL(
   const connection = await mysql.createConnection({
     host: host,
     user: database.username,
-    password: database.password.value,
+    password: database.password_encrypt.value,
     database: database.database,
     port: port,
   });
@@ -235,7 +235,7 @@ async function evalClickHouse(
     basicAuth: database.username
       ? {
           username: database.username,
-          password: database.password.value,
+          password: database.password_encrypt.value,
         }
       : null,
     config: {
@@ -259,7 +259,7 @@ async function evalSnowflake(
     account: database.extra.account,
     database: database.database,
     username: database.username,
-    password: database.password.value,
+    password: database.password_encrypt.value,
   });
 
   const conn: any = await new Promise((resolve, reject) => {
@@ -471,15 +471,15 @@ export async function evalDatabase(
     );
   }
 
-  if (connector.database.password.encrypted) {
-    if (!connector.database.password.value) {
-      connector.database.password.value = undefined;
-      connector.database.password.encrypted = true;
+  if (connector.database.password_encrypt.encrypted) {
+    if (!connector.database.password_encrypt.value) {
+      connector.database.password_encrypt.value = undefined;
+      connector.database.password_encrypt.encrypted = true;
     }
-    connector.database.password.value = await decrypt(
-      connector.database.password.value
+    connector.database.password_encrypt.value = await decrypt(
+      connector.database.password_encrypt.value
     );
-    connector.database.password.encrypted = false;
+    connector.database.password_encrypt.encrypted = false;
   }
 
   if (info.database.type === 'snowflake') {

@@ -14,8 +14,8 @@ export function Password({
   function syncPassword(p: string) {
     setPassword(p);
     // Sync typed password to state on change
-    connector.database.password.value = p;
-    connector.database.password.encrypted = false;
+    connector.database.password_encrypt.value = p;
+    connector.database.password_encrypt.encrypted = false;
     updateConnector(connector);
   }
 

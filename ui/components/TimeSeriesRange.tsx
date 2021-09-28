@@ -26,19 +26,22 @@ export function TimeSeriesRange({
     switch (value) {
       case 'relative':
         return updateRange({
+          field: range.field,
           rangeType: value,
           relative: 'last-hour',
         });
       case 'fixed':
         return updateRange({
+          field: range.field,
           rangeType: value,
           fixed: 'this-hour',
         });
       case 'absolute':
         return updateRange({
+          field: range.field,
           rangeType: value,
-          begin: subMinutes(new Date(), 15),
-          end: new Date(),
+          begin_date: subMinutes(new Date(), 15),
+          end_date: new Date(),
         });
     }
   };
@@ -148,9 +151,9 @@ export function TimeSeriesRange({
               <div className="form-row">
                 <Datetime
                   label="Begin"
-                  value={range.end}
+                  value={range.end_date}
                   onChange={(v) => {
-                    range.begin = v;
+                    range.begin_date = v;
                     updateRange(range);
                   }}
                 />
@@ -158,9 +161,9 @@ export function TimeSeriesRange({
               <div className="form-row">
                 <Datetime
                   label="End"
-                  value={range.end}
+                  value={range.end_date}
                   onChange={(v) => {
-                    range.end = v;
+                    range.end_date = v;
                     updateRange(range);
                   }}
                 />

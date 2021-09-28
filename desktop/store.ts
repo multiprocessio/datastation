@@ -3,7 +3,7 @@ import fsPromises from 'fs/promises';
 import path from 'path';
 import log from '../shared/log';
 import { getPath } from '../shared/object';
-import { doOnAllEncryptFields, Encrypt, ProjectState } from '../shared/state';
+import { doOnEncryptFields, Encrypt, ProjectState } from '../shared/state';
 import { DISK_ROOT, PROJECT_EXTENSION, SYNC_PERIOD } from './constants';
 import { ensureFile } from './fs';
 import { Dispatch } from './rpc';
@@ -68,9 +68,9 @@ export function encryptProjectSecrets(
   s: ProjectState,
   existingState: ProjectState
 ) {
-  return doOnAllEncryptFields(s, (field, path) =>
-    checkAndEncrypt(field, getPath(existingState, path))
-  );
+  return doOnEncryptFields(s, (field: Encrypt, path: string) => {
+    return checkAndEncrypt(field, getPath(existingState, path));
+  });
 }
 
 export const storeHandlers = [
@@ -110,11 +110,7 @@ export const storeHandlers = [
   },
   {
     resource: 'makeProject',
-    handler: async (
-      _0: string,
-      { projectId }: { projectId: string },
-      _1: void
-    ) => {
+    handler: async (_0: string, { projectId }: { projectId: string }) => {
       const fileName = await ensureProjectFile(projectId);
       const newProject = new ProjectState();
       newProject.projectName = fileName;

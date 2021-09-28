@@ -9,7 +9,7 @@ import { PanelPlayWarning } from './errors';
 import { PanelList } from './PanelList';
 import { PANEL_UI_DETAILS } from './panels';
 
-export function Pages({
+export function PageList({
   state,
   addPage,
   deletePage,

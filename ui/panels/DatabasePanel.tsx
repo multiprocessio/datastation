@@ -12,7 +12,7 @@ import { CodeEditor } from '../components/CodeEditor';
 import { Select } from '../components/Select';
 import { ServerPicker } from '../components/ServerPicker';
 import { TimeSeriesRange } from '../components/TimeSeriesRange';
-import { VENDORS } from '../connectors';
+import { VENDOR_GROUPS } from '../connectors';
 import { ProjectContext } from '../ProjectStore';
 import { PanelBodyProps, PanelDetailsProps, PanelUIDetails } from './types';
 
@@ -44,11 +44,17 @@ export function DatabasePanelDetails({
     }
   });
 
-  const vendorsWithConnectors = VENDORS.map((group) => {
+  const vendorsWithConnectors = VENDOR_GROUPS.map((group) => {
     return {
       label: group.group,
       options: group.vendors
-        .map(({ id }) => connectors.filter((c) => c.type === id))
+        .map((id) =>
+          connectors.filter(
+            (c) =>
+              c.type === 'database' &&
+              (c as DatabaseConnectorInfo).database.type === id
+          )
+        )
         .flat()
         .sort((a, b) => (a.name < b.name ? 1 : -1)),
     };

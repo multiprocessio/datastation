@@ -52,7 +52,7 @@ export const VENDORS: {
   },
   splunk: {
     name: 'Splunk',
-    id: 'spunk',
+    id: 'splunk',
     details: GenericDetails,
   },
   prometheus: {
@@ -65,11 +65,21 @@ export const VENDORS: {
     id: 'influx',
     details: GenericDetails,
   },
+  presto: {
+    name: 'Presto',
+    id: 'presto',
+    details: GenericDetails,
+  },
+  cassandra: {
+    name: 'Cassandra',
+    id: 'cassandra',
+    details: GenericDetails,
+  },
 };
 
 export const VENDOR_GROUPS: Array<{
   group: string;
-  vendors: Array<string>;
+  vendors: Array<DatabaseConnectorInfoType>;
 }> = [
   {
     group: 'SQL',

@@ -3,7 +3,7 @@ const enzyme = require('enzyme');
 const { DatabaseConnectorInfo } = require('../../shared/state');
 const { wait } = require('../../shared/promise');
 const { Database } = require('./Database');
-const { INPUT_SYNC_PERIOD } = require('../component-library/Input');
+const { INPUT_SYNC_PERIOD } = require('../components/Input');
 
 test('Database shows input and changes', async () => {
   const connector = new DatabaseConnectorInfo();

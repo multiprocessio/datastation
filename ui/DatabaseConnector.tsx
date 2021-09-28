@@ -1,5 +1,8 @@
 import * as React from 'react';
-import { DatabaseConnectorInfo } from '../shared/state';
+import {
+  DatabaseConnectorInfo,
+  DatabaseConnectorInfoType,
+} from '../shared/state';
 import { Select } from './components/Select';
 import { VENDORS, VENDOR_GROUPS } from './connectors';
 import { ProjectContext } from './ProjectStore';

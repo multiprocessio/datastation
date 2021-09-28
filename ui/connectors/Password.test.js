@@ -3,7 +3,7 @@ const enzyme = require('enzyme');
 const { DatabaseConnectorInfo } = require('../../shared/state');
 const { wait } = require('../../shared/promise');
 const { Password } = require('./Password');
-const { INPUT_SYNC_PERIOD } = require('../component-library/Input');
+const { INPUT_SYNC_PERIOD } = require('../components/Input');
 
 test('Password shows input and changes', async () => {
   const connector = new DatabaseConnectorInfo();
@@ -11,7 +11,7 @@ test('Password shows input and changes', async () => {
   const changeTo = 'my-great-password';
   let changed = '';
   const updateConnector = jest.fn((conn) => {
-    changed = conn.database.password.value;
+    changed = conn.database.password_encrypt.value;
   });
   const component = enzyme.mount(
     <Password connector={connector} updateConnector={updateConnector} />

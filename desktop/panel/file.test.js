@@ -1,6 +1,6 @@
 const fs = require('fs/promises');
 const { file: makeTmpFile } = require('tmp-promise');
-const { evalFileHandler } = require('./file');
+const { evalFile } = require('./file');
 
 test('file handler', async () => {
   const tmp = await makeTmpFile();
@@ -12,21 +12,18 @@ test('file handler', async () => {
   try {
     await fs.writeFile(readFromTmp.path, testDataJSON);
 
-    const { size, contentType } = await evalFileHandler.handler(
-      tmp.path,
-      null,
-      {
-        file: {
-          name: readFromTmp.path,
-          contentTypeInfo: {
-            type: 'application/json',
-          },
-          id: 'any',
+    const { contentType, value } = await evalFile(tmp.path, {
+      type: 'file',
+      file: {
+        name: readFromTmp.path,
+        contentTypeInfo: {
+          type: 'application/json',
         },
-      }
-    );
-    expect(size).toBe(testDataJSON.length);
+        id: 'any',
+      },
+    });
     expect(contentType).toBe('application/json');
+    expect(value).toStrictEqual(testData);
   } finally {
     await tmp.cleanup();
     await readFromTmp.cleanup();
