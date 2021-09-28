@@ -140,7 +140,7 @@ export async function openProject() {
   await openWindow(filePaths[0]);
 }
 
-export const openProjectHandler: RPCHandler<void> = {
+export const openProjectHandler: RPCHandler<void, void> = {
   resource: 'openProject',
   handler: openProject,
 };

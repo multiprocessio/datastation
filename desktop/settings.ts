@@ -80,7 +80,7 @@ export class Settings {
     return fs.writeFile(this.file, JSON.stringify(this));
   }
 
-  getUpdateHandler(): RPCHandler<void> {
+  getUpdateHandler(): RPCHandler<Settings, void> {
     return {
       resource: 'updateSettings',
       handler: (_: string, settings: Settings) => {

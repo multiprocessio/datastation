@@ -59,7 +59,7 @@ export async function evalLiteral(
   return await parseArrayBuffer(contentTypeInfo, '', panel.content);
 }
 
-export const fetchResultsHandler: RPCHandler<any> = {
+export const fetchResultsHandler: RPCHandler<PanelBody, EvalHandlerResponse> = {
   resource: 'fetchResults',
   handler: async function (
     projectId: string,

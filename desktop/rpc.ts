@@ -2,6 +2,7 @@ import { IpcMain, IpcMainEvent } from 'electron';
 import { RPC_ASYNC_REQUEST, RPC_ASYNC_RESPONSE } from '../shared/constants';
 import log from '../shared/log';
 import { Endpoint, IPCRendererResponse } from '../shared/rpc';
+import { ProjectState } from '../shared/state';
 
 export interface RPCPayload {
   messageNumber: number;
@@ -16,10 +17,22 @@ export type DispatchPayload = Omit<RPCPayload, 'messageNumber' | 'body'> & {
 
 export type Dispatch = (payload: DispatchPayload) => Promise<any>;
 
-export interface RPCHandler<T> {
+export interface RPCHandler<Request, Response> {
   resource: Endpoint;
-  handler: (projectId: string, body: T, dispatch: Dispatch) => Promise<T>;
+  handler: (
+    projectId: string,
+    body: Request,
+    dispatch: Dispatch
+  ) => Promise<Response>;
 }
+
+// Standard handlers
+export type GetProjectHandler = RPCHandler<
+  { internal?: boolean; projectId: string },
+  ProjectState | null
+>;
+export type UpdateProjectHandler = RPCHandler<ProjectState, void>;
+export type MakeProjectHandler = RPCHandler<{ projectId: string }, void>;
 
 // Stub to ensure msg is always typed
 function sendIPCRendererResponse(
@@ -30,9 +43,9 @@ function sendIPCRendererResponse(
   event.sender.send(channel, msg);
 }
 
-export function registerRPCHandlers<T>(
+export function registerRPCHandlers(
   ipcMain: IpcMain,
-  handlers: RPCHandler<T>[]
+  handlers: RPCHandler<any, any>[]
 ) {
   function dispatch(payload: RPCPayload) {
     const handler = handlers.filter((h) => h.resource === payload.resource)[0];

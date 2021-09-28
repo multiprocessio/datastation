@@ -5,7 +5,7 @@ import log from '../shared/log';
 export async function handleRPC(
   req: express.Request,
   rsp: express.Response,
-  rpcHandlers: RPCHandler<any>[]
+  rpcHandlers: RPCHandler<any, any>[]
 ) {
   const payload = {
     ...req.query,

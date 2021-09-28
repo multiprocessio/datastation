@@ -9,7 +9,7 @@ import {
   PanelResult,
   ProjectState,
 } from '../../shared/state';
-import { Dispatch } from '../rpc';
+import { Dispatch, RPCHandler } from '../rpc';
 import { getProjectResultsFile } from '../store';
 import { evalColumns, evalLiteral } from './columns';
 import { evalDatabase } from './database';
@@ -37,7 +37,7 @@ const EVAL_HANDLERS: { [k in PanelInfoType]: EvalHandler } = {
   literal: evalLiteral,
 };
 
-export const evalHandler: RPCHandler<PanelResult> = {
+export const evalHandler: RPCHandler<PanelBody, PanelResult> = {
   resource: 'eval',
   handler: async function (
     projectId: string,

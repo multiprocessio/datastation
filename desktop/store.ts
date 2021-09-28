@@ -6,7 +6,13 @@ import { getPath } from '../shared/object';
 import { doOnEncryptFields, Encrypt, ProjectState } from '../shared/state';
 import { DISK_ROOT, PROJECT_EXTENSION, SYNC_PERIOD } from './constants';
 import { ensureFile } from './fs';
-import { Dispatch, RPCHandler } from './rpc';
+import {
+  Dispatch,
+  GetProjectHandler,
+  MakeProjectHandler,
+  RPCHandler,
+  UpdateProjectHandler,
+} from './rpc';
 import { encrypt } from './secret';
 
 const buffers: Record<
@@ -73,7 +79,7 @@ export function encryptProjectSecrets(
   });
 }
 
-const getProjectHandler: RPCHandler<ProjectState | null> = {
+const getProjectHandler: GetProjectHandler = {
   resource: 'getProject',
   handler: async (
     _: string,
@@ -91,7 +97,7 @@ const getProjectHandler: RPCHandler<ProjectState | null> = {
   },
 };
 
-const updateProjectHandler: RPCHandler<void> = {
+const updateProjectHandler: UpdateProjectHandler = {
   resource: 'updateProject',
   handler: async (
     projectId: string,
@@ -106,7 +112,7 @@ const updateProjectHandler: RPCHandler<void> = {
   },
 };
 
-const makeProjectHandler: RPCHandler<void> = {
+const makeProjectHandler: MakeProjectHandler = {
   resource: 'makeProject',
   handler: async (_0: string, { projectId }: { projectId: string }) => {
     const fileName = await ensureProjectFile(projectId);
@@ -116,7 +122,8 @@ const makeProjectHandler: RPCHandler<void> = {
   },
 };
 
-export const storeHandlers: RPCHandler<any>[] = [
+// Break handlers out so they can be individually typed without `any`
+export const storeHandlers: RPCHandler<any, any>[] = [
   getProjectHandler,
   updateProjectHandler,
   makeProjectHandler,

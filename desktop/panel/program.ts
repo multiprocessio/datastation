@@ -124,9 +124,9 @@ export async function evalProgram(
   }
 }
 
-export const killProcessHandler: RPCHandler<void> = {
+export const killProcessHandler: RPCHandler<PanelBody, void> = {
   resource: 'killProcess',
-  handler: function (_: string, body: PanelBody) {
+  handler: async function (_: string, body: PanelBody) {
     killAllByPanelId(body.panelId);
   },
 };

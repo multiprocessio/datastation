@@ -51,7 +51,7 @@ export async function init() {
   await ensureSigningKey();
 
   const settings = await loadSettings();
-  const rpcHandlers: RPCHandler<any>[] = [
+  const rpcHandlers: RPCHandler<any, any>[] = [
     ...getProjectHandlers(app),
     ...panelHandlers,
     settings.getUpdateHandler(),
