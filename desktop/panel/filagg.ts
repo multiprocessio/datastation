@@ -49,6 +49,7 @@ export async function evalFilterAggregate(
   try {
     const metaPanel = new DatabasePanelInfo('', 'sqlite', '', range, query);
     const metaConnector = new DatabaseConnectorInfo('', 'sqlite', tmp.path);
+    metaPanel.database.connectorId = metaConnector.id;
     // Register connector in project
     if (!project.connectors) {
       project.connectors = [];

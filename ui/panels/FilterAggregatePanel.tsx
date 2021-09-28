@@ -132,122 +132,128 @@ export function FilterAggregatePanelDetails({
           />
         </div>
       </FormGroup>
-      <FormGroup label="Filter">
-        <div className="form-row">
-          <CodeEditor
-            singleLine
-            id={panel.id + 'filter'}
-            label="Expression"
-            placeholder="x LIKE '%town%' AND y IN (1, 2)"
-            value={panel.filagg.filter}
-            onChange={(value: string) => {
-              panel.filagg.filter = value;
-              updatePanel(panel);
-            }}
-            language="sql"
-            className="editor"
-          />
+      <div className="flex">
+        <div>
+          <FormGroup label="Filter">
+            <div className="form-row">
+              <CodeEditor
+                singleLine
+                id={panel.id + 'filter'}
+                label="Expression"
+                placeholder="x LIKE '%town%' AND y IN (1, 2)"
+                value={panel.filagg.filter}
+                onChange={(value: string) => {
+                  panel.filagg.filter = value;
+                  updatePanel(panel);
+                }}
+                language="sql"
+                className="editor"
+              />
+            </div>
+            <TimeSeriesRange
+              shape={data.shape}
+              range={panel.filagg.range}
+              updateRange={(r: TimeSeriesRangeT) => {
+                panel.filagg.range = r;
+                updatePanel(panel);
+              }}
+            />
+          </FormGroup>
         </div>
-      </FormGroup>
-      <TimeSeriesRange
-        shape={data.shape}
-        range={panel.filagg.range}
-        updateRange={(r: TimeSeriesRangeT) => {
-          panel.filagg.range = r;
-          updatePanel(panel);
-        }}
-      />
-      <FormGroup label="Aggregate">
-        <div className="form-row">
-          <Select
-            label="Function"
-            value={panel.filagg.aggregateType}
-            onChange={(value: string) => {
-              panel.filagg.aggregateType = value as AggregateType;
-              updatePanel(panel);
-            }}
-          >
-            <optgroup label="Disabled">
-              <option value="none">None</option>
-            </optgroup>
-            <optgroup label="Enabled">
-              <option value="count">Count</option>
-              <option value="sum">Sum</option>
-              <option value="average">Average</option>
-              <option value="min">Min</option>
-              <option value="max">Max</option>
-            </optgroup>
-          </Select>
-        </div>
-        {panel.filagg.aggregateType !== 'none' && (
-          <React.Fragment>
+        <div>
+          <FormGroup label="Aggregate">
+            <div className="form-row">
+              <Select
+                label="Function"
+                value={panel.filagg.aggregateType}
+                onChange={(value: string) => {
+                  panel.filagg.aggregateType = value as AggregateType;
+                  updatePanel(panel);
+                }}
+              >
+                <optgroup label="Disabled">
+                  <option value="none">None</option>
+                </optgroup>
+                <optgroup label="Enabled">
+                  <option value="count">Count</option>
+                  <option value="sum">Sum</option>
+                  <option value="average">Average</option>
+                  <option value="min">Min</option>
+                  <option value="max">Max</option>
+                </optgroup>
+              </Select>
+            </div>
+            {panel.filagg.aggregateType !== 'none' && (
+              <React.Fragment>
+                <div className="form-row">
+                  <FieldPicker
+                    preferredDefaultType="string"
+                    label="Group by"
+                    shape={data?.shape}
+                    value={panel.filagg.groupBy}
+                    onChange={(value: string) => {
+                      panel.filagg.groupBy = value;
+                      updatePanel(panel);
+                    }}
+                  />
+                </div>
+                {panel.filagg.aggregateType !== 'count' && (
+                  <div className="form-row">
+                    <FieldPicker
+                      preferredDefaultType="number"
+                      label={title(panel.filagg.aggregateType) + ' on'}
+                      shape={data?.shape}
+                      value={panel.filagg.aggregateOn}
+                      onChange={(value: string) => {
+                        panel.filagg.aggregateOn = value;
+                        updatePanel(panel);
+                      }}
+                    />
+                  </div>
+                )}
+              </React.Fragment>
+            )}
+          </FormGroup>
+          <FormGroup label="Sort">
             <div className="form-row">
               <FieldPicker
-                preferredDefaultType="string"
-                label="Group by"
-                shape={data?.shape}
-                value={panel.filagg.groupBy}
+                preferredDefaultType="number"
+                label="Field"
+                shape={withAggregateShape(data, panel)}
+                value={panel.filagg.sortOn}
                 onChange={(value: string) => {
-                  panel.filagg.groupBy = value;
+                  panel.filagg.sortOn = value;
                   updatePanel(panel);
                 }}
               />
+              <Select
+                label="Direction"
+                value={panel.filagg.aggregateType}
+                onChange={(value: string) => {
+                  panel.filagg.sortAsc = value === 'asc';
+                  updatePanel(panel);
+                }}
+              >
+                <option value="desc">Descending</option>
+                <option value="asc">Ascending</option>
+              </Select>
             </div>
-            {panel.filagg.aggregateType !== 'count' && (
-              <div className="form-row">
-                <FieldPicker
-                  preferredDefaultType="number"
-                  label={title(panel.filagg.aggregateType) + ' on'}
-                  shape={data?.shape}
-                  value={panel.filagg.aggregateOn}
-                  onChange={(value: string) => {
-                    panel.filagg.aggregateOn = value;
-                    updatePanel(panel);
-                  }}
-                />
-              </div>
-            )}
-          </React.Fragment>
-        )}
-      </FormGroup>
-      <FormGroup label="Sort">
-        <div className="form-row">
-          <FieldPicker
-            preferredDefaultType="number"
-            label="Field"
-            shape={withAggregateShape(data, panel)}
-            value={panel.filagg.sortOn}
-            onChange={(value: string) => {
-              panel.filagg.sortOn = value;
-              updatePanel(panel);
-            }}
-          />
-          <Select
-            label="Direction"
-            value={panel.filagg.aggregateType}
-            onChange={(value: string) => {
-              panel.filagg.sortAsc = value === 'asc';
-              updatePanel(panel);
-            }}
-          >
-            <option value="desc">Descending</option>
-            <option value="asc">Ascending</option>
-          </Select>
+          </FormGroup>
+          <FormGroup label="Limit">
+            <div className="form-row">
+              <Input
+                onChange={(value: string) => {
+                  panel.filagg.limit = +value;
+                  updatePanel(panel);
+                }}
+                value={String(panel.filagg.limit)}
+                min={1}
+                type="number"
+              />
+            </div>
+          </FormGroup>
         </div>
-      </FormGroup>
-      <FormGroup label="Limit">
-        <div className="form-row">
-          <Input
-            onChange={(value: string) => {
-              panel.filagg.limit = +value;
-              updatePanel(panel);
-            }}
-            value={String(panel.filagg.limit)}
-            min={1}
-            type="number"
-          />
-        </div>
-      </FormGroup>
+      </div>
     </React.Fragment>
   );
 }

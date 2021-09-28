@@ -9,7 +9,6 @@ import {
 import { title } from '../../shared/text';
 import { Datetime } from './Datetime';
 import { FieldPicker } from './FieldPicker';
-import { FormGroup } from './FormGroup';
 import { Radio } from './Radio';
 import { NONE, Select } from './Select';
 
@@ -112,7 +111,7 @@ export function TimeSeriesRange({
   ];
 
   return (
-    <FormGroup label="Time Range">
+    <React.Fragment>
       <div className="form-row">
         <FieldPicker
           label="Timestamp Field"
@@ -120,7 +119,7 @@ export function TimeSeriesRange({
           shape={shape}
           allowNone="None"
           onChange={(value: string) => {
-            if (range.field === NONE) {
+            if (value === NONE) {
               range.field = '';
             } else {
               range.field = value;
@@ -132,7 +131,7 @@ export function TimeSeriesRange({
       <div className="flex">
         <div className="form-row">
           <Radio
-            disabled={Boolean(range.field)}
+            disabled={!range.field}
             vertical
             name="range-type"
             value={range.rangeType}
@@ -150,6 +149,7 @@ export function TimeSeriesRange({
             <React.Fragment>
               <div className="form-row">
                 <Datetime
+                  disabled={!range.field}
                   label="Begin"
                   value={range.end_date}
                   onChange={(v) => {
@@ -161,6 +161,7 @@ export function TimeSeriesRange({
               <div className="form-row">
                 <Datetime
                   label="End"
+                  disabled={!range.field}
                   value={range.end_date}
                   onChange={(v) => {
                     range.end_date = v;
@@ -173,6 +174,7 @@ export function TimeSeriesRange({
           {range.rangeType === 'relative' && (
             <React.Fragment>
               <Select
+                disabled={!range.field}
                 value={range.relative}
                 onChange={(id) => {
                   range.relative = id as TimeSeriesRelativeTimes;
@@ -194,6 +196,7 @@ export function TimeSeriesRange({
           {range.rangeType === 'fixed' && (
             <React.Fragment>
               <Select
+                disabled={!range.field}
                 onChange={(id) => {
                   range.fixed = id as TimeSeriesFixedTimes;
                   updateRange(range);
@@ -213,6 +216,6 @@ export function TimeSeriesRange({
           )}
         </div>
       </div>
-    </FormGroup>
+    </React.Fragment>
   );
 }
