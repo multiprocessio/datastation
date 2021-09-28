@@ -130,7 +130,6 @@ export function FilterAggregatePanelDetails({
               updatePanel(panel);
             }}
           />
-          4{' '}
         </div>
       </FormGroup>
       <FormGroup label="Filter">
