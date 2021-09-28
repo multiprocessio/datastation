@@ -21,10 +21,9 @@ test('store and retrieve literal, specific columns', async () => {
   ];
 
   const id = 'my-uuid';
-  const resultsFile = getProjectResultsFile(tmp.path) + id;
 
   try {
-    const result = await evalHandler.handler(tmp.path, { panelId: id }, () => ({
+    const projectState = {
       ...new ProjectState(),
       id: tmp.path,
       pages: [
@@ -40,21 +39,31 @@ test('store and retrieve literal, specific columns', async () => {
                   type: 'application/json',
                 },
               },
+              // For the fetchResults call
+              resultMeta: {
+                contentType: 'application/json',
+              },
             },
           ],
         },
       ],
-    }));
+    };
+    const result = await evalHandler.handler(
+      tmp.path,
+      { panelId: id },
+      () => projectState
+    );
     expect(result.size).toStrictEqual(JSON.stringify(testData).length);
     expect(result.shape).toStrictEqual(shape(testData));
     expect(result.preview).toStrictEqual(preview(testData));
     expect(result.contentType).toBe('application/json');
 
-    const { value: valueFromDisk } = await fetchResultsHandler(
-      { id: tmp.path },
+    const { value: valueFromDisk } = await fetchResultsHandler.handler(
+      tmp.path,
       {
-        id,
-      }
+        panelId: id,
+      },
+      () => projectState
     );
     expect(valueFromDisk).toStrictEqual(testData);
 
@@ -73,7 +82,7 @@ test('store and retrieve literal, specific columns', async () => {
                 id,
                 resultMeta: result,
                 table: {
-                  columns: ['a'],
+                  columns: [{ field: 'a' }],
                 },
               },
             ],
@@ -86,7 +95,7 @@ test('store and retrieve literal, specific columns', async () => {
     try {
       // Results file
       await tmp.cleanup();
-      await fs.unlink(resultFile);
+      await fs.unlink(getProjectResultsFile(tmp.path) + id);
     } catch (e) {
       console.error(e); // don't fail on failure to cleanup, means an earlier step is going to fail after finally block
     }
