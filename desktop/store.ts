@@ -3,6 +3,7 @@ import fsPromises from 'fs/promises';
 import path from 'path';
 import log from '../shared/log';
 import { getPath } from '../shared/object';
+import { GetProjectRequest, MakeProjectRequest } from '../shared/rpc';
 import { doOnEncryptFields, Encrypt, ProjectState } from '../shared/state';
 import { DISK_ROOT, PROJECT_EXTENSION, SYNC_PERIOD } from './constants';
 import { ensureFile } from './fs';
@@ -82,14 +83,16 @@ export function encryptProjectSecrets(
 const getProjectHandler: GetProjectHandler = {
   resource: 'getProject',
   handler: async (
-    _: string,
-    { internal, projectId }: { internal?: boolean; projectId: string }
+    _0: string,
+    { projectId }: GetProjectRequest,
+    _1: unknown,
+    external: boolean
   ) => {
     const fileName = await ensureProjectFile(projectId);
     try {
       const f = await fsPromises.readFile(fileName);
       const ps = JSON.parse(f.toString()) as ProjectState;
-      return await ProjectState.fromJSON(ps, internal);
+      return await ProjectState.fromJSON(ps, external);
     } catch (e) {
       log.error(e);
       return null;
@@ -114,7 +117,7 @@ const updateProjectHandler: UpdateProjectHandler = {
 
 const makeProjectHandler: MakeProjectHandler = {
   resource: 'makeProject',
-  handler: async (_0: string, { projectId }: { projectId: string }) => {
+  handler: async (_: string, { projectId }: MakeProjectRequest) => {
     const fileName = await ensureProjectFile(projectId);
     const newProject = new ProjectState();
     newProject.projectName = fileName;

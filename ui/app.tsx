@@ -10,6 +10,14 @@ import {
 } from '../shared/constants';
 import '../shared/polyfill';
 import {
+  GetProjectsRequest,
+  GetProjectsResponse,
+  MakeProjectRequest,
+  MakeProjectResponse,
+  OpenProjectRequest,
+  OpenProjectResponse,
+} from '../shared/rpc';
+import {
   ConnectorInfo,
   DEFAULT_PROJECT,
   ProjectPage,
@@ -146,7 +154,7 @@ function App() {
   const [makeProjectError, setMakeProjectError] = React.useState('');
   async function makeProject(projectId: string) {
     try {
-      await asyncRPC<{ projectId: string }>('makeProject', {
+      await asyncRPC<MakeProjectRequest, MakeProjectResponse>('makeProject', {
         projectId,
       });
       setProjectId(projectId);
@@ -188,16 +196,15 @@ function App() {
     setHeaderHeightInternal(e.offsetHeight);
   }, []);
 
-  const [projects, setProjects] = React.useState<Array<{
-    name: string;
-    createdAt: string;
-  }> | null>(null);
+  const [projects, setProjects] = React.useState<GetProjectsResponse | null>(
+    null
+  );
   React.useEffect(() => {
     async function load() {
-      const projects = await asyncRPC<
-        void,
-        Array<{ name: string; createdAt: string }>
-      >('getProjects', null);
+      const projects = await asyncRPC<GetProjectsRequest, GetProjectsResponse>(
+        'getProjects',
+        null
+      );
       setProjects(projects);
     }
 
@@ -261,7 +268,10 @@ function App() {
   }
 
   async function openProject() {
-    await asyncRPC('openProject', null);
+    await asyncRPC<OpenProjectRequest, OpenProjectResponse>(
+      'openProject',
+      null
+    );
     window.close();
   }
 

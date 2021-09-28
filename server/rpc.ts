@@ -12,7 +12,7 @@ export async function handleRPC(
     ...req.body,
   };
 
-  async function dispatch(payload: DispatchPayload) {
+  async function dispatch(payload: DispatchPayload, external = false) {
     const handler = rpcHandlers.filter(
       (h) => h.resource === payload.resource
     )[0];
@@ -21,11 +21,16 @@ export async function handleRPC(
     }
 
     // TODO: run these in an external process pool
-    return await handler.handler(payload.projectId, payload.body, dispatch);
+    return await handler.handler(
+      payload.projectId,
+      payload.body,
+      dispatch,
+      external
+    );
   }
 
   try {
-    const rpcResponse = await dispatch(payload);
+    const rpcResponse = await dispatch(payload, true);
     rsp.json(rpcResponse || { message: 'ok' });
   } catch (e) {
     log.error(e);

@@ -1,8 +1,16 @@
 import { IpcMain, IpcMainEvent } from 'electron';
 import { RPC_ASYNC_REQUEST, RPC_ASYNC_RESPONSE } from '../shared/constants';
 import log from '../shared/log';
-import { Endpoint, IPCRendererResponse } from '../shared/rpc';
-import { ProjectState } from '../shared/state';
+import {
+  Endpoint,
+  GetProjectRequest,
+  GetProjectResponse,
+  IPCRendererResponse,
+  MakeProjectRequest,
+  MakeProjectResponse,
+  UpdateProjectRequest,
+  UpdateProjectResponse,
+} from '../shared/rpc';
 
 export interface RPCPayload {
   messageNumber: number;
@@ -22,17 +30,24 @@ export interface RPCHandler<Request, Response> {
   handler: (
     projectId: string,
     body: Request,
-    dispatch: Dispatch
+    dispatch: Dispatch,
+    external: boolean
   ) => Promise<Response>;
 }
 
 // Standard handlers
 export type GetProjectHandler = RPCHandler<
-  { internal?: boolean; projectId: string },
-  ProjectState | null
+  GetProjectRequest,
+  GetProjectResponse
 >;
-export type UpdateProjectHandler = RPCHandler<ProjectState, void>;
-export type MakeProjectHandler = RPCHandler<{ projectId: string }, void>;
+export type UpdateProjectHandler = RPCHandler<
+  UpdateProjectRequest,
+  UpdateProjectResponse
+>;
+export type MakeProjectHandler = RPCHandler<
+  MakeProjectRequest,
+  MakeProjectResponse
+>;
 
 // Stub to ensure msg is always typed
 function sendIPCRendererResponse(
@@ -47,13 +62,13 @@ export function registerRPCHandlers(
   ipcMain: IpcMain,
   handlers: RPCHandler<any, any>[]
 ) {
-  function dispatch(payload: RPCPayload) {
+  function dispatch(payload: RPCPayload, external = false) {
     const handler = handlers.filter((h) => h.resource === payload.resource)[0];
     if (!handler) {
       throw new Error(`No RPC handler for resource: ${payload.resource}`);
     }
 
-    return handler.handler(payload.projectId, payload.body, dispatch);
+    return handler.handler(payload.projectId, payload.body, dispatch, external);
   }
 
   ipcMain.on(
@@ -61,7 +76,7 @@ export function registerRPCHandlers(
     async function (event: IpcMainEvent, payload: RPCPayload) {
       const responseChannel = `${RPC_ASYNC_RESPONSE}:${payload.messageNumber}`;
       try {
-        const rsp = await dispatch(payload);
+        const rsp = await dispatch(payload, true);
         sendIPCRendererResponse(event, responseChannel, {
           kind: 'response',
           body: rsp,

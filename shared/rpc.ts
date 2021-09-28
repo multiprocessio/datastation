@@ -1,3 +1,19 @@
+import { ProjectState } from '../shared/state';
+export type GetProjectRequest = { projectId: string };
+export type GetProjectResponse = ProjectState | null;
+
+export type UpdateProjectRequest = ProjectState;
+export type UpdateProjectResponse = void;
+
+export type MakeProjectRequest = { projectId: string };
+export type MakeProjectResponse = void;
+
+export type OpenProjectRequest = void;
+export type OpenProjectResponse = void;
+
+export type GetProjectsRequest = void;
+export type GetProjectsResponse = Array<{ name: string; createdAt: string }>;
+
 export type PanelBody = { panelId: string };
 
 export type StoreEndpoint =

@@ -10,7 +10,7 @@ export async function getProjectAndPanel(
     ((await dispatch({
       resource: 'getProject',
       projectId,
-      body: { projectId, internal: true },
+      body: { projectId },
     })) as ProjectState) || new ProjectState();
   let panelPage = 0;
   let panel: PanelInfo;

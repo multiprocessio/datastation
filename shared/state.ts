@@ -600,7 +600,7 @@ export class ProjectState {
     this.id = uuid.v4();
   }
 
-  static async fromJSON(raw: any, internal = false): Promise<ProjectState> {
+  static async fromJSON(raw: any, external = true): Promise<ProjectState> {
     raw = raw || {};
     const ps = new ProjectState();
     ps.projectName = raw.projectName || '';
@@ -610,7 +610,7 @@ export class ProjectState {
     ps.id = raw.id || uuid.v4();
     ps.originalVersion = raw.originalVersion || VERSION;
     ps.lastVersion = raw.lastVersion || VERSION;
-    if (!internal) {
+    if (external) {
       await doOnEncryptFields(ps, (f, p) => {
         const new_ = new Encrypt(null);
         new_.encrypted = true;

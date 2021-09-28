@@ -6,6 +6,7 @@ import {
   UpdateProjectHandler,
 } from '../desktop/rpc';
 import { encryptProjectSecrets } from '../desktop/store';
+import { GetProjectsRequest, GetProjectsResponse } from '../shared/rpc';
 import { ProjectState } from '../shared/state';
 import { App } from './app';
 
@@ -19,10 +20,7 @@ export const getProjectHandlers = (app: App) => {
     port: +port,
   });
 
-  const getProjects: RPCHandler<
-    void,
-    Array<{ name: string; createdAt: string }>
-  > = {
+  const getProjects: RPCHandler<GetProjectsRequest, GetProjectsResponse> = {
     resource: 'getProjects',
     handler: async (): Promise<Array<{ name: string; createdAt: string }>> => {
       const client = await app.dbpool.connect();
@@ -44,7 +42,9 @@ export const getProjectHandlers = (app: App) => {
     resource: 'getProject',
     handler: async (
       _: string,
-      { internal, projectId }: { projectId: string; internal?: boolean }
+      { projectId }: { projectId: string },
+      _1: unknown,
+      external: boolean
     ): Promise<ProjectState> => {
       const client = await app.dbpool.connect();
       try {
@@ -53,7 +53,7 @@ export const getProjectHandlers = (app: App) => {
           [projectId]
         );
         const ps = res.rows[0].project_value;
-        return await ProjectState.fromJSON(ps, internal);
+        return await ProjectState.fromJSON(ps, external);
       } finally {
         client.release();
       }

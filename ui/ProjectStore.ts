@@ -1,4 +1,10 @@
 import * as React from 'react';
+import {
+  GetProjectRequest,
+  GetProjectResponse,
+  UpdateProjectRequest,
+  UpdateProjectResponse,
+} from '../shared/rpc';
 import { DEFAULT_PROJECT, ProjectState } from '../shared/state';
 import { asyncRPC } from './asyncRPC';
 
@@ -82,11 +88,16 @@ class LocalStorageStore extends ProjectStore {
 class RPCStore extends ProjectStore {
   update(projectId: string, newState: ProjectState, addToRestoreBuffer = true) {
     super.update(projectId, newState, addToRestoreBuffer);
-    return asyncRPC<ProjectState>('updateProject', newState);
+    return asyncRPC<UpdateProjectRequest, UpdateProjectResponse>(
+      'updateProject',
+      newState
+    );
   }
 
   get(projectId: string) {
-    return asyncRPC<string, ProjectState>('getProject', projectId);
+    return asyncRPC<GetProjectRequest, GetProjectResponse>('getProject', {
+      projectId,
+    });
   }
 }
 
