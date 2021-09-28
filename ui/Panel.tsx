@@ -176,7 +176,9 @@ export function Panel({
   movePanel: (from: number, to: number) => void;
   panels: Array<PanelInfo>;
 }) {
-  const panelUIDetails = PANEL_UI_DETAILS[panel.type];
+  // Fall back to empty dict in case panel.type names ever change
+  const panelUIDetails =
+    PANEL_UI_DETAILS[panel.type] || PANEL_UI_DETAILS.literal;
   const [details, setDetails] = React.useState(true);
   const [hidden, setHidden] = React.useState(false);
 
