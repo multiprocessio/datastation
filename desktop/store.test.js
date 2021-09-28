@@ -1,6 +1,6 @@
 const { SYNC_PERIOD } = require('./constants');
 const { wait } = require('../shared/promise');
-const { deepClone } = require('../shared/object');
+const { getPath } = require('../shared/object');
 const path = require('path');
 const os = require('os');
 const fs = require('fs/promises');
@@ -31,12 +31,12 @@ test('write project with encrypted secrets, read with nulled secrets', async () 
   const testProject = new ProjectState();
   const testServer = new ServerInfo();
   const testServerPassword = 'taffy';
-  testServer.password = new Encrypt(testServerPassword);
+  testServer.password_encrypt = new Encrypt(testServerPassword);
   const testServerPassphrase = 'kewl';
-  testServer.passphrase = new Encrypt(testServerPassphrase);
+  testServer.passphrase_encrypt = new Encrypt(testServerPassphrase);
   const testDatabase = new DatabaseConnectorInfo();
   const testDatabasePassword = 'kevin';
-  testDatabase.database.password = new Encrypt(testDatabasePassword);
+  testDatabase.database.password_encrypt = new Encrypt(testDatabasePassword);
   testProject.servers.push(testServer);
   testProject.connectors.push(testDatabase);
 
@@ -70,23 +70,14 @@ test('write project with encrypted secrets, read with nulled secrets', async () 
     expect(
       onDisk.connectors[0].database.password_encrypt.value.length
     ).not.toBe(0);
-    expect(onDisk.connectors[0].database.password).not.toBe(
+    expect(onDisk.connectors[0].database.password_encrypt.value).not.toBe(
       testDatabasePassword
     );
     expect(onDisk.connectors[0].database.password_encrypt.encrypted).toBe(true);
 
     // Passwords come back as null
     const readProject = await getProject.handler(null, { projectId });
-    testServer.id = onDisk.servers[0].id; // id is generated newly on every instantiation which is ok
-    testServer.password_encrypt.value = null;
-    testServer.password_encrypt.encrypted = true;
-    testServer.passphrase_encrypt.value = null;
-    testServer.passphrase_encrypt.encrypted = true;
-    testDatabase.database.password_encrypt.value = null;
-    testDatabase.database.password_encrypt.encrypted = true;
-    testDatabase.id = onDisk.connectors[0].id; // id is generated newly on every instantiation which is ok
-    testProject.id = readProject.id; // id is generated newly on every instantiation which is ok
-    expect(readProject).toStrictEqual(testProject);
+    expect(readProject).toStrictEqual(await ProjectState.fromJSON(testProject));
   } finally {
     try {
       await fs.unlink(projectPath);

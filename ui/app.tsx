@@ -1,5 +1,4 @@
 import formatDistanceToNow from 'date-fns/formatDistanceToNow';
-import pako from 'pako';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import {
@@ -60,37 +59,9 @@ function getQueryParameter(param: String) {
   return '';
 }
 
-const shareStateCache: {
-  state: undefined | ProjectState;
-  checked: boolean;
-} = {
-  state: undefined,
-  checked: false,
-};
-
-function getShareState(): undefined | ProjectState {
-  if (shareStateCache.checked) {
-    return shareStateCache.state;
-  }
-
-  shareStateCache.checked = true;
-  const shareState = getQueryParameter('share');
-  if (shareState) {
-    // TODO: this can be more efficient than calling split
-    const intArray = Uint8Array.from(
-      shareState.split(',').map((i) => parseInt(i))
-    );
-    const uncompressed = JSON.parse(pako.inflate(intArray, { to: 'string' }));
-    shareStateCache.state = ProjectState.fromJSON(uncompressed);
-  }
-
-  return shareStateCache.state;
-}
-
 function useProjectState(
   projectId: string,
-  store: ProjectStore | null,
-  shareState: ProjectState | undefined
+  store: ProjectStore | null
 ): [ProjectState, (d: ProjectState) => void] {
   const [state, setProjectState] = React.useState<ProjectState>(null);
 
@@ -126,11 +97,6 @@ function useProjectState(
 
   // Re-read state when projectId changes
   React.useEffect(() => {
-    if (shareState) {
-      setProjectState(shareState);
-      return;
-    }
-
     async function fetch() {
       let state;
       try {
@@ -138,7 +104,7 @@ function useProjectState(
         if (!rawState && (!isNewProject || isDefault)) {
           throw new Error();
         } else {
-          state = ProjectState.fromJSON(rawState);
+          state = await ProjectState.fromJSON(rawState);
         }
       } catch (e) {
         if (isDefault && e.message === '') {
@@ -165,11 +131,9 @@ function useProjectState(
 const store = makeStore(MODE);
 
 function App() {
-  const shareState = getShareState();
   const requestedProjectId = getQueryParameter('project');
   const [projectId, setProjectId] = React.useState(
-    (shareState && shareState.id) ||
-      requestedProjectId ||
+    requestedProjectId ||
       (MODE_FEATURES.useDefaultProject ? DEFAULT_PROJECT.projectName : '')
   );
   (window as any).projectId = projectId;
@@ -191,11 +155,7 @@ function App() {
     }
   }
 
-  const [state, updateProjectState] = useProjectState(
-    projectId,
-    store,
-    shareState
-  );
+  const [state, updateProjectState] = useProjectState(projectId, store);
 
   const currentPageKey = 'currentPage:' + projectId;
   const [currentPage, _setCurrentPage] = React.useState(
@@ -204,19 +164,6 @@ function App() {
   function setCurrentPage(p: number) {
     localStorage.setItem(currentPageKey, String(p) || '0');
     return _setCurrentPage(p);
-  }
-
-  const [shareURL, setShareURL] = React.useState('');
-
-  function computeShareURL() {
-    const domain =
-      window.location.protocol +
-      '//' +
-      window.location.hostname +
-      (window.location.port ? ':' + window.location.port : '');
-    const json = JSON.stringify(state);
-    const compressed = pako.deflate(json, { to: 'string' });
-    setShareURL(domain + '/?share=' + compressed);
   }
 
   React.useEffect(() => {
@@ -338,27 +285,6 @@ function App() {
                         Reset
                       </Button>
                     </span>
-                    <div className="share">
-                      <Button onClick={() => computeShareURL()}>Share</Button>
-                      <div className="share-details">
-                        <p>This URL contains the entire project state.</p>
-                        <p>
-                          Project data is not stored on a server. But if you do
-                          use this URL, the data encoded in the URL will appear
-                          in DataStation web server access logs.
-                        </p>
-                        <p>
-                          If you make changes, you will need to click "Share"
-                          again to get a new URL.
-                        </p>
-                        <Input readOnly value={shareURL} onChange={() => {}} />
-                        <p>
-                          <a href="https://tinyurl.com/app">TinyURL</a> is a
-                          good service for shortening these URLs correctly, some
-                          other systems break the URL.
-                        </p>
-                      </div>
-                    </div>
                     <a
                       href="https://github.com/multiprocessio/datastation"
                       target="_blank"

@@ -84,10 +84,7 @@ export const storeHandlers = [
       try {
         const f = await fsPromises.readFile(fileName);
         const ps = JSON.parse(f.toString()) as ProjectState;
-        if (internal) {
-          return ps;
-        }
-        return ProjectState.fromJSON(ps);
+        return await ProjectState.fromJSON(ps, internal);
       } catch (e) {
         log.error(e);
         return null;

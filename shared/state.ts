@@ -600,7 +600,7 @@ export class ProjectState {
     this.id = uuid.v4();
   }
 
-  static fromJSON(raw: any): ProjectState {
+  static async fromJSON(raw: any, internal = false): Promise<ProjectState> {
     raw = raw || {};
     const ps = new ProjectState();
     ps.projectName = raw.projectName || '';
@@ -610,12 +610,14 @@ export class ProjectState {
     ps.id = raw.id || uuid.v4();
     ps.originalVersion = raw.originalVersion || VERSION;
     ps.lastVersion = raw.lastVersion || VERSION;
-    doOnEncryptFields(ps, (f) => {
-      const new_ = new Encrypt(null);
-      new_.encrypted = true;
-      return Promise.resolve(new_);
-    });
-    doOnMatchingFields<Date>(
+    if (!internal) {
+      await doOnEncryptFields(ps, (f, p) => {
+        const new_ = new Encrypt(null);
+        new_.encrypted = true;
+        return Promise.resolve(new_);
+      });
+    }
+    await doOnMatchingFields<Date>(
       ps,
       (path) => path.endsWith('_date'),
       (d) => {

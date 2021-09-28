@@ -46,10 +46,7 @@ export const getProjectHandlers = (app: App) => {
             [projectId]
           );
           const ps = res.rows[0].project_value;
-          if (internal) {
-            return ps;
-          }
-          return ProjectState.fromJSON(ps);
+          return await ProjectState.fromJSON(ps, internal);
         } finally {
           client.release();
         }
