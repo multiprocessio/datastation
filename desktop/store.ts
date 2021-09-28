@@ -6,7 +6,7 @@ import { getPath } from '../shared/object';
 import { doOnEncryptFields, Encrypt, ProjectState } from '../shared/state';
 import { DISK_ROOT, PROJECT_EXTENSION, SYNC_PERIOD } from './constants';
 import { ensureFile } from './fs';
-import { Dispatch } from './rpc';
+import { Dispatch, RPCHandler } from './rpc';
 import { encrypt } from './secret';
 
 const buffers: Record<
@@ -73,47 +73,53 @@ export function encryptProjectSecrets(
   });
 }
 
-export const storeHandlers = [
-  {
-    resource: 'getProject',
-    handler: async (
-      _: string,
-      { internal, projectId }: { internal?: boolean; projectId: string }
-    ) => {
-      const fileName = await ensureProjectFile(projectId);
-      try {
-        const f = await fsPromises.readFile(fileName);
-        const ps = JSON.parse(f.toString()) as ProjectState;
-        return await ProjectState.fromJSON(ps, internal);
-      } catch (e) {
-        log.error(e);
-        return null;
-      }
-    },
-  },
-  {
-    resource: 'updateProject',
-    handler: async (
-      projectId: string,
-      newState: ProjectState,
-      dispatch: Dispatch
-    ) => {
-      const fileName = await ensureProjectFile(projectId);
+const getProjectHandler: RPCHandler<ProjectState | null> = {
+  resource: 'getProject',
+  handler: async (
+    _: string,
+    { internal, projectId }: { internal?: boolean; projectId: string }
+  ) => {
+    const fileName = await ensureProjectFile(projectId);
+    try {
       const f = await fsPromises.readFile(fileName);
-      const existingState = JSON.parse(f.toString());
-      await encryptProjectSecrets(newState, existingState);
-      return writeFileBuffered(fileName, JSON.stringify(newState));
-    },
+      const ps = JSON.parse(f.toString()) as ProjectState;
+      return await ProjectState.fromJSON(ps, internal);
+    } catch (e) {
+      log.error(e);
+      return null;
+    }
   },
-  {
-    resource: 'makeProject',
-    handler: async (_0: string, { projectId }: { projectId: string }) => {
-      const fileName = await ensureProjectFile(projectId);
-      const newProject = new ProjectState();
-      newProject.projectName = fileName;
-      return fsPromises.writeFile(fileName, JSON.stringify(newProject));
-    },
+};
+
+const updateProjectHandler: RPCHandler<void> = {
+  resource: 'updateProject',
+  handler: async (
+    projectId: string,
+    newState: ProjectState,
+    dispatch: Dispatch
+  ) => {
+    const fileName = await ensureProjectFile(projectId);
+    const f = await fsPromises.readFile(fileName);
+    const existingState = JSON.parse(f.toString());
+    await encryptProjectSecrets(newState, existingState);
+    return writeFileBuffered(fileName, JSON.stringify(newState));
   },
+};
+
+const makeProjectHandler: RPCHandler<void> = {
+  resource: 'makeProject',
+  handler: async (_0: string, { projectId }: { projectId: string }) => {
+    const fileName = await ensureProjectFile(projectId);
+    const newProject = new ProjectState();
+    newProject.projectName = fileName;
+    return fsPromises.writeFile(fileName, JSON.stringify(newProject));
+  },
+};
+
+export const storeHandlers: RPCHandler<any>[] = [
+  getProjectHandler,
+  updateProjectHandler,
+  makeProjectHandler,
 ];
 
 export function ensureProjectFile(projectId: string) {

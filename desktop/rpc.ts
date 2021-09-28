@@ -16,9 +16,9 @@ export type DispatchPayload = Omit<RPCPayload, 'messageNumber' | 'body'> & {
 
 export type Dispatch = (payload: DispatchPayload) => Promise<any>;
 
-export interface RPCHandler {
+export interface RPCHandler<T> {
   resource: Endpoint;
-  handler: (projectId: string, body: any, dispatch: Dispatch) => Promise<any>;
+  handler: (projectId: string, body: T, dispatch: Dispatch) => Promise<T>;
 }
 
 // Stub to ensure msg is always typed
@@ -30,9 +30,9 @@ function sendIPCRendererResponse(
   event.sender.send(channel, msg);
 }
 
-export function registerRPCHandlers(
+export function registerRPCHandlers<T>(
   ipcMain: IpcMain,
-  handlers: Array<RPCHandler>
+  handlers: RPCHandler<T>[]
 ) {
   function dispatch(payload: RPCPayload) {
     const handler = handlers.filter((h) => h.resource === payload.resource)[0];

@@ -1,7 +1,16 @@
 const { getProjectResultsFile } = require('../store');
+const { shape } = require('shape');
+const { preview } = require('preview');
 const fs = require('fs/promises');
 const { file: makeTmpFile } = require('tmp-promise');
-const { evalColumns, evalLiteral, fetchResultsHandler } = require('./columns');
+const {
+  ProjectState,
+  ProjectPage,
+  LiteralPanelInfo,
+  TablePanelInfo,
+} = require('../../shared/state');
+const { evalHandler } = require('./eval');
+const { fetchResultsHandler } = require('./columns');
 
 test('store and retrieve literal, specific columns', async () => {
   const tmp = await makeTmpFile();
@@ -12,19 +21,33 @@ test('store and retrieve literal, specific columns', async () => {
   ];
 
   const id = 'my-uuid';
+  const resultsFile = getProjectResultsFile(tmp.path) + id;
 
   try {
-    const result = await evalLiteral(tmp.path, {
-      type: 'literal',
-      id,
-      content: JSON.stringify(testData),
-      literal: {
-        contentTypeInfo: {
-          type: 'application/json',
+    const result = await evalHandler.handler(tmp.path, { panelId: id }, () => ({
+      ...new ProjectState(),
+      id: tmp.path,
+      pages: [
+        {
+          ...new ProjectPage(),
+          panels: [
+            {
+              ...new LiteralPanelInfo(),
+              id,
+              content: JSON.stringify(testData),
+              literal: {
+                contentTypeInfo: {
+                  type: 'application/json',
+                },
+              },
+            },
+          ],
         },
-      },
-    });
-    expect(result.value).toStrictEqual(testData);
+      ],
+    }));
+    expect(result.size).toStrictEqual(JSON.stringify(testData).length);
+    expect(result.shape).toStrictEqual(shape(testData));
+    expect(result.preview).toStrictEqual(preview(testData));
     expect(result.contentType).toBe('application/json');
 
     const { value: valueFromDisk } = await fetchResultsHandler(
@@ -35,20 +58,35 @@ test('store and retrieve literal, specific columns', async () => {
     );
     expect(valueFromDisk).toStrictEqual(testData);
 
-    const { value: selectColumns } = await evalColumns(tmp.path, {
-      type: 'table',
-      id,
-      table: {
-        panelSource: id,
-        columns: ['a'],
-      },
-    });
+    const { value: selectColumns } = await evalHandler.handler(
+      tmp.path,
+      { panelId: id },
+      () => ({
+        ...new ProjectState(),
+        id: tmp.path,
+        pages: [
+          {
+            ...new ProjectPage(),
+            panels: [
+              {
+                ...new TablePanelInfo(),
+                id,
+                resultMeta: result,
+                table: {
+                  columns: ['a'],
+                },
+              },
+            ],
+          },
+        ],
+      })
+    );
     expect(selectColumns).toStrictEqual([{ a: 1 }, { a: 19 }]);
   } finally {
-    await tmp.cleanup();
     try {
       // Results file
-      await fs.unlink(getProjectResultsFile(tmp.path) + id);
+      await tmp.cleanup();
+      await fs.unlink(resultFile);
     } catch (e) {
       console.error(e); // don't fail on failure to cleanup, means an earlier step is going to fail after finally block
     }

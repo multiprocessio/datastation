@@ -5,13 +5,10 @@ export type StoreEndpoint =
   | 'makeProject'
   | 'updateProject'
   | 'getProject'
-  | 'openProject';
+  | 'openProject'
+  | 'updateSettings';
 
-export type PanelEndpoint =
-  | 'killProcess'
-  | 'storeLiteral'
-  | 'fetchResults'
-  | 'eval';
+export type PanelEndpoint = 'killProcess' | 'fetchResults' | 'eval';
 
 export type Endpoint = PanelEndpoint | StoreEndpoint;
 

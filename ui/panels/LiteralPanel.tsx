@@ -19,7 +19,7 @@ export async function evalLiteralPanel(panel: LiteralPanelInfo) {
   );
 
   if (MODE !== 'browser') {
-    await panelRPC('storeLiteral', panel.id);
+    await panelRPC('eval', panel.id);
   }
 
   return {

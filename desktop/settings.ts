@@ -4,6 +4,7 @@ import { LANGUAGES, SupportedLanguages } from '../shared/languages';
 import log from '../shared/log';
 import { mergeDeep } from '../shared/object';
 import { ensureFile } from './fs';
+import { RPCHandler } from './rpc';
 
 export class LanguageSettings {
   path: string;
@@ -79,7 +80,7 @@ export class Settings {
     return fs.writeFile(this.file, JSON.stringify(this));
   }
 
-  getUpdateHandler() {
+  getUpdateHandler(): RPCHandler<void> {
     return {
       resource: 'updateSettings',
       handler: (_: string, settings: Settings) => {

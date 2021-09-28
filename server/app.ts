@@ -51,11 +51,11 @@ export async function init() {
   await ensureSigningKey();
 
   const settings = await loadSettings();
-  const rpcHandlers = [
+  const rpcHandlers: RPCHandler<any>[] = [
     ...getProjectHandlers(app),
     ...panelHandlers,
     settings.getUpdateHandler(),
-  ] as RPCHandler[];
+  ];
 
   const auth = await registerAuth('/a/auth', app, config);
 

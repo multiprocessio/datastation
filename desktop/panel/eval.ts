@@ -17,6 +17,7 @@ import { evalFilterAggregate } from './filagg';
 import { evalFile } from './file';
 import { evalHTTP } from './http';
 import { evalProgram } from './program';
+import { getProjectAndPanel } from './shared';
 import { EvalHandlerExtra, EvalHandlerResponse } from './types';
 
 type EvalHandler = (
@@ -36,32 +37,18 @@ const EVAL_HANDLERS: { [k in PanelInfoType]: EvalHandler } = {
   literal: evalLiteral,
 };
 
-export const evalHandler = {
+export const evalHandler: RPCHandler<PanelResult> = {
   resource: 'eval',
   handler: async function (
     projectId: string,
     body: PanelBody,
     dispatch: Dispatch
   ): Promise<PanelResult> {
-    const project =
-      ((await dispatch({
-        resource: 'getProject',
-        projectId,
-        body: { projectId, internal: true },
-      })) as ProjectState) || new ProjectState();
-    let panelPage = 0;
-    let panel: PanelInfo;
-    for (; !panel && panelPage < (project.pages || []).length; panelPage++) {
-      for (const p of project.pages[panelPage].panels || []) {
-        if (p.id === body.panelId) {
-          panel = p;
-          break;
-        }
-      }
-    }
-    if (!panel) {
-      throw new Error('Unable to find panel.');
-    }
+    const { project, panel, panelPage } = await getProjectAndPanel(
+      projectId,
+      body.panelId,
+      dispatch
+    );
 
     const indexIdMap = project.pages[panelPage].panels.map((p) => p.id);
     const indexShapeMap = project.pages[panelPage].panels.map(

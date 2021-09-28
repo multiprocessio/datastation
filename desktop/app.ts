@@ -33,12 +33,12 @@ app.whenReady().then(async () => {
 
   await openWindow(project);
 
-  const handlers = [
+  const handlers: RPCHandler<any>[] = [
     ...storeHandlers,
     ...panelHandlers,
     openProjectHandler,
     settings.getUpdateHandler(),
-  ] as RPCHandler[];
+  ];
 
   registerRPCHandlers(ipcMain, handlers);
 });

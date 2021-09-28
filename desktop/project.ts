@@ -8,6 +8,7 @@ import {
 import path from 'path';
 import { APP_NAME, CHAT_LINK, DEBUG, SITE_ROOT } from '../shared/constants';
 import { DISK_ROOT, PROJECT_EXTENSION } from './constants';
+import { RPCHandler } from './rpc';
 import { SETTINGS } from './settings';
 
 const menuTemplate = [
@@ -139,7 +140,7 @@ export async function openProject() {
   await openWindow(filePaths[0]);
 }
 
-export const openProjectHandler = {
+export const openProjectHandler: RPCHandler<void> = {
   resource: 'openProject',
-  handler: (_0: string, _1: string, _2: any) => openProject,
+  handler: openProject,
 };

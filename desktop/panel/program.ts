@@ -5,7 +5,9 @@ import path from 'path';
 import { file as makeTmpFile } from 'tmp-promise';
 import { InvalidDependentPanelError, NoResultError } from '../../shared/errors';
 import { LANGUAGES } from '../../shared/languages';
+import { PanelBody } from '../../shared/rpc';
 import { PanelInfo, ProgramPanelInfo, ProjectState } from '../../shared/state';
+import { RPCHandler } from '../rpc';
 import { SETTINGS } from '../settings';
 import { getProjectResultsFile } from '../store';
 import { EvalHandlerExtra, EvalHandlerResponse, guardPanel } from './types';
@@ -122,9 +124,9 @@ export async function evalProgram(
   }
 }
 
-export const killProcessHandler = {
+export const killProcessHandler: RPCHandler<void> = {
   resource: 'killProcess',
-  handler: async function (_: string, _1: string, ppi: ProgramPanelInfo) {
-    killAllByPanelId(ppi.id);
+  handler: function (_: string, body: PanelBody) {
+    killAllByPanelId(body.panelId);
   },
 };

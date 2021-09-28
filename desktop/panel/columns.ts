@@ -1,4 +1,5 @@
 import fs from 'fs/promises';
+import { PanelBody } from '../../shared/rpc';
 import {
   GraphPanelInfo,
   LiteralPanelInfo,
@@ -8,7 +9,9 @@ import {
 } from '../../shared/state';
 import { columnsFromObject } from '../../shared/table';
 import { parseArrayBuffer } from '../../shared/text';
+import { Dispatch, RPCHandler } from '../rpc';
 import { getProjectResultsFile } from '../store';
+import { getProjectAndPanel } from './shared';
 import { EvalHandlerResponse, guardPanel } from './types';
 
 export async function evalColumns(
@@ -56,17 +59,27 @@ export async function evalLiteral(
   return await parseArrayBuffer(contentTypeInfo, '', panel.content);
 }
 
-export async function fetchResultsHandler(
-  project: ProjectState,
-  panel: PanelInfo
-): Promise<EvalHandlerResponse> {
-  const projectResultsFile = getProjectResultsFile(project.id);
-  const f = await fs.readFile(projectResultsFile + panel.id);
-  return await parseArrayBuffer(
-    {
-      type: panel.resultMeta.contentType,
-    },
-    '',
-    f
-  );
-}
+export const fetchResultsHandler: RPCHandler<any> = {
+  resource: 'fetchResults',
+  handler: async function (
+    projectId: string,
+    body: PanelBody,
+    dispatch: Dispatch
+  ): Promise<EvalHandlerResponse> {
+    const { panel } = await getProjectAndPanel(
+      projectId,
+      body.panelId,
+      dispatch
+    );
+
+    const projectResultsFile = getProjectResultsFile(projectId);
+    const f = await fs.readFile(projectResultsFile + panel.id);
+    return await parseArrayBuffer(
+      {
+        type: panel.resultMeta.contentType,
+      },
+      '',
+      f
+    );
+  },
+};
