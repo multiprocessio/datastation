@@ -2,10 +2,16 @@ import React from 'react';
 import { shape } from 'shape';
 import { MODE } from '../../shared/constants';
 import { LANGUAGES, SupportedLanguages } from '../../shared/languages';
-import { PanelResult, ProgramPanelInfo } from '../../shared/state';
+import { genericSQLRangeQuery } from '../../shared/sql';
+import {
+  PanelResult,
+  ProgramPanelInfo,
+  TimeSeriesRange as TimeSeriesRangeT,
+} from '../../shared/state';
 import { panelRPC } from '../asyncRPC';
 import { CodeEditor } from '../components/CodeEditor';
 import { Select } from '../components/Select';
+import { TimeSeriesRange } from '../components/TimeSeriesRange';
 import { PanelBodyProps, PanelDetailsProps, PanelUIDetails } from './types';
 
 export async function evalProgramPanel(
@@ -23,7 +29,12 @@ export async function evalProgramPanel(
     throw new Error(`Unknown program type: '${program.type}'`);
   }
 
-  const res = await language.inMemoryEval(panel.content, panelResults);
+  let content = panel.content;
+  if (program.type === 'sql') {
+    content = genericSQLRangeQuery(content, panel.range);
+  }
+
+  const res = await language.inMemoryEval(content, panelResults);
   return {
     ...res,
     size: res.value ? JSON.stringify(res.value).length : 0,
@@ -70,6 +81,17 @@ export function ProgramPanelDetails({
             </option>
           ))}
         </Select>
+        {program.type === 'sql' && (
+          <div class="form-row">
+            <TimeSeriesRange
+              range={panel.database.range}
+              updateRange={(r: TimeSeriesRangeT) => {
+                panel.database.range = r;
+                updatePanel(panel);
+              }}
+            />
+          </div>
+        )}
       </div>
     </React.Fragment>
   );

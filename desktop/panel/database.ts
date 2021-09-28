@@ -23,6 +23,7 @@ import {
   UnsupportedError,
 } from '../../shared/errors';
 import log from '../../shared/log';
+import { genericSQLRangeQuery } from '../../shared/sql';
 import {
   DatabaseConnectorInfo,
   DatabasePanelInfo,
@@ -368,20 +369,19 @@ async function evalSQLite(
   project: ProjectState,
   panelsToImport: Array<PanelToImport>
 ) {
-  let sqlitefile = connector.database.database;
-
-  async function run() {
+  async function run(sqlitefile: string) {
     const db = await sqlite.open({
       filename: sqlitefile,
       driver: sqlite3.Database,
     });
 
     try {
+      const rangeQuery = genericSQLRangeQuery(query, info.range);
       return await sqliteImportAndRun(
         db,
         project.id,
         info,
-        query,
+        rangeQuery,
         panelsToImport
       );
     } finally {
@@ -402,8 +402,7 @@ async function evalSQLite(
 
     try {
       await sftp.fastGet(sqlitefile, localCopy.path);
-      sqlitefile = localCopy.path;
-      const value = await run();
+      const value = await run(localCopy.path);
       return { value };
     } finally {
       localCopy.cleanup();
@@ -411,7 +410,7 @@ async function evalSQLite(
     }
   }
 
-  const value = await run();
+  const value = await run(connector.database.database);
   return { value };
 }
 

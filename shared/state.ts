@@ -273,12 +273,23 @@ export class PanelInfo {
 export class ProgramPanelInfo extends PanelInfo {
   program: {
     type: SupportedLanguages;
+    range?: TimeSeriesRange;
   };
 
-  constructor(name?: string, type?: SupportedLanguages, content?: string) {
+  constructor(
+    name?: string,
+    type?: SupportedLanguages,
+    content?: string,
+    range?: TimeSeriesRange
+  ) {
     super('program', name, content);
     this.program = {
       type: type || 'python',
+      range: range || {
+        field: '',
+        rangeType: 'relative',
+        relative: 'last-hour',
+      },
     };
   }
 }
