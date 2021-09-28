@@ -31,8 +31,6 @@ export const PANEL_GROUPS: Array<{
     label: 'Import',
     panels: (() => {
       const panels: Array<PanelInfoType> = [
-        // TODO: remove DATABASE
-        'database',
         'http',
         'file',
         'literal',
