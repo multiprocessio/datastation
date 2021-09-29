@@ -70,25 +70,28 @@ test('store and retrieve literal, specific columns', async () => {
     const { value: selectColumns } = await evalHandler.handler(
       tmp.path,
       { panelId: id },
-      () => ({
-        ...new ProjectState(),
-        id: tmp.path,
-        pages: [
-          {
-            ...new ProjectPage(),
-            panels: [
-              {
-                ...new TablePanelInfo(),
-                id,
-                resultMeta: result,
-                table: {
-                  columns: [{ field: 'a' }],
+      ({ resource }) =>
+        resource === 'fetchResults'
+          ? { ...result, value: valueFromDisk }
+          : {
+              ...new ProjectState(),
+              id: tmp.path,
+              pages: [
+                {
+                  ...new ProjectPage(),
+                  panels: [
+                    {
+                      ...new TablePanelInfo(),
+                      id,
+                      resultMeta: result,
+                      table: {
+                        columns: [{ field: 'a' }],
+                      },
+                    },
+                  ],
                 },
-              },
-            ],
-          },
-        ],
-      })
+              ],
+            }
     );
     expect(selectColumns).toStrictEqual([{ a: 1 }, { a: 19 }]);
   } finally {

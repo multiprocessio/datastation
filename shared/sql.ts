@@ -148,9 +148,9 @@ export function sqlRangeQuery(
 
   const { begin, end } = timestampsFromRange(range);
 
-  function formatTimestamp(t: Date) {
+  function formatTimestamp(t: Date | string) {
     const quotedTime = quote(
-      format(t, 'yyyy-MM-dd HH:mm:ss'),
+      format(new Date(t), 'yyyy-MM-dd HH:mm:ss'),
       quoteStyle.string
     );
     if (type === 'clickhouse') {
@@ -162,7 +162,7 @@ export function sqlRangeQuery(
   }
 
   // This is not going to work for systems like Cassandra that don't support subqueries.
-  return `SELECT * FROM ${query} WHERE ${quote(
+  return `SELECT * FROM (${query}) WHERE ${quote(
     range.field,
     quoteStyle.identifier
   )} > ${formatTimestamp(begin)} AND ${quote(

@@ -1,3 +1,6 @@
+const { getProjectResultsFile } = require('../store');
+const fs = require('fs');
+const { file: makeTmpFile } = require('tmp-promise');
 const { shape } = require('shape');
 const { MYSQL_QUOTE, ANSI_SQL_QUOTE } = require('../../shared/sql');
 const {
@@ -37,7 +40,7 @@ test('transform DM_getPanel calls', () => {
   expect(query).toBe('SELECT * FROM t0 WHERE x >= 2');
   expect(panelsToImport).toStrictEqual([
     {
-      panelId: 'panel0ID',
+      id: 'panel0ID',
       tableName: 't0',
       columns: [
         { name: 'a', type: 'TEXT' },
@@ -57,7 +60,7 @@ test('format import query and rows', () => {
     panel0Data.map((d) => ({ value: d })),
     ANSI_SQL_QUOTE
   );
-  expect(query).toBe(`INSERT INTO "t1" ("a", "x") VALUES (?,?), (?,?);`);
+  expect(query).toBe(`INSERT INTO "t1" ("a", "x") VALUES (?, ?), (?, ?);`);
   expect(rows).toStrictEqual(['cara', 1, 'demi', 2]);
 
   [query, rows] = formatImportQueryAndRows(
@@ -66,17 +69,20 @@ test('format import query and rows', () => {
     panel0Data.map((d) => ({ value: d })),
     MYSQL_QUOTE
   );
-  expect(query).toBe('INSERT INTO `t1` (`a`, `x`) VALUES (?,?), (?,?);');
+  expect(query).toBe('INSERT INTO `t1` (`a`, `x`) VALUES (?, ?), (?, ?);');
 });
 
-test('importAndRun', () => {
-  const t0Results = {
-    value: [
-      { a: 12, b: 'Mel', c: 9 },
-      { a: 154, b: 'Karry', c: 10 },
-    ],
-  };
-  const dispatch = () => t0Results;
+test('importAndRun', async () => {
+  const tmp = await makeTmpFile();
+  const panelId = 'some-great-id';
+  const t0Results = [
+    { a: 12, b: 'Mel', c: 9 },
+    { a: 154, b: 'Karry', c: 10 },
+  ];
+  fs.writeFileSync(
+    getProjectResultsFile(tmp.path) + panelId,
+    JSON.stringify(t0Results)
+  );
 
   const db = {
     createTable: jest.fn(),
@@ -84,10 +90,11 @@ test('importAndRun', () => {
     query: jest.fn(() => [1, 2]),
   };
 
-  const projectId = 'my new uuid';
+  const projectId = tmp.path;
   const query = 'SELECT * FROM t0';
   const panelsToImport = [
     {
+      id: panelId,
       tableName: 't0',
       columns: [
         { name: 'a', type: 'int' },
@@ -96,29 +103,29 @@ test('importAndRun', () => {
     },
   ];
 
-  const { value } = await importAndRun(
-    dispatch,
+  const value = await importAndRun(
+    null,
     db,
     projectId,
     query,
     panelsToImport,
     ANSI_SQL_QUOTE
   );
-  expect(value).toStrictEqual([1, 2]);
+  await tmp.cleanup();
+
   expect(db.createTable.mock.calls.length).toBe(1);
   expect(db.createTable.mock.calls[0][0]).toBe(
-    'CREATE TABLE "t0" ("a" int, "b" text);'
+    'CREATE TEMPORARY TABLE "t0" ("a" int, "b" text);'
   );
 
   expect(db.insert.mock.calls.length).toBe(1);
-  expect(db.insert.mock.calls[0]).toBe([
-    'INSERT INTO "t0" VALUES ("a", "b") (?, ?), (?, ?);',
-    12,
-    154,
-    'Mel',
-    'Kerry',
+  expect([...db.insert.mock.calls[0]]).toStrictEqual([
+    'INSERT INTO "t0" ("a", "b") VALUES (?, ?), (?, ?);',
+    [12, 'Mel', 154, 'Karry'],
   ]);
 
   expect(db.query.mock.calls.length).toBe(1);
   expect(db.query.mock.calls[0][0]).toBe(query);
+
+  expect(value).toStrictEqual([1, 2]);
 });

@@ -364,7 +364,7 @@ export function formatImportQueryAndRows(
     .map((c) => quote(c.name, quoteType.identifier))
     .join(', ');
   const values = data
-    .map(({ value: row }) => '(' + columns.map((c) => '?') + ')')
+    .map(({ value: row }) => '(' + columns.map((c) => '?').join(', ') + ')')
     .join(', ');
   const query = `INSERT INTO ${quote(
     tableName,
@@ -376,7 +376,7 @@ export function formatImportQueryAndRows(
   return [query, rows];
 }
 
-async function importAndRun(
+export async function importAndRun(
   dispatch: Dispatch,
   db: {
     createTable: (stmt: string) => Promise<unknown>;

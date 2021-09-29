@@ -37,6 +37,20 @@ test('parse csv', async () => {
   expect(res.value).toStrictEqual([{ name: 'kev', age: '12' }]);
 });
 
+test('json newlines', async () => {
+  const logs = [
+    { a: 1, b: 23 },
+    { a: 22, b: 90 },
+  ];
+  const res = await parseArrayBuffer(
+    { type: 'application/jsonlines' },
+    '',
+    logs.map(JSON.stringify).join('\n')
+  );
+
+  expect(res.value).toStrictEqual(logs);
+});
+
 test('nginx regex', async () => {
   const sampleLogs = `66.249.65.159 - - [06/Nov/2014:19:10:38 +0600] "GET /news/53f8d72920ba2744fe873ebc.html HTTP/1.1" 404 177 "-" "Mozilla/5.0 (iPhone; CPU iPhone OS 6_0 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Version/6.0 Mobile/10A5376e Safari/8536.25 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)"
 66.249.65.62 - - [06/Nov/2014:19:12:14 +0600] "GET /?q=%E0%A6%A6%E0%A7%8B%E0%A7%9F%E0%A6%BE HTTP/1.1" 200 4356 "-" "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)"`;
