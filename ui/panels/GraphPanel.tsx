@@ -97,7 +97,6 @@ function getNDifferentColors(
 
 export function GraphPanel({ panel, panels }: PanelBodyProps<GraphPanelInfo>) {
   const data = panel.resultMeta || new PanelResult();
-  //(panels[panel.graph.panelSource] || {}).resultMeta || new PanelResult();
   const value = (data || {}).value || [];
   const ref = React.useRef(null);
   React.useEffect(() => {

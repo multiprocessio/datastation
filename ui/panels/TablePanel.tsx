@@ -133,8 +133,7 @@ export function TablePanelDetails({
 }
 
 export function TablePanel({ panel, panels }: PanelBodyProps<TablePanelInfo>) {
-  const data =
-    (panels[panel.table.panelSource] || {}).resultMeta || new PanelResult();
+  const data = panel.resultMeta || new PanelResult();
 
   let valueAsArray: Array<any> = [];
   if (data && data.value && Array.isArray(data.value)) {
