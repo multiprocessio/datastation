@@ -30,7 +30,7 @@ export async function evalProgram(
   const programTmp = await makeTmpFile();
   const language = LANGUAGES[ppi.program.type];
 
-  const projectResultsFile = getProjectResultsFile(project.name);
+  const projectResultsFile = getProjectResultsFile(project.projectName);
 
   if (!language.defaultPath) {
     const res = await language.inMemoryEval(ppi.content, {
