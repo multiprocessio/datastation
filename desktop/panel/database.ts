@@ -461,7 +461,7 @@ async function evalSQLite(
           insert: (stmt: string, values: any[]) => db.run(stmt, ...values),
           query: (stmt: string) => db.all(stmt),
         },
-        project.id,
+        project.name,
         query,
         panelsToImport,
         ANSI_SQL_QUOTE
@@ -717,7 +717,7 @@ export async function evalDatabase(
           host,
           port,
           connector,
-          project.id,
+          project.name,
           panelsToImport
         );
       }
@@ -729,7 +729,7 @@ export async function evalDatabase(
           host,
           port,
           connector,
-          project.id,
+          project.name,
           panelsToImport
         );
       }

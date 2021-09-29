@@ -35,7 +35,7 @@ export async function evalColumns(
     guardPanel<GraphPanelInfo>(panel, 'graph');
   }
 
-  const { value } = await getPanelResult(dispatch, project.id, panel.id);
+  const { value } = await getPanelResult(dispatch, project.name, panel.id);
 
   const valueWithRequestedColumns = columnsFromObject(
     value,
