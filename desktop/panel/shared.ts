@@ -1,8 +1,5 @@
-import fs from 'fs';
-import { Readable } from 'stream';
 import { PanelInfo, PanelResult, ProjectState } from '../../shared/state';
 import { Dispatch } from '../rpc';
-import { getProjectResultsFile } from '../store';
 
 export async function getProjectAndPanel(
   dispatch: Dispatch,
@@ -35,25 +32,8 @@ export async function getProjectAndPanel(
 export async function getPanelResult(
   dispatch: Dispatch,
   projectId: string,
-  panelId: string,
-  raw: true
-): Promise<Readable>;
-export async function getPanelResult(
-  dispatch: Dispatch,
-  projectId: string,
   panelId: string
-): Promise<PanelResult>;
-export async function getPanelResult(
-  dispatch: Dispatch,
-  projectId: string,
-  panelId: string,
-  raw?: boolean
-): Promise<PanelResult | Readable> {
-  if (raw === true) {
-    const resultFile = getProjectResultsFile(projectId) + panelId;
-    return await fs.createReadStream(resultFile);
-  }
-
+): Promise<PanelResult> {
   return (await dispatch({
     resource: 'fetchResults',
     projectId,

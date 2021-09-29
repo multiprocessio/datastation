@@ -56,7 +56,7 @@ test('format import query and rows', () => {
   let [query, rows] = formatImportQueryAndRows(
     't1',
     [{ name: 'a' }, { name: 'x' }],
-    panel0Data.map((d) => ({ value: d })),
+    panel0Data,
     ANSI_SQL_QUOTE
   );
   expect(query).toBe(`INSERT INTO "t1" ("a", "x") VALUES (?, ?), (?, ?);`);
@@ -84,7 +84,7 @@ test('importAndRun', async () => {
     query: jest.fn(() => [1, 2]),
   };
 
-  const projectId = tmp.path;
+  const projectId = 'any project';
   const query = 'SELECT * FROM t0';
   const panelsToImport = [
     {

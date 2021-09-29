@@ -356,22 +356,20 @@ async function evalSnowflake(
 export function formatImportQueryAndRows(
   tableName: string,
   columns: Array<{ name: string }>,
-  data: Array<EvalHandlerResponse>,
+  data: Array<any>,
   quoteType: QuoteType
 ): [string, Array<any>] {
   const columnsDDL = columns
     .map((c) => quote(c.name, quoteType.identifier))
     .join(', ');
   const values = data
-    .map(({ value: row }) => '(' + columns.map((c) => '?').join(', ') + ')')
+    .map((row) => '(' + columns.map((c) => '?').join(', ') + ')')
     .join(', ');
   const query = `INSERT INTO ${quote(
     tableName,
     quoteType.identifier
   )} (${columnsDDL}) VALUES ${values};`;
-  const rows = data
-    .map(({ value: row }) => columns.map((c) => row[c.name]))
-    .flat();
+  const rows = data.map((row) => columns.map((c) => row[c.name])).flat();
   return [query, rows];
 }
 
@@ -418,7 +416,6 @@ export async function importAndRun(
     log.info(
       `Ingested ${rowsIngested} rows in ${panelsToImport.length} tables.`
     );
-    console.log(await db.query('select * from t0'));
   }
 
   return db.query(query);
