@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { CHAT_LINK } from '../../shared/constants';
+import { CHAT_LINK, MODE } from '../../shared/constants';
 import { Alert } from './Alert';
 import { Highlight } from './Highlight';
 
@@ -29,6 +29,14 @@ export class ErrorBoundary extends React.Component<Props, State> {
                 community support channel
               </a>{' '}
               with details about how to reproduce the error.
+            </p>
+            <p>
+              {MODE === 'server' &&
+                'If it was an unhandled error after you executed the panel, refreshing this page may allow you to fix the problem. Otherwise you may need to edit this project in the database manually to delete this panel.'}
+              {MODE === 'browser' &&
+                'If it was an unhandled error after you executed the panel, refreshing this page may allow you to fix the problem.'}
+              {MODE === 'desktop' &&
+                'If it was an unhandled error after you executed the panel, closing this window and reopening the project may allow you to fix the problem. Otherwise you may need to edit this project file manually to delete this panel.'}
             </p>
             <Highlight
               language="javascript"

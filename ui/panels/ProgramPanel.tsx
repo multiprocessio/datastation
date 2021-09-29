@@ -2,7 +2,7 @@ import React from 'react';
 import { shape } from 'shape';
 import { MODE } from '../../shared/constants';
 import { LANGUAGES, SupportedLanguages } from '../../shared/languages';
-import { genericSQLRangeQuery } from '../../shared/sql';
+import { sqlRangeQuery } from '../../shared/sql';
 import {
   PanelResult,
   ProgramPanelInfo,
@@ -31,7 +31,7 @@ export async function evalProgramPanel(
 
   let content = panel.content;
   if (program.type === 'sql') {
-    content = genericSQLRangeQuery(content, panel.range);
+    content = sqlRangeQuery(content, panel.program.range, 'sqlite');
   }
 
   const res = await language.inMemoryEval(content, panelResults);
@@ -81,12 +81,12 @@ export function ProgramPanelDetails({
             </option>
           ))}
         </Select>
-        {program.type === 'sql' && (
-          <div class="form-row">
+        {panel.program.type === 'sql' && (
+          <div className="form-row">
             <TimeSeriesRange
-              range={panel.database.range}
+              range={panel.program.range}
               updateRange={(r: TimeSeriesRangeT) => {
-                panel.database.range = r;
+                panel.program.range = r;
                 updatePanel(panel);
               }}
             />

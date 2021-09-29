@@ -6,6 +6,7 @@ import {
   ProjectPage,
 } from '../shared/state';
 import { Button } from './components/Button';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { Panel } from './Panel';
 
 export function PanelList({
@@ -65,7 +66,7 @@ export function PanelList({
     <React.Fragment>
       {newPanel(-1)}
       {page.panels.map((panel, panelIndex) => (
-        <React.Fragment key={panel.id}>
+        <ErrorBoundary key={panel.id}>
           <Panel
             panel={panel}
             updatePanel={updatePanel(page, panel.id)}
@@ -77,7 +78,7 @@ export function PanelList({
             panels={page.panels}
           />
           {newPanel(panelIndex)}
-        </React.Fragment>
+        </ErrorBoundary>
       ))}
     </React.Fragment>
   );

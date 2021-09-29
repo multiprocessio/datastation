@@ -23,7 +23,8 @@ import { EvalHandlerExtra, EvalHandlerResponse } from './types';
 type EvalHandler = (
   project: ProjectState,
   panel: PanelInfo,
-  extra: EvalHandlerExtra
+  extra: EvalHandlerExtra,
+  dispatch: Dispatch
 ) => Promise<EvalHandlerResponse>;
 
 const EVAL_HANDLERS: { [k in PanelInfoType]: EvalHandler } = {
@@ -45,9 +46,9 @@ export const evalHandler: RPCHandler<PanelBody, PanelResult> = {
     dispatch: Dispatch
   ): Promise<PanelResult> {
     const { project, panel, panelPage } = await getProjectAndPanel(
+      dispatch,
       projectId,
-      body.panelId,
-      dispatch
+      body.panelId
     );
 
     const indexIdMap = project.pages[panelPage].panels.map((p) => p.id);
@@ -56,10 +57,15 @@ export const evalHandler: RPCHandler<PanelBody, PanelResult> = {
     );
 
     const evalHandler = EVAL_HANDLERS[panel.type];
-    const res = await evalHandler(project, panel, {
-      indexIdMap,
-      indexShapeMap,
-    });
+    const res = await evalHandler(
+      project,
+      panel,
+      {
+        indexIdMap,
+        indexShapeMap,
+      },
+      dispatch
+    );
 
     // TODO: is it a problem panels like Program skip this escaping?
     // This library is important for escaping responses otherwise some

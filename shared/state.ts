@@ -171,7 +171,7 @@ export class HTTPConnectorInfo extends ConnectorInfo {
   }
 }
 
-export type DatabaseConnectorInfoType =
+export type SQLConnectorType =
   | 'postgres'
   | 'mysql'
   | 'sqlite'
@@ -180,7 +180,10 @@ export type DatabaseConnectorInfoType =
   | 'presto'
   | 'clickhouse'
   | 'snowflake'
-  | 'cassandra'
+  | 'cassandra';
+
+export type DatabaseConnectorInfoType =
+  | SQLConnectorType
   | 'elasticsearch'
   | 'splunk'
   | 'prometheus'

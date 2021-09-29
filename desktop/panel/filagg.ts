@@ -7,13 +7,15 @@ import {
   PanelInfo,
   ProjectState,
 } from '../../shared/state';
+import { Dispatch } from '../rpc';
 import { evalDatabase } from './database';
 import { EvalHandlerExtra, guardPanel } from './types';
 
 export async function evalFilterAggregate(
   project: ProjectState,
   panel: PanelInfo,
-  extra: EvalHandlerExtra
+  extra: EvalHandlerExtra,
+  dispatch: Dispatch
 ) {
   const {
     panelSource,
@@ -55,7 +57,7 @@ export async function evalFilterAggregate(
       project.connectors = [];
     }
     project.connectors.push(metaConnector);
-    return await evalDatabase(project, metaPanel, extra);
+    return await evalDatabase(project, metaPanel, extra, dispatch);
   } finally {
     try {
       await tmp.cleanup();

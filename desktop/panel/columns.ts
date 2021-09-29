@@ -11,12 +11,14 @@ import { columnsFromObject } from '../../shared/table';
 import { parseArrayBuffer } from '../../shared/text';
 import { Dispatch, RPCHandler } from '../rpc';
 import { getProjectResultsFile } from '../store';
-import { getProjectAndPanel } from './shared';
+import { getPanelResult, getProjectAndPanel } from './shared';
 import { EvalHandlerResponse, guardPanel } from './types';
 
 export async function evalColumns(
   project: ProjectState,
-  panel: PanelInfo
+  panel: PanelInfo,
+  _: unknown,
+  dispatch: Dispatch
 ): Promise<EvalHandlerResponse> {
   let columns: Array<string>;
   let panelSource: number;
@@ -33,9 +35,7 @@ export async function evalColumns(
     guardPanel<GraphPanelInfo>(panel, 'graph');
   }
 
-  const projectResultsFile = getProjectResultsFile(project.id);
-  const f = await fs.readFile(projectResultsFile + panel.id);
-  const value = JSON.parse(f.toString());
+  const { value } = await getPanelResult(dispatch, project.id, panel.id);
 
   const valueWithRequestedColumns = columnsFromObject(
     value,
@@ -67,11 +67,12 @@ export const fetchResultsHandler: RPCHandler<PanelBody, EvalHandlerResponse> = {
     dispatch: Dispatch
   ): Promise<EvalHandlerResponse> {
     const { panel } = await getProjectAndPanel(
+      dispatch,
       projectId,
-      body.panelId,
-      dispatch
+      body.panelId
     );
 
+    // Maybe the only appropriate place to call this in this package?
     const projectResultsFile = getProjectResultsFile(projectId);
     const f = await fs.readFile(projectResultsFile + panel.id);
     return await parseArrayBuffer(

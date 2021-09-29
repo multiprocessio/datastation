@@ -94,13 +94,15 @@ export function DatabasePanelDetails({
           updatePanel(panel);
         }}
       />
-      <TimeSeriesRange
-        range={panel.database.range}
-        updateRange={(r: TimeSeriesRangeT) => {
-          panel.database.range = r;
-          updatePanel(panel);
-        }}
-      />
+      {!['cassandra', 'presto'].includes(panel.database.type) && (
+        <TimeSeriesRange
+          range={panel.database.range}
+          updateRange={(r: TimeSeriesRangeT) => {
+            panel.database.range = r;
+            updatePanel(panel);
+          }}
+        />
+      )}
     </React.Fragment>
   );
 }

@@ -1,5 +1,4 @@
 import { ClickHouse } from 'clickhouse';
-import fs from 'fs';
 import sqlserver from 'mssql';
 import mysql from 'mysql2/promise';
 import { Client as PostgresClient } from 'pg';
@@ -13,6 +12,7 @@ import {
 import * as sqlite from 'sqlite';
 import sqlite3 from 'sqlite3';
 import Client from 'ssh2-sftp-client';
+import stream from 'stream';
 import { chain } from 'stream-chain';
 import * as json from 'stream-json';
 import { streamArray } from 'stream-json/streamers/StreamArray';
@@ -23,15 +23,22 @@ import {
   UnsupportedError,
 } from '../../shared/errors';
 import log from '../../shared/log';
-import { genericSQLRangeQuery } from '../../shared/sql';
+import {
+  ANSI_SQL_QUOTE,
+  quote,
+  QuoteType,
+  sqlRangeQuery,
+} from '../../shared/sql';
 import {
   DatabaseConnectorInfo,
   DatabasePanelInfo,
   PanelInfo,
   ProjectState,
+  TimeSeriesRange,
 } from '../../shared/state';
+import { Dispatch } from '../rpc';
 import { decrypt } from '../secret';
-import { getProjectResultsFile } from '../store';
+import { getPanelResult } from './shared';
 import { getSSHConfig, tunnel } from './tunnel';
 import { EvalHandlerExtra, EvalHandlerResponse, guardPanel } from './types';
 
@@ -74,7 +81,7 @@ function sqlColumnsAndTypesFromShape(rowShape: ObjectShape) {
 }
 
 interface PanelToImport {
-  panelId: string;
+  id: string;
   columns: Array<{ name: string; type: string }>;
   tableName: string;
 }
@@ -82,7 +89,8 @@ interface PanelToImport {
 export function transformDM_getPanelCalls(
   query: string,
   indexShapeMap: Array<Shape>,
-  indexIdMap: Array<string>
+  indexIdMap: Array<string>,
+  getPanelCallsAllowed: boolean
 ): { panelsToImport: Array<PanelToImport>; query: string } {
   const panelsToImport: Array<PanelToImport> = [];
   query = query.replace(
@@ -98,38 +106,70 @@ export function transformDM_getPanelCalls(
         throw new NotAnArrayOfObjectsError(+panelSource);
       }
 
-      const columns = sqlColumnsAndTypesFromShape(rowShape);
+      const id = indexIdMap[+panelSource];
+      if (panelsToImport.filter((p) => id === p.id).length) {
+        // Don't import the same panel twice.
+        return;
+      }
+
       const tableName = `t${panelSource}`;
+      const columns = sqlColumnsAndTypesFromShape(rowShape);
       panelsToImport.push({
+        id,
         columns,
         tableName,
-        panelId: indexIdMap[+panelSource],
       });
       return tableName;
     }
   );
 
+  if (panelsToImport.length && !getPanelCallsAllowed) {
+    throw new UnsupportedError(
+      'DM_getPanel() is not yet supported by this connector.'
+    );
+  }
+
   return { panelsToImport, query };
 }
 
 async function evalPostgreSQL(
-  content: string,
+  dispatch: Dispatch,
+  query: string,
   host: string,
   port: number,
-  { database }: DatabaseConnectorInfo
+  info: DatabaseConnectorInfo,
+  projectId: string,
+  panelsToImport: Array<PanelToImport>
 ) {
+  // Replace ? with $1, and so on
+  query = query
+    .split('?')
+    .map((_: string, i: number) => `$${i + 1}`)
+    .join('');
+
   const client = new PostgresClient({
-    user: database.username,
-    password: database.password_encrypt.value,
-    database: database.database,
+    user: info.database.username,
+    password: info.database.password_encrypt.value,
+    database: info.database.database,
     host,
     port,
   });
   try {
     await client.connect();
-    const res = await client.query(content);
+    const { rows } = await importAndRun(
+      dispatch,
+      {
+        createTable: (stmt: string) => client.query(stmt),
+        insert: (stmt: string, values: any[]) => client.query(stmt, values),
+        query: (stmt: string) => client.query(stmt),
+      },
+      projectId,
+      query,
+      panelsToImport,
+      ANSI_SQL_QUOTE
+    );
     return {
-      value: res.rows,
+      value: rows,
     };
   } finally {
     await client.end();
@@ -193,21 +233,36 @@ async function evalOracle(
 }
 
 async function evalMySQL(
-  content: string,
+  dispatch: Dispatch,
+  query: string,
   host: string,
   port: number,
-  { database }: DatabaseConnectorInfo
+  info: DatabaseConnectorInfo,
+  projectId: string,
+  panelsToImport: Array<PanelToImport>
 ) {
   const connection = await mysql.createConnection({
     host: host,
-    user: database.username,
-    password: database.password_encrypt.value,
-    database: database.database,
+    user: info.database.username,
+    password: info.database.password_encrypt.value,
+    database: info.database.database,
     port: port,
   });
 
   try {
-    const [value] = await connection.execute(content);
+    const [value] = await importAndRun(
+      dispatch,
+      {
+        createTable: (stmt: string) => connection.execute(stmt),
+        insert: (stmt: string, values: any[]) =>
+          connection.execute(stmt, values),
+        query: (stmt: string) => connection.execute(stmt),
+      },
+      projectId,
+      query,
+      panelsToImport,
+      ANSI_SQL_QUOTE
+    );
     return { value };
   } finally {
     connection.end();
@@ -299,52 +354,74 @@ async function evalSnowflake(
   return { value: rows };
 }
 
-export function formatSQLiteImportQueryAndRows(
+export function formatImportQueryAndRows(
   tableName: string,
   columns: Array<{ name: string }>,
-  data: Array<{ value: any }>
+  data: Array<EvalHandlerResponse>,
+  quoteType: QuoteType
 ): [string, Array<any>] {
-  const columnsDDL = columns.map((c) => `'${c.name}'`).join(', ');
+  const columnsDDL = columns
+    .map((c) => quote(c.name, quoteType.identifier))
+    .join(', ');
   const values = data
     .map(({ value: row }) => '(' + columns.map((c) => '?') + ')')
     .join(', ');
-  const query = `INSERT INTO ${tableName} (${columnsDDL}) VALUES ${values};`;
+  const query = `INSERT INTO ${quote(
+    tableName,
+    quoteType.identifier
+  )} (${columnsDDL}) VALUES ${values};`;
   const rows = data
     .map(({ value: row }) => columns.map((c) => row[c.name]))
     .flat();
   return [query, rows];
 }
 
-async function sqliteImportAndRun(
-  db: sqlite.Database,
+async function importAndRun(
+  dispatch: Dispatch,
+  db: {
+    createTable: (stmt: string) => Promise<unknown>;
+    insert: (stmt: string, values: any[]) => Promise<unknown>;
+    query: (stmt: string) => Promise<any>;
+  },
   projectId: string,
-  panel: DatabasePanelInfo,
   query: string,
-  panelsToImport: Array<PanelToImport>
+  panelsToImport: Array<PanelToImport>,
+  quoteType: QuoteType
 ) {
   for (const panel of panelsToImport) {
     const ddlColumns = panel.columns
-      .map((c) => `${c.name} ${c.type}`)
+      .map((c) => `${quote(c.name, quoteType.identifier)} ${c.type}`)
       .join(', ');
     log.info('Creating temp table ' + panel.tableName);
-    await db.exec(`CREATE TEMPORARY TABLE ${panel.tableName} (${ddlColumns});`);
+    await db.createTable(
+      `CREATE TEMPORARY TABLE ${quote(
+        panel.tableName,
+        quoteType.identifier
+      )} (${ddlColumns});`
+    );
 
-    const panelResultsFile = getProjectResultsFile(projectId) + panel.panelId;
+    const panelResultStream: stream.Readable = await getPanelResult(
+      dispatch,
+      projectId,
+      panel.id,
+      true
+    );
 
     await new Promise((resolve, reject) => {
       try {
         const pipeline = chain([
-          fs.createReadStream(panelResultsFile),
+          panelResultStream,
           json.parser(),
           streamArray(),
           new Batch({ batchSize: 1000 }),
           async (data: Array<{ value: any }>) => {
-            const [query, rows] = formatSQLiteImportQueryAndRows(
+            const [query, rows] = formatImportQueryAndRows(
               panel.tableName,
               panel.columns,
-              data
+              data,
+              quoteType
             );
-            await db.run(query, ...rows);
+            await db.insert(query, rows);
           },
         ]);
         pipeline.on('error', reject);
@@ -359,10 +436,11 @@ async function sqliteImportAndRun(
     log.info('Done ingestion');
   }
 
-  return db.all(query);
+  return db.query(query);
 }
 
 async function evalSQLite(
+  dispatch: Dispatch,
   query: string,
   info: DatabasePanelInfo,
   connector: DatabaseConnectorInfo,
@@ -376,13 +454,17 @@ async function evalSQLite(
     });
 
     try {
-      const rangeQuery = genericSQLRangeQuery(query, info.range);
-      return await sqliteImportAndRun(
-        db,
+      return await importAndRun(
+        dispatch,
+        {
+          createTable: (stmt: string) => db.exec(stmt),
+          insert: (stmt: string, values: any[]) => db.run(stmt, ...values),
+          query: (stmt: string) => db.all(stmt),
+        },
         project.id,
-        info,
-        rangeQuery,
-        panelsToImport
+        query,
+        panelsToImport,
+        ANSI_SQL_QUOTE
       );
     } finally {
       try {
@@ -393,6 +475,7 @@ async function evalSQLite(
     }
   }
 
+  const file = connector.database.database;
   if (info.serverId) {
     const localCopy = await makeTmpFile();
     const config = await getSSHConfig(project, info.serverId);
@@ -401,7 +484,7 @@ async function evalSQLite(
     await sftp.connect(config);
 
     try {
-      await sftp.fastGet(sqlitefile, localCopy.path);
+      await sftp.fastGet(file, localCopy.path);
       const value = await run(localCopy.path);
       return { value };
     } finally {
@@ -410,8 +493,74 @@ async function evalSQLite(
     }
   }
 
-  const value = await run(connector.database.database);
+  const value = await run(file);
   return { value };
+}
+
+export async function getAndDecryptConnector(
+  project: ProjectState,
+  connectorId: string
+) {
+  const connectors = (project.connectors || []).filter(
+    (c) => c.id === connectorId
+  );
+  if (!connectors.length) {
+    throw new Error(`No such connector: ${connectorId}.`);
+  }
+  const connector = connectors[0] as DatabaseConnectorInfo;
+
+  if (connector.database.password_encrypt.encrypted) {
+    if (!connector.database.password_encrypt.value) {
+      connector.database.password_encrypt.value = undefined;
+      connector.database.password_encrypt.encrypted = true;
+    }
+    connector.database.password_encrypt.value = await decrypt(
+      connector.database.password_encrypt.value
+    );
+    connector.database.password_encrypt.encrypted = false;
+  }
+
+  return connector;
+}
+
+async function evalElasticsearch(
+  query: string,
+  range: TimeSeriesRange,
+  host: string,
+  port: number,
+  connector: DatabaseConnectorInfo
+): Promise<EvalHandlerResponse> {
+  return { value: [] };
+}
+
+async function evalSplunk(
+  query: string,
+  range: TimeSeriesRange,
+  host: string,
+  port: number,
+  connector: DatabaseConnectorInfo
+): Promise<EvalHandlerResponse> {
+  return { value: [] };
+}
+
+async function evalPrometheus(
+  query: string,
+  range: TimeSeriesRange,
+  host: string,
+  port: number,
+  connector: DatabaseConnectorInfo
+): Promise<EvalHandlerResponse> {
+  return { value: [] };
+}
+
+async function evalInflux(
+  query: string,
+  range: TimeSeriesRange,
+  host: string,
+  port: number,
+  connector: DatabaseConnectorInfo
+): Promise<EvalHandlerResponse> {
+  return { value: [] };
 }
 
 const DEFAULT_PORT = {
@@ -430,66 +579,118 @@ const DEFAULT_PORT = {
   prometheus: 9090,
 };
 
+export function portHostFromAddress(
+  info: DatabasePanelInfo,
+  connector: DatabaseConnectorInfo
+) {
+  // TODO: this needs to be more robust. Not all systems format ports the same way
+  const port =
+    +connector.database.address.split(':')[1] ||
+    DEFAULT_PORT[info.database.type];
+  const host = connector.database.address.split(':')[0];
+  return { port, host };
+}
+
 export async function evalDatabase(
   project: ProjectState,
   panel: PanelInfo,
-  extra: EvalHandlerExtra
+  extra: EvalHandlerExtra,
+  dispatch: Dispatch
 ): Promise<EvalHandlerResponse> {
   const { content } = panel;
   const info = guardPanel<DatabasePanelInfo>(panel, 'database');
 
+  const connector = await getAndDecryptConnector(
+    project,
+    info.database.connectorId
+  );
+
+  if (
+    info.database.type === 'elasticsearch' ||
+    info.database.type === 'splunk' ||
+    info.database.type === 'prometheus' ||
+    info.database.type === 'influx'
+  ) {
+    const { host, port } = portHostFromAddress(info, connector);
+    return await tunnel(
+      project,
+      info.serverId,
+      host,
+      port,
+      (host: string, port: number): any => {
+        if (info.database.type === 'elasticsearch') {
+          return evalElasticsearch(
+            content,
+            info.database.range,
+            host,
+            port,
+            connector
+          );
+        }
+
+        if (info.database.type === 'splunk') {
+          return evalSplunk(
+            content,
+            info.database.range,
+            host,
+            port,
+            connector
+          );
+        }
+
+        if (info.database.type === 'prometheus') {
+          return evalPrometheus(
+            content,
+            info.database.range,
+            host,
+            port,
+            connector
+          );
+        }
+
+        if (info.database.type === 'influx') {
+          return evalInflux(
+            content,
+            info.database.range,
+            host,
+            port,
+            connector
+          );
+        }
+      }
+    );
+  }
+
   const { query, panelsToImport } = transformDM_getPanelCalls(
     content,
     extra.indexShapeMap,
-    extra.indexIdMap
+    extra.indexIdMap,
+    ['mysql', 'postgres', 'sqlite'].includes(info.database.type)
   );
 
-  const connectors = (project.connectors || []).filter(
-    (c) => c.id === info.database.connectorId
+  const rangeQuery = sqlRangeQuery(
+    query,
+    info.database.range,
+    info.database.type
   );
-  if (!connectors.length) {
-    throw new Error(`No such connector: ${info.database.connectorId}.`);
-  }
-  const connector = connectors[0] as DatabaseConnectorInfo;
 
   // SQLite is file, not network based so handle separately.
   if (info.database.type === 'sqlite') {
     return await evalSQLite(
-      query,
+      dispatch,
+      rangeQuery,
       info,
-      // ./filagg.ts doesn't add a connector to the project. Just passes info in directly
       connector,
       project,
       panelsToImport
     );
   }
 
-  if (panelsToImport.length) {
-    throw new UnsupportedError(
-      'DM_getPanel() is not yet supported by this connector.'
-    );
-  }
-
-  if (connector.database.password_encrypt.encrypted) {
-    if (!connector.database.password_encrypt.value) {
-      connector.database.password_encrypt.value = undefined;
-      connector.database.password_encrypt.encrypted = true;
-    }
-    connector.database.password_encrypt.value = await decrypt(
-      connector.database.password_encrypt.value
-    );
-    connector.database.password_encrypt.encrypted = false;
-  }
-
   if (info.database.type === 'snowflake') {
-    return await evalSnowflake(content, connector);
+    return await evalSnowflake(rangeQuery, connector);
   }
 
-  // TODO: this needs to be more robust. Not all systems format ports the same way
-  const port =
-    +connector.database.address.split(':')[1] ||
-    DEFAULT_PORT[info.database.type];
-  const host = connector.database.address.split(':')[0];
+  const { host, port } = portHostFromAddress(info, connector);
 
   // The way hosts are formatted is unique so have sqlserver manage its own call to tunnel()
   if (info.database.type === 'sqlserver') {
@@ -499,7 +700,7 @@ export async function evalDatabase(
       host.split('\\')[0],
       port,
       (host: string, port: number): any =>
-        evalSQLServer(content, host, port, connector)
+        evalSQLServer(rangeQuery, host, port, connector)
     );
   }
 
@@ -510,19 +711,35 @@ export async function evalDatabase(
     port,
     (host: string, port: number): any => {
       if (info.database.type === 'postgres') {
-        return evalPostgreSQL(content, host, port, connector);
-      }
-
-      if (info.database.type === 'oracle') {
-        return evalOracle(content, host, port, connector);
+        return evalPostgreSQL(
+          dispatch,
+          rangeQuery,
+          host,
+          port,
+          connector,
+          project.id,
+          panelsToImport
+        );
       }
 
       if (info.database.type === 'mysql') {
-        return evalMySQL(content, host, port, connector);
+        return evalMySQL(
+          dispatch,
+          rangeQuery,
+          host,
+          port,
+          connector,
+          project.id,
+          panelsToImport
+        );
+      }
+
+      if (info.database.type === 'oracle') {
+        return evalOracle(rangeQuery, host, port, connector);
       }
 
       if (info.database.type === 'clickhouse') {
-        return evalClickHouse(content, host, port, connector);
+        return evalClickHouse(rangeQuery, host, port, connector);
       }
 
       throw new Error(`Unknown SQL type: ${info.database.type}`);
