@@ -12,12 +12,8 @@ import {
 import * as sqlite from 'sqlite';
 import sqlite3 from 'sqlite3';
 import Client from 'ssh2-sftp-client';
-import stream from 'stream';
-import { chain } from 'stream-chain';
-import * as json from 'stream-json';
-import { streamArray } from 'stream-json/streamers/StreamArray';
-import Batch from 'stream-json/utils/Batch';
 import { file as makeTmpFile } from 'tmp-promise';
+import { chunk } from '../../shared/array';
 import {
   NotAnArrayOfObjectsError,
   UnsupportedError,
@@ -132,6 +128,14 @@ export function transformDM_getPanelCalls(
   return { panelsToImport, query };
 }
 
+export function replaceQuestionWithDollarCount(query: string) {
+  // Replace ? with $1, and so on
+  let i = 1;
+  return query.replace(/\?/g, function () {
+    return `$${i++}`;
+  });
+}
+
 async function evalPostgreSQL(
   dispatch: Dispatch,
   query: string,
@@ -141,12 +145,7 @@ async function evalPostgreSQL(
   projectId: string,
   panelsToImport: Array<PanelToImport>
 ) {
-  // Replace ? with $1, and so on
-  query = query
-    .split('?')
-    .map((_: string, i: number) => `$${i + 1}`)
-    .join('');
-
+  query = replaceQuestionWithDollarCount(query);
   const client = new PostgresClient({
     user: info.database.username,
     password: info.database.password_encrypt.value,
@@ -388,6 +387,7 @@ export async function importAndRun(
   panelsToImport: Array<PanelToImport>,
   quoteType: QuoteType
 ) {
+  let rowsIngested = 0;
   for (const panel of panelsToImport) {
     const ddlColumns = panel.columns
       .map((c) => `${quote(c.name, quoteType.identifier)} ${c.type}`)
@@ -400,40 +400,25 @@ export async function importAndRun(
       )} (${ddlColumns});`
     );
 
-    const panelResultStream: stream.Readable = await getPanelResult(
-      dispatch,
-      projectId,
-      panel.id,
-      true
-    );
+    const { value } = await getPanelResult(dispatch, projectId, panel.id);
 
-    await new Promise((resolve, reject) => {
-      try {
-        const pipeline = chain([
-          panelResultStream,
-          json.parser(),
-          streamArray(),
-          new Batch({ batchSize: 1000 }),
-          async (data: Array<{ value: any }>) => {
-            const [query, rows] = formatImportQueryAndRows(
-              panel.tableName,
-              panel.columns,
-              data,
-              quoteType
-            );
-            await db.insert(query, rows);
-          },
-        ]);
-        pipeline.on('error', reject);
-        pipeline.on('finish', resolve);
-      } catch (e) {
-        reject(e);
-      }
-    });
+    for (const data of chunk(value, 1000)) {
+      const [query, rows] = formatImportQueryAndRows(
+        panel.tableName,
+        panel.columns,
+        data,
+        quoteType
+      );
+      await db.insert(query, rows);
+      rowsIngested += data.length;
+    }
   }
 
   if (panelsToImport.length) {
-    log.info('Done ingestion');
+    log.info(
+      `Ingested ${rowsIngested} rows in ${panelsToImport.length} tables.`
+    );
+    console.log(await db.query('select * from t0'));
   }
 
   return db.query(query);
@@ -605,6 +590,8 @@ export async function evalDatabase(
     info.database.connectorId
   );
 
+  const serverId = connector.serverId || info.serverId;
+
   if (
     info.database.type === 'elasticsearch' ||
     info.database.type === 'splunk' ||
@@ -614,7 +601,7 @@ export async function evalDatabase(
     const { host, port } = portHostFromAddress(info, connector);
     return await tunnel(
       project,
-      info.serverId,
+      serverId,
       host,
       port,
       (host: string, port: number): any => {
@@ -696,7 +683,7 @@ export async function evalDatabase(
   if (info.database.type === 'sqlserver') {
     return await tunnel(
       project,
-      info.serverId,
+      serverId,
       host.split('\\')[0],
       port,
       (host: string, port: number): any =>
@@ -706,7 +693,7 @@ export async function evalDatabase(
 
   return await tunnel(
     project,
-    info.serverId,
+    serverId,
     host,
     port,
     (host: string, port: number): any => {

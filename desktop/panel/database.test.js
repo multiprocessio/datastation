@@ -1,6 +1,5 @@
 const { getProjectResultsFile } = require('../store');
 const fs = require('fs');
-const { file: makeTmpFile } = require('tmp-promise');
 const { shape } = require('shape');
 const { MYSQL_QUOTE, ANSI_SQL_QUOTE } = require('../../shared/sql');
 const {
@@ -73,16 +72,11 @@ test('format import query and rows', () => {
 });
 
 test('importAndRun', async () => {
-  const tmp = await makeTmpFile();
   const panelId = 'some-great-id';
   const t0Results = [
     { a: 12, b: 'Mel', c: 9 },
     { a: 154, b: 'Karry', c: 10 },
   ];
-  fs.writeFileSync(
-    getProjectResultsFile(tmp.path) + panelId,
-    JSON.stringify(t0Results)
-  );
 
   const db = {
     createTable: jest.fn(),
@@ -104,14 +98,13 @@ test('importAndRun', async () => {
   ];
 
   const value = await importAndRun(
-    null,
+    () => ({ value: t0Results }),
     db,
     projectId,
     query,
     panelsToImport,
     ANSI_SQL_QUOTE
   );
-  await tmp.cleanup();
 
   expect(db.createTable.mock.calls.length).toBe(1);
   expect(db.createTable.mock.calls[0][0]).toBe(

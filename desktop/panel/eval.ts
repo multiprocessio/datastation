@@ -10,7 +10,7 @@ import {
   ProjectState,
 } from '../../shared/state';
 import { Dispatch, RPCHandler } from '../rpc';
-import { getProjectResultsFile } from '../store';
+import { flushUnwritten, getProjectResultsFile } from '../store';
 import { evalColumns, evalLiteral } from './columns';
 import { evalDatabase } from './database';
 import { evalFilterAggregate } from './filagg';
@@ -45,6 +45,9 @@ export const evalHandler: RPCHandler<PanelBody, PanelResult> = {
     body: PanelBody,
     dispatch: Dispatch
   ): Promise<PanelResult> {
+    // Flushes desktop panel writes to disk. Not relevant in server context.
+    flushUnwritten();
+
     const { project, panel, panelPage } = await getProjectAndPanel(
       dispatch,
       projectId,

@@ -60,6 +60,13 @@ export function DatabasePanelDetails({
     };
   }).filter((g) => g.options.length);
 
+  const connectorNotRemote =
+    connectors.length &&
+    !(
+      connectors.filter((c) => c.id === panel.database.connectorId)[0] ||
+      new DatabaseConnectorInfo()
+    ).serverId;
+
   return (
     <React.Fragment>
       <div className="form-row">
@@ -74,31 +81,33 @@ export function DatabasePanelDetails({
               updatePanel(panel);
             }}
           >
-            {vendorsWithConnectors.map((g) => {
+            {vendorsWithConnectors.map((g) => (
               <optgroup label={g.label} key={g.label}>
                 {g.options.map((o) => (
                   <option key={o.name} value={o.id}>
                     {o.name}
                   </option>
                 ))}
-              </optgroup>;
-            })}
+              </optgroup>
+            ))}
           </Select>
         )}
       </div>
-      <ServerPicker
-        servers={servers}
-        serverId={panel.serverId}
-        onChange={(serverId: string) => {
-          panel.serverId = serverId;
-          updatePanel(panel);
-        }}
-      />
       {!['cassandra', 'presto'].includes(panel.database.type) && (
         <TimeSeriesRange
           range={panel.database.range}
           updateRange={(r: TimeSeriesRangeT) => {
             panel.database.range = r;
+            updatePanel(panel);
+          }}
+        />
+      )}
+      {connectorNotRemote && (
+        <ServerPicker
+          servers={servers}
+          serverId={panel.serverId}
+          onChange={(serverId: string) => {
+            panel.serverId = serverId;
             updatePanel(panel);
           }}
         />
