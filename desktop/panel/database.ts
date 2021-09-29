@@ -165,7 +165,8 @@ async function evalPostgreSQL(
       projectId,
       query,
       panelsToImport,
-      ANSI_SQL_QUOTE
+      ANSI_SQL_QUOTE,
+      replaceQuestionWithDollarCount
     );
     return {
       value: rows,
@@ -383,7 +384,9 @@ export async function importAndRun(
   projectId: string,
   query: string,
   panelsToImport: Array<PanelToImport>,
-  quoteType: QuoteType
+  quoteType: QuoteType,
+  // Postgres uses $1, mysql/sqlite use ?
+  mangleInsert?: (stmt: string) => string
 ) {
   let rowsIngested = 0;
   for (const panel of panelsToImport) {
@@ -398,7 +401,8 @@ export async function importAndRun(
       )} (${ddlColumns});`
     );
 
-    const { value } = await getPanelResult(dispatch, projectId, panel.id);
+    const res = await getPanelResult(dispatch, projectId, panel.id);
+    const { value } = res;
 
     for (const data of chunk(value, 1000)) {
       const [query, rows] = formatImportQueryAndRows(
@@ -407,7 +411,7 @@ export async function importAndRun(
         data,
         quoteType
       );
-      await db.insert(query, rows);
+      await db.insert(mangleInsert ? mangleInsert(query) : query, rows);
       rowsIngested += data.length;
     }
   }
