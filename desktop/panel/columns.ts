@@ -12,12 +12,12 @@ import { parseArrayBuffer } from '../../shared/text';
 import { Dispatch, RPCHandler } from '../rpc';
 import { getProjectResultsFile } from '../store';
 import { getPanelResult, getProjectAndPanel } from './shared';
-import { EvalHandlerResponse, guardPanel } from './types';
+import { EvalHandlerExtra, EvalHandlerResponse, guardPanel } from './types';
 
 export async function evalColumns(
   project: ProjectState,
   panel: PanelInfo,
-  _: unknown,
+  { indexIdMap }: EvalHandlerExtra,
   dispatch: Dispatch
 ): Promise<EvalHandlerResponse> {
   let columns: Array<string>;
@@ -38,7 +38,7 @@ export async function evalColumns(
   const { value } = await getPanelResult(
     dispatch,
     project.projectName,
-    panel.id
+    indexIdMap[panelSource]
   );
 
   const valueWithRequestedColumns = columnsFromObject(
