@@ -72,7 +72,7 @@ export function portHostFromAddress(
   // TODO: this needs to be more robust. Not all systems format ports the same way
   const port =
     +connector.database.address.split(':')[1] ||
-    DEFAULT_PORT[info.database.type];
+    DEFAULT_PORT[connector.database.type];
   const host = connector.database.address.split(':')[0];
   return { port, host };
 }
@@ -94,10 +94,10 @@ export async function evalDatabase(
   const serverId = connector.serverId || info.serverId;
 
   if (
-    info.database.type === 'elasticsearch' ||
-    info.database.type === 'splunk' ||
-    info.database.type === 'prometheus' ||
-    info.database.type === 'influx'
+    connector.database.type === 'elasticsearch' ||
+    connector.database.type === 'splunk' ||
+    connector.database.type === 'prometheus' ||
+    connector.database.type === 'influx'
   ) {
     const { host, port } = portHostFromAddress(info, connector);
     return await tunnel(
@@ -105,8 +105,8 @@ export async function evalDatabase(
       serverId,
       host,
       port,
-      (host: string, port: number): any => {
-        if (info.database.type === 'elasticsearch') {
+      (host: string, port: number) => {
+        if (connector.database.type === 'elasticsearch') {
           return evalElasticSearch(
             content,
             info.database.range,
@@ -117,7 +117,7 @@ export async function evalDatabase(
           );
         }
 
-        if (info.database.type === 'splunk') {
+        if (connector.database.type === 'splunk') {
           return evalSplunk(
             content,
             info.database.range,
@@ -127,7 +127,7 @@ export async function evalDatabase(
           );
         }
 
-        if (info.database.type === 'prometheus') {
+        if (connector.database.type === 'prometheus') {
           return evalPrometheus(
             content,
             info.database.range,
@@ -138,7 +138,7 @@ export async function evalDatabase(
           );
         }
 
-        if (info.database.type === 'influx') {
+        if (connector.database.type === 'influx') {
           return evalInflux(
             content,
             info.database.range,
@@ -156,17 +156,17 @@ export async function evalDatabase(
     content,
     extra.indexShapeMap,
     extra.indexIdMap,
-    ['mysql', 'postgres', 'sqlite'].includes(info.database.type)
+    ['mysql', 'postgres', 'sqlite'].includes(connector.database.type)
   );
 
   const rangeQuery = sqlRangeQuery(
     query,
     info.database.range,
-    info.database.type
+    connector.database.type
   );
 
   // SQLite is file, not network based so handle separately.
-  if (info.database.type === 'sqlite') {
+  if (connector.database.type === 'sqlite') {
     return await evalSQLite(
       dispatch,
       rangeQuery,
@@ -177,14 +177,14 @@ export async function evalDatabase(
     );
   }
 
-  if (info.database.type === 'snowflake') {
+  if (connector.database.type === 'snowflake') {
     return await evalSnowflake(rangeQuery, connector);
   }
 
   const { host, port } = portHostFromAddress(info, connector);
 
   // The way hosts are formatted is unique so have sqlserver manage its own call to tunnel()
-  if (info.database.type === 'sqlserver') {
+  if (connector.database.type === 'sqlserver') {
     return await tunnel(
       project,
       serverId,
@@ -201,7 +201,7 @@ export async function evalDatabase(
     host,
     port,
     (host: string, port: number): any => {
-      if (info.database.type === 'postgres') {
+      if (connector.database.type === 'postgres') {
         return evalPostgres(
           dispatch,
           rangeQuery,
@@ -213,7 +213,7 @@ export async function evalDatabase(
         );
       }
 
-      if (info.database.type === 'mysql') {
+      if (connector.database.type === 'mysql') {
         return evalMySQL(
           dispatch,
           rangeQuery,
@@ -225,15 +225,15 @@ export async function evalDatabase(
         );
       }
 
-      if (info.database.type === 'oracle') {
+      if (connector.database.type === 'oracle') {
         return evalOracle(rangeQuery, host, port, connector);
       }
 
-      if (info.database.type === 'clickhouse') {
+      if (connector.database.type === 'clickhouse') {
         return evalClickHouse(rangeQuery, host, port, connector);
       }
 
-      throw new Error(`Unknown SQL type: ${info.database.type}`);
+      throw new Error(`Unknown SQL type: ${connector.database.type}`);
     }
   );
 }

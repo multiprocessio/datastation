@@ -1,7 +1,8 @@
 import * as React from 'react';
-import { DatabaseConnectorInfo, Encrypt } from '../../shared/state';
+import { DatabaseConnectorInfo, Encrypt, ServerInfo } from '../../shared/state';
 import { Input } from '../components/Input';
 import { Select } from '../components/Select';
+import { ServerPicker } from '../components/ServerPicker';
 import { Host } from './Host';
 import { Password } from './Password';
 import { Username } from './Username';
@@ -9,8 +10,9 @@ import { Username } from './Username';
 export function ElasticSearchDetails(props: {
   connector: DatabaseConnectorInfo;
   updateConnector: (c: DatabaseConnectorInfo) => void;
+  servers: Array<ServerInfo>;
 }) {
-  const { connector, updateConnector } = props;
+  const { connector, updateConnector, servers } = props;
 
   // Don't try to show initial apiKey
   const [apiKey, setApiKey] = React.useState('');
@@ -59,6 +61,14 @@ export function ElasticSearchDetails(props: {
           </React.Fragment>
         )}
       </div>
+      <ServerPicker
+        servers={servers}
+        serverId={connector.serverId}
+        onChange={(serverId: string) => {
+          connector.serverId = serverId;
+          updateConnector(connector);
+        }}
+      />
     </React.Fragment>
   );
 }

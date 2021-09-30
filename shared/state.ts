@@ -197,28 +197,21 @@ export class DatabaseConnectorInfo extends ConnectorInfo {
     password_encrypt: Encrypt;
     address: string;
     apiKey_encrypt: Encrypt;
-    bearer_encrypt: Encrypt;
     extra: Record<string, string>;
   };
 
   constructor(
-    name?: string,
-    type?: DatabaseConnectorInfoType,
-    database?: string,
-    username?: string,
-    password?: Encrypt,
-    address?: string
+    panel: Partial<DatabaseConnectorInfo['database'] & { name: string }> = {}
   ) {
-    super('database', name);
+    super('database', panel.name || '');
     this.database = {
-      type: type || 'postgres',
-      database: database || '',
-      username: username || '',
-      password_encrypt: password || new Encrypt(''),
-      address: address || '',
-      extra: {},
-      bearer_encrypt: new Encrypt(''),
-      apiKey_encrypt: new Encrypt(''),
+      type: panel.type || 'postgres',
+      database: panel.database || '',
+      username: panel.username || '',
+      password_encrypt: panel.password_encrypt || new Encrypt(''),
+      address: panel.address || '',
+      extra: panel.extra || {},
+      apiKey_encrypt: panel.apiKey_encrypt || new Encrypt(''),
     };
   }
 }
@@ -388,7 +381,6 @@ export type TimeSeriesRange = {
 
 export class DatabasePanelInfo extends PanelInfo {
   database: {
-    type: DatabaseConnectorInfoType;
     connectorId?: string;
     range: TimeSeriesRange;
     table: string;
@@ -396,25 +388,20 @@ export class DatabasePanelInfo extends PanelInfo {
   };
 
   constructor(
-    name?: string,
-    type?: DatabaseConnectorInfoType,
-    connectorId?: string,
-    range?: TimeSeriesRange,
-    table?: string,
-    step?: number,
-    content?: string
+    panel: Partial<
+      DatabasePanelInfo['database'] & { content: string; name: string }
+    > = {}
   ) {
-    super('database', name, content);
+    super('database', panel.name || '', panel.content || '');
     this.database = {
-      type: type || 'postgres',
-      connectorId,
-      range: range || {
+      connectorId: panel.connectorId || '',
+      range: panel.range || {
         field: '',
         rangeType: 'relative',
         relative: 'last-hour',
       },
-      table: table || '',
-      step: step || 60,
+      table: panel.table || '',
+      step: panel.step || 60,
     };
   }
 }

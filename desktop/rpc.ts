@@ -86,8 +86,7 @@ export function registerRPCHandlers(
         sendIPCRendererResponse(event, responseChannel, {
           kind: 'error',
           error: {
-            // Not all fields get pulled out unless explicitly requested
-            ...e,
+            // Not all errors are easily serializable
             stack: e.stack,
             message: e.message,
             name: e.name,

@@ -1,10 +1,12 @@
 import { Client, ClientOptions } from '@elastic/elasticsearch';
+import log from '../../../shared/log';
 import { timestampsFromRange } from '../../../shared/sql';
 import {
   DatabaseConnectorInfo,
   DatabasePanelInfo,
   TimeSeriesRange,
 } from '../../../shared/state';
+import { fullHttpURL } from '../../../shared/url';
 import { EvalHandlerResponse } from '../types';
 
 export async function evalElasticSearch(
@@ -16,7 +18,7 @@ export async function evalElasticSearch(
   panel: DatabasePanelInfo
 ): Promise<EvalHandlerResponse> {
   const config: ClientOptions = {
-    node: connector.database.address,
+    node: fullHttpURL(host, port),
   };
   if (connector.database.apiKey_encrypt.value) {
     config.auth = {
@@ -36,9 +38,9 @@ export async function evalElasticSearch(
 
   if (range.field) {
     const { begin, end } = timestampsFromRange(range);
-    query = `(${query}) AND ${
-      range.field
-    }:[${begin.toISOString()} TO ${end.toISOString()}]`;
+    query =
+      (query ? `(${query}) AND ` : '') +
+      `${range.field}:[${begin.toISOString()} TO ${end.toISOString()}]`;
   }
 
   const client = new Client(config);
@@ -46,7 +48,7 @@ export async function evalElasticSearch(
   let results: Array<{ [k: string]: any }> = [];
   const pageSize = 1000;
   while (true) {
-    const res = await client.search({
+    const req = {
       size: pageSize,
       index: panel.database.table.split(','),
       q: query,
@@ -57,13 +59,15 @@ export async function evalElasticSearch(
           ? [results[results.length - 1][range.field]]
           : undefined,
       },
-    });
+    };
+    log.info('ElasticSearch request: ' + JSON.stringify(req));
+    const res = await client.search(req);
+
+    results = results.concat(res.body.hits.hits);
 
     if (res.body.hits.hits.length < pageSize) {
       break;
     }
-
-    results = results.concat(res.body.hits.hits);
   }
 
   return { value: results };

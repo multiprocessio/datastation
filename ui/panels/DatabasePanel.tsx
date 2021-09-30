@@ -39,14 +39,15 @@ export function DatabasePanelDetails({
 }: PanelDetailsProps<DatabasePanelInfo>) {
   const { connectors, servers } = React.useContext(ProjectContext);
 
-  React.useEffect(() => {
-    if (!connectors.length && panel.database.connectorId) {
-      panel.database.connectorId = '';
-    }
+  if (!connectors.length && panel.database.connectorId) {
+    panel.database.connectorId = '';
+  }
 
-    const connector = connectors.find(
-      (c) => c.id === panel.database.connectorId
-    ) as DatabaseConnectorInfo;
+  const connector = connectors.find(
+    (c) => c.id === panel.database.connectorId
+  ) as DatabaseConnectorInfo;
+
+  React.useEffect(() => {
     if (!connector) {
       return;
     }
@@ -71,13 +72,6 @@ export function DatabasePanelDetails({
         .sort((a, b) => (a.name < b.name ? 1 : -1)),
     };
   }).filter((g) => g.options.length);
-
-  const connectorNotRemote =
-    connectors.length &&
-    !(
-      connectors.find((c) => c.id === panel.database.connectorId) ||
-      new DatabaseConnectorInfo()
-    ).serverId;
 
   return (
     <React.Fragment>
@@ -105,46 +99,50 @@ export function DatabasePanelDetails({
           </Select>
         )}
       </div>
-      {panel.database.type === 'elasticsearch' && (
-        <Input
-          label="Indexes"
-          placeholder="journalbeat-*,logstash-*"
-          value={panel.database.table}
-          onChange={(i: string) => {
-            panel.database.table = i;
-            updatePanel(panel);
-          }}
-        />
-      )}
-      {!['cassandra', 'presto'].includes(panel.database.type) && (
-        <TimeSeriesRange
-          range={panel.database.range}
-          updateRange={(r: TimeSeriesRangeT) => {
-            panel.database.range = r;
-            updatePanel(panel);
-          }}
-        />
-      )}
-      {panel.database.type === 'influx' && (
-        <Input
-          label="Step (seconds)"
-          type="number"
-          value={panel.database.step}
-          onChange={(s: string) => {
-            panel.database.step = +s;
-            updatePanel(panel);
-          }}
-        />
-      )}
-      {connectorNotRemote && (
-        <ServerPicker
-          servers={servers}
-          serverId={panel.serverId}
-          onChange={(serverId: string) => {
-            panel.serverId = serverId;
-            updatePanel(panel);
-          }}
-        />
+      {connector && (
+        <React.Fragment>
+          {connector.database.type === 'elasticsearch' && (
+            <Input
+              label="Indexes"
+              placeholder="journalbeat-*,logstash-*"
+              value={panel.database.table}
+              onChange={(i: string) => {
+                panel.database.table = i;
+                updatePanel(panel);
+              }}
+            />
+          )}
+          {!['cassandra', 'presto'].includes(connector.database.type) && (
+            <TimeSeriesRange
+              range={panel.database.range}
+              updateRange={(r: TimeSeriesRangeT) => {
+                panel.database.range = r;
+                updatePanel(panel);
+              }}
+            />
+          )}
+          {connector.database.type === 'influx' && (
+            <Input
+              label="Step (seconds)"
+              type="number"
+              value={panel.database.step}
+              onChange={(s: string) => {
+                panel.database.step = +s;
+                updatePanel(panel);
+              }}
+            />
+          )}
+          {!connector.serverId && (
+            <ServerPicker
+              servers={servers}
+              serverId={panel.serverId}
+              onChange={(serverId: string) => {
+                panel.serverId = serverId;
+                updatePanel(panel);
+              }}
+            />
+          )}
+        </React.Fragment>
       )}
     </React.Fragment>
   );

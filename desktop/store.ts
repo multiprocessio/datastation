@@ -58,7 +58,8 @@ export function getProjectResultsFile(projectId: string) {
   return path.join(DISK_ROOT, '.' + fileName + '.results');
 }
 
-async function checkAndEncrypt(e: Encrypt, existing: Encrypt) {
+async function checkAndEncrypt(e: Encrypt, existing?: Encrypt) {
+  existing = existing || new Encrypt('');
   const new_ = new Encrypt('');
   if (e.value === null) {
     new_.value = existing.value;

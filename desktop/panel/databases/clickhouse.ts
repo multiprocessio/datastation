@@ -1,5 +1,6 @@
 import { ClickHouse } from 'clickhouse';
 import { DatabaseConnectorInfo } from '../../../shared/state';
+import { fullHttpURL } from '../../../shared/url';
 
 export async function evalClickHouse(
   content: string,
@@ -7,16 +8,10 @@ export async function evalClickHouse(
   port: number,
   { database }: DatabaseConnectorInfo
 ) {
-  let protocol = 'http:';
-  if (host.startsWith('http://')) {
-    host = host.slice('http://'.length);
-  } else if (host.startsWith('https://')) {
-    protocol = 'https:';
-    host = host.slice('https://'.length);
-  }
+  const { hostname, protocol } = new URL(fullHttpURL(host, port));
 
   const connection = new ClickHouse({
-    host,
+    host: hostname,
     port,
     protocol,
     dataObjects: true,
