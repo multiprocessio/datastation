@@ -8,6 +8,7 @@ import {
   SITE_ROOT,
   VERSION,
 } from '../shared/constants';
+import log from '../shared/log';
 import '../shared/polyfill';
 import {
   GetProjectsRequest,
@@ -118,7 +119,7 @@ function useProjectState(
         if (isDefault && e.message === '') {
           state = DEFAULT_PROJECT;
         } else {
-          console.error(e);
+          log.error(e);
         }
       }
 

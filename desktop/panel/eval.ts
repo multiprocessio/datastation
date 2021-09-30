@@ -1,8 +1,12 @@
+import { DSPROJ_FLAG, PANEL_FLAG, PANEL_META_FLAG } from './constants';
+import { spawn } from 'child_process';
 import fs from 'fs/promises';
+import { file as makeTmpFile } from 'tmp-promise';
 import jsesc from 'jsesc';
 import { preview } from 'preview';
 import { shape } from 'shape';
 import { PanelBody } from '../../shared/rpc';
+import log from '../../shared/log';
 import {
   PanelInfo,
   PanelInfoType,
@@ -38,7 +42,39 @@ const EVAL_HANDLERS: { [k in PanelInfoType]: EvalHandler } = {
   literal: evalLiteral,
 };
 
-export const evalHandler: RPCHandler<PanelBody, PanelResult> = {
+export async function evalInSubprocess(subprocess: string, projectId: string, panelId: string) {
+  const tmp = await makeTmpFile();
+
+  try {
+    const child = spawn(subprocessEval, [DSPROJ_FLAG, projectId, PANEL_FLAG, panelId, PANEL_META_FLAG, tmp.path]);
+
+    let stderr = '';
+    child.stderr.on('data', (data) => {
+      stderr += data;
+    });
+
+    try {
+      return new Promise((resolve, reject) => {
+	try {
+	  child.on('close', resolve);
+	} catch (e) {
+	  reject(e);
+	}
+      });
+    } catch (e) {
+      log.error(e);
+      throw new Error(stderr);
+    }
+  } finally {
+    try {
+      await tmp.close();
+    } catch (e) {
+      log.error(e);
+    }
+  }
+}
+
+export const makeEvalHandler: (subprocessEval?: string): RPCHandler<PanelBody, PanelResult> {
   resource: 'eval',
   handler: async function (
     projectId: string,
@@ -53,6 +89,10 @@ export const evalHandler: RPCHandler<PanelBody, PanelResult> = {
       projectId,
       body.panelId
     );
+
+    if (subprocessEval) {
+      return evalInSubprocess(subprocessEval, project.id, body.panelId);
+    }
 
     const indexIdMap = project.pages[panelPage].panels.map((p) => p.id);
     const indexShapeMap = project.pages[panelPage].panels.map(

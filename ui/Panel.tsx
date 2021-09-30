@@ -5,6 +5,7 @@ import * as CSV from 'papaparse';
 import * as React from 'react';
 import { toString } from 'shape';
 import { MODE, MODE_FEATURES } from '../shared/constants';
+import log from '../shared/log';
 import {
   PanelInfo,
   PanelInfoType,
@@ -50,7 +51,7 @@ function download(filename: string, value: any, isChart = false) {
   let [dataURL, mimeType, extension] = ['', '', ''];
   if (isChart) {
     if (!value) {
-      console.error('Invalid context ref');
+      log.error('Invalid context ref');
       return;
     }
     mimeType = 'image/png';

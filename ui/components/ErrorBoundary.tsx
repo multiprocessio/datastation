@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { CHAT_LINK, MODE } from '../../shared/constants';
+import log from '../shared/log';
 import { Alert } from './Alert';
 import { Highlight } from './Highlight';
 
@@ -15,7 +16,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error(error, errorInfo);
+    log.error(error, errorInfo);
   }
 
   render() {

@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { SITE_ROOT, VERSION } from '../shared/constants';
 import { request } from '../shared/http';
+import log from '../shared/log';
 import { ContentTypeInfo } from '../shared/state';
 
 export function Updates() {
@@ -19,7 +20,7 @@ export function Updates() {
         );
         setUpdates(updates);
       } catch (e) {
-        console.error(e);
+        log.error(e);
       }
     }
 
