@@ -20,6 +20,7 @@
     "e2e-test": "node --unhandled-rejections=throw ./e2e/index.js"
   },
   "dependencies": {
+    "@elastic/elasticsearch": "6",
     "ace-builds": "^1.4.12",
     "alasql": "^1.7.3",
     "chart.js": "^3.3.2",
@@ -28,6 +29,7 @@
     "date-fns": "^2.22.1",
     "express": "^4.17.1",
     "express-session": "^1.17.2",
+    "influx": "^5.9.2",
     "jsesc": "^3.0.2",
     "json-stringify-safe": "^5.0.1",
     "lodash.debounce": "^4.0.8",
@@ -42,6 +44,7 @@
     "pg": "^8.6.0",
     "preview": "https://github.com/multiprocessio/preview",
     "prismjs": "1.25.0",
+    "prometheus-query": "^3.0.3",
     "react": "^17.0.2",
     "react-ace": "^9.4.1",
     "react-dom": "^17.0.2",

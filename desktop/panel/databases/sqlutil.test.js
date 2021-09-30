@@ -1,12 +1,12 @@
-const { getProjectResultsFile } = require('../store');
+const { getProjectResultsFile } = require('../../store');
 const fs = require('fs');
 const { shape } = require('shape');
-const { MYSQL_QUOTE, ANSI_SQL_QUOTE } = require('../../shared/sql');
+const { MYSQL_QUOTE, ANSI_SQL_QUOTE } = require('../../../shared/sql');
 const {
   importAndRun,
   formatImportQueryAndRows,
   transformDM_getPanelCalls,
-} = require('./database');
+} = require('./sqlutil');
 
 const panel0Data = [
   {

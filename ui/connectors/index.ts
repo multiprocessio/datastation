@@ -1,5 +1,6 @@
 import { DatabaseConnectorInfoType } from '../../shared/state';
 import { ClickhouseDetails } from './ClickhouseDetails';
+import { ElasticSearchDetails } from './ElasticSearchDetails';
 import { GenericDetails } from './GenericDetails';
 import { SnowflakeDetails } from './SnowflakeDetails';
 
@@ -48,7 +49,7 @@ export const VENDORS: {
   elasticsearch: {
     name: 'ElasticSearch',
     id: 'elasticsearch',
-    details: GenericDetails,
+    details: ElasticSearchDetails,
   },
   splunk: {
     name: 'Splunk',
@@ -91,7 +92,7 @@ export const VENDOR_GROUPS: Array<{
   },
   {
     group: 'Log',
-    vendors: ['elasticsearch', 'splunk'],
+    vendors: ['elasticsearch'],
   },
   {
     group: 'Metrics',

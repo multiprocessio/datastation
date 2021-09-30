@@ -129,7 +129,7 @@ export function Server({
                 <FileInput
                   label="Private Key"
                   value={server.privateKeyFile}
-                  placeholder="~/.ssh/id_rsa"
+                  placeholder="~/.ssh/id_ed25519"
                   allowManualEntry
                   allowFilePicker={MODE === 'desktop'}
                   onChange={(fileName: string) => {
@@ -144,13 +144,6 @@ export function Server({
                   value={password.passphrase}
                   type="password"
                   onChange={syncPassword.bind(null, 'passphrase')}
-                  onBlur={
-                    () =>
-                      syncPassword(
-                        'passphrase',
-                        null
-                      ) /* Turns off continued attempts to encrypt */
-                  }
                 />
               </div>
             </React.Fragment>

@@ -15,7 +15,7 @@ import {
   subWeeks,
   subYears,
 } from 'date-fns';
-import { SQLConnectorType, TimeSeriesRange } from './state';
+import { DatabaseConnectorInfoType, TimeSeriesRange } from './state';
 
 export function timestampsFromRange(range: TimeSeriesRange) {
   if (range.rangeType === 'absolute') {
@@ -137,7 +137,7 @@ export const MYSQL_QUOTE = {
 export function sqlRangeQuery(
   query: string,
   range: TimeSeriesRange | null,
-  type: SQLConnectorType
+  type: DatabaseConnectorInfoType
 ) {
   if (!range || !range.field) {
     return query;
@@ -155,6 +155,10 @@ export function sqlRangeQuery(
     );
     if (type === 'clickhouse') {
       return `parseDateTimeBestEffort(${quotedTime})`;
+    }
+
+    if (type === 'influx') {
+      return quote(new Date(t).toISOString(), quoteStyle.string);
     }
 
     // Timestamp functions/formats differ by engine as soon as we bring in time zones. We're not doing that yet.

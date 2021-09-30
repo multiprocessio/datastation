@@ -9,6 +9,7 @@ import {
 } from '../../shared/state';
 import { panelRPC } from '../asyncRPC';
 import { CodeEditor } from '../components/CodeEditor';
+import { Input } from '../components/Input';
 import { Select } from '../components/Select';
 import { ServerPicker } from '../components/ServerPicker';
 import { TimeSeriesRange } from '../components/TimeSeriesRange';
@@ -42,6 +43,17 @@ export function DatabasePanelDetails({
     if (!connectors.length && panel.database.connectorId) {
       panel.database.connectorId = '';
     }
+
+    const connector = connectors.find(
+      (c) => c.id === panel.database.connectorId
+    ) as DatabaseConnectorInfo;
+    if (!connector) {
+      return;
+    }
+
+    if (connector.database.type === 'influx' && !panel.database.range.field) {
+      panel.database.range.field = 'time';
+    }
   });
 
   const vendorsWithConnectors = VENDOR_GROUPS.map((group) => {
@@ -63,7 +75,7 @@ export function DatabasePanelDetails({
   const connectorNotRemote =
     connectors.length &&
     !(
-      connectors.filter((c) => c.id === panel.database.connectorId)[0] ||
+      connectors.find((c) => c.id === panel.database.connectorId) ||
       new DatabaseConnectorInfo()
     ).serverId;
 
@@ -93,11 +105,33 @@ export function DatabasePanelDetails({
           </Select>
         )}
       </div>
+      {panel.database.type === 'elasticsearch' && (
+        <Input
+          label="Indexes"
+          placeholder="journalbeat-*,logstash-*"
+          value={panel.database.table}
+          onChange={(i: string) => {
+            panel.database.table = i;
+            updatePanel(panel);
+          }}
+        />
+      )}
       {!['cassandra', 'presto'].includes(panel.database.type) && (
         <TimeSeriesRange
           range={panel.database.range}
           updateRange={(r: TimeSeriesRangeT) => {
             panel.database.range = r;
+            updatePanel(panel);
+          }}
+        />
+      )}
+      {panel.database.type === 'influx' && (
+        <Input
+          label="Step (seconds)"
+          type="number"
+          value={panel.database.step}
+          onChange={(s: string) => {
+            panel.database.step = +s;
             updatePanel(panel);
           }}
         />

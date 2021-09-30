@@ -196,6 +196,8 @@ export class DatabaseConnectorInfo extends ConnectorInfo {
     username: string;
     password_encrypt: Encrypt;
     address: string;
+    apiKey_encrypt: Encrypt;
+    bearer_encrypt: Encrypt;
     extra: Record<string, string>;
   };
 
@@ -215,6 +217,8 @@ export class DatabaseConnectorInfo extends ConnectorInfo {
       password_encrypt: password || new Encrypt(''),
       address: address || '',
       extra: {},
+      bearer_encrypt: new Encrypt(''),
+      apiKey_encrypt: new Encrypt(''),
     };
   }
 }
@@ -387,6 +391,8 @@ export class DatabasePanelInfo extends PanelInfo {
     type: DatabaseConnectorInfoType;
     connectorId?: string;
     range: TimeSeriesRange;
+    table: string;
+    step: number;
   };
 
   constructor(
@@ -394,6 +400,8 @@ export class DatabasePanelInfo extends PanelInfo {
     type?: DatabaseConnectorInfoType,
     connectorId?: string,
     range?: TimeSeriesRange,
+    table?: string,
+    step?: number,
     content?: string
   ) {
     super('database', name, content);
@@ -405,6 +413,8 @@ export class DatabasePanelInfo extends PanelInfo {
         rangeType: 'relative',
         relative: 'last-hour',
       },
+      table: table || '',
+      step: step || 60,
     };
   }
 }
@@ -559,7 +569,7 @@ export class ProjectPage {
 }
 
 export async function doOnMatchingFields<T>(
-  ps: ProjectState,
+  ps: any,
   check: (key: string) => boolean,
   cb: (f: T, path: string) => Promise<T>
 ) {
@@ -582,7 +592,7 @@ export async function doOnMatchingFields<T>(
 }
 
 export function doOnEncryptFields(
-  ps: ProjectState,
+  ps: any,
   cb: (f: Encrypt, path: string) => Promise<Encrypt>
 ) {
   return doOnMatchingFields(ps, (f) => f.endsWith('_encrypt'), cb);
