@@ -14,6 +14,9 @@ configureLogger().then(() => {
 process.on('uncaughtException', (e) => {
   log.error(e);
 });
+process.on('unhandledRejection', (e) => {
+  log.error(e);
+});
 
 app.whenReady().then(async () => {
   const { handlers, project } = await initialize({

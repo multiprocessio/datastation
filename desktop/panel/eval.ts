@@ -96,6 +96,10 @@ export async function evalInSubprocess(
             resolve();
           }
 
+          if (code === 1) {
+            reject(new Cancelled());
+          }
+
           reject('Exited with ' + code + '\n' + stderr);
         });
       } catch (e) {
@@ -183,8 +187,7 @@ export const makeEvalHandler = (
 
 export const killProcessHandler: RPCHandler<PanelBody, void> = {
   resource: 'killProcess',
-  handler: async function (_: string, body: PanelBody) {
-    await killAllByPanelId(body.panelId);
-    throw new Cancelled();
+  handler: function (_: string, body: PanelBody) {
+    return killAllByPanelId(body.panelId);
   },
 };

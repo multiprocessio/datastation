@@ -52,11 +52,10 @@ export function PageList({
     const { connectors, servers } = state;
     const start = new Date();
 
-    const panelIndex = page.panels.findIndex((p) => p.id === panelId);
-    if (panelIndex === -1) {
+    const panel = page.panels.find((p) => p.id === panelId);
+    if (!panel) {
       return;
     }
-    const panel = page.panels[panelIndex];
     let resultMeta = panel.resultMeta || new PanelResultMeta();
     resultMeta.lastRun = null;
     resultMeta.loading = !reset;
