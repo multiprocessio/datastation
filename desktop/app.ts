@@ -7,6 +7,7 @@ import { configureLogger } from './log';
 import { openWindow } from './project';
 import { registerRPCHandlers } from './rpc';
 import { initialize } from './runner';
+import { storeHandlers } from './store';
 
 configureLogger().then(() => {
   log.info(APP_NAME, VERSION, DEBUG ? 'DEBUG' : '');
@@ -21,6 +22,7 @@ process.on('unhandledRejection', (e) => {
 app.whenReady().then(async () => {
   const { handlers, project } = await initialize({
     subprocess: path.join(__dirname, 'desktop_runner.js'),
+    additionalHandlers: storeHandlers,
   });
 
   await openWindow(project);

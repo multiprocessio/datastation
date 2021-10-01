@@ -272,7 +272,7 @@ header > div {
 .sidebar {
   border-right: 1px solid #ccc;
   background: white;
-  flex: 0 0 275px;
+  flex: 0 0 350px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -336,6 +336,7 @@ header > div {
 }
 
 .panel {
+  min-width: 900px;
   background: white;
   border: 1px solid #ccc;
   margin-bottom: 15px;

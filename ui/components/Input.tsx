@@ -1,5 +1,6 @@
 import debounce from 'lodash.debounce';
 import * as React from 'react';
+import { Tooltip } from './Tooltip';
 
 export const INPUT_SYNC_PERIOD = 125;
 
@@ -44,6 +45,7 @@ export interface InputProps
   label?: string;
   autoWidth?: boolean;
   defaultValue?: string;
+  tooltip?: React.ReactNode;
 }
 
 export function Input({
@@ -54,6 +56,7 @@ export function Input({
   autoWidth,
   type,
   defaultValue,
+  tooltip,
   ...props
 }: InputProps) {
   let inputClass = `input ${className ? ' ' + className : ''}`;
@@ -67,18 +70,21 @@ export function Input({
   );
 
   const input = (
-    <input
-      type={type}
-      {...(type === 'checkbox'
-        ? { checked: value === 'true' }
-        : { value: localValue })}
-      className={label ? '' : inputClass}
-      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-        setLocalValue(String(e.target.value))
-      }
-      {...props}
-      size={autoWidth ? Math.min(100, String(localValue).length) : undefined}
-    />
+    <React.Fragment>
+      <input
+        type={type}
+        {...(type === 'checkbox'
+          ? { checked: value === 'true' }
+          : { value: localValue })}
+        className={label ? '' : inputClass}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+          setLocalValue(String(e.target.value))
+        }
+        {...props}
+        size={autoWidth ? Math.min(100, String(localValue).length) : undefined}
+      />
+      {tooltip && <Tooltip children={tooltip} />}
+    </React.Fragment>
   );
 
   if (label) {
