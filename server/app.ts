@@ -44,7 +44,7 @@ export async function init() {
     next();
   });
 
-  const { handlers } = await initialize({
+  const { handlers } = await initialize(app, {
     subprocess: path.join(__dirname, 'server_runner.js'),
   });
 

@@ -10,7 +10,13 @@ import { ensureSigningKey } from './secret';
 import { loadSettings } from './settings';
 import { storeHandlers } from './store';
 
-export async function initialize({ subprocess }: { subprocess?: string } = {}) {
+export async function initialize({
+  subprocess,
+  additionalHandlers,
+}: {
+  subprocess?: string;
+  additionalHandlers?: RPCHandler<any, any>[];
+} = {}) {
   let project = '';
   let panel = '';
   let panelMetaOut = '';
@@ -36,17 +42,27 @@ export async function initialize({ subprocess }: { subprocess?: string } = {}) {
   const settings = await loadSettings();
 
   const handlers: RPCHandler<any, any>[] = [
-    ...storeHandlers,
     ...panelHandlers(subprocess),
     openProjectHandler,
     settings.getUpdateHandler(),
+    ...additionalHandlers,
   ];
 
   return { settings, handlers, project, panel, panelMetaOut };
 }
 
-async function main() {
-  const { project, handlers, panel, panelMetaOut } = await initialize();
+export async function main(additionalHandlers?: RPCHandler<any, any>[]) {
+  // These throws are very important! Otherwise the runner will just hang.
+  process.on('uncaughtException', (e) => {
+    throw e;
+  });
+  process.on('unhandledRejection', (e) => {
+    throw e;
+  });
+
+  const { project, handlers, panel, panelMetaOut } = await initialize({
+    additionalHandlers,
+  });
   if (!project) {
     throw new Error('No project given.');
   }
@@ -83,19 +99,10 @@ async function main() {
   process.exit(0);
 }
 
-if (process.argv[1].includes('runner.js')) {
+if (process.argv[1].includes('desktop_runner.js')) {
   configureLogger().then(() => {
     log.info(APP_NAME, VERSION, DEBUG ? 'DEBUG' : '');
   });
 
-  // These throws are very important! Otherwise the runner will just hang.
-  process.on('uncaughtException', (e) => {
-    throw e;
-  });
-
-  process.on('unhandledRejection', (e) => {
-    throw e;
-  });
-
-  main();
+  main(storeHandlers);
 }
