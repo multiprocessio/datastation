@@ -38,5 +38,4 @@ export interface PanelUIDetails<T extends PanelInfo> {
   hasStdout: boolean;
   info: React.ElementType<{ panel: T }> | null;
   factory: () => T;
-  killable: boolean;
 }

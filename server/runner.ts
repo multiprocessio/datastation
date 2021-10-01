@@ -1,14 +1,12 @@
 import fs from 'fs/promises';
-import { APP_NAME, DEBUG, VERSION } from '../shared/constants';
+import { DSPROJ_FLAG, PANEL_FLAG, PANEL_META_FLAG } from '../desktop/constants';
+import { panelHandlers } from '../desktop/panel';
+import { openProjectHandler } from '../desktop/project';
+import { RPCHandler, RPCPayload } from '../desktop/rpc';
+import { ensureSigningKey } from '../desktop/secret';
+import { loadSettings } from '../desktop/settings';
+import { storeHandlers } from '../desktop/store';
 import log from '../shared/log';
-import { DSPROJ_FLAG, PANEL_FLAG, PANEL_META_FLAG } from './constants';
-import { configureLogger } from './log';
-import { panelHandlers } from './panel';
-import { openProjectHandler } from './project';
-import { RPCHandler, RPCPayload } from './rpc';
-import { ensureSigningKey } from './secret';
-import { loadSettings } from './settings';
-import { storeHandlers } from './store';
 
 export async function initialize({ subprocess }: { subprocess?: string } = {}) {
   let project = '';
@@ -76,25 +74,13 @@ async function main() {
     body: { panelId: panel },
     projectId: project,
   });
-  await fs.writeFile(panelMetaOut, JSON.stringify(resultMeta));
+  await fs.writeFile(panelMetaOut, resultMeta);
   log.info(`Wrote panel meta for ${panel} of "${project}" to ${panelMetaOut}.`);
-
-  // Must explicitly exit
-  process.exit(0);
 }
 
-if (process.argv[1].includes('runner.js')) {
-  configureLogger().then(() => {
-    log.info(APP_NAME, VERSION, DEBUG ? 'DEBUG' : '');
-  });
-
-  // These throws are very important! Otherwise the runner will just hang.
+if (require.main === module) {
   process.on('uncaughtException', (e) => {
-    throw e;
-  });
-
-  process.on('unhandledRejection', (e) => {
-    throw e;
+    log.error(e);
   });
 
   main();

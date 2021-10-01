@@ -171,5 +171,4 @@ export const httpPanel: PanelUIDetails<HTTPPanelInfo> = {
   factory: () => new HTTPPanelInfo(),
   info: HTTPInfo,
   hasStdout: false,
-  killable: false,
 };

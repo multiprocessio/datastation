@@ -95,5 +95,4 @@ export const filePanel: PanelUIDetails<FilePanelInfo> = {
   factory: () => new FilePanelInfo(),
   hasStdout: false,
   info: null,
-  killable: false,
 };

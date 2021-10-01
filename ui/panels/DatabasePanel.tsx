@@ -180,5 +180,4 @@ export const databasePanel: PanelUIDetails<DatabasePanelInfo> = {
   factory: () => new DatabasePanelInfo(),
   hasStdout: false,
   info: null,
-  killable: false,
 };

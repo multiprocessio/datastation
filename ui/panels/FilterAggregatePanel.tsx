@@ -270,5 +270,4 @@ export const filaggPanel: PanelUIDetails<FilterAggregatePanelInfo> = {
   factory: () => new FilterAggregatePanelInfo(),
   info: null,
   hasStdout: false,
-  killable: false,
 };

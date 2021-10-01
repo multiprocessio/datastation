@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { CHAT_LINK, MODE } from '../../shared/constants';
-import log from '../shared/log';
+import log from '../../shared/log';
 import { Alert } from './Alert';
 import { Highlight } from './Highlight';
 

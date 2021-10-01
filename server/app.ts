@@ -5,17 +5,13 @@ import https from 'https';
 import path from 'path';
 import pg from 'pg';
 import { CODE_ROOT } from '../desktop/constants';
-import { panelHandlers } from '../desktop/panel';
-import { RPCHandler } from '../desktop/rpc';
-import { ensureSigningKey } from '../desktop/secret';
-import { loadSettings } from '../desktop/settings';
 import '../shared/polyfill';
 import { humanSize } from '../shared/text';
 import { registerAuth } from './auth';
 import { Config, readConfig } from './config';
 import log from './log';
-import { getProjectHandlers } from './project';
 import { handleRPC } from './rpc';
+import { initialize } from './runner';
 
 export class App {
   express: express.Express;
@@ -48,19 +44,14 @@ export async function init() {
     next();
   });
 
-  await ensureSigningKey();
-
-  const settings = await loadSettings();
-  const rpcHandlers: RPCHandler<any, any>[] = [
-    ...getProjectHandlers(app),
-    ...panelHandlers,
-    settings.getUpdateHandler(),
-  ];
+  const { handlers } = await initialize({
+    subprocess: path.join(__dirname, 'server_runner.js'),
+  });
 
   const auth = await registerAuth('/a/auth', app, config);
 
   app.express.post('/a/rpc', auth.requireAuth, (req, rsp) =>
-    handleRPC(req, rsp, rpcHandlers)
+    handleRPC(req, rsp, handlers)
   );
 
   // Serve static files

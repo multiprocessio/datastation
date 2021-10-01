@@ -206,8 +206,7 @@ export function Panel({
     }
   }
 
-  const runningProgram =
-    results.loading && panelUIDetails.killable && MODE_FEATURES.killProcess;
+  const killable = results.loading && MODE_FEATURES.killProcess;
   function killProcess() {
     return panelRPC('killProcess', panel.id);
   }
@@ -329,19 +328,21 @@ export function Panel({
               </span>
               <span
                 title={
-                  runningProgram
-                    ? 'Kill Process'
+                  results.loading
+                    ? killable
+                      ? 'Cancel'
+                      : 'Running'
                     : 'Evaluate Panel (Ctrl-Enter)'
                 }
               >
                 <Button
                   icon
                   onClick={() =>
-                    runningProgram ? killProcess() : reevalPanel(panel.id)
+                    killable ? killProcess() : reevalPanel(panel.id)
                   }
                   type="primary"
                 >
-                  {runningProgram ? 'close' : 'play_circle'}
+                  {results.loading ? 'close' : 'play_circle'}
                 </Button>
               </span>
               <span

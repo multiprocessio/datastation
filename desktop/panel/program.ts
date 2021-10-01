@@ -5,21 +5,10 @@ import path from 'path';
 import { file as makeTmpFile } from 'tmp-promise';
 import { InvalidDependentPanelError, NoResultError } from '../../shared/errors';
 import { LANGUAGES } from '../../shared/languages';
-import { PanelBody } from '../../shared/rpc';
 import { PanelInfo, ProgramPanelInfo, ProjectState } from '../../shared/state';
-import { RPCHandler } from '../rpc';
 import { SETTINGS } from '../settings';
 import { getProjectResultsFile } from '../store';
 import { EvalHandlerExtra, EvalHandlerResponse, guardPanel } from './types';
-
-const runningProcesses: Record<string, Set<number>> = {};
-
-function killAllByPanelId(panelId: string) {
-  const pids = runningProcesses[panelId];
-  if (pids) {
-    Array.from(pids).map((pid) => process.kill(pid));
-  }
-}
 
 export async function evalProgram(
   project: ProjectState,
@@ -45,7 +34,6 @@ export async function evalProgram(
     SETTINGS.languages[ppi.program.type].path || language.defaultPath;
 
   let out = '';
-  let pid = 0;
   try {
     const preamble = language.preamble(projectResultsFile, ppi.id, indexIdMap);
     await fs.writeFile(programTmp.path, [preamble, ppi.content].join(EOL));
@@ -78,12 +66,6 @@ export async function evalProgram(
         }
       });
 
-      killAllByPanelId(ppi.id);
-      if (!runningProcesses[ppi.id]) {
-        runningProcesses[ppi.id] = new Set();
-      }
-      pid = child.pid;
-      runningProcesses[ppi.id].add(child.pid);
       const code = await new Promise((resolve) => child.on('close', resolve));
       if (code !== 0) {
         throw Error(stderr);
@@ -117,16 +99,6 @@ export async function evalProgram(
       throw e;
     }
   } finally {
-    if (pid) {
-      runningProcesses[ppi.id].delete(pid);
-    }
     programTmp.cleanup();
   }
 }
-
-export const killProcessHandler: RPCHandler<PanelBody, void> = {
-  resource: 'killProcess',
-  handler: async function (_: string, body: PanelBody) {
-    killAllByPanelId(body.panelId);
-  },
-};

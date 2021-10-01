@@ -92,5 +92,4 @@ export const literalPanel: PanelUIDetails<LiteralPanelInfo> = {
   factory: () => new LiteralPanelInfo(),
   info: null,
   hasStdout: false,
-  killable: false,
 };

@@ -1,18 +1,19 @@
-import { DSPROJ_FLAG, PANEL_FLAG, PANEL_META_FLAG } from './constants';
-import { spawn } from 'child_process';
 import fs from 'fs/promises';
-import { file as makeTmpFile } from 'tmp-promise';
 import jsesc from 'jsesc';
 import { preview } from 'preview';
 import { shape } from 'shape';
-import { PanelBody } from '../../shared/rpc';
+import { file as makeTmpFile } from 'tmp-promise';
+import { Worker } from 'worker_threads';
+import { Cancelled } from '../../shared/errors';
 import log from '../../shared/log';
+import { PanelBody } from '../../shared/rpc';
 import {
   PanelInfo,
   PanelInfoType,
   PanelResult,
   ProjectState,
 } from '../../shared/state';
+import { DSPROJ_FLAG, PANEL_FLAG, PANEL_META_FLAG } from '../constants';
 import { Dispatch, RPCHandler } from '../rpc';
 import { flushUnwritten, getProjectResultsFile } from '../store';
 import { evalColumns, evalLiteral } from './columns';
@@ -42,39 +43,84 @@ const EVAL_HANDLERS: { [k in PanelInfoType]: EvalHandler } = {
   literal: evalLiteral,
 };
 
-export async function evalInSubprocess(subprocess: string, projectId: string, panelId: string) {
+const runningProcesses: Record<string, Record<string, Worker>> = {};
+
+async function killAllByPanelId(panelId: string) {
+  const workers = runningProcesses[panelId];
+  if (workers) {
+    await Promise.all(
+      Object.values(workers).map((worker) => worker.terminate())
+    );
+  }
+}
+
+export async function evalInSubprocess(
+  subprocess: string,
+  projectName: string,
+  panelId: string
+) {
   const tmp = await makeTmpFile();
+  let threadId = 0;
 
   try {
-    const child = spawn(subprocessEval, [DSPROJ_FLAG, projectId, PANEL_FLAG, panelId, PANEL_META_FLAG, tmp.path]);
+    // This means only one user can run a panel at a time
+    killAllByPanelId(panelId);
+    if (!runningProcesses[panelId]) {
+      runningProcesses[panelId] = {};
+    }
+
+    const child = new Worker(subprocess, {
+      argv: [
+        DSPROJ_FLAG,
+        projectName,
+        PANEL_FLAG,
+        panelId,
+        PANEL_META_FLAG,
+        tmp.path,
+      ],
+    });
+
+    threadId = child.threadId;
+    runningProcesses[panelId][threadId] = child;
 
     let stderr = '';
     child.stderr.on('data', (data) => {
       stderr += data;
     });
 
-    try {
-      return new Promise((resolve, reject) => {
-	try {
-	  child.on('close', resolve);
-	} catch (e) {
-	  reject(e);
-	}
-      });
-    } catch (e) {
-      log.error(e);
-      throw new Error(stderr);
-    }
+    await new Promise<void>((resolve, reject) => {
+      try {
+        child.on('error', reject);
+        child.on('exit', (code) => {
+          if (code === 0) {
+            resolve();
+          }
+
+          reject('Exited with ' + code + '\n' + stderr);
+        });
+      } catch (e) {
+        reject(e + '\n' + stderr);
+      }
+    });
+
+    const resultMeta = await fs.readFile(tmp.path);
+    return JSON.parse(resultMeta.toString());
   } finally {
     try {
-      await tmp.close();
+      if (threadId) {
+        delete runningProcesses[panelId][threadId];
+      }
+
+      tmp.cleanup();
     } catch (e) {
       log.error(e);
     }
   }
 }
 
-export const makeEvalHandler: (subprocessEval?: string): RPCHandler<PanelBody, PanelResult> {
+export const makeEvalHandler = (
+  subprocessEval?: string
+): RPCHandler<PanelBody, PanelResult> => ({
   resource: 'eval',
   handler: async function (
     projectId: string,
@@ -91,7 +137,11 @@ export const makeEvalHandler: (subprocessEval?: string): RPCHandler<PanelBody, P
     );
 
     if (subprocessEval) {
-      return evalInSubprocess(subprocessEval, project.id, body.panelId);
+      return evalInSubprocess(
+        subprocessEval,
+        project.projectName,
+        body.panelId
+      );
     }
 
     const indexIdMap = project.pages[panelPage].panels.map((p) => p.id);
@@ -128,5 +178,13 @@ export const makeEvalHandler: (subprocessEval?: string): RPCHandler<PanelBody, P
       size: json.length,
       contentType: res.contentType || 'application/json',
     };
+  },
+});
+
+export const killProcessHandler: RPCHandler<PanelBody, void> = {
+  resource: 'killProcess',
+  handler: async function (_: string, body: PanelBody) {
+    await killAllByPanelId(body.panelId);
+    throw new Cancelled();
   },
 };

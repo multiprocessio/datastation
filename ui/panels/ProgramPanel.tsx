@@ -169,5 +169,4 @@ export const programPanel: PanelUIDetails<ProgramPanelInfo> = {
   factory: () => new ProgramPanelInfo(),
   hasStdout: true,
   info: ProgramInfo,
-  killable: true,
 };

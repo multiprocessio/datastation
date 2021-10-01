@@ -1,9 +1,8 @@
 import { fetchResultsHandler } from './columns';
-import { evalHandler } from './eval';
-import { killProcessHandler } from './program';
+import { killProcessHandler, makeEvalHandler } from './eval';
 
-export const panelHandlers = [
-  evalHandler,
+export const panelHandlers = (subprocess?: string) => [
+  makeEvalHandler(subprocess),
   fetchResultsHandler,
   killProcessHandler,
 ];
