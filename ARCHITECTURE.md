@@ -24,7 +24,7 @@ it.
 All state in the desktop app is stored in JSON files on disk at the
 moment. The result of panel evals is stored on disk.
 
-It would be ideal to store state in a database (especially for the
+It might be ideal to store state in a database (especially for the
 server use case) but that complicates the install for all supported
 languages that would then depend not just on a JSON library but also
 on a database library. Still, this may be the right way to go at the
@@ -33,7 +33,17 @@ something to install all missing dependencies.
 
 ### ./desktop/panel
 
-This is where eval handlers for each panel type are defined.
+This is where eval handlers for each panel type (program, database,
+etc.) are defined.
+
+All database-specific handlers are defined in
+./desktop/panel/databases/*.ts since there are so many of them.
+
+Evaluation happens by spawning a Node.js subprocess where all the eval
+handlers are actually run. ./desktop/runner.ts is the entrypoint for
+this on desktop. ./server/runner.ts is the equivalent on the server.
+
+This allows easy resource cleanup and easy "kill" panel eval support.
 
 ## ./server
 
@@ -83,4 +93,5 @@ here.
 
 ### ./shared/languages
 
-This is where all supported languages are defined.
+This is where all supported languages are defined and where their
+libraries for interacting with DataStation are defined.
