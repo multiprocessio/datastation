@@ -1,9 +1,9 @@
 import * as React from 'react';
-import { ConnectorInfo, SQLConnectorInfo } from '../shared/state';
-import { Button } from './component-library/Button';
-import { Confirm } from './component-library/Confirm';
-import { Input } from './component-library/Input';
-import { SQLConnector } from './SQLConnector';
+import { ConnectorInfo, DatabaseConnectorInfo } from '../shared/state';
+import { Button } from './components/Button';
+import { Confirm } from './components/Confirm';
+import { Input } from './components/Input';
+import { DatabaseConnector } from './DatabaseConnector';
 
 export function Connector({
   connector,
@@ -54,9 +54,9 @@ export function Connector({
       </div>
       {expanded && (
         <React.Fragment>
-          {connector.type === 'sql' && (
-            <SQLConnector
-              connector={connector as SQLConnectorInfo}
+          {connector.type === 'database' && (
+            <DatabaseConnector
+              connector={connector as DatabaseConnectorInfo}
               updateConnector={updateConnector}
             />
           )}

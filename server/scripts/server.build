@@ -1,7 +1,8 @@
 setenv UI_CONFIG_OVERRIDES "window.DS_CONFIG_MODE = 'server';"
 yarn build-ui
 
-yarn esbuild server/index.ts --sourcemap --platform=node --external:sqlite3 --external:react-native-fs --external:react-native-fetch-blob --external:oracledb --external:ssh2 --external:snowflake-sdk --external:ssh2-promise --external:ssh2-sftp-client --external:cpu-features --external:electron --external:pg-native --bundle --outfile=build/server.js
+yarn esbuild server/runner.ts --sourcemap --platform=node --external:sqlite3 --external:react-native-fs --external:react-native-fetch-blob --external:oracledb --external:@elastic/elasticsearch --external:influx --external:prometheus-query --external:ssh2 --external:snowflake-sdk --external:ssh2-promise --external:ssh2-sftp-client --external:cpu-features --external:electron --external:pg-native --bundle --outfile=build/server_runner.js
+yarn esbuild server/index.ts --sourcemap --platform=node --external:sqlite3 --external:react-native-fs --external:react-native-fetch-blob --external:oracledb --external:@elastic/elasticsearch --external:influx --external:prometheus-query --external:ssh2 --external:snowflake-sdk --external:ssh2-promise --external:ssh2-sftp-client --external:cpu-features --external:electron --external:pg-native --bundle --outfile=build/server.js
 
 setenv_default SERVER_CONFIG_OVERRIDES ""
 prepend {SERVER_CONFIG_OVERRIDES} build/server.js

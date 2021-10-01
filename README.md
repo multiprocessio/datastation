@@ -36,7 +36,8 @@ See [here](https://datastation.multiprocess.io/docs/) for details.
 Download the app and use it! Report bugs on
 [Discord](https://discord.gg/f2wQBc4bXX).
 
-If you want to make a fix, see [HACKING.md](HACKING.md).
+Read about the architecture in [ARCHITECTURE.md](ARCHITECTURE.md). And
+if you want to make a fix, see [HACKING.md](HACKING.md).
 
 Before starting on any new feature though, check in on
 [Discord](https://discord.gg/f2wQBc4bXX)!

@@ -2,17 +2,6 @@ export const APP_NAME = 'DataStation Community Edition';
 export const SITE_ROOT = 'https://datastation.multiprocess.io';
 export const CHAT_LINK = 'https://discord.gg/f2wQBc4bXX';
 
-export const RPC = {
-  KILL_PROCESS: 'killProcess',
-  EVAL_PROGRAM: 'evalProgram',
-
-  STORE_LITERAL: 'storeLiteral',
-  FETCH_RESULTS: 'fetchResults',
-  EVAL_COLUMNS: 'evalColumns',
-
-  EVAL_FILTER_AGGREGATE: 'evalFilterAggregate',
-};
-
 export const RPC_ASYNC_REQUEST = 'rpcAsyncRequest';
 export const RPC_ASYNC_RESPONSE = 'rpcAsyncResponse';
 

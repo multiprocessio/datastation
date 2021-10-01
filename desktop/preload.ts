@@ -1,46 +1,51 @@
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
 import { RPC_ASYNC_REQUEST, RPC_ASYNC_RESPONSE } from '../shared/constants';
 import log from '../shared/log';
+import { Endpoint, IPCRendererResponse, WindowAsyncRPC } from '../shared/rpc';
 
 let messageNumber = -1;
 
-contextBridge.exposeInMainWorld('asyncRPC', async function <
-  Request,
-  Args,
-  Response
->(resource: string, projectId: string, args?: Args, body?: Request) {
+const asyncRPC: WindowAsyncRPC = async function <Request, Response = void>(
+  resource: Endpoint,
+  projectId: string,
+  body: Request
+): Promise<Response> {
   const payload = {
     // Assign a new message number
     messageNumber: ++messageNumber,
     resource,
-    args,
     body,
     projectId,
   };
   ipcRenderer.send(RPC_ASYNC_REQUEST, payload);
 
-  const result = await new Promise<{
-    isError: boolean;
-    body: Response | string;
-  }>((resolve, reject) => {
-    ipcRenderer.once(
-      `${RPC_ASYNC_RESPONSE}:${payload.messageNumber}`,
-      (
-        e: IpcRendererEvent,
-        response: { isError: boolean; body: Response | string }
-      ) => resolve(response)
-    );
-  });
+  const result = await new Promise<IPCRendererResponse<Response>>(
+    (resolve, reject) => {
+      try {
+        ipcRenderer.once(
+          `${RPC_ASYNC_RESPONSE}:${payload.messageNumber}`,
+          (e: IpcRendererEvent, response: IPCRendererResponse<Response>) =>
+            resolve(response)
+        );
+      } catch (e) {
+        reject(e);
+      }
+    }
+  );
 
-  if (result.isError) {
+  if (result.kind === 'error') {
     try {
-      throw result.body;
+      throw result.error;
     } catch (e) {
-      // Want to log it as an error, not just the object result.body
+      // The result.error object isn't a real Error at this point with
+      // prototype after going through serialization. So throw it to get
+      // a real Error instance that has full info for logs.
       log.error(e);
       throw e;
     }
   }
 
   return result.body;
-});
+};
+
+contextBridge.exposeInMainWorld('asyncRPC', asyncRPC);

@@ -10,6 +10,8 @@ export const DISK_ROOT = path.join(HOME, 'DataStationProjects');
 export const PROJECT_EXTENSION = 'dsproj';
 
 export const DSPROJ_FLAG = '--dsproj';
+export const PANEL_FLAG = '--evalPanel';
+export const PANEL_META_FLAG = '--metaFile';
 
 export const KEY_SIZE = 4096;
 

@@ -1,4 +1,10 @@
-const { deepEquals, mergeDeep, getPath, validate } = require('./object');
+const {
+  deepEquals,
+  mergeDeep,
+  getPath,
+  setPath,
+  validate,
+} = require('./object');
 
 test('getPath gets the path in the object', () => {
   const obj = { a: { 1: { b: '12' } } };
@@ -45,4 +51,14 @@ test('deepEquals', () => {
   expect(deepEquals(1, {})).toBe(false);
   expect(deepEquals({ a: 2, b: { c: 3 } }, { a: 2, b: { c: 3 } })).toBe(true);
   expect(deepEquals({ a: 2, b: { c: 3 } }, { a: 2, b: { c: 4 } })).toBe(false);
+});
+
+test('setPath', () => {
+  const obj = {
+    ns: [{ a: 1 }, { b: 2 }],
+  };
+  setPath(obj, 'ns.1.b', 3);
+  expect(obj).toStrictEqual({
+    ns: [{ a: 1 }, { b: 3 }],
+  });
 });

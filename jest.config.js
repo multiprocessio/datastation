@@ -1,6 +1,6 @@
 module.exports = {
   transform: {
-    '\\.[jt]sx?$': [
+    '.[jt]sx?$': [
       'esbuild-jest',
       {
         sourcemap: true,
@@ -20,4 +20,5 @@ module.exports = {
     'desktop/**/*.ts',
     'server/**/*.ts',
   ],
+  modulePathIgnorePatterns: ['<rootDir>/releases/', '<rootDir>/build/'],
 };

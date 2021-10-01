@@ -1,11 +1,11 @@
 import * as React from 'react';
 import { MODE } from '../shared/constants';
 import { ServerInfo, ServerInfoType } from '../shared/state';
-import { Button } from './component-library/Button';
-import { Confirm } from './component-library/Confirm';
-import { FileInput } from './component-library/FileInput';
-import { Input } from './component-library/Input';
-import { Select } from './component-library/Select';
+import { Button } from './components/Button';
+import { Confirm } from './components/Confirm';
+import { FileInput } from './components/FileInput';
+import { Input } from './components/Input';
+import { Select } from './components/Select';
 
 export function Server({
   server,
@@ -30,8 +30,11 @@ export function Server({
     });
 
     // Sync typed password to state on change
-    server[which].value = p;
-    server[which].encrypted = false;
+    const fieldKey = (which + '_encrypt') as
+      | 'passphrase_encrypt'
+      | 'password_encrypt';
+    server[fieldKey].value = p;
+    server[fieldKey].encrypted = false;
     updateServer(server);
   }
 
@@ -126,7 +129,7 @@ export function Server({
                 <FileInput
                   label="Private Key"
                   value={server.privateKeyFile}
-                  placeholder="~/.ssh/id_rsa"
+                  placeholder="~/.ssh/id_ed25519"
                   allowManualEntry
                   allowFilePicker={MODE === 'desktop'}
                   onChange={(fileName: string) => {
@@ -141,13 +144,6 @@ export function Server({
                   value={password.passphrase}
                   type="password"
                   onChange={syncPassword.bind(null, 'passphrase')}
-                  onBlur={
-                    () =>
-                      syncPassword(
-                        'passphrase',
-                        null
-                      ) /* Turns off continued attempts to encrypt */
-                  }
                 />
               </div>
             </React.Fragment>

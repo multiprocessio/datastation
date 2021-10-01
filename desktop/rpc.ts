@@ -1,13 +1,22 @@
 import { IpcMain, IpcMainEvent } from 'electron';
 import { RPC_ASYNC_REQUEST, RPC_ASYNC_RESPONSE } from '../shared/constants';
 import log from '../shared/log';
+import {
+  Endpoint,
+  GetProjectRequest,
+  GetProjectResponse,
+  IPCRendererResponse,
+  MakeProjectRequest,
+  MakeProjectResponse,
+  UpdateProjectRequest,
+  UpdateProjectResponse,
+} from '../shared/rpc';
 
 export interface RPCPayload {
   messageNumber: number;
-  resource: string;
+  resource: Endpoint;
   projectId: string;
   body: any;
-  args: any;
 }
 
 export type DispatchPayload = Omit<RPCPayload, 'messageNumber' | 'body'> & {
@@ -16,32 +25,50 @@ export type DispatchPayload = Omit<RPCPayload, 'messageNumber' | 'body'> & {
 
 export type Dispatch = (payload: DispatchPayload) => Promise<any>;
 
-export interface RPCHandler {
-  resource: string;
+export interface RPCHandler<Request, Response> {
+  resource: Endpoint;
   handler: (
     projectId: string,
-    args: any,
-    body: any,
-    dispatch: Dispatch
-  ) => Promise<any>;
+    body: Request,
+    dispatch: Dispatch,
+    external: boolean
+  ) => Promise<Response>;
+}
+
+// Standard handlers
+export type GetProjectHandler = RPCHandler<
+  GetProjectRequest,
+  GetProjectResponse
+>;
+export type UpdateProjectHandler = RPCHandler<
+  UpdateProjectRequest,
+  UpdateProjectResponse
+>;
+export type MakeProjectHandler = RPCHandler<
+  MakeProjectRequest,
+  MakeProjectResponse
+>;
+
+// Stub to ensure msg is always typed
+function sendIPCRendererResponse(
+  event: IpcMainEvent,
+  channel: string,
+  msg: IPCRendererResponse<any>
+) {
+  event.sender.send(channel, msg);
 }
 
 export function registerRPCHandlers(
   ipcMain: IpcMain,
-  handlers: Array<RPCHandler>
+  handlers: RPCHandler<any, any>[]
 ) {
-  function dispatch(payload: RPCPayload) {
+  function dispatch(payload: RPCPayload, external = false) {
     const handler = handlers.filter((h) => h.resource === payload.resource)[0];
     if (!handler) {
       throw new Error(`No RPC handler for resource: ${payload.resource}`);
     }
 
-    return handler.handler(
-      payload.projectId,
-      payload.args,
-      payload.body,
-      dispatch
-    );
+    return handler.handler(payload.projectId, payload.body, dispatch, external);
   }
 
   ipcMain.on(
@@ -49,17 +76,17 @@ export function registerRPCHandlers(
     async function (event: IpcMainEvent, payload: RPCPayload) {
       const responseChannel = `${RPC_ASYNC_RESPONSE}:${payload.messageNumber}`;
       try {
-        const rsp = await dispatch(payload);
-        event.sender.send(responseChannel, {
+        const rsp = await dispatch(payload, true);
+        sendIPCRendererResponse(event, responseChannel, {
+          kind: 'response',
           body: rsp,
         });
       } catch (e) {
         log.error(e);
-        event.sender.send(responseChannel, {
-          isError: true,
-          body: {
-            // Not all fields get pulled out unless explicitly requested
-            ...e,
+        sendIPCRendererResponse(event, responseChannel, {
+          kind: 'error',
+          error: {
+            // Not all errors are easily serializable
             stack: e.stack,
             message: e.message,
             name: e.name,

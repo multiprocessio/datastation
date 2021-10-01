@@ -2,7 +2,7 @@ import { Shape } from 'shape';
 import * as uuid from 'uuid';
 import { VERSION } from './constants';
 import { SupportedLanguages } from './languages';
-import { mergeDeep } from './object';
+import { mergeDeep, setPath } from './object';
 
 export class PanelResult {
   exception?: Error;
@@ -54,12 +54,6 @@ export class Encrypt {
     this.value = value;
     this.encrypted = false;
   }
-
-  static fromJSON(value: any) {
-    const e = new Encrypt(null);
-    e.encrypted = true;
-    return e;
-  }
 }
 
 export type ServerInfoType = 'ssh-agent' | 'password' | 'private-key';
@@ -70,9 +64,9 @@ export class ServerInfo {
   port: number;
   type: ServerInfoType;
   username: string;
-  password: Encrypt;
+  password_encrypt: Encrypt;
   privateKeyFile: string;
-  passphrase: Encrypt;
+  passphrase_encrypt: Encrypt;
   id: string;
 
   constructor(
@@ -90,21 +84,19 @@ export class ServerInfo {
     this.address = address || '';
     this.port = port || 22;
     this.username = username || '';
-    this.password = password || new Encrypt('');
+    this.password_encrypt = password || new Encrypt('');
     this.privateKeyFile = privateKeyFile || '~/.ssh/id_rsa';
-    this.passphrase = passphrase || new Encrypt('');
+    this.passphrase_encrypt = passphrase || new Encrypt('');
     this.id = uuid.v4();
   }
 
   static fromJSON(raw: any): ServerInfo {
-    const base = mergeDeep(new ServerInfo(), raw);
-    base.password = Encrypt.fromJSON(base.password);
-    base.passphrase = Encrypt.fromJSON(base.passphrase);
-    return base;
+    raw = raw || {};
+    return mergeDeep(new ServerInfo(), raw);
   }
 }
 
-export type ConnectorInfoType = 'sql' | 'http';
+export type ConnectorInfoType = 'database' | 'http';
 
 export class ConnectorInfo {
   name: string;
@@ -114,7 +106,7 @@ export class ConnectorInfo {
 
   constructor(type?: ConnectorInfoType, name?: string, serverId?: string) {
     this.name = name || 'Untitled Connector';
-    this.type = type || 'sql';
+    this.type = type || 'database';
     this.serverId = serverId;
     this.id = uuid.v4();
   }
@@ -124,10 +116,8 @@ export class ConnectorInfo {
     const ci = mergeDeep(new ConnectorInfo(), raw);
 
     switch (raw.type) {
-      case 'sql':
-        const base = mergeDeep(new SQLConnectorInfo(), ci);
-        base.sql.password = Encrypt.fromJSON(base.sql.password);
-        return base;
+      case 'database':
+        return mergeDeep(new DatabaseConnectorInfo(), ci);
       case 'http':
         return mergeDeep(new HTTPConnectorInfo(), ci);
     }
@@ -181,7 +171,7 @@ export class HTTPConnectorInfo extends ConnectorInfo {
   }
 }
 
-export type SQLConnectorInfoType =
+export type SQLConnectorType =
   | 'postgres'
   | 'mysql'
   | 'sqlite'
@@ -192,33 +182,36 @@ export type SQLConnectorInfoType =
   | 'snowflake'
   | 'cassandra';
 
-export class SQLConnectorInfo extends ConnectorInfo {
-  sql: {
-    type: SQLConnectorInfoType;
+export type DatabaseConnectorInfoType =
+  | SQLConnectorType
+  | 'elasticsearch'
+  | 'splunk'
+  | 'prometheus'
+  | 'influx';
+
+export class DatabaseConnectorInfo extends ConnectorInfo {
+  database: {
+    type: DatabaseConnectorInfoType;
     database: string;
     username: string;
-    password: Encrypt;
+    password_encrypt: Encrypt;
     address: string;
-
+    apiKey_encrypt: Encrypt;
     extra: Record<string, string>;
   };
 
   constructor(
-    name?: string,
-    type?: SQLConnectorInfoType,
-    database?: string,
-    username?: string,
-    password?: Encrypt,
-    address?: string
+    panel: Partial<DatabaseConnectorInfo['database'] & { name: string }> = {}
   ) {
-    super('sql', name);
-    this.sql = {
-      type: type || 'postgres',
-      database: database || '',
-      username: username || '',
-      password: password || new Encrypt(''),
-      address: address || '',
-      extra: {},
+    super('database', panel.name || '');
+    this.database = {
+      type: panel.type || 'postgres',
+      database: panel.database || '',
+      username: panel.username || '',
+      password_encrypt: panel.password_encrypt || new Encrypt(''),
+      address: panel.address || '',
+      extra: panel.extra || {},
+      apiKey_encrypt: panel.apiKey_encrypt || new Encrypt(''),
     };
   }
 }
@@ -229,7 +222,7 @@ export type PanelInfoType =
   | 'graph'
   | 'program'
   | 'literal'
-  | 'sql'
+  | 'database'
   | 'file'
   | 'filagg';
 
@@ -264,8 +257,8 @@ export class PanelInfo {
         pit = mergeDeep(new ProgramPanelInfo(), pit);
       case 'literal':
         pit = mergeDeep(new LiteralPanelInfo(), pit);
-      case 'sql':
-        pit = mergeDeep(new SQLPanelInfo(), pit);
+      case 'database':
+        pit = mergeDeep(new DatabasePanelInfo(), pit);
       case 'file':
         pit = mergeDeep(new FilePanelInfo(), pit);
       case 'filagg':
@@ -280,12 +273,23 @@ export class PanelInfo {
 export class ProgramPanelInfo extends PanelInfo {
   program: {
     type: SupportedLanguages;
+    range?: TimeSeriesRange;
   };
 
-  constructor(name?: string, type?: SupportedLanguages, content?: string) {
+  constructor(
+    name?: string,
+    type?: SupportedLanguages,
+    content?: string,
+    range?: TimeSeriesRange
+  ) {
     super('program', name, content);
     this.program = {
       type: type || 'python',
+      range: range || {
+        field: '',
+        rangeType: 'relative',
+        relative: 'last-hour',
+      },
     };
   }
 }
@@ -323,22 +327,81 @@ export class GraphPanelInfo extends PanelInfo {
   }
 }
 
-export class SQLPanelInfo extends PanelInfo {
-  sql: {
-    type: SQLConnectorInfoType;
+export type TimeSeriesRelativeTimes =
+  | 'last-5-minutes'
+  | 'last-15-minutes'
+  | 'last-30-minutes'
+  | 'last-hour'
+  | 'last-3-hours'
+  | 'last-6-hours'
+  | 'last-12-hours'
+  | 'last-day'
+  | 'last-3-days'
+  | 'last-week'
+  | 'last-2-weeks'
+  | 'last-month'
+  | 'last-2-months'
+  | 'last-3-months'
+  | 'last-6-months'
+  | 'last-year'
+  | 'last-2-years'
+  | 'all-time';
+
+export type TimeSeriesFixedTimes =
+  | 'this-hour'
+  | 'previous-hour'
+  | 'today'
+  | 'yesterday'
+  | 'week-to-date'
+  | 'previous-week'
+  | 'month-to-date'
+  | 'previous-month'
+  | 'quarter-to-date'
+  | 'previous-quarter'
+  | 'year-to-date'
+  | 'previous-year';
+
+export type TimeSeriesRange = {
+  field: string;
+} & (
+  | {
+      rangeType: 'absolute';
+      begin_date: Date;
+      end_date: Date;
+    }
+  | {
+      rangeType: 'relative';
+      relative: TimeSeriesRelativeTimes;
+    }
+  | {
+      rangeType: 'fixed';
+      fixed: TimeSeriesFixedTimes;
+    }
+);
+
+export class DatabasePanelInfo extends PanelInfo {
+  database: {
     connectorId?: string;
+    range: TimeSeriesRange;
+    table: string;
+    step: number;
   };
 
   constructor(
-    name?: string,
-    type?: SQLConnectorInfoType,
-    connectorId?: string,
-    content?: string
+    panel: Partial<
+      DatabasePanelInfo['database'] & { content: string; name: string }
+    > = {}
   ) {
-    super('sql', name, content);
-    this.sql = {
-      type: type || 'postgres',
-      connectorId,
+    super('database', panel.name || '', panel.content || '');
+    this.database = {
+      connectorId: panel.connectorId || '',
+      range: panel.range || {
+        field: '',
+        rangeType: 'relative',
+        relative: 'last-hour',
+      },
+      table: panel.table || '',
+      step: panel.step || 60,
     };
   }
 }
@@ -391,6 +454,7 @@ export class FilterAggregatePanelInfo extends PanelInfo {
   filagg: {
     panelSource: number;
     filter: string;
+    range: TimeSeriesRange;
     aggregateType: AggregateType;
     groupBy: string;
     aggregateOn: string;
@@ -409,7 +473,8 @@ export class FilterAggregatePanelInfo extends PanelInfo {
     sortOn?: string,
     sortAsc?: boolean,
     content?: string,
-    limit?: number
+    limit?: number,
+    range?: TimeSeriesRange
   ) {
     super('filagg', name, content);
     this.filagg = {
@@ -421,6 +486,11 @@ export class FilterAggregatePanelInfo extends PanelInfo {
       sortOn: sortOn || '',
       sortAsc: sortAsc || false,
       limit: 100,
+      range: range || {
+        field: '',
+        rangeType: 'relative',
+        relative: 'last-hour',
+      },
     };
   }
 }
@@ -485,6 +555,36 @@ export class ProjectPage {
   }
 }
 
+export async function doOnMatchingFields<T>(
+  ps: any,
+  check: (key: string) => boolean,
+  cb: (f: T, path: string) => Promise<T>
+) {
+  const stack: Array<[any, Array<string>]> = [[ps, []]];
+
+  while (stack.length) {
+    const [top, path] = stack.pop();
+
+    if (top && typeof top === 'object') {
+      for (const [elPath, el] of Object.entries(top)) {
+        stack.push([el, [...path, elPath]]);
+      }
+    }
+
+    const p = path.filter(Boolean).join('.');
+    if (check(p)) {
+      setPath(ps, p, await cb(top, p));
+    }
+  }
+}
+
+export function doOnEncryptFields(
+  ps: any,
+  cb: (f: Encrypt, path: string) => Promise<Encrypt>
+) {
+  return doOnMatchingFields(ps, (f) => f.endsWith('_encrypt'), cb);
+}
+
 export class ProjectState {
   pages: Array<ProjectPage>;
   projectName: string;
@@ -511,7 +611,7 @@ export class ProjectState {
     this.id = uuid.v4();
   }
 
-  static fromJSON(raw: any): ProjectState {
+  static async fromJSON(raw: any, external = true): Promise<ProjectState> {
     raw = raw || {};
     const ps = new ProjectState();
     ps.projectName = raw.projectName || '';
@@ -521,6 +621,25 @@ export class ProjectState {
     ps.id = raw.id || uuid.v4();
     ps.originalVersion = raw.originalVersion || VERSION;
     ps.lastVersion = raw.lastVersion || VERSION;
+    if (external) {
+      await doOnEncryptFields(ps, (f, p) => {
+        const new_ = new Encrypt(null);
+        new_.encrypted = true;
+        return Promise.resolve(new_);
+      });
+    }
+    await doOnMatchingFields<Date>(
+      ps,
+      (path) => path.endsWith('_date'),
+      (d) => {
+        const nd = new Date(d);
+        if (String(nd) === 'Invalid Date') {
+          return Promise.resolve(new Date());
+        }
+
+        return Promise.resolve(nd);
+      }
+    );
     return ps;
   }
 }

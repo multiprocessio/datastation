@@ -31,6 +31,14 @@ export class NoConnectorError extends Error {
   }
 }
 
+export class Cancelled extends Error {
+  constructor() {
+    super();
+    this.name = 'Cancelled';
+    this.message = 'Cancelled panel evaluation.';
+  }
+}
+
 export class UnsupportedError extends Error {
   constructor(msg: string) {
     super();
@@ -45,4 +53,5 @@ export const EVAL_ERRORS = [
   NoResultError,
   UnsupportedError,
   NoConnectorError,
+  Cancelled,
 ];

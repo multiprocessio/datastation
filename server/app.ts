@@ -5,26 +5,13 @@ import https from 'https';
 import path from 'path';
 import pg from 'pg';
 import { CODE_ROOT } from '../desktop/constants';
-import {
-  evalColumnsHandler,
-  fetchResultsHandler,
-  storeLiteralHandler,
-} from '../desktop/eval/columns';
-import { evalFilterAggregateHandler } from '../desktop/eval/filagg';
-import { evalFileHandler } from '../desktop/eval/file';
-import { evalHTTPHandler } from '../desktop/eval/http';
-import { programHandlers } from '../desktop/eval/program';
-import { evalSQLHandler } from '../desktop/eval/sql';
-import { RPCHandler } from '../desktop/rpc';
-import { ensureSigningKey } from '../desktop/secret';
-import { loadSettings } from '../desktop/settings';
 import '../shared/polyfill';
 import { humanSize } from '../shared/text';
 import { registerAuth } from './auth';
 import { Config, readConfig } from './config';
 import log from './log';
-import { getProjectHandlers } from './project';
 import { handleRPC } from './rpc';
+import { initialize } from './runner';
 
 export class App {
   express: express.Express;
@@ -57,26 +44,14 @@ export async function init() {
     next();
   });
 
-  await ensureSigningKey();
-
-  const settings = await loadSettings();
-  const rpcHandlers = [
-    ...getProjectHandlers(app),
-    evalColumnsHandler,
-    storeLiteralHandler,
-    evalSQLHandler,
-    evalHTTPHandler,
-    fetchResultsHandler,
-    ...programHandlers,
-    evalFileHandler,
-    evalFilterAggregateHandler,
-    settings.getUpdateHandler(),
-  ] as RPCHandler[];
+  const { handlers } = await initialize(app, {
+    subprocess: path.join(__dirname, 'server_runner.js'),
+  });
 
   const auth = await registerAuth('/a/auth', app, config);
 
   app.express.post('/a/rpc', auth.requireAuth, (req, rsp) =>
-    handleRPC(req, rsp, rpcHandlers)
+    handleRPC(req, rsp, handlers)
   );
 
   // Serve static files

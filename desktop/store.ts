@@ -2,15 +2,18 @@ import fs from 'fs';
 import fsPromises from 'fs/promises';
 import path from 'path';
 import log from '../shared/log';
-import {
-  Encrypt,
-  ProjectState,
-  ServerInfo,
-  SQLConnectorInfo,
-} from '../shared/state';
+import { getPath } from '../shared/object';
+import { GetProjectRequest, MakeProjectRequest } from '../shared/rpc';
+import { doOnEncryptFields, Encrypt, ProjectState } from '../shared/state';
 import { DISK_ROOT, PROJECT_EXTENSION, SYNC_PERIOD } from './constants';
 import { ensureFile } from './fs';
-import { Dispatch } from './rpc';
+import {
+  Dispatch,
+  GetProjectHandler,
+  MakeProjectHandler,
+  RPCHandler,
+  UpdateProjectHandler,
+} from './rpc';
 import { encrypt } from './secret';
 
 const buffers: Record<
@@ -34,7 +37,7 @@ export function writeFileBuffered(name: string, contents: string) {
   }, SYNC_PERIOD);
 }
 
-function flushUnwritten() {
+export function flushUnwritten() {
   Object.keys(buffers).map((fileName: string) => {
     clearTimeout(buffers[fileName].timeout);
     // Must be a synchronous write in this 'exit' context
@@ -55,90 +58,79 @@ export function getProjectResultsFile(projectId: string) {
   return path.join(DISK_ROOT, '.' + fileName + '.results');
 }
 
-async function checkAndEncrypt(e: Encrypt, existing: Encrypt) {
+async function checkAndEncrypt(e: Encrypt, existing?: Encrypt) {
+  existing = existing || new Encrypt('');
+  const new_ = new Encrypt('');
   if (e.value === null) {
-    e.value = existing.value;
-    e.encrypted = true;
+    new_.value = existing.value;
+    new_.encrypted = true;
   } else if (!e.encrypted) {
-    e.value = await encrypt(e.value);
-    e.encrypted = true;
+    new_.value = await encrypt(e.value);
+    new_.encrypted = true;
   }
+
+  return new_;
 }
 
-export async function encryptProjectSecrets(
+export function encryptProjectSecrets(
   s: ProjectState,
   existingState: ProjectState
 ) {
-  for (const server of s.servers) {
-    const existingServer =
-      existingState.servers.filter((s) => s.id === server.id)[0] ||
-      new ServerInfo();
-    await checkAndEncrypt(server.passphrase, existingServer.passphrase);
-    await checkAndEncrypt(server.password, existingServer.password);
-  }
-
-  for (const conn of s.connectors) {
-    if (conn.type === 'sql') {
-      const sconn = conn as SQLConnectorInfo;
-      const existingSConn =
-        (existingState.connectors.filter(
-          (c) => c.id === sconn.id
-        )[0] as SQLConnectorInfo) || new SQLConnectorInfo();
-      await checkAndEncrypt(sconn.sql.password, existingSConn.sql.password);
-    }
-  }
+  return doOnEncryptFields(s, (field: Encrypt, path: string) => {
+    return checkAndEncrypt(field, getPath(existingState, path));
+  });
 }
 
-export const storeHandlers = [
-  {
-    resource: 'getProjectState',
-    handler: async (
-      _: string,
-      projectId: string,
-      { internal }: { internal?: boolean } = {}
-    ) => {
-      const fileName = await ensureProjectFile(projectId);
-      try {
-        const f = await fsPromises.readFile(fileName);
-        const ps = JSON.parse(f.toString()) as ProjectState;
-        if (internal) {
-          return ps;
-        }
-        return ProjectState.fromJSON(ps);
-      } catch (e) {
-        log.error(e);
-        return null;
-      }
-    },
-  },
-  {
-    resource: 'updateProjectState',
-    handler: async (
-      projectId: string,
-      _: string,
-      newState: ProjectState,
-      dispatch: Dispatch
-    ) => {
-      const fileName = await ensureProjectFile(projectId);
+const getProjectHandler: GetProjectHandler = {
+  resource: 'getProject',
+  handler: async (
+    _0: string,
+    { projectId }: GetProjectRequest,
+    _1: unknown,
+    external: boolean
+  ) => {
+    const fileName = await ensureProjectFile(projectId);
+    try {
       const f = await fsPromises.readFile(fileName);
-      const existingState = JSON.parse(f.toString());
-      await encryptProjectSecrets(newState, existingState);
-      return writeFileBuffered(fileName, JSON.stringify(newState));
-    },
+      const ps = JSON.parse(f.toString()) as ProjectState;
+      return await ProjectState.fromJSON(ps, external);
+    } catch (e) {
+      log.error(e);
+      return null;
+    }
   },
-  {
-    resource: 'makeProject',
-    handler: async (
-      _0: string,
-      { projectId }: { projectId: string },
-      _1: void
-    ) => {
-      const fileName = await ensureProjectFile(projectId);
-      const newProject = new ProjectState();
-      newProject.projectName = fileName;
-      return fsPromises.writeFile(fileName, JSON.stringify(newProject));
-    },
+};
+
+const updateProjectHandler: UpdateProjectHandler = {
+  resource: 'updateProject',
+  handler: async (
+    projectId: string,
+    newState: ProjectState,
+    dispatch: Dispatch
+  ) => {
+    const fileName = await ensureProjectFile(projectId);
+    const f = await fsPromises.readFile(fileName);
+    const existingState = JSON.parse(f.toString());
+    await encryptProjectSecrets(newState, existingState);
+    return writeFileBuffered(fileName, JSON.stringify(newState));
   },
+};
+
+const makeProjectHandler: MakeProjectHandler = {
+  resource: 'makeProject',
+  handler: async (_: string, { projectId }: MakeProjectRequest) => {
+    const fileName = await ensureProjectFile(projectId);
+    const newProject = new ProjectState();
+    newProject.projectName = fileName;
+    return fsPromises.writeFile(fileName, JSON.stringify(newProject));
+  },
+};
+
+// Break handlers out so they can be individually typed without `any`
+export const storeHandlers: RPCHandler<any, any>[] = [
+  getProjectHandler,
+  updateProjectHandler,
+  makeProjectHandler,
 ];
 
 export function ensureProjectFile(projectId: string) {

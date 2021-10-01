@@ -5,14 +5,14 @@ import log from '../shared/log';
 export async function handleRPC(
   req: express.Request,
   rsp: express.Response,
-  rpcHandlers: RPCHandler[]
+  rpcHandlers: RPCHandler<any, any>[]
 ) {
   const payload = {
     ...req.query,
     ...req.body,
   };
 
-  async function dispatch(payload: DispatchPayload) {
+  async function dispatch(payload: DispatchPayload, external = false) {
     const handler = rpcHandlers.filter(
       (h) => h.resource === payload.resource
     )[0];
@@ -23,14 +23,14 @@ export async function handleRPC(
     // TODO: run these in an external process pool
     return await handler.handler(
       payload.projectId,
-      payload.args,
       payload.body,
-      dispatch
+      dispatch,
+      external
     );
   }
 
   try {
-    const rpcResponse = await dispatch(payload);
+    const rpcResponse = await dispatch(payload, true);
     rsp.json(rpcResponse || { message: 'ok' });
   } catch (e) {
     log.error(e);

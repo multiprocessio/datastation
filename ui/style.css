@@ -98,9 +98,24 @@ label {
   font-size: 0.75rem;
 }
 
+input[type='radio'] {
+  margin: 0;
+  margin-left: 3px;
+}
+
+.radio--vertical {
+  display: block;
+}
+
+.radio--vertical .radio-element {
+  display: block;
+  padding: 5px;
+  text-align: right;
+}
+
 .editor-container .input,
-input.input,
-label.input input,
+input.input:not([type='radio']),
+label.input input:not([type='radio']),
 select.select,
 label.select select {
   padding: 5px;
@@ -126,9 +141,16 @@ label.input input[type='file'] {
   max-height: 100%;
   display: flex;
   flex-direction: row;
-  justify-content: center;
   align-items: stretch;
   align-content: center;
+}
+
+.flex--vertical {
+  flex-direction: column;
+}
+
+.items-flex-end {
+  align-items: flex-end;
 }
 
 .block {
@@ -250,7 +272,7 @@ header > div {
 .sidebar {
   border-right: 1px solid #ccc;
   background: white;
-  flex: 0 0 275px;
+  flex: 0 0 350px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -314,6 +336,7 @@ header > div {
 }
 
 .panel {
+  min-width: 900px;
   background: white;
   border: 1px solid #ccc;
   margin-bottom: 15px;

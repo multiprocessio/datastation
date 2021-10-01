@@ -2,7 +2,9 @@ import * as CSV from 'papaparse';
 import * as XLSX from 'xlsx';
 import log from './log';
 
-export type Parsers = { [type: string]: (a: ArrayBuffer) => Promise<any> };
+export type Parsers = {
+  [type: string]: (a: ArrayBuffer | string) => Promise<any>;
+};
 
 export interface ContentTypeInfoPlusParsers {
   additionalParsers?: Parsers;
@@ -11,7 +13,7 @@ export interface ContentTypeInfoPlusParsers {
 }
 
 const APACHE2_ACCESS_RE =
-  /^(?<host>[^ ]*) [^ ]* (?<user>[^ ]*) \[(?<time>[^\]]*)\] "(?<method>\S+)(?: +(?<path>(?:[^\"]|\\.)*?)(?: +\S*)?)?" (?<code>[^ ]*) (?<size>[^ ]*)(?: "(?<referer>(?:[^\"]|\\.)*)" "(?<agent>(?:[^\"]|\\.)*)")?$/;
+  /^(?<host>[^ ]*) [^ ]* (?<user>[^ ]*) \[(?<time>[^\]]*)\] "(?<method>\S+)(?: +(?<path>(?:[^\"]|\.)*?)(?: +\S*)?)?" (?<code>[^ ]*) (?<size>[^ ]*)(?: "(?<referer>(?:[^\"]|\.)*)" "(?<agent>(?:[^\"]|\.)*)")?$/;
 const APACHE2_ERROR_RE =
   /^\[[^ ]* (?<time>[^\]]*)\] \[(?<level>[^\]]*)\](?: \[pid (?<pid>[^\]]*)\])? \[client (?<client>[^\]]*)\] (?<message>.*)$/;
 const NGINX_ACCESS_RE =
@@ -83,10 +85,13 @@ export const XLSX_MIME_TYPE =
 export async function parseArrayBuffer(
   { type, additionalParsers, customLineRegexp }: ContentTypeInfoPlusParsers,
   fileName: string,
-  body: ArrayBuffer
+  body: ArrayBuffer | string
 ): Promise<{ value: any; contentType: string }> {
-  // I'm not sure body is actually always an arraybuffer.
-  if (!body || (body as any).length === 0 || body.byteLength === 0) {
+  if (
+    !body ||
+    (typeof body === 'string' && body.length === 0) ||
+    (body instanceof ArrayBuffer && body.byteLength === 0)
+  ) {
     return { value: null, contentType: 'unknown' };
   }
 

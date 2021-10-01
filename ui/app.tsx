@@ -1,5 +1,4 @@
 import formatDistanceToNow from 'date-fns/formatDistanceToNow';
-import pako from 'pako';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import {
@@ -9,7 +8,16 @@ import {
   SITE_ROOT,
   VERSION,
 } from '../shared/constants';
+import log from '../shared/log';
 import '../shared/polyfill';
+import {
+  GetProjectsRequest,
+  GetProjectsResponse,
+  MakeProjectRequest,
+  MakeProjectResponse,
+  OpenProjectRequest,
+  OpenProjectResponse,
+} from '../shared/rpc';
 import {
   ConnectorInfo,
   DEFAULT_PROJECT,
@@ -18,14 +26,14 @@ import {
   ServerInfo,
 } from '../shared/state';
 import { asyncRPC } from './asyncRPC';
-import { Alert } from './component-library/Alert';
-import { Button } from './component-library/Button';
-import { Input } from './component-library/Input';
-import { Connectors } from './Connectors';
-import { ErrorBoundary } from './ErrorBoundary';
-import { Pages } from './Pages';
+import { Alert } from './components/Alert';
+import { Button } from './components/Button';
+import { ErrorBoundary } from './components/ErrorBoundary';
+import { Input } from './components/Input';
+import { ConnectorList } from './ConnectorList';
+import { PageList } from './PageList';
 import { makeStore, ProjectContext, ProjectStore } from './ProjectStore';
-import { Servers } from './Servers';
+import { ServerList } from './ServerList';
 import { Sidebar } from './Sidebar';
 import { Updates } from './Updates';
 
@@ -60,37 +68,9 @@ function getQueryParameter(param: String) {
   return '';
 }
 
-const shareStateCache: {
-  state: undefined | ProjectState;
-  checked: boolean;
-} = {
-  state: undefined,
-  checked: false,
-};
-
-function getShareState(): undefined | ProjectState {
-  if (shareStateCache.checked) {
-    return shareStateCache.state;
-  }
-
-  shareStateCache.checked = true;
-  const shareState = getQueryParameter('share');
-  if (shareState) {
-    // TODO: this can be more efficient than calling split
-    const intArray = Uint8Array.from(
-      shareState.split(',').map((i) => parseInt(i))
-    );
-    const uncompressed = JSON.parse(pako.inflate(intArray, { to: 'string' }));
-    shareStateCache.state = ProjectState.fromJSON(uncompressed);
-  }
-
-  return shareStateCache.state;
-}
-
 function useProjectState(
   projectId: string,
-  store: ProjectStore | null,
-  shareState: ProjectState | undefined
+  store: ProjectStore | null
 ): [ProjectState, (d: ProjectState) => void] {
   const [state, setProjectState] = React.useState<ProjectState>(null);
 
@@ -100,7 +80,9 @@ function useProjectState(
 
   function setState(newState: ProjectState, addToRestoreBuffer = true) {
     store.update(projectId, newState, addToRestoreBuffer);
-    setProjectState(newState);
+    const c = { ...newState };
+    Object.setPrototypeOf(c, ProjectState.prototype);
+    setProjectState(c);
   }
 
   const isDefault =
@@ -124,11 +106,6 @@ function useProjectState(
 
   // Re-read state when projectId changes
   React.useEffect(() => {
-    if (shareState) {
-      setProjectState(shareState);
-      return;
-    }
-
     async function fetch() {
       let state;
       try {
@@ -136,13 +113,13 @@ function useProjectState(
         if (!rawState && (!isNewProject || isDefault)) {
           throw new Error();
         } else {
-          state = ProjectState.fromJSON(rawState);
+          state = await ProjectState.fromJSON(rawState);
         }
       } catch (e) {
-        if (isDefault) {
+        if (isDefault && e.message === '') {
           state = DEFAULT_PROJECT;
         } else {
-          console.error(e);
+          log.error(e);
         }
       }
 
@@ -163,22 +140,22 @@ function useProjectState(
 const store = makeStore(MODE);
 
 function App() {
-  const shareState = getShareState();
   const requestedProjectId = getQueryParameter('project');
   const [projectId, setProjectId] = React.useState(
-    (shareState && shareState.id) ||
-      requestedProjectId ||
+    requestedProjectId ||
       (MODE_FEATURES.useDefaultProject ? DEFAULT_PROJECT.projectName : '')
   );
   (window as any).projectId = projectId;
-  if (!requestedProjectId && projectId) {
-    window.location.href = window.location.pathname + '?project=' + projectId;
-  }
+  React.useEffect(() => {
+    if (!requestedProjectId && projectId && MODE !== 'browser') {
+      window.location.href = window.location.pathname + '?project=' + projectId;
+    }
+  }, [requestedProjectId, projectId]);
 
   const [makeProjectError, setMakeProjectError] = React.useState('');
   async function makeProject(projectId: string) {
     try {
-      await asyncRPC<void, { projectId: string }, void>('makeProject', {
+      await asyncRPC<MakeProjectRequest, MakeProjectResponse>('makeProject', {
         projectId,
       });
       setProjectId(projectId);
@@ -187,11 +164,7 @@ function App() {
     }
   }
 
-  const [state, updateProjectState] = useProjectState(
-    projectId,
-    store,
-    shareState
-  );
+  const [state, updateProjectState] = useProjectState(projectId, store);
 
   const currentPageKey = 'currentPage:' + projectId;
   const [currentPage, _setCurrentPage] = React.useState(
@@ -200,19 +173,6 @@ function App() {
   function setCurrentPage(p: number) {
     localStorage.setItem(currentPageKey, String(p) || '0');
     return _setCurrentPage(p);
-  }
-
-  const [shareURL, setShareURL] = React.useState('');
-
-  function computeShareURL() {
-    const domain =
-      window.location.protocol +
-      '//' +
-      window.location.hostname +
-      (window.location.port ? ':' + window.location.port : '');
-    const json = JSON.stringify(state);
-    const compressed = pako.deflate(json, { to: 'string' });
-    setShareURL(domain + '/?share=' + compressed);
   }
 
   React.useEffect(() => {
@@ -237,17 +197,15 @@ function App() {
     setHeaderHeightInternal(e.offsetHeight);
   }, []);
 
-  const [projects, setProjects] = React.useState<Array<{
-    name: string;
-    createdAt: string;
-  }> | null>(null);
+  const [projects, setProjects] = React.useState<GetProjectsResponse | null>(
+    null
+  );
   React.useEffect(() => {
     async function load() {
-      const projects = await asyncRPC<
-        void,
-        void,
-        Array<{ name: string; createdAt: string }>
-      >('getProjects');
+      const projects = await asyncRPC<GetProjectsRequest, GetProjectsResponse>(
+        'getProjects',
+        null
+      );
       setProjects(projects);
     }
 
@@ -267,51 +225,54 @@ function App() {
 
   function updatePage(page: ProjectPage) {
     state.pages[currentPage] = page;
-    updateProjectState({ ...state });
+    updateProjectState(state);
   }
 
   function addPage(page: ProjectPage) {
     state.pages.push(page);
-    updateProjectState({ ...state });
+    updateProjectState(state);
   }
 
   function deletePage(at: number) {
     state.pages.splice(at, 1);
-    updateProjectState({ ...state });
+    updateProjectState(state);
   }
 
   function updateConnector(dcIndex: number, dc: ConnectorInfo) {
     state.connectors[dcIndex] = dc;
-    updateProjectState({ ...state });
+    updateProjectState(state);
   }
 
   function addConnector(dc: ConnectorInfo) {
     state.connectors.push(dc);
-    updateProjectState({ ...state });
+    updateProjectState(state);
   }
 
   function deleteConnector(at: number) {
     state.connectors.splice(at, 1);
-    updateProjectState({ ...state });
+    updateProjectState(state);
   }
 
   function updateServer(dcIndex: number, dc: ServerInfo) {
     state.servers[dcIndex] = dc;
-    updateProjectState({ ...state });
+    updateProjectState(state);
   }
 
   function addServer(dc: ServerInfo) {
     state.servers.push(dc);
-    updateProjectState({ ...state });
+    updateProjectState(state);
   }
 
   function deleteServer(at: number) {
     state.servers.splice(at, 1);
-    updateProjectState({ ...state });
+    updateProjectState(state);
   }
 
   async function openProject() {
-    await asyncRPC<void, void, void>('openProject');
+    await asyncRPC<OpenProjectRequest, OpenProjectResponse>(
+      'openProject',
+      null
+    );
     window.close();
   }
 
@@ -335,27 +296,6 @@ function App() {
                         Reset
                       </Button>
                     </span>
-                    <div className="share">
-                      <Button onClick={() => computeShareURL()}>Share</Button>
-                      <div className="share-details">
-                        <p>This URL contains the entire project state.</p>
-                        <p>
-                          Project data is not stored on a server. But if you do
-                          use this URL, the data encoded in the URL will appear
-                          in DataStation web server access logs.
-                        </p>
-                        <p>
-                          If you make changes, you will need to click "Share"
-                          again to get a new URL.
-                        </p>
-                        <Input readOnly value={shareURL} onChange={() => {}} />
-                        <p>
-                          <a href="https://tinyurl.com/app">TinyURL</a> is a
-                          good service for shortening these URLs correctly, some
-                          other systems break the URL.
-                        </p>
-                      </div>
-                    </div>
                     <a
                       href="https://github.com/multiprocessio/datastation"
                       target="_blank"
@@ -391,13 +331,13 @@ function App() {
         >
           {projectId && MODE_FEATURES.connectors && (
             <Sidebar>
-              <Connectors
+              <ConnectorList
                 state={state}
                 updateConnector={updateConnector}
                 addConnector={addConnector}
                 deleteConnector={deleteConnector}
               />
-              <Servers
+              <ServerList
                 state={state}
                 updateServer={updateServer}
                 addServer={addServer}
@@ -459,7 +399,7 @@ function App() {
                 ) : null}
               </div>
             ) : (
-              <Pages
+              <PageList
                 state={state}
                 updatePage={updatePage}
                 addPage={addPage}
