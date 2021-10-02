@@ -76,8 +76,8 @@ export class Settings {
     return mergeDeep(new Settings(settingsFile), existingSettings);
   }
 
-  save() {
-    return fs.writeFile(this.file, JSON.stringify(this));
+  async save() {
+    return await fs.writeFile(this.file, JSON.stringify(this));
   }
 
   getUpdateHandler(): RPCHandler<Settings, void> {
@@ -91,7 +91,7 @@ export class Settings {
   }
 }
 
-export let SETTINGS: Settings = null;
+export let SETTINGS: Settings = new Settings();
 
 export async function loadSettings(settingsFile?: string): Promise<Settings> {
   if (!settingsFile) {

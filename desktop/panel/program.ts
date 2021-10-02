@@ -35,8 +35,13 @@ export async function evalProgram(
 
   let out = '';
   try {
-    const preamble = language.preamble(projectResultsFile, ppi.id, indexIdMap);
-    await fs.writeFile(programTmp.path, [preamble, ppi.content].join(EOL));
+    const preamble = language.preamble(
+      projectResultsFile.replaceAll('\\', '/'),
+      ppi.id,
+      indexIdMap
+    );
+    const fullProgramBody = [preamble, ppi.content].join(EOL);
+    await fs.writeFile(programTmp.path, fullProgramBody);
     try {
       const child = spawn(programPathOrName, [programTmp.path]);
       // TODO: stream back

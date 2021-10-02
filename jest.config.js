@@ -1,7 +1,7 @@
 module.exports = {
   transform: {
     '.[jt]sx?$': [
-      'esbuild-jest',
+      '@sucrase/jest-plugin',
       {
         sourcemap: true,
         loaders: {

@@ -1,3 +1,4 @@
+import AsyncLock from 'async-lock';
 import fs from 'fs';
 import fsPromises from 'fs/promises';
 import path from 'path';
@@ -8,7 +9,6 @@ import { doOnEncryptFields, Encrypt, ProjectState } from '../shared/state';
 import { DISK_ROOT, PROJECT_EXTENSION, SYNC_PERIOD } from './constants';
 import { ensureFile } from './fs';
 import {
-  Dispatch,
   GetProjectHandler,
   MakeProjectHandler,
   RPCHandler,
@@ -101,18 +101,26 @@ const getProjectHandler: GetProjectHandler = {
   },
 };
 
-const updateProjectHandler: UpdateProjectHandler = {
+const updateLock = new AsyncLock({ timeout: 10000 });
+
+export const updateProjectHandler: UpdateProjectHandler = {
   resource: 'updateProject',
-  handler: async (
-    projectId: string,
-    newState: ProjectState,
-    dispatch: Dispatch
-  ) => {
+  handler: async (projectId: string, newState: ProjectState) => {
     const fileName = await ensureProjectFile(projectId);
-    const f = await fsPromises.readFile(fileName);
-    const existingState = JSON.parse(f.toString());
-    await encryptProjectSecrets(newState, existingState);
-    return writeFileBuffered(fileName, JSON.stringify(newState));
+    await updateLock.acquire(fileName, async () => {
+      let existingState = new ProjectState();
+      try {
+        const f = await fsPromises.readFile(fileName);
+        existingState = JSON.parse(f.toString());
+      } catch (e) {
+        // Fine to default to blank project when reading for update
+        if (e.code !== 'ENOENT') {
+          throw e;
+        }
+      }
+      await encryptProjectSecrets(newState, existingState);
+      return writeFileBuffered(fileName, JSON.stringify(newState));
+    });
   },
 };
 
