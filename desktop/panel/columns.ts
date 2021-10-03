@@ -78,7 +78,11 @@ export const fetchResultsHandler: RPCHandler<PanelBody, EvalHandlerResponse> = {
 
     // Maybe the only appropriate place to call this in this package?
     const projectResultsFile = getProjectResultsFile(projectId);
-    const f = await fs.readFile(projectResultsFile + panel.id);
+    try {
+      const f = await fs.readFile(projectResultsFile + panel.id);
+    } catch (e) {
+      throw e;
+    }
     // Everything gets stored as JSON on disk. Even literals and files get rewritten as JSON.
     return { value: JSON.parse(f.toString()) };
   },
