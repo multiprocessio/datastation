@@ -118,7 +118,7 @@ test('runs programs in current process and subprocess', async () => {
     {
       type: 'ruby',
       content:
-        'prev = DM_getPanel(0)\nnext = prev.map { |row| { **row, age: row["age"].to_i + 10 } }\nDM_setPanel(next)',
+        'prev = DM_getPanel(0)\npanel = prev.map { |row| { **row, age: row["age"].to_i + 10 } }\nDM_setPanel(panel)',
       condition: false && process.platform === 'linux' || exports.inPath('ruby'),
     },
   ];
@@ -134,7 +134,7 @@ test('runs programs in current process and subprocess', async () => {
     // First pass runs in process, second pass runs in subprocess
     for (const subprocessName of [
       undefined,
-      path.join(CODE_ROOT, 'build', 'desktop_runner.js'),
+      //path.join(CODE_ROOT, 'build', 'desktop_runner.js'),
     ]) {
       let finished = false;
       const panels = [lp, pp];
