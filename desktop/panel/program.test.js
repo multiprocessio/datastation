@@ -179,7 +179,7 @@ for (const t of LANGUAGES) {
         if (!finished) {
           throw new Error('Callback did not finish');
         }
-      }, 30_000);
+      }, 300_000);
     }
   });
 }
