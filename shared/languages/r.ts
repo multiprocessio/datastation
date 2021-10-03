@@ -4,7 +4,7 @@ function preamble(
   indexIdMap: Array<string>
 ) {
   return `
-library("rjson")
+tryCatch(library("rjson"), error=function(cond) {install.packages("rjson", repos="https://cloud.r-project.org")}, finally=library("rjson"))
 DM_getPanel <- function(i) {
   panelId = fromJSON("${JSON.stringify(indexIdMap).replaceAll(
     '"',

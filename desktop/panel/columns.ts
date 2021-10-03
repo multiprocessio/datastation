@@ -78,8 +78,9 @@ export const fetchResultsHandler: RPCHandler<PanelBody, EvalHandlerResponse> = {
 
     // Maybe the only appropriate place to call this in this package?
     const projectResultsFile = getProjectResultsFile(projectId);
+    let f: Buffer;
     try {
-      const f = await fs.readFile(projectResultsFile + panel.id);
+      f = await fs.readFile(projectResultsFile + panel.id);
     } catch (e) {
       throw e;
     }
