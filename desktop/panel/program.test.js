@@ -110,22 +110,40 @@ test('runs programs in current process and subprocess', async () => {
       condition: true,
     },
     {
+      type: 'sql',
+      content: 'SELECT name, age::INT + 10 AS age FROM DM_getPanel(0)',
+      condition: true,
+    },
+    // Rest are only mandatory-tested on Linux to make CI easier for now
+    {
       type: 'python',
       content:
         'prev = DM_getPanel(0)\nnext = [{ **row, "age": int(row["age"]) + 10 } for row in prev]\nDM_setPanel(next)',
-      condition: false && process.platform === 'linux' || exports.inPath('python3'),
+      condition: process.platform === 'linux' || exports.inPath('python3'),
     },
     {
       type: 'ruby',
       content:
         'prev = DM_getPanel(0)\npanel = prev.map { |row| { **row, age: row["age"].to_i + 10 } }\nDM_setPanel(panel)',
-      condition: false && process.platform === 'linux' || exports.inPath('ruby'),
+      condition: process.platform === 'linux' || exports.inPath('ruby'),
+    },
+    {
+      type: 'julia',
+      content:
+        'prev = DM_getPanel(0)\nfor row in prev\n  row["age"] = parse(Int64, row["age"]) + 10\nend\nDM_setPanel(prev)',
+      condition: process.platform === 'linux' || exports.inPath('julia'),
+    },
+    {
+      type: 'r',
+      content:
+        'prev = DM_getPanel(0)\nfor (i in 1:length(prev)) {\n  prev[[i]]$age = strtoi(prev[[i]]$age) + 10\n}\nDM_setPanel(prev)',
+      condition: process.platform === 'linux' || exports.inPath('Rscript'),
     },
   ];
 
   async function run(t) {
     if (!t.condition) {
-      return
+      return;
     }
     const pp = new ProgramPanelInfo();
     pp.program.type = t.type;
@@ -160,7 +178,7 @@ test('runs programs in current process and subprocess', async () => {
     }
   }
 
-  await run(types[0]);
-  await run(types[1]);
-  await run(types[2]);
+  for (const t of types) {
+    await run(t);
+  }
 }, 10000);
