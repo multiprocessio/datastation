@@ -62,6 +62,6 @@ for (const language of TESTS) {
         { age: 92, name: 'Quan' },
       ]);
     },
-    language.type === 'python' ? 60_000 : undefined
+    language.type === 'python' ? 300_000 : undefined
   ); // pyodide takes a very long time to load
 }
