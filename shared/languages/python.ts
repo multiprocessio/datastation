@@ -37,26 +37,18 @@ function inMemoryInit() {
 
   return new Promise<void>((resolve, reject) => {
     try {
-      console.log('am i here 1');
       pyodide.onload = async function () {
-	console.log('am i here 2');
         try {
           (window as any).pyodide = await (window as any).loadPyodide({
             indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.18.0/full/',
           });
-	  console.log('am i here 3');
           resolve();
-	  console.log('am i here 4');
         } catch (e) {
-	  console.log('am i here 5');
           reject(e);
         }
       };
-      console.log('am i here 6');
       document.body.appendChild(pyodide);
-      console.log('am i here 7');
     } catch (e) {
-      console.log('am i here 8');
       reject(e);
     }
   });

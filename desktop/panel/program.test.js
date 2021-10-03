@@ -137,11 +137,6 @@ const LANGUAGES = [
 ];
 
 for (const t of LANGUAGES) {
-  console.log({
-    t,
-    platform: process.platform,
-    inpath: exports.inPath(t.type),
-  });
   if (!t.condition) {
     continue;
   }
