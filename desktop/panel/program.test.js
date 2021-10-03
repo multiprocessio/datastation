@@ -119,7 +119,7 @@ const LANGUAGES = [
   {
     type: 'ruby',
     content:
-      'prev = DM_getPanel(0)\npanel = prev.map { |row| { **row, age: row["age"].to_i + 10 } }\nDM_setPanel(panel)',
+      'prev = DM_getPanel(0)\npanel = prev.map { |row| { name: row["name"], age: row["age"].to_i + 10 } }\nDM_setPanel(panel)',
     condition: process.platform === 'linux' || exports.inPath('ruby'),
   },
   {
