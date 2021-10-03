@@ -56,7 +56,6 @@ for (const language of TESTS) {
         await reevalPanel(panel.id);
       }
 
-      console.log(project.pages[0].panels[1]);
       expect(project.pages[0].panels[1].resultMeta.value).toStrictEqual([
         { age: 50, name: 'Mel' },
         { age: 92, name: 'Quan' },
