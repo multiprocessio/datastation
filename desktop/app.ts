@@ -2,7 +2,6 @@ import { app, ipcMain } from 'electron';
 import path from 'path';
 import { APP_NAME, DEBUG, VERSION } from '../shared/constants';
 import log from '../shared/log';
-import '../shared/polyfill';
 import { configureLogger } from './log';
 import { openWindow } from './project';
 import { registerRPCHandlers } from './rpc';

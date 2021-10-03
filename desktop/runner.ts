@@ -1,6 +1,7 @@
 import fs from 'fs/promises';
 import { APP_NAME, DEBUG, VERSION } from '../shared/constants';
 import log from '../shared/log';
+import '../shared/polyfill';
 import { DSPROJ_FLAG, PANEL_FLAG, PANEL_META_FLAG } from './constants';
 import { configureLogger } from './log';
 import { panelHandlers } from './panel';

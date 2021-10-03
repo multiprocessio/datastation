@@ -276,13 +276,13 @@ export class ProgramPanelInfo extends PanelInfo {
     range?: TimeSeriesRange;
   };
 
-  constructor(
-    name?: string,
-    type?: SupportedLanguages,
-    content?: string,
-    range?: TimeSeriesRange
-  ) {
-    super('program', name, content);
+  constructor({
+    name,
+    type,
+    content,
+    range,
+  }: Partial<ProgramPanelInfo['program'] & { name: string }> = {}) {
+    super('program', name || '', content || '');
     this.program = {
       type: type || 'python',
       range: range || {
@@ -522,12 +522,12 @@ export class LiteralPanelInfo extends PanelInfo {
     contentTypeInfo: ContentTypeInfo;
   };
 
-  constructor(
-    name?: string,
-    content?: string,
-    contentTypeInfo?: ContentTypeInfo
-  ) {
-    super('literal', name, content);
+  constructor({
+    name,
+    content,
+    contentTypeInfo,
+  }: Partial<LiteralPanelInfo['literal'] & { name: string }> = {}) {
+    super('literal', name || '', content || '');
     this.literal = {
       contentTypeInfo: contentTypeInfo || new ContentTypeInfo(),
     };
@@ -648,16 +648,16 @@ export const DEFAULT_PROJECT: ProjectState = new ProjectState(
   'Example project',
   [
     new ProjectPage('CSV Discovery Example', [
-      new LiteralPanelInfo(
-        'Raw CSV Text',
-        'name,age\nMorgan,12\nJames,17',
-        new ContentTypeInfo('text/csv')
-      ),
-      new ProgramPanelInfo(
-        'Transform with SQL',
-        'sql',
-        'SELECT name, age+5 AS age FROM DM_getPanel(0);'
-      ),
+      new LiteralPanelInfo({
+        name: 'Raw CSV Text',
+        content: 'name,age\nMorgan,12\nJames,17',
+        contentTypeInfo: new ContentTypeInfo('text/csv'),
+      }),
+      new ProgramPanelInfo({
+        name: 'Transform with SQL',
+        type: 'sql',
+        content: 'SELECT name, age+5 AS age FROM DM_getPanel(0);',
+      }),
       (() => {
         const panel = new GraphPanelInfo('Display');
         panel.graph.ys = [{ field: 'age', label: 'Age' }];
