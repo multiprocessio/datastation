@@ -48,7 +48,16 @@ const runningProcesses: Record<string, Set<number>> = {};
 function killAllByPanelId(panelId: string) {
   const workers = runningProcesses[panelId];
   if (workers) {
-    Array.from(workers).map((pid) => process.kill(pid, 'SIGINT'));
+    Array.from(workers).map((pid) => {
+      try {
+        process.kill(pid, 'SIGINT');
+      } catch (e) {
+        // If process doesn't exist, that's ok
+        if (!e.message.includes('ESRCH')) {
+          throw e;
+        }
+      }
+    });
   }
 }
 
@@ -92,19 +101,18 @@ export async function evalInSubprocess(
 
     await new Promise<void>((resolve, reject) => {
       try {
-        child.on('close', (code) => {
+        child.on('exit', (code) => {
           if (code === 0) {
             resolve();
           }
 
-          if (code === 1) {
+          if (code === 1 || code === null) {
             reject(new Cancelled());
           }
 
-          reject('Exited with ' + code + '\n' + stderr);
+          reject(new Error(stderr));
         });
       } catch (e) {
-        e.message += '\n' + stderr;
         reject(e);
       }
     });

@@ -54,11 +54,11 @@ export async function initialize({
 
 export async function main(additionalHandlers?: RPCHandler<any, any>[]) {
   // These throws are very important! Otherwise the runner will just hang.
-  process.on('uncaughtException', (e) => {
-    throw e;
-  });
-  process.on('unhandledRejection', (e) => {
-    throw e;
+  ['uncaughtException', 'unhandledRejection'].map((condition) => {
+    process.on(condition, (e) => {
+      console.error(e);
+      process.exit(2);
+    });
   });
 
   const { project, handlers, panel, panelMetaOut } = await initialize({

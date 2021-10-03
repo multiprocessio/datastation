@@ -113,6 +113,10 @@ export class ConnectorInfo {
 
   static fromJSON(raw: any): ConnectorInfo {
     raw = raw || {};
+    // Migrate panel name from sql to database
+    if (raw.type === 'sql') {
+      raw.type = 'database';
+    }
     const ci = mergeDeep(new ConnectorInfo(), raw);
 
     switch (raw.type) {
@@ -244,25 +248,39 @@ export class PanelInfo {
 
   static fromJSON(raw: any): PanelInfo {
     raw = raw || {};
+
+    // Migrate panel name from sql to database
+    if (raw.type === 'sql') {
+      raw.type = 'database';
+    }
+
     let pit: PanelInfo = mergeDeep(new PanelInfo(raw.type || 'literal'), raw);
 
     switch (pit.type) {
       case 'table':
         pit = mergeDeep(new TablePanelInfo(), pit);
+        break;
       case 'http':
         pit = mergeDeep(new HTTPPanelInfo(), pit);
+        break;
       case 'graph':
         pit = mergeDeep(new GraphPanelInfo(), pit);
+        break;
       case 'program':
         pit = mergeDeep(new ProgramPanelInfo(), pit);
+        break;
       case 'literal':
         pit = mergeDeep(new LiteralPanelInfo(), pit);
+        break;
       case 'database':
         pit = mergeDeep(new DatabasePanelInfo(), pit);
+        break;
       case 'file':
         pit = mergeDeep(new FilePanelInfo(), pit);
+        break;
       case 'filagg':
         pit = mergeDeep(new FilterAggregatePanelInfo(), pit);
+        break;
     }
 
     pit.resultMeta = PanelResultMeta.fromJSON(raw.resultMeta);
