@@ -97,54 +97,56 @@ exports.withSavedPanels = async function (
   }
 };
 
-test('runs programs in current process and subprocess', async () => {
-  const lp = new LiteralPanelInfo();
-  lp.literal.contentTypeInfo = { type: 'text/csv' };
-  lp.content = 'age,name\n12,Kev\n18,Nyra';
+const LANGUAGES = [
+  {
+    type: 'javascript',
+    content:
+    'const prev = DM_getPanel(0); const next = prev.map((row) => ({ ...row, "age": +row.age + 10 })); DM_setPanel(next);',
+    condition: true,
+  },
+  {
+    type: 'sql',
+    content: 'SELECT name, age::INT + 10 AS age FROM DM_getPanel(0)',
+    condition: true,
+  },
+  // Rest are only mandatory-tested on Linux to make CI easier for now
+  {
+    type: 'python',
+    content:
+    'prev = DM_getPanel(0)\nnext = [{ **row, "age": int(row["age"]) + 10 } for row in prev]\nDM_setPanel(next)',
+    condition: process.platform === 'linux' || exports.inPath('python3'),
+  },
+  {
+    type: 'ruby',
+    content:
+    'prev = DM_getPanel(0)\npanel = prev.map { |row| { **row, age: row["age"].to_i + 10 } }\nDM_setPanel(panel)',
+    condition: process.platform === 'linux' || exports.inPath('ruby'),
+  },
+  {
+    type: 'julia',
+    content:
+    'prev = DM_getPanel(0)\nfor row in prev\n  row["age"] = parse(Int64, row["age"]) + 10\nend\nDM_setPanel(prev)',
+    condition: process.platform === 'linux' || exports.inPath('julia'),
+  },
+  {
+    type: 'r',
+    content:
+    'prev = DM_getPanel(0)\nfor (i in 1:length(prev)) {\n  prev[[i]]$age = strtoi(prev[[i]]$age) + 10\n}\nDM_setPanel(prev)',
+    condition: process.platform === 'linux' || exports.inPath('Rscript'),
+  },
+];
 
-  const types = [
-    {
-      type: 'javascript',
-      content:
-        'const prev = DM_getPanel(0); const next = prev.map((row) => ({ ...row, "age": +row.age + 10 })); DM_setPanel(next);',
-      condition: true,
-    },
-    {
-      type: 'sql',
-      content: 'SELECT name, age::INT + 10 AS age FROM DM_getPanel(0)',
-      condition: true,
-    },
-    // Rest are only mandatory-tested on Linux to make CI easier for now
-    {
-      type: 'python',
-      content:
-        'prev = DM_getPanel(0)\nnext = [{ **row, "age": int(row["age"]) + 10 } for row in prev]\nDM_setPanel(next)',
-      condition: process.platform === 'linux' || exports.inPath('python3'),
-    },
-    {
-      type: 'ruby',
-      content:
-        'prev = DM_getPanel(0)\npanel = prev.map { |row| { **row, age: row["age"].to_i + 10 } }\nDM_setPanel(panel)',
-      condition: process.platform === 'linux' || exports.inPath('ruby'),
-    },
-    {
-      type: 'julia',
-      content:
-        'prev = DM_getPanel(0)\nfor row in prev\n  row["age"] = parse(Int64, row["age"]) + 10\nend\nDM_setPanel(prev)',
-      condition: process.platform === 'linux' || exports.inPath('julia'),
-    },
-    {
-      type: 'r',
-      content:
-        'prev = DM_getPanel(0)\nfor (i in 1:length(prev)) {\n  prev[[i]]$age = strtoi(prev[[i]]$age) + 10\n}\nDM_setPanel(prev)',
-      condition: process.platform === 'linux' || exports.inPath('Rscript'),
-    },
-  ];
+for (const t of LANGUAGES) {
+  if (!t.condition) {
+    continue;
+  }
 
-  async function run(t) {
-    if (!t.condition) {
-      return;
-    }
+  test(`runs ${t.type} programs in current process and subprocess`, async () => {
+    const lp = new LiteralPanelInfo();
+    lp.literal.contentTypeInfo = { type: 'text/csv' };
+    lp.content = 'age,name\n12,Kev\n18,Nyra';
+
+
     const pp = new ProgramPanelInfo();
     pp.program.type = t.type;
     pp.content = t.content;
@@ -176,9 +178,5 @@ test('runs programs in current process and subprocess', async () => {
         throw new Error('Callback did not finish');
       }
     }
-  }
-
-  for (const t of types) {
-    await run(t);
-  }
-}, 10000);
+  });
+}
