@@ -17,7 +17,7 @@ sudo Rscript -e 'install.packages("rjson", repos="https://cloud.r-project.org")'
 wget https://julialang-s3.julialang.org/bin/linux/x64/1.6/julia-1.6.3-linux-x86_64.tar.gz
 tar zxvf julia-1.6.3-linux-x86_64.tar.gz
 sudo ln -s julia-1.6.3/bin/julia /usr/local/bin/julia
-sudo julia -e 'Pkg.add("JSON.jl")'
+julia -e 'import Pkg; Pkg.add("JSON.jl")'
 
 # # Set up MySQL
 # sudo mysql -u root --execute="CREATE USER 'test'@'localhost' IDENTIFIED BY 'test'";
