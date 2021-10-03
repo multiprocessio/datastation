@@ -13,7 +13,8 @@ sudo apt-get install -y nodejs cmake xvfb jq postgresql postgresql-contrib mysql
 #sudo apt install r-base
 
 # Allow R programs to install packages
-sudo usermod -a -G staff $(whoami)
+sudo mkdir -P /usr/local/lib/R/site-library
+sudo chown -R $USER:$GROUP /usr/local/lib/R/
 
 # # Set up MySQL
 sudo mysql -u root --execute="CREATE USER 'test'@'localhost' IDENTIFIED BY 'test'";
