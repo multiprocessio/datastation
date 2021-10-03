@@ -101,7 +101,7 @@ const LANGUAGES = [
   {
     type: 'javascript',
     content:
-    'const prev = DM_getPanel(0); const next = prev.map((row) => ({ ...row, "age": +row.age + 10 })); DM_setPanel(next);',
+      'const prev = DM_getPanel(0); const next = prev.map((row) => ({ ...row, "age": +row.age + 10 })); DM_setPanel(next);',
     condition: true,
   },
   {
@@ -113,25 +113,25 @@ const LANGUAGES = [
   {
     type: 'python',
     content:
-    'prev = DM_getPanel(0)\nnext = [{ **row, "age": int(row["age"]) + 10 } for row in prev]\nDM_setPanel(next)',
+      'prev = DM_getPanel(0)\nnext = [{ **row, "age": int(row["age"]) + 10 } for row in prev]\nDM_setPanel(next)',
     condition: process.platform === 'linux' || exports.inPath('python3'),
   },
   {
     type: 'ruby',
     content:
-    'prev = DM_getPanel(0)\npanel = prev.map { |row| { **row, age: row["age"].to_i + 10 } }\nDM_setPanel(panel)',
+      'prev = DM_getPanel(0)\npanel = prev.map { |row| { **row, age: row["age"].to_i + 10 } }\nDM_setPanel(panel)',
     condition: process.platform === 'linux' || exports.inPath('ruby'),
   },
   {
     type: 'julia',
     content:
-    'prev = DM_getPanel(0)\nfor row in prev\n  row["age"] = parse(Int64, row["age"]) + 10\nend\nDM_setPanel(prev)',
+      'prev = DM_getPanel(0)\nfor row in prev\n  row["age"] = parse(Int64, row["age"]) + 10\nend\nDM_setPanel(prev)',
     condition: process.platform === 'linux' || exports.inPath('julia'),
   },
   {
     type: 'r',
     content:
-    'prev = DM_getPanel(0)\nfor (i in 1:length(prev)) {\n  prev[[i]]$age = strtoi(prev[[i]]$age) + 10\n}\nDM_setPanel(prev)',
+      'prev = DM_getPanel(0)\nfor (i in 1:length(prev)) {\n  prev[[i]]$age = strtoi(prev[[i]]$age) + 10\n}\nDM_setPanel(prev)',
     condition: process.platform === 'linux' || exports.inPath('Rscript'),
   },
 ];
@@ -141,21 +141,22 @@ for (const t of LANGUAGES) {
     continue;
   }
 
-  test(`runs ${t.type} programs in current process and subprocess`, async () => {
-    const lp = new LiteralPanelInfo();
-    lp.literal.contentTypeInfo = { type: 'text/csv' };
-    lp.content = 'age,name\n12,Kev\n18,Nyra';
+  // First pass runs in process, second pass runs in subprocess
+  for (const subprocessName of [
+    undefined,
+    path.join(CODE_ROOT, 'build', 'desktop_runner.js'),
+  ]) {
+    test(`runs ${t.type} programs via ${
+      subprocessName ? 'process' : subprocessName
+    }`, async () => {
+      const lp = new LiteralPanelInfo();
+      lp.literal.contentTypeInfo = { type: 'text/csv' };
+      lp.content = 'age,name\n12,Kev\n18,Nyra';
 
+      const pp = new ProgramPanelInfo();
+      pp.program.type = t.type;
+      pp.content = t.content;
 
-    const pp = new ProgramPanelInfo();
-    pp.program.type = t.type;
-    pp.content = t.content;
-
-    // First pass runs in process, second pass runs in subprocess
-    for (const subprocessName of [
-      undefined,
-      //path.join(CODE_ROOT, 'build', 'desktop_runner.js'),
-    ]) {
       let finished = false;
       const panels = [lp, pp];
       await exports.withSavedPanels(
@@ -177,6 +178,6 @@ for (const t of LANGUAGES) {
       if (!finished) {
         throw new Error('Callback did not finish');
       }
-    }
-  });
+    }, 10_000);
+  }
 }

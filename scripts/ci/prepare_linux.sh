@@ -6,18 +6,18 @@ sudo apt-get update -y
 sudo apt-get install -y nodejs cmake xvfb jq python3 ruby postgresql postgresql-contrib mysql-server clickhouse
 
 # Set up R
-# sudo apt-get install -y dirmngr gnupg apt-transport-https ca-certificates software-properties-common build-essential
-# wget -qO- https://cloud.r-project.org/bin/linux/ubuntu/marutter_pubkey.asc | sudo tee -a /etc/apt/trusted.gpg.d/cran_ubuntu_key.asc
-# sudo add-apt-repository "deb https://cloud.r-project.org/bin/linux/ubuntu $(lsb_release -cs)-cran40/"
-# sudo apt-get update -y
-# sudo apt install r-base
-# sudo Rscript -e 'install.packages("rjson", repos="https://cloud.r-project.org")'
+sudo apt-get install -y dirmngr gnupg apt-transport-https ca-certificates software-properties-common build-essential
+wget -qO- https://cloud.r-project.org/bin/linux/ubuntu/marutter_pubkey.asc | sudo tee -a /etc/apt/trusted.gpg.d/cran_ubuntu_key.asc
+sudo add-apt-repository "deb https://cloud.r-project.org/bin/linux/ubuntu $(lsb_release -cs)-cran40/"
+sudo apt-get update -y
+sudo apt install r-base
+sudo Rscript -e 'install.packages("rjson", repos="https://cloud.r-project.org")'
 
-# # Set up Julia
-# wget https://julialang-s3.julialang.org/bin/linux/x64/1.6/julia-1.6.3-linux-x86_64.tar.gz
-# tar zxvf julia-1.6.3-linux-x86_64.tar.gz
-# sudo ln -s julia-1.6.3/bin/julia /usr/local/bin/julia
-# sudo julia -e 'Pkg.add("JSON.jl")'
+# Set up Julia
+wget https://julialang-s3.julialang.org/bin/linux/x64/1.6/julia-1.6.3-linux-x86_64.tar.gz
+tar zxvf julia-1.6.3-linux-x86_64.tar.gz
+sudo ln -s julia-1.6.3/bin/julia /usr/local/bin/julia
+sudo julia -e 'Pkg.add("JSON.jl")'
 
 # # Set up MySQL
 # sudo mysql -u root --execute="CREATE USER 'test'@'localhost' IDENTIFIED BY 'test'";
