@@ -11,10 +11,10 @@ wget -qO- https://cloud.r-project.org/bin/linux/ubuntu/marutter_pubkey.asc | sud
 sudo add-apt-repository "deb https://cloud.r-project.org/bin/linux/ubuntu $(lsb_release -cs)-cran40/"
 sudo apt-get update -y
 sudo apt install r-base
-sudo Rscript -e 'install.packages("rjson", repos="https://cloud.r-project.org")'
+Rscript -e 'install.packages("rjson", repos="https://cloud.r-project.org")'
 
 # Set up Julia
-sudo julia -e 'Pkg.add("JSON.jl")'
+julia -e 'Pkg.add("JSON.jl")'
 
 # # Set up MySQL
 # sudo mysql -u root --execute="CREATE USER 'test'@'localhost' IDENTIFIED BY 'test'";
