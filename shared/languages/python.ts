@@ -1,7 +1,9 @@
 import circularSafeStringify from 'json-stringify-safe';
 import { preview } from 'preview';
+import { MODE } from '../constants';
 import { InvalidDependentPanelError, NoResultError } from '../errors';
 import log from '../log';
+import { deepClone } from '../object';
 import { PanelResult } from '../state';
 import { EOL } from './types';
 
@@ -29,6 +31,22 @@ def DM_setPanel(v):
     json.dump(v, f)`;
 }
 
+// Load pyodide on startup if in browser app
+if (MODE === 'browser') {
+  window.addEventListener('load', function () {
+    const pyodide = document.createElement('script');
+    pyodide.defer = true;
+    pyodide.src = 'https://cdn.jsdelivr.net/pyodide/v0.18.0/full/pyodide.js';
+    document.body.appendChild(pyodide);
+
+    pyodide.onload = async function () {
+      (window as any).pyodide = await (window as any).loadPyodide({
+        indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.18.0/full/',
+      });
+    };
+  });
+}
+
 function inMemoryEval(
   prog: string,
   results:
@@ -54,7 +72,7 @@ function inMemoryEval(
       }
 
       try {
-        return JSON.parse(JSON.stringify((results[panelId] || {}).value));
+        return deepClone((results[panelId] || {}).value);
       } catch (e) {
         log.error(e);
         reject(new InvalidDependentPanelError(panelId));
