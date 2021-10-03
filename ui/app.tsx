@@ -8,6 +8,7 @@ import {
   SITE_ROOT,
   VERSION,
 } from '../shared/constants';
+import { LANGUAGES } from '../shared/languages';
 import log from '../shared/log';
 import '../shared/polyfill';
 import {
@@ -36,6 +37,12 @@ import { makeStore, ProjectContext, ProjectStore } from './ProjectStore';
 import { ServerList } from './ServerList';
 import { Sidebar } from './Sidebar';
 import { Updates } from './Updates';
+
+Object.values(LANGUAGES).map((l) => {
+  if (l.inMemoryInit) {
+    l.inMemoryInit();
+  }
+});
 
 function getQueryParameter(param: String) {
   const query = window.location.search.substring(1);

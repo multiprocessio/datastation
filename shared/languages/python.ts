@@ -1,9 +1,8 @@
 import circularSafeStringify from 'json-stringify-safe';
 import { preview } from 'preview';
-import { MODE } from '../constants';
 import { InvalidDependentPanelError, NoResultError } from '../errors';
 import log from '../log';
-import { deepClone } from '../object';
+import { deepClone, windowOrGlobal } from '../object';
 import { PanelResult } from '../state';
 import { EOL } from './types';
 
@@ -31,19 +30,27 @@ def DM_setPanel(v):
     json.dump(v, f)`;
 }
 
-// Load pyodide on startup if in browser app
-if (MODE === 'browser') {
-  window.addEventListener('load', function () {
-    const pyodide = document.createElement('script');
-    pyodide.defer = true;
-    pyodide.src = 'https://cdn.jsdelivr.net/pyodide/v0.18.0/full/pyodide.js';
-    document.body.appendChild(pyodide);
+function inMemoryInit() {
+  const pyodide = document.createElement('script');
+  pyodide.defer = true;
+  pyodide.src = 'https://cdn.jsdelivr.net/pyodide/v0.18.0/full/pyodide.js';
+  document.body.appendChild(pyodide);
 
-    pyodide.onload = async function () {
-      (window as any).pyodide = await (window as any).loadPyodide({
-        indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.18.0/full/',
-      });
-    };
+  return new Promise<void>((resolve, reject) => {
+    try {
+      pyodide.onload = async function () {
+        try {
+          (window as any).pyodide = await (window as any).loadPyodide({
+            indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.18.0/full/',
+          });
+          resolve();
+        } catch (e) {
+          reject(e);
+        }
+      };
+    } catch (e) {
+      reject(e);
+    }
   });
 }
 
@@ -60,7 +67,7 @@ function inMemoryEval(
     );
   }
 
-  const anyWindow = window as any;
+  const anyWindow = windowOrGlobal as any;
 
   const stdout: Array<string> = [];
   return new Promise((resolve, reject) => {
@@ -133,5 +140,6 @@ export const PYTHON = {
   defaultContent,
   preamble,
   inMemoryEval,
+  inMemoryInit,
   exceptionRewriter,
 };

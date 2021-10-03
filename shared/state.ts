@@ -281,7 +281,9 @@ export class ProgramPanelInfo extends PanelInfo {
     type,
     content,
     range,
-  }: Partial<ProgramPanelInfo['program'] & { content: string; name: string }> = {}) {
+  }: Partial<
+    ProgramPanelInfo['program'] & { content: string; name: string }
+  > = {}) {
     super('program', name || '', content || '');
     this.program = {
       type: type || 'python',
@@ -526,7 +528,9 @@ export class LiteralPanelInfo extends PanelInfo {
     name,
     content,
     contentTypeInfo,
-  }: Partial<LiteralPanelInfo['literal'] & { content: string; name: string }> = {}) {
+  }: Partial<
+    LiteralPanelInfo['literal'] & { content: string; name: string }
+  > = {}) {
     super('literal', name || '', content || '');
     this.literal = {
       contentTypeInfo: contentTypeInfo || new ContentTypeInfo(),

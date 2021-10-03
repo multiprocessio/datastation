@@ -2,7 +2,7 @@ import circularSafeStringify from 'json-stringify-safe';
 import { preview } from 'preview';
 import { InvalidDependentPanelError, NoResultError } from '../errors';
 import log from '../log';
-import { deepClone } from '../object';
+import { deepClone, windowOrGlobal } from '../object';
 import { PanelResult } from '../state';
 import { EOL } from './types';
 
@@ -55,7 +55,7 @@ function inMemoryEval(
     );
   }
 
-  const anyWindow = window as any;
+  const anyWindow = windowOrGlobal as any;
   anyWindow.DM_getPanel = (panelId: number) => {
     if (!results[panelId]) {
       throw new InvalidDependentPanelError(panelId);
