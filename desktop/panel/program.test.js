@@ -152,7 +152,7 @@ for (const t of LANGUAGES) {
     path.join(CODE_ROOT, 'build', 'desktop_runner.js'),
   ]) {
     test(`runs ${t.type} programs via ${
-      subprocessName ? 'process' : subprocessName
+      subprocessName ? subprocessName : 'process'
     }`, async () => {
       const lp = new LiteralPanelInfo();
       lp.literal.contentTypeInfo = { type: 'text/csv' };

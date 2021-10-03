@@ -47,7 +47,9 @@ for (const language of TESTS) {
         ],
       };
 
+      console.log('waiting for init: ' + language.type);
       await (LANGUAGES[language.type].inMemoryInit || (() => {}))();
+      console.log('done init: ' + language.type);
 
       const reevalPanel = makeReevalPanel(project.pages[0], project, (page) => {
         project.pages[0] = page;
