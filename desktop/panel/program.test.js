@@ -15,7 +15,6 @@ const { wait } = require('../../shared/promise');
 const { updateProjectHandler } = require('../store');
 const { CODE_ROOT } = require('../constants');
 const { makeEvalHandler } = require('./eval');
-const { fetchResultsHandler } = require('./columns');
 
 exports.inPath = function (program) {
   const where = process.platform === 'win32' ? 'where' : 'whereis';
