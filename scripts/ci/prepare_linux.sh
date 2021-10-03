@@ -14,7 +14,7 @@ sudo apt install r-base
 sudo Rscript -e 'install.packages("rjson", repos="https://cloud.r-project.org")'
 
 # Set up Julia
-julia -e 'Pkg.add("JSON.jl")'
+sudo julia -e 'Pkg.add("JSON.jl")'
 
 # # Set up MySQL
 # sudo mysql -u root --execute="CREATE USER 'test'@'localhost' IDENTIFIED BY 'test'";
