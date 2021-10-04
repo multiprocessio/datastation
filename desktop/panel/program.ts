@@ -73,7 +73,7 @@ export async function evalProgram(
 
       const code = await new Promise((resolve) => child.on('close', resolve));
       if (code !== 0) {
-        throw Error(stderr);
+        throw new Error(stderr);
       }
 
       let f: Buffer;
