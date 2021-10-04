@@ -19,6 +19,7 @@ sudo mkdir -p /usr/local/lib/R/site-library
 sudo chown -R $USER /usr/local/lib/R/
 
 # # Set up MySQL
+sudo service mysql start
 sudo mysql -u root --execute="CREATE USER 'test'@'localhost' IDENTIFIED BY 'test'";
 sudo mysql -u root --execute="CREATE DATABASE test";
 sudo mysql -u root --execute="GRANT ALL ON *.* TO 'test'@'localhost' IDENTIFIED BY 'test'";
