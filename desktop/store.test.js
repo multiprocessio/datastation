@@ -26,7 +26,7 @@ test('write project with encrypted secrets, read with nulled secrets', async () 
   // real file. It's value is valid and wouldn't overwrite an existing
   // one. Just necessary to call so that in tests this is definitely
   // populated.
-  await ensureSigningKey();
+  ensureSigningKey();
 
   const testProject = new ProjectState();
   const testServer = new ServerInfo();
@@ -41,7 +41,7 @@ test('write project with encrypted secrets, read with nulled secrets', async () 
   testProject.connectors.push(testDatabase);
 
   const projectId = 'unittestproject';
-  const projectPath = await ensureProjectFile(projectId);
+  const projectPath = ensureProjectFile(projectId);
   expect(projectPath).toBe(
     path.join(os.homedir(), 'DataStationProjects', projectId + '.dsproj')
   );
@@ -77,10 +77,10 @@ test('write project with encrypted secrets, read with nulled secrets', async () 
 
     // Passwords come back as null
     const readProject = await getProject.handler(null, { projectId });
-    expect(readProject).toStrictEqual(await ProjectState.fromJSON(testProject));
+    expect(readProject).toStrictEqual(ProjectState.fromJSON(testProject));
   } finally {
     try {
-      await fs.unlink(projectPath);
+      fs.unlinkSync(projectPath);
     } catch (e) {
       console.error(e);
     }
@@ -99,9 +99,9 @@ test('write project with encrypted secrets, read with nulled secrets', async () 
     read.id = testProject.id; // id is generated newly on every instantiation which is ok
     expect(read).toStrictEqual(testProject);
   } finally {
-    const projectPath = await ensureProjectFile(testProject.projectName);
+    const projectPath = ensureProjectFile(testProject.projectName);
     try {
-      await fs.unlink(projectPath);
+      fs.unlinkSync(projectPath);
     } catch (e) {
       console.error(e);
     }

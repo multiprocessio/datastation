@@ -98,7 +98,7 @@ test('store and retrieve literal, specific columns', async () => {
     try {
       // Results file
       await tmp.cleanup();
-      fs.unlink(getProjectResultsFile(tmp.path) + id);
+      fs.unlinkSync(getProjectResultsFile(tmp.path) + id);
     } catch (e) {
       console.error(e); // don't fail on failure to cleanup, means an earlier step is going to fail after finally block
     }

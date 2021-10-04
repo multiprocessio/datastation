@@ -50,7 +50,7 @@ export class Config {
   }
 }
 
-export async function readConfig(): Promise<Config> {
+export function readConfig(): Config {
   const raw = fs.readFileSync(CONFIG_PATH);
   const rawJson = JSON.parse(raw.toString());
   const cfg = mergeDeep(new Config(), rawJson);

@@ -24,7 +24,7 @@ export class App {
 }
 
 export async function init() {
-  const config = await readConfig();
+  const config = readConfig();
   const app = new App(config);
 
   app.express.use(cookieParser());
@@ -43,7 +43,7 @@ export async function init() {
     next();
   });
 
-  const { handlers } = await initialize(app, {
+  const { handlers } = initialize(app, {
     subprocess: path.join(__dirname, 'server_runner.js'),
   });
 

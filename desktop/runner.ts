@@ -11,7 +11,7 @@ import { ensureSigningKey } from './secret';
 import { loadSettings } from './settings';
 import { storeHandlers } from './store';
 
-export async function initialize({
+export function initialize({
   subprocess,
   additionalHandlers,
 }: {
@@ -38,9 +38,9 @@ export async function initialize({
     }
   }
 
-  await ensureSigningKey();
+  ensureSigningKey();
 
-  const settings = await loadSettings();
+  const settings = loadSettings();
 
   const handlers: RPCHandler<any, any>[] = [
     ...panelHandlers(subprocess),
@@ -61,7 +61,7 @@ export async function main(additionalHandlers?: RPCHandler<any, any>[]) {
     });
   });
 
-  const { project, handlers, panel, panelMetaOut } = await initialize({
+  const { project, handlers, panel, panelMetaOut } = initialize({
     additionalHandlers,
   });
   if (!project) {

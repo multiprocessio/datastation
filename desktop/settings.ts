@@ -43,7 +43,7 @@ export class Settings {
     this.file = file;
   }
 
-  static async fromFile(settingsFile: string) {
+  static fromFile(settingsFile: string) {
     let existingSettingsString: Buffer | null = null;
     try {
       existingSettingsString = fs.readFileSync(settingsFile);
@@ -76,14 +76,14 @@ export class Settings {
     return mergeDeep(new Settings(settingsFile), existingSettings);
   }
 
-  async save() {
+  save() {
     return fs.writeFileSync(this.file, JSON.stringify(this));
   }
 
   getUpdateHandler(): RPCHandler<Settings, void> {
     return {
       resource: 'updateSettings',
-      handler: (_: string, settings: Settings) => {
+      handler: async (_: string, settings: Settings) => {
         this.lastProject = settings.lastProject;
         return this.save();
       },
@@ -93,11 +93,11 @@ export class Settings {
 
 export let SETTINGS: Settings = new Settings('');
 
-export async function loadSettings(settingsFile?: string): Promise<Settings> {
+export function loadSettings(settingsFile?: string): Settings {
   if (!settingsFile) {
     settingsFile = '.settings';
   }
-  const fullName = await ensureFile(settingsFile);
-  SETTINGS = await Settings.fromFile(fullName);
+  const fullName = ensureFile(settingsFile);
+  SETTINGS = Settings.fromFile(fullName);
   return SETTINGS;
 }

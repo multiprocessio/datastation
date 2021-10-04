@@ -19,7 +19,7 @@ process.on('unhandledRejection', (e) => {
 });
 
 app.whenReady().then(async () => {
-  const { handlers, project } = await initialize({
+  const { handlers, project } = initialize({
     subprocess: path.join(__dirname, 'desktop_runner.js'),
     additionalHandlers: storeHandlers,
   });
