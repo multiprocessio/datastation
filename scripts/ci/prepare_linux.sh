@@ -16,7 +16,7 @@ sudo apt-get install -y nodejs cmake xvfb jq postgresql postgresql-contrib mysql
 
 # Allow R programs to install packages
 sudo mkdir -p /usr/local/lib/R/site-library
-sudo chown -R $USER:$GROUP /usr/local/lib/R/
+sudo chown -R $USER /usr/local/lib/R/
 
 # # Set up MySQL
 sudo mysql -u root --execute="CREATE USER 'test'@'localhost' IDENTIFIED BY 'test'";
@@ -34,10 +34,10 @@ sudo psql -U postgres -c "CREATE DATABASE test"
 sudo psql -U postgres -c "GRANT ALL ON DATABASE test TO test"
 
 # # Set up ClickHouse
-# sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv E0C56BD4
-# echo "deb https://repo.clickhouse.tech/deb/stable/ main/" | sudo tee /etc/apt/sources.list.d/clickhouse.list
-# sudo apt-get update -y
-# sudo apt-get install -y clickhouse-server clickhouse-client
+sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv E0C56BD4
+echo "deb https://repo.clickhouse.tech/deb/stable/ main/" | sudo tee /etc/apt/sources.list.d/clickhouse.list
+sudo apt-get update -y
+sudo apt-get install -y clickhouse-server clickhouse-client
 echo "
 <yandex>
   <users>
@@ -53,7 +53,7 @@ echo "
     </test>
   </users>
 </yandex>" | sudo tee /etc/clickhouse-server/users.d/test.xml
-# sudo clickhouse-server start
+sudo clickhouse-server start
 
 # Set up project
 sudo npm install --global yarn
