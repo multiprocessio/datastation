@@ -71,7 +71,6 @@ function inMemoryEval(
 
   const stdout: Array<string> = [];
   return new Promise((resolve, reject) => {
-    // TODO: better deep copy
     anyWindow.DM_getPanel = (panelId: number) => {
       if (!results[panelId]) {
         reject(new InvalidDependentPanelError(panelId));
