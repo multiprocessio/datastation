@@ -265,6 +265,11 @@ export function App() {
     window.close();
   }
 
+  // This allows us to render the sidebar in tests where we
+  // prepopulate connectors and servers
+  const hasSidebar =
+    MODE_FEATURES.connectors || state.connectors || state.servers;
+
   return (
     <ProjectContext.Provider value={state}>
       <div className={`app app--${MODE}`}>
@@ -318,7 +323,7 @@ export function App() {
             height: `calc(100% - ${headerHeight}px)`,
           }}
         >
-          {projectId && MODE_FEATURES.connectors && (
+          {projectId && hasSidebar && (
             <Sidebar>
               <ConnectorList
                 state={state}
