@@ -8,17 +8,17 @@ async function run() {
   const chrome = spawn('yarn', ['run', 'chromedriver']);
   await new Promise((resolve, reject) => {
     try {
-      chrome.stderr.on('data', d => process.stderr.write(d));
+      chrome.stderr.on('data', (d) => process.stderr.write(d));
       chrome.stdout.on('data', (data) => {
-	try {
-	  if (data.includes('ChromeDriver was started successfully.')) {
-	    resolve();
-	  }
-	  process.stdout.write(data);
-	} catch (e) {
-	  reject(e);
-	}
-    });
+        try {
+          if (data.includes('ChromeDriver was started successfully.')) {
+            resolve();
+          }
+          process.stdout.write(data);
+        } catch (e) {
+          reject(e);
+        }
+      });
     } catch (e) {
       reject(e);
     }
@@ -26,7 +26,7 @@ async function run() {
 
   const applicationPath = {
     darwin:
-    'DataStation Community Edition.app/Contents/MacOS/DataStation Community Edition',
+      'DataStation Community Edition.app/Contents/MacOS/DataStation Community Edition',
     win32: 'DataStation Community Edition.exe',
     linux: 'DataStation Community Edition',
   }[process.platform];
@@ -37,11 +37,11 @@ async function run() {
   );
 
   const driver = new webdriver.Builder()
-  // The "9515" is the port opened by chrome driver.
+    // The "9515" is the port opened by chrome driver.
     .usingServer('http://localhost:9515')
     .withCapabilities({
       'goog:chromeOptions': {
-	binary: path.join(process.cwd(), directory, applicationPath),
+        binary: path.join(process.cwd(), directory, applicationPath),
       },
     })
     .forBrowser('chrome')
