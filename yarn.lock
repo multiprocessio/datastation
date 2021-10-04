@@ -534,7 +534,7 @@
     ms "^2.1.3"
     secure-json-parse "^2.4.0"
 
-"@electron/get@^1.13.0", "@electron/get@^1.6.0":
+"@electron/get@^1.12.4", "@electron/get@^1.13.0", "@electron/get@^1.6.0":
   version "1.13.0"
   resolved "https://registry.yarnpkg.com/@electron/get/-/get-1.13.0.tgz#95c6bcaff4f9a505ea46792424f451efea89228c"
   integrity sha512-+SjZhRuRo+STTO1Fdhzqnv9D2ZhjxXP6egsJ9kiO8dtP68cDx7dFCwWi64dlMQV7sWcfW1OYCW4wviEBzmRsfQ==
@@ -2692,6 +2692,14 @@ ee-first@1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/ee-first/-/ee-first-1.1.1.tgz#590c61156b0ae2f4f0255732a158b266bc56b21d"
   integrity sha1-WQxhFWsK4vTwJVcyoViyZrxWsh0=
+
+electron-chromedriver@^15.0.0:
+  version "15.0.0"
+  resolved "https://registry.yarnpkg.com/electron-chromedriver/-/electron-chromedriver-15.0.0.tgz#d4be66a4a7b98438d7acbbcc90f657633a13b11c"
+  integrity sha512-xs/ZSH1Ghdfh7Xfe8zHRP5PKoExzYATDyUmorTYAjulf9IjS0U1JazxYZCRVSUhfScrr5NoSj8rPvqPEztqaKw==
+  dependencies:
+    "@electron/get" "^1.12.4"
+    extract-zip "^2.0.0"
 
 electron-notarize@^1.1.1:
   version "1.1.1"

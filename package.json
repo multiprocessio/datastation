@@ -86,6 +86,7 @@
     "@types/uuid": "^8.3.1",
     "@wojtekmaj/enzyme-adapter-react-17": "^0.6.3",
     "electron": "^15.1.0",
+    "electron-chromedriver": "^15.0.0",
     "electron-packager": "^15.4.0",
     "enzyme": "^3.11.0",
     "esbuild": "^0.13.3",
