@@ -32,7 +32,11 @@ copyProps(window, global);
 
 window.fetch = () => {
   return Promise.resolve({
-    text() { return Promise.resolve(null) }
-    json() { return Promise.resolve(null) }
+    text() {
+      return Promise.resolve(null);
+    },
+    json() {
+      return Promise.resolve(null);
+    },
   });
 };
