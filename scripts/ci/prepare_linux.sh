@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 
+set -eux
+
 # Set up Node.js, databases
 curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
 sudo apt-get update -y
-sudo apt-get install -y nodejs cmake xvfb jq postgresql postgresql-contrib mysql-server clickhouse
+sudo apt-get install -y nodejs cmake xvfb jq postgresql postgresql-server postgresql-contrib mysql-server clickhouse
 
 # Set up R
 #sudo apt-get install -y dirmngr gnupg apt-transport-https ca-certificates software-properties-common build-essential
@@ -22,6 +24,7 @@ sudo mysql -u root --execute="CREATE DATABASE test";
 sudo mysql -u root --execute="GRANT ALL ON *.* TO 'test'@'localhost' IDENTIFIED BY 'test'";
 
 # # Set up PostgreSQL
+sudo /usr/bin/postgresql-setup --initdb
 sudo psql -U postgres -c "CREATE USER test WITH PASSWORD 'test'"
 sudo psql -U postgres -c "CREATE DATABASE test"
 sudo psql -U postgres -c "GRANT ALL ON test TO test"
