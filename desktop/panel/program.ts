@@ -1,5 +1,5 @@
 import { spawn } from 'child_process';
-import fs from 'fs/promises';
+import fs from 'fs';
 import { EOL } from 'os';
 import path from 'path';
 import { file as makeTmpFile } from 'tmp-promise';
@@ -41,7 +41,7 @@ export async function evalProgram(
       indexIdMap
     );
     const fullProgramBody = [preamble, ppi.content].join(EOL);
-    await fs.writeFile(programTmp.path, fullProgramBody);
+    fs.writeFileSync(programTmp.path, fullProgramBody);
     try {
       const child = spawn(programPathOrName, [programTmp.path]);
       // TODO: stream back
@@ -78,7 +78,7 @@ export async function evalProgram(
 
       let f: Buffer;
       try {
-        f = await fs.readFile(projectResultsFile + ppi.id);
+        f = fs.readFileSync(projectResultsFile + ppi.id);
       } catch (e) {
         throw new NoResultError();
       }

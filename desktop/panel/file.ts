@@ -1,4 +1,4 @@
-import fs from 'fs/promises';
+import fs from 'fs';
 import Client from 'ssh2-sftp-client';
 import { FilePanelInfo, PanelInfo, ProjectState } from '../../shared/state';
 import { parseArrayBuffer } from '../../shared/text';
@@ -16,7 +16,7 @@ export async function evalFile(
   } = guardPanel<FilePanelInfo>(panel, 'file');
   const typeInfo = { ...contentTypeInfo, additionalParsers };
   if (!serverId) {
-    const body = await fs.readFile(resolvePath(name));
+    const body = fs.readFileSync(resolvePath(name));
     return await parseArrayBuffer(typeInfo, name, body);
   }
 

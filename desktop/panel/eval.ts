@@ -1,5 +1,5 @@
 import { execFile } from 'child_process';
-import fs from 'fs/promises';
+import fs from 'fs';
 import jsesc from 'jsesc';
 import { preview } from 'preview';
 import { shape } from 'shape';
@@ -117,7 +117,7 @@ export async function evalInSubprocess(
       }
     });
 
-    const resultMeta = await fs.readFile(tmp.path);
+    const resultMeta = fs.readFileSync(tmp.path);
     return JSON.parse(resultMeta.toString());
   } finally {
     try {
@@ -181,7 +181,7 @@ export const makeEvalHandler = (
 
     if (!res.skipWrite) {
       const projectResultsFile = getProjectResultsFile(projectId);
-      await fs.writeFile(projectResultsFile + panel.id, json);
+      fs.writeFileSync(projectResultsFile + panel.id, json);
     }
 
     return {
