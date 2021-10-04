@@ -22,7 +22,7 @@ jobs:
     - uses: artiomtr/jest-coverage-report-action@v2.0-rc.1
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
-        threshold: 59
+        threshold: 62
 
   e2e-linux:
     runs-on: ubuntu-latest
