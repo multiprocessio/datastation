@@ -1,8 +1,7 @@
+const webdriver = require('selenium-webdriver');
 const fs = require('fs');
 const assert = require('assert');
 const path = require('path');
-
-const Application = require('spectron').Application;
 
 const applicationPath = {
   darwin:
@@ -16,21 +15,20 @@ const directory = path.join(
   `DataStation Community Edition-${process.platform}-${process.arch}`
 );
 
-async function run() {
-  const app = new Application({
-    path: path.join(process.cwd(), directory, applicationPath),
-  });
-  await app.start();
-  const title = await app.client.getTitle();
-  assert.equal(title, 'DataStation Community Edition');
-  await app.stop();
-}
-
-run()
-  .then(function () {
-    process.exit(0);
+const driver = new webdriver.Builder()
+  // The "9515" is the port opened by chrome driver.
+  .usingServer('http://localhost:9515')
+  .withCapabilities({
+    'goog:chromeOptions': {
+      binary: path.join(process.cwd(), directory, applicationPath),
+    },
   })
-  .catch(function (error) {
-    console.error('Failed: ', error);
-    process.exit(1);
-  });
+  .forBrowser('chrome')
+  .build();
+
+driver.wait(async () => {
+  const title = await driver.getTitle();
+  assert.equal(title, 'DataStation Community Edition');
+}, 1000);
+
+driver.quit();
