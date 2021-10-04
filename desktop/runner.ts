@@ -56,7 +56,7 @@ export async function main(additionalHandlers?: RPCHandler<any, any>[]) {
   // These throws are very important! Otherwise the runner will just hang.
   ['uncaughtException', 'unhandledRejection'].map((condition) => {
     process.on(condition, (e) => {
-      console.error(e);
+      log.error(e);
       process.exit(2);
     });
   });
