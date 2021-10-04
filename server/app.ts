@@ -1,6 +1,6 @@
 import cookieParser from 'cookie-parser';
 import express from 'express';
-import fs from 'fs/promises';
+import fs from 'fs';
 import https from 'https';
 import path from 'path';
 import pg from 'pg';
@@ -71,8 +71,8 @@ export async function init() {
 
   const server = https.createServer(
     {
-      key: await fs.readFile(config.server.tlsKey),
-      cert: await fs.readFile(config.server.tlsCert),
+      key: fs.readFileSync(config.server.tlsKey),
+      cert: fs.readFileSync(config.server.tlsCert),
     },
     app.express
   );

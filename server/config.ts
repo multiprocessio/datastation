@@ -1,4 +1,4 @@
-import fs from 'fs/promises';
+import fs from 'fs';
 import { mergeDeep, validate } from '../shared/object';
 import log from './log';
 
@@ -51,7 +51,7 @@ export class Config {
 }
 
 export async function readConfig(): Promise<Config> {
-  const raw = await fs.readFile(CONFIG_PATH);
+  const raw = fs.readFileSync(CONFIG_PATH);
   const rawJson = JSON.parse(raw.toString());
   const cfg = mergeDeep(new Config(), rawJson);
 

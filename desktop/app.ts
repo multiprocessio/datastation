@@ -8,9 +8,9 @@ import { registerRPCHandlers } from './rpc';
 import { initialize } from './runner';
 import { storeHandlers } from './store';
 
-configureLogger().then(() => {
-  log.info(APP_NAME, VERSION, DEBUG ? 'DEBUG' : '');
-});
+configureLogger();
+log.info(APP_NAME, VERSION, DEBUG ? 'DEBUG' : '');
+
 process.on('uncaughtException', (e) => {
   log.error(e);
 });

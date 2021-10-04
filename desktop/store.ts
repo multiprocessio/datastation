@@ -1,6 +1,5 @@
 import AsyncLock from 'async-lock';
 import fs from 'fs';
-import fsPromises from 'fs/promises';
 import path from 'path';
 import log from '../shared/log';
 import { getPath } from '../shared/object';
@@ -58,14 +57,14 @@ export function getProjectResultsFile(projectId: string) {
   return path.join(DISK_ROOT, '.' + fileName + '.results');
 }
 
-async function checkAndEncrypt(e: Encrypt, existing?: Encrypt) {
+function checkAndEncrypt(e: Encrypt, existing?: Encrypt) {
   existing = existing || new Encrypt('');
   const new_ = new Encrypt('');
   if (e.value === null) {
     new_.value = existing.value;
     new_.encrypted = true;
   } else if (!e.encrypted) {
-    new_.value = await encrypt(e.value);
+    new_.value = encrypt(e.value);
     new_.encrypted = true;
   }
 
@@ -89,11 +88,11 @@ const getProjectHandler: GetProjectHandler = {
     _1: unknown,
     external: boolean
   ) => {
-    const fileName = await ensureProjectFile(projectId);
+    const fileName = ensureProjectFile(projectId);
     try {
-      const f = await fsPromises.readFile(fileName);
+      const f = fs.readFileSync(fileName);
       const ps = JSON.parse(f.toString()) as ProjectState;
-      return await ProjectState.fromJSON(ps, external);
+      return ProjectState.fromJSON(ps, external);
     } catch (e) {
       log.error(e);
       return null;
@@ -106,11 +105,11 @@ const updateLock = new AsyncLock({ timeout: 10000 });
 export const updateProjectHandler: UpdateProjectHandler = {
   resource: 'updateProject',
   handler: async (projectId: string, newState: ProjectState) => {
-    const fileName = await ensureProjectFile(projectId);
+    const fileName = ensureProjectFile(projectId);
     await updateLock.acquire(fileName, async () => {
       let existingState = new ProjectState();
       try {
-        const f = await fsPromises.readFile(fileName);
+        const f = fs.readFileSync(fileName);
         existingState = JSON.parse(f.toString());
       } catch (e) {
         // Fine to default to blank project when reading for update
@@ -118,7 +117,7 @@ export const updateProjectHandler: UpdateProjectHandler = {
           throw e;
         }
       }
-      await encryptProjectSecrets(newState, existingState);
+      encryptProjectSecrets(newState, existingState);
       return writeFileBuffered(fileName, JSON.stringify(newState));
     });
   },
@@ -127,10 +126,10 @@ export const updateProjectHandler: UpdateProjectHandler = {
 const makeProjectHandler: MakeProjectHandler = {
   resource: 'makeProject',
   handler: async (_: string, { projectId }: MakeProjectRequest) => {
-    const fileName = await ensureProjectFile(projectId);
+    const fileName = ensureProjectFile(projectId);
     const newProject = new ProjectState();
     newProject.projectName = fileName;
-    return fsPromises.writeFile(fileName, JSON.stringify(newProject));
+    return fs.writeFileSync(fileName, JSON.stringify(newProject));
   },
 };
 

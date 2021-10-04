@@ -1,4 +1,4 @@
-import * as fs from 'fs/promises';
+import fs from 'fs';
 import * as uuid from 'uuid';
 import { LANGUAGES, SupportedLanguages } from '../shared/languages';
 import log from '../shared/log';
@@ -46,7 +46,7 @@ export class Settings {
   static async fromFile(settingsFile: string) {
     let existingSettingsString: Buffer | null = null;
     try {
-      existingSettingsString = await fs.readFile(settingsFile);
+      existingSettingsString = fs.readFileSync(settingsFile);
     } catch (e) {
       // Fine if it doesn't exist
     }
@@ -69,7 +69,7 @@ export class Settings {
           `Settings file has been corrupted, renaming to ${backupFile}`,
           e
         );
-        await fs.rename(settingsFile, backupFile);
+        fs.renameSync(settingsFile, backupFile);
       }
     }
 
@@ -77,7 +77,7 @@ export class Settings {
   }
 
   async save() {
-    return await fs.writeFile(this.file, JSON.stringify(this));
+    return fs.writeFileSync(this.file, JSON.stringify(this));
   }
 
   getUpdateHandler(): RPCHandler<Settings, void> {

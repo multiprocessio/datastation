@@ -1,4 +1,4 @@
-import fs from 'fs/promises';
+import fs from 'fs';
 import { APP_NAME, DEBUG, VERSION } from '../shared/constants';
 import log from '../shared/log';
 import '../shared/polyfill';
@@ -93,7 +93,7 @@ export async function main(additionalHandlers?: RPCHandler<any, any>[]) {
     body: { panelId: panel },
     projectId: project,
   });
-  await fs.writeFile(panelMetaOut, JSON.stringify(resultMeta));
+  fs.writeFileSync(panelMetaOut, JSON.stringify(resultMeta));
   log.info(`Wrote panel meta for ${panel} of "${project}" to ${panelMetaOut}.`);
 
   // Must explicitly exit
@@ -101,9 +101,8 @@ export async function main(additionalHandlers?: RPCHandler<any, any>[]) {
 }
 
 if (process.argv[1].includes('desktop_runner.js')) {
-  configureLogger().then(() => {
-    log.info(APP_NAME, VERSION, DEBUG ? 'DEBUG' : '');
-  });
+  configureLogger();
+  log.info(APP_NAME + 'Panel Runner', VERSION, DEBUG ? 'DEBUG' : '');
 
   main(storeHandlers);
 }

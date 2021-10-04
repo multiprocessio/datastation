@@ -24,7 +24,7 @@ import { transformDM_getPanelCalls } from './databases/sqlutil';
 import { tunnel } from './tunnel';
 import { EvalHandlerExtra, EvalHandlerResponse, guardPanel } from './types';
 
-export async function getAndDecryptConnector(
+export function getAndDecryptConnector(
   project: ProjectState,
   connectorId: string
 ) {
@@ -36,13 +36,13 @@ export async function getAndDecryptConnector(
   }
   const connector = connectors[0] as DatabaseConnectorInfo;
 
-  await doOnEncryptFields(connector, async (f: Encrypt) => {
+  doOnEncryptFields(connector, (f: Encrypt) => {
     if (!f.value) {
       f.value = undefined;
       return f;
     }
 
-    f.value = await decrypt(f.value);
+    f.value = decrypt(f.value);
     return f;
   });
 
@@ -86,10 +86,7 @@ export async function evalDatabase(
   const { content } = panel;
   const info = guardPanel<DatabasePanelInfo>(panel, 'database');
 
-  const connector = await getAndDecryptConnector(
-    project,
-    info.database.connectorId
-  );
+  const connector = getAndDecryptConnector(project, info.database.connectorId);
 
   const serverId = connector.serverId || info.serverId;
 

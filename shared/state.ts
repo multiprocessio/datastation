@@ -577,10 +577,10 @@ export class ProjectPage {
   }
 }
 
-export async function doOnMatchingFields<T>(
+export function doOnMatchingFields<T>(
   ps: any,
   check: (key: string) => boolean,
-  cb: (f: T, path: string) => Promise<T>
+  cb: (f: T, path: string) => T
 ) {
   const stack: Array<[any, Array<string>]> = [[ps, []]];
 
@@ -595,14 +595,14 @@ export async function doOnMatchingFields<T>(
 
     const p = path.filter(Boolean).join('.');
     if (check(p)) {
-      setPath(ps, p, await cb(top, p));
+      setPath(ps, p, cb(top, p));
     }
   }
 }
 
 export function doOnEncryptFields(
   ps: any,
-  cb: (f: Encrypt, path: string) => Promise<Encrypt>
+  cb: (f: Encrypt, path: string) => Encrypt
 ) {
   return doOnMatchingFields(ps, (f) => f.endsWith('_encrypt'), cb);
 }
@@ -633,7 +633,7 @@ export class ProjectState {
     this.id = uuid.v4();
   }
 
-  static async fromJSON(raw: any, external = true): Promise<ProjectState> {
+  static fromJSON(raw: any, external = true): ProjectState {
     raw = raw || {};
     const ps = new ProjectState();
     ps.projectName = raw.projectName || '';
@@ -644,22 +644,22 @@ export class ProjectState {
     ps.originalVersion = raw.originalVersion || VERSION;
     ps.lastVersion = raw.lastVersion || VERSION;
     if (external) {
-      await doOnEncryptFields(ps, (f, p) => {
+      doOnEncryptFields(ps, (f, p) => {
         const new_ = new Encrypt(null);
         new_.encrypted = true;
-        return Promise.resolve(new_);
+        return new_;
       });
     }
-    await doOnMatchingFields<Date>(
+    doOnMatchingFields<Date>(
       ps,
       (path) => path.endsWith('_date'),
       (d) => {
         const nd = new Date(d);
         if (String(nd) === 'Invalid Date') {
-          return Promise.resolve(new Date());
+          return new Date();
         }
 
-        return Promise.resolve(nd);
+        return nd;
       }
     );
     return ps;
