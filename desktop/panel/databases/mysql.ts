@@ -1,5 +1,5 @@
 import mysql from 'mysql2/promise';
-import { ANSI_SQL_QUOTE } from '../../../shared/sql';
+import { MYSQL_QUOTE } from '../../../shared/sql';
 import { DatabaseConnectorInfo } from '../../../shared/state';
 import { Dispatch } from '../../rpc';
 import { importAndRun, PanelToImport } from './sqlutil';
@@ -33,7 +33,7 @@ export async function evalMySQL(
       projectId,
       query,
       panelsToImport,
-      ANSI_SQL_QUOTE
+      MYSQL_QUOTE
     );
     return { value };
   } finally {

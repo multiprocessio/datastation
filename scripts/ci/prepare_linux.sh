@@ -25,9 +25,13 @@ sudo mysql -u root --execute="GRANT ALL ON *.* TO 'test'@'localhost' IDENTIFIED 
 
 # # Set up PostgreSQL
 sudo /usr/bin/postgresql-setup --initdb
+echo "
+local  test            test                md5
+host   test            test   localhost    md5" | sudo tee /var/lib/pgsql/data/pg_hba.conf
+sudo service postgresql restart
 sudo psql -U postgres -c "CREATE USER test WITH PASSWORD 'test'"
 sudo psql -U postgres -c "CREATE DATABASE test"
-sudo psql -U postgres -c "GRANT ALL ON test TO test"
+sudo psql -U postgres -c "GRANT ALL ON DATABASE test TO test"
 
 # # Set up ClickHouse
 # sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv E0C56BD4
