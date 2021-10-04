@@ -13,7 +13,7 @@ import { Input } from '../components/Input';
 import { Select } from '../components/Select';
 import { ServerPicker } from '../components/ServerPicker';
 import { TimeSeriesRange } from '../components/TimeSeriesRange';
-import { VENDOR_GROUPS } from '../connectors';
+import { VENDORS, VENDOR_GROUPS } from '../connectors';
 import { ProjectContext } from '../ProjectStore';
 import { PanelBodyProps, PanelDetailsProps, PanelUIDetails } from './types';
 
@@ -52,7 +52,10 @@ export function DatabasePanelDetails({
       return;
     }
 
-    if (connector.database.type === 'influx' && !panel.database.range.field) {
+    if (
+      ['influx', 'prometheus'].includes(connector.database.type) &&
+      !panel.database.range.field
+    ) {
       panel.database.range.field = 'time';
     }
   });
@@ -62,11 +65,13 @@ export function DatabasePanelDetails({
       label: group.group,
       options: group.vendors
         .map((id) =>
-          connectors.filter(
-            (c) =>
-              c.type === 'database' &&
-              (c as DatabaseConnectorInfo).database.type === id
-          )
+          connectors
+            .filter(
+              (c) =>
+                c.type === 'database' &&
+                (c as DatabaseConnectorInfo).database.type === id
+            )
+            .map((c) => ({ ...c, vendor: VENDORS[id].name }))
         )
         .flat()
         .sort((a, b) => (a.name < b.name ? 1 : -1)),
@@ -91,7 +96,7 @@ export function DatabasePanelDetails({
               <optgroup label={g.label} key={g.label}>
                 {g.options.map((o) => (
                   <option key={o.id} value={o.id}>
-                    {o.name}
+                    {o.name} ({o.vendor})
                   </option>
                 ))}
               </optgroup>
@@ -115,13 +120,16 @@ export function DatabasePanelDetails({
           {!['cassandra', 'presto'].includes(connector.database.type) && (
             <TimeSeriesRange
               range={panel.database.range}
+              hideField={['prometheus', 'influx'].includes(
+                connector.database.type
+              )}
               updateRange={(r: TimeSeriesRangeT) => {
                 panel.database.range = r;
                 updatePanel(panel);
               }}
             />
           )}
-          {connector.database.type === 'influx' && (
+          {connector.database.type === 'prometheus' && (
             <Input
               label="Step (seconds)"
               type="number"

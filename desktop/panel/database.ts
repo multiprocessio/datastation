@@ -7,6 +7,7 @@ import {
   PanelInfo,
   ProjectState,
 } from '../../shared/state';
+import { fullHttpURL } from '../../shared/url';
 import { Dispatch } from '../rpc';
 import { decrypt } from '../secret';
 import { evalClickHouse } from './databases/clickhouse';
@@ -96,12 +97,17 @@ export async function evalDatabase(
     connector.database.type === 'prometheus' ||
     connector.database.type === 'influx'
   ) {
-    const { host, port } = portHostFromAddress(info, connector);
+    const defaultPort = DEFAULT_PORT[connector.database.type];
+    // This is going to get annoying if one of these dbs ever has a non-HTTP protocol.
+    const { protocol, hostname, port } = new URL(
+      fullHttpURL(connector.database.address, undefined, defaultPort)
+    );
+    const host = protocol + '//' + hostname;
     return await tunnel(
       project,
       serverId,
       host,
-      port,
+      +port,
       (host: string, port: number) => {
         if (connector.database.type === 'elasticsearch') {
           return evalElasticSearch(

@@ -1,4 +1,4 @@
-import { PrometheusDriver } from 'prometheus-query';
+import fetch from 'node-fetch';
 import { timestampsFromRange } from '../../../shared/sql';
 import {
   DatabaseConnectorInfo,
@@ -15,16 +15,37 @@ export async function evalPrometheus(
   connector: DatabaseConnectorInfo,
   panel: DatabasePanelInfo
 ): Promise<EvalHandlerResponse> {
-  const prom = new PrometheusDriver({
-    endpoint: host + ':' + port,
-  });
-
   const { begin, end } = timestampsFromRange(range);
-  const { result: series } = await prom.rangeQuery(
-    query,
-    begin,
-    end,
-    panel.database.step
+  const endpoint = `${host}${
+    port ? ':' + String(port) : ''
+  }/api/v1/query_range?query=${query}&start=${begin.valueOf() / 1000}&end=${
+    end.valueOf() / 1000
+  }&step=${panel.database.step}`;
+
+  const headers: Record<string, string> = {};
+  if (
+    connector.database.username ||
+    connector.database.password_encrypt.value
+  ) {
+    headers['Authorization'] =
+      'Basic ' +
+      new Buffer(
+        connector.database.username +
+          ':' +
+          connector.database.password_encrypt.value
+      ).toString('base64');
+  }
+
+  const response = await fetch(endpoint, {
+    method: 'GET',
+    headers,
+  });
+  const body = await response.json();
+  if (body.status !== 'success') {
+    throw body;
+  }
+
+  return body.data.result.map((m) =>
+    m.values.map((v) => ({ metric: m.metric, time: v[0], value: v[1] }))
   );
-  return { value: series.map((s) => s.value) };
 }

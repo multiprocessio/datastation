@@ -102,7 +102,7 @@ export async function main(additionalHandlers?: RPCHandler<any, any>[]) {
 
 if (process.argv[1].includes('desktop_runner.js')) {
   configureLogger();
-  log.info(APP_NAME + 'Panel Runner', VERSION, DEBUG ? 'DEBUG' : '');
+  log.info(APP_NAME + ' Panel Runner', VERSION, DEBUG ? 'DEBUG' : '');
 
   main(storeHandlers);
 }

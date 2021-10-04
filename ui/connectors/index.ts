@@ -1,7 +1,6 @@
 import { DatabaseConnectorInfoType } from '../../shared/state';
-import { ClickhouseDetails } from './ClickhouseDetails';
 import { ElasticSearchDetails } from './ElasticSearchDetails';
-import { GenericDetails } from './GenericDetails';
+import { GenericDetails, GenericNoDatabaseDetails } from './GenericDetails';
 import { SnowflakeDetails } from './SnowflakeDetails';
 
 export const VENDORS: {
@@ -39,7 +38,7 @@ export const VENDORS: {
   clickhouse: {
     name: 'ClickHouse',
     id: 'clickhouse',
-    details: ClickhouseDetails,
+    details: GenericNoDatabaseDetails,
   },
   snowflake: {
     name: 'Snowflake',
@@ -59,7 +58,7 @@ export const VENDORS: {
   prometheus: {
     name: 'Prometheus',
     id: 'prometheus',
-    details: GenericDetails,
+    details: GenericNoDatabaseDetails,
   },
   influx: {
     name: 'Influx',

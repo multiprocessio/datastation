@@ -15,7 +15,7 @@ export function initialize(app: App, args: { subprocess: string }) {
 async function run() {
   const config = await readConfig();
   const app = new App(config);
-  log.info(APP_NAME + 'Panel Runner', VERSION, DEBUG ? 'DEBUG' : '');
+  log.info(APP_NAME + ' Panel Runner', VERSION, DEBUG ? 'DEBUG' : '');
   await main(getProjectHandlers(app));
 }
 

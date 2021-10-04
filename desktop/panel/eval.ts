@@ -1,6 +1,7 @@
 import { execFile } from 'child_process';
 import fs from 'fs';
 import jsesc from 'jsesc';
+import { EOL } from 'os';
 import { preview } from 'preview';
 import { shape } from 'shape';
 import { file as makeTmpFile } from 'tmp-promise';
@@ -92,7 +93,6 @@ export async function evalInSubprocess(
     let stderr = '';
     child.stderr.on('data', (data) => {
       stderr += data;
-      process.stderr.write(data);
     });
 
     child.stdout.on('data', (data) => {
@@ -103,6 +103,9 @@ export async function evalInSubprocess(
       try {
         child.on('exit', (code) => {
           if (code === 0) {
+            if (stderr) {
+              process.stderr.write(stderr + EOL);
+            }
             resolve();
           }
 
@@ -113,6 +116,9 @@ export async function evalInSubprocess(
           reject(new Error(stderr));
         });
       } catch (e) {
+        if (stderr) {
+          process.stderr.write(stderr + EOL);
+        }
         reject(e);
       }
     });

@@ -1,4 +1,3 @@
-import AsyncLock from 'async-lock';
 import fs from 'fs';
 import path from 'path';
 import log from '../shared/log';
@@ -100,26 +99,25 @@ const getProjectHandler: GetProjectHandler = {
   },
 };
 
-const updateLock = new AsyncLock({ timeout: 10000 });
-
 export const updateProjectHandler: UpdateProjectHandler = {
   resource: 'updateProject',
   handler: async (projectId: string, newState: ProjectState) => {
     const fileName = ensureProjectFile(projectId);
-    await updateLock.acquire(fileName, async () => {
-      let existingState = new ProjectState();
-      try {
-        const f = fs.readFileSync(fileName);
-        existingState = JSON.parse(f.toString());
-      } catch (e) {
-        // Fine to default to blank project when reading for update
-        if (e.code !== 'ENOENT') {
-          throw e;
-        }
+    let existingState = new ProjectState();
+    try {
+      // This is a race condition but not sure if it matters because
+      // it is only used to preserve the current project secret.
+      // Maybe secrets should be stored somewhere els.e
+      const f = fs.readFileSync(fileName);
+      existingState = JSON.parse(f.toString());
+    } catch (e) {
+      // Fine to default to blank project when reading for update
+      if (e.code !== 'ENOENT') {
+        throw e;
       }
-      encryptProjectSecrets(newState, existingState);
-      return writeFileBuffered(fileName, JSON.stringify(newState));
-    });
+    }
+    encryptProjectSecrets(newState, existingState);
+    writeFileBuffered(fileName, JSON.stringify(newState));
   },
 };
 

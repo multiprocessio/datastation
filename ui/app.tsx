@@ -37,11 +37,13 @@ import { ServerList } from './ServerList';
 import { Sidebar } from './Sidebar';
 import { Updates } from './Updates';
 
-Object.values(LANGUAGES).map((l) => {
-  if (l.inMemoryInit) {
-    l.inMemoryInit();
-  }
-});
+if (MODE === 'browser') {
+  Object.values(LANGUAGES).map((l) => {
+    if (l.inMemoryInit) {
+      l.inMemoryInit();
+    }
+  });
+}
 
 function getQueryParameter(param: String) {
   const query = window.location.search.substring(1);

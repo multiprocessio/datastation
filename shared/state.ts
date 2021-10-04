@@ -116,6 +116,8 @@ export class ConnectorInfo {
     // Migrate panel name from sql to database
     if (raw.type === 'sql') {
       raw.type = 'database';
+      raw.database = raw.sql;
+      delete raw.sql;
     }
     const ci = mergeDeep(new ConnectorInfo(), raw);
 
@@ -252,6 +254,8 @@ export class PanelInfo {
     // Migrate panel name from sql to database
     if (raw.type === 'sql') {
       raw.type = 'database';
+      raw.database = raw.sql;
+      delete raw.sql;
     }
 
     let pit: PanelInfo = mergeDeep(new PanelInfo(raw.type || 'literal'), raw);
