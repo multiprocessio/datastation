@@ -3,7 +3,7 @@ const { wait } = require('../shared/promise');
 const { getPath } = require('../shared/object');
 const path = require('path');
 const os = require('os');
-const fs = require('fs/promises');
+const fs = require('fs');
 const { storeHandlers, ensureProjectFile } = require('./store');
 const {
   ProjectState,
@@ -53,7 +53,7 @@ test('write project with encrypted secrets, read with nulled secrets', async () 
     // Wait to make sure file has been written
     await wait(SYNC_PERIOD + 1000);
 
-    const f = await fs.readFile(projectPath);
+    const f = fs.readFileSync(projectPath);
     const onDisk = JSON.parse(f.toString());
 
     // Passwords are encrypted
