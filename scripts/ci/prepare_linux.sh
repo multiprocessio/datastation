@@ -5,7 +5,7 @@ set -eux
 # Set up Node.js, databases
 curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
 sudo apt-get update -y
-sudo apt-get install -y nodejs cmake xvfb jq postgresql postgresql-server postgresql-contrib mysql-server clickhouse
+sudo apt-get install -y nodejs cmake xvfb jq postgresql postgresql-contrib mysql-server
 
 # Set up R
 #sudo apt-get install -y dirmngr gnupg apt-transport-https ca-certificates software-properties-common build-essential
