@@ -7,6 +7,13 @@ import {
 } from '../../../shared/state';
 import { EvalHandlerResponse } from '../types';
 
+export interface PrometheusRangeResponse {
+  status: string;
+  data: {
+    result: Array<{ metric: any; values: Array<[number, any]> }>;
+  };
+}
+
 export async function evalPrometheus(
   query: string,
   range: TimeSeriesRange,
@@ -40,12 +47,15 @@ export async function evalPrometheus(
     method: 'GET',
     headers,
   });
-  const body = await response.json();
+  const body = (await response.json()) as PrometheusRangeResponse;
   if (body.status !== 'success') {
     throw body;
   }
 
-  return body.data.result.map((m) =>
-    m.values.map((v) => ({ metric: m.metric, time: v[0], value: v[1] }))
-  );
+  const flatResults = body.data.result
+    .map((m) =>
+      m.values.map((v) => ({ metric: m.metric, time: v[0], value: v[1] }))
+    )
+    .flat();
+  return { value: flatResults };
 }
