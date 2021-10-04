@@ -90,7 +90,7 @@ export function DatabasePanelDetails({
             {vendorsWithConnectors.map((g) => (
               <optgroup label={g.label} key={g.label}>
                 {g.options.map((o) => (
-                  <option key={o.name} value={o.id}>
+                  <option key={o.id} value={o.id}>
                     {o.name}
                   </option>
                 ))}
