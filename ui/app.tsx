@@ -269,8 +269,11 @@ export function App() {
 
   // This allows us to render the sidebar in tests where we
   // prepopulate connectors and servers
-  const hasSidebar =
-    Boolean(MODE_FEATURES.connectors || state.connectors?.length || state.servers?.length);
+  const hasSidebar = Boolean(
+    MODE_FEATURES.connectors ||
+      state.connectors?.length ||
+      state.servers?.length
+  );
 
   return (
     <ProjectContext.Provider value={state}>

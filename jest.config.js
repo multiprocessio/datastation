@@ -10,7 +10,9 @@ module.exports = {
       },
     ],
   },
-  transformIgnorePatterns: ['node_modules/(?!react-syntax-highlighter)'],
+  transformIgnorePatterns: [
+    'node_modules/(?!react-syntax-highlighter|refractor|node-fetch|fetch-blob)',
+  ],
   setupFiles: ['./shared/polyfill.ts', './testsetup.js'],
   testURL: 'http://localhost/',
   testEnvironment: 'node',
