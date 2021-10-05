@@ -13,6 +13,7 @@ export function Radio({ options, value, vertical, ...props }: RadioProps) {
     }
 
     if (!options.map((o) => String(o.value)).includes(String(value))) {
+      console.log('SETTING DEFAULT');
       props.onChange(String(options[0].value));
     }
   });

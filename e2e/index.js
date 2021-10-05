@@ -5,7 +5,7 @@ const path = require('path');
 const { spawn } = require('child_process');
 
 async function run() {
-  const chrome = spawn('yarn', ['run', 'chromedriver']);
+  const chrome = spawn('yarn', ['run', 'chromedriver'], { shell: process.platform === 'win32' });
   await new Promise((resolve, reject) => {
     try {
       chrome.stderr.on('data', (d) =>
@@ -49,14 +49,20 @@ async function run() {
     .forBrowser('chrome')
     .build();
 
-  driver.wait(async () => {
-    const title = await driver.getTitle();
-    assert.equal(title, 'DataStation Community Edition');
-    return true;
-  }, 10_000);
+  try {
+    let reached = false;
+    await driver.wait(async () => {
+      const title = await driver.getTitle();
+      assert.equal(title, 'DataStation Community Edition');
+      reached = true;
+      return true;
+    }, 10_000);
+  } finally {
+    await driver.quit();
+    process.kill(chrome.pid); // This doesn't do anything on Windows. Need to manually `ps | grep chromedriver` and kill it. TODO: script.
+  }
 
-  driver.quit();
-  process.kill(chrome.pid);
+  assert.equal(reached, true);
   process.exit(0);
 }
 

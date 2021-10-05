@@ -46,13 +46,11 @@ export interface InputProps
   autoWidth?: boolean;
   defaultValue?: string;
   tooltip?: React.ReactNode;
-  checked?: boolean;
 }
 
 export function Input({
   className,
   onChange,
-  checked,
   value,
   label,
   autoWidth,
@@ -71,20 +69,16 @@ export function Input({
     defaultValue
   );
 
-  const inputArgs = (type === 'checkbox' || type === 'radio')
-    ? { checked }
-    : { value: localValue };
-
   const input = (
     <React.Fragment>
       <input
+        value={localValue}
         type={type}
         className={label ? '' : inputClass}
         onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
           setLocalValue(String(e.target.value))
         }
-    {...props}
-    {...inputArgs}
+        {...props}
         size={autoWidth ? Math.min(100, String(localValue).length) : undefined}
       />
       {tooltip && <Tooltip children={tooltip} />}
