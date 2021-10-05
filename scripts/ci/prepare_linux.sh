@@ -54,7 +54,9 @@ echo "
     </test>
   </users>
 </yandex>" | sudo tee /etc/clickhouse-server/users.d/test.xml
-sudo clickhouse-server start
+# See: https://community.atlassian.com/t5/Bitbucket-Pipelines-discussions/Broken-starting-clickhouse-in-a-docker-because-of-wrong/td-p/1689466
+setcap -r `which clickhouse` && echo "Cleaning caps success" || echo "Cleaning caps error"
+sudo service clickhouse-server start
 
 # Set up project
 sudo npm install --global yarn
