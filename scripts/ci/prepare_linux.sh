@@ -28,7 +28,7 @@ sudo mysql -u root -proot --execute="GRANT ALL PRIVILEGES ON test.* TO 'test'@'l
 echo "
 local  test            test                md5
 host   test            test   localhost    md5
-local  all             postgres            peer" | sudo tee /etc/postgresql/12/main/pg_hba.conf
+local  all             all                 peer" | sudo tee /etc/postgresql/12/main/pg_hba.conf
 sudo service postgresql restart
 sudo psql -U postgres -c "CREATE USER test WITH PASSWORD 'test'"
 sudo psql -U postgres -c "CREATE DATABASE test"
