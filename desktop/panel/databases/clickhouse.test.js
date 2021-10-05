@@ -32,7 +32,9 @@ test(`runs clickhouse query`, async () => {
       const panelValueBuffer = fs.readFileSync(
         getProjectResultsFile(project.projectName) + dp.id
       );
-      expect(JSON.parse(panelValueBuffer.toString())).toStrictEqual([{ "number": 42 }]);
+      expect(JSON.parse(panelValueBuffer.toString())).toStrictEqual([
+        { number: 42 },
+      ]);
 
       finished = true;
     },

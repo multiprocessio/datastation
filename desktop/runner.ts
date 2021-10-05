@@ -21,6 +21,7 @@ export function initialize({
   let project = '';
   let panel = '';
   let panelMetaOut = '';
+  console.log(process.argv);
   for (let i = 0; i < process.argv.length; i++) {
     if (process.argv[i] === DSPROJ_FLAG) {
       project = process.argv[i + 1];

@@ -6,17 +6,19 @@ import { configureLogger } from './log';
 import { openWindow } from './project';
 import { registerRPCHandlers } from './rpc';
 import { initialize } from './runner';
-import { storeHandlers } from './store';
+import { flushUnwritten, storeHandlers } from './store';
 
 configureLogger();
 log.info(APP_NAME, VERSION, DEBUG ? 'DEBUG' : '');
 
-process.on('uncaughtException', (e) => {
-  log.error(e);
-});
-process.on('unhandledRejection', (e) => {
-  log.error(e);
-});
+['uncaughtException', 'unhandledRejection'].map((sig) =>
+  process.on(sig, log.error)
+);
+
+// There doesn't seem to be a catchall signal
+['exit', 'SIGUSR1', 'SIGUSR2', 'SIGINT'].map((sig) =>
+  process.on(sig, flushUnwritten)
+);
 
 app.whenReady().then(async () => {
   const { handlers, project } = initialize({

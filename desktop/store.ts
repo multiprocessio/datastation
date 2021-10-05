@@ -44,10 +44,6 @@ export function flushUnwritten() {
     delete buffers[fileName];
   });
 }
-// There doesn't seem to be a catchall signal
-['exit', 'SIGUSR1', 'SIGUSR2', 'uncaughtException', 'SIGINT'].map((sig) =>
-  process.on(sig, flushUnwritten)
-);
 
 export function getProjectResultsFile(projectId: string) {
   const fileName = path
