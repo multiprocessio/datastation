@@ -21,7 +21,6 @@ export function initialize({
   let project = '';
   let panel = '';
   let panelMetaOut = '';
-  console.log(process.argv);
   for (let i = 0; i < process.argv.length; i++) {
     if (process.argv[i] === DSPROJ_FLAG) {
       project = process.argv[i + 1];
@@ -101,7 +100,7 @@ export async function main(additionalHandlers?: RPCHandler<any, any>[]) {
   process.exit(0);
 }
 
-if (process.argv[1].includes('desktop_runner.js')) {
+if ((process.argv[1] || '').includes('desktop_runner.js')) {
   configureLogger();
   log.info(APP_NAME + ' Panel Runner', VERSION, DEBUG ? 'DEBUG' : '');
 

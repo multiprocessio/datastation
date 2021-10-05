@@ -19,6 +19,6 @@ async function run() {
   await main(getProjectHandlers(app));
 }
 
-if (process.argv[1].includes('server_runner.js')) {
+if ((process.argv[1] || '').includes('server_runner.js')) {
   run();
 }
