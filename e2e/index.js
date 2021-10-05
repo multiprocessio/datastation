@@ -5,7 +5,9 @@ const path = require('path');
 const { spawn } = require('child_process');
 
 async function run() {
-  const chrome = spawn('yarn', ['run', 'chromedriver'], { shell: process.platform === 'win32' });
+  const chrome = spawn('yarn', ['run', 'chromedriver'], {
+    shell: process.platform === 'win32',
+  });
   await new Promise((resolve, reject) => {
     try {
       chrome.stderr.on('data', (d) =>
