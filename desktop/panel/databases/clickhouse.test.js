@@ -1,10 +1,10 @@
-const { getProjectResultsFile } = require('../store');
+const { getProjectResultsFile } = require('../../store');
 const fs = require('fs');
 const {
   Encrypt,
   DatabasePanelInfo,
   DatabaseConnectorInfo,
-} = require('../../shared/state');
+} = require('../../../shared/state');
 const { withSavedPanels } = require('../testutil');
 
 test(`runs clickhouse query`, async () => {
