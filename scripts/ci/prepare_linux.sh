@@ -25,9 +25,9 @@ sudo mysql -u root -proot --execute="CREATE DATABASE test";
 sudo mysql -u root -proot --execute="GRANT ALL PRIVILEGES ON test.* TO 'test'@'localhost'";
 
 # # Set up PostgreSQL
-<echo "
+echo "
 local  test            test                md5
-host   test            test   localhost    md5" | sudo tee /var/lib/pgsql/data/pg_hba.conf
+host   test            test   localhost    md5" | sudo tee /etc/postgresql/12/main/pg_hba.conf
 sudo service postgresql restart
 sudo psql -U postgres -c "CREATE USER test WITH PASSWORD 'test'"
 sudo psql -U postgres -c "CREATE DATABASE test"
