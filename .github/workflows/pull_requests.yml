@@ -18,7 +18,7 @@ jobs:
     - run: ./scripts/fail_on_diff.sh
     - run: yarn test-licenses
     - run: yarn build-desktop # Needed so we can have ./build/desktop_runner.js ready for tests
-    - run: yarn test
+    - run: yarn test --verbose
     - uses: artiomtr/jest-coverage-report-action@v2.0-rc.1
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -48,7 +48,7 @@ jobs:
         ref: ${{ github.ref }}
     - run: ./scripts/ci/prepare_macos.sh
     - run: yarn build-desktop # Needed so we can have ./build/desktop_runner.js ready for tests
-    - run: yarn test
+    - run: yarn test --verbose
     - run: yarn release-desktop 0.0.0-e2etest
     - run: yarn e2e-test
 
@@ -63,6 +63,6 @@ jobs:
     - run: ./scripts/ci/prepare_windows.ps1
       shell: pwsh
     - run: yarn build-desktop # Needed so we can have ./build/desktop_runner.js ready for tests
-    - run: yarn test
+    - run: yarn test --verbose
     - run: yarn release-desktop 0.0.0-e2etest
     - run: yarn e2e-test
