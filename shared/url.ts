@@ -7,9 +7,10 @@ export function fullHttpURL(
   let guessedPort = port || defaultPort || '80';
 
   let [domain, ...path] = address.split('/');
+  let protocol = '';
 
   if (address.startsWith('http://') || address.startsWith('https://')) {
-    const protocol =
+    protocol =
       domain +
       address.slice(address.indexOf(':') + 1, address.indexOf('//') + 2);
     [domain, ...path] = address.slice(protocol.length).split('/');
@@ -26,15 +27,29 @@ export function fullHttpURL(
     }
 
     // Only append to _domain_ so we can add port optionally later
-    domain = 'http://' + domain;
+    protocol = 'http://';
+    domain = protocol + domain;
     if (String(guessedPort) === '80') {
       return [domain, ...path].join('/');
     }
   }
 
-  if (!guessedPort) {
+  if (!guessedPort || domain.slice(protocol.length).includes(':')) {
     return [domain, ...path].join('/');
   }
 
   return [domain + ':' + String(guessedPort), ...path].join('/');
+}
+
+export function queryParameters(d: Record<string, string | undefined>) {
+  let q = '';
+  for (const [key, value] of Object.entries(d)) {
+    if (q) {
+      q += '&';
+    }
+
+    q += `${key}=${encodeURIComponent(value)}`;
+  }
+
+  return q;
 }

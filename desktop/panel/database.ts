@@ -1,3 +1,4 @@
+import log from '../../shared/log';
 import { sqlRangeQuery } from '../../shared/sql';
 import {
   DatabaseConnectorInfo,
@@ -103,12 +104,18 @@ export async function evalDatabase(
       fullHttpURL(connector.database.address, undefined, defaultPort)
     );
     const host = protocol + '//' + hostname;
+    log.info(
+      `Connecting ${serverId ? 'through tunnel ' : ''}to ${host}:${port} for ${
+        connector.database.type
+      } query`
+    );
     return await tunnel(
       project,
       serverId,
       host,
       +port,
       (host: string, port: number) => {
+        host = host || 'localhost';
         if (connector.database.type === 'elasticsearch') {
           return evalElasticSearch(
             content,

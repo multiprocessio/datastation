@@ -29,7 +29,6 @@ export async function evalPostgres(
     host,
     port,
   };
-  console.log(config);
   const client = new PostgresClient(config);
   try {
     await client.connect();

@@ -8,13 +8,15 @@ async function run() {
   const chrome = spawn('yarn', ['run', 'chromedriver']);
   await new Promise((resolve, reject) => {
     try {
-      chrome.stderr.on('data', (d) => process.stderr.write(d));
+      chrome.stderr.on('data', (d) =>
+        process.stderr.write('[CHROME] ' + d + '\n')
+      );
       chrome.stdout.on('data', (data) => {
         try {
           if (data.includes('ChromeDriver was started successfully.')) {
             resolve();
           }
-          process.stdout.write(data);
+          process.stdout.write('[CHROME] ' + data + '\n');
         } catch (e) {
           reject(e);
         }

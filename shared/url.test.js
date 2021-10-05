@@ -1,4 +1,4 @@
-const { fullHttpURL } = require('./url');
+const { fullHttpURL, queryParameters } = require('./url');
 
 test('fullHttpURL', () => {
   expect(fullHttpURL('')).toBe('http://localhost');
@@ -7,6 +7,9 @@ test('fullHttpURL', () => {
   expect(fullHttpURL('https://foo.com:8080', null, 9090)).toBe(
     'https://foo.com:8080'
   );
+
+  expect(fullHttpURL('foo.com:9090', null, 9090)).toBe('http://foo.com:9090');
+
   expect(fullHttpURL('https://foo.com', 8080, 9090)).toBe(
     'https://foo.com:8080'
   );
@@ -17,4 +20,8 @@ test('fullHttpURL', () => {
   expect(fullHttpURL('localhost/fluber', 20)).toBe(
     'http://localhost:20/fluber'
   );
+});
+
+test('queryParameters', () => {
+  expect(queryParameters({ a: 1, b: 2 })).toBe('a=1&b=2');
 });
