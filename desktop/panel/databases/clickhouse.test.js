@@ -22,7 +22,7 @@ test(`runs clickhouse query`, async () => {
   ];
   const dp = new DatabasePanelInfo();
   dp.database.connectorId = connectors[0].id;
-  dp.content = 'SELECT 42';
+  dp.content = 'SELECT 42 AS number';
 
   let finished = false;
   const panels = [dp];
@@ -32,7 +32,7 @@ test(`runs clickhouse query`, async () => {
       const panelValueBuffer = fs.readFileSync(
         getProjectResultsFile(project.projectName) + dp.id
       );
-      expect(JSON.parse(panelValueBuffer.toString())).toStrictEqual(42);
+      expect(JSON.parse(panelValueBuffer.toString())).toStrictEqual([{ "number": 42 }]);
 
       finished = true;
     },
