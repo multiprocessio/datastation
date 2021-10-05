@@ -30,6 +30,8 @@ local  test            test                md5
 host   test            test   localhost    md5
 local  all             all                 peer" | sudo tee /etc/postgresql/12/main/pg_hba.conf
 sudo service postgresql restart
+file psql
+cat psql
 sudo su postgres -- psql -c "CREATE USER test WITH PASSWORD 'test'"
 sudo su postgres -- psql -c "CREATE DATABASE test"
 sudo su postgres -- psql -c "GRANT ALL ON DATABASE test TO test"
