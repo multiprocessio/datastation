@@ -5,7 +5,7 @@ set -eux
 # Set up Node.js, databases
 curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
 sudo apt-get update -y
-sudo apt-get install -y nodejs cmake xvfb jq postgresql postgresql-contrib mysql-server
+sudo apt-get install -y nodejs cmake xvfb jq postgresql postgresql-contrib
 
 # Set up R
 #sudo apt-get install -y dirmngr gnupg apt-transport-https ca-certificates software-properties-common build-essential
@@ -20,12 +20,12 @@ sudo chown -R $USER /usr/local/lib/R/
 
 # # Set up MySQL
 sudo service mysql start
-sudo mysql -u root --execute="CREATE USER 'test'@'localhost' IDENTIFIED BY 'test'";
-sudo mysql -u root --execute="CREATE DATABASE test";
-sudo mysql -u root --execute="GRANT ALL PRIVILEGES ON test.* TO 'test'@'localhost'";
+sudo mysql -u root -proot --execute="CREATE USER 'test'@'localhost' IDENTIFIED BY 'test'";
+sudo mysql -u root -proot --execute="CREATE DATABASE test";
+sudo mysql -u root -proot --execute="GRANT ALL PRIVILEGES ON test.* TO 'test'@'localhost'";
 
 # # Set up PostgreSQL
-echo "
+<echo "
 local  test            test                md5
 host   test            test   localhost    md5" | sudo tee /var/lib/pgsql/data/pg_hba.conf
 sudo service postgresql restart
