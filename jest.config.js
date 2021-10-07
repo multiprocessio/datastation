@@ -1,12 +1,16 @@
 module.exports = {
-  coverageThreshold: {
-    global: {
-      statements: 63,
-      branches: 52,
-      functions: 54,
-      lines: 58,
-    },
-  },
+  // Only on linux do all tests run
+  coverageThreshold:
+    process.platform === 'linux'
+      ? {
+          global: {
+            statements: 63,
+            branches: 52,
+            functions: 54,
+            lines: 58,
+          },
+        }
+      : undefined,
   transform: {
     '.[jt]sx?$': [
       '@sucrase/jest-plugin',
