@@ -81,7 +81,7 @@ new connector, you could copy an existing connector and register it in
 ./ui/connectors/index.ts. You would also need to declare it in
 ./shared/state.ts.
 
-### ./shared
+## ./shared
 
 This contains helper utilities used all over the place.
 
