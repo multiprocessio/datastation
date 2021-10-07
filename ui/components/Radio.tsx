@@ -13,7 +13,6 @@ export function Radio({ options, value, vertical, ...props }: RadioProps) {
     }
 
     if (!options.map((o) => String(o.value)).includes(String(value))) {
-      console.log('SETTING DEFAULT');
       props.onChange(String(options[0].value));
     }
   });
@@ -27,10 +26,7 @@ export function Radio({ options, value, vertical, ...props }: RadioProps) {
           type="radio"
           {...props}
           value={o.value}
-          checked={
-            (console.log(o.value, value, String(o.value) === String(value)),
-            String(o.value) === String(value))
-          }
+          checked={String(o.value) === String(value)}
           label={o.label}
         />
       ))}
