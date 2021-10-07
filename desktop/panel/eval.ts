@@ -190,8 +190,6 @@ export const makeEvalHandler = (
       fs.writeFileSync(projectResultsFile + panel.id, json);
     }
 
-    console.log(res.value, shape(res.value), toString(shape(res.value)));
-
     return {
       stdout: res.stdout || '',
       preview: preview(res.value),
