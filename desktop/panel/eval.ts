@@ -3,7 +3,7 @@ import fs from 'fs';
 import jsesc from 'jsesc';
 import { EOL } from 'os';
 import { preview } from 'preview';
-import { shape, toString } from 'shape';
+import { shape } from 'shape';
 import { file as makeTmpFile } from 'tmp-promise';
 import { Cancelled } from '../../shared/errors';
 import log from '../../shared/log';
