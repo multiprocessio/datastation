@@ -20,10 +20,6 @@ jobs:
     # Needed so we can have ./build/desktop_runner.js ready for tests
     - run: yarn build-desktop
     - run: yarn test --runInBand --detectOpenHandles --forceExit --verbose
-    - uses: artiomtr/jest-coverage-report-action@v2.0-rc.1
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        threshold: 63
 
   e2e-linux:
     runs-on: ubuntu-latest

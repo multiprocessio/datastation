@@ -1,4 +1,12 @@
 module.exports = {
+  coverageThreshold: {
+    global: {
+      statements: 63,
+      branches: 52,
+      functions: 54,
+      lines: 58,
+    },
+  },
   transform: {
     '.[jt]sx?$': [
       '@sucrase/jest-plugin',
