@@ -3,7 +3,7 @@ import fs from 'fs';
 import jsesc from 'jsesc';
 import { EOL } from 'os';
 import { preview } from 'preview';
-import { shape } from 'shape';
+import { shape, toString } from 'shape';
 import { file as makeTmpFile } from 'tmp-promise';
 import { Cancelled } from '../../shared/errors';
 import log from '../../shared/log';
@@ -189,6 +189,8 @@ export const makeEvalHandler = (
       const projectResultsFile = getProjectResultsFile(projectId);
       fs.writeFileSync(projectResultsFile + panel.id, json);
     }
+
+    console.log(res.value, shape(res.value), toString(shape(res.value)));
 
     return {
       stdout: res.stdout || '',

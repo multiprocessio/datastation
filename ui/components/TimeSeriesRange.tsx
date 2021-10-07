@@ -1,6 +1,7 @@
 import subMinutes from 'date-fns/subMinutes';
 import * as React from 'react';
 import { Shape } from 'shape';
+import * as uuid from 'uuid';
 import {
   TimeSeriesFixedTimes,
   TimeSeriesRange as TimeSeriesRangeT,
@@ -112,6 +113,8 @@ export function TimeSeriesRange({
     },
   ];
 
+  const fieldName = 'range-type-' + uuid.v4();
+
   return (
     <React.Fragment>
       {!hideField && (
@@ -137,7 +140,7 @@ export function TimeSeriesRange({
           <Radio
             disabled={!range.field}
             vertical
-            name="range-type"
+            name={fieldName}
             value={range.rangeType}
             onChange={setTab}
             options={[
