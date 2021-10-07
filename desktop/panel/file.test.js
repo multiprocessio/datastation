@@ -1,4 +1,4 @@
-const fs = require('fs/promises');
+const fs = require('fs');
 const { file: makeTmpFile } = require('tmp-promise');
 const { evalFile } = require('./file');
 
@@ -10,7 +10,7 @@ test('file handler', async () => {
   const testDataJSON = JSON.stringify(testData);
 
   try {
-    await fs.writeFile(readFromTmp.path, testDataJSON);
+    fs.writeFileSync(readFromTmp.path, testDataJSON);
 
     const { contentType, value } = await evalFile(tmp.path, {
       type: 'file',

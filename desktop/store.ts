@@ -1,5 +1,4 @@
 import fs from 'fs';
-import fsPromises from 'fs/promises';
 import path from 'path';
 import log from '../shared/log';
 import { getPath } from '../shared/object';
@@ -8,7 +7,6 @@ import { doOnEncryptFields, Encrypt, ProjectState } from '../shared/state';
 import { DISK_ROOT, PROJECT_EXTENSION, SYNC_PERIOD } from './constants';
 import { ensureFile } from './fs';
 import {
-  Dispatch,
   GetProjectHandler,
   MakeProjectHandler,
   RPCHandler,
@@ -46,10 +44,6 @@ export function flushUnwritten() {
     delete buffers[fileName];
   });
 }
-// There doesn't seem to be a catchall signal
-['exit', 'SIGUSR1', 'SIGUSR2', 'uncaughtException', 'SIGINT'].map((sig) =>
-  process.on(sig, flushUnwritten)
-);
 
 export function getProjectResultsFile(projectId: string) {
   const fileName = path
@@ -58,14 +52,14 @@ export function getProjectResultsFile(projectId: string) {
   return path.join(DISK_ROOT, '.' + fileName + '.results');
 }
 
-async function checkAndEncrypt(e: Encrypt, existing?: Encrypt) {
+function checkAndEncrypt(e: Encrypt, existing?: Encrypt) {
   existing = existing || new Encrypt('');
   const new_ = new Encrypt('');
   if (e.value === null) {
     new_.value = existing.value;
     new_.encrypted = true;
   } else if (!e.encrypted) {
-    new_.value = await encrypt(e.value);
+    new_.value = encrypt(e.value);
     new_.encrypted = true;
   }
 
@@ -89,11 +83,11 @@ const getProjectHandler: GetProjectHandler = {
     _1: unknown,
     external: boolean
   ) => {
-    const fileName = await ensureProjectFile(projectId);
+    const fileName = ensureProjectFile(projectId);
     try {
-      const f = await fsPromises.readFile(fileName);
+      const f = fs.readFileSync(fileName);
       const ps = JSON.parse(f.toString()) as ProjectState;
-      return await ProjectState.fromJSON(ps, external);
+      return ProjectState.fromJSON(ps, external);
     } catch (e) {
       log.error(e);
       return null;
@@ -101,28 +95,35 @@ const getProjectHandler: GetProjectHandler = {
   },
 };
 
-const updateProjectHandler: UpdateProjectHandler = {
+export const updateProjectHandler: UpdateProjectHandler = {
   resource: 'updateProject',
-  handler: async (
-    projectId: string,
-    newState: ProjectState,
-    dispatch: Dispatch
-  ) => {
-    const fileName = await ensureProjectFile(projectId);
-    const f = await fsPromises.readFile(fileName);
-    const existingState = JSON.parse(f.toString());
-    await encryptProjectSecrets(newState, existingState);
-    return writeFileBuffered(fileName, JSON.stringify(newState));
+  handler: async (projectId: string, newState: ProjectState) => {
+    const fileName = ensureProjectFile(projectId);
+    let existingState = new ProjectState();
+    try {
+      // This is a race condition but not sure if it matters because
+      // it is only used to preserve the current project secret.
+      // Maybe secrets should be stored somewhere els.e
+      const f = fs.readFileSync(fileName);
+      existingState = JSON.parse(f.toString());
+    } catch (e) {
+      // Fine to default to blank project when reading for update
+      if (e.code !== 'ENOENT') {
+        throw e;
+      }
+    }
+    encryptProjectSecrets(newState, existingState);
+    writeFileBuffered(fileName, JSON.stringify(newState));
   },
 };
 
 const makeProjectHandler: MakeProjectHandler = {
   resource: 'makeProject',
   handler: async (_: string, { projectId }: MakeProjectRequest) => {
-    const fileName = await ensureProjectFile(projectId);
+    const fileName = ensureProjectFile(projectId);
     const newProject = new ProjectState();
     newProject.projectName = fileName;
-    return fsPromises.writeFile(fileName, JSON.stringify(newProject));
+    return fs.writeFileSync(fileName, JSON.stringify(newProject));
   },
 };
 

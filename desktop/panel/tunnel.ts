@@ -1,4 +1,4 @@
-import fs from 'fs/promises';
+import fs from 'fs';
 import path from 'path';
 import SSH2Promise from 'ssh2-promise';
 import SSH2Config from 'ssh2-promise/lib/sshConfig';
@@ -48,7 +48,7 @@ export async function getSSHConfig(
   if (server.type === 'private-key') {
     config.username = server.username;
     if (server.privateKeyFile) {
-      const buffer = await fs.readFile(resolvePath(server.privateKeyFile));
+      const buffer = fs.readFileSync(resolvePath(server.privateKeyFile));
       config.privateKey = buffer.toString();
     }
     if (server.passphrase_encrypt) {

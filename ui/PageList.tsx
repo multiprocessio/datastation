@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { EVAL_ERRORS } from '../shared/errors';
-import { wait } from '../shared/promise';
 import { PanelResultMeta, ProjectPage, ProjectState } from '../shared/state';
 import { Button } from './components/Button';
 import { Confirm } from './components/Confirm';
@@ -9,46 +8,12 @@ import { PanelPlayWarning } from './errors';
 import { PanelList } from './PanelList';
 import { PANEL_UI_DETAILS } from './panels';
 
-export function PageList({
-  state,
-  addPage,
-  deletePage,
-  updatePage,
-  setCurrentPage,
-  currentPage,
-}: {
-  state: ProjectState;
-  addPage: (page: ProjectPage) => void;
-  deletePage: (i: number) => void;
-  updatePage: (page: ProjectPage) => void;
-  setCurrentPage: (i: number) => void;
-  currentPage: number;
-}) {
-  const page: ProjectPage | null = state.pages[currentPage] || null;
-
-  if (!page) {
-    return (
-      <div className="section pages pages--empty">
-        <p>This is an empty project.</p>
-        <p>
-          <Button
-            type="primary"
-            onClick={() => {
-              addPage(new ProjectPage('Untitled Page'));
-              setCurrentPage(state.pages.length - 1);
-            }}
-          >
-            Add a page
-          </Button>{' '}
-          to get started!
-        </p>
-      </div>
-    );
-  }
-
-  const panelResults = page.panels.map((p) => p.resultMeta);
-
-  async function reevalPanel(panelId: string, reset?: boolean) {
+export function makeReevalPanel(
+  page: ProjectPage,
+  state: ProjectState,
+  updatePage: (page: ProjectPage) => void
+) {
+  return async function reevalPanel(panelId: string, reset?: boolean) {
     const { connectors, servers } = state;
     const start = new Date();
 
@@ -67,6 +32,7 @@ export function PageList({
     }
 
     try {
+      const panelResults = page.panels.map((p) => p.resultMeta);
       const indexIdMap: Array<string> = page.panels.map((p) => p.id);
       const panelUIDetails = PANEL_UI_DETAILS[panel.type];
       const { value, size, contentType, preview, stdout, shape } =
@@ -107,12 +73,52 @@ export function PageList({
       };
       updatePage(page);
     }
+  };
+}
+
+export function PageList({
+  state,
+  addPage,
+  deletePage,
+  updatePage,
+  setCurrentPage,
+  currentPage,
+}: {
+  state: ProjectState;
+  addPage: (page: ProjectPage) => void;
+  deletePage: (i: number) => void;
+  updatePage: (page: ProjectPage) => void;
+  setCurrentPage: (i: number) => void;
+  currentPage: number;
+}) {
+  const page: ProjectPage | null = state.pages[currentPage] || null;
+
+  if (!page) {
+    return (
+      <div className="section pages pages--empty">
+        <p>This is an empty project.</p>
+        <p>
+          <Button
+            type="primary"
+            onClick={() => {
+              addPage(new ProjectPage('Untitled Page'));
+              setCurrentPage(state.pages.length - 1);
+            }}
+          >
+            Add a page
+          </Button>{' '}
+          to get started!
+        </p>
+      </div>
+    );
   }
+
+  const panelResults = page.panels.map((p) => p.resultMeta);
+  const reevalPanel = makeReevalPanel(page, state, updatePage);
 
   async function evalAll() {
     for (let panel of page.panels) {
       await reevalPanel(panel.id);
-      await wait(1500);
     }
   }
 

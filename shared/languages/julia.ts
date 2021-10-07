@@ -6,7 +6,13 @@ function preamble(
   indexIdMap: Array<string>
 ) {
   return `
-import JSON
+try
+    import JSON
+catch e
+    import Pkg
+    Pkg.add("JSON")
+    import JSON
+end
 function DM_getPanel(i)
   panelId = JSON.parse("${JSON.stringify(indexIdMap).replaceAll(
     '"',

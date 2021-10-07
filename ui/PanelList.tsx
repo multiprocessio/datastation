@@ -48,10 +48,10 @@ export function PanelList({
       <div className="new-panel">
         <Button
           onClick={() => {
-            const panel = new ProgramPanelInfo(
-              `Untitled panel #${panelIndex + 1}`,
-              'python'
-            );
+            const panel = new ProgramPanelInfo({
+              name: `Untitled panel #${panelIndex + 1}`,
+              type: 'python',
+            });
             page.panels.splice(panelIndex + 1, 0, panel);
             updatePage(page);
           }}

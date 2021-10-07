@@ -1,7 +1,7 @@
 const { getProjectResultsFile } = require('../store');
 const { shape } = require('shape');
 const { preview } = require('preview');
-const fs = require('fs/promises');
+const fs = require('fs');
 const { file: makeTmpFile } = require('tmp-promise');
 const {
   ProjectState,
@@ -98,7 +98,7 @@ test('store and retrieve literal, specific columns', async () => {
     try {
       // Results file
       await tmp.cleanup();
-      await fs.unlink(getProjectResultsFile(tmp.path) + id);
+      fs.unlinkSync(getProjectResultsFile(tmp.path) + id);
     } catch (e) {
       console.error(e); // don't fail on failure to cleanup, means an earlier step is going to fail after finally block
     }

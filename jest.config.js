@@ -1,7 +1,19 @@
 module.exports = {
+  // Only on linux do all tests run
+  coverageThreshold:
+    process.platform === 'linux'
+      ? {
+          global: {
+            statements: 63,
+            branches: 52,
+            functions: 54,
+            lines: 58,
+          },
+        }
+      : undefined,
   transform: {
     '.[jt]sx?$': [
-      'esbuild-jest',
+      '@sucrase/jest-plugin',
       {
         sourcemap: true,
         loaders: {
@@ -10,6 +22,9 @@ module.exports = {
       },
     ],
   },
+  transformIgnorePatterns: [
+    'node_modules/(?!react-syntax-highlighter|refractor|node-fetch|fetch-blob)',
+  ],
   setupFiles: ['./shared/polyfill.ts', './testsetup.js'],
   testURL: 'http://localhost/',
   testEnvironment: 'node',

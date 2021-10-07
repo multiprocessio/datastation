@@ -64,7 +64,7 @@ export function Input({
   const [localValue, setLocalValue] = useDebouncedLocalState(
     value,
     onChange,
-    type !== 'checkbox',
+    type !== 'checkbox' && type !== 'radio',
     INPUT_SYNC_PERIOD,
     defaultValue
   );
@@ -72,10 +72,8 @@ export function Input({
   const input = (
     <React.Fragment>
       <input
+        value={localValue}
         type={type}
-        {...(type === 'checkbox'
-          ? { checked: value === 'true' }
-          : { value: localValue })}
         className={label ? '' : inputClass}
         onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
           setLocalValue(String(e.target.value))

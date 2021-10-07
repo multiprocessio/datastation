@@ -78,3 +78,11 @@ export function validate(
     }
   });
 }
+
+export const windowOrGlobal = (() => {
+  try {
+    return global;
+  } catch (e) {
+    return window;
+  }
+})();

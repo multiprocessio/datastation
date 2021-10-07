@@ -15,9 +15,11 @@ import { NONE, Select } from './Select';
 export function TimeSeriesRange({
   range,
   shape,
+  hideField,
   updateRange,
 }: {
   range: TimeSeriesRangeT;
+  hideField?: boolean;
   shape?: Shape;
   updateRange: (r: TimeSeriesRangeT) => void;
 }) {
@@ -112,22 +114,24 @@ export function TimeSeriesRange({
 
   return (
     <React.Fragment>
-      <div className="form-row">
-        <FieldPicker
-          label="Timestamp Field"
-          value={range.field}
-          shape={shape}
-          allowNone="None"
-          onChange={(value: string) => {
-            if (value === NONE) {
-              range.field = '';
-            } else {
-              range.field = value;
-            }
-            updateRange(range);
-          }}
-        />
-      </div>
+      {!hideField && (
+        <div className="form-row">
+          <FieldPicker
+            label="Timestamp Field"
+            value={range.field}
+            shape={shape}
+            allowNone="None"
+            onChange={(value: string) => {
+              if (value === NONE) {
+                range.field = '';
+              } else {
+                range.field = value;
+              }
+              updateRange(range);
+            }}
+          />
+        </div>
+      )}
       <div className="flex">
         <div className="form-row">
           <Radio

@@ -22,13 +22,14 @@ export async function evalPostgres(
   panelsToImport: Array<PanelToImport>
 ) {
   query = replaceQuestionWithDollarCount(query);
-  const client = new PostgresClient({
+  const config = {
     user: info.database.username,
     password: info.database.password_encrypt.value,
     database: info.database.database,
     host,
     port,
-  });
+  };
+  const client = new PostgresClient(config);
   try {
     await client.connect();
     const { rows } = await importAndRun(

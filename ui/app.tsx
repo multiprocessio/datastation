@@ -1,6 +1,5 @@
 import formatDistanceToNow from 'date-fns/formatDistanceToNow';
 import * as React from 'react';
-import * as ReactDOM from 'react-dom';
 import {
   APP_NAME,
   MODE,
@@ -8,6 +7,7 @@ import {
   SITE_ROOT,
   VERSION,
 } from '../shared/constants';
+import { LANGUAGES } from '../shared/languages';
 import log from '../shared/log';
 import '../shared/polyfill';
 import {
@@ -37,22 +37,13 @@ import { ServerList } from './ServerList';
 import { Sidebar } from './Sidebar';
 import { Updates } from './Updates';
 
-// Load pyodide on startup if in browser app
-window.addEventListener('load', function () {
-  if (MODE !== 'browser') {
-    return;
-  }
-
-  const pyodide = document.createElement('script');
-  pyodide.src = 'https://cdn.jsdelivr.net/pyodide/v0.18.0/full/pyodide.js';
-  document.body.appendChild(pyodide);
-
-  pyodide.onload = async function () {
-    (window as any).pyodide = await (window as any).loadPyodide({
-      indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.18.0/full/',
-    });
-  };
-});
+if (MODE === 'browser') {
+  Object.values(LANGUAGES).map((l) => {
+    if (l.inMemoryInit) {
+      l.inMemoryInit();
+    }
+  });
+}
 
 function getQueryParameter(param: String) {
   const query = window.location.search.substring(1);
@@ -139,7 +130,7 @@ function useProjectState(
 
 const store = makeStore(MODE);
 
-function App() {
+export function App() {
   const requestedProjectId = getQueryParameter('project');
   const [projectId, setProjectId] = React.useState(
     requestedProjectId ||
@@ -276,6 +267,14 @@ function App() {
     window.close();
   }
 
+  // This allows us to render the sidebar in tests where we
+  // prepopulate connectors and servers
+  const hasSidebar = Boolean(
+    MODE_FEATURES.connectors ||
+      state.connectors?.length ||
+      state.servers?.length
+  );
+
   return (
     <ProjectContext.Provider value={state}>
       <div className={`app app--${MODE}`}>
@@ -329,7 +328,7 @@ function App() {
             height: `calc(100% - ${headerHeight}px)`,
           }}
         >
-          {projectId && MODE_FEATURES.connectors && (
+          {projectId && hasSidebar && (
             <Sidebar>
               <ConnectorList
                 state={state}
@@ -414,15 +413,4 @@ function App() {
       </div>
     </ProjectContext.Provider>
   );
-}
-
-// SOURCE: https://stackoverflow.com/a/7995898/1507139
-const isMobile = navigator.userAgent.match(
-  /(iPad)|(iPhone)|(iPod)|(android)|(webOS)/i
-);
-if (!isMobile) {
-  ReactDOM.render(<App />, document.getElementById('root'));
-} else {
-  document.getElementById('root').innerHTML =
-    'Please use a desktop web browser to view this app.';
 }

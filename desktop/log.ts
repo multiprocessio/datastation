@@ -1,4 +1,4 @@
-import fs from 'fs/promises';
+import fs from 'fs';
 import { EOL } from 'os';
 import util from 'util';
 import { DEBUG } from '../shared/constants';
@@ -6,13 +6,9 @@ import { logger } from '../shared/log';
 import { LOG_FILE } from './constants';
 import { ensureFile } from './fs';
 
-export async function configureLogger() {
-  await ensureFile(LOG_FILE);
-  let logFd: fs.FileHandle;
-  async function open() {
-    logFd = await fs.open(LOG_FILE, 'a');
-  }
-  await open();
+export function configureLogger() {
+  ensureFile(LOG_FILE);
+  const logFd = fs.openSync(LOG_FILE, 'a');
 
   logger.INFO = (...args: any[]) => {
     try {
@@ -20,7 +16,7 @@ export async function configureLogger() {
       if (DEBUG) {
         console.log(msg);
       }
-      logFd.appendFile(msg + EOL);
+      fs.appendFileSync(logFd, msg + EOL);
     } catch (e) {
       console.error(e);
       open();
@@ -34,7 +30,7 @@ export async function configureLogger() {
       if (DEBUG) {
         console.log(msg);
       }
-      logFd.appendFile(msg + EOL);
+      fs.appendFileSync(logFd, msg + EOL);
     } catch (e) {
       console.error(e);
       open();

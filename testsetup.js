@@ -6,7 +6,7 @@ const Adapter = require('@wojtekmaj/enzyme-adapter-react-17');
 configure({ adapter: new Adapter() });
 
 const jsdom = new JSDOM('<!doctype html><html><body></body></html>', {
-  url: 'http://localhost/',
+  url: 'http://localhost/?project=test',
 });
 const { window } = jsdom;
 
@@ -29,3 +29,14 @@ global.cancelAnimationFrame = function (id) {
   clearTimeout(id);
 };
 copyProps(window, global);
+
+window.fetch = () => {
+  return Promise.resolve({
+    text() {
+      return Promise.resolve(null);
+    },
+    json() {
+      return Promise.resolve(null);
+    },
+  });
+};

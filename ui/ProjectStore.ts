@@ -66,7 +66,7 @@ export class ProjectStore {
   }
 }
 
-class LocalStorageStore extends ProjectStore {
+export class LocalStorageStore extends ProjectStore {
   makeKey(projectId: string) {
     return `projectState:${projectId}`;
   }

@@ -1,9 +1,10 @@
-import fs from 'fs/promises';
+import { execFile } from 'child_process';
+import fs from 'fs';
 import jsesc from 'jsesc';
+import { EOL } from 'os';
 import { preview } from 'preview';
 import { shape } from 'shape';
 import { file as makeTmpFile } from 'tmp-promise';
-import { Worker } from 'worker_threads';
 import { Cancelled } from '../../shared/errors';
 import log from '../../shared/log';
 import { PanelBody } from '../../shared/rpc';
@@ -43,14 +44,21 @@ const EVAL_HANDLERS: { [k in PanelInfoType]: EvalHandler } = {
   literal: evalLiteral,
 };
 
-const runningProcesses: Record<string, Record<string, Worker>> = {};
+const runningProcesses: Record<string, Set<number>> = {};
 
-async function killAllByPanelId(panelId: string) {
+function killAllByPanelId(panelId: string) {
   const workers = runningProcesses[panelId];
   if (workers) {
-    await Promise.all(
-      Object.values(workers).map((worker) => worker.terminate())
-    );
+    Array.from(workers).map((pid) => {
+      try {
+        process.kill(pid, 'SIGINT');
+      } catch (e) {
+        // If process doesn't exist, that's ok
+        if (!e.message.includes('ESRCH')) {
+          throw e;
+        }
+      }
+    });
   }
 }
 
@@ -60,59 +68,67 @@ export async function evalInSubprocess(
   panelId: string
 ) {
   const tmp = await makeTmpFile();
-  let threadId = 0;
+  let pid = 0;
 
   try {
     // This means only one user can run a panel at a time
     killAllByPanelId(panelId);
+
+    const child = execFile(process.argv[0], [
+      subprocess,
+      DSPROJ_FLAG,
+      projectName,
+      PANEL_FLAG,
+      panelId,
+      PANEL_META_FLAG,
+      tmp.path,
+    ]);
+
+    pid = child.pid;
     if (!runningProcesses[panelId]) {
-      runningProcesses[panelId] = {};
+      runningProcesses[panelId] = new Set();
     }
-
-    const child = new Worker(subprocess, {
-      argv: [
-        DSPROJ_FLAG,
-        projectName,
-        PANEL_FLAG,
-        panelId,
-        PANEL_META_FLAG,
-        tmp.path,
-      ],
-    });
-
-    threadId = child.threadId;
-    runningProcesses[panelId][threadId] = child;
+    runningProcesses[panelId].add(pid);
 
     let stderr = '';
     child.stderr.on('data', (data) => {
       stderr += data;
     });
 
+    child.stdout.on('data', (data) => {
+      process.stdout.write(data);
+    });
+
     await new Promise<void>((resolve, reject) => {
       try {
-        child.on('error', reject);
         child.on('exit', (code) => {
           if (code === 0) {
+            if (stderr) {
+              process.stderr.write(stderr + EOL);
+            }
             resolve();
           }
 
-          if (code === 1) {
+          if (code === 1 || code === null) {
             reject(new Cancelled());
           }
 
-          reject('Exited with ' + code + '\n' + stderr);
+          reject(new Error(stderr));
         });
       } catch (e) {
-        reject(e + '\n' + stderr);
+        if (stderr) {
+          process.stderr.write(stderr + EOL);
+        }
+        reject(e);
       }
     });
 
-    const resultMeta = await fs.readFile(tmp.path);
+    const resultMeta = fs.readFileSync(tmp.path);
     return JSON.parse(resultMeta.toString());
   } finally {
     try {
-      if (threadId) {
-        delete runningProcesses[panelId][threadId];
+      if (pid) {
+        runningProcesses[panelId].delete(pid);
       }
 
       tmp.cleanup();
@@ -171,7 +187,7 @@ export const makeEvalHandler = (
 
     if (!res.skipWrite) {
       const projectResultsFile = getProjectResultsFile(projectId);
-      await fs.writeFile(projectResultsFile + panel.id, json);
+      fs.writeFileSync(projectResultsFile + panel.id, json);
     }
 
     return {
@@ -187,7 +203,7 @@ export const makeEvalHandler = (
 
 export const killProcessHandler: RPCHandler<PanelBody, void> = {
   resource: 'killProcess',
-  handler: function (_: string, body: PanelBody) {
-    return killAllByPanelId(body.panelId);
+  handler: async function (_: string, body: PanelBody) {
+    killAllByPanelId(body.panelId);
   },
 };

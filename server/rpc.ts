@@ -20,7 +20,6 @@ export async function handleRPC(
       throw new Error(`No RPC handler for resource: ${payload.resource}`);
     }
 
-    // TODO: run these in an external process pool
     return await handler.handler(
       payload.projectId,
       payload.body,

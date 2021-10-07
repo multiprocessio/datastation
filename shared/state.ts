@@ -113,6 +113,12 @@ export class ConnectorInfo {
 
   static fromJSON(raw: any): ConnectorInfo {
     raw = raw || {};
+    // Migrate panel name from sql to database
+    if (raw.type === 'sql') {
+      raw.type = 'database';
+      raw.database = raw.sql;
+      delete raw.sql;
+    }
     const ci = mergeDeep(new ConnectorInfo(), raw);
 
     switch (raw.type) {
@@ -244,25 +250,41 @@ export class PanelInfo {
 
   static fromJSON(raw: any): PanelInfo {
     raw = raw || {};
+
+    // Migrate panel name from sql to database
+    if (raw.type === 'sql') {
+      raw.type = 'database';
+      raw.database = raw.sql;
+      delete raw.sql;
+    }
+
     let pit: PanelInfo = mergeDeep(new PanelInfo(raw.type || 'literal'), raw);
 
     switch (pit.type) {
       case 'table':
         pit = mergeDeep(new TablePanelInfo(), pit);
+        break;
       case 'http':
         pit = mergeDeep(new HTTPPanelInfo(), pit);
+        break;
       case 'graph':
         pit = mergeDeep(new GraphPanelInfo(), pit);
+        break;
       case 'program':
         pit = mergeDeep(new ProgramPanelInfo(), pit);
+        break;
       case 'literal':
         pit = mergeDeep(new LiteralPanelInfo(), pit);
+        break;
       case 'database':
         pit = mergeDeep(new DatabasePanelInfo(), pit);
+        break;
       case 'file':
         pit = mergeDeep(new FilePanelInfo(), pit);
+        break;
       case 'filagg':
         pit = mergeDeep(new FilterAggregatePanelInfo(), pit);
+        break;
     }
 
     pit.resultMeta = PanelResultMeta.fromJSON(raw.resultMeta);
@@ -276,13 +298,15 @@ export class ProgramPanelInfo extends PanelInfo {
     range?: TimeSeriesRange;
   };
 
-  constructor(
-    name?: string,
-    type?: SupportedLanguages,
-    content?: string,
-    range?: TimeSeriesRange
-  ) {
-    super('program', name, content);
+  constructor({
+    name,
+    type,
+    content,
+    range,
+  }: Partial<
+    ProgramPanelInfo['program'] & { content: string; name: string }
+  > = {}) {
+    super('program', name || '', content || '');
     this.program = {
       type: type || 'python',
       range: range || {
@@ -522,12 +546,14 @@ export class LiteralPanelInfo extends PanelInfo {
     contentTypeInfo: ContentTypeInfo;
   };
 
-  constructor(
-    name?: string,
-    content?: string,
-    contentTypeInfo?: ContentTypeInfo
-  ) {
-    super('literal', name, content);
+  constructor({
+    name,
+    content,
+    contentTypeInfo,
+  }: Partial<
+    LiteralPanelInfo['literal'] & { content: string; name: string }
+  > = {}) {
+    super('literal', name || '', content || '');
     this.literal = {
       contentTypeInfo: contentTypeInfo || new ContentTypeInfo(),
     };
@@ -555,10 +581,10 @@ export class ProjectPage {
   }
 }
 
-export async function doOnMatchingFields<T>(
+export function doOnMatchingFields<T>(
   ps: any,
   check: (key: string) => boolean,
-  cb: (f: T, path: string) => Promise<T>
+  cb: (f: T, path: string) => T
 ) {
   const stack: Array<[any, Array<string>]> = [[ps, []]];
 
@@ -573,14 +599,14 @@ export async function doOnMatchingFields<T>(
 
     const p = path.filter(Boolean).join('.');
     if (check(p)) {
-      setPath(ps, p, await cb(top, p));
+      setPath(ps, p, cb(top, p));
     }
   }
 }
 
 export function doOnEncryptFields(
   ps: any,
-  cb: (f: Encrypt, path: string) => Promise<Encrypt>
+  cb: (f: Encrypt, path: string) => Encrypt
 ) {
   return doOnMatchingFields(ps, (f) => f.endsWith('_encrypt'), cb);
 }
@@ -611,7 +637,7 @@ export class ProjectState {
     this.id = uuid.v4();
   }
 
-  static async fromJSON(raw: any, external = true): Promise<ProjectState> {
+  static fromJSON(raw: any, external = true): ProjectState {
     raw = raw || {};
     const ps = new ProjectState();
     ps.projectName = raw.projectName || '';
@@ -622,22 +648,22 @@ export class ProjectState {
     ps.originalVersion = raw.originalVersion || VERSION;
     ps.lastVersion = raw.lastVersion || VERSION;
     if (external) {
-      await doOnEncryptFields(ps, (f, p) => {
+      doOnEncryptFields(ps, (f, p) => {
         const new_ = new Encrypt(null);
         new_.encrypted = true;
-        return Promise.resolve(new_);
+        return new_;
       });
     }
-    await doOnMatchingFields<Date>(
+    doOnMatchingFields<Date>(
       ps,
       (path) => path.endsWith('_date'),
       (d) => {
         const nd = new Date(d);
         if (String(nd) === 'Invalid Date') {
-          return Promise.resolve(new Date());
+          return new Date();
         }
 
-        return Promise.resolve(nd);
+        return nd;
       }
     );
     return ps;
@@ -648,16 +674,16 @@ export const DEFAULT_PROJECT: ProjectState = new ProjectState(
   'Example project',
   [
     new ProjectPage('CSV Discovery Example', [
-      new LiteralPanelInfo(
-        'Raw CSV Text',
-        'name,age\nMorgan,12\nJames,17',
-        new ContentTypeInfo('text/csv')
-      ),
-      new ProgramPanelInfo(
-        'Transform with SQL',
-        'sql',
-        'SELECT name, age+5 AS age FROM DM_getPanel(0);'
-      ),
+      new LiteralPanelInfo({
+        name: 'Raw CSV Text',
+        content: 'name,age\nMorgan,12\nJames,17',
+        contentTypeInfo: new ContentTypeInfo('text/csv'),
+      }),
+      new ProgramPanelInfo({
+        name: 'Transform with SQL',
+        type: 'sql',
+        content: 'SELECT name, age+5 AS age FROM DM_getPanel(0);',
+      }),
       (() => {
         const panel = new GraphPanelInfo('Display');
         panel.graph.ys = [{ field: 'age', label: 'Age' }];

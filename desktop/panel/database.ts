@@ -1,3 +1,4 @@
+import log from '../../shared/log';
 import { sqlRangeQuery } from '../../shared/sql';
 import {
   DatabaseConnectorInfo,
@@ -7,6 +8,7 @@ import {
   PanelInfo,
   ProjectState,
 } from '../../shared/state';
+import { fullHttpURL } from '../../shared/url';
 import { Dispatch } from '../rpc';
 import { decrypt } from '../secret';
 import { evalClickHouse } from './databases/clickhouse';
@@ -24,7 +26,7 @@ import { transformDM_getPanelCalls } from './databases/sqlutil';
 import { tunnel } from './tunnel';
 import { EvalHandlerExtra, EvalHandlerResponse, guardPanel } from './types';
 
-export async function getAndDecryptConnector(
+export function getAndDecryptConnector(
   project: ProjectState,
   connectorId: string
 ) {
@@ -36,13 +38,13 @@ export async function getAndDecryptConnector(
   }
   const connector = connectors[0] as DatabaseConnectorInfo;
 
-  await doOnEncryptFields(connector, async (f: Encrypt) => {
+  doOnEncryptFields(connector, (f: Encrypt) => {
     if (!f.value) {
       f.value = undefined;
       return f;
     }
 
-    f.value = await decrypt(f.value);
+    f.value = decrypt(f.value);
     return f;
   });
 
@@ -86,10 +88,7 @@ export async function evalDatabase(
   const { content } = panel;
   const info = guardPanel<DatabasePanelInfo>(panel, 'database');
 
-  const connector = await getAndDecryptConnector(
-    project,
-    info.database.connectorId
-  );
+  const connector = getAndDecryptConnector(project, info.database.connectorId);
 
   const serverId = connector.serverId || info.serverId;
 
@@ -99,13 +98,24 @@ export async function evalDatabase(
     connector.database.type === 'prometheus' ||
     connector.database.type === 'influx'
   ) {
-    const { host, port } = portHostFromAddress(info, connector);
+    const defaultPort = DEFAULT_PORT[connector.database.type];
+    // This is going to get annoying if one of these dbs ever has a non-HTTP protocol.
+    const { protocol, hostname, port } = new URL(
+      fullHttpURL(connector.database.address, undefined, defaultPort)
+    );
+    const host = protocol + '//' + hostname;
+    log.info(
+      `Connecting ${serverId ? 'through tunnel ' : ''}to ${host}:${port} for ${
+        connector.database.type
+      } query`
+    );
     return await tunnel(
       project,
       serverId,
       host,
-      port,
+      +port,
       (host: string, port: number) => {
+        host = host || 'localhost';
         if (connector.database.type === 'elasticsearch') {
           return evalElasticSearch(
             content,

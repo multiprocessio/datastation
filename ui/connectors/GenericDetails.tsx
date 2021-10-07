@@ -32,3 +32,7 @@ export function GenericDetails(props: GenericDetailsProps) {
     </React.Fragment>
   );
 }
+
+export const GenericNoDatabaseDetails = (props: GenericDetailsProps) => (
+  <GenericDetails {...props} skipDatabase />
+);
