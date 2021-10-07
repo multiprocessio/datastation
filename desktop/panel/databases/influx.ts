@@ -27,7 +27,7 @@ export async function evalInflux(
   const url = fullHttpURL(host, port);
   const endpoint = `${url}/query?${queryParameters({
     db: database,
-    query: rangeQuery,
+    q: rangeQuery,
     u: username,
     p: password_encrypt.value,
   })}`;

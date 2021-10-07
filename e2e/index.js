@@ -51,8 +51,8 @@ async function run() {
     .forBrowser('chrome')
     .build();
 
+  let reached = false;
   try {
-    let reached = false;
     await driver.wait(async () => {
       const title = await driver.getTitle();
       assert.equal(title, 'DataStation Community Edition');
