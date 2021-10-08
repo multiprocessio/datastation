@@ -10,6 +10,7 @@ export class PanelResult {
   preview: string;
   stdout: string;
   shape: Shape;
+  arrayCount: null | number;
   size: number;
   contentType: string;
   elapsed?: number;

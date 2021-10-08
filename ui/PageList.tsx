@@ -35,7 +35,7 @@ export function makeReevalPanel(
       const panelResults = page.panels.map((p) => p.resultMeta);
       const indexIdMap: Array<string> = page.panels.map((p) => p.id);
       const panelUIDetails = PANEL_UI_DETAILS[panel.type];
-      const { value, size, contentType, preview, stdout, shape } =
+      const { value, size, contentType, preview, stdout, shape, arrayCount } =
         await panelUIDetails.eval(
           panel,
           panelResults,
@@ -50,6 +50,7 @@ export function makeReevalPanel(
         preview,
         stdout,
         shape,
+        arrayCount,
         contentType,
         size,
         loading: false,
@@ -69,6 +70,7 @@ export function makeReevalPanel(
         preview: '',
         contentType: 'unknown',
         size: 0,
+        arrayCount: null,
         shape: { kind: 'unknown' },
       };
       updatePage(page);

@@ -105,6 +105,8 @@ function PreviewResults({
       metadata: JSON.stringify(
         {
           Size: humanSize(results.size),
+          'Number of Elements':
+            results.arrayCount === null ? 'Not an array' : results.arrayCount,
           'Inferred Content-Type': results.contentType,
         },
         null,

@@ -54,6 +54,8 @@ export async function evalInflux(
         for (let i = 0; i < series.columns.length; i++) {
           r[series.columns[i]] = row[i];
         }
+
+        rows.push(r);
       }
     }
   }

@@ -194,12 +194,15 @@ export const makeEvalHandler = (
       fs.writeFileSync(projectResultsFile + panel.id, json);
     }
 
+    const s = shape(res.value);
+
     return {
       stdout: res.stdout || '',
       preview: preview(res.value),
-      shape: shape(res.value),
+      shape: s,
       value: res.returnValue ? res.value : null,
       size: json.length,
+      arrayCount: s.kind === 'array' ? (res.value || []).length : null,
       contentType: res.contentType || 'application/json',
     };
   },

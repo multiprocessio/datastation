@@ -44,6 +44,10 @@ export function fullHttpURL(
 export function queryParameters(d: Record<string, string | undefined>) {
   let q = '';
   for (const [key, value] of Object.entries(d)) {
+    if (value === undefined) {
+      continue;
+    }
+
     if (q) {
       q += '&';
     }

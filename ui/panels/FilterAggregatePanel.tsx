@@ -98,11 +98,13 @@ export async function evalFilterAggregatePanel(
 
     const language = LANGUAGES.sql;
     const res = await language.inMemoryEval(query, panelResults);
+    const s = shape(res.value);
     return {
       ...res,
       size: res.value ? JSON.stringify(res.value).length : 0,
+      arrayCount: s.kind === 'array' ? (res.value || []).length : null,
       contentType: 'application/json',
-      shape: shape(res.value),
+      shape: s,
     };
   }
 

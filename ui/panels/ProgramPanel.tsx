@@ -35,11 +35,13 @@ export async function evalProgramPanel(
   }
 
   const res = await language.inMemoryEval(content, panelResults);
+  const s = shape(res.value);
   return {
     ...res,
     size: res.value ? JSON.stringify(res.value).length : 0,
+    shape: s,
+    arrayCount: s.kind === 'array' ? (res.value || []).length : null,
     contentType: 'application/json',
-    shape: shape(res.value),
   };
 }
 

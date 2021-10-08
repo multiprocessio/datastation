@@ -22,12 +22,14 @@ export async function evalLiteralPanel(panel: LiteralPanelInfo) {
     await panelRPC('eval', panel.id);
   }
 
+  const s = shape(value);
   return {
     value,
     preview: preview(value),
-    shape: shape(value),
+    shape: s,
     stdout: '',
     contentType,
+    arrayCount: s.kind === 'array' ? (value || []).length : null,
     size: panel.content.length,
   };
 }

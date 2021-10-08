@@ -139,7 +139,11 @@ export function sqlRangeQuery(
   range: TimeSeriesRange | null,
   type: DatabaseConnectorInfoType
 ) {
-  if (!range || !range.field) {
+  if (
+    !range ||
+    !range.field ||
+    (range.rangeType === 'relative' && range.relative === 'all-time')
+  ) {
     return query;
   }
 
