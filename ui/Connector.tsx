@@ -17,7 +17,7 @@ export function Connector({
   const [expanded, setExpanded] = React.useState(false);
 
   return (
-    <div className="connector">
+    <div className={`connector ${expanded ? 'connector--expanded' : ''}`}>
       <div className="connector-header vertical-align-center">
         <span title="Delete data source">
           <Confirm
@@ -33,24 +33,29 @@ export function Connector({
             )}
           />
         </span>
-        <span className="connector-type">{connector.type}</span>
-        <span className="connector-name">
-          {expanded ? (
-            <Input
-              className="connector-name"
-              onChange={(value: string) => {
-                connector.name = value;
-                updateConnector(connector);
-              }}
-              value={connector.name}
-            />
-          ) : (
-            connector.name
-          )}
-        </span>
-        <Button icon onClick={() => setExpanded(!expanded)}>
-          {expanded ? 'unfold_less' : 'unfold_more'}
-        </Button>
+        {expanded ? (
+          <Input
+            className="connector-name"
+            onChange={(value: string) => {
+              connector.name = value;
+              updateConnector(connector);
+            }}
+            value={connector.name}
+          />
+        ) : (
+          <span className="connector-name">{connector.name}</span>
+        )}
+        {!expanded && (
+          <Button
+            type="outline"
+            icon
+            className="flex-right"
+            onClick={() => setExpanded(true)}
+            title="Edit"
+          >
+            edit_outline
+          </Button>
+        )}
       </div>
       {expanded && (
         <React.Fragment>
@@ -60,6 +65,11 @@ export function Connector({
               updateConnector={updateConnector}
             />
           )}
+          <div className="text-center">
+            <Button type="outline" onClick={() => setExpanded(false)}>
+              Close
+            </Button>
+          </div>
         </React.Fragment>
       )}
     </div>

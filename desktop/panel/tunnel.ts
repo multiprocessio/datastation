@@ -2,7 +2,6 @@ import fs from 'fs';
 import path from 'path';
 import SSH2Promise from 'ssh2-promise';
 import SSH2Config from 'ssh2-promise/lib/sshConfig';
-import { DEBUG } from '../../shared/constants';
 import log from '../../shared/log';
 import { ProjectState } from '../../shared/state';
 import { HOME } from '../constants';
@@ -38,7 +37,6 @@ export async function getSSHConfig(
     retries: 2,
     retry_factor: 2,
     retry_minTimeout: 2000,
-    debug: DEBUG ? log.info : null,
   };
 
   if (server.type === 'ssh-agent') {
@@ -71,6 +69,10 @@ export async function tunnel<T>(
   destPort: number,
   callback: (host: string, port: number) => Promise<T>
 ) {
+  if (destAddress.includes('://')) {
+    throw new Error('Tunnel address must not contain protocol.');
+  }
+
   if (!serverId) {
     return callback(destAddress, destPort);
   }
@@ -83,8 +85,16 @@ export async function tunnel<T>(
     remotePort: destPort,
   });
   try {
+    log.info(
+      `Connected to tunnel, proxying ${destAddress}:${destPort} via server to localhost:${tunnel.localPort}`
+    );
     return await callback(tunnel.localAddress, tunnel.localPort);
+  } catch (e) {
+    console.log('THERE WAS AN ERROR INSIDE THE TUNNEL!');
+    console.error(e);
+    throw e;
   } finally {
+    log.info('Closing tunnel');
     ssh.close();
   }
 }

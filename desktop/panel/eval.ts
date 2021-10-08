@@ -92,6 +92,10 @@ export async function evalInSubprocess(
 
     let stderr = '';
     child.stderr.on('data', (data) => {
+      // Can't find any way to suppress this error appearing in Node processes.
+      if (data.includes('stream/web is an experimental feature.')) {
+        return;
+      }
       stderr += data;
     });
 

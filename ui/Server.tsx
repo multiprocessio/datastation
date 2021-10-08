@@ -55,23 +55,29 @@ export function Server({
             )}
           />
         </span>
-        <span>
-          {expanded ? (
-            <Input
-              className="server-name"
-              onChange={(value: string) => {
-                server.name = value;
-                updateServer(server);
-              }}
-              value={server.name}
-            />
-          ) : (
-            server.name
-          )}
-        </span>
-        <Button icon onClick={() => setExpanded(!expanded)}>
-          {expanded ? 'unfold_less' : 'unfold_more'}
-        </Button>
+        {expanded ? (
+          <Input
+            className="server-name"
+            onChange={(value: string) => {
+              server.name = value;
+              updateServer(server);
+            }}
+            value={server.name}
+          />
+        ) : (
+          <span className="server-name">{server.name}</span>
+        )}
+        {!expanded && (
+          <Button
+            type="outline"
+            icon
+            className="flex-right"
+            onClick={() => setExpanded(true)}
+            title="Edit"
+          >
+            edit_outline
+          </Button>
+        )}
       </div>
       {expanded && (
         <React.Fragment>
@@ -164,6 +170,13 @@ export function Server({
               />
             </div>
           ) : null}
+          {expanded && (
+            <div className="text-center">
+              <Button type="outline" onClick={() => setExpanded(false)}>
+                Close
+              </Button>
+            </div>
+          )}
         </React.Fragment>
       )}
     </div>

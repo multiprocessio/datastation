@@ -100,19 +100,18 @@ export async function evalDatabase(
   ) {
     const defaultPort = DEFAULT_PORT[connector.database.type];
     // This is going to get annoying if one of these dbs ever has a non-HTTP protocol.
-    const { protocol, hostname, port } = new URL(
+    const { hostname, port } = new URL(
       fullHttpURL(connector.database.address, undefined, defaultPort)
     );
-    const host = protocol + '//' + hostname;
     log.info(
-      `Connecting ${serverId ? 'through tunnel ' : ''}to ${host}:${port} for ${
-        connector.database.type
-      } query`
+      `Connecting ${
+        serverId ? 'through tunnel ' : ''
+      }to ${hostname}:${port} for ${connector.database.type} query`
     );
     return await tunnel(
       project,
       serverId,
-      host,
+      hostname,
       +port,
       (host: string, port: number) => {
         host = host || 'localhost';

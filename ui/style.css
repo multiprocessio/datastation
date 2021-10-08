@@ -167,6 +167,12 @@ label.input input[type='file'] {
   border-radius: 3px;
 }
 
+.material-icons,
+.material-icons-outlined {
+  width: 24px;
+  height: 24px;
+}
+
 .button:not(.material-icons-outlined):not(.material-icons):not(.button--primary) {
   box-shadow: 0px 1px 0px 0px #ccc;
 }
@@ -276,6 +282,7 @@ header > div {
   overflow-y: auto;
   display: flex;
   flex-direction: column;
+  background: #fbfbfb;
 }
 
 .sidebar--collapsed {
@@ -289,6 +296,9 @@ header > div {
 .server,
 .connector {
   margin-bottom: 15px;
+  padding: 10px;
+  background: white;
+  border: 1px solid #ccc;
 }
 
 .server-name,
@@ -342,6 +352,10 @@ header > div {
   margin-bottom: 15px;
 }
 
+.connector:focus-within,
+.connector:focus,
+.server:focus-within,
+.server:focus,
 .panel:focus-within,
 .panel:focus {
   border-color: #9f04ff;

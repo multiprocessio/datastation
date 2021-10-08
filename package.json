@@ -48,6 +48,7 @@
     "react-syntax-highlighter": "^15.4.4",
     "shape": "https://github.com/multiprocessio/shape#0.2.1",
     "snowflake-sdk": "^1.6.3",
+    "source-map-support": "^0.5.20",
     "sqlite": "^4.0.23",
     "sqlite3": "^5.0.2",
     "ssh2-promise": "^1.0.2",
