@@ -254,7 +254,7 @@ export function App() {
   }
 
   function updateServer(id: string, dc: ServerInfo) {
-    const index = (state.connectors || []).findIndex((c) => c.id === id);
+    const index = (state.servers || []).findIndex((c) => c.id === id);
     if (index === -1) {
       state.servers.push(dc);
       return;
@@ -269,7 +269,7 @@ export function App() {
   }
 
   function deleteServer(id: string) {
-    const at = (state.connectors || []).findIndex((c) => c.id === id);
+    const at = (state.servers || []).findIndex((c) => c.id === id);
     if (at === -1) {
       return;
     }

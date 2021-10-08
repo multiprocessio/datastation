@@ -3,14 +3,12 @@ import { sqlRangeQuery } from '../../shared/sql';
 import {
   DatabaseConnectorInfo,
   DatabasePanelInfo,
-  doOnEncryptFields,
-  Encrypt,
   PanelInfo,
   ProjectState,
 } from '../../shared/state';
 import { fullHttpURL } from '../../shared/url';
 import { Dispatch } from '../rpc';
-import { decrypt } from '../secret';
+import { decryptFields } from '../secret';
 import { evalClickHouse } from './databases/clickhouse';
 import { evalElasticSearch } from './databases/elasticsearch';
 import { evalInflux } from './databases/influx';
@@ -38,15 +36,7 @@ export function getAndDecryptConnector(
   }
   const connector = connectors[0] as DatabaseConnectorInfo;
 
-  doOnEncryptFields(connector, (f: Encrypt) => {
-    if (!f.value) {
-      f.value = undefined;
-      return f;
-    }
-
-    f.value = decrypt(f.value);
-    return f;
-  });
+  decryptFields(connector);
 
   return connector;
 }

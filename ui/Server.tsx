@@ -49,7 +49,7 @@ export function Server({
             action="Delete"
             className="page-delete"
             render={(confirm: () => void) => (
-              <Button icon onClick={confirm}>
+              <Button icon onClick={confirm} type="outline">
                 delete
               </Button>
             )}

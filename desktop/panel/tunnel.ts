@@ -5,7 +5,7 @@ import SSH2Config from 'ssh2-promise/lib/sshConfig';
 import log from '../../shared/log';
 import { ProjectState } from '../../shared/state';
 import { HOME } from '../constants';
-import { decrypt } from '../secret';
+import { decryptFields } from '../secret';
 
 interface SSHConfig extends SSH2Config {
   retries: number;
@@ -29,6 +29,7 @@ export async function getSSHConfig(
     throw new Error('No such server.');
   }
   const server = servers[0];
+  decryptFields(server);
 
   const config: SSHConfig = {
     host: server.address,
@@ -48,15 +49,13 @@ export async function getSSHConfig(
     if (server.privateKeyFile) {
       const buffer = fs.readFileSync(resolvePath(server.privateKeyFile));
       config.privateKey = buffer.toString();
-    }
-    if (server.passphrase_encrypt) {
-      config.passphrase = await decrypt(server.passphrase_encrypt.value);
+      config.passphrase = server.passphrase_encrypt.value;
     }
   }
 
   if (server.type === 'password') {
     config.username = server.username;
-    config.password = await decrypt(server.password_encrypt.value);
+    config.password = server.password_encrypt.value;
   }
 
   return config;

@@ -293,6 +293,11 @@ header > div {
   flex: 1;
 }
 
+.connector-group {
+  display: inline-block;
+  padding-bottom: 5px;
+}
+
 .server,
 .connector {
   margin-bottom: 15px;

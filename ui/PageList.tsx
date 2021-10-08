@@ -22,12 +22,12 @@ export function makeReevalPanel(
       return;
     }
     let resultMeta = panel.resultMeta || new PanelResultMeta();
-    resultMeta.lastRun = null;
     resultMeta.loading = !reset;
 
     panel.resultMeta = resultMeta;
     updatePage(page);
     if (reset) {
+      resultMeta.lastRun = null;
       return;
     }
 
