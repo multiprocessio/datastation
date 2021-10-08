@@ -36,8 +36,8 @@ export function ConnectorList({
       <h2 className="title">Data Sources</h2>
       {groupedConnectors.map((v) => (
         <React.Fragment key={v.name}>
-          <small className="connector-group">{v.name}</small>
-          {v.connectors.map((dc: ConnectorInfo, i: number) => (
+          <small className="connector-group text-muted">{v.name}</small>
+          {v.connectors.map((dc: ConnectorInfo) => (
             <Connector
               key={dc.id}
               connector={dc}

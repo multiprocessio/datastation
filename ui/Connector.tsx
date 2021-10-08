@@ -19,20 +19,6 @@ export function Connector({
   return (
     <div className={`connector ${expanded ? 'connector--expanded' : ''}`}>
       <div className="connector-header vertical-align-center">
-        <span title="Delete data source">
-          <Confirm
-            right
-            onConfirm={deleteConnector}
-            message="delete this data source"
-            action="Delete"
-            className="page-delete"
-            render={(confirm: () => void) => (
-              <Button icon onClick={confirm} type="outline">
-                delete
-              </Button>
-            )}
-          />
-        </span>
         {expanded ? (
           <Input
             className="connector-name"
@@ -45,17 +31,33 @@ export function Connector({
         ) : (
           <span className="connector-name">{connector.name}</span>
         )}
-        {!expanded && (
-          <Button
-            type="outline"
-            icon
-            className="flex-right"
-            onClick={() => setExpanded(true)}
-            title="Edit"
-          >
-            edit_outline
-          </Button>
-        )}
+        <div className="flex-right">
+          {!expanded && (
+            <Button
+              type="outline"
+              icon
+              className="flex-right hover-button"
+              onClick={() => setExpanded(true)}
+              title="Edit"
+            >
+              edit_outline
+            </Button>
+          )}
+          <span title="Delete data source">
+            <Confirm
+              right
+              onConfirm={deleteConnector}
+              message="delete this data source"
+              action="Delete"
+              className="hover-button"
+              render={(confirm: () => void) => (
+                <Button icon onClick={confirm} type="outline">
+                  delete
+                </Button>
+              )}
+            />
+          </span>
+        </div>
       </div>
       {expanded && (
         <React.Fragment>

@@ -302,8 +302,29 @@ header > div {
 .connector {
   margin-bottom: 15px;
   padding: 10px;
+  border: 1px solid transparent;
+  border-bottom: 1px solid #ccc;
+}
+
+.server .hover-button,
+.connector .hover-button {
+  visibility: hidden;
+  margin-left: 10px;
+}
+
+.server:hover .hover-button,
+.server--expanded .hover-button,
+.connector:hover .hover-button,
+.connector--expanded .hover-button {
+  visibility: initial;
+}
+
+.server:hover,
+.connector:hover,
+.server--expanded,
+.connector--expanded {
   background: white;
-  border: 1px solid #ccc;
+  border-color: #ccc;
 }
 
 .server-name,
@@ -343,11 +364,6 @@ header > div {
   border-left: 0;
   border-top: 0;
   border-right: 0;
-}
-
-.page-delete {
-  margin-right: 15px;
-  display: inline-block;
 }
 
 .panel {
@@ -666,6 +682,10 @@ th {
 
 tbody tr:nth-child(odd) {
   background: #f9f0ff;
+}
+
+.confirm-wrapper {
+  display: inline-block;
 }
 
 .confirm {

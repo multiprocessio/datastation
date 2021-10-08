@@ -41,20 +41,6 @@ export function Server({
   return (
     <div className="server">
       <div className="server-header vertical-align-center">
-        <span title="Delete server">
-          <Confirm
-            right
-            onConfirm={deleteServer}
-            message="delete this server"
-            action="Delete"
-            className="page-delete"
-            render={(confirm: () => void) => (
-              <Button icon onClick={confirm} type="outline">
-                delete
-              </Button>
-            )}
-          />
-        </span>
         {expanded ? (
           <Input
             className="server-name"
@@ -67,17 +53,33 @@ export function Server({
         ) : (
           <span className="server-name">{server.name}</span>
         )}
-        {!expanded && (
-          <Button
-            type="outline"
-            icon
-            className="flex-right"
-            onClick={() => setExpanded(true)}
-            title="Edit"
-          >
-            edit_outline
-          </Button>
-        )}
+        <div className="flex-right">
+          {!expanded && (
+            <Button
+              type="outline"
+              icon
+              className="hover-button"
+              onClick={() => setExpanded(true)}
+              title="Edit"
+            >
+              edit_outline
+            </Button>
+          )}
+          <span title="Delete server">
+            <Confirm
+              right
+              onConfirm={deleteServer}
+              message="delete this server"
+              action="Delete"
+              className="hover-button"
+              render={(confirm: () => void) => (
+                <Button icon onClick={confirm} type="outline">
+                  delete
+                </Button>
+              )}
+            />
+          </span>
+        </div>
       </div>
       {expanded && (
         <React.Fragment>
