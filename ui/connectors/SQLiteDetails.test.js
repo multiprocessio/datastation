@@ -1,0 +1,3 @@
+require('./SQLiteDetails');
+
+test('stub', () => {});

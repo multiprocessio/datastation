@@ -20,17 +20,20 @@ log.info(APP_NAME, VERSION, DEBUG ? 'DEBUG' : '');
   process.on(sig, flushUnwritten)
 );
 
-app.whenReady().then(async () => {
-  const { handlers, project } = initialize({
-    subprocess: path.join(__dirname, 'desktop_runner.js'),
-    additionalHandlers: storeHandlers,
+// Just for basic unit tests
+if (app) {
+  app.whenReady().then(async () => {
+    const { handlers, project } = initialize({
+      subprocess: path.join(__dirname, 'desktop_runner.js'),
+      additionalHandlers: storeHandlers,
+    });
+
+    await openWindow(project);
+
+    registerRPCHandlers(ipcMain, handlers);
   });
 
-  await openWindow(project);
-
-  registerRPCHandlers(ipcMain, handlers);
-});
-
-app.on('window-all-closed', function () {
-  if (process.platform !== 'darwin') app.quit();
-});
+  app.on('window-all-closed', function () {
+    if (process.platform !== 'darwin') app.quit();
+  });
+}

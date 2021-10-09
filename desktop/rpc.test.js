@@ -1,4 +1,7 @@
-const { RPC_ASYNC_REQUEST, RPC_ASYNC_RESPONSE } = require('../shared/constants');
+const {
+  RPC_ASYNC_REQUEST,
+  RPC_ASYNC_RESPONSE,
+} = require('../shared/constants');
 const { registerRPCHandlers } = require('./rpc');
 
 test('registers handlers', async () => {
@@ -11,27 +14,29 @@ test('registers handlers', async () => {
   };
 
   let finished1 = false;
-  const handlers = [{
-    resource: 'test',
-    handler: (projectId, body, dispatch, external) => {
-      expect(projectId).toBe('test id');
-      expect(body).toStrictEqual({something: 1});
-      expect(external).toStrictEqual(true);
-      expect(typeof dispatch).toBe('function');
-      finished1 = true;
-      return { aresponse: true };
-    }
-  }];
+  const handlers = [
+    {
+      resource: 'test',
+      handler: (projectId, body, dispatch, external) => {
+        expect(projectId).toBe('test id');
+        expect(body).toStrictEqual({ something: 1 });
+        expect(external).toStrictEqual(true);
+        expect(typeof dispatch).toBe('function');
+        finished1 = true;
+        return { aresponse: true };
+      },
+    },
+  ];
 
   let finished2 = false;
   registerRPCHandlers(ipcMain, handlers);
   const event = {
     sender: {
       send(channel, body) {
-	expect(channel).toBe(`${RPC_ASYNC_RESPONSE}:88`);
-	expect(body.kind).toBe('response');
-	expect(body.body).toStrictEqual({ aresponse: true });
-	finished2 = true;
+        expect(channel).toBe(`${RPC_ASYNC_RESPONSE}:88`);
+        expect(body.kind).toBe('response');
+        expect(body.body).toStrictEqual({ aresponse: true });
+        finished2 = true;
       },
     },
   };

@@ -1,0 +1,3 @@
+require('./app');
+
+test('stub', () => {});
