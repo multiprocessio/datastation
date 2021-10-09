@@ -27,7 +27,7 @@ test('filters no group', async () => {
 
   let finished = false;
   const panels = [lp, vp];
-  await withSavevpanels(
+  await withSavedPanels(
     panels,
     async (project) => {
       const panelValueBuffer = fs.readFileSync(
@@ -58,7 +58,7 @@ test('filters with group', async () => {
 
   let finished = false;
   const panels = [lp, vp];
-  await withSavevpanels(
+  await withSavedPanels(
     panels,
     async (project) => {
       const panelValueBuffer = fs.readFileSync(
@@ -81,12 +81,12 @@ test('filters with group', async () => {
 
 test('filters time range', async () => {
   const rows = [45, 6, 5, 14, 35].map((timeOffset) => ({
-    time: subMinutes(new Date(), timeOffset),
+    time: subMinutes(new Date(), timeOffset).toISOString(),
     value: timeOffset,
   }));
   const lp = new LiteralPanelInfo({
     contentTypeInfo: { type: 'application/json' },
-    content: JSON.stringify(),
+    content: JSON.stringify(rows),
   });
 
   const vp = new FilterAggregatePanelInfo({
@@ -100,7 +100,7 @@ test('filters time range', async () => {
 
   let finished = false;
   const panels = [lp, vp];
-  await withSavevpanels(
+  await withSavedPanels(
     panels,
     async (project) => {
       const panelValueBuffer = fs.readFileSync(
