@@ -1,6 +1,6 @@
 import { file as makeTmpFile } from 'tmp-promise';
 import log from '../../shared/log';
-import { ANSI_SQL_QUOTE, quote } from '../../shared/sql';
+import { buildSQLiteQuery } from '../../shared/sql';
 import {
   DatabaseConnectorInfo,
   DatabasePanelInfo,
@@ -18,37 +18,8 @@ export async function evalFilterAggregate(
   extra: EvalHandlerExtra,
   dispatch: Dispatch
 ) {
-  const {
-    panelSource,
-    aggregateType,
-    aggregateOn,
-    groupBy,
-    filter,
-    sortOn,
-    sortAsc,
-    range,
-    limit,
-  } = guardPanel<FilterAggregatePanelInfo>(panel, 'filagg').filagg;
-  let columns = '*';
-  let groupByClause = '';
-  if (aggregateType !== 'none') {
-    columns = `${quote(
-      groupBy,
-      ANSI_SQL_QUOTE.identifier
-    )}, ${aggregateType.toUpperCase()}(${
-      aggregateOn ? quote(aggregateOn, ANSI_SQL_QUOTE.identifier) : 1
-    }) AS ${quote(aggregateType, ANSI_SQL_QUOTE.identifier)}`;
-    groupByClause = `GROUP BY ${quote(groupBy, ANSI_SQL_QUOTE.identifier)}`;
-  }
-  const whereClause = filter ? 'WHERE ' + filter : '';
-  let sort = quote(sortOn, ANSI_SQL_QUOTE.identifier);
-  if ((sortOn || '').startsWith('Aggregate: ')) {
-    sort = `${aggregateType.toUpperCase()}(${
-      aggregateOn ? quote(aggregateOn, ANSI_SQL_QUOTE.identifier) : 1
-    })`;
-  }
-  const orderByClause = `ORDER BY ${sort} ${sortAsc ? 'ASC' : 'DESC'}`;
-  const query = `SELECT ${columns} FROM DM_getPanel(${panelSource}) ${whereClause} ${groupByClause} ${orderByClause} LIMIT ${limit}`;
+  const vp = guardPanel<FilterAggregatePanelInfo>(panel, 'filagg');
+  const query = buildSQLiteQuery(vp);
 
   const tmp = await makeTmpFile();
   log.info('Filagg loading into ' + tmp.path);
@@ -59,7 +30,6 @@ export async function evalFilterAggregate(
     });
     const metaPanel = new DatabasePanelInfo({
       content: query,
-      range,
       connectorId: metaConnector.id,
     });
 

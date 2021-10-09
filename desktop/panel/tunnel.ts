@@ -88,10 +88,6 @@ export async function tunnel<T>(
       `Connected to tunnel, proxying ${destAddress}:${destPort} via server to localhost:${tunnel.localPort}`
     );
     return await callback(tunnel.localAddress, tunnel.localPort);
-  } catch (e) {
-    console.log('THERE WAS AN ERROR INSIDE THE TUNNEL!');
-    console.error(e);
-    throw e;
   } finally {
     log.info('Closing tunnel');
     ssh.close();

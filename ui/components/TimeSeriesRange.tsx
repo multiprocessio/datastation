@@ -18,9 +18,11 @@ export function TimeSeriesRange({
   shape,
   hideField,
   updateRange,
+  showSort,
 }: {
   range: TimeSeriesRangeT;
   hideField?: boolean;
+  showSort?: boolean;
   shape?: Shape;
   updateRange: (r: TimeSeriesRangeT) => void;
 }) {

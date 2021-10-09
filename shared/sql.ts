@@ -15,7 +15,7 @@ import {
   subWeeks,
   subYears,
 } from 'date-fns';
-import { DatabaseConnectorInfoType, TimeSeriesRange } from './state';
+import { FilterAggregatePanelInfo, TimeSeriesRange } from './state';
 
 export function timestampsFromRange(range: TimeSeriesRange) {
   if (range.rangeType === 'absolute') {
@@ -134,47 +134,61 @@ export const MYSQL_QUOTE = {
   identifier: '`',
 };
 
-export function sqlRangeQuery(
-  query: string,
-  range: TimeSeriesRange | null,
-  type: DatabaseConnectorInfoType
-) {
-  if (
-    !range ||
-    !range.field ||
-    (range.rangeType === 'relative' && range.relative === 'all-time')
-  ) {
-    return query;
+export function buildSQLiteQuery(vp: FilterAggregatePanelInfo): string {
+  const {
+    panelSource,
+    aggregateType,
+    aggregateOn,
+    groupBy,
+    filter,
+    sortOn,
+    sortAsc,
+    range,
+    limit,
+  } = vp.filagg;
+
+  let columns = '*';
+  let groupByClause = '';
+  if (aggregateType !== 'none') {
+    columns = `${quote(
+      groupBy,
+      ANSI_SQL_QUOTE.identifier
+    )}, ${aggregateType.toUpperCase()}(${
+      aggregateOn ? quote(aggregateOn, ANSI_SQL_QUOTE.identifier) : 1
+    }) AS ${quote(aggregateType, ANSI_SQL_QUOTE.identifier)}`;
+    groupByClause = `GROUP BY ${quote(groupBy, ANSI_SQL_QUOTE.identifier)}`;
+  }
+  let whereClause = filter ? 'WHERE ' + filter : '';
+  if (range.field) {
+    const { begin, end } = timestampsFromRange(range);
+    const quoted = (t: string | Date) =>
+      quote(format(new Date(t), 'yyyy-MM-dd HH:mm:ss'), ANSI_SQL_QUOTE.string);
+    const timeFilter = `DATETIME(${quote(
+      range.field,
+      ANSI_SQL_QUOTE.identifier
+    )}) > ${quoted(begin)} AND DATETIME(${quote(
+      range.field,
+      ANSI_SQL_QUOTE.identifier
+    )}) < ${quoted(end)}`;
+
+    if (filter) {
+      whereClause = `WHERE (${filter} AND ${timeFilter})`;
+    } else {
+      whereClause = 'WHERE ' + timeFilter;
+    }
   }
 
-  // TODO: what happens if a user overrides these defaults? MySQL can run in ANSI SQL mode.
-  const quoteStyle = type === 'mysql' ? MYSQL_QUOTE : ANSI_SQL_QUOTE;
-
-  const { begin, end } = timestampsFromRange(range);
-
-  function formatTimestamp(t: Date | string) {
-    const quotedTime = quote(
-      format(new Date(t), 'yyyy-MM-dd HH:mm:ss'),
-      quoteStyle.string
-    );
-    if (type === 'clickhouse') {
-      return `parseDateTimeBestEffort(${quotedTime})`;
+  let orderByClause = '';
+  if (sortOn) {
+    const sortQuoted = quote(sortOn, ANSI_SQL_QUOTE.identifier);
+    let sortField = sortQuoted;
+    if ((sortOn || '').startsWith('Aggregate: ')) {
+      sortField = `${aggregateType.toUpperCase()}(${
+        aggregateOn ? quote(aggregateOn, ANSI_SQL_QUOTE.identifier) : 1
+      })`;
     }
 
-    if (type === 'influx') {
-      return quote(new Date(t).toISOString(), quoteStyle.string);
-    }
-
-    // Timestamp functions/formats differ by engine as soon as we bring in time zones. We're not doing that yet.
-    return 'TIMESTAMP ' + quotedTime;
+    orderByClause = `ORDER BY ${sortField} ${sortAsc ? 'ASC' : 'DESC'}`;
   }
-
-  // This is not going to work for systems like Cassandra that don't support subqueries.
-  return `SELECT * FROM (${query}) WHERE ${quote(
-    range.field,
-    quoteStyle.identifier
-  )} > ${formatTimestamp(begin)} AND ${quote(
-    range.field,
-    quoteStyle.identifier
-  )} < ${formatTimestamp(end)}`;
+  return `SELECT ${columns} FROM DM_getPanel(${panelSource}) ${whereClause} ${groupByClause} ${orderByClause} LIMIT ${limit}`;
 }

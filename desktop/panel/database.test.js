@@ -1,4 +1,3 @@
-const { spawnSync } = require('child_process');
 const { getProjectResultsFile } = require('../store');
 const fs = require('fs');
 const {

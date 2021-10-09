@@ -1,5 +1,4 @@
 import log from '../../shared/log';
-import { sqlRangeQuery } from '../../shared/sql';
 import {
   DatabaseConnectorInfo,
   DatabasePanelInfo,
@@ -158,17 +157,11 @@ export async function evalDatabase(
     ['mysql', 'postgres', 'sqlite'].includes(connector.database.type)
   );
 
-  const rangeQuery = sqlRangeQuery(
-    query,
-    info.database.range,
-    connector.database.type
-  );
-
   // SQLite is file, not network based so handle separately.
   if (connector.database.type === 'sqlite') {
     return await evalSQLite(
       dispatch,
-      rangeQuery,
+      query,
       info,
       connector,
       project,
@@ -177,7 +170,7 @@ export async function evalDatabase(
   }
 
   if (connector.database.type === 'snowflake') {
-    return await evalSnowflake(rangeQuery, connector);
+    return await evalSnowflake(query, connector);
   }
 
   const { host, port } = portHostFromAddress(info, connector);
@@ -190,7 +183,7 @@ export async function evalDatabase(
       host.split('\\')[0],
       port,
       (host: string, port: number): any =>
-        evalSQLServer(rangeQuery, host, port, connector)
+        evalSQLServer(query, host, port, connector)
     );
   }
 
@@ -203,7 +196,7 @@ export async function evalDatabase(
       if (connector.database.type === 'postgres') {
         return evalPostgres(
           dispatch,
-          rangeQuery,
+          query,
           host,
           port,
           connector,
@@ -215,7 +208,7 @@ export async function evalDatabase(
       if (connector.database.type === 'mysql') {
         return evalMySQL(
           dispatch,
-          rangeQuery,
+          query,
           host,
           port,
           connector,
@@ -225,11 +218,11 @@ export async function evalDatabase(
       }
 
       if (connector.database.type === 'oracle') {
-        return evalOracle(rangeQuery, host, port, connector);
+        return evalOracle(query, host, port, connector);
       }
 
       if (connector.database.type === 'clickhouse') {
-        return evalClickHouse(rangeQuery, host, port, connector);
+        return evalClickHouse(query, host, port, connector);
       }
 
       throw new Error(`Unknown SQL type: ${connector.database.type}`);

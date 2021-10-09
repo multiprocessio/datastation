@@ -17,13 +17,16 @@ function log(level: keyof typeof logger, ...args: any[]) {
   let stackRecorded = '';
   for (const arg of args) {
     if (arg instanceof Error && !stackRecorded) {
-      stackRecorded = arg.stack;
+      stringArgs.push(arg.message);
+      // Drop first line, which is arg.message.
+      stackRecorded = (arg.stack.split('\n').slice(1) || []).join('\n');
+      continue;
     }
 
     stringArgs.push(safePreview(arg));
   }
   if (stackRecorded) {
-    stringArgs.push(safePreview(stackRecorded));
+    stringArgs.push('\n' + safePreview(stackRecorded));
   }
 
   const f = logger[level];

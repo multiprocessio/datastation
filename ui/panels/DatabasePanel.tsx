@@ -53,7 +53,7 @@ export function DatabasePanelDetails({
     }
 
     if (
-      ['influx', 'prometheus'].includes(connector.database.type) &&
+      ['prometheus'].includes(connector.database.type) &&
       !panel.database.range.field
     ) {
       panel.database.range.field = 'time';
@@ -117,12 +117,12 @@ export function DatabasePanelDetails({
               }}
             />
           )}
-          {!['cassandra', 'presto'].includes(connector.database.type) && (
+          {['elasticsearch', 'prometheus'].includes(
+            connector.database.type
+          ) && (
             <TimeSeriesRange
               range={panel.database.range}
-              hideField={['prometheus', 'influx'].includes(
-                connector.database.type
-              )}
+              hideField={['prometheus'].includes(connector.database.type)}
               updateRange={(r: TimeSeriesRangeT) => {
                 panel.database.range = r;
                 updatePanel(panel);

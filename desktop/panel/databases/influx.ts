@@ -1,5 +1,4 @@
 import fetch from 'node-fetch';
-import { sqlRangeQuery } from '../../../shared/sql';
 import {
   DatabaseConnectorInfo,
   DatabasePanelInfo,
@@ -26,11 +25,10 @@ export async function evalInflux(
   { database: { database, username, password_encrypt } }: DatabaseConnectorInfo,
   panel: DatabasePanelInfo
 ): Promise<EvalHandlerResponse> {
-  const rangeQuery = sqlRangeQuery(query, range, 'influx');
   const url = fullHttpURL(host, port);
   const params = queryParameters({
     db: database,
-    q: rangeQuery,
+    q: query,
     u: username,
     p: password_encrypt.value,
   });
