@@ -1,4 +1,5 @@
 const path = require('path');
+const { LANGUAGES } = require('../../shared/languages');
 const { getProjectResultsFile } = require('../store');
 const fs = require('fs');
 const { LiteralPanelInfo, ProgramPanelInfo } = require('../../shared/state');
@@ -7,7 +8,7 @@ const { CODE_ROOT } = require('../constants');
 const { makeEvalHandler } = require('./eval');
 const { inPath, withSavedPanels } = require('./testutil');
 
-const LANGUAGES = [
+const TESTS = [
   {
     type: 'javascript',
     content:
@@ -46,7 +47,7 @@ const LANGUAGES = [
   },
 ];
 
-for (const t of LANGUAGES) {
+for (const t of TESTS) {
   if (!t.condition) {
     continue;
   }
@@ -57,7 +58,7 @@ for (const t of LANGUAGES) {
       undefined,
       path.join(CODE_ROOT, 'build', 'desktop_runner.js'),
     ]) {
-      test(`runs ${t.type} programs via ${
+      test(`runs ${t.type} programs to perform addition via ${
         subprocessName ? subprocessName : 'process'
       }`, async () => {
         const lp = new LiteralPanelInfo();
@@ -84,6 +85,51 @@ for (const t of LANGUAGES) {
             finished = true;
           },
           { evalPanels: true, subprocessName }
+        );
+
+        if (!finished) {
+          throw new Error('Callback did not finish');
+        }
+      }, 300_000);
+    }
+
+    for (const n of [0, 1]) {
+      test(`${t.type} default content ${
+        n === 0 ? 'first' : 'second'
+      } panel`, async () => {
+        const lp = new LiteralPanelInfo();
+        lp.literal.contentTypeInfo = { type: 'text/csv' };
+        lp.content = 'age,name\n12,Kev\n18,Nyra';
+
+        const pp = new ProgramPanelInfo();
+        pp.program.type = t.type;
+        pp.content = LANGUAGES[t.type].defaultContent(n);
+
+        let finished = false;
+        const panels = [lp, pp];
+        await withSavedPanels(
+          panels,
+          async (project) => {
+            const panelValueBuffer = fs.readFileSync(
+              getProjectResultsFile(project.projectName) + pp.id
+            );
+            // defaultContent(0) returns [] and defaultContent(!0) returns the previous panel
+            expect(JSON.parse(panelValueBuffer.toString())).toStrictEqual(
+              n === 0
+                ? t.type === 'r'
+                  ? null
+                  : t.type === 'sql'
+                  ? [{ NULL: null }]
+                  : []
+                : [
+                    { name: 'Kev', age: '12' },
+                    { name: 'Nyra', age: '18' },
+                  ]
+            );
+
+            finished = true;
+          },
+          { evalPanels: true }
         );
 
         if (!finished) {

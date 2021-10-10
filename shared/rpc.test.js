@@ -1,0 +1,3 @@
+require('./rpc');
+
+test('stub', () => {});

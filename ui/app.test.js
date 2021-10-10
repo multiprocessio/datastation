@@ -1,6 +1,7 @@
 const React = require('react');
 const { act } = require('react-dom/test-utils');
 const enzyme = require('enzyme');
+const { VENDORS } = require('./connectors');
 const {
   ProjectState,
   ProjectPage,
@@ -19,48 +20,82 @@ const { wait } = require('../shared/promise');
 const { App } = require('./app');
 const { LocalStorageStore } = require('./ProjectStore');
 
-test('app loads with default project', async () => {
-  const store = new LocalStorageStore();
-  const project = new ProjectState();
-  project.pages = [new ProjectPage()];
-  project.pages[0].panels = [
-    new TablePanelInfo(),
-    new HTTPPanelInfo(),
-    new GraphPanelInfo(),
-    new ProgramPanelInfo(),
-    new LiteralPanelInfo(),
-    new DatabasePanelInfo(),
-    new FilePanelInfo(),
-    new FilterAggregatePanelInfo(),
-  ];
-  project.servers = [new ServerInfo()];
-  project.connectors = [
-    new DatabaseConnectorInfo({ type: 'postgres' }),
-    new DatabaseConnectorInfo({ type: 'mysql' }),
-    new DatabaseConnectorInfo({ type: 'sqlite' }),
-    new DatabaseConnectorInfo({ type: 'oracle' }),
-    new DatabaseConnectorInfo({ type: 'sqlserver' }),
-    new DatabaseConnectorInfo({ type: 'presto' }),
-    new DatabaseConnectorInfo({ type: 'clickhouse' }),
-    new DatabaseConnectorInfo({ type: 'snowflake' }),
-    new DatabaseConnectorInfo({ type: 'cassandra' }),
-    new DatabaseConnectorInfo({ type: 'elasticsearch' }),
-    new DatabaseConnectorInfo({ type: 'prometheus' }),
-    new DatabaseConnectorInfo({ type: 'influx' }),
-  ];
+async function throwOnErrorBoundary(component) {
+  component.find('ErrorBoundary').forEach((e) => {
+    if (e.find({ type: 'fatal' }).length) {
+      // Weird ways to find the actual error message
+      throw new Error(e.find('Highlight').props().children);
+    }
+  });
+}
 
-  store.update('test', project);
-  window.location.search = '?project=test';
-
-  const component = await enzyme.mount(<App />);
-
-  // Let it load
+async function componentLoad(component) {
   await wait(1000);
   await act(async () => {
     await wait(0);
     component.update();
   });
+}
 
-  const panels = await component.find('.panel');
-  expect(panels.length).toBe(project.pages[0].panels.length);
-}, 10_000);
+const store = new LocalStorageStore();
+const project = new ProjectState();
+project.pages = [new ProjectPage()];
+project.connectors = Object.keys(VENDORS)
+  .sort()
+  .map((id) => new DatabaseConnectorInfo({ type: id }));
+project.pages[0].panels = [
+  new TablePanelInfo(),
+  new HTTPPanelInfo(),
+  new GraphPanelInfo(),
+  new ProgramPanelInfo(),
+  new LiteralPanelInfo(),
+  ...project.connectors.map(
+    (c) => new DatabasePanelInfo({ connectorId: c.id })
+  ),
+  new FilePanelInfo(),
+  new FilterAggregatePanelInfo(),
+];
+project.servers = [new ServerInfo()];
+
+test(
+  'app loads with default project',
+  async () => {
+    store.update('test', project);
+    window.location.search = '?project=test';
+
+    const component = await enzyme.mount(<App />);
+
+    await componentLoad(component);
+
+    const panels = await component.find('.panel');
+    expect(panels.length).toBe(project.pages[0].panels.length);
+
+    await throwOnErrorBoundary(component);
+
+    // Open all panels
+    for (let i = 0; i < panels.length; i++) {
+      const p = panels.at(i);
+      if (!p.find('.panel-details').length) {
+        await p.find({ 'data-testid': 'show-hide-panel' }).simulate('click');
+        await componentLoad(p);
+      }
+
+      expect(p.find('.panel-details').length).toBe(1);
+    }
+
+    const connectors = await component.find('.connector');
+    expect(connectors.length).toBe(project.connectors.length);
+
+    // Open all connectors
+    for (let i = 0; i < connectors.length; i++) {
+      const c = connectors.at(i);
+      await c
+        .find({ 'data-testid': 'show-hide-connector', type: 'outline' })
+        .simulate('click');
+      await componentLoad(c);
+    }
+
+    await throwOnErrorBoundary(component);
+  },
+  10_000 + 1_000 * (project.connectors.length + project.pages[0].panels.length)
+);

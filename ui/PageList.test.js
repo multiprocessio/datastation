@@ -61,7 +61,7 @@ for (const language of TESTS) {
       { age: 92, name: 'Quan' },
     ];
     const resultMetaCopy = { ...project.pages[0].panels[1].resultMeta };
-    expect(resultMetaCopy.elapsed).toBeGreaterThan(0);
+    expect(resultMetaCopy.elapsed).toBeGreaterThanOrEqual(0);
     expect(resultMetaCopy.elapsed).toBeLessThanOrEqual(new Date() - before);
     delete resultMetaCopy.elapsed;
     expect(resultMetaCopy.lastRun.valueOf()).toBeGreaterThan(before.valueOf());

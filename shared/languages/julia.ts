@@ -27,6 +27,14 @@ function DM_setPanel(v)
 end`;
 }
 
+function defaultContent(panelIndex: number) {
+  if (panelIndex === 0) {
+    return 'result = []\n# Your logic here\nDM_setPanel(result)';
+  }
+
+  return 'transform = DM_getPanel(0)\n# Your logic here\nDM_setPanel(transform)';
+}
+
 function exceptionRewriter(msg: string, programPath: string) {
   const matcher = RegExp(`${programPath}:([1-9]*)`.replaceAll('/', '\\/'), 'g');
 
@@ -38,7 +46,7 @@ function exceptionRewriter(msg: string, programPath: string) {
 export const JULIA = {
   name: 'Julia',
   defaultPath: 'julia',
-  defaultContent: (panelIndex: number) => '',
+  defaultContent,
   preamble,
   exceptionRewriter,
 };

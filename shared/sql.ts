@@ -1,4 +1,5 @@
 import {
+  addMinutes,
   format,
   startOfHour,
   startOfMonth,
@@ -161,8 +162,15 @@ export function buildSQLiteQuery(vp: FilterAggregatePanelInfo): string {
   let whereClause = filter ? 'WHERE ' + filter : '';
   if (range.field) {
     const { begin, end } = timestampsFromRange(range);
+    // Converts to UTC
     const quoted = (t: string | Date) =>
-      quote(format(new Date(t), 'yyyy-MM-dd HH:mm:ss'), ANSI_SQL_QUOTE.string);
+      quote(
+        format(
+          addMinutes(new Date(t), new Date().getTimezoneOffset()),
+          'yyyy-MM-dd HH:mm:ss'
+        ),
+        ANSI_SQL_QUOTE.string
+      );
     const timeFilter = `DATETIME(${quote(
       range.field,
       ANSI_SQL_QUOTE.identifier
