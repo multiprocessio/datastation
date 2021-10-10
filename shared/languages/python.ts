@@ -8,10 +8,12 @@ import { EOL } from './types';
 
 function defaultContent(panelIndex: number) {
   if (panelIndex === 0) {
-    return 'DM_setPanel([])';
+    return 'result = []\n// Your logic here\nDM_setPanel(result)';
   }
 
-  return `previous = DM_getPanel(${panelIndex - 1});\nDM_setPanel(previous);`;
+  return `transform = DM_getPanel(${
+    panelIndex - 1
+  })\n// Your logic here\nDM_setPanel(transform)`;
 }
 
 function preamble(

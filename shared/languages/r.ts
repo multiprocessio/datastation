@@ -1,3 +1,13 @@
+function defaultContent(panelIndex: number) {
+  if (panelIndex === 0) {
+    return 'result = []\n// Your logic here\nDM_setPanel(result)';
+  }
+
+  return `transform = DM_getPanel(${
+    panelIndex - 1
+  })\n// Your logic here\nDM_setPanel(transform)`;
+}
+
 function preamble(
   resultsFile: string,
   panelId: string,
@@ -20,7 +30,7 @@ DM_setPanel <- function(v) {
 export const R = {
   name: 'R',
   defaultPath: 'Rscript',
-  defaultContent: (panelIndex: number) => '',
+  defaultContent,
   preamble,
   exceptionRewriter(msg: string, _: string) {
     return msg;
