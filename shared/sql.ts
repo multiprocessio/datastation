@@ -152,19 +152,20 @@ export function buildSQLiteQuery(vp: FilterAggregatePanelInfo): string {
   let columns = '*';
   let groupByClause = '';
   if (aggregateType !== 'none') {
+    let groupColumn = quote(groupBy, ANSI_SQL_QUOTE.identifier);
+
+    let groupExpression = quote(groupBy, ANSI_SQL_QUOTE.identifier);
     if (windowInterval) {
       const intervalSeconds = (+windowInterval || 0) * 60;
-      columns = `DATETIME((STRFTIME('%s', ${groupBy}) / ${intervalSeconds}) *${intervalSeconds}, 'unixepoch') ${groupBy},`;
-    } else {
-      columns = `${quote(
-        groupBy,
-        ANSI_SQL_QUOTE.identifier
-      )}, ${aggregateType.toUpperCase()}(${
-        aggregateOn ? quote(aggregateOn, ANSI_SQL_QUOTE.identifier) : 1
-      }) AS ${quote(aggregateType, ANSI_SQL_QUOTE.identifier)}`;
+      groupExpression = `DATETIME((STRFTIME('%s', ${groupBy}) / ${intervalSeconds}) *${intervalSeconds}, 'unixepoch')`;
+      groupColumn = `${groupExpression} ${groupBy}`;
     }
 
-    groupByClause = `GROUP BY ${quote(groupBy, ANSI_SQL_QUOTE.identifier)}`;
+    columns = `${groupColumn}, ${aggregateType.toUpperCase()}(${
+      aggregateOn ? quote(aggregateOn, ANSI_SQL_QUOTE.identifier) : 1
+    }) AS ${quote(aggregateType, ANSI_SQL_QUOTE.identifier)}`;
+
+    groupByClause = `GROUP BY ${groupExpression}`;
   }
   let whereClause = filter ? 'WHERE ' + filter : '';
   if (range.field) {

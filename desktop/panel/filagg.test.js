@@ -1,4 +1,4 @@
-const { subMinutes } = require('date-fns');
+const { format, subMinutes, subHours, startOfHour } = require('date-fns');
 const { getProjectResultsFile } = require('../store');
 const fs = require('fs');
 const {
@@ -111,6 +111,52 @@ test('filters time range', async () => {
         rows[1],
         rows[3],
       ]);
+
+      finished = true;
+    },
+    { evalPanels: true }
+  );
+
+  if (!finished) {
+    throw new Error('Callback did not finish');
+  }
+});
+
+test('group on time range', async () => {
+  const rows = [45, 15, 80, 220, 5, 200, 35, 210, 100].map((timeOffset) => ({
+    time: subMinutes(new Date(), timeOffset).toISOString(),
+    value: timeOffset,
+  }));
+  const lp = new LiteralPanelInfo({
+    contentTypeInfo: { type: 'application/json' },
+    content: JSON.stringify(rows),
+  });
+
+  const vp = new FilterAggregatePanelInfo({
+    sortOn: 'time',
+    groupBy: 'time',
+    aggregateType: 'count',
+    windowInterval: '60',
+  });
+
+  let finished = false;
+  const panels = [lp, vp];
+  await withSavedPanels(
+    panels,
+    async (project) => {
+      const panelValueBuffer = fs.readFileSync(
+        getProjectResultsFile(project.projectName) + vp.id
+      );
+      expect(JSON.parse(panelValueBuffer.toString())).toStrictEqual(
+        [
+          { count: 4, time: subHours(startOfHour(new Date()), 0) },
+          { count: 2, time: subHours(startOfHour(new Date()), 1) },
+          { count: 3, time: subHours(startOfHour(new Date()), 3) },
+        ].map((row) => ({
+          ...row,
+          time: format(row.time, 'yyyy-MM-dd HH:mm:ss'),
+        }))
+      );
 
       finished = true;
     },

@@ -189,7 +189,7 @@ export function FilterAggregatePanelDetails({
                     />
                   </div>
                 )}
-                {MODE !== 'browser' && panel.filagg.aggregateType !== 'none' && (
+                {MODE !== 'browser' && (
                   <div className="form-row">
                     <Select
                       label="With Time Interval"
@@ -200,27 +200,26 @@ export function FilterAggregatePanelDetails({
                       }}
                     >
                       <optgroup label="Up to a day">
-                        <option value="1-minute">1 Minute</option>
-                        <option value="5-minutes">5 Minutes</option>
-                        <option value="15-minutes">15 Minutes</option>
-                        <option value="30-minutes">30 Minutes</option>
-                        <option value="1-hours">1 Hour</option>
-                        <option value="3-hours">3 Hours</option>
-                        <option value="6-hours">6 Hours</option>
-                        <option value="12-hours">12 Hours</option>
-                        <option value="1-day">1 Day</option>
+                        <option value="1">1 Minute</option>
+                        <option value="5">5 Minutes</option>
+                        <option value="15">15 Minutes</option>
+                        <option value="30">30 Minutes</option>
+                        <option value="60">1 Hour</option>
+                        <option value="180">3 Hours</option>
+                        <option value={String(60 * 6)}>6 Hours</option>
+                        <option value={String(60 * 12)}>12 Hours</option>
+                        <option value={String(60 * 24)}>1 Day</option>
                       </optgroup>
                       <optgroup label="Up to a month">
-                        <option value="3-days">3 Days</option>
-                        <option value="5-days">5 Days</option>
-                        <option value="1-week">1 Week</option>
-                        <option value="2-weeks">2 Weeks</option>
-                        <option value="1-month">1 Month</option>
+                        <option value={String(60 * 12 * 3)}>3 Days</option>
+                        <option value={String(60 * 12 * 7)}>7 days</option>
+                        <option value={String(60 * 12 * 7 * 2)}>14 days</option>
+                        <option value={String(60 * 12 * 30)}>30 days</option>
                       </optgroup>
                       <optgroup label="Up to a year">
-                        <option value="3-months">3 Months</option>
-                        <option value="6-months">6 Months</option>
-                        <option value="1-year">1 Year</option>
+                        <option value={String(60 * 12 * 90)}>90 Days</option>
+                        <option value={String(60 * 12 * 180)}>180 Days</option>
+                        <option value={String(60 * 12 * 365)}>1 Year</option>
                       </optgroup>
                     </Select>
                   </div>
