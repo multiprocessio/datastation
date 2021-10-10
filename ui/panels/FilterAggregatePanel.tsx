@@ -124,6 +124,7 @@ export function FilterAggregatePanelDetails({
                 }}
                 language="sql"
                 className="editor"
+                tooltip="Use any valid SQLite WHERE expression."
               />
             </div>
             {MODE !== 'browser' && (
@@ -134,6 +135,9 @@ export function FilterAggregatePanelDetails({
                   panel.filagg.range = r;
                   updatePanel(panel);
                 }}
+                timeFieldTooltip={
+                  'Column must be a date field in ISO8601/RFC3339 format.'
+                }
               />
             )}
           </FormGroup>
@@ -198,7 +202,11 @@ export function FilterAggregatePanelDetails({
                         panel.filagg.windowInterval = value;
                         updatePanel(panel);
                       }}
+                      tooltip={`If used, the above "Group by" column must be a date field in ISO8601/RFC3339 format.`}
                     >
+                      <optgroup label="None">
+                        <option value="0">None</option>
+                      </optgroup>
                       <optgroup label="Up to a day">
                         <option value="1">1 Minute</option>
                         <option value="5">5 Minutes</option>
@@ -211,15 +219,15 @@ export function FilterAggregatePanelDetails({
                         <option value={String(60 * 24)}>1 Day</option>
                       </optgroup>
                       <optgroup label="Up to a month">
-                        <option value={String(60 * 12 * 3)}>3 Days</option>
-                        <option value={String(60 * 12 * 7)}>7 days</option>
-                        <option value={String(60 * 12 * 7 * 2)}>14 days</option>
-                        <option value={String(60 * 12 * 30)}>30 days</option>
+                        <option value={String(60 * 24 * 3)}>3 Days</option>
+                        <option value={String(60 * 24 * 7)}>7 days</option>
+                        <option value={String(60 * 24 * 7 * 2)}>14 days</option>
+                        <option value={String(60 * 24 * 30)}>30 days</option>
                       </optgroup>
                       <optgroup label="Up to a year">
-                        <option value={String(60 * 12 * 90)}>90 Days</option>
-                        <option value={String(60 * 12 * 180)}>180 Days</option>
-                        <option value={String(60 * 12 * 365)}>1 Year</option>
+                        <option value={String(60 * 24 * 90)}>90 Days</option>
+                        <option value={String(60 * 24 * 180)}>180 Days</option>
+                        <option value={String(60 * 24 * 365)}>1 Year</option>
                       </optgroup>
                     </Select>
                   </div>

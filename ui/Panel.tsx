@@ -100,19 +100,22 @@ function PreviewResults({
   }
 
   if (panelOut === 'metadata') {
-    results = {
-      ...results,
-      metadata: JSON.stringify(
-        {
-          Size: humanSize(results.size),
-          'Number of Elements':
-            results.arrayCount === null ? 'Not an array' : results.arrayCount,
-          'Inferred Content-Type': results.contentType,
-        },
-        null,
-        2
-      ),
-    };
+    const metadata = [
+      { name: 'Inferred Content-Type', value: results.contentType },
+      { name: 'Size', value: humanSize(results.size) },
+      {
+        name: 'Number of Elements',
+        value:
+          results.arrayCount === null
+            ? 'Not an array'
+            : results.arrayCount.toLocaleString(),
+      },
+    ];
+    return (
+      <Highlight language="javascript">
+        {metadata.map((d) => `${d.name}: ${d.value}`).join('\n')}
+      </Highlight>
+    );
   }
 
   if (!results[panelOut]) {
@@ -321,6 +324,7 @@ export function Panel({
                     })}
                     <div>
                       <small>
+                        Took{' '}
                         {formatDistanceStrict(
                           results.lastRun.valueOf() - (results.elapsed || 0),
                           results.lastRun.valueOf()

@@ -73,6 +73,10 @@ header a {
   height: 100% !important;
 }
 
+.editor-container:not(.editor-container--singleLine) {
+  height: 100%;
+}
+
 .editor-container--singleLine .editor.input {
   height: initial !important;
   min-height: initial !important;
@@ -523,6 +527,36 @@ header > div {
 .text-muted {
   font-size: 0.9rem;
   color: #333;
+}
+
+.tooltip {
+  position: relative;
+  font-size: 0.9rem;
+}
+
+.tooltip-body {
+  position: absolute;
+  top: 24px;
+  right: 0;
+  display: none;
+  background: rgba(30, 30, 30, 0.75);
+  border: 1px solid black;
+  color: white;
+  padding: 10px;
+}
+
+.tooltip-icon {
+  color: #ccc;
+  cursor: pointer;
+  cursor: hand;
+}
+
+.tooltip:hover .tooltip-body {
+  display: initial;
+}
+
+.tooltip:hover .tooltip-icon {
+  color: initial;
 }
 
 .alert {

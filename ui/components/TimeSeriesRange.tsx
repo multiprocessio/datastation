@@ -20,12 +20,14 @@ export function TimeSeriesRange({
   hideField,
   updateRange,
   showSort,
+  timeFieldTooltip,
 }: {
   range: TimeSeriesRangeT;
   hideField?: boolean;
   showSort?: boolean;
   shape?: Shape;
   updateRange: (r: TimeSeriesRangeT) => void;
+  timeFieldTooltip?: React.ReactNode;
 }) {
   const setTab = (value: string) => {
     switch (value) {
@@ -124,6 +126,7 @@ export function TimeSeriesRange({
         <div className="form-row">
           <FieldPicker
             label="Time Field"
+            tooltip={timeFieldTooltip}
             value={range.field}
             shape={shape}
             allowNone="None"

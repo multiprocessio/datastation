@@ -155,8 +155,8 @@ export function buildSQLiteQuery(vp: FilterAggregatePanelInfo): string {
     let groupColumn = quote(groupBy, ANSI_SQL_QUOTE.identifier);
 
     let groupExpression = quote(groupBy, ANSI_SQL_QUOTE.identifier);
-    if (windowInterval) {
-      const intervalSeconds = (+windowInterval || 0) * 60;
+    if (windowInterval && +windowInterval) {
+      const intervalSeconds = +windowInterval * 60;
       groupExpression = `DATETIME((STRFTIME('%s', ${groupBy}) / ${intervalSeconds}) *${intervalSeconds}, 'unixepoch')`;
       groupColumn = `${groupExpression} ${groupBy}`;
     }
