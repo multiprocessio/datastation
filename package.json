@@ -90,6 +90,7 @@
     "electron-packager": "^15.4.0",
     "enzyme": "^3.11.0",
     "esbuild": "^0.13.3",
+    "faker": "^5.5.3",
     "jest": "^27.2.4",
     "jsdom": "^17.0.0",
     "license-checker": "^25.0.1",
