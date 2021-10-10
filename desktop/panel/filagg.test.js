@@ -123,8 +123,9 @@ test('filters time range', async () => {
 });
 
 test('group on time range', async () => {
+  const startDate = new Date('2021-02-01 05:00:00');
   const rows = [45, 15, 80, 220, 5, 200, 35, 210, 100].map((timeOffset) => ({
-    time: subMinutes(new Date(), timeOffset).toISOString(),
+    time: subMinutes(startDate, timeOffset).toISOString(),
     value: timeOffset,
   }));
   const lp = new LiteralPanelInfo({
@@ -148,18 +149,11 @@ test('group on time range', async () => {
         getProjectResultsFile(project.projectName) + vp.id
       );
 
-      const expected = [];
-      for (const row of rows) {
-        const hourStart = startOfHour(new Date(row.time));
-        let existing = expected.findIndex((r) => r.time === hourStart);
-        if (existing === -1) {
-          expected.push({ time: hourStart, count: 0 });
-          existing = expected.length - 1;
-        }
-
-        expected[existing].count++;
-      }
-      expected.sort((r) => r.time);
+      const expected = [
+        { time: subHours(startDate, 1), count: 4 },
+        { time: subHours(startDate, 2), count: 2 },
+        { time: subHours(startDate, 4), count: 3 },
+      ];
       expect(JSON.parse(panelValueBuffer.toString())).toStrictEqual(
         expected.map((row) => ({
           ...row,
