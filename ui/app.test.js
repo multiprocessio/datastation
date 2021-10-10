@@ -37,52 +37,65 @@ async function componentLoad(component) {
   });
 }
 
-test('app loads with default project', async () => {
-  const store = new LocalStorageStore();
-  const project = new ProjectState();
-  project.pages = [new ProjectPage()];
-  project.connectors = Object.keys(VENDORS)
-    .sort()
-    .map((id) => new DatabaseConnectorInfo({ type: id }));
-  project.pages[0].panels = [
-    new TablePanelInfo(),
-    new HTTPPanelInfo(),
-    new GraphPanelInfo(),
-    new ProgramPanelInfo(),
-    new LiteralPanelInfo(),
-    ...project.connectors.map(
-      (c) => new DatabasePanelInfo({ connectorId: c.id })
-    ),
-    new FilePanelInfo(),
-    new FilterAggregatePanelInfo(),
-  ];
-  project.servers = [new ServerInfo()];
+const store = new LocalStorageStore();
+const project = new ProjectState();
+project.pages = [new ProjectPage()];
+project.connectors = Object.keys(VENDORS)
+  .sort()
+  .map((id) => new DatabaseConnectorInfo({ type: id }));
+project.pages[0].panels = [
+  new TablePanelInfo(),
+  new HTTPPanelInfo(),
+  new GraphPanelInfo(),
+  new ProgramPanelInfo(),
+  new LiteralPanelInfo(),
+  ...project.connectors.map(
+    (c) => new DatabasePanelInfo({ connectorId: c.id })
+  ),
+  new FilePanelInfo(),
+  new FilterAggregatePanelInfo(),
+];
+project.servers = [new ServerInfo()];
 
-  store.update('test', project);
-  window.location.search = '?project=test';
+test(
+  'app loads with default project',
+  async () => {
+    store.update('test', project);
+    window.location.search = '?project=test';
 
-  const component = await enzyme.mount(<App />);
+    const component = await enzyme.mount(<App />);
 
-  await componentLoad(component);
+    await componentLoad(component);
 
-  const panels = await component.find('.panel');
-  expect(panels.length).toBe(project.pages[0].panels.length);
+    const panels = await component.find('.panel');
+    expect(panels.length).toBe(project.pages[0].panels.length);
 
-  await throwOnErrorBoundary(component);
+    await throwOnErrorBoundary(component);
 
-  await Promise.all(
-    panels.map(async (p) => {
+    // Open all panels
+    for (let i = 0; i < panels.length; i++) {
+      const p = panels.at(i);
       if (!p.find('.panel-details').length) {
-        await p
-          .find({ 'data-testid': 'show-hide-details' })
-          .props()
-          .simulate('click');
+        await p.find({ 'data-testid': 'show-hide-panel' }).simulate('click');
         await componentLoad(p);
       }
 
       expect(p.find('.panel-details').length).toBe(1);
-    })
-  );
+    }
 
-  await throwOnErrorBoundary(component);
-}, 10_000);
+    const connectors = await component.find('.connector');
+    expect(connectors.length).toBe(project.connectors.length);
+
+    // Open all connectors
+    for (let i = 0; i < connectors.length; i++) {
+      const c = connectors.at(i);
+      await c
+        .find({ 'data-testid': 'show-hide-connector', type: 'outline' })
+        .simulate('click');
+      await componentLoad(c);
+    }
+
+    await throwOnErrorBoundary(component);
+  },
+  10_000 + 1_000 * (project.connectors.length + project.pages[0].panels.length)
+);

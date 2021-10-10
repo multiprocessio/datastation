@@ -294,7 +294,7 @@ export function Panel({
             {!panelUIDetails.alwaysOpen && (
               <span title={details ? 'Hide Details' : 'Show Details'}>
                 <Button
-                  data-testid="show-hide-details"
+                  data-testid="show-hide-panel"
                   icon
                   onClick={() => setDetails(!details)}
                 >

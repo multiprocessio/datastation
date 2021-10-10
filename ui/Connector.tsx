@@ -36,6 +36,7 @@ export function Connector({
             <Button
               type="outline"
               icon
+              data-testid="show-hide-connector"
               className="flex-right hover-button"
               onClick={() => setExpanded(true)}
               title="Edit"
