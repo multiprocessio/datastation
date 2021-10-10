@@ -58,7 +58,7 @@ for (const t of TESTS) {
       undefined,
       path.join(CODE_ROOT, 'build', 'desktop_runner.js'),
     ]) {
-      test(`runs ${t.type} programs to performa addition via ${
+      test(`runs ${t.type} programs to perform addition via ${
         subprocessName ? subprocessName : 'process'
       }`, async () => {
         const lp = new LiteralPanelInfo();
