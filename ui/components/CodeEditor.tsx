@@ -47,7 +47,6 @@ export function CodeEditor({
 }) {
   const [localValue, setLocalValue] = useDebouncedLocalState(value, onChange);
 
-  console.log(language);
   return (
     <div
       className={`editor-container ${

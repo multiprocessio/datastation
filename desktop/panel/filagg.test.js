@@ -151,7 +151,7 @@ test('group on time range', async () => {
       const expected = [];
       for (const row of rows) {
         const hourStart = startOfHour(new Date(row.time));
-        const existing = expected.findIndex((r) => r.time === hourStart);
+        let existing = expected.findIndex((r) => r.time === hourStart);
         if (existing === -1) {
           expected.push({ time: hourStart, count: 0 });
           existing = expected.length - 1;
