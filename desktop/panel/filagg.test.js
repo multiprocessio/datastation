@@ -147,12 +147,21 @@ test('group on time range', async () => {
       const panelValueBuffer = fs.readFileSync(
         getProjectResultsFile(project.projectName) + vp.id
       );
+
+      const expected = [];
+      for (const row of rows) {
+        const hourStart = startOfHour(new Date(row.time));
+        const existing = expected.findIndex((r) => r.time === hourStart);
+        if (existing === -1) {
+          expected.push({ time: hourStart, count: 0 });
+          existing = expected.length - 1;
+        }
+
+        expected[existing].count++;
+      }
+      expected.sort((r) => r.time);
       expect(JSON.parse(panelValueBuffer.toString())).toStrictEqual(
-        [
-          { count: 4, time: subHours(startOfHour(new Date()), 0) },
-          { count: 2, time: subHours(startOfHour(new Date()), 1) },
-          { count: 3, time: subHours(startOfHour(new Date()), 3) },
-        ].map((row) => ({
+        expected.map((row) => ({
           ...row,
           time: format(row.time, 'yyyy-MM-dd HH:mm:ss'),
         }))

@@ -10,6 +10,7 @@ import {
 import { title } from '../../shared/text';
 import { Datetime } from './Datetime';
 import { FieldPicker } from './FieldPicker';
+import { FormGroup } from './FormGroup';
 import { Radio } from './Radio';
 import { NONE, Select } from './Select';
 
@@ -118,11 +119,11 @@ export function TimeSeriesRange({
   const fieldName = 'range-type-' + uuid.v4();
 
   return (
-    <React.Fragment>
+    <FormGroup label="Time Range">
       {!hideField && (
         <div className="form-row">
           <FieldPicker
-            label="Timestamp Field"
+            label="Time Field"
             value={range.field}
             shape={shape}
             allowNone="None"
@@ -225,6 +226,6 @@ export function TimeSeriesRange({
           )}
         </div>
       </div>
-    </React.Fragment>
+    </FormGroup>
   );
 }
