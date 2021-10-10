@@ -1,5 +1,5 @@
 const path = require('path');
-const { LANGUGES } = require('../../shared/languages');
+const { LANGUAGES } = require('../../shared/languages');
 const { getProjectResultsFile } = require('../store');
 const fs = require('fs');
 const { LiteralPanelInfo, ProgramPanelInfo } = require('../../shared/state');
@@ -116,10 +116,14 @@ for (const t of TESTS) {
             // defaultContent(0) returns [] and defaultContent(!0) returns the previous panel
             expect(JSON.parse(panelValueBuffer.toString())).toStrictEqual(
               n === 0
-                ? []
+                ? t.type === 'r'
+                  ? null
+                  : t.type === 'sql'
+                  ? [{ NULL: null }]
+                  : []
                 : [
-                    { name: 'Kev', age: 12 },
-                    { name: 'Nyra', age: 18 },
+                    { name: 'Kev', age: '12' },
+                    { name: 'Nyra', age: '18' },
                   ]
             );
 

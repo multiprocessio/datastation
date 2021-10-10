@@ -29,10 +29,10 @@ end`;
 
 function defaultContent(panelIndex: number) {
   if (panelIndex === 0) {
-    return 'result = []\n// Your logic here\nDM_setPanel(result)';
+    return 'result = []\n# Your logic here\nDM_setPanel(result)';
   }
 
-  return 'transform = DM_getPanel(0)\n// Your logic here\nDM_setPanel(transform)';
+  return 'transform = DM_getPanel(0)\n# Your logic here\nDM_setPanel(transform)';
 }
 
 function exceptionRewriter(msg: string, programPath: string) {

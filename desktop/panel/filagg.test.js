@@ -84,6 +84,7 @@ test('filters time range', async () => {
     time: subMinutes(new Date(), timeOffset).toISOString(),
     value: timeOffset,
   }));
+  console.log(rows);
   const lp = new LiteralPanelInfo({
     contentTypeInfo: { type: 'application/json' },
     content: JSON.stringify(rows),

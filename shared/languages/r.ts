@@ -1,11 +1,11 @@
 function defaultContent(panelIndex: number) {
   if (panelIndex === 0) {
-    return 'result = []\n// Your logic here\nDM_setPanel(result)';
+    return 'result = c()\n# Your logic here\nDM_setPanel(result)';
   }
 
   return `transform = DM_getPanel(${
     panelIndex - 1
-  })\n// Your logic here\nDM_setPanel(transform)`;
+  })\n# Your logic here\nDM_setPanel(transform)`;
 }
 
 function preamble(
