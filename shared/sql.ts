@@ -146,17 +146,24 @@ export function buildSQLiteQuery(vp: FilterAggregatePanelInfo): string {
     sortAsc,
     range,
     limit,
+    windowInterval,
   } = vp.filagg;
 
   let columns = '*';
   let groupByClause = '';
   if (aggregateType !== 'none') {
-    columns = `${quote(
-      groupBy,
-      ANSI_SQL_QUOTE.identifier
-    )}, ${aggregateType.toUpperCase()}(${
-      aggregateOn ? quote(aggregateOn, ANSI_SQL_QUOTE.identifier) : 1
-    }) AS ${quote(aggregateType, ANSI_SQL_QUOTE.identifier)}`;
+    if (windowInterval) {
+      const intervalSeconds = (+windowInterval || 0) * 60;
+      columns = `DATETIME((STRFTIME('%s', ${groupBy}) / ${intervalSeconds}) *${intervalSeconds}, 'unixepoch') ${groupBy},`;
+    } else {
+      columns = `${quote(
+        groupBy,
+        ANSI_SQL_QUOTE.identifier
+      )}, ${aggregateType.toUpperCase()}(${
+        aggregateOn ? quote(aggregateOn, ANSI_SQL_QUOTE.identifier) : 1
+      }) AS ${quote(aggregateType, ANSI_SQL_QUOTE.identifier)}`;
+    }
+
     groupByClause = `GROUP BY ${quote(groupBy, ANSI_SQL_QUOTE.identifier)}`;
   }
   let whereClause = filter ? 'WHERE ' + filter : '';

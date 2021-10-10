@@ -59,7 +59,7 @@ for (const t of TESTS) {
       path.join(CODE_ROOT, 'build', 'desktop_runner.js'),
     ]) {
       test(`runs ${t.type} programs to perform addition via ${
-        subprocessName ? subprocessName : 'process'
+        subprocessName ? subprocessName : 'same-process'
       }`, async () => {
         const lp = new LiteralPanelInfo();
         lp.literal.contentTypeInfo = { type: 'text/csv' };

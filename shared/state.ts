@@ -480,6 +480,7 @@ export class FilterAggregatePanelInfo extends PanelInfo {
     aggregateOn: string;
     sortOn: string;
     sortAsc: boolean;
+    windowInterval: string;
     limit: number;
   };
 
@@ -496,6 +497,7 @@ export class FilterAggregatePanelInfo extends PanelInfo {
       sortOn: panel.sortOn || '',
       sortAsc: panel.sortAsc || false,
       limit: panel.limit || 100,
+      windowInterval: panel.windowInterval || '',
       range: panel.range || {
         field: '',
         rangeType: 'relative',

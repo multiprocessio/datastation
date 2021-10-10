@@ -85,6 +85,13 @@ exports.withSavedPanels = async function (
           { panelId: panel.id },
           dispatch
         );
+
+        // Make panel results are saved to disk
+        expect(
+          exports.fileIsEmpty(
+            getProjectResultsFile(project.projectName) + panel.id
+          )
+        ).toBe(false);
       }
     }
 

@@ -189,6 +189,42 @@ export function FilterAggregatePanelDetails({
                     />
                   </div>
                 )}
+                {MODE !== 'browser' && panel.filagg.aggregateType !== 'none' && (
+                  <div className="form-row">
+                    <Select
+                      label="With Time Interval"
+                      value={panel.filagg.windowInterval}
+                      onChange={(value: string) => {
+                        panel.filagg.windowInterval = value;
+                        updatePanel(panel);
+                      }}
+                    >
+                      <optgroup label="Up to a day">
+                        <option value="1-minute">1 Minute</option>
+                        <option value="5-minutes">5 Minutes</option>
+                        <option value="15-minutes">15 Minutes</option>
+                        <option value="30-minutes">30 Minutes</option>
+                        <option value="1-hours">1 Hour</option>
+                        <option value="3-hours">3 Hours</option>
+                        <option value="6-hours">6 Hours</option>
+                        <option value="12-hours">12 Hours</option>
+                        <option value="1-day">1 Day</option>
+                      </optgroup>
+                      <optgroup label="Up to a month">
+                        <option value="3-days">3 Days</option>
+                        <option value="5-days">5 Days</option>
+                        <option value="1-week">1 Week</option>
+                        <option value="2-weeks">2 Weeks</option>
+                        <option value="1-month">1 Month</option>
+                      </optgroup>
+                      <optgroup label="Up to a year">
+                        <option value="3-months">3 Months</option>
+                        <option value="6-months">6 Months</option>
+                        <option value="1-year">1 Year</option>
+                      </optgroup>
+                    </Select>
+                  </div>
+                )}
               </React.Fragment>
             )}
           </FormGroup>
