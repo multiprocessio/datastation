@@ -1,4 +1,5 @@
 require('source-map-support/register');
+require('./shared/polyfill');
 
 // https://enzymejs.github.io/enzyme/docs/guides/jsdom.html
 const { JSDOM } = require('jsdom');

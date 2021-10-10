@@ -2,25 +2,25 @@ const fs = require('fs');
 const faker = require('faker');
 const XLSX = require('xlsx');
 const CSV = require('papaparse');
-const parquet = require('parquetjs-lite');
+const parquet = require('@dsnp/parquetjs');
 
 const data = [];
 for (let i = 0; i < 1000; i++) {
   data.push({
-    name: faker.name.findName(),
-    phone: faker.phone.phoneNumber(),
-    email: faker.internet.email(),
-    street: faker.address.streetAddress(),
-    city: faker.address.city(),
-    state: faker.address.state(),
-    zipCode: faker.address.zipCode(),
-    routingNumber: faker.finance.routingNumber(),
-    department: faker.commerce.department(),
-    company: faker.company.companyName(),
-    createdAt: faker.date.past(),
-    profilePhoto: faker.image.imageUrl(),
-    description: faker.lorem.paragraph(),
-    activated: faker.datatype.boolean(),
+    ' Name ': faker.name.findName(),
+    'Phone Number ': faker.phone.phoneNumber(),
+    Email: faker.internet.email(),
+    Street: faker.address.streetAddress(),
+    '    City ': faker.address.city(),
+    State: faker.address.state(),
+    'Zip Code ': faker.address.zipCode(),
+    'Routing Number   ': faker.finance.routingNumber(),
+    Department: faker.commerce.department(),
+    'Company\t': faker.company.companyName(),
+    'Created At ': faker.date.past(),
+    'Profile Photo': faker.image.imageUrl(),
+    '  Description': faker.lorem.paragraph(),
+    Activated: faker.datatype.boolean(),
   });
 }
 console.log(`Generated ${data.length} test data rows`);
@@ -33,6 +33,11 @@ async function write() {
   fs.writeFileSync(csvname, CSV.unparse(data));
   console.log(`Wrote ${csvname}`);
 
+  // Write as JSON
+  const jsonname = directory + 'userdata.json';
+  fs.writeFileSync(jsonname, JSON.stringify(data));
+  console.log(`Wrote ${jsonname}`);
+
   // Write as Excel file
   const ws = XLSX.utils.json_to_sheet(data);
   const wb = XLSX.utils.book_new();
@@ -43,20 +48,20 @@ async function write() {
 
   // Write as parquet file
   const schema = new parquet.ParquetSchema({
-    name: { type: 'UTF8' },
-    phone: { type: 'UTF8' },
-    email: { type: 'UTF8' },
-    street: { type: 'UTF8' },
-    city: { type: 'UTF8' },
-    state: { type: 'UTF8' },
-    zipCode: { type: 'UTF8' },
-    routingNumber: { type: 'INT64' },
-    department: { type: 'UTF8' },
-    company: { type: 'UTF8' },
-    createdAt: { type: 'TIMESTAMP_MILLIS' },
-    profilePhoto: { type: 'UTF8' },
-    description: { type: 'UTF8' },
-    activated: { type: 'BOOLEAN' },
+    ' Name ': { type: 'UTF8' },
+    'Phone Number ': { type: 'UTF8' },
+    Email: { type: 'UTF8' },
+    Street: { type: 'UTF8' },
+    '    City ': { type: 'UTF8' },
+    State: { type: 'UTF8' },
+    'Zip Code ': { type: 'UTF8' },
+    'Routing Number   ': { type: 'INT64' },
+    Department: { type: 'UTF8' },
+    'Company\t': { type: 'UTF8' },
+    'Created At ': { type: 'TIMESTAMP_MILLIS' },
+    'Profile Photo': { type: 'UTF8' },
+    '  Description': { type: 'UTF8' },
+    Activated: { type: 'BOOLEAN' },
   });
   const parquetname = directory + 'userdata.parquet';
   const writer = await parquet.ParquetWriter.openFile(schema, parquetname);

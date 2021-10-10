@@ -18,6 +18,7 @@ test('registers handlers', async () => {
     {
       resource: 'test',
       handler: (projectId, body, dispatch, external) => {
+        // TODO: test internal dispatch
         expect(projectId).toBe('test id');
         expect(body).toStrictEqual({ something: 1 });
         expect(external).toStrictEqual(true);

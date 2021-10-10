@@ -513,16 +513,13 @@ export class FilePanelInfo extends PanelInfo {
   };
 
   constructor(
-    name?: string,
-    fileName?: string,
-    fileContent?: ArrayBuffer,
-    contentTypeInfo?: ContentTypeInfo
+    panel: Partial<FilePanelInfo['file'] & { panelName: string }> = {}
   ) {
-    super('file', name, '');
+    super('file', panel.panelName, '');
     this.file = {
-      name: fileName || '',
-      content: fileContent || new ArrayBuffer(0),
-      contentTypeInfo: contentTypeInfo || new ContentTypeInfo(),
+      name: panel.name || '',
+      content: panel.content || new ArrayBuffer(0),
+      contentTypeInfo: panel.contentTypeInfo || new ContentTypeInfo(),
     };
   }
 }

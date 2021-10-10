@@ -1,4 +1,4 @@
-declare module 'parquetjs-lite' {
+declare module '@dsnp/parquetjs' {
   export class ParquetCursor {
     next(): Promise<object>;
   }
