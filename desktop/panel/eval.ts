@@ -67,7 +67,7 @@ export async function evalInSubprocess(
   projectName: string,
   panelId: string
 ) {
-  const tmp = await makeTmpFile();
+  const tmp = await makeTmpFile({ prefix: 'resultmeta-' });
   let pid = 0;
 
   try {

@@ -16,7 +16,7 @@ export async function evalProgram(
   { indexIdMap }: EvalHandlerExtra
 ): Promise<EvalHandlerResponse> {
   const ppi = guardPanel<ProgramPanelInfo>(panel, 'program');
-  const programTmp = await makeTmpFile();
+  const programTmp = await makeTmpFile({ prefix: 'program-tmp-' });
   const language = LANGUAGES[ppi.program.type];
 
   const projectResultsFile = getProjectResultsFile(project.projectName);
