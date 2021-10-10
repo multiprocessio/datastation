@@ -62,7 +62,7 @@ for (const userdataFileType of USERDATA_FILES) {
   const dynamicF = {
     // Do this so that its name shows up in stack traces
     [userdataFileType + 'Test']: async () => {
-      const tmp = await makeTmpFile();
+      const tmp = await makeTmpFile({ prefix: userDataFileType+'-file-project-' });
 
       try {
         const { value } = await evalFile(

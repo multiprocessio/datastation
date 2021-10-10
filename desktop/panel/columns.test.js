@@ -13,7 +13,7 @@ const { makeEvalHandler } = require('./eval');
 const { fetchResultsHandler } = require('./columns');
 
 test('store and retrieve literal, specific columns', async () => {
-  const tmp = await makeTmpFile();
+  const tmp = await makeTmpFile({ prefix: 'columns-project-' });
 
   const testData = [
     { a: 1, b: 'hey' },

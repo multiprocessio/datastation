@@ -30,7 +30,7 @@ exports.withSavedPanels = async function (
   cb,
   { evalPanels, subprocessName, connectors } = {}
 ) {
-  const tmp = await makeTmpFile();
+  const tmp = await makeTmpFile({ prefix: 'saved-panel-project-' });
 
   const project = {
     ...new ProjectState(),
