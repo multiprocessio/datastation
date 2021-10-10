@@ -1,3 +1,5 @@
+require('source-map-support/register');
+
 // https://enzymejs.github.io/enzyme/docs/guides/jsdom.html
 const { JSDOM } = require('jsdom');
 const { configure } = require('enzyme');
