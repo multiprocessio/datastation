@@ -28,12 +28,14 @@ export async function evalHTTPPanel(panel: HTTPPanelInfo) {
       panel.http.http.headers,
       panel.content
     );
+    const s = shape(value);
     return {
       value,
       size: JSON.stringify(value).length,
+      arrayCount: s.kind === 'array' ? (value || []).length : null,
       contentType,
       preview: preview(value),
-      shape: shape(value),
+      shape: s,
       stdout: '',
     };
   }

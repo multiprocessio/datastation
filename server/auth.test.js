@@ -1,0 +1,3 @@
+require('./auth');
+
+test('stub', () => {});

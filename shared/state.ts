@@ -10,6 +10,7 @@ export class PanelResult {
   preview: string;
   stdout: string;
   shape: Shape;
+  arrayCount: null | number;
   size: number;
   contentType: string;
   elapsed?: number;
@@ -295,25 +296,18 @@ export class PanelInfo {
 export class ProgramPanelInfo extends PanelInfo {
   program: {
     type: SupportedLanguages;
-    range?: TimeSeriesRange;
   };
 
   constructor({
     name,
     type,
     content,
-    range,
   }: Partial<
     ProgramPanelInfo['program'] & { content: string; name: string }
   > = {}) {
     super('program', name || '', content || '');
     this.program = {
       type: type || 'python',
-      range: range || {
-        field: '',
-        rangeType: 'relative',
-        relative: 'last-hour',
-      },
     };
   }
 }
@@ -387,6 +381,8 @@ export type TimeSeriesFixedTimes =
 
 export type TimeSeriesRange = {
   field: string;
+  sortOn?: string;
+  sortAsc?: boolean;
 } & (
   | {
       rangeType: 'absolute';
@@ -484,33 +480,25 @@ export class FilterAggregatePanelInfo extends PanelInfo {
     aggregateOn: string;
     sortOn: string;
     sortAsc: boolean;
+    windowInterval: string;
     limit: number;
   };
 
   constructor(
-    name?: string,
-    panelSource?: number,
-    filter?: string,
-    aggregateType?: AggregateType,
-    groupBy?: string,
-    aggregateOn?: string,
-    sortOn?: string,
-    sortAsc?: boolean,
-    content?: string,
-    limit?: number,
-    range?: TimeSeriesRange
+    panel: Partial<FilterAggregatePanelInfo['filagg'] & { name: string }> = {}
   ) {
-    super('filagg', name, content);
+    super('filagg', panel.name || '', '');
     this.filagg = {
-      panelSource: panelSource || 0,
-      filter: filter || '',
-      aggregateType: aggregateType || 'none',
-      groupBy: groupBy || '',
-      aggregateOn: aggregateOn || '',
-      sortOn: sortOn || '',
-      sortAsc: sortAsc || false,
-      limit: 100,
-      range: range || {
+      panelSource: panel.panelSource || 0,
+      filter: panel.filter || '',
+      aggregateType: panel.aggregateType || 'none',
+      groupBy: panel.groupBy || '',
+      aggregateOn: panel.aggregateOn || '',
+      sortOn: panel.sortOn || '',
+      sortAsc: panel.sortAsc || false,
+      limit: panel.limit || 100,
+      windowInterval: panel.windowInterval || '',
+      range: panel.range || {
         field: '',
         rangeType: 'relative',
         relative: 'last-hour',
@@ -527,16 +515,13 @@ export class FilePanelInfo extends PanelInfo {
   };
 
   constructor(
-    name?: string,
-    fileName?: string,
-    fileContent?: ArrayBuffer,
-    contentTypeInfo?: ContentTypeInfo
+    panel: Partial<FilePanelInfo['file'] & { panelName: string }> = {}
   ) {
-    super('file', name, '');
+    super('file', panel.panelName, '');
     this.file = {
-      name: fileName || '',
-      content: fileContent || new ArrayBuffer(0),
-      contentTypeInfo: contentTypeInfo || new ContentTypeInfo(),
+      name: panel.name || '',
+      content: panel.content || new ArrayBuffer(0),
+      contentTypeInfo: panel.contentTypeInfo || new ContentTypeInfo(),
     };
   }
 }

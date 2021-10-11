@@ -1,5 +1,4 @@
 import fetch from 'node-fetch';
-import { sqlRangeQuery } from '../../../shared/sql';
 import {
   DatabaseConnectorInfo,
   DatabasePanelInfo,
@@ -10,8 +9,11 @@ import { EvalHandlerResponse } from '../types';
 
 interface InfluxResponse {
   results: Array<{
-    columns: Array<string>;
-    values: Array<Array<any>>;
+    series: Array<{
+      columns: Array<string>;
+      values: Array<any>;
+      name: string;
+    }>;
   }>;
 }
 
@@ -23,19 +25,18 @@ export async function evalInflux(
   { database: { database, username, password_encrypt } }: DatabaseConnectorInfo,
   panel: DatabasePanelInfo
 ): Promise<EvalHandlerResponse> {
-  const rangeQuery = sqlRangeQuery(query, range, 'influx');
   const url = fullHttpURL(host, port);
-  const endpoint = `${url}/query?${queryParameters({
+  const params = queryParameters({
     db: database,
-    q: rangeQuery,
+    q: query,
     u: username,
     p: password_encrypt.value,
-  })}`;
+  });
+  const endpoint = `${url}/query?${params}`;
 
   const response = await fetch(endpoint, {
     method: 'POST',
   });
-
   const j = (await response.json()) as InfluxResponse;
   if (response.status !== 200) {
     throw j;
@@ -43,10 +44,16 @@ export async function evalInflux(
 
   const rows: Array<Record<string, any>> = [];
   for (const results of j.results) {
-    for (const row of results.values) {
-      const r: Record<string, any> = {};
-      for (let i = 0; i < results.columns.length; i++) {
-        r[results.columns[i]] = row[i];
+    for (const series of results.series) {
+      for (const row of series.values) {
+        const r: Record<string, any> = {
+          influx_series_name: series.name,
+        };
+        for (let i = 0; i < series.columns.length; i++) {
+          r[series.columns[i]] = row[i];
+        }
+
+        rows.push(r);
       }
     }
   }

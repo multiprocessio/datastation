@@ -100,17 +100,22 @@ function PreviewResults({
   }
 
   if (panelOut === 'metadata') {
-    results = {
-      ...results,
-      metadata: JSON.stringify(
-        {
-          Size: humanSize(results.size),
-          'Inferred Content-Type': results.contentType,
-        },
-        null,
-        2
-      ),
-    };
+    const metadata = [
+      { name: 'Inferred Content-Type', value: results.contentType },
+      { name: 'Size', value: humanSize(results.size) },
+      {
+        name: 'Number of Elements',
+        value:
+          results.arrayCount === null
+            ? 'Not an array'
+            : results.arrayCount.toLocaleString(),
+      },
+    ];
+    return (
+      <Highlight language="javascript">
+        {metadata.map((d) => `${d.name}: ${d.value}`).join('\n')}
+      </Highlight>
+    );
   }
 
   if (!results[panelOut]) {
@@ -291,7 +296,11 @@ export function Panel({
 
             {!panelUIDetails.alwaysOpen && (
               <span title={details ? 'Hide Details' : 'Show Details'}>
-                <Button icon onClick={() => setDetails(!details)}>
+                <Button
+                  data-testid="show-hide-panel"
+                  icon
+                  onClick={() => setDetails(!details)}
+                >
                   {details ? 'unfold_less' : 'unfold_more'}
                 </Button>
               </span>
@@ -315,6 +324,7 @@ export function Panel({
                     })}
                     <div>
                       <small>
+                        Took{' '}
                         {formatDistanceStrict(
                           results.lastRun.valueOf() - (results.elapsed || 0),
                           results.lastRun.valueOf()

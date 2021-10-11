@@ -67,7 +67,7 @@ export async function evalInSubprocess(
   projectName: string,
   panelId: string
 ) {
-  const tmp = await makeTmpFile();
+  const tmp = await makeTmpFile({ prefix: 'resultmeta-' });
   let pid = 0;
 
   try {
@@ -92,6 +92,10 @@ export async function evalInSubprocess(
 
     let stderr = '';
     child.stderr.on('data', (data) => {
+      // Can't find any way to suppress this error appearing in Node processes.
+      if (data.includes('stream/web is an experimental feature.')) {
+        return;
+      }
       stderr += data;
     });
 
@@ -190,12 +194,15 @@ export const makeEvalHandler = (
       fs.writeFileSync(projectResultsFile + panel.id, json);
     }
 
+    const s = shape(res.value);
+
     return {
       stdout: res.stdout || '',
       preview: preview(res.value),
-      shape: shape(res.value),
+      shape: s,
       value: res.returnValue ? res.value : null,
       size: json.length,
+      arrayCount: s.kind === 'array' ? (res.value || []).length : null,
       contentType: res.contentType || 'application/json',
     };
   },

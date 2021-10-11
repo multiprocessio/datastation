@@ -16,10 +16,12 @@
     "release-desktop": "python3 ./scripts/build.py ./desktop/scripts/release.build",
     "format": "yarn prettier --write \"**/*.js\" \"**/*.test.js\" \"**/*.ts\" \"**/*.tsx\" \"**/*.css\" \"**/*.json\"",
     "test-licenses": "yarn license-checker --production --onlyAllow 'AFLv2.1;BSD;MIT;Apache-2.0;Apache 2.0;Apache*;ISC;BSD-3-Clause;MIT*;BSD-2-Clause;Unlicense'",
+    "generate-test-data": "node --unhandled-rejections=strict ./scripts/generate_test_data.js",
     "test": "yarn jest --passWithNoTests --coverage",
     "e2e-test": "node --unhandled-rejections=throw ./e2e/index.js"
   },
   "dependencies": {
+    "@dsnp/parquetjs": "^1.1.2",
     "@elastic/elasticsearch": "^7.15.0",
     "ace-builds": "^1.4.13",
     "alasql": "^1.7.3",
@@ -29,7 +31,6 @@
     "date-fns": "^2.24.0",
     "express": "^4.17.1",
     "express-session": "^1.17.2",
-    "influx": "^5.9.2",
     "jsesc": "^3.0.2",
     "json-stringify-safe": "^5.0.1",
     "lodash.debounce": "^4.0.8",
@@ -38,7 +39,6 @@
     "node-fetch": "^3.0.0",
     "openid-client": "^4.9.0",
     "papaparse": "^5.3.1",
-    "parquetjs-lite": "^0.8.7",
     "passport": "^0.5.0",
     "pg": "^8.7.1",
     "preview": "https://github.com/multiprocessio/preview#0.2.2",
@@ -48,6 +48,7 @@
     "react-syntax-highlighter": "^15.4.4",
     "shape": "https://github.com/multiprocessio/shape#0.2.1",
     "snowflake-sdk": "^1.6.3",
+    "source-map-support": "^0.5.20",
     "sqlite": "^4.0.23",
     "sqlite3": "^5.0.2",
     "ssh2-promise": "^1.0.2",
@@ -55,7 +56,6 @@
     "tmp-promise": "^3.0.2",
     "tweetnacl": "^1.0.3",
     "tweetnacl-util": "^0.15.1",
-    "urijs": "^1.19.7",
     "uuid": "^8.3.2",
     "xlsx": "^0.17.2"
   },
@@ -91,6 +91,7 @@
     "electron-packager": "^15.4.0",
     "enzyme": "^3.11.0",
     "esbuild": "^0.13.3",
+    "faker": "^5.5.3",
     "jest": "^27.2.4",
     "jsdom": "^17.0.0",
     "license-checker": "^25.0.1",
@@ -98,6 +99,7 @@
     "prettier-plugin-organize-imports": "^2.3.4",
     "refractor": "^4.2.1",
     "selenium-webdriver": "^4.0.0-rc-2",
+    "ts-jest": "^27.0.5",
     "typescript": "^4.4.3"
   },
   "resolutions": {

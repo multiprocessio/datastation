@@ -11,8 +11,8 @@ export function ServerList({
 }: {
   state: ProjectState;
   addServer: (dc: ServerInfo) => void;
-  updateServer: (n: number, dc: ServerInfo) => void;
-  deleteServer: (n: number) => void;
+  updateServer: (id: string, dc: ServerInfo) => void;
+  deleteServer: (id: string) => void;
 }) {
   return (
     <div className="servers">
@@ -21,8 +21,8 @@ export function ServerList({
         <Server
           key={dc.id}
           server={dc}
-          updateServer={(dc: ServerInfo) => updateServer(i, dc)}
-          deleteServer={deleteServer.bind(null, i)}
+          updateServer={(dc: ServerInfo) => updateServer(dc.id, dc)}
+          deleteServer={() => deleteServer(dc.id)}
         />
       ))}
       <div className="text-center">

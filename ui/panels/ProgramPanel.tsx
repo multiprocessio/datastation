@@ -2,16 +2,10 @@ import React from 'react';
 import { shape } from 'shape';
 import { MODE } from '../../shared/constants';
 import { LANGUAGES, SupportedLanguages } from '../../shared/languages';
-import { sqlRangeQuery } from '../../shared/sql';
-import {
-  PanelResult,
-  ProgramPanelInfo,
-  TimeSeriesRange as TimeSeriesRangeT,
-} from '../../shared/state';
+import { PanelResult, ProgramPanelInfo } from '../../shared/state';
 import { panelRPC } from '../asyncRPC';
 import { CodeEditor } from '../components/CodeEditor';
 import { Select } from '../components/Select';
-import { TimeSeriesRange } from '../components/TimeSeriesRange';
 import { PanelBodyProps, PanelDetailsProps, PanelUIDetails } from './types';
 
 export async function evalProgramPanel(
@@ -29,17 +23,14 @@ export async function evalProgramPanel(
     throw new Error(`Unknown program type: '${program.type}'`);
   }
 
-  let content = panel.content;
-  if (program.type === 'sql') {
-    content = sqlRangeQuery(content, panel.program.range, 'sqlite');
-  }
-
-  const res = await language.inMemoryEval(content, panelResults);
+  const res = await language.inMemoryEval(panel.content, panelResults);
+  const s = shape(res.value);
   return {
     ...res,
     size: res.value ? JSON.stringify(res.value).length : 0,
+    shape: s,
+    arrayCount: s.kind === 'array' ? (res.value || []).length : null,
     contentType: 'application/json',
-    shape: shape(res.value),
   };
 }
 
@@ -81,17 +72,6 @@ export function ProgramPanelDetails({
             </option>
           ))}
         </Select>
-        {panel.program.type === 'sql' && (
-          <div className="form-row">
-            <TimeSeriesRange
-              range={panel.program.range}
-              updateRange={(r: TimeSeriesRangeT) => {
-                panel.program.range = r;
-                updatePanel(panel);
-              }}
-            />
-          </div>
-        )}
       </div>
     </React.Fragment>
   );

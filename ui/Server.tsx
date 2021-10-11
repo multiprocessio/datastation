@@ -41,37 +41,45 @@ export function Server({
   return (
     <div className="server">
       <div className="server-header vertical-align-center">
-        <span title="Delete server">
-          <Confirm
-            right
-            onConfirm={deleteServer}
-            message="delete this server"
-            action="Delete"
-            className="page-delete"
-            render={(confirm: () => void) => (
-              <Button icon onClick={confirm}>
-                delete
-              </Button>
-            )}
+        {expanded ? (
+          <Input
+            className="server-name"
+            onChange={(value: string) => {
+              server.name = value;
+              updateServer(server);
+            }}
+            value={server.name}
           />
-        </span>
-        <span>
-          {expanded ? (
-            <Input
-              className="server-name"
-              onChange={(value: string) => {
-                server.name = value;
-                updateServer(server);
-              }}
-              value={server.name}
-            />
-          ) : (
-            server.name
+        ) : (
+          <span className="server-name">{server.name}</span>
+        )}
+        <div className="flex-right">
+          {!expanded && (
+            <Button
+              type="outline"
+              icon
+              className="hover-button"
+              onClick={() => setExpanded(true)}
+              title="Edit"
+            >
+              edit_outline
+            </Button>
           )}
-        </span>
-        <Button icon onClick={() => setExpanded(!expanded)}>
-          {expanded ? 'unfold_less' : 'unfold_more'}
-        </Button>
+          <span title="Delete server">
+            <Confirm
+              right
+              onConfirm={deleteServer}
+              message="delete this server"
+              action="Delete"
+              className="hover-button"
+              render={(confirm: () => void) => (
+                <Button icon onClick={confirm} type="outline">
+                  delete
+                </Button>
+              )}
+            />
+          </span>
+        </div>
       </div>
       {expanded && (
         <React.Fragment>
@@ -164,6 +172,13 @@ export function Server({
               />
             </div>
           ) : null}
+          {expanded && (
+            <div className="text-center">
+              <Button type="outline" onClick={() => setExpanded(false)}>
+                Close
+              </Button>
+            </div>
+          )}
         </React.Fragment>
       )}
     </div>

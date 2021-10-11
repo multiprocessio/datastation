@@ -4,24 +4,14 @@ module.exports = {
     process.platform === 'linux'
       ? {
           global: {
-            statements: 63,
-            branches: 52,
-            functions: 54,
-            lines: 58,
+            statements: 66,
+            branches: 56,
+            functions: 56,
+            lines: 66,
           },
         }
       : undefined,
-  transform: {
-    '.[jt]sx?$': [
-      '@sucrase/jest-plugin',
-      {
-        sourcemap: true,
-        loaders: {
-          '.test.js': 'jsx',
-        },
-      },
-    ],
-  },
+  preset: 'ts-jest/presets/js-with-ts',
   transformIgnorePatterns: [
     'node_modules/(?!react-syntax-highlighter|refractor|node-fetch|fetch-blob)',
   ],

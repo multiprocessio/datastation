@@ -1,0 +1,3 @@
+require('./project');
+
+test('stub', () => {});

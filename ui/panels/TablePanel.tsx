@@ -31,12 +31,14 @@ export async function evalColumnPanel(
         columns,
         panelSource
       );
+      const s = shape(valueWithRequestedColumns);
       return {
         value: valueWithRequestedColumns,
         preview: preview(valueWithRequestedColumns),
-        shape: shape(valueWithRequestedColumns),
+        shape: s,
         stdout: '',
         size: value ? JSON.stringify(value).length : 0,
+        arrayCount: s.kind === 'array' ? (value || []).length : null,
         contentType: 'application/json',
       };
     } catch (e) {

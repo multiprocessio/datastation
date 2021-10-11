@@ -6,6 +6,7 @@ import {
   encodeBase64,
   encodeUTF8,
 } from 'tweetnacl-util';
+import { doOnEncryptFields, Encrypt } from '../shared/state';
 import { ensureFile } from './fs';
 
 function getSigningKeyPath(signingKeyPath?: string) {
@@ -68,4 +69,16 @@ export function decrypt(msgWithNonce: string, signingKeyPath?: string) {
 
   const base64DecryptedMessage = encodeUTF8(decrypted);
   return base64DecryptedMessage;
+}
+
+export function decryptFields(a: any) {
+  doOnEncryptFields(a, (f: Encrypt) => {
+    if (!f.value) {
+      f.value = undefined;
+      return f;
+    }
+
+    f.value = decrypt(f.value);
+    return f;
+  });
 }

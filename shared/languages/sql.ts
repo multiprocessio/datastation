@@ -11,7 +11,7 @@ function exceptionRewriter(msg: string, _: string) {
 
 function defaultContent(panelIndex: number) {
   if (panelIndex === 0) {
-    return '';
+    return 'SELECT NULL -- Your query here';
   }
 
   return `SELECT * FROM DM_getPanel(${panelIndex - 1})`;

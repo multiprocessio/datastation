@@ -1,4 +1,5 @@
 import fs from 'fs';
+import 'source-map-support/register';
 import { APP_NAME, DEBUG, VERSION } from '../shared/constants';
 import log from '../shared/log';
 import '../shared/polyfill';
@@ -61,43 +62,50 @@ export async function main(additionalHandlers?: RPCHandler<any, any>[]) {
     });
   });
 
-  const { project, handlers, panel, panelMetaOut } = initialize({
-    additionalHandlers,
-  });
-  if (!project) {
-    throw new Error('No project given.');
-  }
-
-  if (!panel) {
-    throw new Error('No panel given.');
-  }
-
-  if (!panelMetaOut) {
-    throw new Error('No panel meta out given.');
-  }
-
-  function dispatch(
-    payload: Omit<RPCPayload, 'messageNumber'>,
-    external = false
-  ) {
-    const handler = handlers.find((h) => h.resource === payload.resource);
-    if (!handler) {
-      throw new Error(`No RPC handler for resource: ${payload.resource}`);
+  try {
+    const { project, handlers, panel, panelMetaOut } = initialize({
+      additionalHandlers,
+    });
+    if (!project) {
+      throw new Error('No project given.');
     }
 
-    return handler.handler(payload.projectId, payload.body, dispatch, false);
+    if (!panel) {
+      throw new Error('No panel given.');
+    }
+
+    if (!panelMetaOut) {
+      throw new Error('No panel meta out given.');
+    }
+
+    function dispatch(
+      payload: Omit<RPCPayload, 'messageNumber'>,
+      external = false
+    ) {
+      const handler = handlers.find((h) => h.resource === payload.resource);
+      if (!handler) {
+        throw new Error(`No RPC handler for resource: ${payload.resource}`);
+      }
+
+      return handler.handler(payload.projectId, payload.body, dispatch, false);
+    }
+
+    const resultMeta = await dispatch({
+      resource: 'eval',
+      body: { panelId: panel },
+      projectId: project,
+    });
+    fs.writeFileSync(panelMetaOut, JSON.stringify(resultMeta));
+    log.info(
+      `Wrote panel meta for ${panel} of "${project}" to ${panelMetaOut}.`
+    );
+
+    // Must explicitly exit
+    process.exit(0);
+  } catch (e) {
+    log.error(e);
+    process.exit(2);
   }
-
-  const resultMeta = await dispatch({
-    resource: 'eval',
-    body: { panelId: panel },
-    projectId: project,
-  });
-  fs.writeFileSync(panelMetaOut, JSON.stringify(resultMeta));
-  log.info(`Wrote panel meta for ${panel} of "${project}" to ${panelMetaOut}.`);
-
-  // Must explicitly exit
-  process.exit(0);
 }
 
 if ((process.argv[1] || '').includes('desktop_runner.js')) {

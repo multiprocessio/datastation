@@ -1,3 +1,5 @@
+const { shape } = require('shape');
+const { preview } = require('preview');
 const {
   ProjectState,
   ProjectPage,
@@ -46,6 +48,7 @@ for (const language of TESTS) {
       ],
     };
 
+    const before = new Date();
     const reevalPanel = makeReevalPanel(project.pages[0], project, (page) => {
       project.pages[0] = page;
     });
@@ -53,9 +56,28 @@ for (const language of TESTS) {
       await reevalPanel(panel.id);
     }
 
-    expect(project.pages[0].panels[1].resultMeta.value).toStrictEqual([
+    const expectedResult = [
       { age: 50, name: 'Mel' },
       { age: 92, name: 'Quan' },
-    ]);
+    ];
+    const resultMetaCopy = { ...project.pages[0].panels[1].resultMeta };
+    expect(resultMetaCopy.elapsed).toBeGreaterThanOrEqual(0);
+    expect(resultMetaCopy.elapsed).toBeLessThanOrEqual(new Date() - before);
+    delete resultMetaCopy.elapsed;
+    expect(resultMetaCopy.lastRun.valueOf()).toBeGreaterThan(before.valueOf());
+    expect(resultMetaCopy.lastRun.valueOf()).toBeLessThanOrEqual(
+      new Date().valueOf()
+    );
+    delete resultMetaCopy.lastRun;
+    expect(resultMetaCopy).toStrictEqual({
+      loading: false,
+      shape: shape(expectedResult),
+      preview: preview(expectedResult),
+      arrayCount: 2,
+      value: expectedResult,
+      contentType: 'application/json',
+      size: 50,
+      stdout: '',
+    });
   });
 }

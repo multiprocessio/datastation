@@ -1,20 +1,12 @@
 import * as React from 'react';
 
-export function Button({
-  className,
-  children,
-  onClick,
-  type,
-  icon,
-  disabled,
-}: {
-  className?: string;
-  children: string;
-  onClick: React.MouseEventHandler<HTMLButtonElement>;
+export interface ButtonProps
+  extends React.InputHTMLAttributes<HTMLInputElement> {
   type?: 'primary' | 'outline';
   icon?: boolean;
-  disabled?: boolean;
-}) {
+}
+
+export function Button({ className, type, icon, ...props }: ButtonProps) {
   let buttonClass = `button ${className ? ' ' + className : ''}`;
   if (type) {
     buttonClass += ` button--${type}`;
@@ -24,14 +16,5 @@ export function Button({
     buttonClass += ' material-icons' + (type === 'outline' ? '-outlined' : '');
   }
 
-  return (
-    <button
-      disabled={disabled}
-      type="button"
-      className={buttonClass}
-      onClick={onClick}
-    >
-      {children}
-    </button>
-  );
+  return <button type="button" className={buttonClass} {...props} />;
 }

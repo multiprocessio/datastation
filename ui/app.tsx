@@ -229,8 +229,13 @@ export function App() {
     updateProjectState(state);
   }
 
-  function updateConnector(dcIndex: number, dc: ConnectorInfo) {
-    state.connectors[dcIndex] = dc;
+  function updateConnector(id: string, dc: ConnectorInfo) {
+    const index = (state.connectors || []).findIndex((c) => c.id === id);
+    if (index === -1) {
+      state.connectors.push(dc);
+      return;
+    }
+    state.connectors[index] = dc;
     updateProjectState(state);
   }
 
@@ -239,13 +244,22 @@ export function App() {
     updateProjectState(state);
   }
 
-  function deleteConnector(at: number) {
+  function deleteConnector(id: string) {
+    const at = (state.connectors || []).findIndex((c) => c.id === id);
+    if (at === -1) {
+      return;
+    }
     state.connectors.splice(at, 1);
     updateProjectState(state);
   }
 
-  function updateServer(dcIndex: number, dc: ServerInfo) {
-    state.servers[dcIndex] = dc;
+  function updateServer(id: string, dc: ServerInfo) {
+    const index = (state.servers || []).findIndex((c) => c.id === id);
+    if (index === -1) {
+      state.servers.push(dc);
+      return;
+    }
+    state.servers[index] = dc;
     updateProjectState(state);
   }
 
@@ -254,7 +268,11 @@ export function App() {
     updateProjectState(state);
   }
 
-  function deleteServer(at: number) {
+  function deleteServer(id: string) {
+    const at = (state.servers || []).findIndex((c) => c.id === id);
+    if (at === -1) {
+      return;
+    }
     state.servers.splice(at, 1);
     updateProjectState(state);
   }

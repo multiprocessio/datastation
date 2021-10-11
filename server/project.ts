@@ -22,10 +22,12 @@ export const getProjectHandlers = (app: App) => {
 
   const getProjects: RPCHandler<GetProjectsRequest, GetProjectsResponse> = {
     resource: 'getProjects',
-    handler: async (): Promise<Array<{ name: string; createdAt: string }>> => {
+    handler: async function getProjectsHandler(): Promise<
+      Array<{ name: string; createdAt: string }>
+    > {
       const client = await app.dbpool.connect();
       try {
-        const res = await app.dbpool.query(
+        const res = await client.query(
           'SELECT project_name, project_created_at FROM projects;'
         );
         return res.rows.map((row: any) => ({
@@ -40,15 +42,15 @@ export const getProjectHandlers = (app: App) => {
 
   const getProject: GetProjectHandler = {
     resource: 'getProject',
-    handler: async (
+    handler: async function getProjectHandler(
       _: string,
       { projectId }: { projectId: string },
       _1: unknown,
       external: boolean
-    ): Promise<ProjectState> => {
+    ): Promise<ProjectState> {
       const client = await app.dbpool.connect();
       try {
-        const res = await app.dbpool.query(
+        const res = await client.query(
           'SELECT project_value FROM projects WHERE project_name = $1;',
           [projectId]
         );
@@ -62,16 +64,19 @@ export const getProjectHandlers = (app: App) => {
 
   const updateProject: UpdateProjectHandler = {
     resource: 'updateProject',
-    handler: async (projectId: string, newState: ProjectState) => {
+    handler: async function updateProjectHandler(
+      projectId: string,
+      newState: ProjectState
+    ) {
       const client = await app.dbpool.connect();
-      const res = await app.dbpool.query(
+      const res = await client.query(
         'SELECT project_value FROM projects WHERE project_name = $1;',
         [projectId]
       );
       const existingState = res.rows[0].project_value;
       await encryptProjectSecrets(newState, existingState);
       try {
-        await app.dbpool.query(
+        await client.query(
           'INSERT INTO projects (project_name, project_value) VALUES ($1, $2) ON CONFLICT (project_name) DO UPDATE SET project_value = EXCLUDED.project_value',
           [projectId, JSON.stringify(newState)]
         );
@@ -83,10 +88,13 @@ export const getProjectHandlers = (app: App) => {
 
   const makeProject: MakeProjectHandler = {
     resource: 'makeProject',
-    handler: async (_: string, { projectId }: { projectId: string }) => {
+    handler: async function makeProjectHandler(
+      _: string,
+      { projectId }: { projectId: string }
+    ) {
       const client = await app.dbpool.connect();
       try {
-        await app.dbpool.query(
+        await client.query(
           'INSERT INTO projects (project_name, project_value) VALUES ($1, $2)',
           [projectId, JSON.stringify(new ProjectState())]
         );

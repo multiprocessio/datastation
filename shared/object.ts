@@ -32,6 +32,10 @@ export function deepClone(a: any) {
 }
 
 export function getPath(obj: any, path: string): any {
+  if (!path) {
+    return obj;
+  }
+
   const pieces = path.split('.');
 
   let current = obj;

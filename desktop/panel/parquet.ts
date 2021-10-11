@@ -1,4 +1,4 @@
-import * as parquet from 'parquetjs-lite';
+import * as parquet from '@dsnp/parquetjs';
 
 export async function parseParquet(body: ArrayBuffer) {
   const rows: Array<{ [k: string]: any }> = [];

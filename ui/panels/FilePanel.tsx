@@ -21,11 +21,13 @@ export async function evalFilePanel(
       panel.file.name,
       panel.file.content
     );
+    const s = shape(value);
     return {
       value,
       preview: preview(value),
-      shape: shape(value),
+      shape: s,
       stdout: '',
+      arrayCount: s.kind === 'array' ? (value || []).length : null,
       size: panel.file.content.byteLength,
       contentType,
     };

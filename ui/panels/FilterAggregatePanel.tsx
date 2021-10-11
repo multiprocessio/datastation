@@ -3,6 +3,7 @@ import { ArrayShape, ObjectShape, Shape, shape } from 'shape';
 import { MODE } from '../../shared/constants';
 import { InvalidDependentPanelError } from '../../shared/errors';
 import { LANGUAGES } from '../../shared/languages';
+import { buildSQLiteQuery } from '../../shared/sql';
 import {
   AggregateType,
   FilterAggregatePanelInfo,
@@ -62,47 +63,22 @@ export async function evalFilterAggregatePanel(
   panelResults: Array<PanelResult>
 ) {
   if (MODE === 'browser') {
-    const {
-      panelSource,
-      aggregateType,
-      aggregateOn,
-      groupBy,
-      filter,
-      sortOn,
-      sortAsc,
-      limit,
-    } = panel.filagg;
-
+    const { panelSource } = panel.filagg;
     if (!panelResults || !panelResults[panelSource]) {
       throw new InvalidDependentPanelError(panelSource);
     }
 
-    let columns = '*';
-    let groupByClause = '';
-    if (aggregateType !== 'none') {
-      columns = `\`${groupBy}\`, ${aggregateType.toUpperCase()}(${
-        aggregateOn ? '`' + aggregateOn + '`' : 1
-      }) AS \`${aggregateType}\``;
-      groupByClause = `GROUP BY \`${groupBy}\``;
-    }
-    const whereClause = filter ? 'WHERE ' + filter : '';
-    // TODO: implement range support
-    let sort = sortOn;
-    if ((sortOn || '').startsWith('Aggregate: ')) {
-      sort = `${aggregateType.toUpperCase()}(${
-        aggregateOn ? '`' + aggregateOn + '`' : 1
-      })`;
-    }
-    const orderByClause = `ORDER BY ${sort} ${sortAsc ? 'ASC' : 'DESC'}`;
-    const query = `SELECT ${columns} FROM DM_getPanel(${panelSource}) ${whereClause} ${groupByClause} ${orderByClause} LIMIT ${limit}`;
+    const query = buildSQLiteQuery(panel);
 
     const language = LANGUAGES.sql;
     const res = await language.inMemoryEval(query, panelResults);
+    const s = shape(res.value);
     return {
       ...res,
       size: res.value ? JSON.stringify(res.value).length : 0,
+      arrayCount: s.kind === 'array' ? (res.value || []).length : null,
       contentType: 'application/json',
-      shape: shape(res.value),
+      shape: s,
     };
   }
 
@@ -148,16 +124,22 @@ export function FilterAggregatePanelDetails({
                 }}
                 language="sql"
                 className="editor"
+                tooltip="Use any valid SQLite WHERE expression."
               />
             </div>
-            <TimeSeriesRange
-              shape={data.shape}
-              range={panel.filagg.range}
-              updateRange={(r: TimeSeriesRangeT) => {
-                panel.filagg.range = r;
-                updatePanel(panel);
-              }}
-            />
+            {MODE !== 'browser' && (
+              <TimeSeriesRange
+                shape={data.shape}
+                range={panel.filagg.range}
+                updateRange={(r: TimeSeriesRangeT) => {
+                  panel.filagg.range = r;
+                  updatePanel(panel);
+                }}
+                timeFieldTooltip={
+                  'Column must be a date field in ISO8601/RFC3339 format.'
+                }
+              />
+            )}
           </FormGroup>
         </div>
         <div>
@@ -209,6 +191,45 @@ export function FilterAggregatePanelDetails({
                         updatePanel(panel);
                       }}
                     />
+                  </div>
+                )}
+                {MODE !== 'browser' && (
+                  <div className="form-row">
+                    <Select
+                      label="With Time Interval"
+                      value={panel.filagg.windowInterval}
+                      onChange={(value: string) => {
+                        panel.filagg.windowInterval = value;
+                        updatePanel(panel);
+                      }}
+                      tooltip={`If used, the above "Group by" column must be a date field in ISO8601/RFC3339 format.`}
+                    >
+                      <optgroup label="None">
+                        <option value="0">None</option>
+                      </optgroup>
+                      <optgroup label="Up to a day">
+                        <option value="1">1 Minute</option>
+                        <option value="5">5 Minutes</option>
+                        <option value="15">15 Minutes</option>
+                        <option value="30">30 Minutes</option>
+                        <option value="60">1 Hour</option>
+                        <option value="180">3 Hours</option>
+                        <option value={String(60 * 6)}>6 Hours</option>
+                        <option value={String(60 * 12)}>12 Hours</option>
+                        <option value={String(60 * 24)}>1 Day</option>
+                      </optgroup>
+                      <optgroup label="Up to a month">
+                        <option value={String(60 * 24 * 3)}>3 Days</option>
+                        <option value={String(60 * 24 * 7)}>7 days</option>
+                        <option value={String(60 * 24 * 7 * 2)}>14 days</option>
+                        <option value={String(60 * 24 * 30)}>30 days</option>
+                      </optgroup>
+                      <optgroup label="Up to a year">
+                        <option value={String(60 * 24 * 90)}>90 Days</option>
+                        <option value={String(60 * 24 * 180)}>180 Days</option>
+                        <option value={String(60 * 24 * 365)}>1 Year</option>
+                      </optgroup>
+                    </Select>
                   </div>
                 )}
               </React.Fragment>

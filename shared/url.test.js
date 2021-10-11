@@ -23,5 +23,5 @@ test('fullHttpURL', () => {
 });
 
 test('queryParameters', () => {
-  expect(queryParameters({ a: 1, b: 2 })).toBe('a=1&b=2');
+  expect(queryParameters({ a: 1, b: 2, c: undefined })).toBe('a=1&b=2');
 });
