@@ -73,6 +73,10 @@ header a {
   height: 100% !important;
 }
 
+.editor-container:not(.editor-container--singleLine) {
+  height: 100%;
+}
+
 .editor-container--singleLine .editor.input {
   height: initial !important;
   min-height: initial !important;
@@ -165,6 +169,12 @@ label.input input[type='file'] {
   cursor: pointer;
   cursor: hand;
   border-radius: 3px;
+}
+
+.material-icons,
+.material-icons-outlined {
+  width: 24px;
+  height: 24px;
 }
 
 .button:not(.material-icons-outlined):not(.material-icons):not(.button--primary) {
@@ -276,6 +286,7 @@ header > div {
   overflow-y: auto;
   display: flex;
   flex-direction: column;
+  background: #fbfbfb;
 }
 
 .sidebar--collapsed {
@@ -286,9 +297,38 @@ header > div {
   flex: 1;
 }
 
+.connector-group {
+  display: inline-block;
+  padding-bottom: 5px;
+}
+
 .server,
 .connector {
   margin-bottom: 15px;
+  padding: 10px;
+  border: 1px solid transparent;
+  border-bottom: 1px solid #ccc;
+}
+
+.server .hover-button,
+.connector .hover-button {
+  visibility: hidden;
+  margin-left: 10px;
+}
+
+.server:hover .hover-button,
+.server--expanded .hover-button,
+.connector:hover .hover-button,
+.connector--expanded .hover-button {
+  visibility: initial;
+}
+
+.server:hover,
+.connector:hover,
+.server--expanded,
+.connector--expanded {
+  background: white;
+  border-color: #ccc;
 }
 
 .server-name,
@@ -330,11 +370,6 @@ header > div {
   border-right: 0;
 }
 
-.page-delete {
-  margin-right: 15px;
-  display: inline-block;
-}
-
 .panel {
   min-width: 900px;
   background: white;
@@ -342,6 +377,10 @@ header > div {
   margin-bottom: 15px;
 }
 
+.connector:focus-within,
+.connector:focus,
+.server:focus-within,
+.server:focus,
 .panel:focus-within,
 .panel:focus {
   border-color: #9f04ff;
@@ -488,6 +527,36 @@ header > div {
 .text-muted {
   font-size: 0.9rem;
   color: #333;
+}
+
+.tooltip {
+  position: relative;
+  font-size: 0.9rem;
+}
+
+.tooltip-body {
+  position: absolute;
+  top: 24px;
+  right: 0;
+  display: none;
+  background: rgba(30, 30, 30, 0.75);
+  border: 1px solid black;
+  color: white;
+  padding: 10px;
+}
+
+.tooltip-icon {
+  color: #ccc;
+  cursor: pointer;
+  cursor: hand;
+}
+
+.tooltip:hover .tooltip-body {
+  display: initial;
+}
+
+.tooltip:hover .tooltip-icon {
+  color: initial;
 }
 
 .alert {
@@ -647,6 +716,10 @@ th {
 
 tbody tr:nth-child(odd) {
   background: #f9f0ff;
+}
+
+.confirm-wrapper {
+  display: inline-block;
 }
 
 .confirm {

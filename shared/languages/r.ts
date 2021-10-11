@@ -1,10 +1,20 @@
+function defaultContent(panelIndex: number) {
+  if (panelIndex === 0) {
+    return 'result = c()\n# Your logic here\nDM_setPanel(result)';
+  }
+
+  return `transform = DM_getPanel(${
+    panelIndex - 1
+  })\n# Your logic here\nDM_setPanel(transform)`;
+}
+
 function preamble(
   resultsFile: string,
   panelId: string,
   indexIdMap: Array<string>
 ) {
   return `
-library("rjson")
+tryCatch(library("rjson"), error=function(cond) {install.packages("rjson", repos="https://cloud.r-project.org")}, finally=library("rjson"))
 DM_getPanel <- function(i) {
   panelId = fromJSON("${JSON.stringify(indexIdMap).replaceAll(
     '"',
@@ -20,7 +30,7 @@ DM_setPanel <- function(v) {
 export const R = {
   name: 'R',
   defaultPath: 'Rscript',
-  defaultContent: (panelIndex: number) => '',
+  defaultContent,
   preamble,
   exceptionRewriter(msg: string, _: string) {
     return msg;

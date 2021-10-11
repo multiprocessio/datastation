@@ -1,4 +1,5 @@
 import {
+  addMinutes,
   format,
   startOfHour,
   startOfMonth,
@@ -15,7 +16,7 @@ import {
   subWeeks,
   subYears,
 } from 'date-fns';
-import { DatabaseConnectorInfoType, TimeSeriesRange } from './state';
+import { FilterAggregatePanelInfo, TimeSeriesRange } from './state';
 
 export function timestampsFromRange(range: TimeSeriesRange) {
   if (range.rangeType === 'absolute') {
@@ -134,43 +135,76 @@ export const MYSQL_QUOTE = {
   identifier: '`',
 };
 
-export function sqlRangeQuery(
-  query: string,
-  range: TimeSeriesRange | null,
-  type: DatabaseConnectorInfoType
-) {
-  if (!range || !range.field) {
-    return query;
-  }
+export function buildSQLiteQuery(vp: FilterAggregatePanelInfo): string {
+  const {
+    panelSource,
+    aggregateType,
+    aggregateOn,
+    groupBy,
+    filter,
+    sortOn,
+    sortAsc,
+    range,
+    limit,
+    windowInterval,
+  } = vp.filagg;
 
-  // TODO: what happens if a user overrides these defaults? MySQL can run in ANSI SQL mode.
-  const quoteStyle = type === 'mysql' ? MYSQL_QUOTE : ANSI_SQL_QUOTE;
+  let columns = '*';
+  let groupByClause = '';
+  if (aggregateType !== 'none') {
+    let groupColumn = quote(groupBy, ANSI_SQL_QUOTE.identifier);
 
-  const { begin, end } = timestampsFromRange(range);
-
-  function formatTimestamp(t: Date | string) {
-    const quotedTime = quote(
-      format(new Date(t), 'yyyy-MM-dd HH:mm:ss'),
-      quoteStyle.string
-    );
-    if (type === 'clickhouse') {
-      return `parseDateTimeBestEffort(${quotedTime})`;
+    let groupExpression = quote(groupBy, ANSI_SQL_QUOTE.identifier);
+    if (windowInterval && +windowInterval) {
+      const intervalSeconds = +windowInterval * 60;
+      groupExpression = `DATETIME((STRFTIME('%s', ${groupBy}) / ${intervalSeconds}) *${intervalSeconds}, 'unixepoch')`;
+      groupColumn = `${groupExpression} ${groupBy}`;
     }
 
-    if (type === 'influx') {
-      return quote(new Date(t).toISOString(), quoteStyle.string);
-    }
+    columns = `${groupColumn}, ${aggregateType.toUpperCase()}(${
+      aggregateOn ? quote(aggregateOn, ANSI_SQL_QUOTE.identifier) : 1
+    }) AS ${quote(aggregateType, ANSI_SQL_QUOTE.identifier)}`;
 
-    // Timestamp functions/formats differ by engine as soon as we bring in time zones. We're not doing that yet.
-    return 'TIMESTAMP ' + quotedTime;
+    groupByClause = `GROUP BY ${groupExpression}`;
+  }
+  let whereClause = filter ? 'WHERE ' + filter : '';
+  if (range.field) {
+    const { begin, end } = timestampsFromRange(range);
+    // Converts to UTC
+    const quoted = (t: string | Date) =>
+      quote(
+        format(
+          addMinutes(new Date(t), new Date().getTimezoneOffset()),
+          'yyyy-MM-dd HH:mm:ss'
+        ),
+        ANSI_SQL_QUOTE.string
+      );
+    const timeFilter = `DATETIME(${quote(
+      range.field,
+      ANSI_SQL_QUOTE.identifier
+    )}) > ${quoted(begin)} AND DATETIME(${quote(
+      range.field,
+      ANSI_SQL_QUOTE.identifier
+    )}) < ${quoted(end)}`;
+
+    if (filter) {
+      whereClause = `WHERE (${filter} AND ${timeFilter})`;
+    } else {
+      whereClause = 'WHERE ' + timeFilter;
+    }
   }
 
-  // This is not going to work for systems like Cassandra that don't support subqueries.
-  return `SELECT * FROM (${query}) WHERE ${quote(
-    range.field,
-    quoteStyle.identifier
-  )} > ${formatTimestamp(begin)} AND ${quote(
-    range.field,
-    quoteStyle.identifier
-  )} < ${formatTimestamp(end)}`;
+  let orderByClause = '';
+  if (sortOn) {
+    const sortQuoted = quote(sortOn, ANSI_SQL_QUOTE.identifier);
+    let sortField = sortQuoted;
+    if ((sortOn || '').startsWith('Aggregate: ')) {
+      sortField = `${aggregateType.toUpperCase()}(${
+        aggregateOn ? quote(aggregateOn, ANSI_SQL_QUOTE.identifier) : 1
+      })`;
+    }
+
+    orderByClause = `ORDER BY ${sortField} ${sortAsc ? 'ASC' : 'DESC'}`;
+  }
+  return `SELECT ${columns} FROM DM_getPanel(${panelSource}) ${whereClause} ${groupByClause} ${orderByClause} LIMIT ${limit}`;
 }

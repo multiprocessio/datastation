@@ -19,7 +19,7 @@ export function Confirm({
   const [open, setOpen] = React.useState(false);
 
   return (
-    <div className={className}>
+    <div className={`confirm-wrapper ${className}`}>
       <div className="confirm">
         {render(() => setOpen(true))}
         <div

@@ -8,6 +8,7 @@ const {
 
 test('getPath gets the path in the object', () => {
   const obj = { a: { 1: { b: '12' } } };
+  expect(getPath(obj, '')).toStrictEqual(obj);
   expect(getPath(obj, 'a.1.b')).toBe('12');
   expect(getPath(obj, 'a.12.c')).toBe(undefined);
   expect(getPath(obj, 'a.1.c')).toBe(undefined);

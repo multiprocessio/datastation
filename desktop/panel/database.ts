@@ -1,14 +1,13 @@
-import { sqlRangeQuery } from '../../shared/sql';
+import log from '../../shared/log';
 import {
   DatabaseConnectorInfo,
   DatabasePanelInfo,
-  doOnEncryptFields,
-  Encrypt,
   PanelInfo,
   ProjectState,
 } from '../../shared/state';
+import { fullHttpURL } from '../../shared/url';
 import { Dispatch } from '../rpc';
-import { decrypt } from '../secret';
+import { decryptFields } from '../secret';
 import { evalClickHouse } from './databases/clickhouse';
 import { evalElasticSearch } from './databases/elasticsearch';
 import { evalInflux } from './databases/influx';
@@ -24,7 +23,7 @@ import { transformDM_getPanelCalls } from './databases/sqlutil';
 import { tunnel } from './tunnel';
 import { EvalHandlerExtra, EvalHandlerResponse, guardPanel } from './types';
 
-export async function getAndDecryptConnector(
+export function getAndDecryptConnector(
   project: ProjectState,
   connectorId: string
 ) {
@@ -36,15 +35,7 @@ export async function getAndDecryptConnector(
   }
   const connector = connectors[0] as DatabaseConnectorInfo;
 
-  await doOnEncryptFields(connector, async (f: Encrypt) => {
-    if (!f.value) {
-      f.value = undefined;
-      return f;
-    }
-
-    f.value = await decrypt(f.value);
-    return f;
-  });
+  decryptFields(connector);
 
   return connector;
 }
@@ -86,10 +77,7 @@ export async function evalDatabase(
   const { content } = panel;
   const info = guardPanel<DatabasePanelInfo>(panel, 'database');
 
-  const connector = await getAndDecryptConnector(
-    project,
-    info.database.connectorId
-  );
+  const connector = getAndDecryptConnector(project, info.database.connectorId);
 
   const serverId = connector.serverId || info.serverId;
 
@@ -99,13 +87,23 @@ export async function evalDatabase(
     connector.database.type === 'prometheus' ||
     connector.database.type === 'influx'
   ) {
-    const { host, port } = portHostFromAddress(info, connector);
+    const defaultPort = DEFAULT_PORT[connector.database.type];
+    // This is going to get annoying if one of these dbs ever has a non-HTTP protocol.
+    const { hostname, port } = new URL(
+      fullHttpURL(connector.database.address, undefined, defaultPort)
+    );
+    log.info(
+      `Connecting ${
+        serverId ? 'through tunnel ' : ''
+      }to ${hostname}:${port} for ${connector.database.type} query`
+    );
     return await tunnel(
       project,
       serverId,
-      host,
-      port,
+      hostname,
+      +port,
       (host: string, port: number) => {
+        host = host || 'localhost';
         if (connector.database.type === 'elasticsearch') {
           return evalElasticSearch(
             content,
@@ -159,17 +157,11 @@ export async function evalDatabase(
     ['mysql', 'postgres', 'sqlite'].includes(connector.database.type)
   );
 
-  const rangeQuery = sqlRangeQuery(
-    query,
-    info.database.range,
-    connector.database.type
-  );
-
   // SQLite is file, not network based so handle separately.
   if (connector.database.type === 'sqlite') {
     return await evalSQLite(
       dispatch,
-      rangeQuery,
+      query,
       info,
       connector,
       project,
@@ -178,7 +170,7 @@ export async function evalDatabase(
   }
 
   if (connector.database.type === 'snowflake') {
-    return await evalSnowflake(rangeQuery, connector);
+    return await evalSnowflake(query, connector);
   }
 
   const { host, port } = portHostFromAddress(info, connector);
@@ -191,7 +183,7 @@ export async function evalDatabase(
       host.split('\\')[0],
       port,
       (host: string, port: number): any =>
-        evalSQLServer(rangeQuery, host, port, connector)
+        evalSQLServer(query, host, port, connector)
     );
   }
 
@@ -204,7 +196,7 @@ export async function evalDatabase(
       if (connector.database.type === 'postgres') {
         return evalPostgres(
           dispatch,
-          rangeQuery,
+          query,
           host,
           port,
           connector,
@@ -216,7 +208,7 @@ export async function evalDatabase(
       if (connector.database.type === 'mysql') {
         return evalMySQL(
           dispatch,
-          rangeQuery,
+          query,
           host,
           port,
           connector,
@@ -226,11 +218,11 @@ export async function evalDatabase(
       }
 
       if (connector.database.type === 'oracle') {
-        return evalOracle(rangeQuery, host, port, connector);
+        return evalOracle(query, host, port, connector);
       }
 
       if (connector.database.type === 'clickhouse') {
-        return evalClickHouse(rangeQuery, host, port, connector);
+        return evalClickHouse(query, host, port, connector);
       }
 
       throw new Error(`Unknown SQL type: ${connector.database.type}`);

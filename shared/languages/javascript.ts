@@ -2,6 +2,7 @@ import circularSafeStringify from 'json-stringify-safe';
 import { preview } from 'preview';
 import { InvalidDependentPanelError, NoResultError } from '../errors';
 import log from '../log';
+import { deepClone, windowOrGlobal } from '../object';
 import { PanelResult } from '../state';
 import { EOL } from './types';
 
@@ -15,12 +16,12 @@ function exceptionRewriter(msg: string, programPath: string) {
 
 function defaultContent(panelIndex: number) {
   if (panelIndex === 0) {
-    return 'DM_setPanel([])';
+    return 'const result = [];\n// Your logic here\nDM_setPanel([]);';
   }
 
-  return `const previous = DM_getPanel(${
+  return `const transform = DM_getPanel(${
     panelIndex - 1
-  });\nDM_setPanel(previous);`;
+  });\n// Your logic here\nDM_setPanel(transform);`;
 }
 
 function preamble(
@@ -54,15 +55,14 @@ function inMemoryEval(
     );
   }
 
-  const anyWindow = window as any;
-  // TODO: better deep copy
+  const anyWindow = windowOrGlobal as any;
   anyWindow.DM_getPanel = (panelId: number) => {
     if (!results[panelId]) {
       throw new InvalidDependentPanelError(panelId);
     }
 
     try {
-      return JSON.parse(JSON.stringify((results[panelId] || {}).value));
+      return deepClone((results[panelId] || {}).value);
     } catch (e) {
       log.error(e);
       throw new InvalidDependentPanelError(panelId);

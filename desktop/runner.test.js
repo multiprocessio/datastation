@@ -1,0 +1,3 @@
+require('./runner');
+
+test('stub', () => {});

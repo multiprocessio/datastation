@@ -1,3 +1,9 @@
+if (!(BigInt.prototype as any).toJSON) {
+  (BigInt.prototype as any).toJSON = function () {
+    return this.toString();
+  };
+}
+
 if (!String.prototype.replaceAll) {
   String.prototype.replaceAll = function (match, replace) {
     if (typeof replace === 'function') {

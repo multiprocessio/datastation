@@ -12,6 +12,7 @@ export interface LanguageInfo {
   ) => string;
   defaultPath: string;
   exceptionRewriter: (msg: string, programPath: string) => string;
+  inMemoryInit?: () => Promise<void>;
   inMemoryEval?: (
     prog: string,
     resultsOrDiskDetails:

@@ -25,7 +25,7 @@ export function PanelList({
     page.panels.splice(from, 1);
     page.panels.splice(to, 0, panel);
     updatePage(page);
-    reevalPanel(page.panels[to].id, true);
+    reevalPanel(page.panels[from].id, true);
     reevalPanel(page.panels[to].id, true);
   }
 
@@ -39,7 +39,6 @@ export function PanelList({
       const panelIndex = page.panels.findIndex((p) => p.id === panelId);
       page.panels[panelIndex] = panel;
       updatePage(page);
-      reevalPanel(panelId, true);
     };
   }
 
@@ -48,10 +47,10 @@ export function PanelList({
       <div className="new-panel">
         <Button
           onClick={() => {
-            const panel = new ProgramPanelInfo(
-              `Untitled panel #${panelIndex + 1}`,
-              'python'
-            );
+            const panel = new ProgramPanelInfo({
+              name: `Untitled panel #${panelIndex + 1}`,
+              type: 'python',
+            });
             page.panels.splice(panelIndex + 1, 0, panel);
             updatePage(page);
           }}

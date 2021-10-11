@@ -1,5 +1,5 @@
 import { spawn } from 'child_process';
-import fs from 'fs/promises';
+import fs from 'fs';
 import { EOL } from 'os';
 import path from 'path';
 import { file as makeTmpFile } from 'tmp-promise';
@@ -16,7 +16,7 @@ export async function evalProgram(
   { indexIdMap }: EvalHandlerExtra
 ): Promise<EvalHandlerResponse> {
   const ppi = guardPanel<ProgramPanelInfo>(panel, 'program');
-  const programTmp = await makeTmpFile();
+  const programTmp = await makeTmpFile({ prefix: 'program-tmp-' });
   const language = LANGUAGES[ppi.program.type];
 
   const projectResultsFile = getProjectResultsFile(project.projectName);
@@ -35,8 +35,13 @@ export async function evalProgram(
 
   let out = '';
   try {
-    const preamble = language.preamble(projectResultsFile, ppi.id, indexIdMap);
-    await fs.writeFile(programTmp.path, [preamble, ppi.content].join(EOL));
+    const preamble = language.preamble(
+      projectResultsFile.replaceAll('\\', '/'),
+      ppi.id,
+      indexIdMap
+    );
+    const fullProgramBody = [preamble, ppi.content].join(EOL);
+    fs.writeFileSync(programTmp.path, fullProgramBody);
     try {
       const child = spawn(programPathOrName, [programTmp.path]);
       // TODO: stream back
@@ -68,12 +73,12 @@ export async function evalProgram(
 
       const code = await new Promise((resolve) => child.on('close', resolve));
       if (code !== 0) {
-        throw Error(stderr);
+        throw new Error(stderr);
       }
 
       let f: Buffer;
       try {
-        f = await fs.readFile(projectResultsFile + ppi.id);
+        f = fs.readFileSync(projectResultsFile + ppi.id);
       } catch (e) {
         throw new NoResultError();
       }

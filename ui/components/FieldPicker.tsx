@@ -120,6 +120,7 @@ export function FieldPicker({
   preferredDefaultType,
   used,
   allowNone,
+  tooltip,
 }: {
   onChange: (v: string) => void;
   label: string;
@@ -131,6 +132,7 @@ export function FieldPicker({
   preferredDefaultType?: 'number' | 'string';
   used?: Array<string>;
   allowNone?: string;
+  tooltip?: React.ReactNode;
 }) {
   // Default the label to the field name
   const [labelModified, setLabelModified] = React.useState(false);
@@ -163,6 +165,7 @@ export function FieldPicker({
         onChange={onChange}
         used={used}
         allowNone={allowNone}
+        tooltip={labelOnChange ? null : tooltip}
       >
         {fieldGroups.length === 1
           ? renderOptions(fieldGroups[0], false)
@@ -176,6 +179,7 @@ export function FieldPicker({
         label={label}
         value={value}
         onChange={onChange}
+        tooltip={labelOnChange ? null : tooltip}
       />
     );
   }
@@ -192,7 +196,12 @@ export function FieldPicker({
         </Button>
       )}
       {fieldPicker}
-      <Input label="Label" value={labelValue} onChange={labelOnChangeWrapper} />
+      <Input
+        label="Label"
+        value={labelValue}
+        onChange={labelOnChangeWrapper}
+        tooltip={tooltip}
+      />
     </React.Fragment>
   );
 }

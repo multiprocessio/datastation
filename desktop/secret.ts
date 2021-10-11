@@ -1,4 +1,4 @@
-import fs from 'fs/promises';
+import fs from 'fs';
 import { randomBytes, secretbox } from 'tweetnacl';
 import {
   decodeBase64,
@@ -6,30 +6,31 @@ import {
   encodeBase64,
   encodeUTF8,
 } from 'tweetnacl-util';
+import { doOnEncryptFields, Encrypt } from '../shared/state';
 import { ensureFile } from './fs';
 
 function getSigningKeyPath(signingKeyPath?: string) {
   return ensureFile(signingKeyPath || '.signingKey');
 }
 
-export async function ensureSigningKey(signingKeyPath?: string) {
-  signingKeyPath = await getSigningKeyPath(signingKeyPath);
+export function ensureSigningKey(signingKeyPath?: string) {
+  signingKeyPath = getSigningKeyPath(signingKeyPath);
 
   try {
-    const current = await fs.readFile(signingKeyPath);
+    const current = fs.readFileSync(signingKeyPath);
     if (!current.length) {
       throw new Error();
     }
   } catch (e) {
     const newKey = encodeBase64(randomBytes(secretbox.keyLength));
-    await fs.writeFile(signingKeyPath, newKey);
-    await fs.chmod(signingKeyPath, 0o400);
+    fs.writeFileSync(signingKeyPath, newKey);
+    fs.chmodSync(signingKeyPath, 0o400);
   }
 }
 
-export async function encrypt(msg: string, signingKeyPath?: string) {
-  signingKeyPath = await getSigningKeyPath(signingKeyPath);
-  const key = await fs.readFile(signingKeyPath, { encoding: 'utf-8' });
+export function encrypt(msg: string, signingKeyPath?: string) {
+  signingKeyPath = getSigningKeyPath(signingKeyPath);
+  const key = fs.readFileSync(signingKeyPath, { encoding: 'utf-8' });
 
   const keyUint8Array = decodeBase64(key);
   const nonce = randomBytes(secretbox.nonceLength);
@@ -44,13 +45,13 @@ export async function encrypt(msg: string, signingKeyPath?: string) {
   return base64FullMessage;
 }
 
-export async function decrypt(msgWithNonce: string, signingKeyPath?: string) {
+export function decrypt(msgWithNonce: string, signingKeyPath?: string) {
   if (msgWithNonce === null) {
     return '';
   }
 
-  signingKeyPath = await getSigningKeyPath(signingKeyPath);
-  const key = await fs.readFile(signingKeyPath, { encoding: 'utf-8' });
+  signingKeyPath = getSigningKeyPath(signingKeyPath);
+  const key = fs.readFileSync(signingKeyPath, { encoding: 'utf-8' });
 
   const keyUint8Array = decodeBase64(key);
   const messageWithNonceAsUint8Array = decodeBase64(msgWithNonce);
@@ -68,4 +69,16 @@ export async function decrypt(msgWithNonce: string, signingKeyPath?: string) {
 
   const base64DecryptedMessage = encodeUTF8(decrypted);
   return base64DecryptedMessage;
+}
+
+export function decryptFields(a: any) {
+  doOnEncryptFields(a, (f: Encrypt) => {
+    if (!f.value) {
+      f.value = undefined;
+      return f;
+    }
+
+    f.value = decrypt(f.value);
+    return f;
+  });
 }

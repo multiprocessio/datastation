@@ -50,7 +50,7 @@ export async function evalSQLite(
 
   const file = connector.database.database;
   if (info.serverId) {
-    const localCopy = await makeTmpFile();
+    const localCopy = await makeTmpFile({ prefix: 'local-sqlite-copy-' });
     const config = await getSSHConfig(project, info.serverId);
 
     const sftp = new Client();

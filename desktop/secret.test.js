@@ -3,7 +3,7 @@ const { file: makeTmpFile } = require('tmp-promise');
 const { encrypt, decrypt, ensureSigningKey } = require('./secret');
 
 async function withTmpSigningKey(cb) {
-  const tmp = await makeTmpFile();
+  const tmp = await makeTmpFile({ prefix: 'secret-project-' });
   try {
     await ensureSigningKey(tmp.path);
     expect(fs.readFileSync(tmp.path).length).toBe(44);

@@ -2,15 +2,18 @@ import circularSafeStringify from 'json-stringify-safe';
 import { preview } from 'preview';
 import { InvalidDependentPanelError, NoResultError } from '../errors';
 import log from '../log';
+import { deepClone, windowOrGlobal } from '../object';
 import { PanelResult } from '../state';
 import { EOL } from './types';
 
 function defaultContent(panelIndex: number) {
   if (panelIndex === 0) {
-    return 'DM_setPanel([])';
+    return 'result = []\n# Your logic here\nDM_setPanel(result)';
   }
 
-  return `previous = DM_getPanel(${panelIndex - 1});\nDM_setPanel(previous);`;
+  return `transform = DM_getPanel(${
+    panelIndex - 1
+  })\n# Your logic here\nDM_setPanel(transform)`;
 }
 
 function preamble(
@@ -29,6 +32,30 @@ def DM_setPanel(v):
     json.dump(v, f)`;
 }
 
+function inMemoryInit() {
+  const pyodide = document.createElement('script');
+  pyodide.defer = true;
+  pyodide.src = 'https://cdn.jsdelivr.net/pyodide/v0.18.0/full/pyodide.js';
+
+  return new Promise<void>((resolve, reject) => {
+    try {
+      pyodide.onload = async function () {
+        try {
+          (window as any).pyodide = await (window as any).loadPyodide({
+            indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.18.0/full/',
+          });
+          resolve();
+        } catch (e) {
+          reject(e);
+        }
+      };
+      document.body.appendChild(pyodide);
+    } catch (e) {
+      reject(e);
+    }
+  });
+}
+
 function inMemoryEval(
   prog: string,
   results:
@@ -42,11 +69,10 @@ function inMemoryEval(
     );
   }
 
-  const anyWindow = window as any;
+  const anyWindow = windowOrGlobal as any;
 
   const stdout: Array<string> = [];
   return new Promise((resolve, reject) => {
-    // TODO: better deep copy
     anyWindow.DM_getPanel = (panelId: number) => {
       if (!results[panelId]) {
         reject(new InvalidDependentPanelError(panelId));
@@ -54,7 +80,7 @@ function inMemoryEval(
       }
 
       try {
-        return JSON.parse(JSON.stringify((results[panelId] || {}).value));
+        return deepClone((results[panelId] || {}).value);
       } catch (e) {
         log.error(e);
         reject(new InvalidDependentPanelError(panelId));
@@ -115,5 +141,6 @@ export const PYTHON = {
   defaultContent,
   preamble,
   inMemoryEval,
+  inMemoryInit,
   exceptionRewriter,
 };

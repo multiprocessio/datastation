@@ -1,4 +1,4 @@
-import fs from 'fs/promises';
+import fs from 'fs';
 import { PanelBody } from '../../shared/rpc';
 import {
   GraphPanelInfo,
@@ -78,7 +78,8 @@ export const fetchResultsHandler: RPCHandler<PanelBody, EvalHandlerResponse> = {
 
     // Maybe the only appropriate place to call this in this package?
     const projectResultsFile = getProjectResultsFile(projectId);
-    const f = await fs.readFile(projectResultsFile + panel.id);
+    const f = fs.readFileSync(projectResultsFile + panel.id);
+
     // Everything gets stored as JSON on disk. Even literals and files get rewritten as JSON.
     return { value: JSON.parse(f.toString()) };
   },

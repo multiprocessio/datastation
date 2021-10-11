@@ -3,12 +3,13 @@
 import AceEditor from 'react-ace';
 // Enables Ctrl-f
 import 'ace-builds/src-min-noconflict/ext-searchbox';
+// Enables syntax highlighting
 import 'ace-builds/src-min-noconflict/mode-javascript';
+import 'ace-builds/src-min-noconflict/mode-json';
 import 'ace-builds/src-min-noconflict/mode-julia';
 import 'ace-builds/src-min-noconflict/mode-python';
 import 'ace-builds/src-min-noconflict/mode-r';
 import 'ace-builds/src-min-noconflict/mode-ruby';
-// Enables syntax highlighting
 import 'ace-builds/src-min-noconflict/mode-sql';
 // UI theme
 import 'ace-builds/src-min-noconflict/theme-github';
@@ -17,6 +18,7 @@ import * as React from 'react';
 // This steals Ctrl-a so this should not be a default
 //import 'ace-builds/src-min-noconflict/keybinding-emacs';
 import { useDebouncedLocalState } from './Input';
+import { Tooltip } from './Tooltip';
 
 export function CodeEditor({
   value,
@@ -29,6 +31,7 @@ export function CodeEditor({
   id,
   singleLine,
   label,
+  tooltip,
 }: {
   value: string;
   onChange: (value: string) => void;
@@ -40,6 +43,7 @@ export function CodeEditor({
   id: string;
   singleLine?: boolean;
   label?: string;
+  tooltip?: string;
 }) {
   const [localValue, setLocalValue] = useDebouncedLocalState(value, onChange);
 
@@ -94,6 +98,7 @@ export function CodeEditor({
             : undefined
         }
       />
+      {tooltip && <Tooltip>{tooltip}</Tooltip>}
     </div>
   );
 }

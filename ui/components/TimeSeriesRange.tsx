@@ -1,6 +1,7 @@
 import subMinutes from 'date-fns/subMinutes';
 import * as React from 'react';
 import { Shape } from 'shape';
+import * as uuid from 'uuid';
 import {
   TimeSeriesFixedTimes,
   TimeSeriesRange as TimeSeriesRangeT,
@@ -9,17 +10,24 @@ import {
 import { title } from '../../shared/text';
 import { Datetime } from './Datetime';
 import { FieldPicker } from './FieldPicker';
+import { FormGroup } from './FormGroup';
 import { Radio } from './Radio';
 import { NONE, Select } from './Select';
 
 export function TimeSeriesRange({
   range,
   shape,
+  hideField,
   updateRange,
+  showSort,
+  timeFieldTooltip,
 }: {
   range: TimeSeriesRangeT;
+  hideField?: boolean;
+  showSort?: boolean;
   shape?: Shape;
   updateRange: (r: TimeSeriesRangeT) => void;
+  timeFieldTooltip?: React.ReactNode;
 }) {
   const setTab = (value: string) => {
     switch (value) {
@@ -110,30 +118,35 @@ export function TimeSeriesRange({
     },
   ];
 
+  const fieldName = 'range-type-' + uuid.v4();
+
   return (
-    <React.Fragment>
-      <div className="form-row">
-        <FieldPicker
-          label="Timestamp Field"
-          value={range.field}
-          shape={shape}
-          allowNone="None"
-          onChange={(value: string) => {
-            if (value === NONE) {
-              range.field = '';
-            } else {
-              range.field = value;
-            }
-            updateRange(range);
-          }}
-        />
-      </div>
+    <FormGroup label="Time Range">
+      {!hideField && (
+        <div className="form-row">
+          <FieldPicker
+            label="Time Field"
+            tooltip={timeFieldTooltip}
+            value={range.field}
+            shape={shape}
+            allowNone="None"
+            onChange={(value: string) => {
+              if (value === NONE) {
+                range.field = '';
+              } else {
+                range.field = value;
+              }
+              updateRange(range);
+            }}
+          />
+        </div>
+      )}
       <div className="flex">
         <div className="form-row">
           <Radio
             disabled={!range.field}
             vertical
-            name="range-type"
+            name={fieldName}
             value={range.rangeType}
             onChange={setTab}
             options={[
@@ -216,6 +229,6 @@ export function TimeSeriesRange({
           )}
         </div>
       </div>
-    </React.Fragment>
+    </FormGroup>
   );
 }

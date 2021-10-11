@@ -1,8 +1,8 @@
-import fs from 'fs/promises';
+import fs from 'fs';
 import path from 'path';
 import { DISK_ROOT } from './constants';
-export async function ensureFile(f: string) {
+export function ensureFile(f: string) {
   let root = path.isAbsolute(f) ? path.dirname(f) : DISK_ROOT;
-  await fs.mkdir(root, { recursive: true });
+  fs.mkdirSync(root, { recursive: true });
   return path.isAbsolute(f) ? f : path.join(DISK_ROOT, f);
 }

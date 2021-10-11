@@ -1,17 +1,20 @@
 # DataStation Community Edition
 
-DataStation allows you to seamlessly connect SQL queries, HTTP requests,
-scripting, and visualization in a single platform.
+DataStation allows you to seamlessly connect database queries, HTTP
+requests, scripting, and visualization in a single platform.
 
 ![A screenshot of app.datastation.multiprocess.io](./screenshot.png)
 
 ## Features
 
 * Cross-platform: Windows, macOS, and Linux
-* Query SQLite, SQL Server, Oracle, Snowflake, ClickHouse, PostgreSQL- and MySQL-compatible databases
-  * With builtin support for proxying over SSH
+* Query all kinds of databases
+  * Traditional OLTP: SQLite, SQL Server, Oracle, PostgreSQL- and MySQL-compatible databases
+  * Analytics: Snowflake, ClickHouse
+  * Document and time series: Prometheus, Influx, ElasticSearch
+  * More on the roadmap
+  * All support proxying over SSH
 * Query HTTP servers
-  * With builtin support for proxying over SSH
 * Read files from disk
   * Builtin support for parquet, CSV, JSON, and Excel (.xlsx, .xls)
   * Builtin support for parsing Apache2 access and error logs, Nginx access logs, syslogs, and newline-delimited JSON

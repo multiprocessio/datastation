@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { EVAL_ERRORS } from '../shared/errors';
-import { wait } from '../shared/promise';
 import { PanelResultMeta, ProjectPage, ProjectState } from '../shared/state';
 import { Button } from './components/Button';
 import { Confirm } from './components/Confirm';
@@ -8,6 +7,76 @@ import { Input } from './components/Input';
 import { PanelPlayWarning } from './errors';
 import { PanelList } from './PanelList';
 import { PANEL_UI_DETAILS } from './panels';
+
+export function makeReevalPanel(
+  page: ProjectPage,
+  state: ProjectState,
+  updatePage: (page: ProjectPage) => void
+) {
+  return async function reevalPanel(panelId: string, reset?: boolean) {
+    const { connectors, servers } = state;
+    const start = new Date();
+
+    const panel = page.panels.find((p) => p.id === panelId);
+    if (!panel) {
+      return;
+    }
+    let resultMeta = panel.resultMeta || new PanelResultMeta();
+    resultMeta.loading = !reset;
+
+    panel.resultMeta = resultMeta;
+    updatePage(page);
+    if (reset) {
+      resultMeta.lastRun = null;
+      return;
+    }
+
+    try {
+      const panelResults = page.panels.map((p) => p.resultMeta);
+      const indexIdMap: Array<string> = page.panels.map((p) => p.id);
+      const panelUIDetails = PANEL_UI_DETAILS[panel.type];
+      const { value, size, contentType, preview, stdout, shape, arrayCount } =
+        await panelUIDetails.eval(
+          panel,
+          panelResults,
+          indexIdMap,
+          connectors,
+          servers
+        );
+      panel.resultMeta = {
+        lastRun: new Date(),
+        elapsed: new Date().valueOf() - start.valueOf(),
+        value,
+        preview,
+        stdout,
+        shape,
+        arrayCount,
+        contentType,
+        size,
+        loading: false,
+      };
+      updatePage(page);
+    } catch (e) {
+      if (EVAL_ERRORS.map((cls) => new (cls as any)().name).includes(e.name)) {
+        e = new PanelPlayWarning(e.message);
+      }
+
+      panel.resultMeta = {
+        loading: false,
+        elapsed: new Date().valueOf() - start.valueOf(),
+        lastRun: new Date(),
+        exception: e,
+        stdout: e.stdout,
+        preview: '',
+        contentType: 'unknown',
+        size: 0,
+        arrayCount: null,
+        shape: { kind: 'unknown' },
+      };
+      updatePage(page);
+    }
+  };
+}
 
 export function PageList({
   state,
@@ -47,72 +116,11 @@ export function PageList({
   }
 
   const panelResults = page.panels.map((p) => p.resultMeta);
-
-  async function reevalPanel(panelId: string, reset?: boolean) {
-    const { connectors, servers } = state;
-    const start = new Date();
-
-    const panel = page.panels.find((p) => p.id === panelId);
-    if (!panel) {
-      return;
-    }
-    let resultMeta = panel.resultMeta || new PanelResultMeta();
-    resultMeta.lastRun = null;
-    resultMeta.loading = !reset;
-
-    panel.resultMeta = resultMeta;
-    updatePage(page);
-    if (reset) {
-      return;
-    }
-
-    try {
-      const indexIdMap: Array<string> = page.panels.map((p) => p.id);
-      const panelUIDetails = PANEL_UI_DETAILS[panel.type];
-      const { value, size, contentType, preview, stdout, shape } =
-        await panelUIDetails.eval(
-          panel,
-          panelResults,
-          indexIdMap,
-          connectors,
-          servers
-        );
-      panel.resultMeta = {
-        lastRun: new Date(),
-        elapsed: new Date().valueOf() - start.valueOf(),
-        value,
-        preview,
-        stdout,
-        shape,
-        contentType,
-        size,
-        loading: false,
-      };
-      updatePage(page);
-    } catch (e) {
-      if (EVAL_ERRORS.map((cls) => new (cls as any)().name).includes(e.name)) {
-        e = new PanelPlayWarning(e.message);
-      }
-
-      panel.resultMeta = {
-        loading: false,
-        elapsed: new Date().valueOf() - start.valueOf(),
-        lastRun: new Date(),
-        exception: e,
-        stdout: e.stdout,
-        preview: '',
-        contentType: 'unknown',
-        size: 0,
-        shape: { kind: 'unknown' },
-      };
-      updatePage(page);
-    }
-  }
+  const reevalPanel = makeReevalPanel(page, state, updatePage);
 
   async function evalAll() {
     for (let panel of page.panels) {
       await reevalPanel(panel.id);
-      await wait(1500);
     }
   }
 

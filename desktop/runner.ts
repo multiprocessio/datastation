@@ -1,6 +1,8 @@
-import fs from 'fs/promises';
+import fs from 'fs';
+import 'source-map-support/register';
 import { APP_NAME, DEBUG, VERSION } from '../shared/constants';
 import log from '../shared/log';
+import '../shared/polyfill';
 import { DSPROJ_FLAG, PANEL_FLAG, PANEL_META_FLAG } from './constants';
 import { configureLogger } from './log';
 import { panelHandlers } from './panel';
@@ -10,7 +12,7 @@ import { ensureSigningKey } from './secret';
 import { loadSettings } from './settings';
 import { storeHandlers } from './store';
 
-export async function initialize({
+export function initialize({
   subprocess,
   additionalHandlers,
 }: {
@@ -37,9 +39,9 @@ export async function initialize({
     }
   }
 
-  await ensureSigningKey();
+  ensureSigningKey();
 
-  const settings = await loadSettings();
+  const settings = loadSettings();
 
   const handlers: RPCHandler<any, any>[] = [
     ...panelHandlers(subprocess),
@@ -53,56 +55,62 @@ export async function initialize({
 
 export async function main(additionalHandlers?: RPCHandler<any, any>[]) {
   // These throws are very important! Otherwise the runner will just hang.
-  process.on('uncaughtException', (e) => {
-    throw e;
+  ['uncaughtException', 'unhandledRejection'].map((condition) => {
+    process.on(condition, (e) => {
+      log.error(e);
+      process.exit(2);
+    });
   });
-  process.on('unhandledRejection', (e) => {
-    throw e;
-  });
 
-  const { project, handlers, panel, panelMetaOut } = await initialize({
-    additionalHandlers,
-  });
-  if (!project) {
-    throw new Error('No project given.');
-  }
-
-  if (!panel) {
-    throw new Error('No panel given.');
-  }
-
-  if (!panelMetaOut) {
-    throw new Error('No panel meta out given.');
-  }
-
-  function dispatch(
-    payload: Omit<RPCPayload, 'messageNumber'>,
-    external = false
-  ) {
-    const handler = handlers.find((h) => h.resource === payload.resource);
-    if (!handler) {
-      throw new Error(`No RPC handler for resource: ${payload.resource}`);
+  try {
+    const { project, handlers, panel, panelMetaOut } = initialize({
+      additionalHandlers,
+    });
+    if (!project) {
+      throw new Error('No project given.');
     }
 
-    return handler.handler(payload.projectId, payload.body, dispatch, false);
+    if (!panel) {
+      throw new Error('No panel given.');
+    }
+
+    if (!panelMetaOut) {
+      throw new Error('No panel meta out given.');
+    }
+
+    function dispatch(
+      payload: Omit<RPCPayload, 'messageNumber'>,
+      external = false
+    ) {
+      const handler = handlers.find((h) => h.resource === payload.resource);
+      if (!handler) {
+        throw new Error(`No RPC handler for resource: ${payload.resource}`);
+      }
+
+      return handler.handler(payload.projectId, payload.body, dispatch, false);
+    }
+
+    const resultMeta = await dispatch({
+      resource: 'eval',
+      body: { panelId: panel },
+      projectId: project,
+    });
+    fs.writeFileSync(panelMetaOut, JSON.stringify(resultMeta));
+    log.info(
+      `Wrote panel meta for ${panel} of "${project}" to ${panelMetaOut}.`
+    );
+
+    // Must explicitly exit
+    process.exit(0);
+  } catch (e) {
+    log.error(e);
+    process.exit(2);
   }
-
-  const resultMeta = await dispatch({
-    resource: 'eval',
-    body: { panelId: panel },
-    projectId: project,
-  });
-  await fs.writeFile(panelMetaOut, JSON.stringify(resultMeta));
-  log.info(`Wrote panel meta for ${panel} of "${project}" to ${panelMetaOut}.`);
-
-  // Must explicitly exit
-  process.exit(0);
 }
 
-if (process.argv[1].includes('desktop_runner.js')) {
-  configureLogger().then(() => {
-    log.info(APP_NAME, VERSION, DEBUG ? 'DEBUG' : '');
-  });
+if ((process.argv[1] || '').includes('desktop_runner.js')) {
+  configureLogger();
+  log.info(APP_NAME + ' Panel Runner', VERSION, DEBUG ? 'DEBUG' : '');
 
   main(storeHandlers);
 }

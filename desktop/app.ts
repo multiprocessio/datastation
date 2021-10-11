@@ -2,34 +2,38 @@ import { app, ipcMain } from 'electron';
 import path from 'path';
 import { APP_NAME, DEBUG, VERSION } from '../shared/constants';
 import log from '../shared/log';
-import '../shared/polyfill';
 import { configureLogger } from './log';
 import { openWindow } from './project';
 import { registerRPCHandlers } from './rpc';
 import { initialize } from './runner';
-import { storeHandlers } from './store';
+import { flushUnwritten, storeHandlers } from './store';
 
-configureLogger().then(() => {
-  log.info(APP_NAME, VERSION, DEBUG ? 'DEBUG' : '');
-});
-process.on('uncaughtException', (e) => {
-  log.error(e);
-});
-process.on('unhandledRejection', (e) => {
-  log.error(e);
-});
+configureLogger();
+log.info(APP_NAME, VERSION, DEBUG ? 'DEBUG' : '');
 
-app.whenReady().then(async () => {
-  const { handlers, project } = await initialize({
-    subprocess: path.join(__dirname, 'desktop_runner.js'),
-    additionalHandlers: storeHandlers,
+['uncaughtException', 'unhandledRejection'].map((sig) =>
+  process.on(sig, log.error)
+);
+
+// There doesn't seem to be a catchall signal
+['exit', 'SIGUSR1', 'SIGUSR2', 'SIGINT'].map((sig) =>
+  process.on(sig, flushUnwritten)
+);
+
+// Just for basic unit tests
+if (app) {
+  app.whenReady().then(async () => {
+    const { handlers, project } = initialize({
+      subprocess: path.join(__dirname, 'desktop_runner.js'),
+      additionalHandlers: storeHandlers,
+    });
+
+    await openWindow(project);
+
+    registerRPCHandlers(ipcMain, handlers);
   });
 
-  await openWindow(project);
-
-  registerRPCHandlers(ipcMain, handlers);
-});
-
-app.on('window-all-closed', function () {
-  if (process.platform !== 'darwin') app.quit();
-});
+  app.on('window-all-closed', function () {
+    if (process.platform !== 'darwin') app.quit();
+  });
+}

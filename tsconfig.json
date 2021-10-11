@@ -4,6 +4,7 @@
     "noUnusedLocals": true,
     "noEmit": true,
     "jsx": "react",
+    "allowJs": true,
     "target": "esnext",
     "module": "commonjs",
     "skipLibCheck": true,

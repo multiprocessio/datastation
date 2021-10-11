@@ -1,4 +1,4 @@
-import * as fs from 'fs/promises';
+import fs from 'fs';
 import * as uuid from 'uuid';
 import { LANGUAGES, SupportedLanguages } from '../shared/languages';
 import log from '../shared/log';
@@ -43,10 +43,10 @@ export class Settings {
     this.file = file;
   }
 
-  static async fromFile(settingsFile: string) {
+  static fromFile(settingsFile: string) {
     let existingSettingsString: Buffer | null = null;
     try {
-      existingSettingsString = await fs.readFile(settingsFile);
+      existingSettingsString = fs.readFileSync(settingsFile);
     } catch (e) {
       // Fine if it doesn't exist
     }
@@ -69,7 +69,7 @@ export class Settings {
           `Settings file has been corrupted, renaming to ${backupFile}`,
           e
         );
-        await fs.rename(settingsFile, backupFile);
+        fs.renameSync(settingsFile, backupFile);
       }
     }
 
@@ -77,13 +77,13 @@ export class Settings {
   }
 
   save() {
-    return fs.writeFile(this.file, JSON.stringify(this));
+    return fs.writeFileSync(this.file, JSON.stringify(this));
   }
 
   getUpdateHandler(): RPCHandler<Settings, void> {
     return {
       resource: 'updateSettings',
-      handler: (_: string, settings: Settings) => {
+      handler: async (_: string, settings: Settings) => {
         this.lastProject = settings.lastProject;
         return this.save();
       },
@@ -91,13 +91,13 @@ export class Settings {
   }
 }
 
-export let SETTINGS: Settings = null;
+export let SETTINGS: Settings = new Settings('');
 
-export async function loadSettings(settingsFile?: string): Promise<Settings> {
+export function loadSettings(settingsFile?: string): Settings {
   if (!settingsFile) {
     settingsFile = '.settings';
   }
-  const fullName = await ensureFile(settingsFile);
-  SETTINGS = await Settings.fromFile(fullName);
+  const fullName = ensureFile(settingsFile);
+  SETTINGS = Settings.fromFile(fullName);
   return SETTINGS;
 }

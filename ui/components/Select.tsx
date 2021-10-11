@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { Tooltip } from './Tooltip';
 
 function getOptionValues(children: React.ReactNode): Array<string> {
   return React.Children.map(children, (c: React.ReactElement) => {
@@ -31,6 +32,7 @@ export function Select({
   className,
   used,
   allowNone,
+  tooltip,
 }: {
   value: string;
   onChange: (value: string) => void;
@@ -40,8 +42,9 @@ export function Select({
   className?: string;
   used?: Array<string>;
   allowNone?: string;
+  tooltip?: React.ReactNode;
 }) {
-  let selectClass = 'select';
+  let selectClass = 'select vertical-align-center';
   if (className) {
     selectClass += ' ' + className;
   }
@@ -75,17 +78,20 @@ export function Select({
   }, [value, getOptionValues(children).join(',')]);
 
   const select = (
-    <select
-      className={`${label ? '' : className} select-container`}
-      value={value}
-      onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-        onChange(e.target.value)
-      }
-      disabled={disabled}
-    >
-      {allowNone ? <option value={NONE}>{allowNone}</option> : null}
-      {children}
-    </select>
+    <React.Fragment>
+      <select
+        className={`${label ? '' : className} select-container`}
+        value={value}
+        onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+          onChange(e.target.value)
+        }
+        disabled={disabled}
+      >
+        {allowNone ? <option value={NONE}>{allowNone}</option> : null}
+        {children}
+      </select>
+      {tooltip && <Tooltip>{tooltip}</Tooltip>}
+    </React.Fragment>
   );
   if (label) {
     return (

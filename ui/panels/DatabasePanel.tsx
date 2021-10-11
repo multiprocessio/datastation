@@ -13,7 +13,7 @@ import { Input } from '../components/Input';
 import { Select } from '../components/Select';
 import { ServerPicker } from '../components/ServerPicker';
 import { TimeSeriesRange } from '../components/TimeSeriesRange';
-import { VENDOR_GROUPS } from '../connectors';
+import { VENDORS } from '../connectors';
 import { ProjectContext } from '../ProjectStore';
 import { PanelBodyProps, PanelDetailsProps, PanelUIDetails } from './types';
 
@@ -52,26 +52,28 @@ export function DatabasePanelDetails({
       return;
     }
 
-    if (connector.database.type === 'influx' && !panel.database.range.field) {
+    if (
+      ['prometheus'].includes(connector.database.type) &&
+      !panel.database.range.field
+    ) {
       panel.database.range.field = 'time';
     }
   });
 
-  const vendorsWithConnectors = VENDOR_GROUPS.map((group) => {
-    return {
-      label: group.group,
-      options: group.vendors
-        .map((id) =>
-          connectors.filter(
-            (c) =>
-              c.type === 'database' &&
-              (c as DatabaseConnectorInfo).database.type === id
-          )
-        )
-        .flat()
-        .sort((a, b) => (a.name < b.name ? 1 : -1)),
-    };
-  }).filter((g) => g.options.length);
+  const vendorsWithConnectors = Object.keys(VENDORS)
+    .sort()
+    .map((id) => {
+      const vendor = VENDORS[id as keyof typeof VENDORS];
+      return {
+        label: vendor.name,
+        options: (connectors || []).filter(
+          (c) =>
+            c.type === 'database' &&
+            (c as DatabaseConnectorInfo).database.type === id
+        ),
+      };
+    })
+    .filter((g) => g.options.length);
 
   return (
     <React.Fragment>
@@ -79,24 +81,27 @@ export function DatabasePanelDetails({
         {connectors.length === 0 ? (
           <small>Create a connector on the left to get started.</small>
         ) : (
-          <Select
-            label="Connector"
-            value={panel.database.connectorId}
-            onChange={(connectorId: string) => {
-              panel.database.connectorId = connectorId;
-              updatePanel(panel);
-            }}
-          >
-            {vendorsWithConnectors.map((g) => (
-              <optgroup label={g.label} key={g.label}>
-                {g.options.map((o) => (
-                  <option key={o.name} value={o.id}>
-                    {o.name}
-                  </option>
-                ))}
-              </optgroup>
-            ))}
-          </Select>
+          <React.Fragment>
+            <Select
+              label="Connector"
+              value={panel.database.connectorId}
+              onChange={(connectorId: string) => {
+                panel.database.connectorId = connectorId;
+                updatePanel(panel);
+              }}
+            >
+              {vendorsWithConnectors.map((g) => (
+                <optgroup label={g.label} key={g.label}>
+                  {g.options.map((o) => (
+                    <option key={o.id} value={o.id}>
+                      {o.name}
+                    </option>
+                  ))}
+                </optgroup>
+              ))}
+            </Select>
+            <small>{VENDORS[connector.database.type]?.name}</small>
+          </React.Fragment>
         )}
       </div>
       {connector && (
@@ -112,16 +117,19 @@ export function DatabasePanelDetails({
               }}
             />
           )}
-          {!['cassandra', 'presto'].includes(connector.database.type) && (
+          {['elasticsearch', 'prometheus'].includes(
+            connector.database.type
+          ) && (
             <TimeSeriesRange
               range={panel.database.range}
+              hideField={['prometheus'].includes(connector.database.type)}
               updateRange={(r: TimeSeriesRangeT) => {
                 panel.database.range = r;
                 updatePanel(panel);
               }}
             />
           )}
-          {connector.database.type === 'influx' && (
+          {connector.database.type === 'prometheus' && (
             <Input
               label="Step (seconds)"
               type="number"

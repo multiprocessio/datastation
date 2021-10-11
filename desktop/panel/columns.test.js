@@ -1,7 +1,7 @@
 const { getProjectResultsFile } = require('../store');
 const { shape } = require('shape');
 const { preview } = require('preview');
-const fs = require('fs/promises');
+const fs = require('fs');
 const { file: makeTmpFile } = require('tmp-promise');
 const {
   ProjectState,
@@ -13,7 +13,7 @@ const { makeEvalHandler } = require('./eval');
 const { fetchResultsHandler } = require('./columns');
 
 test('store and retrieve literal, specific columns', async () => {
-  const tmp = await makeTmpFile();
+  const tmp = await makeTmpFile({ prefix: 'columns-project-' });
 
   const testData = [
     { a: 1, b: 'hey' },
@@ -98,7 +98,7 @@ test('store and retrieve literal, specific columns', async () => {
     try {
       // Results file
       await tmp.cleanup();
-      await fs.unlink(getProjectResultsFile(tmp.path) + id);
+      fs.unlinkSync(getProjectResultsFile(tmp.path) + id);
     } catch (e) {
       console.error(e); // don't fail on failure to cleanup, means an earlier step is going to fail after finally block
     }
