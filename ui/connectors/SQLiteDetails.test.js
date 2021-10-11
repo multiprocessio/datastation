@@ -1,3 +1,0 @@
-require('./SQLiteDetails');
-
-test('stub', () => {});

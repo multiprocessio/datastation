@@ -11,17 +11,7 @@ module.exports = {
           },
         }
       : undefined,
-  transform: {
-    '.[jt]sx?$': [
-      '@sucrase/jest-plugin',
-      {
-        sourcemap: true,
-        loaders: {
-          '.test.js': 'jsx',
-        },
-      },
-    ],
-  },
+  preset: 'ts-jest/presets/js-with-ts',
   transformIgnorePatterns: [
     'node_modules/(?!react-syntax-highlighter|refractor|node-fetch|fetch-blob)',
   ],
