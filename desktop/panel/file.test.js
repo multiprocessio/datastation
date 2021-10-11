@@ -63,7 +63,7 @@ for (const userdataFileType of USERDATA_FILES) {
     // Do this so that its name shows up in stack traces
     [userdataFileType + 'Test']: async () => {
       const tmp = await makeTmpFile({
-        prefix: userDataFileType + '-file-project-',
+        prefix: userdataFileType + '-file-project-',
       });
 
       try {
