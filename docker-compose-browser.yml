@@ -1,0 +1,11 @@
+version: "3.9"
+services:
+  datastation:
+    image: datastation:latest
+    build: .
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./:/home/datastation/datastation:Z
+    entrypoint: "sh -c"
+    command: ["cd ~/datastation && yarn && yarn start-ui"]

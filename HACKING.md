@@ -27,6 +27,14 @@ yarn build-ui
 
 And manually start a web-server: `python3 -m http.server --port 8080 build`.
 
+### Via Docker
+
+To build and run the in-browser application via `docker` and `docker-compose`:
+
+```
+docker-compose -f docker-compose-browser.yml build
+docker-compose -f docker-compose-browser.yml up
+```
 
 ## Build and run the desktop app
 
