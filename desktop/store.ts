@@ -49,7 +49,9 @@ export function getProjectResultsFile(projectId: string) {
   const fileName = path
     .basename(projectId)
     .replace('.' + PROJECT_EXTENSION, '');
-  return path.join(DISK_ROOT, '.' + fileName + '.results');
+  const base = path.join(DISK_ROOT, '.' + fileName + '.results');
+  ensureFile(base);
+  return base;
 }
 
 function checkAndEncrypt(e: Encrypt, existing?: Encrypt) {
