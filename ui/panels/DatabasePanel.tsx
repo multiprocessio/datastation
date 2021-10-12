@@ -89,6 +89,7 @@ export function DatabasePanelDetails({
                 panel.database.connectorId = connectorId;
                 updatePanel(panel);
               }}
+              subtext={VENDORS[connector.database.type]?.name}
             >
               {vendorsWithConnectors.map((g) => (
                 <optgroup label={g.label} key={g.label}>
@@ -100,7 +101,6 @@ export function DatabasePanelDetails({
                 </optgroup>
               ))}
             </Select>
-            <small>{VENDORS[connector.database.type]?.name}</small>
           </React.Fragment>
         )}
       </div>

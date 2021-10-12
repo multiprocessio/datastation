@@ -89,13 +89,13 @@ export async function evalDatabase(
   ) {
     const defaultPort = DEFAULT_PORT[connector.database.type];
     // This is going to get annoying if one of these dbs ever has a non-HTTP protocol.
-    const { hostname, port } = new URL(
+    const { protocol, hostname, port } = new URL(
       fullHttpURL(connector.database.address, undefined, defaultPort)
     );
     log.info(
       `Connecting ${
         serverId ? 'through tunnel ' : ''
-      }to ${hostname}:${port} for ${connector.database.type} query`
+      }to ${protocol}//${hostname}:${port} for ${connector.database.type} query`
     );
     return await tunnel(
       project,
@@ -129,7 +129,7 @@ export async function evalDatabase(
           return evalPrometheus(
             content,
             info.database.range,
-            host,
+            protocol + '//' + host,
             port,
             connector,
             info
@@ -140,7 +140,7 @@ export async function evalDatabase(
           return evalInflux(
             content,
             info.database.range,
-            host,
+            protocol + '//' + host,
             port,
             connector,
             info

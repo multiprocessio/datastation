@@ -33,6 +33,7 @@ export function Select({
   used,
   allowNone,
   tooltip,
+  subtext,
 }: {
   value: string;
   onChange: (value: string) => void;
@@ -43,6 +44,7 @@ export function Select({
   used?: Array<string>;
   allowNone?: string;
   tooltip?: React.ReactNode;
+  subtext?: React.ReactNode;
 }) {
   let selectClass = 'select vertical-align-center';
   if (className) {
@@ -78,7 +80,7 @@ export function Select({
   }, [value, getOptionValues(children).join(',')]);
 
   const select = (
-    <React.Fragment>
+    <div>
       <select
         className={`${label ? '' : className} select-container`}
         value={value}
@@ -91,7 +93,10 @@ export function Select({
         {children}
       </select>
       {tooltip && <Tooltip>{tooltip}</Tooltip>}
-    </React.Fragment>
+      <div>
+        <small>{subtext}</small>
+      </div>
+    </div>
   );
   if (label) {
     return (
