@@ -11,7 +11,7 @@ requests, scripting, and visualization in a single platform.
 * Query all kinds of databases
   * Traditional OLTP: SQLite, SQL Server, Oracle, PostgreSQL- and MySQL-compatible databases
   * Analytics: Snowflake, ClickHouse
-  * Document and time series: Prometheus, Influx, ElasticSearch
+  * Document and time series: Prometheus, Influx, Elasticsearch
   * More on the roadmap
   * All support proxying over SSH
 * Query HTTP servers

@@ -9,7 +9,7 @@ import {
 import { fullHttpURL } from '../../../shared/url';
 import { EvalHandlerResponse } from '../types';
 
-export async function evalElasticSearch(
+export async function evalElasticsearch(
   query: string,
   range: TimeSeriesRange,
   host: string,
@@ -60,7 +60,7 @@ export async function evalElasticSearch(
           : undefined,
       },
     };
-    log.info('ElasticSearch request: ' + JSON.stringify(req));
+    log.info('Elasticsearch request: ' + JSON.stringify(req));
     const res = await client.search(req);
 
     results = results.concat(res.body.hits.hits);

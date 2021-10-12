@@ -9,7 +9,7 @@ import { fullHttpURL } from '../../shared/url';
 import { Dispatch } from '../rpc';
 import { decryptFields } from '../secret';
 import { evalClickHouse } from './databases/clickhouse';
-import { evalElasticSearch } from './databases/elasticsearch';
+import { evalElasticsearch } from './databases/elasticsearch';
 import { evalInflux } from './databases/influx';
 import { evalMySQL } from './databases/mysql';
 import { evalOracle } from './databases/oracle';
@@ -105,7 +105,7 @@ export async function evalDatabase(
       (host: string, port: number) => {
         host = host || 'localhost';
         if (connector.database.type === 'elasticsearch') {
-          return evalElasticSearch(
+          return evalElasticsearch(
             content,
             info.database.range,
             host,
