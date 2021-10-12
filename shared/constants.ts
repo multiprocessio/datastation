@@ -13,6 +13,7 @@ function getConfig<T>(v: string, _default: T) {
   } catch (e) {
     wg = global as any;
   }
+  console.log(wg[key], key);
   if (key in wg) {
     return wg[key] as T;
   }

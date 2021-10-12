@@ -1,4 +1,5 @@
 import fetch from 'node-fetch';
+import log from '../../../shared/log';
 import { timestampsFromRange } from '../../../shared/sql';
 import {
   DatabaseConnectorInfo,
@@ -29,6 +30,7 @@ export async function evalPrometheus(
     end.valueOf() / 1000
   }&step=${panel.database.step}`;
 
+  log.info('Prometheus query: ' + endpoint);
   const headers: Record<string, string> = {};
   if (
     connector.database.username ||

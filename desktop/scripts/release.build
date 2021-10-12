@@ -1,10 +1,9 @@
 rm -rf build
 yarn
 setenv UI_ESBUILD_ARGS "--minify"
-yarn build-ui
-prepend "window.DS_CONFIG_VERSION='{arg0}';" build/ui.js
-prepend "window.DS_CONFIG_MODE='desktop';" build/ui.js
 yarn build-desktop
+prepend "window.DS_CONFIG_MODE='desktop';" build/ui.js
+prepend "window.DS_CONFIG_VERSION='{arg0}';" build/ui.js
 prepend "global.DS_CONFIG_VERSION='{arg0}';" build/desktop.js
 yarn electron-packager --overwrite --out=releases --build-version={arg0} --app-version={arg0} . "DataStation Community Edition"
 zip -9 -r releases/{os}-{arch}-{arg0}.zip "releases/DataStation Community Edition-{os}-{arch}"
