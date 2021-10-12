@@ -89,6 +89,7 @@ const menuTemplate = [
 ];
 
 export async function openWindow(project: string, newProject: boolean = false) {
+  // TODO: update last open project on window exit too
   if (!newProject) {
     if (!project) {
       project = SETTINGS.lastProject;

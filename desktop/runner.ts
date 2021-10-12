@@ -3,7 +3,12 @@ import 'source-map-support/register';
 import { APP_NAME, DEBUG, VERSION } from '../shared/constants';
 import log from '../shared/log';
 import '../shared/polyfill';
-import { DSPROJ_FLAG, PANEL_FLAG, PANEL_META_FLAG } from './constants';
+import {
+  DSPROJ_FLAG,
+  IS_DESKTOP_RUNNER,
+  PANEL_FLAG,
+  PANEL_META_FLAG,
+} from './constants';
 import { configureLogger } from './log';
 import { panelHandlers } from './panel';
 import { openProjectHandler } from './project';
@@ -108,7 +113,7 @@ export async function main(additionalHandlers?: RPCHandler<any, any>[]) {
   }
 }
 
-if ((process.argv[1] || '').includes('desktop_runner.js')) {
+if (IS_DESKTOP_RUNNER) {
   configureLogger();
   log.info(APP_NAME + ' Panel Runner', VERSION, DEBUG ? 'DEBUG' : '');
 
