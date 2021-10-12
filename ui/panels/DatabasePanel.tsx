@@ -89,7 +89,7 @@ export function DatabasePanelDetails({
                 panel.database.connectorId = connectorId;
                 updatePanel(panel);
               }}
-              subtext={VENDORS[connector.database.type]?.name}
+              subtext={VENDORS[connector?.database.type]?.name}
             >
               {vendorsWithConnectors.map((g) => (
                 <optgroup label={g.label} key={g.label}>
