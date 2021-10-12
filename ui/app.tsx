@@ -168,6 +168,7 @@ export function App() {
 
   React.useEffect(() => {
     if (state && state.projectName) {
+      log.info(state);
       document.title = state.projectName;
     }
 
