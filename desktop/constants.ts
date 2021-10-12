@@ -29,3 +29,7 @@ export const CODE_ROOT = (() => {
 
   return '';
 })();
+
+export const IS_DESKTOP_RUNNER = (process.argv[1] || '').includes(
+  'desktop_runner.js'
+);

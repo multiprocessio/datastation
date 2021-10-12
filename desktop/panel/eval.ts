@@ -74,15 +74,21 @@ export async function evalInSubprocess(
     // This means only one user can run a panel at a time
     killAllByPanelId(panelId);
 
-    const child = execFile(process.argv[0], [
-      subprocess,
-      DSPROJ_FLAG,
-      projectName,
-      PANEL_FLAG,
-      panelId,
-      PANEL_META_FLAG,
-      tmp.path,
-    ]);
+    const child = execFile(
+      process.argv[0],
+      [
+        subprocess,
+        DSPROJ_FLAG,
+        projectName,
+        PANEL_FLAG,
+        panelId,
+        PANEL_META_FLAG,
+        tmp.path,
+      ],
+      {
+        windowsHide: true,
+      }
+    );
 
     pid = child.pid;
     if (!runningProcesses[panelId]) {
