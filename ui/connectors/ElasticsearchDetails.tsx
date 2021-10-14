@@ -7,7 +7,7 @@ import { Host } from './Host';
 import { Password } from './Password';
 import { Username } from './Username';
 
-export function ElasticSearchDetails(props: {
+export function ElasticsearchDetails(props: {
   connector: DatabaseConnectorInfo;
   updateConnector: (c: DatabaseConnectorInfo) => void;
   servers: Array<ServerInfo>;

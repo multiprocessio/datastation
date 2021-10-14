@@ -1,5 +1,5 @@
 import { DatabaseConnectorInfoType } from '../../shared/state';
-import { ElasticSearchDetails } from './ElasticSearchDetails';
+import { ElasticsearchDetails } from './ElasticsearchDetails';
 import { GenericDetails, GenericNoDatabaseDetails } from './GenericDetails';
 import { SnowflakeDetails } from './SnowflakeDetails';
 
@@ -46,9 +46,9 @@ export const VENDORS: {
     details: SnowflakeDetails,
   },
   elasticsearch: {
-    name: 'ElasticSearch',
+    name: 'Elasticsearch',
     id: 'elasticsearch',
-    details: ElasticSearchDetails,
+    details: ElasticsearchDetails,
   },
   splunk: {
     name: 'Splunk',
