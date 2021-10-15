@@ -68,7 +68,7 @@ You'll need to have PostgreSQL install and running. Create a
 Then run migrations: `psql -U datastation -f
 ./server/migrations/1_init.sql`.
 
-Create a config file at `/usr/local/etc/datastation/config.json` and
+Create a config file at `/etc/datastation/config.json` and
 fill out the following fields:
 
 ```
@@ -76,9 +76,9 @@ fill out the following fields:
   "auth": {
     "sessionSecret": "", // A strong key for session signing
     "openId": {
-      realm": "https://accounts.google.com", // Or some other realm
-      clientId": "my id",
-      clientSecret": "my secret",
+      "realm": "https://accounts.google.com", // Or some other realm
+      "clientId": "my id",
+      "clientSecret": "my secret",
     },
   },
 

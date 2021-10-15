@@ -1,8 +1,9 @@
+import JSON5 from 'json5';
 import fs from 'fs';
 import { mergeDeep, validate } from '../shared/object';
 import log from './log';
 
-const CONFIG_PATH = '/usr/local/etc/datastation/config.json';
+const CONFIG_PATH = '/etc/datastation/config.json';
 
 export class Config {
   auth: {
@@ -52,7 +53,7 @@ export class Config {
 
 export function readConfig(): Config {
   const raw = fs.readFileSync(CONFIG_PATH);
-  const rawJson = JSON.parse(raw.toString());
+  const rawJson = JSON5.parse(raw.toString());
   const cfg = mergeDeep(new Config(), rawJson);
 
   const requiredFields = [

@@ -11,13 +11,13 @@ import { ProjectState } from '../shared/state';
 import { App } from './app';
 
 export const getProjectHandlers = (app: App) => {
-  const { host, port } = new URL(app.config.database.address);
+  const [ host, port]  = app.config.database.address.split(':');
   app.dbpool = new Pool({
     user: app.config.database.username || '',
     password: app.config.database.password || '',
     database: app.config.database.database,
     host,
-    port: +port,
+    port: +port || undefined,
   });
 
   const getProjects: RPCHandler<GetProjectsRequest, GetProjectsResponse> = {

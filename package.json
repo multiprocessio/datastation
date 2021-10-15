@@ -33,6 +33,7 @@
     "express-session": "^1.17.2",
     "jsesc": "^3.0.2",
     "json-stringify-safe": "^5.0.1",
+    "json5": "^2.2.0",
     "lodash.debounce": "^4.0.8",
     "mssql": "^7.2.1",
     "mysql2": "^2.3.0",
