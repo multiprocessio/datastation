@@ -6,12 +6,13 @@ import {
   WindowAsyncRPC,
 } from '../shared/rpc';
 import { PanelResult } from '../shared/state';
+import { getUrlState } from './urlState';
 
 export async function asyncRPC<Request = void, Response = void>(
   resource: Endpoint,
   body: Request
 ): Promise<Response> {
-  const projectId = (window as any).projectId;
+  const { projectId } = getUrlState();
 
   if (MODE === 'desktop') {
     // this method is exposed by ./desktop/preload.ts in Electron environments

@@ -5,7 +5,7 @@ import {
   UpdateProjectRequest,
   UpdateProjectResponse,
 } from '../shared/rpc';
-import { DEFAULT_PROJECT, ProjectState } from '../shared/state';
+import { ProjectState } from '../shared/state';
 import { asyncRPC } from './asyncRPC';
 
 // This will store X copies of the entire state. Project state
@@ -110,5 +110,7 @@ export function makeStore(mode: string, restoreBufferSize = 50) {
   return new storeClass(restoreBufferSize);
 }
 
-export const ProjectContext =
-  React.createContext<ProjectState>(DEFAULT_PROJECT);
+export const ProjectContext = React.createContext<{
+  state: ProjectState;
+  setState: (a0: Partial<ProjectState>) => void;
+}>();

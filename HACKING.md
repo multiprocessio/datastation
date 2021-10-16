@@ -10,6 +10,12 @@ macOS. On Linux install gcc or clang.
 If you want to have hot-reloading, install
 [fswatch](https://github.com/emcrisostomo/fswatch).
 
+## Principles
+
+* Keep things simple and don't abstract early
+* Node packages bring in tons of dependencies. So be very careful before adding new depencies and don't bring in small dependencies or dependencies that can be easily written and fully unit-tested.
+* Keep adding unit tests and bumping 
+
 ## Build and run the online environment
 
 This will start a web server for the in-browser application. If you

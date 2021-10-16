@@ -92,7 +92,6 @@ export const filePanel: PanelUIDetails<FilePanelInfo> = {
   label: 'File',
   details: FilePanelDetails,
   body: null,
-  alwaysOpen: false,
   previewable: true,
   factory: () => new FilePanelInfo(),
   hasStdout: false,

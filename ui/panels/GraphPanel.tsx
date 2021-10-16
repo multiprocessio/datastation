@@ -306,7 +306,6 @@ export const graphPanel: PanelUIDetails<GraphPanelInfo> = {
   label: 'Graph',
   details: GraphPanelDetails,
   body: GraphPanel,
-  alwaysOpen: true,
   previewable: false,
   factory: () => new GraphPanelInfo(),
   hasStdout: false,

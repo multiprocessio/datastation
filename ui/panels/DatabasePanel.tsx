@@ -183,7 +183,6 @@ export const databasePanel: PanelUIDetails<DatabasePanelInfo> = {
   label: 'Database',
   details: DatabasePanelDetails,
   body: DatabasePanelBody,
-  alwaysOpen: false,
   previewable: true,
   factory: () => new DatabasePanelInfo(),
   hasStdout: false,

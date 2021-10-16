@@ -6,6 +6,7 @@ import * as React from 'react';
 import { toString } from 'shape';
 import { MODE, MODE_FEATURES } from '../shared/constants';
 import log from '../shared/log';
+import { deepEquals } from '../shared/object';
 import {
   PanelInfo,
   PanelInfoType,

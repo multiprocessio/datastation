@@ -1,5 +1,5 @@
-import JSON5 from 'json5';
 import fs from 'fs';
+import JSON5 from 'json5';
 import { mergeDeep, validate } from '../shared/object';
 import log from './log';
 

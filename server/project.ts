@@ -11,7 +11,7 @@ import { ProjectState } from '../shared/state';
 import { App } from './app';
 
 export const getProjectHandlers = (app: App) => {
-  const [ host, port]  = app.config.database.address.split(':');
+  const [host, port] = app.config.database.address.split(':');
   app.dbpool = new Pool({
     user: app.config.database.username || '',
     password: app.config.database.password || '',

@@ -168,7 +168,6 @@ export const httpPanel: PanelUIDetails<HTTPPanelInfo> = {
   label: 'HTTP',
   details: HTTPPanelDetails,
   body: null,
-  alwaysOpen: true,
   previewable: true,
   factory: () => new HTTPPanelInfo(),
   info: HTTPInfo,

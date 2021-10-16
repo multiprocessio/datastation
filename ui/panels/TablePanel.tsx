@@ -179,7 +179,6 @@ export const tablePanel: PanelUIDetails<TablePanelInfo> = {
   label: 'Table',
   details: TablePanelDetails,
   body: TablePanel,
-  alwaysOpen: true,
   previewable: false,
   factory: () => new TablePanelInfo(),
   hasStdout: false,

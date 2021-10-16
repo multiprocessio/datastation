@@ -144,7 +144,6 @@ export const programPanel: PanelUIDetails<ProgramPanelInfo> = {
   label: 'Code',
   details: ProgramPanelDetails,
   body: ProgramPanelBody,
-  alwaysOpen: false,
   previewable: true,
   factory: () => new ProgramPanelInfo(),
   hasStdout: true,

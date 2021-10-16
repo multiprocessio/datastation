@@ -286,7 +286,6 @@ export const filaggPanel: PanelUIDetails<FilterAggregatePanelInfo> = {
   label: 'Visual Transform',
   details: FilterAggregatePanelDetails,
   body: null,
-  alwaysOpen: false,
   previewable: true,
   factory: () => new FilterAggregatePanelInfo(),
   info: null,
