@@ -14,7 +14,7 @@ export function DatabaseConnector({
   connector: DatabaseConnectorInfo;
   updateConnector: (dc: DatabaseConnectorInfo) => void;
 }) {
-  const { servers } = React.useContext(ProjectContext);
+  const { servers } = React.useContext(ProjectContext).state;
   const { details: Details } = VENDORS[connector.database.type];
   return (
     <React.Fragment>

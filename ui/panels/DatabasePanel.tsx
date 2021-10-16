@@ -37,7 +37,7 @@ export function DatabasePanelDetails({
   panel,
   updatePanel,
 }: PanelDetailsProps<DatabasePanelInfo>) {
-  const { connectors, servers } = React.useContext(ProjectContext);
+  const { connectors, servers } = React.useContext(ProjectContext).state;
 
   if (!connectors.length && panel.database.connectorId) {
     panel.database.connectorId = '';

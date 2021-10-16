@@ -19,6 +19,7 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { Input } from './components/Input';
 import { ConnectorList } from './ConnectorList';
 import { PageList } from './PageList';
+import { ProjectContext } from './ProjectStore';
 import { ServerList } from './ServerList';
 import { Sidebar } from './Sidebar';
 import { Updates } from './Updates';
@@ -27,7 +28,9 @@ import { UrlStateContext } from './urlState';
 export function Editor() {
   const {
     state: { projectId },
+    setState: setUrlState,
   } = React.useContext(UrlStateContext);
+  const { state, setState: setProjectState } = React.useContext(ProjectContext);
 
   const [makeProjectError, setMakeProjectError] = React.useState('');
   async function makeProject(projectId: string) {
@@ -92,17 +95,17 @@ export function Editor() {
 
   function updatePage(page: ProjectPage) {
     state.pages[currentPage] = page;
-    updateProjectState(state);
+    setProjectState(state);
   }
 
   function addPage(page: ProjectPage) {
     state.pages.push(page);
-    updateProjectState(state);
+    setProjectState(state);
   }
 
   function deletePage(at: number) {
     state.pages.splice(at, 1);
-    updateProjectState(state);
+    setProjectState(state);
   }
 
   function updateConnector(id: string, dc: ConnectorInfo) {
@@ -112,12 +115,12 @@ export function Editor() {
       return;
     }
     state.connectors[index] = dc;
-    updateProjectState(state);
+    setProjectState(state);
   }
 
   function addConnector(dc: ConnectorInfo) {
     state.connectors.push(dc);
-    updateProjectState(state);
+    setProjectState(state);
   }
 
   function deleteConnector(id: string) {
@@ -126,7 +129,7 @@ export function Editor() {
       return;
     }
     state.connectors.splice(at, 1);
-    updateProjectState(state);
+    setProjectState(state);
   }
 
   function updateServer(id: string, dc: ServerInfo) {
@@ -136,12 +139,12 @@ export function Editor() {
       return;
     }
     state.servers[index] = dc;
-    updateProjectState(state);
+    setProjectState(state);
   }
 
   function addServer(dc: ServerInfo) {
     state.servers.push(dc);
-    updateProjectState(state);
+    setProjectState(state);
   }
 
   function deleteServer(id: string) {
@@ -150,7 +153,7 @@ export function Editor() {
       return;
     }
     state.servers.splice(at, 1);
-    updateProjectState(state);
+    setProjectState(state);
   }
 
   async function openProject() {

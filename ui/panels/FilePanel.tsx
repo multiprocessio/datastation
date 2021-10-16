@@ -40,7 +40,7 @@ export function FilePanelDetails({
   panel,
   updatePanel,
 }: PanelDetailsProps<FilePanelInfo>) {
-  const { servers } = React.useContext(ProjectContext);
+  const { servers } = React.useContext(ProjectContext).state;
   return (
     <div className="FilePanel">
       <FormGroup label="General">

@@ -54,8 +54,7 @@ export function useUrlState(): [URLState, (a0: Partial<URLState>) => void] {
   return [state, setState];
 }
 
-export const UrlStateContext =
-  React.createContext<{
-    state: URLState;
-    setState: (a: Partial<URLState>) => void;
-  }>();
+export const UrlStateContext = React.createContext<{
+  state: URLState;
+  setState: (a: Partial<URLState>) => void;
+}>();
