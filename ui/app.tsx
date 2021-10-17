@@ -7,6 +7,7 @@ import { DEFAULT_PROJECT, ProjectState } from '../shared/state';
 import { Loading } from './components/Loading';
 import { Dashboard } from './Dashboard';
 import { Editor } from './Editor';
+import { MakeSelectProject } from './MakeSelectProject';
 import { Header } from './Header';
 import { NotFound } from './NotFound';
 import { makeStore, ProjectContext, ProjectStore } from './ProjectStore';
@@ -93,6 +94,11 @@ const store = makeStore(MODE);
 
 export function App() {
   const [urlState, setUrlState] = useUrlState();
+  React.useEffect(() => {
+    if (!urlState.projectId && MODE_FEATURES.useDefaultProject) {
+      setUrlState({ projectId: DEFAULT_PROJECT.projectName });
+    }
+  });
   const [state, setProjectState] = useProjectState(urlState.projectId, store);
 
   const [headerHeight, setHeaderHeightInternal] = React.useState(0);
@@ -104,11 +110,14 @@ export function App() {
     setHeaderHeightInternal(e.offsetHeight);
   }, []);
 
-  const MainChild =
+  let MainChild =
     {
       editor: Editor,
       dashboard: Dashboard,
     }[urlState.view || 'editor'] || NotFound;
+  if (!urlState.projectId && !MODE_FEATURES.useDefaultProject) {
+    MainChild = MakeSelectProject;
+  }
 
   if (!state && urlState.projectId) {
     return <Loading />;

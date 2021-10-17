@@ -5,6 +5,7 @@ import '../shared/polyfill';
 import { ConnectorInfo, ProjectPage, ServerInfo } from '../shared/state';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { Version } from './components/Version';
+import { Loading } from './components/Loading';
 import { ConnectorList } from './ConnectorList';
 import { PageList } from './PageList';
 import { ProjectContext } from './ProjectStore';
@@ -32,7 +33,7 @@ export function Editor() {
 
   React.useEffect(() => {
     if (state && state.projectName) {
-      log.info(state);
+      console.info(state);
       document.title = state.projectName;
     }
 
@@ -103,6 +104,10 @@ export function Editor() {
     }
     state.servers.splice(at, 1);
     setProjectState(state);
+  }
+
+  if (!state) {
+    return <Loading />;
   }
 
   // This allows us to render the sidebar in tests where we
