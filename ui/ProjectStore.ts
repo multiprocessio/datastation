@@ -113,4 +113,9 @@ export function makeStore(mode: string, restoreBufferSize = 50) {
 export const ProjectContext = React.createContext<{
   state: ProjectState;
   setState: (a0: Partial<ProjectState>) => void;
-}>();
+}>({
+  state: new ProjectState(),
+  setState(a) {
+    throw new Error('Context not initialized.');
+  },
+});

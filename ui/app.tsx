@@ -4,8 +4,10 @@ import { LANGUAGES } from '../shared/languages';
 import log from '../shared/log';
 import '../shared/polyfill';
 import { DEFAULT_PROJECT, ProjectState } from '../shared/state';
+import { Loading } from './components/Loading';
 import { Dashboard } from './Dashboard';
 import { Editor } from './Editor';
+import { Header } from './Header';
 import { NotFound } from './NotFound';
 import { makeStore, ProjectContext, ProjectStore } from './ProjectStore';
 import { UrlStateContext, useUrlState } from './urlState';
@@ -91,7 +93,7 @@ const store = makeStore(MODE);
 
 export function App() {
   const [urlState, setUrlState] = useUrlState();
-  const [state, setProjectState] = useProjectState(projectId, store);
+  const [state, setProjectState] = useProjectState(urlState.projectId, store);
 
   const [headerHeight, setHeaderHeightInternal] = React.useState(0);
   const setHeaderHeight = React.useCallback((e: HTMLElement) => {
@@ -102,15 +104,21 @@ export function App() {
     setHeaderHeightInternal(e.offsetHeight);
   }, []);
 
-  const body =
+  const MainChild =
     {
       editor: Editor,
       dashboard: Dashboard,
     }[urlState.view || 'editor'] || NotFound;
 
+  if (!state && urlState.projectId) {
+    return <Loading />;
+  }
+
   return (
-    <ProjectContext.Provider value={{ state, setProjectState }}>
-      <UrlStateContext.Provider value={{ urlState, setUrlState }}>
+    <ProjectContext.Provider value={{ state, setState: setProjectState }}>
+      <UrlStateContext.Provider
+        value={{ state: urlState, setState: setUrlState }}
+      >
         <div className={`app app--${MODE}`}>
           {MODE_FEATURES.appHeader && (
             <Header setHeaderHeight={setHeaderHeight} />
@@ -121,7 +129,7 @@ export function App() {
               height: `calc(100% - ${headerHeight}px)`,
             }}
           >
-            {body}
+            <MainChild />
           </main>
         </div>
       </UrlStateContext.Provider>

@@ -21,11 +21,11 @@ interface URLState {
   view: 'editor' | 'dashboard';
 }
 
-export function getUrlState() {
+export function getUrlState(): URLState {
   return {
     projectId: getQueryParameter('projectId'),
     pageId: getQueryParameter('pageId'),
-    view: getQueryParameter('view'),
+    view: getQueryParameter('view') as 'editor' | 'dashboard',
   };
 }
 const defaultState = getUrlState();
@@ -34,10 +34,10 @@ export function useUrlState(): [URLState, (a0: Partial<URLState>) => void] {
   const [state, setStateInternal] = React.useState<URLState>(defaultState);
 
   React.useEffect(() => {
-    const currentState = getCurrentState();
+    const currentState = getUrlState();
     if (!deepEquals(currentState, state)) {
       const serialized = Object.keys(state)
-        .map((k) => `${k}=${encodeURIComponent(state[k])}`)
+        .map((k) => `${k}=${encodeURIComponent(state[k as keyof URLState])}`)
         .join('&');
       const newUrl = window.location.pathname + '?' + serialized;
       history.pushState({}, document.title, newUrl);
@@ -57,4 +57,9 @@ export function useUrlState(): [URLState, (a0: Partial<URLState>) => void] {
 export const UrlStateContext = React.createContext<{
   state: URLState;
   setState: (a: Partial<URLState>) => void;
-}>();
+}>({
+  state: getUrlState(),
+  setState(a) {
+    throw new Error('Context not initialized.');
+  },
+});

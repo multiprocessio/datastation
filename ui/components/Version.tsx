@@ -1,3 +1,4 @@
+import React from 'react';
 import { VERSION } from '../../shared/constants';
 
 export function Version() {

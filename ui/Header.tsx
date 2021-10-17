@@ -3,14 +3,19 @@ import { APP_NAME, MODE, SITE_ROOT } from '../shared/constants';
 import '../shared/polyfill';
 import { DEFAULT_PROJECT } from '../shared/state';
 import { Button } from './components/Button';
+import { ProjectContext } from './ProjectStore';
+import { UrlStateContext } from './urlState';
 
 export function Header({
   setHeaderHeight,
-  projectId,
 }: {
   setHeaderHeight: (e: HTMLElement) => void;
-  projectId: string;
 }) {
+  const {
+    state: { projectId },
+  } = React.useContext(UrlStateContext);
+  const { setState: setProjectState } = React.useContext(ProjectContext);
+
   return (
     <header ref={setHeaderHeight}>
       <div className="vertical-align-center">
@@ -21,7 +26,7 @@ export function Header({
               <span title="Drop all state and load a sample project.">
                 <Button
                   onClick={() => {
-                    updateProjectState(DEFAULT_PROJECT);
+                    setProjectState(DEFAULT_PROJECT);
                     window.location.reload();
                   }}
                 >

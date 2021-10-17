@@ -1,22 +1,10 @@
-import formatDistanceToNow from 'date-fns/formatDistanceToNow';
 import * as React from 'react';
-import { MODE, MODE_FEATURES } from '../shared/constants';
+import { MODE_FEATURES } from '../shared/constants';
 import log from '../shared/log';
 import '../shared/polyfill';
-import {
-  GetProjectsRequest,
-  GetProjectsResponse,
-  MakeProjectRequest,
-  MakeProjectResponse,
-  OpenProjectRequest,
-  OpenProjectResponse,
-} from '../shared/rpc';
 import { ConnectorInfo, ProjectPage, ServerInfo } from '../shared/state';
-import { asyncRPC } from './asyncRPC';
-import { Alert } from './components/Alert';
-import { Button } from './components/Button';
 import { ErrorBoundary } from './components/ErrorBoundary';
-import { Input } from './components/Input';
+import { Version } from './components/Version';
 import { ConnectorList } from './ConnectorList';
 import { PageList } from './PageList';
 import { ProjectContext } from './ProjectStore';
@@ -27,29 +15,18 @@ import { UrlStateContext } from './urlState';
 
 export function Editor() {
   const {
-    state: { projectId },
+    state: { projectId, pageId },
     setState: setUrlState,
   } = React.useContext(UrlStateContext);
   const { state, setState: setProjectState } = React.useContext(ProjectContext);
 
-  const [makeProjectError, setMakeProjectError] = React.useState('');
-  async function makeProject(projectId: string) {
-    try {
-      await asyncRPC<MakeProjectRequest, MakeProjectResponse>('makeProject', {
-        projectId,
-      });
-      setUrlState({ projectId });
-    } catch (e) {
-      setMakeProjectError(e.message);
-    }
-  }
-
   const currentPageKey = 'currentPage:' + projectId;
   const [currentPage, _setCurrentPage] = React.useState(
-    +localStorage.getItem(currentPageKey) || 0
+    +localStorage.getItem(currentPageKey) || +pageId || 0
   );
   function setCurrentPage(p: number) {
     localStorage.setItem(currentPageKey, String(p) || '0');
+    setUrlState({ pageId: String(p) });
     return _setCurrentPage(p);
   }
 
@@ -64,34 +41,6 @@ export function Editor() {
       document.body.style.overflowY = 'hidden';
     }
   }, [state && state.projectName]);
-
-  const [projectNameTmp, setProjectNameTmp] = React.useState('');
-
-  const [projects, setProjects] = React.useState<GetProjectsResponse | null>(
-    null
-  );
-  React.useEffect(() => {
-    async function load() {
-      const projects = await asyncRPC<GetProjectsRequest, GetProjectsResponse>(
-        'getProjects',
-        null
-      );
-      setProjects(projects);
-    }
-
-    if (MODE === 'server' && !projects) {
-      load();
-    }
-  }, []);
-
-  if ((!state && projectId) || (MODE === 'server' && !projects)) {
-    return (
-      <div className="loading">
-        Loading...
-        <span id="spin"></span>
-      </div>
-    );
-  }
 
   function updatePage(page: ProjectPage) {
     state.pages[currentPage] = page;
@@ -156,14 +105,6 @@ export function Editor() {
     setProjectState(state);
   }
 
-  async function openProject() {
-    await asyncRPC<OpenProjectRequest, OpenProjectResponse>(
-      'openProject',
-      null
-    );
-    window.close();
-  }
-
   // This allows us to render the sidebar in tests where we
   // prepopulate connectors and servers
   const hasSidebar = Boolean(
@@ -194,65 +135,14 @@ export function Editor() {
         </Sidebar>
       )}
       <div className="main-body">
-        {!projectId ? (
-          <div className="project-name">
-            <h1>New Project</h1>
-            <p>Pick a name for this project to get started.</p>
-            <div className="form-row">
-              <Input
-                value={projectNameTmp}
-                label="Project name"
-                onChange={(v) => setProjectNameTmp(v)}
-              />
-            </div>
-            <div className="form-row">
-              <Button
-                type="primary"
-                disabled={!projectNameTmp}
-                onClick={() => makeProject(projectNameTmp)}
-              >
-                {projectNameTmp ? 'Go!' : 'Pick a name'}
-              </Button>
-            </div>
-            {makeProjectError && (
-              <Alert type="error" children={makeProjectError} />
-            )}
-            {MODE === 'desktop' && (
-              <div className="project-existing">
-                <p>Or open an existing project.</p>
-                <div className="form-row">
-                  <Button onClick={openProject}>Open</Button>
-                </div>
-              </div>
-            )}
-            {MODE === 'server' && projects.length ? (
-              <div className="project-existing">
-                <p>Or open an existing project.</p>
-                {projects.map(({ name, createdAt }) => (
-                  <div className="form-row">
-                    <h3>{name}</h3>
-                    <div>
-                      Created{' '}
-                      {formatDistanceToNow(new Date(createdAt), {
-                        addSuffix: true,
-                      })}
-                    </div>
-                    <a href={'/?projectId=' + name}>Open</a>
-                  </div>
-                ))}
-              </div>
-            ) : null}
-          </div>
-        ) : (
-          <PageList
-            state={state}
-            updatePage={updatePage}
-            addPage={addPage}
-            deletePage={deletePage}
-            currentPage={currentPage}
-            setCurrentPage={setCurrentPage}
-          />
-        )}
+        <PageList
+          state={state}
+          updatePage={updatePage}
+          addPage={addPage}
+          deletePage={deletePage}
+          currentPage={currentPage}
+          setCurrentPage={setCurrentPage}
+        />
         <Version />
       </div>
     </React.Fragment>
