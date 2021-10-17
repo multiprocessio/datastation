@@ -83,17 +83,17 @@ export function PageList({
   addPage,
   deletePage,
   updatePage,
-  setCurrentPage,
-  currentPage,
+  setPageIndex,
+  pageIndex,
 }: {
   state: ProjectState;
   addPage: (page: ProjectPage) => void;
   deletePage: (i: number) => void;
   updatePage: (page: ProjectPage) => void;
-  setCurrentPage: (i: number) => void;
-  currentPage: number;
+  setPageIndex: (i: number) => void;
+  pageIndex: number;
 }) {
-  const page: ProjectPage | null = state.pages[currentPage] || null;
+  const page: ProjectPage | null = state.pages[pageIndex] || null;
 
   if (!page) {
     return (
@@ -104,7 +104,7 @@ export function PageList({
             type="primary"
             onClick={() => {
               addPage(new ProjectPage('Untitled Page'));
-              setCurrentPage(state.pages.length - 1);
+              setPageIndex(state.pages.length - 1);
             }}
           >
             Add a page
@@ -128,14 +128,14 @@ export function PageList({
     <div className="section pages">
       <div className="section-title">
         {state.pages.map((page: ProjectPage, i: number) =>
-          i === currentPage ? (
+          i === pageIndex ? (
             <div className="vertical-align-center current-page" key={page.id}>
               <span title="Delete Page">
                 <Confirm
                   right
                   onConfirm={() => {
-                    deletePage(currentPage);
-                    setCurrentPage(Math.min(state.pages.length - 1, 0));
+                    deletePage(pageIndex);
+                    setPageIndex(Math.min(state.pages.length - 1, 0));
                   }}
                   message="delete this page"
                   action="Delete"
@@ -168,7 +168,7 @@ export function PageList({
             <Button
               key={page.id}
               className="page-name"
-              onClick={() => setCurrentPage(i)}
+              onClick={() => setPageIndex(i)}
             >
               {page.name}
             </Button>
@@ -179,7 +179,7 @@ export function PageList({
           className="flex-right"
           onClick={() => {
             addPage(new ProjectPage('Untitled Page'));
-            setCurrentPage(state.pages.length - 1);
+            setPageIndex(state.pages.length - 1);
           }}
         >
           New Page

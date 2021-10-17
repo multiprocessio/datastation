@@ -183,4 +183,5 @@ export const tablePanel: PanelUIDetails<TablePanelInfo> = {
   factory: () => new TablePanelInfo(),
   hasStdout: false,
   info: null,
+  dashboard: true,
 };

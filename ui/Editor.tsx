@@ -1,11 +1,10 @@
 import * as React from 'react';
 import { MODE_FEATURES } from '../shared/constants';
-import log from '../shared/log';
 import '../shared/polyfill';
 import { ConnectorInfo, ProjectPage, ServerInfo } from '../shared/state';
 import { ErrorBoundary } from './components/ErrorBoundary';
-import { Version } from './components/Version';
 import { Loading } from './components/Loading';
+import { Version } from './components/Version';
 import { ConnectorList } from './ConnectorList';
 import { PageList } from './PageList';
 import { ProjectContext } from './ProjectStore';
@@ -16,20 +15,10 @@ import { UrlStateContext } from './urlState';
 
 export function Editor() {
   const {
-    state: { projectId, pageId },
+    state: { projectId, page: pageIndex },
     setState: setUrlState,
   } = React.useContext(UrlStateContext);
   const { state, setState: setProjectState } = React.useContext(ProjectContext);
-
-  const currentPageKey = 'currentPage:' + projectId;
-  const [currentPage, _setCurrentPage] = React.useState(
-    +localStorage.getItem(currentPageKey) || +pageId || 0
-  );
-  function setCurrentPage(p: number) {
-    localStorage.setItem(currentPageKey, String(p) || '0');
-    setUrlState({ pageId: String(p) });
-    return _setCurrentPage(p);
-  }
 
   React.useEffect(() => {
     if (state && state.projectName) {
@@ -44,7 +33,7 @@ export function Editor() {
   }, [state && state.projectName]);
 
   function updatePage(page: ProjectPage) {
-    state.pages[currentPage] = page;
+    state.pages[pageIndex] = page;
     setProjectState(state);
   }
 
@@ -145,8 +134,8 @@ export function Editor() {
           updatePage={updatePage}
           addPage={addPage}
           deletePage={deletePage}
-          currentPage={currentPage}
-          setCurrentPage={setCurrentPage}
+          pageIndex={pageIndex}
+          setPageIndex={(i) => setUrlState({ page: i })}
         />
         <Version />
       </div>

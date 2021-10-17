@@ -310,4 +310,5 @@ export const graphPanel: PanelUIDetails<GraphPanelInfo> = {
   factory: () => new GraphPanelInfo(),
   hasStdout: false,
   info: null,
+  dashboard: true,
 };

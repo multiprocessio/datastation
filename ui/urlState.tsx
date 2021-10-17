@@ -17,21 +17,25 @@ function getQueryParameter(param: String) {
 
 interface URLState {
   projectId: string;
-  pageId: string;
+  page: number;
   view: 'editor' | 'dashboard';
 }
 
 export function getUrlState(): URLState {
   return {
     projectId: getQueryParameter('projectId'),
-    pageId: getQueryParameter('pageId'),
+    page: +getQueryParameter('page') || 0,
     view: getQueryParameter('view') as 'editor' | 'dashboard',
   };
 }
-const defaultState = getUrlState();
 
 export function useUrlState(): [URLState, (a0: Partial<URLState>) => void] {
-  const [state, setStateInternal] = React.useState<URLState>(defaultState);
+  const defaultState = getUrlState();
+  const lastPageIdKey = 'lastPageId:' + defaultState.projectId;
+  const [state, setStateInternal] = React.useState<URLState>({
+    ...defaultState,
+    page: defaultState.page || localStorage.getItem(lastPageIdKey),
+  });
 
   React.useEffect(() => {
     const currentState = getUrlState();
@@ -41,6 +45,10 @@ export function useUrlState(): [URLState, (a0: Partial<URLState>) => void] {
         .join('&');
       const newUrl = window.location.pathname + '?' + serialized;
       history.pushState({}, document.title, newUrl);
+
+      if (currentState.page !== state.page) {
+        localStorage.setItem(lastPageIdKey, state.page);
+      }
     }
   });
 
