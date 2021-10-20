@@ -85,7 +85,7 @@ export function FilePanelDetails({
   );
 }
 
-function panelDependencies(panel: GraphPanelInfo) {
+function panelDependencies(panel: GraphPanelInfo): string[] {
   return [];
 }
 

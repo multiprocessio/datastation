@@ -63,9 +63,10 @@ export async function evalFilterAggregatePanel(
   panelResults: Array<PanelResult>
 ) {
   if (MODE === 'browser') {
-    const { panelSource } = panel.filagg;
-    if (!panelResults || !panelResults[panelSource]) {
-      throw new InvalidDependentPanelError(panelSource);
+    const panelIndex = (panels || []).findIndex(p => p.id === filagg.panelSource);
+    const resultMeta = (panels[panelIndex] || {}).resultMeta;
+    if (!resultMeta || !resultMeta.value) {
+      throw new InvalidDependentPanelError(panelIndex);
     }
 
     const query = buildSQLiteQuery(panel);
@@ -90,8 +91,7 @@ export function FilterAggregatePanelDetails({
   panels,
   updatePanel,
 }: PanelDetailsProps<FilterAggregatePanelInfo>) {
-  const data =
-    (panels[panel.filagg.panelSource] || {}).resultMeta || new PanelResult();
+  const data = ((panels || []).find(p => p.id === panel.filagg.panelSource) || {}).resultMeta || new PanelResult();
 
   return (
     <React.Fragment>
@@ -101,7 +101,7 @@ export function FilterAggregatePanelDetails({
             currentPanel={panel.id}
             panels={panels}
             value={panel.filagg.panelSource}
-            onChange={(value: number) => {
+            onChange={(value: string) => {
               panel.filagg.panelSource = value;
               updatePanel(panel);
             }}

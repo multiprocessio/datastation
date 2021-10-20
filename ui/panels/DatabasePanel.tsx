@@ -176,9 +176,11 @@ export function DatabasePanelBody({
   );
 }
 
-function DM_getPanelCalls()
+function DM_getPanelCalls(s: string, panels: Array<PanelInfo>) {
+  
+}
 
-function panelDependencies(p: DatabasePanelInfo) {
+function panelDependencies(p: DatabasePanelInfo, panels: Array<PanelInfo>) {
   
 }
 

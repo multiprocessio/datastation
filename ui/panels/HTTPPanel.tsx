@@ -161,7 +161,7 @@ export function HTTPInfo() {
   );
 }
 
-function panelDependencies(panel: GraphPanelInfo) {
+function panelDependencies(panel: GraphPanelInfo): string[] {
   return [];
 }
 

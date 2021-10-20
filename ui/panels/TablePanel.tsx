@@ -21,16 +21,17 @@ export async function evalColumnPanel(
   panels: Array<PanelInfo>,
 ) {
   if (MODE === 'browser') {
-    const panel = panelResults || 
-    if (!panelResults || !panelResults.findIndex()) {
-      throw new InvalidDependentPanelError(panelSource);
+    const panelIndex = (panels || []).findIndex(p => p.id === panelSource);
+    const resultMeta = (panels[panelIndex] || {}).resultMeta;
+    if (!resultMeta || !resultMeta.value) {
+      throw new InvalidDependentPanelError(panelIndex);
     }
-    const { value } = panelResults[panelSource];
+    const { value } = resultMeta;
     try {
       const valueWithRequestedColumns = columnsFromObject(
         value,
         columns,
-        panelSource
+        panelIndex
       );
       const s = shape(valueWithRequestedColumns);
       return {
@@ -69,8 +70,7 @@ export function TablePanelDetails({
   panels,
   updatePanel,
 }: PanelDetailsProps<TablePanelInfo>) {
-  const data =
-    (panels[panel.table.panelSource] || {}).resultMeta || new PanelResult();
+  const data = ((panels || []).find(p => p.id === panel.table.panelSource) || {}).resultMeta || new PanelResult();
   React.useEffect(() => {
     const fields = unusedFields(
       data?.shape,
@@ -91,7 +91,7 @@ export function TablePanelDetails({
             currentPanel={panel.id}
             panels={panels}
             value={panel.table.panelSource}
-            onChange={(value: number) => {
+            onChange={(value: string) => {
               panel.table.panelSource = value;
               updatePanel(panel);
             }}

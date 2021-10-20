@@ -451,7 +451,7 @@ export class TablePanelInfo extends PanelInfo {
   constructor(
     name?: string,
     columns: Array<TableColumn> = [],
-    panelSource: string,
+    panelSource?: string,
     content?: string
   ) {
     super('table', name, content);

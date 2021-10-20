@@ -82,7 +82,7 @@ export function LiteralPanelBody({
   );
 }
 
-function panelDependencies(panel: GraphPanelInfo) {
+function panelDependencies(panel: GraphPanelInfo): string[] {
   return [];
 }
 
