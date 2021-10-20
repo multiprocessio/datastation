@@ -279,6 +279,10 @@ export function FilterAggregatePanelDetails({
   );
 }
 
+function panelDependencies(panel: FilterAggregatePanelInfo) {
+  return [panel.filagg.panelSource];
+}
+
 export const filaggPanel: PanelUIDetails<FilterAggregatePanelInfo> = {
   icon: 'search',
   eval: evalFilterAggregatePanel,
@@ -290,4 +294,5 @@ export const filaggPanel: PanelUIDetails<FilterAggregatePanelInfo> = {
   factory: () => new FilterAggregatePanelInfo(),
   info: null,
   hasStdout: false,
+  panelDependencies,
 };

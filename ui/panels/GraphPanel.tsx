@@ -197,8 +197,7 @@ export function GraphPanelDetails({
   panels,
   updatePanel,
 }: PanelDetailsProps<GraphPanelInfo>) {
-  const data =
-    (panels[panel.graph.panelSource] || {}).resultMeta || new PanelResult();
+  const data = (panels.find(p => p.id === panel.graph.panelSource) || {}).resultMeta || new PanelResult();
 
   React.useEffect(() => {
     if (panel.graph.ys.length) {
@@ -237,7 +236,7 @@ export function GraphPanelDetails({
             currentPanel={panel.id}
             panels={panels}
             value={panel.graph.panelSource}
-            onChange={(value: number) => {
+            onChange={(value: string) => {
               panel.graph.panelSource = value;
               updatePanel(panel);
             }}
@@ -299,6 +298,10 @@ export function GraphPanelDetails({
   );
 }
 
+function panelDependencies(panel: GraphPanelInfo) {
+  return [panel.graph.panelSource];
+}
+
 export const graphPanel: PanelUIDetails<GraphPanelInfo> = {
   icon: 'bar_chart',
   eval: evalGraphPanel,
@@ -311,4 +314,5 @@ export const graphPanel: PanelUIDetails<GraphPanelInfo> = {
   hasStdout: false,
   info: null,
   dashboard: true,
+  panelDependencies,
 };

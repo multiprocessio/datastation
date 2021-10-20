@@ -85,6 +85,10 @@ export function FilePanelDetails({
   );
 }
 
+function panelDependencies(panel: GraphPanelInfo) {
+  return [];
+}
+
 export const filePanel: PanelUIDetails<FilePanelInfo> = {
   icon: 'description',
   eval: evalFilePanel,
@@ -96,4 +100,5 @@ export const filePanel: PanelUIDetails<FilePanelInfo> = {
   factory: () => new FilePanelInfo(),
   hasStdout: false,
   info: null,
+  panelDependencies,
 };

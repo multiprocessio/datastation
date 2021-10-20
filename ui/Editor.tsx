@@ -22,7 +22,7 @@ export function Editor() {
 
   React.useEffect(() => {
     if (state && state.projectName) {
-      console.info(state);
+      console.log(state);
       document.title = state.projectName;
     }
 

@@ -28,8 +28,6 @@ function useProjectState(
   const [state, setProjectState] = React.useState<ProjectState>(null);
 
   const [previousProjectId, setPreviousProjectId] = React.useState('');
-  const isNewProject =
-    projectId && previousProjectId === '' && projectId !== previousProjectId;
 
   function setState(newState: ProjectState, addToRestoreBuffer = true) {
     store.update(projectId, newState, addToRestoreBuffer);
@@ -38,9 +36,6 @@ function useProjectState(
     setProjectState(c);
   }
 
-  const isDefault =
-    MODE_FEATURES.useDefaultProject &&
-    projectId === DEFAULT_PROJECT.projectName;
 
   // Set up undo mechanism
   /* React.useEffect(() => {
@@ -63,17 +58,9 @@ function useProjectState(
       let state;
       try {
         let rawState = await store.get(projectId);
-        if (!rawState && (!isNewProject || isDefault)) {
-          throw new Error();
-        } else {
-          state = await ProjectState.fromJSON(rawState);
-        }
+        state = await ProjectState.fromJSON(rawState);
       } catch (e) {
-        if (isDefault && e.message === '') {
-          state = DEFAULT_PROJECT;
-        } else {
-          log.error(e);
-        }
+        log.error(e);
       }
 
       state.projectName = projectId;
@@ -94,12 +81,13 @@ const store = makeStore(MODE);
 
 export function App() {
   const [urlState, setUrlState] = useUrlState();
+  const [state, setProjectState] = useProjectState(urlState.projectId, store);
   React.useEffect(() => {
     if (!urlState.projectId && MODE_FEATURES.useDefaultProject) {
       setUrlState({ projectId: DEFAULT_PROJECT.projectName });
+      setProjectState(DEFAULT_PROJECT);
     }
   });
-  const [state, setProjectState] = useProjectState(urlState.projectId, store);
 
   const [headerHeight, setHeaderHeightInternal] = React.useState(0);
   const setHeaderHeight = React.useCallback((e: HTMLElement) => {

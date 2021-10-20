@@ -274,9 +274,11 @@ header > div {
   display: inline-block;
 }
 
-.pages .section-title {
+.section-title {
   font-size: 1.5rem;
   padding-bottom: 15px;
+  display: flex;
+  align-items: flex-end;
 }
 
 .sidebar {
@@ -343,11 +345,6 @@ header > div {
   /* Necessary for overflow-y:auto to take effect */
   height: 100%;
   overflow-y: auto;
-}
-
-.pages .section-title {
-  display: flex;
-  align-items: flex-end;
 }
 
 .pages .current-page {

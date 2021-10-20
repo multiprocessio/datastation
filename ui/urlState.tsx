@@ -31,10 +31,10 @@ export function getUrlState(): URLState {
 
 export function useUrlState(): [URLState, (a0: Partial<URLState>) => void] {
   const defaultState = getUrlState();
-  const lastPageIdKey = 'lastPageId:' + defaultState.projectId;
+  const lastPageIndexKey = 'lastPageIndex:' + defaultState.projectId;
   const [state, setStateInternal] = React.useState<URLState>({
     ...defaultState,
-    page: defaultState.page || localStorage.getItem(lastPageIdKey),
+    page: defaultState.page || +localStorage.getItem(lastPageIndexKey) || 0,
   });
 
   React.useEffect(() => {
@@ -47,7 +47,7 @@ export function useUrlState(): [URLState, (a0: Partial<URLState>) => void] {
       history.pushState({}, document.title, newUrl);
 
       if (currentState.page !== state.page) {
-        localStorage.setItem(lastPageIdKey, state.page);
+        localStorage.setItem(lastPageIndexKey, String(state.page));
       }
     }
   });

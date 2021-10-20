@@ -176,6 +176,12 @@ export function DatabasePanelBody({
   );
 }
 
+function DM_getPanelCalls()
+
+function panelDependencies(p: DatabasePanelInfo) {
+  
+}
+
 export const databasePanel: PanelUIDetails<DatabasePanelInfo> = {
   icon: 'table_rows',
   eval: evalDatabasePanel,
@@ -187,4 +193,5 @@ export const databasePanel: PanelUIDetails<DatabasePanelInfo> = {
   factory: () => new DatabasePanelInfo(),
   hasStdout: false,
   info: null,
+  panelDependencies,
 };

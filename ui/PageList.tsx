@@ -7,6 +7,7 @@ import { Input } from './components/Input';
 import { PanelPlayWarning } from './errors';
 import { PanelList } from './PanelList';
 import { PANEL_UI_DETAILS } from './panels';
+import { UrlStateContext } from './urlState';
 
 export function makeReevalPanel(
   page: ProjectPage,
@@ -94,6 +95,7 @@ export function PageList({
   pageIndex: number;
 }) {
   const page: ProjectPage | null = state.pages[pageIndex] || null;
+  const { setState: setUrlState } = React.useContext(UrlStateContext);
 
   if (!page) {
     return (
@@ -162,7 +164,11 @@ export function PageList({
                 <Button icon onClick={evalAll} type="primary">
                   play_circle
                 </Button>
-              </span>
+            </span>
+
+	      <span title="Dashboard mode">
+	      <Button icon onClick={() => setUrlState({ view: 'dashboard' })}>bar_chart</Button>
+	    </span>
             </div>
           ) : (
             <Button

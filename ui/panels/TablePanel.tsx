@@ -3,7 +3,7 @@ import * as React from 'react';
 import { shape } from 'shape';
 import { MODE } from '../../shared/constants';
 import { InvalidDependentPanelError } from '../../shared/errors';
-import { PanelResult, TableColumn, TablePanelInfo } from '../../shared/state';
+import { PanelResult, PanelInfo, TableColumn, TablePanelInfo } from '../../shared/state';
 import { columnsFromObject } from '../../shared/table';
 import { panelRPC } from '../asyncRPC';
 import { Alert } from '../components/Alert';
@@ -15,13 +15,14 @@ import { PanelBodyProps, PanelDetailsProps, PanelUIDetails } from './types';
 
 export async function evalColumnPanel(
   panelId: string,
-  panelSource: number,
+  panelSource: string,
   columns: Array<string>,
   _: Array<string>,
-  panelResults: Array<PanelResult>
+  panels: Array<PanelInfo>,
 ) {
   if (MODE === 'browser') {
-    if (!panelResults || !panelResults[panelSource]) {
+    const panel = panelResults || 
+    if (!panelResults || !panelResults.findIndex()) {
       throw new InvalidDependentPanelError(panelSource);
     }
     const { value } = panelResults[panelSource];
@@ -51,7 +52,7 @@ export async function evalColumnPanel(
 
 export function evalTablePanel(
   panel: TablePanelInfo,
-  panelResults: Array<PanelResult>,
+  panels: Array<PanelInfo>,
   indexIdMap: Array<string>
 ) {
   return evalColumnPanel(
@@ -59,7 +60,7 @@ export function evalTablePanel(
     panel.table.panelSource,
     panel.table.columns.map((c) => c.field),
     indexIdMap,
-    panelResults
+    panels,
   );
 }
 
@@ -172,6 +173,10 @@ export function TablePanel({ panel, panels }: PanelBodyProps<TablePanelInfo>) {
   );
 }
 
+function panelDependencies(panel: TablePanelInfo) {
+  return [panel.table.panelSource];
+}
+
 export const tablePanel: PanelUIDetails<TablePanelInfo> = {
   icon: 'table_chart',
   eval: evalTablePanel,
@@ -184,4 +189,5 @@ export const tablePanel: PanelUIDetails<TablePanelInfo> = {
   hasStdout: false,
   info: null,
   dashboard: true,
+  panelDependencies,
 };
