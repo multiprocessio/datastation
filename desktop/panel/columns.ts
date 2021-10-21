@@ -21,7 +21,7 @@ export async function evalColumns(
   dispatch: Dispatch
 ): Promise<EvalHandlerResponse> {
   let columns: Array<string>;
-  let panelSource: number;
+  let panelSource: string;
   if (panel.type === 'graph') {
     const gp = panel as GraphPanelInfo;
     columns = [gp.graph.x, ...gp.graph.ys.map((y) => y.field)];
@@ -38,13 +38,13 @@ export async function evalColumns(
   const { value } = await getPanelResult(
     dispatch,
     project.projectName,
-    indexIdMap[panelSource]
+    panelSource
   );
 
   const valueWithRequestedColumns = columnsFromObject(
     value,
     columns,
-    panelSource
+    indexIdMap.indexOf(panelSource)
   );
 
   return {

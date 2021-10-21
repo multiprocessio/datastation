@@ -19,7 +19,7 @@ export async function evalFilterAggregate(
   dispatch: Dispatch
 ) {
   const vp = guardPanel<FilterAggregatePanelInfo>(panel, 'filagg');
-  const query = buildSQLiteQuery(vp);
+  const query = buildSQLiteQuery(vp, extra.indexIdMap);
 
   const tmp = await makeTmpFile({ prefix: 'filagg-sqlite-' });
   log.info('Filagg loading into ' + tmp.path);

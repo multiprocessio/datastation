@@ -3,7 +3,12 @@ import * as React from 'react';
 import { shape } from 'shape';
 import { MODE } from '../../shared/constants';
 import { InvalidDependentPanelError } from '../../shared/errors';
-import { PanelResult, PanelInfo, TableColumn, TablePanelInfo } from '../../shared/state';
+import {
+  PanelInfo,
+  PanelResult,
+  TableColumn,
+  TablePanelInfo,
+} from '../../shared/state';
 import { columnsFromObject } from '../../shared/table';
 import { panelRPC } from '../asyncRPC';
 import { Alert } from '../components/Alert';
@@ -18,10 +23,10 @@ export async function evalColumnPanel(
   panelSource: string,
   columns: Array<string>,
   _: Array<string>,
-  panels: Array<PanelInfo>,
+  panels: Array<PanelInfo>
 ) {
   if (MODE === 'browser') {
-    const panelIndex = (panels || []).findIndex(p => p.id === panelSource);
+    const panelIndex = (panels || []).findIndex((p) => p.id === panelSource);
     const resultMeta = (panels[panelIndex] || {}).resultMeta;
     if (!resultMeta || !resultMeta.value) {
       throw new InvalidDependentPanelError(panelIndex);
@@ -61,7 +66,7 @@ export function evalTablePanel(
     panel.table.panelSource,
     panel.table.columns.map((c) => c.field),
     indexIdMap,
-    panels,
+    panels
   );
 }
 
@@ -70,7 +75,9 @@ export function TablePanelDetails({
   panels,
   updatePanel,
 }: PanelDetailsProps<TablePanelInfo>) {
-  const data = ((panels || []).find(p => p.id === panel.table.panelSource) || {}).resultMeta || new PanelResult();
+  const data =
+    ((panels || []).find((p) => p.id === panel.table.panelSource) || {})
+      .resultMeta || new PanelResult();
   React.useEffect(() => {
     const fields = unusedFields(
       data?.shape,
@@ -173,10 +180,6 @@ export function TablePanel({ panel, panels }: PanelBodyProps<TablePanelInfo>) {
   );
 }
 
-function panelDependencies(panel: TablePanelInfo) {
-  return [panel.table.panelSource];
-}
-
 export const tablePanel: PanelUIDetails<TablePanelInfo> = {
   icon: 'table_chart',
   eval: evalTablePanel,
@@ -189,5 +192,4 @@ export const tablePanel: PanelUIDetails<TablePanelInfo> = {
   hasStdout: false,
   info: null,
   dashboard: true,
-  panelDependencies,
 };

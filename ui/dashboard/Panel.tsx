@@ -16,8 +16,8 @@ export function Panel({ panel }: { panel: PanelInfo }) {
         <div className="panel-body">
           <panelMetadata.body
             panel={panel}
-    panels={[]}
-    keyboardShortcuts={(e: unknown) => {}}
+            panels={[]}
+            keyboardShortcuts={(e: unknown) => {}}
             updatePanel={() => {}}
           />
         </div>

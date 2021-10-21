@@ -33,13 +33,12 @@ export function makeReevalPanel(
     }
 
     try {
-      const panelResults = page.panels.map((p) => p.resultMeta);
       const indexIdMap: Array<string> = page.panels.map((p) => p.id);
       const panelUIDetails = PANEL_UI_DETAILS[panel.type];
       const { value, size, contentType, preview, stdout, shape, arrayCount } =
         await panelUIDetails.eval(
           panel,
-          panelResults,
+          page.panels,
           indexIdMap,
           connectors,
           servers
@@ -164,11 +163,13 @@ export function PageList({
                 <Button icon onClick={evalAll} type="primary">
                   play_circle
                 </Button>
-            </span>
+              </span>
 
-	      <span title="Dashboard mode">
-	      <Button icon onClick={() => setUrlState({ view: 'dashboard' })}>bar_chart</Button>
-	    </span>
+              <span title="Dashboard mode">
+                <Button icon onClick={() => setUrlState({ view: 'dashboard' })}>
+                  bar_chart
+                </Button>
+              </span>
             </div>
           ) : (
             <Button

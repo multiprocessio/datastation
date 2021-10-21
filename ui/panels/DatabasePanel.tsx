@@ -4,7 +4,6 @@ import {
   ConnectorInfo,
   DatabaseConnectorInfo,
   DatabasePanelInfo,
-  PanelResult,
   TimeSeriesRange as TimeSeriesRangeT,
 } from '../../shared/state';
 import { panelRPC } from '../asyncRPC';
@@ -19,8 +18,8 @@ import { PanelBodyProps, PanelDetailsProps, PanelUIDetails } from './types';
 
 export async function evalDatabasePanel(
   panel: DatabasePanelInfo,
-  _1: Array<PanelResult>,
-  _2: Array<string>,
+  _1: unknown,
+  _2: unknown,
   connectors: Array<ConnectorInfo>
 ) {
   const connector = connectors.find(
@@ -176,14 +175,6 @@ export function DatabasePanelBody({
   );
 }
 
-function DM_getPanelCalls(s: string, panels: Array<PanelInfo>) {
-  
-}
-
-function panelDependencies(p: DatabasePanelInfo, panels: Array<PanelInfo>) {
-  
-}
-
 export const databasePanel: PanelUIDetails<DatabasePanelInfo> = {
   icon: 'table_rows',
   eval: evalDatabasePanel,
@@ -195,5 +186,4 @@ export const databasePanel: PanelUIDetails<DatabasePanelInfo> = {
   factory: () => new DatabasePanelInfo(),
   hasStdout: false,
   info: null,
-  panelDependencies,
 };

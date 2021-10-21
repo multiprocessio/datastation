@@ -2,7 +2,7 @@ import React from 'react';
 import { shape } from 'shape';
 import { MODE } from '../../shared/constants';
 import { LANGUAGES, SupportedLanguages } from '../../shared/languages';
-import { PanelResult, PanelInfo, ProgramPanelInfo } from '../../shared/state';
+import { PanelInfo, PanelResult, ProgramPanelInfo } from '../../shared/state';
 import { panelRPC } from '../asyncRPC';
 import { CodeEditor } from '../components/CodeEditor';
 import { Select } from '../components/Select';
@@ -23,7 +23,7 @@ export async function evalProgramPanel(
     throw new Error(`Unknown program type: '${program.type}'`);
   }
 
-  const panelResults = panels.map(p => p.resultMeta);
+  const panelResults = panels.map((p) => p.resultMeta);
   const res = await language.inMemoryEval(panel.content, panelResults);
   const s = shape(res.value);
   return {
@@ -138,10 +138,6 @@ export function ProgramInfo({ panel }: { panel: ProgramPanelInfo }) {
   );
 }
 
-function panelDependencies(panel: ProgramPanelInfo, panels: Array<PanelInfo>) {
-  return DM_getPanelCalls(panel, panels);
-}
-
 export const programPanel: PanelUIDetails<ProgramPanelInfo> = {
   icon: 'code',
   eval: evalProgramPanel,
@@ -153,5 +149,4 @@ export const programPanel: PanelUIDetails<ProgramPanelInfo> = {
   factory: () => new ProgramPanelInfo(),
   hasStdout: true,
   info: ProgramInfo,
-  panelDependencies,
 };

@@ -662,23 +662,20 @@ export const DEFAULT_PROJECT: ProjectState = (() => {
     content: 'SELECT name, age+5 AS age FROM DM_getPanel(0);',
   });
 
-  const gpi = new GraphGpiInfo('Display');
+  const gpi = new GraphPanelInfo('Display');
   gpi.graph.ys = [{ field: 'age', label: 'Age' }];
   gpi.graph.x = 'name';
   gpi.graph.panelSource = ppi.id;
 
-  return new ProjectState(
-    'Example project',
-    [
-      new ProjectPage('CSV Discovery Example', [
-	new LiteralPanelInfo({
-          name: 'Raw CSV Text',
-          content: 'name,age\nMorgan,12\nJames,17',
-          contentTypeInfo: new ContentTypeInfo('text/csv'),
-	}),
-	ppi,
-	gpi,
-      ]),
-    ]
-  );
+  return new ProjectState('Example project', [
+    new ProjectPage('CSV Discovery Example', [
+      new LiteralPanelInfo({
+        name: 'Raw CSV Text',
+        content: 'name,age\nMorgan,12\nJames,17',
+        contentTypeInfo: new ContentTypeInfo('text/csv'),
+      }),
+      ppi,
+      gpi,
+    ]),
+  ]);
 })();

@@ -38,5 +38,4 @@ export interface PanelUIDetails<T extends PanelInfo> {
   info: React.ElementType<{ panel: T }> | null;
   factory: () => T;
   dashboard?: boolean;
-  panelDependencies: (panel: T) => string[];
 }

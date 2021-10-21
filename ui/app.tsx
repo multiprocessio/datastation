@@ -27,15 +27,12 @@ function useProjectState(
 ): [ProjectState, (d: ProjectState) => void] {
   const [state, setProjectState] = React.useState<ProjectState>(null);
 
-  const [previousProjectId, setPreviousProjectId] = React.useState('');
-
   function setState(newState: ProjectState, addToRestoreBuffer = true) {
     store.update(projectId, newState, addToRestoreBuffer);
     const c = { ...newState };
     Object.setPrototypeOf(c, ProjectState.prototype);
     setProjectState(c);
   }
-
 
   // Set up undo mechanism
   /* React.useEffect(() => {
@@ -66,7 +63,6 @@ function useProjectState(
       state.projectName = projectId;
       state.lastVersion = VERSION;
       setProjectState(state);
-      setPreviousProjectId(projectId);
     }
 
     if (projectId) {

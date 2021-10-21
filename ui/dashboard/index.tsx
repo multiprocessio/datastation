@@ -16,7 +16,7 @@ export function Dashboard() {
   return (
     <div className="main-body">
       <div className="section">
-      <div className="section-title">{name}</div>
+        <div className="section-title">{name}</div>
         {panels.map((panel) => (
           <ErrorBoundary key={panel.id}>
             <Panel panel={panel} />

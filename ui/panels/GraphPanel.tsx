@@ -5,6 +5,7 @@ import log from '../../shared/log';
 import {
   GraphPanelInfo,
   GraphPanelInfoType,
+  PanelInfo,
   PanelResult,
 } from '../../shared/state';
 import { Button } from '../components/Button';
@@ -17,7 +18,7 @@ import { PanelBodyProps, PanelDetailsProps, PanelUIDetails } from './types';
 
 export function evalGraphPanel(
   panel: GraphPanelInfo,
-  panelResults: Array<PanelResult>,
+  panels: Array<PanelInfo>,
   indexIdMap: Array<string>
 ) {
   return evalColumnPanel(
@@ -25,7 +26,7 @@ export function evalGraphPanel(
     panel.graph.panelSource,
     [panel.graph.x, ...panel.graph.ys.map((y) => y.field)],
     indexIdMap,
-    panelResults
+    panels
   );
 }
 
@@ -197,7 +198,9 @@ export function GraphPanelDetails({
   panels,
   updatePanel,
 }: PanelDetailsProps<GraphPanelInfo>) {
-  const data = (panels.find(p => p.id === panel.graph.panelSource) || {}).resultMeta || new PanelResult();
+  const data =
+    (panels.find((p) => p.id === panel.graph.panelSource) || {}).resultMeta ||
+    new PanelResult();
 
   React.useEffect(() => {
     if (panel.graph.ys.length) {
@@ -298,10 +301,6 @@ export function GraphPanelDetails({
   );
 }
 
-function panelDependencies(panel: GraphPanelInfo) {
-  return [panel.graph.panelSource];
-}
-
 export const graphPanel: PanelUIDetails<GraphPanelInfo> = {
   icon: 'bar_chart',
   eval: evalGraphPanel,
@@ -314,5 +313,4 @@ export const graphPanel: PanelUIDetails<GraphPanelInfo> = {
   hasStdout: false,
   info: null,
   dashboard: true,
-  panelDependencies,
 };

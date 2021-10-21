@@ -7,6 +7,7 @@ import { buildSQLiteQuery } from '../../shared/sql';
 import {
   AggregateType,
   FilterAggregatePanelInfo,
+  PanelInfo,
   PanelResult,
   TimeSeriesRange as TimeSeriesRangeT,
 } from '../../shared/state';
@@ -60,19 +61,27 @@ function withAggregateShape(
 
 export async function evalFilterAggregatePanel(
   panel: FilterAggregatePanelInfo,
-  panelResults: Array<PanelResult>
+  panels: Array<PanelInfo>
 ) {
   if (MODE === 'browser') {
-    const panelIndex = (panels || []).findIndex(p => p.id === filagg.panelSource);
+    const panelIndex = (panels || []).findIndex(
+      (p) => p.id === panel.filagg.panelSource
+    );
     const resultMeta = (panels[panelIndex] || {}).resultMeta;
     if (!resultMeta || !resultMeta.value) {
       throw new InvalidDependentPanelError(panelIndex);
     }
 
-    const query = buildSQLiteQuery(panel);
+    const query = buildSQLiteQuery(
+      panel,
+      panels.map((p) => p.id)
+    );
 
     const language = LANGUAGES.sql;
-    const res = await language.inMemoryEval(query, panelResults);
+    const res = await language.inMemoryEval(
+      query,
+      panels.map((p) => p.resultMeta)
+    );
     const s = shape(res.value);
     return {
       ...res,
@@ -91,7 +100,9 @@ export function FilterAggregatePanelDetails({
   panels,
   updatePanel,
 }: PanelDetailsProps<FilterAggregatePanelInfo>) {
-  const data = ((panels || []).find(p => p.id === panel.filagg.panelSource) || {}).resultMeta || new PanelResult();
+  const data =
+    ((panels || []).find((p) => p.id === panel.filagg.panelSource) || {})
+      .resultMeta || new PanelResult();
 
   return (
     <React.Fragment>
@@ -279,10 +290,6 @@ export function FilterAggregatePanelDetails({
   );
 }
 
-function panelDependencies(panel: FilterAggregatePanelInfo) {
-  return [panel.filagg.panelSource];
-}
-
 export const filaggPanel: PanelUIDetails<FilterAggregatePanelInfo> = {
   icon: 'search',
   eval: evalFilterAggregatePanel,
@@ -294,5 +301,4 @@ export const filaggPanel: PanelUIDetails<FilterAggregatePanelInfo> = {
   factory: () => new FilterAggregatePanelInfo(),
   info: null,
   hasStdout: false,
-  panelDependencies,
 };

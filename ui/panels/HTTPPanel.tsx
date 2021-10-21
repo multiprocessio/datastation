@@ -161,10 +161,6 @@ export function HTTPInfo() {
   );
 }
 
-function panelDependencies(panel: GraphPanelInfo): string[] {
-  return [];
-}
-
 export const httpPanel: PanelUIDetails<HTTPPanelInfo> = {
   icon: 'http',
   eval: evalHTTPPanel,
@@ -176,5 +172,4 @@ export const httpPanel: PanelUIDetails<HTTPPanelInfo> = {
   factory: () => new HTTPPanelInfo(),
   info: HTTPInfo,
   hasStdout: false,
-  panelDependencies,
 };

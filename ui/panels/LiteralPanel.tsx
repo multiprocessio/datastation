@@ -82,10 +82,6 @@ export function LiteralPanelBody({
   );
 }
 
-function panelDependencies(panel: GraphPanelInfo): string[] {
-  return [];
-}
-
 export const literalPanel: PanelUIDetails<LiteralPanelInfo> = {
   icon: 'format_quote',
   eval: evalLiteralPanel,
@@ -97,5 +93,4 @@ export const literalPanel: PanelUIDetails<LiteralPanelInfo> = {
   factory: () => new LiteralPanelInfo(),
   info: null,
   hasStdout: false,
-  panelDependencies,
 };
