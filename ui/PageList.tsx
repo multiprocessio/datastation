@@ -165,7 +165,7 @@ export function PageList({
                 </Button>
               </span>
 
-              <span title="Dashboard mode">
+              <span title="Enter dashboard mode">
                 <Button icon onClick={() => setUrlState({ view: 'dashboard' })}>
                   bar_chart
                 </Button>

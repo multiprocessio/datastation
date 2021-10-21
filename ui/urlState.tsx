@@ -19,6 +19,7 @@ interface URLState {
   projectId: string;
   page: number;
   view: 'editor' | 'dashboard';
+  refreshPeriod?: number;
 }
 
 export function getUrlState(): URLState {

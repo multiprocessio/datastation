@@ -1,3 +1,4 @@
+import formatDistanceToNow from 'date-fns/formatDistanceToNow';
 import React from 'react';
 import { PanelInfo } from '../../shared/state';
 import { PANEL_UI_DETAILS } from '../panels';
@@ -11,7 +12,17 @@ export function Panel({ panel }: { panel: PanelInfo }) {
 
   return (
     <div className="panel">
-      <div className="panel-head">{panel.name}</div>
+      <div className="panel-head">
+        <div className="panel-header vertical-align-center">
+          <span className="panel-name">{panel.name}</span>
+          <span className="flex-right">
+            {formatDistanceToNow(panel.resultMeta?.lastRun, {
+              addSuffix: true,
+	      includeSeconds: true,
+            })}
+          </span>
+        </div>
+      </div>
       <div className="panel-body-container">
         <div className="panel-body">
           <panelMetadata.body

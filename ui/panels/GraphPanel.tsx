@@ -133,7 +133,11 @@ export function GraphPanel({ panel, panels }: PanelBodyProps<GraphPanelInfo>) {
           // Pretty ridiculous there's no builtin way to set a background color
           // https://stackoverflow.com/a/38493678/1507139
           beforeDraw: function () {
-            ctx.save();
+	    if (!ref || !ref.current) {
+	      return;
+	    }
+
+	    ctx.save();
             ctx.fillStyle = 'white';
             ctx.fillRect(0, 0, ref.current.width, ref.current.height);
             ctx.restore();
