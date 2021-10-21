@@ -11,6 +11,7 @@ import { Header } from './Header';
 import { MakeSelectProject } from './MakeSelectProject';
 import { NotFound } from './NotFound';
 import { makeStore, ProjectContext, ProjectStore } from './ProjectStore';
+import { Scheduler } from './scheduler';
 import { UrlStateContext, useUrlState } from './urlState';
 
 if (MODE === 'browser') {
@@ -98,6 +99,7 @@ export function App() {
     {
       editor: Editor,
       dashboard: Dashboard,
+      scheduler: Scheduler,
     }[urlState.view || 'editor'] || NotFound;
   if (!urlState.projectId && !MODE_FEATURES.useDefaultProject) {
     MainChild = MakeSelectProject;

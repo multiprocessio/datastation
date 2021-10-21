@@ -545,8 +545,43 @@ export class LiteralPanelInfo extends PanelInfo {
   }
 }
 
+export class ScheduledExport {
+  period: 'day' | 'week' | 'month';
+  name: string;
+  id: string;
+  destination: {
+    type: 'email';
+    from: string;
+    recipients: string;
+    server: string;
+    username: string;
+    password_encrypt: Encrpypt;
+  };
+
+  constructor(defaults: Partial<ScheduledExport>) {
+    this.period = defaults.period || 'day';
+    this.timezone = defaults.timezone || 'America/New_York';
+    this.name = defaults.name || 'DataStation Export';
+    this.destination = {
+      ...defaults.destination,
+    };
+    this.destination.type ||= 'email';
+    // In preparation for supporting other types
+    if (this.destination.type === 'email') {
+      this.destination.from ||= '';
+      this.destination.recipients ||= [];
+      this.destination.server ||= '';
+      this.destination.username ||= '';
+      this.destination.password_encrypt ||= new Encrypt();
+    }
+
+    this.id = uuid.v4();
+  }
+}
+
 export class ProjectPage {
   panels: Array<PanelInfo>;
+  schedules: Array<ScheduledExport>;
   name: string;
   id: string;
 

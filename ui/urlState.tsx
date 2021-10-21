@@ -18,7 +18,7 @@ function getQueryParameter(param: String) {
 interface URLState {
   projectId: string;
   page: number;
-  view: 'editor' | 'dashboard';
+  view: 'editor' | 'dashboard' | 'scheduler';
   refreshPeriod?: number;
 }
 
@@ -26,7 +26,7 @@ export function getUrlState(): URLState {
   return {
     projectId: getQueryParameter('projectId'),
     page: +getQueryParameter('page') || 0,
-    view: getQueryParameter('view') as 'editor' | 'dashboard',
+    view: getQueryParameter('view') as UrlState['view'],
   };
 }
 

@@ -170,6 +170,12 @@ export function PageList({
                   bar_chart
                 </Button>
               </span>
+
+              <span title="Enter scheduled export mode">
+                <Button icon onClick={() => setUrlState({ view: 'scheduler' })}>
+                  schedule
+                </Button>
+              </span>
             </div>
           ) : (
             <Button

@@ -18,7 +18,7 @@ export function Panel({ panel }: { panel: PanelInfo }) {
           <span className="flex-right">
             {formatDistanceToNow(panel.resultMeta?.lastRun, {
               addSuffix: true,
-	      includeSeconds: true,
+              includeSeconds: true,
             })}
           </span>
         </div>
