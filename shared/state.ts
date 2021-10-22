@@ -51,7 +51,7 @@ export class Encrypt {
   value: string;
   encrypted: boolean;
 
-  constructor(value: string) {
+  constructor(value: string = '') {
     this.value = value;
     this.encrypted = false;
   }
@@ -555,12 +555,11 @@ export class ScheduledExport {
     recipients: string;
     server: string;
     username: string;
-    password_encrypt: Encrpypt;
+    password_encrypt: Encrypt;
   };
 
-  constructor(defaults: Partial<ScheduledExport>) {
+  constructor(defaults: Partial<ScheduledExport> = {}) {
     this.period = defaults.period || 'day';
-    this.timezone = defaults.timezone || 'America/New_York';
     this.name = defaults.name || 'DataStation Export';
     this.destination = {
       ...defaults.destination,
@@ -569,7 +568,7 @@ export class ScheduledExport {
     // In preparation for supporting other types
     if (this.destination.type === 'email') {
       this.destination.from ||= '';
-      this.destination.recipients ||= [];
+      this.destination.recipients ||= '';
       this.destination.server ||= '';
       this.destination.username ||= '';
       this.destination.password_encrypt ||= new Encrypt();

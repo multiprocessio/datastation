@@ -29,7 +29,12 @@ export function Schedule({
             <Select
               label="Frequency"
               value={schedule.period}
-              onChange={(period) => setSchedule({ ...schedule, period })}
+              onChange={(period) =>
+                setSchedule({
+                  ...schedule,
+                  period: period as ScheduledExport['period'],
+                })
+              }
             >
               <option value="day">Every day</option>
               <option value="week">Every Monday</option>
@@ -41,7 +46,12 @@ export function Schedule({
               type="email"
               label="From address"
               placeholder="mila@big.co"
-              onChange={(from) => setSchedule({ ...schedule, from })}
+              onChange={(from) =>
+                setSchedule({
+                  ...schedule,
+                  destination: { ...schedule.destination, from },
+                })
+              }
             />
           </div>
           <div className="form-row">
@@ -50,7 +60,10 @@ export function Schedule({
               label="Recipient(s)"
               placeholder="ted@big.co,marta@big.co"
               onChange={(recipients) =>
-                setSchedule({ ...schedule, recipients })
+                setSchedule({
+                  ...schedule,
+                  destination: { ...schedule.destination, recipients },
+                })
               }
               tooltip="Separate multiple addresses with a comma"
             />
@@ -60,7 +73,12 @@ export function Schedule({
               type="string"
               label="SMTP Server"
               placeholder="smtp.big.co:587"
-              onChange={(server) => setSchedule({ ...schedule, server })}
+              onChange={(server) =>
+                setSchedule({
+                  ...schedule,
+                  destination: { ...schedule.destination, server },
+                })
+              }
               tooltip="Separate host and port with a colon"
             />
           </div>
@@ -69,15 +87,21 @@ export function Schedule({
               type="string"
               label="SMTP Username"
               placeholder="smtp@big.co"
-              onChange={(username) => setSchedule({ ...schedule, username })}
+              onChange={(username) =>
+                setSchedule({
+                  ...schedule,
+                  destination: { ...schedule.destination, username },
+                })
+              }
             />
           </div>
-          <div className="form-row">
-            <Input type="string" label="SMTP Password" placeholder="" />
-          </div>
           <Password
+            label="SMTP Password"
             onChange={(password_encrypt) =>
-              setSchedule({ ...schedule, password_encrypt })
+              setSchedule({
+                ...schedule,
+                destination: { ...schedule.destination, password_encrypt },
+              })
             }
           />
         </div>

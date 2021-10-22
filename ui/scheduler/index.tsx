@@ -3,15 +3,16 @@ import { ScheduledExport } from '../../shared/state';
 import { Button } from '../components/Button';
 import { ProjectContext } from '../ProjectStore';
 import { UrlStateContext } from '../urlState';
+import { Schedule } from './Schedule';
 
-export function Dashboard() {
+export function Scheduler() {
   const {
-    state: { page: pageIndex, refreshPeriod },
+    state: { page: pageIndex },
     setState: setUrlState,
   } = React.useContext(UrlStateContext);
   const { state: projectState, setState: setProjectState } =
     React.useContext(ProjectContext);
-  const { panels, name, schedules } = projectState.pages[pageIndex];
+  const { name, schedules } = projectState.pages[pageIndex];
 
   function addSchedule() {
     schedules.push(new ScheduledExport());
@@ -19,7 +20,7 @@ export function Dashboard() {
   }
 
   function setSchedule(s: ScheduledExport) {
-    const i = schedules.findIndex((s) => s.id === id);
+    const i = schedules.findIndex((ps) => ps.id === s.id);
     schedules[i] = s;
     setProjectState(projectState);
   }

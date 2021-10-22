@@ -15,14 +15,14 @@ function getQueryParameter(param: String) {
   return '';
 }
 
-interface URLState {
+interface UrlState {
   projectId: string;
   page: number;
   view: 'editor' | 'dashboard' | 'scheduler';
   refreshPeriod?: number;
 }
 
-export function getUrlState(): URLState {
+export function getUrlState(): UrlState {
   return {
     projectId: getQueryParameter('projectId'),
     page: +getQueryParameter('page') || 0,
@@ -30,10 +30,10 @@ export function getUrlState(): URLState {
   };
 }
 
-export function useUrlState(): [URLState, (a0: Partial<URLState>) => void] {
+export function useUrlState(): [UrlState, (a0: Partial<UrlState>) => void] {
   const defaultState = getUrlState();
   const lastPageIndexKey = 'lastPageIndex:' + defaultState.projectId;
-  const [state, setStateInternal] = React.useState<URLState>({
+  const [state, setStateInternal] = React.useState<UrlState>({
     ...defaultState,
     page: defaultState.page || +localStorage.getItem(lastPageIndexKey) || 0,
   });
@@ -42,7 +42,7 @@ export function useUrlState(): [URLState, (a0: Partial<URLState>) => void] {
     const currentState = getUrlState();
     if (!deepEquals(currentState, state)) {
       const serialized = Object.keys(state)
-        .map((k) => `${k}=${encodeURIComponent(state[k as keyof URLState])}`)
+        .map((k) => `${k}=${encodeURIComponent(state[k as keyof UrlState])}`)
         .join('&');
       const newUrl = window.location.pathname + '?' + serialized;
       history.pushState({}, document.title, newUrl);
@@ -53,7 +53,7 @@ export function useUrlState(): [URLState, (a0: Partial<URLState>) => void] {
     }
   });
 
-  function setState(newState: Partial<URLState>) {
+  function setState(newState: Partial<UrlState>) {
     setStateInternal({
       ...state,
       ...newState,
@@ -64,8 +64,8 @@ export function useUrlState(): [URLState, (a0: Partial<URLState>) => void] {
 }
 
 export const UrlStateContext = React.createContext<{
-  state: URLState;
-  setState: (a: Partial<URLState>) => void;
+  state: UrlState;
+  setState: (a: Partial<UrlState>) => void;
 }>({
   state: getUrlState(),
   setState(a) {
