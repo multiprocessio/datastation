@@ -1,5 +1,7 @@
 import React from 'react';
 import { ScheduledExport } from '../../shared/state';
+import { Button } from '../components/Button';
+import { Confirm } from '../components/Confirm';
 import { Input } from '../components/Input';
 import { Password } from '../components/Password';
 import { Select } from '../components/Select';
@@ -7,24 +9,39 @@ import { Select } from '../components/Select';
 export function Schedule({
   schedule,
   setSchedule,
+  removeSchedule,
 }: {
   schedule: ScheduledExport;
   setSchedule: (s: ScheduledExport) => void;
+  removeSchedule: (s: string) => void;
 }) {
   return (
     <div className="panel">
       <div className="panel-head">
-        <span className="panel-name">{schedule.name}</span>
+        <span className="panel-name">
+          <Input
+            label="Name"
+            value={schedule.name}
+            onChange={(name) => setSchedule({ ...schedule, name })}
+          />
+        </span>
+        <span className="flex-right">
+          <span title="Delete Panel">
+            <Confirm
+              onConfirm={() => removeSchedule(schedule.id)}
+              message="delete this panel"
+              action="Delete"
+              render={(confirm: () => void) => (
+                <Button icon onClick={confirm} type="outline">
+                  delete
+                </Button>
+              )}
+            />
+          </span>
+        </span>
       </div>
       <div className="panel-body-container">
         <div className="panel-body">
-          <div className="form-row">
-            <Input
-              label="Name"
-              value={schedule.name}
-              onChange={(name) => setSchedule({ ...schedule, name })}
-            />
-          </div>
           <div className="form-row">
             <Select
               label="Frequency"

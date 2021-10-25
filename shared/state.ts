@@ -587,6 +587,7 @@ export class ProjectPage {
   constructor(name?: string, panels?: Array<PanelInfo>) {
     this.name = name || '';
     this.panels = panels || [];
+    this.schedules = [];
     this.id = uuid.v4();
   }
 
@@ -596,6 +597,7 @@ export class ProjectPage {
     pp.panels = (raw.panels || []).map(PanelInfo.fromJSON);
     pp.name = raw.name;
     pp.id = raw.id || uuid.v4();
+    pp.schedules = raw.schedules || [];
     return pp;
   }
 }

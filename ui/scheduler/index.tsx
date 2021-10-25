@@ -12,10 +12,16 @@ export function Scheduler() {
   } = React.useContext(UrlStateContext);
   const { state: projectState, setState: setProjectState } =
     React.useContext(ProjectContext);
-  const { name, schedules } = projectState.pages[pageIndex];
+  const { schedules, name } = projectState.pages[pageIndex];
 
   function addSchedule() {
     schedules.push(new ScheduledExport());
+    setProjectState(projectState);
+  }
+
+  function removeSchedule(id: string) {
+    const at = schedules.findIndex((ps) => ps.id === id);
+    schedules.splice(at, 1);
     setProjectState(projectState);
   }
 
@@ -37,7 +43,12 @@ export function Scheduler() {
           </span>
         </div>
         {schedules.map((s) => (
-          <Schedule setSchedule={setSchedule} schedule={s} key={s.id} />
+          <Schedule
+            setSchedule={setSchedule}
+            schedule={s}
+            key={s.id}
+            removeSchedule={removeSchedule}
+          />
         ))}
         <div className="text-center">
           <Button onClick={() => addSchedule()}>New Scheduled Export</Button>
