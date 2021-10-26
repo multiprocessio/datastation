@@ -46,12 +46,10 @@ export function Schedule({
             <Select
               label="Frequency"
               value={schedule.period}
-              onChange={(period) =>
-                setSchedule({
-                  ...schedule,
-                  period: period as ScheduledExport['period'],
-                })
-              }
+              onChange={(period) => {
+                schedule.period = period as ScheduledExport['period'];
+                setSchedule(schedule);
+              }}
             >
               <option value="day">Every day</option>
               <option value="week">Every Monday</option>
@@ -63,12 +61,11 @@ export function Schedule({
               type="email"
               label="From address"
               placeholder="mila@big.co"
-              onChange={(from) =>
-                setSchedule({
-                  ...schedule,
-                  destination: { ...schedule.destination, from },
-                })
-              }
+              value={schedule.destination.from}
+              onChange={(from) => {
+                schedule.destination.from = from;
+                setSchedule(schedule);
+              }}
             />
           </div>
           <div className="form-row">
@@ -76,12 +73,11 @@ export function Schedule({
               type="string"
               label="Recipient(s)"
               placeholder="ted@big.co,marta@big.co"
-              onChange={(recipients) =>
-                setSchedule({
-                  ...schedule,
-                  destination: { ...schedule.destination, recipients },
-                })
-              }
+              value={schedule.destination.recipients}
+              onChange={(recipients) => {
+                schedule.destination.recipients = recipients;
+                setSchedule(schedule);
+              }}
               tooltip="Separate multiple addresses with a comma"
             />
           </div>
@@ -90,12 +86,11 @@ export function Schedule({
               type="string"
               label="SMTP Server"
               placeholder="smtp.big.co:587"
-              onChange={(server) =>
-                setSchedule({
-                  ...schedule,
-                  destination: { ...schedule.destination, server },
-                })
-              }
+              value={schedule.destination.server}
+              onChange={(server) => {
+                schedule.destination.server = server;
+                setSchedule(schedule);
+              }}
               tooltip="Separate host and port with a colon"
             />
           </div>
@@ -103,23 +98,20 @@ export function Schedule({
             <Input
               type="string"
               label="SMTP Username"
+              value={schedule.destination.username}
               placeholder="smtp@big.co"
-              onChange={(username) =>
-                setSchedule({
-                  ...schedule,
-                  destination: { ...schedule.destination, username },
-                })
-              }
+              onChange={(username) => {
+                schedule.destination.username = username;
+                setSchedule(schedule);
+              }}
             />
           </div>
           <Password
             label="SMTP Password"
-            onChange={(password_encrypt) =>
-              setSchedule({
-                ...schedule,
-                destination: { ...schedule.destination, password_encrypt },
-              })
-            }
+            onChange={(p) => {
+              schedule.destination.password_encrypt = p;
+              setSchedule(schedule);
+            }}
           />
         </div>
       </div>

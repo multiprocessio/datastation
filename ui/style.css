@@ -692,6 +692,7 @@ canvas {
   padding: 15px;
   margin: 15px auto;
   width: 500px;
+  height: min-content;
 }
 
 .project-name .input,
