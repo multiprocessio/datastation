@@ -53,24 +53,22 @@ async function runAndSend(
   }
 }
 
-function getScheduledExports(projects: Array<{ name: string }>) {
+function getScheduledExports(project: ProjectState) {
   const daily: Array<[ProjectState, ProjectPage, ScheduledExport]> = [];
   const weekly: Array<[ProjectState, ProjectPage, ScheduledExport]> = [];
   const monthly: Array<[ProjectState, ProjectPage, ScheduledExport]> = [];
 
-  projects.forEach((project) => {
-    project.pages.forEach((page) => {
-      page.schedules.forEach((s) => {
-        if (s.period === 'day') {
-          daily.push([project, page, s]);
-        } else if (s.period === 'week') {
-          weekly.push([project, page, s]);
-        } else if (s.period === 'month') {
-          monthly.push([project, page, s]);
-        } else {
-          log.info('Skipping unknown period for scheduled export: ' + s.id);
-        }
-      });
+  project.pages.forEach((page) => {
+    page.schedules.forEach((s) => {
+      if (s.period === 'day') {
+        daily.push([project, page, s]);
+      } else if (s.period === 'week') {
+        weekly.push([project, page, s]);
+      } else if (s.period === 'month') {
+        monthly.push([project, page, s]);
+      } else {
+        log.info('Skipping unknown period for scheduled export: ' + s.id);
+      }
     });
   });
 
@@ -89,18 +87,27 @@ async function main() {
 
   const projects = await getProjects(null, null, null, null);
 
-  const { daily, weekly, monthly } = getScheduledExports(dispatch, projects);
+  for (const { name } of projects) {
+    const project = await dispatch({
+      resource: 'getProject',
+      projectId: name,
+      body: {
+        projectId: name,
+      },
+    });
 
-  daily.forEach((e) => runAndSend(dispatch, e));
+    const { daily, weekly, monthly } = getScheduledExports(project);
+    daily.forEach((e) => runAndSend(dispatch, e));
 
-  const now = new Date();
+    const now = new Date();
 
-  if (now.getDate() === 1) {
-    weekly.forEach((e) => runAndSend(dispatch, e));
-  }
+    if (now.getDate() === 1) {
+      weekly.forEach((e) => runAndSend(dispatch, e));
+    }
 
-  if (now.getDate() === 1) {
-    monthly.forEach((e) => runAndSend(dispatch, e));
+    if (now.getDate() === 1) {
+      monthly.forEach((e) => runAndSend(dispatch, e));
+    }
   }
 }
 
