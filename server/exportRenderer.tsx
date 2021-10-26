@@ -1,7 +1,8 @@
 import React from 'react';
 import { renderToString } from 'react-dom/server';
+import { ProjectState } from '../shared/state';
 import { Dashboard } from '../ui/dashboard';
-import { ProjectContext } from '../ui/ProjectState';
+import { ProjectContext } from '../ui/ProjectStore';
 import { UrlStateContext } from '../ui/urlState';
 
 export function renderPage(project: ProjectState, pageId: string) {
