@@ -47,7 +47,7 @@ async function runAndSend(
   dispatch: ReturnType<typeof makeDispatch>,
   [project, page, schedule]: [ProjectState, ProjectPage, ScheduledExport]
 ) {
-  log.info(`Evaluating page "${page.name}" for export "${schedule.name} in project "${project.projectName}""`)
+  log.info(`Evaluating page "${page.name}" for export "${schedule.name} in project "${project.projectName}"`)
   for (const panel of page.panels) {
     await dispatch({
       resource: 'eval',
