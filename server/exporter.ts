@@ -1,3 +1,4 @@
+import { JSDOM } from 'jsdom';
 import nodemailer from 'nodemailer';
 import { RPCHandler } from '../desktop/rpc';
 import { decryptFields } from '../desktop/secret';
@@ -5,27 +6,59 @@ import { APP_NAME, DEBUG, VERSION } from '../shared/constants';
 import { GetProjectsRequest, GetProjectsResponse } from '../shared/rpc';
 import { ProjectPage, ProjectState, ScheduledExport } from '../shared/state';
 import { init } from './app';
-import { renderPage } from './exportRenderer';
 import log from './log';
 import { makeDispatch } from './rpc';
 
 log.info(APP_NAME, VERSION, DEBUG ? 'DEBUG' : '');
 
+function getRenderer() {
+  // First set up virtual DOM
+  const jsdom = new JSDOM('<!doctype html><html><body></body></html>', {
+    url: 'http://localhost/',
+  });
+  const { window } = jsdom;
+
+  function copyProps(src: any, target: any) {
+    Object.defineProperties(target, {
+      ...Object.getOwnPropertyDescriptors(src),
+      ...Object.getOwnPropertyDescriptors(target),
+    });
+  }
+
+  (global as any).window = window;
+  global.document = window.document;
+  (global as any).navigator = {
+    userAgent: 'node.js',
+  };
+  global.requestAnimationFrame = function (callback) {
+    return setTimeout(callback, 0);
+  };
+  global.cancelAnimationFrame = function (id) {
+    clearTimeout(id);
+  };
+  copyProps(window, global);
+
+  // Then do the React stuff
+  const { renderPage } = require('./exportRenderer');
+  return renderPage;
+}
+
 async function runAndSend(
   dispatch: ReturnType<typeof makeDispatch>,
   [project, page, schedule]: [ProjectState, ProjectPage, ScheduledExport]
 ) {
+  log.info(`Evaluating page "${page.name}" for export "${schedule.name} in project "${project.projectName}""`)
   for (const panel of page.panels) {
     await dispatch({
       resource: 'eval',
-      projectId: project.id,
+      projectId: project.projectName,
       body: {
         panelId: panel.id,
       },
     });
   }
 
-  const rendered = renderPage(project, page.id);
+  const rendered = getRenderer()(project, page.id);
 
   decryptFields(schedule.destination);
 
@@ -48,6 +81,8 @@ async function runAndSend(
       subject: schedule.name,
       html: rendered,
     });
+
+    log.info('Completed scheduled export: ' + schedule.name);
   } else {
     log.info('Invalid schedule destination type ');
   }
