@@ -13,6 +13,7 @@ export function PanelSourcePicker({
   panels: Array<PanelInfo>;
   currentPanel: string;
 }) {
+  console.log(value, panels);
   const reversed = panels.slice().reverse();
   return (
     <Select

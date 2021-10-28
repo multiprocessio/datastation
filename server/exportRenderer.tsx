@@ -1,3 +1,4 @@
+import fs from 'fs';
 import React from 'react';
 import { renderToString } from 'react-dom/server';
 import { ProjectState } from '../shared/state';
@@ -20,5 +21,11 @@ export function renderPage(project: ProjectState, pageId: string) {
     </ProjectContext.Provider>
   );
 
-  return renderToString(view);
+  return `<!doctype html>
+<html>
+  <head>
+    <style type="text/css">${fs.readFileSync('ui/style.css').toString()}</style>
+  </head>
+  <body>${renderToString(view)}</body>
+</html>`;
 }

@@ -457,7 +457,7 @@ export class TablePanelInfo extends PanelInfo {
     super('table', name, content);
     this.table = {
       columns,
-      panelSource,
+      panelSource: panelSource || '',
     };
   }
 }
@@ -489,7 +489,7 @@ export class FilterAggregatePanelInfo extends PanelInfo {
   ) {
     super('filagg', panel.name || '', '');
     this.filagg = {
-      panelSource: panel.panelSource,
+      panelSource: panel.panelSource || '',
       filter: panel.filter || '',
       aggregateType: panel.aggregateType || 'none',
       groupBy: panel.groupBy || '',

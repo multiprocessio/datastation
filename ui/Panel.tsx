@@ -186,7 +186,9 @@ export function Panel({
   // Fall back to empty dict in case panel.type names ever change
   const panelUIDetails =
     PANEL_UI_DETAILS[panel.type] || PANEL_UI_DETAILS.literal;
-  const isBlank = deepEquals(panel, panelUIDetails.factory());
+  const blank = panelUIDetails.factory();
+  blank.id = panel.id;
+  const isBlank = deepEquals(panel, blank);
   const [details, setDetails] = React.useState(isBlank);
   const [hidden, setHidden] = React.useState(false);
 

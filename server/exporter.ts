@@ -27,9 +27,6 @@ function getRenderer() {
 
   (global as any).window = window;
   global.document = window.document;
-  (global as any).navigator = {
-    userAgent: 'node.js',
-  };
   global.requestAnimationFrame = function (callback) {
     return setTimeout(callback, 0);
   };
@@ -37,6 +34,7 @@ function getRenderer() {
     clearTimeout(id);
   };
   copyProps(window, global);
+  window.DATASTATION_IS_EXPORT = true;
 
   // Then do the React stuff
   const { renderPage } = require('./exportRenderer');
@@ -47,7 +45,9 @@ async function runAndSend(
   dispatch: ReturnType<typeof makeDispatch>,
   [project, page, schedule]: [ProjectState, ProjectPage, ScheduledExport]
 ) {
-  log.info(`Evaluating page "${page.name}" for export "${schedule.name} in project "${project.projectName}"`)
+  log.info(
+    `Evaluating page "${page.name}" for export "${schedule.name} in project "${project.projectName}"`
+  );
   for (const panel of page.panels) {
     await dispatch({
       resource: 'eval',
@@ -71,7 +71,7 @@ async function runAndSend(
       port,
       auth: {
         user: schedule.destination.username,
-        pass: schedule.destination.password_encrypt,
+        pass: schedule.destination.password_encrypt.value,
       },
     });
 

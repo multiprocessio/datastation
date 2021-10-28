@@ -29,7 +29,6 @@ function useProjectState(
   const [state, setProjectState] = React.useState<ProjectState>(null);
 
   function setState(newState: ProjectState, addToRestoreBuffer = true) {
-    console.log('new stating', newState);
     store.update(projectId, newState, addToRestoreBuffer);
     const c = { ...newState };
     Object.setPrototypeOf(c, ProjectState.prototype);
