@@ -564,14 +564,14 @@ export class ScheduledExport {
     this.destination = {
       ...defaults.destination,
     };
-    this.destination.type ||= 'email';
+    this.destination.type = this.destination.type || 'email';
     // In preparation for supporting other types
     if (this.destination.type === 'email') {
-      this.destination.from ||= '';
-      this.destination.recipients ||= '';
-      this.destination.server ||= '';
-      this.destination.username ||= '';
-      this.destination.password_encrypt ||= new Encrypt();
+      this.destination.from || this.destination.from || '';
+      this.destination.recipients = this.destination.recipients || '';
+      this.destination.server = this.destination.server || '';
+      this.destination.username = this.destination.username || '';
+      this.destination.password_encrypt = this.destination.password_encrypt || new Encrypt('');
     }
 
     this.id = uuid.v4();
