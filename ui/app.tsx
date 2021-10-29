@@ -35,21 +35,6 @@ function useProjectState(
     setProjectState(c);
   }
 
-  // Set up undo mechanism
-  /* React.useEffect(() => {
-   *   function handleUndo(e: KeyboardEvent) {
-   *     if ((e.ctrlKey || e.metaKey) && e.code === 'KeyZ') {
-   *       const prevState = store.undo(projectId);
-   *       if (prevState) {
-   *         setState(prevState, false);
-   *       }
-   *     }
-   *   }
-
-   *   document.addEventListener('keydown', handleUndo);
-   *   return () => document.removeEventListener('keydown', handleUndo);
-   * }, []); */
-
   // Re-read state when projectId changes
   React.useEffect(() => {
     async function fetch() {
@@ -123,6 +108,7 @@ export function App() {
               marginTop: headerHeight,
               height: `calc(100% - ${headerHeight}px)`,
             }}
+    className={'view-' + (urlState.view || 'editor')}
           >
             <MainChild />
           </main>

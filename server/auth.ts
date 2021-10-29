@@ -57,7 +57,7 @@ export class Auth {
       !req.session.tokenSet ||
       new Date(req.session.tokenSet.expires_at * 1000) < new Date()
     ) {
-      req.session.redirect = ('/?project=' + req.query.projectId) as string;
+      req.session.redirect = ('/?projectId=' + req.query.projectId) as string;
       rsp.status(401).json({});
       return;
     }

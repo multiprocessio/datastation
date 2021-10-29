@@ -61,22 +61,22 @@ test(
   'app loads with default project',
   async () => {
     store.update('test', project);
-    window.location.search = '?project=test';
+    window.location.search = '?projectId=test';
 
     const component = await enzyme.mount(<App />);
 
     await componentLoad(component);
 
-    const panels = await component.find('.panel');
-    expect(panels.length).toBe(project.pages[0].panels.length);
-
     await throwOnErrorBoundary(component);
+
+    const panels = await component.find('.view-editor .panel');
+    expect(panels.length).toBe(project.pages[0].panels.length);
 
     // Open all panels
     for (let i = 0; i < panels.length; i++) {
       const p = panels.at(i);
       if (!p.find('.panel-details').length) {
-        await p.find({ 'data-testid': 'show-hide-panel' }).simulate('click');
+        await p.findWhere(n => n.name() === 'button' && n.prop('data-testid') === 'show-hide-panel').simulate('click');
         await componentLoad(p);
       }
 
