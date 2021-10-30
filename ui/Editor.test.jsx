@@ -1,3 +1,26 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+const fs = require('fs');
 const React = require('react');
 const { act } = require('react-dom/test-utils');
 const enzyme = require('enzyme');
@@ -20,7 +43,7 @@ const { wait } = require('../shared/promise');
 const { App } = require('./app');
 const { LocalStorageStore } = require('./ProjectStore');
 
-async function throwOnErrorBoundary(component) {
+function throwOnErrorBoundary(component) {
   component.find('ErrorBoundary').forEach((e) => {
     if (e.find({ type: 'fatal' }).length) {
       // Weird ways to find the actual error message
@@ -63,39 +86,50 @@ test(
     store.update('test', project);
     window.location.search = '?projectId=test';
 
-    const component = await enzyme.mount(<App />);
+    const component = enzyme.mount(<App />);
 
     await componentLoad(component);
 
-    await throwOnErrorBoundary(component);
+    throwOnErrorBoundary(component);
 
-    const panels = await component.find('.view-editor .panel');
+    let panels = component.find('.view-editor .panel');
     expect(panels.length).toBe(project.pages[0].panels.length);
 
     // Open all panels
     for (let i = 0; i < panels.length; i++) {
       const p = panels.at(i);
       if (!p.find('.panel-details').length) {
-        await p.findWhere(n => n.name() === 'button' && n.prop('data-testid') === 'show-hide-panel').simulate('click');
-        await componentLoad(p);
+        act(() => {
+	  p.findWhere(n => n.name() === 'button' && n.prop('data-testid') === 'show-hide-panel').simulate('click');
+	});
       }
+    }
 
+    await componentLoad(component);
+
+    // Look panels up again
+    panels = component.find('.view-editor .panel');
+
+    // Check they're all open.
+    for (let i = 0; i < panels.length; i++) {
+      const p = panels.at(i);
       expect(p.find('.panel-details').length).toBe(1);
     }
 
-    const connectors = await component.find('.connector');
+    const connectors = component.find('.connector');
     expect(connectors.length).toBe(project.connectors.length);
 
     // Open all connectors
     for (let i = 0; i < connectors.length; i++) {
       const c = connectors.at(i);
-      await c
-        .find({ 'data-testid': 'show-hide-connector', type: 'outline' })
-        .simulate('click');
-      await componentLoad(c);
+      act(() => {
+	c.find({ 'data-testid': 'show-hide-connector', type: 'outline' }).simulate('click');
+      });
     }
 
-    await throwOnErrorBoundary(component);
+    await componentLoad(component);
+
+    throwOnErrorBoundary(component);
   },
   10_000 + 1_000 * (project.connectors.length + project.pages[0].panels.length)
 );

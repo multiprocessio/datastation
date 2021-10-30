@@ -108,7 +108,7 @@ export function App() {
               marginTop: headerHeight,
               height: `calc(100% - ${headerHeight}px)`,
             }}
-    className={'view-' + (urlState.view || 'editor')}
+            className={'view-' + (urlState.view || 'editor')}
           >
             <MainChild />
           </main>

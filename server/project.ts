@@ -71,23 +71,21 @@ export const getProjectHandlers = (app: App) => {
       const client = await app.dbpool.connect();
 
       try {
-      await client.query('BEGIN');
-      const res = await client.query(
-        'SELECT project_value FROM projects WHERE project_name = $1;',
-        [projectId]
-      );
-      const existingState = res.rows[0].project_value;
-      await encryptProjectSecrets(newState, existingState);
+        await client.query('BEGIN');
+        const res = await client.query(
+          'SELECT project_value FROM projects WHERE project_name = $1;',
+          [projectId]
+        );
+        const existingState = res.rows[0].project_value;
+        await encryptProjectSecrets(newState, existingState);
         await client.query(
           'INSERT INTO projects (project_name, project_value) VALUES ($1, $2) ON CONFLICT (project_name) DO UPDATE SET project_value = EXCLUDED.project_value',
           [projectId, JSON.stringify(newState)]
         );
-	await client.query('COMMIT');
-      }
-	catch (e) {
-	  await client.query('ROLLBACK');
-	  throw e;
-	}
+        await client.query('COMMIT');
+      } catch (e) {
+        await client.query('ROLLBACK');
+        throw e;
       } finally {
         client.release();
       }

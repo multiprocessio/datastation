@@ -571,7 +571,8 @@ export class ScheduledExport {
       this.destination.recipients = this.destination.recipients || '';
       this.destination.server = this.destination.server || '';
       this.destination.username = this.destination.username || '';
-      this.destination.password_encrypt = this.destination.password_encrypt || new Encrypt('');
+      this.destination.password_encrypt =
+        this.destination.password_encrypt || new Encrypt('');
     }
 
     this.id = uuid.v4();
