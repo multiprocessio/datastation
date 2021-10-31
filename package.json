@@ -27,7 +27,6 @@
     "@types/react-syntax-highlighter": "^13.5.2",
     "ace-builds": "^1.4.13",
     "alasql": "^1.7.3",
-    "canvas": "^2.8.0",
     "chart.js": "^3.5.1",
     "clickhouse": "^2.4.2",
     "cookie-parser": "^1.4.5",
@@ -66,10 +65,12 @@
     "xlsx": "^0.17.2"
   },
   "optionalDependencies": {
-    "oracledb": "^5.2.0"
+    "oracledb": "^5.2.0",
+    "canvas": "^2.8.0",
   },
   "devDependencies": {
     "@sucrase/jest-plugin": "^2.1.1",
+    "@testing-library/react": "^12.1.2",
     "@types/cookie-parser": "^1.4.2",
     "@types/express": "^4.17.13",
     "@types/express-session": "^1.17.4",
