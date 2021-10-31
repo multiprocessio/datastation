@@ -1,25 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 const fs = require('fs');
 const React = require('react');
 const { act } = require('react-dom/test-utils');
