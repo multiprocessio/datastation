@@ -146,4 +146,6 @@ async function main() {
   }
 }
 
-main();
+if (process.argv.map(a => a.includes('exporter.js'))) {
+  main();
+}
