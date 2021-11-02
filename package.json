@@ -46,12 +46,12 @@
     "papaparse": "^5.3.1",
     "passport": "^0.5.0",
     "pg": "^8.7.1",
-    "preview": "https://github.com/multiprocessio/preview#0.2.2",
+    "preview": "npm:@multiprocess/preview",
     "react": "^17.0.2",
     "react-ace": "^9.4.4",
     "react-dom": "^17.0.2",
     "react-syntax-highlighter": "^15.4.4",
-    "shape": "https://github.com/multiprocessio/shape#0.2.1",
+    "shape": "npm:@multiprocess/shape",
     "snowflake-sdk": "^1.6.3",
     "source-map-support": "^0.5.20",
     "sqlite": "^4.0.23",
@@ -69,6 +69,7 @@
     "canvas": "^2.8.0"
   },
   "devDependencies": {
+    "@multiprocess/cssplus": "^0.3.1",
     "@sucrase/jest-plugin": "^2.1.1",
     "@testing-library/react": "^12.1.2",
     "@types/cookie-parser": "^1.4.2",

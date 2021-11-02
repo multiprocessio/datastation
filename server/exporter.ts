@@ -11,109 +11,119 @@ import { makeDispatch } from './rpc';
 
 log.info(APP_NAME, VERSION, DEBUG ? 'DEBUG' : '');
 
-export function getRenderer() {
-  // First set up virtual DOM
-  const jsdom = new JSDOM('<!doctype html><html><body></body></html>', {
-    url: 'http://localhost/',
-  });
-  const { window } = jsdom;
-
-  function copyProps(src: any, target: any) {
-    Object.defineProperties(target, {
-      ...Object.getOwnPropertyDescriptors(src),
-      ...Object.getOwnPropertyDescriptors(target),
-    });
+export class Exporter {
+  nodemailer: typeof nodemailer;
+  constructor(n: typeof nodemailer) {
+    this.nodemailer = n;
   }
 
-  (global as any).window = window;
-  global.document = window.document;
-  global.requestAnimationFrame = function (callback) {
-    return setTimeout(callback, 0);
-  };
-  global.cancelAnimationFrame = function (id) {
-    clearTimeout(id);
-  };
-  copyProps(window, global);
-  window.DATASTATION_IS_EXPORT = true;
+  getRenderer() {
+    // First set up virtual DOM
+    const jsdom = new JSDOM('<!doctype html><html><body></body></html>', {
+      url: 'http://localhost/',
+    });
+    const { window } = jsdom;
 
-  // Then do the React stuff
-  const { renderPage } = require('./exportRenderer');
-  return renderPage;
+    function copyProps(src: any, target: any) {
+      Object.defineProperties(target, {
+        ...Object.getOwnPropertyDescriptors(src),
+        ...Object.getOwnPropertyDescriptors(target),
+      });
+    }
+
+    (global as any).window = window;
+    global.document = window.document;
+    global.requestAnimationFrame = function (callback) {
+      return setTimeout(callback, 0);
+    };
+    global.cancelAnimationFrame = function (id) {
+      clearTimeout(id);
+    };
+    copyProps(window, global);
+    window.DATASTATION_IS_EXPORT = true;
+
+    // Then do the React stuff
+    const { renderPage } = require('./exportRenderer');
+    return renderPage;
+  }
+
+  async runAndSend(
+    dispatch: ReturnType<typeof makeDispatch>,
+    [project, page, schedule]: [ProjectState, ProjectPage, ScheduledExport]
+  ) {
+    log.info(
+      `Evaluating page "${page.name}" for export "${schedule.name} in project "${project.projectName}"`
+    );
+    for (const panel of page.panels) {
+      await dispatch({
+        resource: 'eval',
+        projectId: project.projectName,
+        body: {
+          panelId: panel.id,
+        },
+      });
+    }
+
+    const rendered = this.getRenderer()(project, page.id);
+
+    decryptFields(schedule.destination);
+
+    if (schedule.destination.type === 'email') {
+      const split = schedule.destination.server.split(':');
+      const port = parseInt(split.length ? split.pop() : '') || 487;
+      const host = split.join(':');
+      const transporter = this.nodemailer.createTransport({
+        host,
+        port,
+        auth: {
+          user: schedule.destination.username,
+          pass: schedule.destination.password_encrypt.value,
+        },
+      });
+
+      await transporter.sendMail({
+        from: schedule.destination.from,
+        to: schedule.destination.recipients,
+        subject: schedule.name,
+        html: rendered,
+      });
+
+      log.info('Completed scheduled export: ' + schedule.name);
+    } else {
+      log.info('Invalid schedule destination type ');
+    }
+  }
+
+  getScheduledExports(project: ProjectState) {
+    const daily: Array<[ProjectState, ProjectPage, ScheduledExport]> = [];
+    const weekly: Array<[ProjectState, ProjectPage, ScheduledExport]> = [];
+    const monthly: Array<[ProjectState, ProjectPage, ScheduledExport]> = [];
+
+    project.pages.forEach((page) => {
+      page.schedules.forEach((s) => {
+        if (s.period === 'day') {
+          daily.push([project, page, s]);
+        } else if (s.period === 'week') {
+          weekly.push([project, page, s]);
+        } else if (s.period === 'month') {
+          monthly.push([project, page, s]);
+        } else {
+          log.info('Skipping unknown period for scheduled export: ' + s.id);
+        }
+      });
+    });
+
+    return { daily, monthly, weekly };
+  }
 }
 
-export async function runAndSend(
-  dispatch: ReturnType<typeof makeDispatch>,
-  [project, page, schedule]: [ProjectState, ProjectPage, ScheduledExport]
+export async function main(
+  handlers: Array<RPCHandler<any, any>>,
+  n: typeof nodemailer
 ) {
-  log.info(
-    `Evaluating page "${page.name}" for export "${schedule.name} in project "${project.projectName}"`
-  );
-  for (const panel of page.panels) {
-    await dispatch({
-      resource: 'eval',
-      projectId: project.projectName,
-      body: {
-        panelId: panel.id,
-      },
-    });
-  }
-
-  const rendered = getRenderer()(project, page.id);
-
-  decryptFields(schedule.destination);
-
-  if (schedule.destination.type === 'email') {
-    const split = schedule.destination.server.split(':');
-    const port = parseInt(split.length ? split.pop() : '') || 487;
-    const host = split.join(':');
-    const transporter = nodemailer.createTransport({
-      host,
-      port,
-      auth: {
-        user: schedule.destination.username,
-        pass: schedule.destination.password_encrypt.value,
-      },
-    });
-
-    await transporter.sendMail({
-      from: schedule.destination.from,
-      to: schedule.destination.recipients,
-      subject: schedule.name,
-      html: rendered,
-    });
-
-    log.info('Completed scheduled export: ' + schedule.name);
-  } else {
-    log.info('Invalid schedule destination type ');
-  }
-}
-
-export function getScheduledExports(project: ProjectState) {
-  const daily: Array<[ProjectState, ProjectPage, ScheduledExport]> = [];
-  const weekly: Array<[ProjectState, ProjectPage, ScheduledExport]> = [];
-  const monthly: Array<[ProjectState, ProjectPage, ScheduledExport]> = [];
-
-  project.pages.forEach((page) => {
-    page.schedules.forEach((s) => {
-      if (s.period === 'day') {
-        daily.push([project, page, s]);
-      } else if (s.period === 'week') {
-        weekly.push([project, page, s]);
-      } else if (s.period === 'month') {
-        monthly.push([project, page, s]);
-      } else {
-        log.info('Skipping unknown period for scheduled export: ' + s.id);
-      }
-    });
-  });
-
-  return { daily, monthly, weekly };
-}
-
-export async function main() {
-  const runServer = false;
-  const handlers = await init(runServer);
   const dispatch = makeDispatch(handlers);
+
+  const exporter = new Exporter(n);
 
   // It really sucks that this is untyped at this point.
   const { handler: getProjects } = handlers.find(
@@ -131,21 +141,25 @@ export async function main() {
       },
     });
 
-    const { daily, weekly, monthly } = getScheduledExports(project);
-    daily.forEach((e) => runAndSend(dispatch, e));
+    const { daily, weekly, monthly } = exporter.getScheduledExports(project);
+    daily.forEach((e) => exporter.runAndSend(dispatch, e));
 
     const now = new Date();
 
     if (now.getDate() === 1) {
-      weekly.forEach((e) => runAndSend(dispatch, e));
+      weekly.forEach((e) => exporter.runAndSend(dispatch, e));
     }
 
     if (now.getDate() === 1) {
-      monthly.forEach((e) => runAndSend(dispatch, e));
+      monthly.forEach((e) => exporter.runAndSend(dispatch, e));
     }
   }
 }
 
-if (process.argv.some(a => a.includes('exporter.js'))) {
-  main();
+if (process.argv.some((a) => a.includes('exporter.js'))) {
+  (async function () {
+    const runServer = false;
+    const handlers = await init(runServer);
+    main(handlers, nodemailer);
+  })();
 }

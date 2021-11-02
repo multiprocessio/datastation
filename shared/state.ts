@@ -15,13 +15,15 @@ export class PanelResult {
   contentType: string;
   elapsed?: number;
 
-  constructor() {
-    this.stdout = '';
-    this.shape = { kind: 'unknown' };
-    this.preview = '';
-    this.size = 0;
-    this.contentType = 'unknown';
-    this.elapsed = 0;
+  constructor(defaults: Partial<PanelResult> = {}) {
+    this.stdout = defaults.stdout || '';
+    this.shape = defaults.shape || { kind: 'unknown' };
+    this.preview = defaults.preview || '';
+    this.size = defaults.size || 0;
+    this.contentType = defaults.contentType || 'unknown';
+    this.elapsed = defaults.elapsed || 0;
+    this.value = defaults.value || undefined;
+    this.exception = defaults.exception || undefined;
   }
 }
 
@@ -29,10 +31,10 @@ export class PanelResultMeta extends PanelResult {
   lastRun: Date;
   loading: boolean;
 
-  constructor() {
-    super();
-    this.lastRun = null;
-    this.loading = false;
+  constructor(defaults: Partial<PanelResultMeta> = {}) {
+    super(defaults as PanelResult);
+    this.lastRun = defaults.lastRun || null;
+    this.loading = defaults.loading || false;
   }
 
   static fromJSON(raw: any): PanelResultMeta {

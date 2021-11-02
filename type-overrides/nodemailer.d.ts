@@ -6,6 +6,7 @@ declare module 'nodemailer' {
     text?: string;
     html?: string;
   }
+
   export class SMTPTransport {
     sendMail(SendMailOptions): Promise<unknown>;
   }
@@ -19,5 +20,5 @@ declare module 'nodemailer' {
     };
   }
 
-  export function createTransport(TransportOptions);
+  export function createTransport(TransportOptions): SMTPTransport;
 }

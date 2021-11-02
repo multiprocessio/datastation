@@ -1,3 +1,5 @@
+const { act } = require('react-dom/test-utils');
+const { wait } = require('./shared/promise');
 require('./shared/polyfill');
 
 // https://enzymejs.github.io/enzyme/docs/guides/jsdom.html
@@ -40,5 +42,13 @@ window.fetch = () => {
     json() {
       return Promise.resolve(null);
     },
+  });
+};
+
+global.componentLoad = async function (component) {
+  await wait(1000);
+  await act(async () => {
+    await wait(0);
+    component.update();
   });
 };

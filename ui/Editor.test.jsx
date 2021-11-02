@@ -17,7 +17,6 @@ const {
   FilePanelInfo,
   FilterAggregatePanelInfo,
 } = require('../shared/state');
-const { wait } = require('../shared/promise');
 const { App } = require('./app');
 const { LocalStorageStore } = require('./ProjectStore');
 
@@ -27,14 +26,6 @@ function throwOnErrorBoundary(component) {
       // Weird ways to find the actual error message
       throw new Error(e.find('Highlight').props().children);
     }
-  });
-}
-
-async function componentLoad(component) {
-  await wait(1000);
-  await act(async () => {
-    await wait(0);
-    component.update();
   });
 }
 

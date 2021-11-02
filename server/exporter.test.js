@@ -6,7 +6,7 @@ const {
   ProgramPanelInfo,
   LiteralPanelInfo,
 } = require('../shared/state');
-const { main, getScheduledExports, runAndSend, getRenderer } = require('./exporter');
+const { main, Exporter } = require('./exporter');
 
 const project = new ProjectState();
 project.pages = [new ProjectPage()];
@@ -15,7 +15,7 @@ project.pages[0].panels = [
     content: JSON.stringify([
       { name: 'Kay', age: 12 },
       { name: 'Terry', age: 13 },
-    ])
+    ]),
   }),
   new ProgramPanelInfo({
     content: 'SELECT * FROM DM_getPanel(0)',
@@ -56,12 +56,44 @@ project.pages[0].schedules = [
 ];
 
 test('getScheduledExports', () => {
-  const { daily, weekly, monthly } = getScheduledExports(project);
-  expect(daily).toStrictEqual([[project, project.pages[0], project.pages[0].schedules[0]]]);
-  expect(weekly).toStrictEqual([[project, project.pages[0], project.pages[0].schedules[1]]]);
-  expect(monthly).toStrictEqual([[project, project.pages[0], project.pages[0].schedules[2]]]);
+  const e = new Exporter(null);
+  const { daily, weekly, monthly } = e.getScheduledExports(project);
+  expect(daily).toStrictEqual([
+    [project, project.pages[0], project.pages[0].schedules[0]],
+  ]);
+  expect(weekly).toStrictEqual([
+    [project, project.pages[0], project.pages[0].schedules[1]],
+  ]);
+  expect(monthly).toStrictEqual([
+    [project, project.pages[0], project.pages[0].schedules[2]],
+  ]);
 });
 
 test('getRenderer', () => {
-  getRenderer();
+  const e = new Exporter(null);
+  e.getRenderer();
+});
+
+describe('main', () => {
+  const handlers = [
+    {
+      resource: 'getProjects',
+      handler: () => [project],
+    },
+    {
+      resource: 'getProject',
+      handler: () => project,
+    },
+  ];
+  const transport = {
+    sendMail: jest.fn(),
+  };
+  const nodemailer = {
+    createTransport: jest.fn(() => transport),
+  };
+  main(handlers, nodemailer);
+  test('createTransport calls', () =>
+    expect(nodemailer.createTransport.mock.calls.length).toBe(1));
+  test('transport calls', () =>
+    expect(transport.sendMail.mock.calls.length).toBe(1));
 });
