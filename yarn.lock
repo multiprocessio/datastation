@@ -770,6 +770,11 @@
   dependencies:
     cross-spawn "^7.0.1"
 
+"@multiprocess/cssplus@^0.3.1":
+  version "0.3.1"
+  resolved "https://registry.yarnpkg.com/@multiprocess/cssplus/-/cssplus-0.3.1.tgz#78aea36229205935cb66e4470b6d71d80650f2fb"
+  integrity sha512-CxEb1h4SX/9VTFfSYP42Xagm6YqXKI610rVOJzVvzmR5xOVzPHSx8a0CvQH1Nnxk6Bfv5nNVeovVdvJIv7IsHg==
+
 "@opentelemetry/api@^1.0.0", "@opentelemetry/api@^1.0.1":
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/@opentelemetry/api/-/api-1.0.3.tgz#13a12ae9e05c2a782f7b5e84c3cbfda4225eaf80"
@@ -6208,9 +6213,10 @@ pretty-format@^27.2.5:
     ansi-styles "^5.0.0"
     react-is "^17.0.1"
 
-"preview@https://github.com/multiprocessio/preview#0.2.2":
-  version "0.2.2"
-  resolved "https://github.com/multiprocessio/preview#71f0c055cb1ad54afe4f48ffaff485e067a4312b"
+"preview@npm:@multiprocess/preview":
+  version "0.2.3"
+  resolved "https://registry.yarnpkg.com/@multiprocess/preview/-/preview-0.2.3.tgz#d9b192852003bcd07b822f6a8eac0692acbce218"
+  integrity sha512-EhzlTzf2pCoYlcYX1YWcF/N4Qvj160hkxUZXmb8fvWfTEuLD2DO5knvSGU6fvk2o+cqWBgsZ3oxX9QmsF1jV5w==
 
 printj@~1.1.0:
   version "1.1.2"
@@ -6896,9 +6902,10 @@ setprototypeof@1.1.1:
   resolved "https://registry.yarnpkg.com/setprototypeof/-/setprototypeof-1.1.1.tgz#7e95acb24aa92f5885e0abef5ba131330d4ae683"
   integrity sha512-JvdAWfbXeIGaZ9cILp38HntZSFSo3mWg6xGcJJsd+d4aRMOqauag1C63dJfDw7OaMYwEbHMOxEZ1lqVRYP2OAw==
 
-"shape@https://github.com/multiprocessio/shape#0.2.1":
-  version "0.2.1"
-  resolved "https://github.com/multiprocessio/shape#d1fd63f5e39edcfc0dbee1b64207c9e6b9411c1b"
+"shape@npm:@multiprocess/shape":
+  version "0.2.2"
+  resolved "https://registry.yarnpkg.com/@multiprocess/shape/-/shape-0.2.2.tgz#8c4d6352703c1eebefc582ed55692e4d243b01cc"
+  integrity sha512-RbgvlEHiqBr47w/mKF7hscDWAoeD8gtUm/xB9NKshsDqIRUcOeS9qPrJCpvKOHWTEk9qPdmYmSGXQfWYbzorJg==
 
 shebang-command@^2.0.0:
   version "2.0.0"
