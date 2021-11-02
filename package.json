@@ -23,6 +23,8 @@
   "dependencies": {
     "@dsnp/parquetjs": "^1.1.2",
     "@elastic/elasticsearch": "^7.15.0",
+    "@multiprocess/preview": "^0.2.3",
+    "@multiprocess/shape": "^0.2.2",
     "ace-builds": "^1.4.13",
     "alasql": "^1.7.3",
     "chart.js": "^3.5.1",
@@ -41,12 +43,10 @@
     "papaparse": "^5.3.1",
     "passport": "^0.5.0",
     "pg": "^8.7.1",
-    "preview": "https://github.com/multiprocessio/preview#0.2.2",
     "react": "^17.0.2",
     "react-ace": "^9.4.4",
     "react-dom": "^17.0.2",
     "react-syntax-highlighter": "^15.4.4",
-    "shape": "https://github.com/multiprocessio/shape#0.2.1",
     "snowflake-sdk": "^1.6.3",
     "source-map-support": "^0.5.20",
     "sqlite": "^4.0.23",
@@ -63,6 +63,7 @@
     "oracledb": "^5.2.0"
   },
   "devDependencies": {
+    "@multiprocess/cssplus": "^0.3.1",
     "@sucrase/jest-plugin": "^2.1.1",
     "@types/cookie-parser": "^1.4.2",
     "@types/electron": "^1.6.10",
