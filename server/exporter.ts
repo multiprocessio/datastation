@@ -11,7 +11,7 @@ import { makeDispatch } from './rpc';
 
 log.info(APP_NAME, VERSION, DEBUG ? 'DEBUG' : '');
 
-function getRenderer() {
+export function getRenderer() {
   // First set up virtual DOM
   const jsdom = new JSDOM('<!doctype html><html><body></body></html>', {
     url: 'http://localhost/',
@@ -41,7 +41,7 @@ function getRenderer() {
   return renderPage;
 }
 
-async function runAndSend(
+export async function runAndSend(
   dispatch: ReturnType<typeof makeDispatch>,
   [project, page, schedule]: [ProjectState, ProjectPage, ScheduledExport]
 ) {
@@ -88,7 +88,7 @@ async function runAndSend(
   }
 }
 
-function getScheduledExports(project: ProjectState) {
+export function getScheduledExports(project: ProjectState) {
   const daily: Array<[ProjectState, ProjectPage, ScheduledExport]> = [];
   const weekly: Array<[ProjectState, ProjectPage, ScheduledExport]> = [];
   const monthly: Array<[ProjectState, ProjectPage, ScheduledExport]> = [];
@@ -110,7 +110,7 @@ function getScheduledExports(project: ProjectState) {
   return { daily, monthly, weekly };
 }
 
-async function main() {
+export async function main() {
   const runServer = false;
   const handlers = await init(runServer);
   const dispatch = makeDispatch(handlers);
@@ -146,6 +146,6 @@ async function main() {
   }
 }
 
-if (process.argv.map(a => a.includes('exporter.js'))) {
+if (process.argv.some(a => a.includes('exporter.js'))) {
   main();
 }
