@@ -158,12 +158,14 @@ export function TablePanel({ panel, panels }: PanelBodyProps<TablePanelInfo>) {
     );
   }
 
+  // column key is (field + i) everywhere because columns can be
+  // duplicated. Maybe should assign a uuid to them instead
   return (
     <table>
       <thead>
         <tr>
-          {panel.table.columns.map((column: TableColumn) => (
-            <th key={column.field}>{column.label}</th>
+          {panel.table.columns.map((column: TableColumn, i: number) => (
+            <th key={column.field + i}>{column.label}</th>
           ))}
         </tr>
       </thead>
@@ -172,8 +174,8 @@ export function TablePanel({ panel, panels }: PanelBodyProps<TablePanelInfo>) {
           /* probably a better way to do this... */ <tr
             key={Object.values(row).join(',')}
           >
-            {panel.table.columns.map((column: TableColumn) => (
-              <td key={column.field}>{row[column.field]}</td>
+            {panel.table.columns.map((column: TableColumn, i: number) => (
+              <td key={column.field + i}>{row[column.field]}</td>
             ))}
           </tr>
         ))}

@@ -5,23 +5,23 @@ const {
   ProjectState,
   PanelResultMeta,
   ProjectPage,
+  ScheduledExport,
   TablePanelInfo,
 } = require('../../shared/state');
 const { SchedulerWithDeps } = require('./index');
 
 const project = new ProjectState();
-project.pages = [new ProjectPage()];
-const tpi = new TablePanelInfo({
-  columns: ['name', 'age'],
-});
-tpi.resultMeta = new PanelResultMeta({
-  value: [
-    { name: 'Kerry', age: 44 },
-    { name: 'Monroe', age: 59 },
-  ],
-  lastRun: new Date(),
-});
-project.pages[0].panels = [tpi];
+project.pages = [new ProjectPage('A great page')];
+project.pages[0].schedules = [
+  new ScheduledExport({
+    destination: {
+      type: 'email',
+      from: 'test@test.com',
+      recipients: 'test2@test.com',
+      server: 'smtp.test.com',
+    },
+  }),
+];
 
 test('shows a basic schedule page', async () => {
   const component = enzyme.mount(
@@ -33,5 +33,6 @@ test('shows a basic schedule page', async () => {
     />
   );
   await componentLoad(component);
+  console.log(component.debug());
   expect(component.find('.panel').length).toBe(1);
 });
