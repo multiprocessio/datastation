@@ -5,14 +5,19 @@ requests, scripting, and visualization in a single platform.
 
 ![A screenshot of app.datastation.multiprocess.io](./screenshot.png)
 
+DataStation can run as a web application in server mode or as a
+desktop application in desktop mode. Desktop mode makes it easy for
+you to get started scripting your data. Server mode makes it possible
+to share reports and schedule exports.
+
 ## Features
 
-In server-mode:
+In server mode:
 
-* Create and share dashboards with coworkers
+* Create and share dashboards with coworkers behind auth
 * Schedule recurring exports of dashboards
 
-In desktop-mode and server-mode:
+In desktop mode and server mode:
 
 * Build reports with graphs, charts and tables
 * Import all of your data without ETL processes, just basic API access
