@@ -348,25 +348,25 @@ header > div {
 }
 
 .pages {
-    .current-page {
-  margin-right: 8px;
-  margin-left: 8px;
-  padding: 8px;
-  border: 1px solid #9f04ff;
-  border-bottom: 0;
-}
+  .current-page {
+    margin-right: 8px;
+    margin-left: 8px;
+    padding: 8px;
+    border: 1px solid #9f04ff;
+    border-bottom: 0;
+  }
 
- .current-page .page-name {
-  font-size: 1rem;
-  border-color: #9f04ff;
-}
+  .current-page .page-name {
+    font-size: 1rem;
+    border-color: #9f04ff;
+  }
 
- .page-name.button {
-  margin: 0 5px;
-  border-left: 0;
-  border-top: 0;
-  border-right: 0;
- }
+  .page-name.button {
+    margin: 0 5px;
+    border-left: 0;
+    border-top: 0;
+    border-right: 0;
+  }
 }
 
 .panel {

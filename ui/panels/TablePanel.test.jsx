@@ -15,7 +15,10 @@ project.pages = [new ProjectPage()];
 const lp = new LiteralPanelInfo();
 const tp = new TablePanelInfo({
   panelSource: lp.info,
-  columns: [{ field: 'name', label: 'Name' }, { field: 'age', label: 'Age' }];
+  columns: [
+    { field: 'name', label: 'Name' },
+    { field: 'age', label: 'Age' },
+  ],
 });
 project.pages[0].panels = [lp, tp];
 
