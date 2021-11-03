@@ -785,10 +785,10 @@
     semver "^7.3.5"
     tar "^6.1.11"
 
-"@multiprocess/cssplus@^0.3.1":
-  version "0.3.1"
-  resolved "https://registry.yarnpkg.com/@multiprocess/cssplus/-/cssplus-0.3.1.tgz#78aea36229205935cb66e4470b6d71d80650f2fb"
-  integrity sha512-CxEb1h4SX/9VTFfSYP42Xagm6YqXKI610rVOJzVvzmR5xOVzPHSx8a0CvQH1Nnxk6Bfv5nNVeovVdvJIv7IsHg==
+"@multiprocess/cssplus@^0.4.0":
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/@multiprocess/cssplus/-/cssplus-0.4.0.tgz#f3221219226be8de129ed7fb2f74841dc2cd981f"
+  integrity sha512-olP26QmXicAG1ywxf2AZ1i9NpKt4KXzZdEgu0nGfiARAStwWU89SmoEi3Si/PQ6Ny1U4pjckKnKe9CUANDudQA==
 
 "@opentelemetry/api@^1.0.0", "@opentelemetry/api@^1.0.1":
   version "1.0.3"

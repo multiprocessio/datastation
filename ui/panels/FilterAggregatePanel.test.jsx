@@ -13,7 +13,10 @@ const { FilterAggregatePanelDetails } = require('./FilterAggregatePanel');
 const project = new ProjectState();
 project.pages = [new ProjectPage()];
 const lp = new LiteralPanelInfo();
-const fp = new FilterAggregatePanelInfo({ panelSource: lp.info });
+const fp = new FilterAggregatePanelInfo({
+  panelSource: lp.info,
+  aggregateType: 'sum',
+});
 project.pages[0].panels = [lp, fp];
 
 test('shows filagg panel details', async () => {

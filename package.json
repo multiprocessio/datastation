@@ -65,11 +65,11 @@
     "xlsx": "^0.17.2"
   },
   "optionalDependencies": {
-    "oracledb": "^5.2.0",
-    "canvas": "^2.8.0"
+    "canvas": "^2.8.0",
+    "oracledb": "^5.2.0"
   },
   "devDependencies": {
-    "@multiprocess/cssplus": "^0.3.1",
+    "@multiprocess/cssplus": "^0.4.0",
     "@sucrase/jest-plugin": "^2.1.1",
     "@testing-library/react": "^12.1.2",
     "@types/cookie-parser": "^1.4.2",

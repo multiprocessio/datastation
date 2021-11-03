@@ -33,6 +33,5 @@ test('shows a basic schedule page', async () => {
     />
   );
   await componentLoad(component);
-  console.log(component.debug());
   expect(component.find('.panel').length).toBe(1);
 });

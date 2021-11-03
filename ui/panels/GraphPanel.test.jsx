@@ -13,9 +13,12 @@ const { GraphPanel, GraphPanelDetails } = require('./GraphPanel');
 const project = new ProjectState();
 project.pages = [new ProjectPage()];
 const lp = new LiteralPanelInfo();
-const gp = new GraphPanelInfo({ panelSource: lp.info });
+const gp = new GraphPanelInfo({
+  panelSource: lp.info,
+  x: 'name',
+  ys: [{ field: 'age', label: 'Age' }],
+});
 project.pages[0].panels = [lp, gp];
-console.log('HERE!', gp);
 
 test('shows graph panel details', async () => {
   const component = enzyme.mount(
@@ -29,7 +32,6 @@ test('shows graph panel details', async () => {
 });
 
 test('shows filled graph panel', async () => {
-  gp.graph.columns = ['name', 'age'];
   gp.resultMeta = new PanelResultMeta({
     value: [
       { name: 'Nora', age: 33 },

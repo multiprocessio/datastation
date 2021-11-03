@@ -347,7 +347,8 @@ header > div {
   overflow-y: auto;
 }
 
-.pages .current-page {
+.pages {
+    .current-page {
   margin-right: 8px;
   margin-left: 8px;
   padding: 8px;
@@ -355,16 +356,17 @@ header > div {
   border-bottom: 0;
 }
 
-.pages .current-page .page-name {
+ .current-page .page-name {
   font-size: 1rem;
   border-color: #9f04ff;
 }
 
-.pages .page-name.button {
+ .page-name.button {
   margin: 0 5px;
   border-left: 0;
   border-top: 0;
   border-right: 0;
+ }
 }
 
 .panel {
