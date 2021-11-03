@@ -10,16 +10,16 @@ requests, scripting, and visualization in a single platform.
 In server-mode:
 
 * Create and share dashboards with coworkers
-* Schedule recurring exports
+* Schedule recurring exports of dashboards
 
 In desktop-mode and server-mode:
 
-* Produce bar graphs and pie charts from data
-* Import all of your data without ETL processes
+* Build reports with graphs, charts and tables
+* Import all of your data without ETL processes, just basic API access
   * Query all kinds of databases, locally or over SSH
   * Query HTTP servers, locally or over SSH
   * Read all kinds of files from disk, locally or over SSH
-* Script against data in Python, JavaScript, Ruby, Julia, and R
+* Script against data in Python, JavaScript, Ruby, Julia, or R
 * Cross-platform: Windows, macOS, and Linux
 
 ## Install
