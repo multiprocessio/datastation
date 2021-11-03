@@ -16,9 +16,10 @@ project.pages[0].panels = [new ProgramPanelInfo()];
 test('shows program panel details', async () => {
   const component = enzyme.mount(
     <ProgramPanelDetails
-    panel={project.pages[0].panels[0]}
-    panels={project.pages[0].panels[0]}
-    updatePanel={() => {}}
-    />);
+      panel={project.pages[0].panels[0]}
+      panels={project.pages[0].panels[0]}
+      updatePanel={() => {}}
+    />
+  );
   await componentLoad(component);
 });

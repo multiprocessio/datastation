@@ -69,8 +69,12 @@ test(
       const p = panels.at(i);
       if (!p.find('.panel-details').length) {
         act(() => {
-	  p.findWhere(n => n.name() === 'button' && n.prop('data-testid') === 'show-hide-panel').simulate('click');
-	});
+          p.findWhere(
+            (n) =>
+              n.name() === 'button' &&
+              n.prop('data-testid') === 'show-hide-panel'
+          ).simulate('click');
+        });
       }
     }
 
@@ -92,7 +96,10 @@ test(
     for (let i = 0; i < connectors.length; i++) {
       const c = connectors.at(i);
       act(() => {
-	c.find({ 'data-testid': 'show-hide-connector', type: 'outline' }).simulate('click');
+        c.find({
+          'data-testid': 'show-hide-connector',
+          type: 'outline',
+        }).simulate('click');
       });
     }
 

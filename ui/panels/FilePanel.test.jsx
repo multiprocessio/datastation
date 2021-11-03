@@ -16,9 +16,10 @@ project.pages[0].panels = [new FilePanelInfo()];
 test('shows file panel details', async () => {
   const component = enzyme.mount(
     <FilePanelDetails
-    panel={project.pages[0].panels[0]}
-    panels={project.pages[0].panels[0]}
-    updatePanel={() => {}}
-    />);
+      panel={project.pages[0].panels[0]}
+      panels={project.pages[0].panels[0]}
+      updatePanel={() => {}}
+    />
+  );
   await componentLoad(component);
 });

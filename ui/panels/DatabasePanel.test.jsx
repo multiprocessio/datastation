@@ -16,9 +16,10 @@ project.pages[0].panels = [new DatabasePanelInfo()];
 test('shows database panel info', async () => {
   const component = enzyme.mount(
     <DatabasePanelDetails
-    panel={project.pages[0].panels[0]}
-    panels={project.pages[0].panels[0]}
-    updatePanel={() => {}}
-    />);
+      panel={project.pages[0].panels[0]}
+      panels={project.pages[0].panels[0]}
+      updatePanel={() => {}}
+    />
+  );
   await componentLoad(component);
 });

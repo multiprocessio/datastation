@@ -168,8 +168,10 @@ export function TablePanel({ panel, panels }: PanelBodyProps<TablePanelInfo>) {
         </tr>
       </thead>
       <tbody>
-        {valueAsArray.map((row: any, i: number) => (
-          <tr key={i}>
+        {valueAsArray.map((row: any) => (
+          /* probably a better way to do this... */ <tr
+            key={Object.values(row).join(',')}
+          >
             {panel.table.columns.map((column: TableColumn) => (
               <td key={column.field}>{row[column.field]}</td>
             ))}

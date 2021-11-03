@@ -26,11 +26,12 @@ project.pages[0].panels = [tpi];
 test('shows a basic schedule page', async () => {
   const component = enzyme.mount(
     <SchedulerWithDeps
-    projectState={project}
-    setProjectState={() => {}}
-    urlState={{ page: 0 }}
-    setUrlState={() => {}}
-      />);
+      projectState={project}
+      setProjectState={() => {}}
+      urlState={{ page: 0 }}
+      setUrlState={() => {}}
+    />
+  );
   await componentLoad(component);
   expect(component.find('.panel').length).toBe(1);
 });

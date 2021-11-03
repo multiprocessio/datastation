@@ -14,18 +14,17 @@ const project = new ProjectState();
 project.pages = [new ProjectPage()];
 const lp = new LiteralPanelInfo();
 const gp = new GraphPanelInfo({ panelSource: lp.info });
-project.pages[0].panels = [
-  lp,
-  gp,
-];
+project.pages[0].panels = [lp, gp];
+console.log('HERE!', gp);
 
 test('shows graph panel details', async () => {
   const component = enzyme.mount(
     <GraphPanelDetails
-    panel={project.pages[0].panels[0]}
-    panels={project.pages[0].panels}
-    updatePanel={() => {}}
-    />);
+      panel={gp}
+      panels={project.pages[0].panels}
+      updatePanel={() => {}}
+    />
+  );
   await componentLoad(component);
 });
 
@@ -34,15 +33,16 @@ test('shows filled graph panel', async () => {
   gp.resultMeta = new PanelResultMeta({
     value: [
       { name: 'Nora', age: 33 },
-      { name: 'Kay', age: 20 }
+      { name: 'Kay', age: 20 },
     ],
   });
 
   const component = enzyme.mount(
     <GraphPanel
-    panel={gp}
-    panels={project.pages[0].panels}
-    updatePanel={() => {}}
-    />);
+      panel={gp}
+      panels={project.pages[0].panels}
+      updatePanel={() => {}}
+    />
+  );
   await componentLoad(component);
 });
