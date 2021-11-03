@@ -15,7 +15,7 @@ function getQueryParameter(param: String) {
   return '';
 }
 
-interface UrlState {
+export interface UrlState {
   projectId: string;
   page: number;
   view: 'editor' | 'dashboard' | 'scheduler';

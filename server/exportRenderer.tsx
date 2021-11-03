@@ -16,7 +16,7 @@ export function renderPage(project: ProjectState, pageId: string) {
           setState: () => {},
         }}
       >
-        {false && <Dashboard />}
+        <Dashboard />
       </UrlStateContext.Provider>
     </ProjectContext.Provider>
   );

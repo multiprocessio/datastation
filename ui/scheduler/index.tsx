@@ -1,17 +1,21 @@
 import React from 'react';
-import { ScheduledExport } from '../../shared/state';
+import { ProjectState, ScheduledExport } from '../../shared/state';
 import { Button } from '../components/Button';
 import { ProjectContext } from '../ProjectStore';
-import { UrlStateContext } from '../urlState';
+import { UrlState, UrlStateContext } from '../urlState';
 import { Schedule } from './Schedule';
 
-export function Scheduler() {
-  const {
-    state: { page: pageIndex },
-    setState: setUrlState,
-  } = React.useContext(UrlStateContext);
-  const { state: projectState, setState: setProjectState } =
-    React.useContext(ProjectContext);
+export function SchedulerWithDeps({
+  projectState,
+  setProjectState,
+  urlState: { page: pageIndex },
+  setUrlState,
+}: {
+  projectState: ProjectState;
+  setProjectState: (a: ProjectState) => void;
+  urlState: UrlState;
+  setUrlState: (a: Partial<UrlState>) => void;
+}) {
   const { schedules, name } = projectState.pages[pageIndex];
 
   function addSchedule() {
@@ -55,5 +59,20 @@ export function Scheduler() {
         </div>
       </div>
     </div>
+  );
+}
+
+export function Scheduler() {
+  const { state: urlState, setState: setUrlState } =
+    React.useContext(UrlStateContext);
+  const { state: projectState, setState: setProjectState } =
+    React.useContext(ProjectContext);
+  return (
+    <SchedulerWithDeps
+      projectState={projectState}
+      setProjectState={setProjectState}
+      urlState={urlState}
+      setUrlState={setUrlState}
+    />
   );
 }
