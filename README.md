@@ -4,8 +4,10 @@ DataStation makes it easy to build cross-cutting reports on top of
 database queries, API requests, files, and custom scripts without
 requiring ETL processes or maintenance of a new large database.
 
-It can be run on a single laptop as a desktop application or as a web
-application for entire teams.
+Developers can try it out as a desktop application on their own laptop
+where data never leaves the laptop. Or the application can be
+installed as a server so the entire team can build and view
+dashboards.
 
 ![A screenshot of app.datastation.multiprocess.io](./screenshot.png)
 
