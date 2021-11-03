@@ -1,13 +1,15 @@
 # DataStation Community Edition
 
-DataStation allows you to seamlessly connect database queries, HTTP
-requests, scripting, and visualization in a single platform.
+DataStation makes it easy to build cross-cutting reports on top of
+database queries, API requests, files, and custom scripts without
+requiring ETL processes or maintenance of a new large database.
+
+It can be run on a single laptop as a desktop application or as a web
+application for entire teams.
 
 ![A screenshot of app.datastation.multiprocess.io](./screenshot.png)
 
 ## Features
-
-You can run DataStation as either a web application or a desktop application.
 
 In server mode:
 
@@ -17,10 +19,10 @@ In server mode:
 In desktop mode and server mode:
 
 * Build reports with graphs, charts and tables
-* Import all of your data without ETL processes, just basic API access
-  * Query all kinds of databases, locally or over SSH
-  * Query HTTP servers, locally or over SSH
-  * Read all kinds of files from disk, locally or over SSH
+* Easily fetch any/all of your data
+  * Query SQL, NoSQL, metrics, and document databases
+  * Query API servers
+  * Load Excel, Parquet, CSV, JSON, and log files from disk
 * Script against data in Python, JavaScript, Ruby, Julia, or R
 * Cross-platform: Windows, macOS, and Linux
 
