@@ -330,19 +330,16 @@ export class GraphPanelInfo extends PanelInfo {
   };
 
   constructor(
-    name?: string,
-    panelSource?: string,
-    ys?: Array<GraphY>,
-    x?: string,
-    type?: GraphPanelInfoType,
-    content?: string
+    defaults: Partial<
+      GraphPanelInfo['graph'] & { content: string; name: string }
+    > = {}
   ) {
-    super('graph', name, content);
+    super('graph', defaults.name, defaults.content);
     this.graph = {
-      panelSource: '',
-      x: x || '',
-      ys: ys || [],
-      type: type || 'bar',
+      panelSource: defaults.panelSource || '',
+      x: defaults.x || '',
+      ys: defaults.ys || [],
+      type: defaults.type || 'bar',
     };
   }
 }
@@ -451,15 +448,14 @@ export class TablePanelInfo extends PanelInfo {
   };
 
   constructor(
-    name?: string,
-    columns: Array<TableColumn> = [],
-    panelSource?: string,
-    content?: string
+    defaults: Partial<
+      TablePanelInfo['table'] & { content: string; name: string }
+    > = {}
   ) {
-    super('table', name, content);
+    super('table', defaults.name, defaults.content);
     this.table = {
-      columns,
-      panelSource: panelSource || '',
+      columns: defaults.columns || [],
+      panelSource: defaults.panelSource || '',
     };
   }
 }
@@ -701,7 +697,7 @@ export const DEFAULT_PROJECT: ProjectState = (() => {
     content: 'SELECT name, age+5 AS age FROM DM_getPanel(0);',
   });
 
-  const gpi = new GraphPanelInfo('Display');
+  const gpi = new GraphPanelInfo({ name: 'Display' });
   gpi.graph.ys = [{ field: 'age', label: 'Age' }];
   gpi.graph.x = 'name';
   gpi.graph.panelSource = ppi.id;
