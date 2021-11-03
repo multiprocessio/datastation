@@ -89,7 +89,6 @@ export const literalPanel: PanelUIDetails<LiteralPanelInfo> = {
   label: 'Literal',
   details: LiteralPanelDetails,
   body: LiteralPanelBody,
-  alwaysOpen: false,
   previewable: true,
   factory: () => new LiteralPanelInfo(),
   info: null,

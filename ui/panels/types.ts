@@ -24,7 +24,7 @@ export interface PanelUIDetails<T extends PanelInfo> {
   icon: string;
   eval(
     panel: T,
-    panelResults: Array<PanelResult>,
+    panels: Array<PanelInfo>,
     indexIdMap: Array<string>,
     connectors: Array<ConnectorInfo>,
     servers: Array<ServerInfo>
@@ -33,9 +33,9 @@ export interface PanelUIDetails<T extends PanelInfo> {
   label: string;
   details: React.ElementType<PanelDetailsProps<T>>;
   body: React.ElementType<PanelBodyProps<T>> | null;
-  alwaysOpen: boolean;
   previewable: boolean;
   hasStdout: boolean;
   info: React.ElementType<{ panel: T }> | null;
   factory: () => T;
+  dashboard?: boolean;
 }

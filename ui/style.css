@@ -274,9 +274,11 @@ header > div {
   display: inline-block;
 }
 
-.pages .section-title {
+.section-title {
   font-size: 1.5rem;
   padding-bottom: 15px;
+  display: flex;
+  align-items: flex-end;
 }
 
 .sidebar {
@@ -345,29 +347,26 @@ header > div {
   overflow-y: auto;
 }
 
-.pages .section-title {
-  display: flex;
-  align-items: flex-end;
-}
+.pages {
+  .current-page {
+    margin-right: 8px;
+    margin-left: 8px;
+    padding: 8px;
+    border: 1px solid #9f04ff;
+    border-bottom: 0;
+  }
 
-.pages .current-page {
-  margin-right: 8px;
-  margin-left: 8px;
-  padding: 8px;
-  border: 1px solid #9f04ff;
-  border-bottom: 0;
-}
+  .current-page .page-name {
+    font-size: 1rem;
+    border-color: #9f04ff;
+  }
 
-.pages .current-page .page-name {
-  font-size: 1rem;
-  border-color: #9f04ff;
-}
-
-.pages .page-name.button {
-  margin: 0 5px;
-  border-left: 0;
-  border-top: 0;
-  border-right: 0;
+  .page-name.button {
+    margin: 0 5px;
+    border-left: 0;
+    border-top: 0;
+    border-right: 0;
+  }
 }
 
 .panel {
@@ -695,6 +694,7 @@ canvas {
   padding: 15px;
   margin: 15px auto;
   width: 500px;
+  height: min-content;
 }
 
 .project-name .input,

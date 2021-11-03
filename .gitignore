@@ -6,4 +6,5 @@ yarn-error.log
 releases
 coverage
 certs
+.dir-locals.el
 TAGS

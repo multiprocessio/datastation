@@ -20,6 +20,8 @@ jobs:
     # Needed so we can have ./build/desktop_runner.js ready for tests
     - run: yarn build-desktop
     - run: yarn test --runInBand --detectOpenHandles --forceExit --verbose
+    # Test server builds
+    - run: yarn build-server
 
   e2e-linux:
     runs-on: ubuntu-latest

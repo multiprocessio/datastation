@@ -40,7 +40,7 @@ export function FilePanelDetails({
   panel,
   updatePanel,
 }: PanelDetailsProps<FilePanelInfo>) {
-  const { servers } = React.useContext(ProjectContext);
+  const { servers } = React.useContext(ProjectContext).state;
   return (
     <div className="FilePanel">
       <FormGroup label="General">
@@ -92,7 +92,6 @@ export const filePanel: PanelUIDetails<FilePanelInfo> = {
   label: 'File',
   details: FilePanelDetails,
   body: null,
-  alwaysOpen: false,
   previewable: true,
   factory: () => new FilePanelInfo(),
   hasStdout: false,

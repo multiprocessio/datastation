@@ -47,7 +47,7 @@ export function HTTPPanelDetails({
   panel,
   updatePanel,
 }: PanelDetailsProps<HTTPPanelInfo>) {
-  const { servers } = React.useContext(ProjectContext);
+  const { servers } = React.useContext(ProjectContext).state;
   return (
     <React.Fragment>
       <FormGroup label="General">
@@ -168,7 +168,6 @@ export const httpPanel: PanelUIDetails<HTTPPanelInfo> = {
   label: 'HTTP',
   details: HTTPPanelDetails,
   body: null,
-  alwaysOpen: true,
   previewable: true,
   factory: () => new HTTPPanelInfo(),
   info: HTTPInfo,

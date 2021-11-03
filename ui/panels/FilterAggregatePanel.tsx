@@ -7,6 +7,7 @@ import { buildSQLiteQuery } from '../../shared/sql';
 import {
   AggregateType,
   FilterAggregatePanelInfo,
+  PanelInfo,
   PanelResult,
   TimeSeriesRange as TimeSeriesRangeT,
 } from '../../shared/state';
@@ -60,18 +61,27 @@ function withAggregateShape(
 
 export async function evalFilterAggregatePanel(
   panel: FilterAggregatePanelInfo,
-  panelResults: Array<PanelResult>
+  panels: Array<PanelInfo>
 ) {
   if (MODE === 'browser') {
-    const { panelSource } = panel.filagg;
-    if (!panelResults || !panelResults[panelSource]) {
-      throw new InvalidDependentPanelError(panelSource);
+    const panelIndex = (panels || []).findIndex(
+      (p) => p.id === panel.filagg.panelSource
+    );
+    const resultMeta = (panels[panelIndex] || {}).resultMeta;
+    if (!resultMeta || !resultMeta.value) {
+      throw new InvalidDependentPanelError(panelIndex);
     }
 
-    const query = buildSQLiteQuery(panel);
+    const query = buildSQLiteQuery(
+      panel,
+      panels.map((p) => p.id)
+    );
 
     const language = LANGUAGES.sql;
-    const res = await language.inMemoryEval(query, panelResults);
+    const res = await language.inMemoryEval(
+      query,
+      panels.map((p) => p.resultMeta)
+    );
     const s = shape(res.value);
     return {
       ...res,
@@ -91,7 +101,8 @@ export function FilterAggregatePanelDetails({
   updatePanel,
 }: PanelDetailsProps<FilterAggregatePanelInfo>) {
   const data =
-    (panels[panel.filagg.panelSource] || {}).resultMeta || new PanelResult();
+    ((panels || []).find((p) => p.id === panel.filagg.panelSource) || {})
+      .resultMeta || new PanelResult();
 
   return (
     <React.Fragment>
@@ -101,7 +112,7 @@ export function FilterAggregatePanelDetails({
             currentPanel={panel.id}
             panels={panels}
             value={panel.filagg.panelSource}
-            onChange={(value: number) => {
+            onChange={(value: string) => {
               panel.filagg.panelSource = value;
               updatePanel(panel);
             }}
@@ -286,7 +297,6 @@ export const filaggPanel: PanelUIDetails<FilterAggregatePanelInfo> = {
   label: 'Visual Transform',
   details: FilterAggregatePanelDetails,
   body: null,
-  alwaysOpen: false,
   previewable: true,
   factory: () => new FilterAggregatePanelInfo(),
   info: null,

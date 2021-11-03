@@ -23,74 +23,77 @@ export class App {
   }
 }
 
-export async function init() {
+export async function init(runServer = true) {
   const config = readConfig();
   const app = new App(config);
-
-  app.express.use(cookieParser());
-  app.express.use(express.json());
-
-  app.express.use((req, res, next) => {
-    const start = new Date();
-    res.on('finish', () => {
-      const end = new Date();
-      log.info(
-        `${res.statusCode} ${req.method} ${req.url} ${humanSize(
-          +res.getHeader('content-length') || 0
-        )} ${end.valueOf() - start.valueOf()}ms`
-      );
-    });
-    next();
-  });
 
   const { handlers } = initialize(app, {
     subprocess: path.join(__dirname, 'server_runner.js'),
   });
 
-  const auth = await registerAuth('/a/auth', app, config);
+  if (runServer) {
+    app.express.use(cookieParser());
+    app.express.use(express.json());
 
-  app.express.post('/a/rpc', auth.requireAuth, (req, rsp) =>
-    handleRPC(req, rsp, handlers)
-  );
+    app.express.use((req, res, next) => {
+      const start = new Date();
+      res.on('finish', () => {
+        const end = new Date();
+        log.info(
+          `${res.statusCode} ${req.method} ${req.url} ${humanSize(
+            +res.getHeader('content-length') || 0
+          )} ${end.valueOf() - start.valueOf()}ms`
+        );
+      });
+      next();
+    });
+    const auth = await registerAuth('/a/auth', app, config);
 
-  // Serve static files
-  // Mask with nginx in production
-  const staticFiles = ['index.html', 'style.css', 'ui.js', 'ui.js.map'];
-  staticFiles.map((f) => {
-    if (f === 'index.html') {
-      app.express.get('/', (req, rsp) =>
-        rsp.sendFile(path.join(CODE_ROOT, '/build/index.html'))
-      );
-      return;
-    }
-
-    app.express.get('/' + f, (req, rsp) =>
-      rsp.sendFile(path.join(CODE_ROOT, 'build', f))
+    app.express.post('/a/rpc', auth.requireAuth, (req, rsp) =>
+      handleRPC(req, rsp, handlers)
     );
-  });
 
-  const server = https.createServer(
-    {
-      key: fs.readFileSync(config.server.tlsKey),
-      cert: fs.readFileSync(config.server.tlsCert),
-    },
-    app.express
-  );
-  const location = config.server.address + ':' + config.server.port;
-  server.listen(
-    {
-      port: config.server.port,
-      host: config.server.address,
-    },
-    () => {
-      log.info(
-        `Server running on https://${location}, publicly accessible at ${config.server.publicUrl}`
+    // Serve static files
+    // Mask with nginx in production
+    const staticFiles = ['index.html', 'style.css', 'ui.js', 'ui.js.map'];
+    staticFiles.map((f) => {
+      if (f === 'index.html') {
+        app.express.get('/', (req, rsp) =>
+          rsp.sendFile(path.join(CODE_ROOT, '/build/index.html'))
+        );
+        return;
+      }
+
+      app.express.get('/' + f, (req, rsp) =>
+        rsp.sendFile(path.join(CODE_ROOT, 'build', f))
       );
-    }
-  );
+    });
 
-  process.on('SIGINT', async function () {
-    log.info('Gracefully shutting down from SIGINT');
-    server.close(() => process.exit(1));
-  });
+    const server = https.createServer(
+      {
+        key: fs.readFileSync(config.server.tlsKey),
+        cert: fs.readFileSync(config.server.tlsCert),
+      },
+      app.express
+    );
+    const location = config.server.address + ':' + config.server.port;
+    server.listen(
+      {
+        port: config.server.port,
+        host: config.server.address,
+      },
+      () => {
+        log.info(
+          `Server running on https://${location}, publicly accessible at ${config.server.publicUrl}`
+        );
+      }
+    );
+
+    process.on('SIGINT', async function () {
+      log.info('Gracefully shutting down from SIGINT');
+      server.close(() => process.exit(1));
+    });
+  }
+
+  return handlers;
 }

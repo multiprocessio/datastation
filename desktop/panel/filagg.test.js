@@ -23,6 +23,7 @@ test('filters no group', async () => {
   const vp = new FilterAggregatePanelInfo({
     filter: 'age > 10',
     sortOn: 'age',
+    panelSource: lp.id,
   });
 
   let finished = false;
@@ -54,6 +55,7 @@ test('filters with group', async () => {
     sortOn: 'Aggregate: count',
     groupBy: 'age',
     aggregateType: 'count',
+    panelSource: lp.id,
   });
 
   let finished = false;
@@ -96,6 +98,7 @@ test('filters time range', async () => {
       rangeType: 'relative',
       relative: 'last-15-minutes',
     },
+    panelSource: lp.id,
   });
 
   let finished = false;
@@ -138,6 +141,7 @@ test('group on time range', async () => {
     groupBy: 'time',
     aggregateType: 'count',
     windowInterval: '60',
+    panelSource: lp.id,
   });
 
   let finished = false;

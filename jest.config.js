@@ -24,6 +24,7 @@ module.exports = {
     'shared/**/*.ts',
     'desktop/**/*.ts',
     'server/**/*.ts',
+    'server/**/*.tsx',
   ],
   modulePathIgnorePatterns: ['<rootDir>/releases/', '<rootDir>/build/'],
 };

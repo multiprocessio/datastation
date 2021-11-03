@@ -7,6 +7,7 @@ import { Input } from './components/Input';
 import { PanelPlayWarning } from './errors';
 import { PanelList } from './PanelList';
 import { PANEL_UI_DETAILS } from './panels';
+import { UrlStateContext } from './urlState';
 
 export function makeReevalPanel(
   page: ProjectPage,
@@ -32,13 +33,12 @@ export function makeReevalPanel(
     }
 
     try {
-      const panelResults = page.panels.map((p) => p.resultMeta);
       const indexIdMap: Array<string> = page.panels.map((p) => p.id);
       const panelUIDetails = PANEL_UI_DETAILS[panel.type];
       const { value, size, contentType, preview, stdout, shape, arrayCount } =
         await panelUIDetails.eval(
           panel,
-          panelResults,
+          page.panels,
           indexIdMap,
           connectors,
           servers
@@ -83,17 +83,18 @@ export function PageList({
   addPage,
   deletePage,
   updatePage,
-  setCurrentPage,
-  currentPage,
+  setPageIndex,
+  pageIndex,
 }: {
   state: ProjectState;
   addPage: (page: ProjectPage) => void;
   deletePage: (i: number) => void;
   updatePage: (page: ProjectPage) => void;
-  setCurrentPage: (i: number) => void;
-  currentPage: number;
+  setPageIndex: (i: number) => void;
+  pageIndex: number;
 }) {
-  const page: ProjectPage | null = state.pages[currentPage] || null;
+  const page: ProjectPage | null = state.pages[pageIndex] || null;
+  const { setState: setUrlState } = React.useContext(UrlStateContext);
 
   if (!page) {
     return (
@@ -104,7 +105,7 @@ export function PageList({
             type="primary"
             onClick={() => {
               addPage(new ProjectPage('Untitled Page'));
-              setCurrentPage(state.pages.length - 1);
+              setPageIndex(state.pages.length - 1);
             }}
           >
             Add a page
@@ -128,14 +129,14 @@ export function PageList({
     <div className="section pages">
       <div className="section-title">
         {state.pages.map((page: ProjectPage, i: number) =>
-          i === currentPage ? (
+          i === pageIndex ? (
             <div className="vertical-align-center current-page" key={page.id}>
               <span title="Delete Page">
                 <Confirm
                   right
                   onConfirm={() => {
-                    deletePage(currentPage);
-                    setCurrentPage(Math.min(state.pages.length - 1, 0));
+                    deletePage(pageIndex);
+                    setPageIndex(Math.min(state.pages.length - 1, 0));
                   }}
                   message="delete this page"
                   action="Delete"
@@ -163,12 +164,24 @@ export function PageList({
                   play_circle
                 </Button>
               </span>
+
+              <span title="Enter dashboard mode">
+                <Button icon onClick={() => setUrlState({ view: 'dashboard' })}>
+                  bar_chart
+                </Button>
+              </span>
+
+              <span title="Enter scheduled export mode">
+                <Button icon onClick={() => setUrlState({ view: 'scheduler' })}>
+                  schedule
+                </Button>
+              </span>
             </div>
           ) : (
             <Button
               key={page.id}
               className="page-name"
-              onClick={() => setCurrentPage(i)}
+              onClick={() => setPageIndex(i)}
             >
               {page.name}
             </Button>
@@ -179,7 +192,7 @@ export function PageList({
           className="flex-right"
           onClick={() => {
             addPage(new ProjectPage('Untitled Page'));
-            setCurrentPage(state.pages.length - 1);
+            setPageIndex(state.pages.length - 1);
           }}
         >
           New Page

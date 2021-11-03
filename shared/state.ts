@@ -15,13 +15,15 @@ export class PanelResult {
   contentType: string;
   elapsed?: number;
 
-  constructor() {
-    this.stdout = '';
-    this.shape = { kind: 'unknown' };
-    this.preview = '';
-    this.size = 0;
-    this.contentType = 'unknown';
-    this.elapsed = 0;
+  constructor(defaults: Partial<PanelResult> = {}) {
+    this.stdout = defaults.stdout || '';
+    this.shape = defaults.shape || { kind: 'unknown' };
+    this.preview = defaults.preview || '';
+    this.size = defaults.size || 0;
+    this.contentType = defaults.contentType || 'unknown';
+    this.elapsed = defaults.elapsed || 0;
+    this.value = defaults.value || undefined;
+    this.exception = defaults.exception || undefined;
   }
 }
 
@@ -29,10 +31,10 @@ export class PanelResultMeta extends PanelResult {
   lastRun: Date;
   loading: boolean;
 
-  constructor() {
-    super();
-    this.lastRun = null;
-    this.loading = false;
+  constructor(defaults: Partial<PanelResultMeta> = {}) {
+    super(defaults as PanelResult);
+    this.lastRun = defaults.lastRun || null;
+    this.loading = defaults.loading || false;
   }
 
   static fromJSON(raw: any): PanelResultMeta {
@@ -51,7 +53,7 @@ export class Encrypt {
   value: string;
   encrypted: boolean;
 
-  constructor(value: string) {
+  constructor(value: string = '') {
     this.value = value;
     this.encrypted = false;
   }
@@ -321,26 +323,23 @@ export type GraphPanelInfoType = 'bar' | 'pie';
 
 export class GraphPanelInfo extends PanelInfo {
   graph: {
-    panelSource: number;
+    panelSource: string;
     ys: Array<GraphY>;
     x: string;
     type: GraphPanelInfoType;
   };
 
   constructor(
-    name?: string,
-    panelSource?: number,
-    ys?: Array<GraphY>,
-    x?: string,
-    type?: GraphPanelInfoType,
-    content?: string
+    defaults: Partial<
+      GraphPanelInfo['graph'] & { content: string; name: string }
+    > = {}
   ) {
-    super('graph', name, content);
+    super('graph', defaults.name, defaults.content);
     this.graph = {
-      panelSource: panelSource || 0,
-      x: x || '',
-      ys: ys || [],
-      type: type || 'bar',
+      panelSource: defaults.panelSource || '',
+      x: defaults.x || '',
+      ys: defaults.ys || [],
+      type: defaults.type || 'bar',
     };
   }
 }
@@ -445,19 +444,18 @@ export interface TableColumn {
 export class TablePanelInfo extends PanelInfo {
   table: {
     columns: Array<TableColumn>;
-    panelSource: number;
+    panelSource: string;
   };
 
   constructor(
-    name?: string,
-    columns: Array<TableColumn> = [],
-    panelSource: number = 0,
-    content?: string
+    defaults: Partial<
+      TablePanelInfo['table'] & { content: string; name: string }
+    > = {}
   ) {
-    super('table', name, content);
+    super('table', defaults.name, defaults.content);
     this.table = {
-      columns,
-      panelSource,
+      columns: defaults.columns || [],
+      panelSource: defaults.panelSource || '',
     };
   }
 }
@@ -472,7 +470,7 @@ export type AggregateType =
 
 export class FilterAggregatePanelInfo extends PanelInfo {
   filagg: {
-    panelSource: number;
+    panelSource: string;
     filter: string;
     range: TimeSeriesRange;
     aggregateType: AggregateType;
@@ -489,7 +487,7 @@ export class FilterAggregatePanelInfo extends PanelInfo {
   ) {
     super('filagg', panel.name || '', '');
     this.filagg = {
-      panelSource: panel.panelSource || 0,
+      panelSource: panel.panelSource || '',
       filter: panel.filter || '',
       aggregateType: panel.aggregateType || 'none',
       groupBy: panel.groupBy || '',
@@ -545,14 +543,50 @@ export class LiteralPanelInfo extends PanelInfo {
   }
 }
 
+export class ScheduledExport {
+  period: 'day' | 'week' | 'month';
+  name: string;
+  id: string;
+  destination: {
+    type: 'email';
+    from: string;
+    recipients: string;
+    server: string;
+    username: string;
+    password_encrypt: Encrypt;
+  };
+
+  constructor(defaults: Partial<ScheduledExport> = {}) {
+    this.period = defaults.period || 'day';
+    this.name = defaults.name || 'DataStation Export';
+    this.destination = {
+      ...defaults.destination,
+    };
+    this.destination.type = this.destination.type || 'email';
+    // In preparation for supporting other types
+    if (this.destination.type === 'email') {
+      this.destination.from || this.destination.from || '';
+      this.destination.recipients = this.destination.recipients || '';
+      this.destination.server = this.destination.server || '';
+      this.destination.username = this.destination.username || '';
+      this.destination.password_encrypt =
+        this.destination.password_encrypt || new Encrypt('');
+    }
+
+    this.id = uuid.v4();
+  }
+}
+
 export class ProjectPage {
   panels: Array<PanelInfo>;
+  schedules: Array<ScheduledExport>;
   name: string;
   id: string;
 
   constructor(name?: string, panels?: Array<PanelInfo>) {
     this.name = name || '';
     this.panels = panels || [];
+    this.schedules = [];
     this.id = uuid.v4();
   }
 
@@ -562,6 +596,7 @@ export class ProjectPage {
     pp.panels = (raw.panels || []).map(PanelInfo.fromJSON);
     pp.name = raw.name;
     pp.id = raw.id || uuid.v4();
+    pp.schedules = raw.schedules || [];
     return pp;
   }
 }
@@ -655,27 +690,27 @@ export class ProjectState {
   }
 }
 
-export const DEFAULT_PROJECT: ProjectState = new ProjectState(
-  'Example project',
-  [
+export const DEFAULT_PROJECT: ProjectState = (() => {
+  const ppi = new ProgramPanelInfo({
+    name: 'Transform with SQL',
+    type: 'sql',
+    content: 'SELECT name, age+5 AS age FROM DM_getPanel(0);',
+  });
+
+  const gpi = new GraphPanelInfo({ name: 'Display' });
+  gpi.graph.ys = [{ field: 'age', label: 'Age' }];
+  gpi.graph.x = 'name';
+  gpi.graph.panelSource = ppi.id;
+
+  return new ProjectState('Example project', [
     new ProjectPage('CSV Discovery Example', [
       new LiteralPanelInfo({
         name: 'Raw CSV Text',
         content: 'name,age\nMorgan,12\nJames,17',
         contentTypeInfo: new ContentTypeInfo('text/csv'),
       }),
-      new ProgramPanelInfo({
-        name: 'Transform with SQL',
-        type: 'sql',
-        content: 'SELECT name, age+5 AS age FROM DM_getPanel(0);',
-      }),
-      (() => {
-        const panel = new GraphPanelInfo('Display');
-        panel.graph.ys = [{ field: 'age', label: 'Age' }];
-        panel.graph.x = 'name';
-        panel.graph.panelSource = 1;
-        return panel;
-      })(),
+      ppi,
+      gpi,
     ]),
-  ]
-);
+  ]);
+})();

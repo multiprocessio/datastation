@@ -3,7 +3,12 @@ import * as React from 'react';
 import { shape } from 'shape';
 import { MODE } from '../../shared/constants';
 import { InvalidDependentPanelError } from '../../shared/errors';
-import { PanelResult, TableColumn, TablePanelInfo } from '../../shared/state';
+import {
+  PanelInfo,
+  PanelResult,
+  TableColumn,
+  TablePanelInfo,
+} from '../../shared/state';
 import { columnsFromObject } from '../../shared/table';
 import { panelRPC } from '../asyncRPC';
 import { Alert } from '../components/Alert';
@@ -15,21 +20,23 @@ import { PanelBodyProps, PanelDetailsProps, PanelUIDetails } from './types';
 
 export async function evalColumnPanel(
   panelId: string,
-  panelSource: number,
+  panelSource: string,
   columns: Array<string>,
   _: Array<string>,
-  panelResults: Array<PanelResult>
+  panels: Array<PanelInfo>
 ) {
   if (MODE === 'browser') {
-    if (!panelResults || !panelResults[panelSource]) {
-      throw new InvalidDependentPanelError(panelSource);
+    const panelIndex = (panels || []).findIndex((p) => p.id === panelSource);
+    const resultMeta = (panels[panelIndex] || {}).resultMeta;
+    if (!resultMeta || !resultMeta.value) {
+      throw new InvalidDependentPanelError(panelIndex);
     }
-    const { value } = panelResults[panelSource];
+    const { value } = resultMeta;
     try {
       const valueWithRequestedColumns = columnsFromObject(
         value,
         columns,
-        panelSource
+        panelIndex
       );
       const s = shape(valueWithRequestedColumns);
       return {
@@ -51,7 +58,7 @@ export async function evalColumnPanel(
 
 export function evalTablePanel(
   panel: TablePanelInfo,
-  panelResults: Array<PanelResult>,
+  panels: Array<PanelInfo>,
   indexIdMap: Array<string>
 ) {
   return evalColumnPanel(
@@ -59,7 +66,7 @@ export function evalTablePanel(
     panel.table.panelSource,
     panel.table.columns.map((c) => c.field),
     indexIdMap,
-    panelResults
+    panels
   );
 }
 
@@ -69,7 +76,8 @@ export function TablePanelDetails({
   updatePanel,
 }: PanelDetailsProps<TablePanelInfo>) {
   const data =
-    (panels[panel.table.panelSource] || {}).resultMeta || new PanelResult();
+    ((panels || []).find((p) => p.id === panel.table.panelSource) || {})
+      .resultMeta || new PanelResult();
   React.useEffect(() => {
     const fields = unusedFields(
       data?.shape,
@@ -90,7 +98,7 @@ export function TablePanelDetails({
             currentPanel={panel.id}
             panels={panels}
             value={panel.table.panelSource}
-            onChange={(value: number) => {
+            onChange={(value: string) => {
               panel.table.panelSource = value;
               updatePanel(panel);
             }}
@@ -150,20 +158,24 @@ export function TablePanel({ panel, panels }: PanelBodyProps<TablePanelInfo>) {
     );
   }
 
+  // column key is (field + i) everywhere because columns can be
+  // duplicated. Maybe should assign a uuid to them instead
   return (
     <table>
       <thead>
         <tr>
-          {panel.table.columns.map((column: TableColumn) => (
-            <th key={column.field}>{column.label}</th>
+          {panel.table.columns.map((column: TableColumn, i: number) => (
+            <th key={column.field + i}>{column.label}</th>
           ))}
         </tr>
       </thead>
       <tbody>
-        {valueAsArray.map((row: any, i: number) => (
-          <tr key={i}>
-            {panel.table.columns.map((column: TableColumn) => (
-              <td key={column.field}>{row[column.field]}</td>
+        {valueAsArray.map((row: any) => (
+          /* probably a better way to do this... */ <tr
+            key={Object.values(row).join(',')}
+          >
+            {panel.table.columns.map((column: TableColumn, i: number) => (
+              <td key={column.field + i}>{row[column.field]}</td>
             ))}
           </tr>
         ))}
@@ -179,9 +191,9 @@ export const tablePanel: PanelUIDetails<TablePanelInfo> = {
   label: 'Table',
   details: TablePanelDetails,
   body: TablePanel,
-  alwaysOpen: true,
   previewable: false,
   factory: () => new TablePanelInfo(),
   hasStdout: false,
   info: null,
+  dashboard: true,
 };

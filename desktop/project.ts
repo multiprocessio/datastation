@@ -119,7 +119,7 @@ export async function openWindow(project: string, newProject: boolean = false) {
     'file://' +
       path.join(
         __dirname,
-        'index.html' + (project ? '?project=' + project : '')
+        'index.html' + (project ? '?projectId=' + project : '')
       )
   );
 }

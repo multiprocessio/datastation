@@ -10,6 +10,12 @@ macOS. On Linux install gcc or clang.
 If you want to have hot-reloading, install
 [fswatch](https://github.com/emcrisostomo/fswatch).
 
+## Principles
+
+* Keep things simple and don't abstract early
+* Node packages bring in tons of dependencies. So be very careful before adding new depencies and don't bring in small dependencies or dependencies that can be easily written and fully unit-tested.
+* Keep adding unit tests and bumping 
+
 ## Build and run the online environment
 
 This will start a web server for the in-browser application. If you
@@ -68,7 +74,7 @@ You'll need to have PostgreSQL install and running. Create a
 Then run migrations: `psql -U datastation -f
 ./server/migrations/1_init.sql`.
 
-Create a config file at `/usr/local/etc/datastation/config.json` and
+Create a config file at `/etc/datastation/config.json` and
 fill out the following fields:
 
 ```
@@ -76,9 +82,9 @@ fill out the following fields:
   "auth": {
     "sessionSecret": "", // A strong key for session signing
     "openId": {
-      realm": "https://accounts.google.com", // Or some other realm
-      clientId": "my id",
-      clientSecret": "my secret",
+      "realm": "https://accounts.google.com", // Or some other realm
+      "clientId": "my id",
+      "clientSecret": "my secret",
     },
   },
 

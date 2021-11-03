@@ -4,7 +4,6 @@ import {
   ConnectorInfo,
   DatabaseConnectorInfo,
   DatabasePanelInfo,
-  PanelResult,
   TimeSeriesRange as TimeSeriesRangeT,
 } from '../../shared/state';
 import { panelRPC } from '../asyncRPC';
@@ -19,8 +18,8 @@ import { PanelBodyProps, PanelDetailsProps, PanelUIDetails } from './types';
 
 export async function evalDatabasePanel(
   panel: DatabasePanelInfo,
-  _1: Array<PanelResult>,
-  _2: Array<string>,
+  _1: unknown,
+  _2: unknown,
   connectors: Array<ConnectorInfo>
 ) {
   const connector = connectors.find(
@@ -37,7 +36,7 @@ export function DatabasePanelDetails({
   panel,
   updatePanel,
 }: PanelDetailsProps<DatabasePanelInfo>) {
-  const { connectors, servers } = React.useContext(ProjectContext);
+  const { connectors, servers } = React.useContext(ProjectContext).state;
 
   if (!connectors.length && panel.database.connectorId) {
     panel.database.connectorId = '';
@@ -183,7 +182,6 @@ export const databasePanel: PanelUIDetails<DatabasePanelInfo> = {
   label: 'Database',
   details: DatabasePanelDetails,
   body: DatabasePanelBody,
-  alwaysOpen: false,
   previewable: true,
   factory: () => new DatabasePanelInfo(),
   hasStdout: false,

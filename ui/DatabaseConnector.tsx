@@ -14,7 +14,7 @@ export function DatabaseConnector({
   connector: DatabaseConnectorInfo;
   updateConnector: (dc: DatabaseConnectorInfo) => void;
 }) {
-  const { servers } = React.useContext(ProjectContext);
+  const { servers } = React.useContext(ProjectContext).state;
   const { details: Details } = VENDORS[connector.database.type];
   return (
     <React.Fragment>
@@ -29,9 +29,12 @@ export function DatabaseConnector({
         >
           {VENDOR_GROUPS.map((group) => (
             <optgroup
+              key={group.group}
               label={group.group}
               children={group.vendors.map((v) => (
-                <option value={v}>{VENDORS[v].name}</option>
+                <option key={v} value={v}>
+                  {VENDORS[v].name}
+                </option>
               ))}
             />
           ))}

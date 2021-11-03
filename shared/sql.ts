@@ -16,6 +16,7 @@ import {
   subWeeks,
   subYears,
 } from 'date-fns';
+import { InvalidDependentPanelError } from './errors';
 import { FilterAggregatePanelInfo, TimeSeriesRange } from './state';
 
 export function timestampsFromRange(range: TimeSeriesRange) {
@@ -135,7 +136,10 @@ export const MYSQL_QUOTE = {
   identifier: '`',
 };
 
-export function buildSQLiteQuery(vp: FilterAggregatePanelInfo): string {
+export function buildSQLiteQuery(
+  vp: FilterAggregatePanelInfo,
+  idIndexMap: Array<string>
+): string {
   const {
     panelSource,
     aggregateType,
@@ -148,6 +152,11 @@ export function buildSQLiteQuery(vp: FilterAggregatePanelInfo): string {
     limit,
     windowInterval,
   } = vp.filagg;
+
+  const panelIndex = idIndexMap.findIndex((id) => id === panelSource);
+  if (panelIndex === -1) {
+    throw new InvalidDependentPanelError(panelIndex);
+  }
 
   let columns = '*';
   let groupByClause = '';
@@ -206,5 +215,5 @@ export function buildSQLiteQuery(vp: FilterAggregatePanelInfo): string {
 
     orderByClause = `ORDER BY ${sortField} ${sortAsc ? 'ASC' : 'DESC'}`;
   }
-  return `SELECT ${columns} FROM DM_getPanel(${panelSource}) ${whereClause} ${groupByClause} ${orderByClause} LIMIT ${limit}`;
+  return `SELECT ${columns} FROM DM_getPanel(${panelIndex}) ${whereClause} ${groupByClause} ${orderByClause} LIMIT ${limit}`;
 }

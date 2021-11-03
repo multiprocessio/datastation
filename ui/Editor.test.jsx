@@ -1,3 +1,4 @@
+const fs = require('fs');
 const React = require('react');
 const { act } = require('react-dom/test-utils');
 const enzyme = require('enzyme');
@@ -16,24 +17,15 @@ const {
   FilePanelInfo,
   FilterAggregatePanelInfo,
 } = require('../shared/state');
-const { wait } = require('../shared/promise');
 const { App } = require('./app');
 const { LocalStorageStore } = require('./ProjectStore');
 
-async function throwOnErrorBoundary(component) {
+function throwOnErrorBoundary(component) {
   component.find('ErrorBoundary').forEach((e) => {
     if (e.find({ type: 'fatal' }).length) {
       // Weird ways to find the actual error message
       throw new Error(e.find('Highlight').props().children);
     }
-  });
-}
-
-async function componentLoad(component) {
-  await wait(1000);
-  await act(async () => {
-    await wait(0);
-    component.update();
   });
 }
 
@@ -61,41 +53,59 @@ test(
   'app loads with default project',
   async () => {
     store.update('test', project);
-    window.location.search = '?project=test';
+    window.location.search = '?projectId=test';
 
-    const component = await enzyme.mount(<App />);
+    const component = enzyme.mount(<App />);
 
     await componentLoad(component);
 
-    const panels = await component.find('.panel');
-    expect(panels.length).toBe(project.pages[0].panels.length);
+    throwOnErrorBoundary(component);
 
-    await throwOnErrorBoundary(component);
+    let panels = component.find('.view-editor .panel');
+    expect(panels.length).toBe(project.pages[0].panels.length);
 
     // Open all panels
     for (let i = 0; i < panels.length; i++) {
       const p = panels.at(i);
       if (!p.find('.panel-details').length) {
-        await p.find({ 'data-testid': 'show-hide-panel' }).simulate('click');
-        await componentLoad(p);
+        act(() => {
+          p.findWhere(
+            (n) =>
+              n.name() === 'button' &&
+              n.prop('data-testid') === 'show-hide-panel'
+          ).simulate('click');
+        });
       }
+    }
 
+    await componentLoad(component);
+
+    // Look panels up again
+    panels = component.find('.view-editor .panel');
+
+    // Check they're all open.
+    for (let i = 0; i < panels.length; i++) {
+      const p = panels.at(i);
       expect(p.find('.panel-details').length).toBe(1);
     }
 
-    const connectors = await component.find('.connector');
+    const connectors = component.find('.connector');
     expect(connectors.length).toBe(project.connectors.length);
 
     // Open all connectors
     for (let i = 0; i < connectors.length; i++) {
       const c = connectors.at(i);
-      await c
-        .find({ 'data-testid': 'show-hide-connector', type: 'outline' })
-        .simulate('click');
-      await componentLoad(c);
+      act(() => {
+        c.find({
+          'data-testid': 'show-hide-connector',
+          type: 'outline',
+        }).simulate('click');
+      });
     }
 
-    await throwOnErrorBoundary(component);
+    await componentLoad(component);
+
+    throwOnErrorBoundary(component);
   },
   10_000 + 1_000 * (project.connectors.length + project.pages[0].panels.length)
 );

@@ -6,6 +6,7 @@ import * as React from 'react';
 import { toString } from 'shape';
 import { MODE, MODE_FEATURES } from '../shared/constants';
 import log from '../shared/log';
+import { deepEquals } from '../shared/object';
 import {
   PanelInfo,
   PanelInfoType,
@@ -185,7 +186,11 @@ export function Panel({
   // Fall back to empty dict in case panel.type names ever change
   const panelUIDetails =
     PANEL_UI_DETAILS[panel.type] || PANEL_UI_DETAILS.literal;
-  const [details, setDetails] = React.useState(true);
+  const blank = panelUIDetails.factory();
+  blank.id = panel.id;
+  blank.name = panel.name;
+  const isBlank = deepEquals(panel, blank);
+  const [details, setDetails] = React.useState(isBlank);
   const [hidden, setHidden] = React.useState(false);
 
   const [panelOut, setPanelOut] = React.useState<
@@ -294,17 +299,15 @@ export function Panel({
               value={panel.name}
             />
 
-            {!panelUIDetails.alwaysOpen && (
-              <span title={details ? 'Hide Details' : 'Show Details'}>
-                <Button
-                  data-testid="show-hide-panel"
-                  icon
-                  onClick={() => setDetails(!details)}
-                >
-                  {details ? 'unfold_less' : 'unfold_more'}
-                </Button>
-              </span>
-            )}
+            <span title={details ? 'Hide Details' : 'Show Details'}>
+              <Button
+                data-testid="show-hide-panel"
+                icon
+                onClick={() => setDetails(!details)}
+              >
+                {details ? 'unfold_less' : 'unfold_more'}
+              </Button>
+            </span>
 
             <span className="panel-controls vertical-align-center flex-right">
               <span className="text-muted">

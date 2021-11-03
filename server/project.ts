@@ -11,13 +11,13 @@ import { ProjectState } from '../shared/state';
 import { App } from './app';
 
 export const getProjectHandlers = (app: App) => {
-  const { host, port } = new URL(app.config.database.address);
+  const [host, port] = app.config.database.address.split(':');
   app.dbpool = new Pool({
     user: app.config.database.username || '',
     password: app.config.database.password || '',
     database: app.config.database.database,
     host,
-    port: +port,
+    port: +port || undefined,
   });
 
   const getProjects: RPCHandler<GetProjectsRequest, GetProjectsResponse> = {
@@ -69,17 +69,23 @@ export const getProjectHandlers = (app: App) => {
       newState: ProjectState
     ) {
       const client = await app.dbpool.connect();
-      const res = await client.query(
-        'SELECT project_value FROM projects WHERE project_name = $1;',
-        [projectId]
-      );
-      const existingState = res.rows[0].project_value;
-      await encryptProjectSecrets(newState, existingState);
+
       try {
+        await client.query('BEGIN');
+        const res = await client.query(
+          'SELECT project_value FROM projects WHERE project_name = $1;',
+          [projectId]
+        );
+        const existingState = res.rows[0].project_value;
+        await encryptProjectSecrets(newState, existingState);
         await client.query(
           'INSERT INTO projects (project_name, project_value) VALUES ($1, $2) ON CONFLICT (project_name) DO UPDATE SET project_value = EXCLUDED.project_value',
           [projectId, JSON.stringify(newState)]
         );
+        await client.query('COMMIT');
+      } catch (e) {
+        await client.query('ROLLBACK');
+        throw e;
       } finally {
         client.release();
       }

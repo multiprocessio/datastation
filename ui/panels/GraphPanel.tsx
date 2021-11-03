@@ -5,6 +5,7 @@ import log from '../../shared/log';
 import {
   GraphPanelInfo,
   GraphPanelInfoType,
+  PanelInfo,
   PanelResult,
 } from '../../shared/state';
 import { Button } from '../components/Button';
@@ -17,7 +18,7 @@ import { PanelBodyProps, PanelDetailsProps, PanelUIDetails } from './types';
 
 export function evalGraphPanel(
   panel: GraphPanelInfo,
-  panelResults: Array<PanelResult>,
+  panels: Array<PanelInfo>,
   indexIdMap: Array<string>
 ) {
   return evalColumnPanel(
@@ -25,7 +26,7 @@ export function evalGraphPanel(
     panel.graph.panelSource,
     [panel.graph.x, ...panel.graph.ys.map((y) => y.field)],
     indexIdMap,
-    panelResults
+    panels
   );
 }
 
@@ -132,6 +133,10 @@ export function GraphPanel({ panel, panels }: PanelBodyProps<GraphPanelInfo>) {
           // Pretty ridiculous there's no builtin way to set a background color
           // https://stackoverflow.com/a/38493678/1507139
           beforeDraw: function () {
+            if (!ref || !ref.current) {
+              return;
+            }
+
             ctx.save();
             ctx.fillStyle = 'white';
             ctx.fillRect(0, 0, ref.current.width, ref.current.height);
@@ -198,7 +203,8 @@ export function GraphPanelDetails({
   updatePanel,
 }: PanelDetailsProps<GraphPanelInfo>) {
   const data =
-    (panels[panel.graph.panelSource] || {}).resultMeta || new PanelResult();
+    (panels.find((p) => p.id === panel.graph.panelSource) || {}).resultMeta ||
+    new PanelResult();
 
   React.useEffect(() => {
     if (panel.graph.ys.length) {
@@ -237,7 +243,7 @@ export function GraphPanelDetails({
             currentPanel={panel.id}
             panels={panels}
             value={panel.graph.panelSource}
-            onChange={(value: number) => {
+            onChange={(value: string) => {
               panel.graph.panelSource = value;
               updatePanel(panel);
             }}
@@ -306,9 +312,9 @@ export const graphPanel: PanelUIDetails<GraphPanelInfo> = {
   label: 'Graph',
   details: GraphPanelDetails,
   body: GraphPanel,
-  alwaysOpen: true,
   previewable: false,
   factory: () => new GraphPanelInfo(),
   hasStdout: false,
   info: null,
+  dashboard: true,
 };

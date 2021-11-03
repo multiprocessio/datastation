@@ -6,13 +6,4 @@ CREATE TABLE projects (
        project_created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
-CREATE TABLE exports (
-       project_name TEXT NOT NULL REFERENCES projects(project_name),
-       export_project_pages INT[] NOT NULL,
-       export_name TEXT NOT NULL,
-       export_emails TEXT[] NOT NULL,
-       export_frequency TEXT NOT NULL,
-       export_created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
 COMMIT;
