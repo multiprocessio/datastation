@@ -3,28 +3,23 @@ const {
   ProjectPage,
   ScheduledExport,
   TablePanelInfo,
-  ProgramPanelInfo,
-  LiteralPanelInfo,
+  PanelResultMeta,
 } = require('../shared/state');
-const { main, Exporter } = require('./exporter');
+const { main, fetchAndRunAllExports, Exporter } = require('./exporter');
 
 const project = new ProjectState();
 project.pages = [new ProjectPage()];
-project.pages[0].panels = [
-  new LiteralPanelInfo({
-    content: JSON.stringify([
-      { name: 'Kay', age: 12 },
-      { name: 'Terry', age: 13 },
-    ]),
-  }),
-  new ProgramPanelInfo({
-    content: 'SELECT * FROM DM_getPanel(0)',
-    language: 'sql',
-  }),
-  new TablePanelInfo({
-    columns: ['name', 'age'],
-  }),
-];
+const tpi = new TablePanelInfo({
+  columns: ['name', 'age'],
+});
+tpi.resultMeta = new PanelResultMeta({
+  value: [
+    { name: 'Kerry', age: 44 },
+    { name: 'Monroe', age: 59 },
+  ],
+  lastRun: new Date(),
+});
+project.pages[0].panels = [tpi];
 
 project.pages[0].schedules = [
   new ScheduledExport({
@@ -69,12 +64,7 @@ test('getScheduledExports', () => {
   ]);
 });
 
-test('getRenderer', () => {
-  const e = new Exporter(null);
-  e.getRenderer();
-});
-
-describe('main', () => {
+describe('fetchAndRunAllExports', () => {
   const handlers = [
     {
       resource: 'getProjects',
@@ -84,6 +74,10 @@ describe('main', () => {
       resource: 'getProject',
       handler: () => project,
     },
+    {
+      resource: 'eval',
+      handler: () => {},
+    },
   ];
   const transport = {
     sendMail: jest.fn(),
@@ -91,9 +85,29 @@ describe('main', () => {
   const nodemailer = {
     createTransport: jest.fn(() => transport),
   };
-  main(handlers, nodemailer);
+  fetchAndRunAllExports(handlers, nodemailer, {
+    daily: true,
+    weekly: true,
+    monthly: true,
+  });
   test('createTransport calls', () =>
-    expect(nodemailer.createTransport.mock.calls.length).toBe(1));
+    expect(nodemailer.createTransport.mock.calls.length).toBe(3));
   test('transport calls', () =>
-    expect(transport.sendMail.mock.calls.length).toBe(1));
+    expect(transport.sendMail.mock.calls.length).toBe(3));
+});
+
+test('main', async () => {
+  const init = jest.fn(() => 'my handlers');
+  const run = jest.fn();
+  await main(init, run);
+  const now = new Date();
+  expect([...run.mock.calls[0]]).toStrictEqual([
+    'my handlers',
+    run.mock.calls[0][1], // nodemailer
+    {
+      daily: true,
+      weekly: now.getDay() === 1,
+      monthly: now.getDate() === 1,
+    },
+  ]);
 });

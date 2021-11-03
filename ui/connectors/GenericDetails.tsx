@@ -15,12 +15,13 @@ export interface GenericDetailsProps {
 
 export function GenericDetails(props: GenericDetailsProps) {
   const { servers, connector, updateConnector } = props;
+  const { skipDatabase, ...passalong } = props;
   return (
     <React.Fragment>
-      <Host {...props} />
-      {props.skipDatabase ? null : <Database {...props} />}
-      <Username {...props} />
-      <Password {...props} />
+      <Host {...passalong} />
+      {skipDatabase ? null : <Database {...passalong} />}
+      <Username {...passalong} />
+      <Password {...passalong} />
       <ServerPicker
         servers={servers}
         serverId={connector.serverId}

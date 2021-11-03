@@ -64,11 +64,13 @@ export class Exporter {
       });
     }
 
+    log.info('Rendering page');
     const rendered = this.getRenderer()(project, page.id);
 
     decryptFields(schedule.destination);
 
     if (schedule.destination.type === 'email') {
+      log.info('Sending email');
       const split = schedule.destination.server.split(':');
       const port = parseInt(split.length ? split.pop() : '') || 487;
       const host = split.join(':');
@@ -90,7 +92,10 @@ export class Exporter {
 
       log.info('Completed scheduled export: ' + schedule.name);
     } else {
-      log.info('Invalid schedule destination type ');
+      log.info(
+        'Invalid schedule destination type: ',
+        schedule.destination.type
+      );
     }
   }
 
@@ -117,9 +122,14 @@ export class Exporter {
   }
 }
 
-export async function main(
+export async function fetchAndRunAllExports(
   handlers: Array<RPCHandler<any, any>>,
-  n: typeof nodemailer
+  n: typeof nodemailer,
+  runPeriods: {
+    daily: boolean;
+    weekly: boolean;
+    monthly: boolean;
+  }
 ) {
   const dispatch = makeDispatch(handlers);
 
@@ -142,24 +152,35 @@ export async function main(
     });
 
     const { daily, weekly, monthly } = exporter.getScheduledExports(project);
-    daily.forEach((e) => exporter.runAndSend(dispatch, e));
+    if (runPeriods.daily) {
+      daily.forEach((e) => exporter.runAndSend(dispatch, e));
+    }
 
-    const now = new Date();
-
-    if (now.getDate() === 1) {
+    if (runPeriods.weekly) {
       weekly.forEach((e) => exporter.runAndSend(dispatch, e));
     }
 
-    if (now.getDate() === 1) {
+    if (runPeriods.monthly) {
       monthly.forEach((e) => exporter.runAndSend(dispatch, e));
     }
   }
 }
 
+// Weird but allows this to be easily unit tested.
+export async function main(
+  getHandlers: typeof init,
+  run: typeof fetchAndRunAllExports
+) {
+  const runServer = false;
+  const handlers = await getHandlers(runServer);
+  const now = new Date();
+  run(handlers, nodemailer, {
+    daily: true,
+    weekly: now.getDay() === 1,
+    monthly: now.getDate() === 1,
+  });
+}
+
 if (process.argv.some((a) => a.includes('exporter.js'))) {
-  (async function () {
-    const runServer = false;
-    const handlers = await init(runServer);
-    main(handlers, nodemailer);
-  })();
+  main(init, fetchAndRunAllExports);
 }
