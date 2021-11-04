@@ -1,14 +1,21 @@
 {
   "name": "@datastation/desktop",
+  "name": "datastation",
+  "productName": "DataStation Community Edition",
+  "license": "Apache-2.0",
+  "description": "The Data IDE for Developers",
+  "author": "DataStation Authors",
+  "main": "build/desktop.js",
   "version": "0.1.0",
   "dependencies": {
-    "electron": "^15.3.0",
     "source-map-support": "^0.5.20",
     "tweetnacl": "^1.0.3",
     "tweetnacl-util": "^0.15.1"
   },
   "devDependencies": {
+    "electron": "^15.3.0",
     "@types/electron": "^1.6.10",
-    "@types/uuid": "^8.3.1"
+    "@types/uuid": "^8.3.1",
+    "electron-packager": "^15.4.0"
   }
 }

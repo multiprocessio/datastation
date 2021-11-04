@@ -1,7 +1,7 @@
-import { app, ipcMain } from 'electron';
-import path from 'path';
 import { APP_NAME, DEBUG, VERSION } from '@datastation/shared/constants';
 import log from '@datastation/shared/log';
+import { app, ipcMain } from 'electron';
+import path from 'path';
 import { IS_DESKTOP_RUNNER } from './constants';
 import { initialize } from './initialize';
 import { configureLogger } from './log';
