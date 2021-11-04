@@ -1,6 +1,6 @@
+import { Shape } from '@multiprocess/shape';
 import subMinutes from 'date-fns/subMinutes';
 import * as React from 'react';
-import { Shape } from 'shape';
 import * as uuid from 'uuid';
 import {
   TimeSeriesFixedTimes,

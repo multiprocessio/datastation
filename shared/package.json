@@ -1,0 +1,9 @@
+{
+  "name": "@datastation/shared",
+  "private": "true",
+  "version": "0.1.0",
+  "dependencies": {
+    "@multiprocess/preview": "^0.2.3",
+    "@multiprocess/shape": "^0.2.2"
+  }
+}

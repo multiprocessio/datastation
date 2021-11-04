@@ -4,7 +4,8 @@ import {
   ScalarShape,
   Shape,
   VariedShape,
-} from 'shape';
+} from '@multiprocess/shape';
+import { Dispatch } from '../../desktop/rpc';
 import { chunk } from '../../shared/array';
 import {
   NotAnArrayOfObjectsError,
@@ -12,7 +13,6 @@ import {
 } from '../../shared/errors';
 import log from '../../shared/log';
 import { quote, QuoteType } from '../../shared/sql';
-import { Dispatch } from '../desktop/rpc';
 import { getPanelResult } from '../shared';
 
 const JSON_SQL_TYPE_MAP: Record<ScalarShape['name'], string> = {
@@ -152,8 +152,7 @@ export async function importAndRun(
       )} (${ddlColumns});`
     );
 
-    const res = await getPanelResult(dispatch, projectId, panel.id);
-    const { value } = res;
+    const { value } = await getPanelResult(dispatch, projectId, panel.id);
 
     for (const data of chunk(value, 1000)) {
       const [query, rows] = formatImportQueryAndRows(

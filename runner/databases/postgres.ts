@@ -1,7 +1,7 @@
 import { Client as PostgresClient } from 'pg';
+import { Dispatch } from '../../desktop/rpc';
 import { ANSI_SQL_QUOTE } from '../../shared/sql';
 import { DatabaseConnectorInfo } from '../../shared/state';
-import { Dispatch } from '../../desktop/rpc';
 import { importAndRun, PanelToImport } from './sqlutil';
 
 function replaceQuestionWithDollarCount(query: string) {

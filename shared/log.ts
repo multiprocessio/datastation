@@ -1,4 +1,5 @@
-import { preview } from 'preview';
+import { preview } from '@multiprocess/preview';
+
 export const logger = {
   INFO: console.log,
   ERROR: console.trace,

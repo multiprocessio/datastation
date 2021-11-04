@@ -1,5 +1,5 @@
+import { shape } from '@multiprocess/shape';
 import React from 'react';
-import { shape } from 'shape';
 import { MODE } from '../../shared/constants';
 import { LANGUAGES, SupportedLanguages } from '../../shared/languages';
 import { PanelInfo, PanelResult, ProgramPanelInfo } from '../../shared/state';

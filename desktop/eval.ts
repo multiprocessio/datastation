@@ -2,14 +2,13 @@ import { execFile } from 'child_process';
 import fs from 'fs';
 import { EOL } from 'os';
 import { file as makeTmpFile } from 'tmp-promise';
-import { Cancelled } from '../../shared/errors';
-import log from '../../shared/log';
-import { PanelBody } from '../../shared/rpc';
-import { PanelResult } from '../../shared/state';
-import { DSPROJ_FLAG, PANEL_FLAG, PANEL_META_FLAG } from '../constants';
-import { Dispatch, RPCHandler } from '../rpc';
-import { flushUnwritten } from '../store';
-import { getProjectAndPanel } from './shared';
+import { Cancelled } from '../shared/errors';
+import log from '../shared/log';
+import { PanelBody } from '../shared/rpc';
+import { PanelResult } from '../shared/state';
+import { DSPROJ_FLAG, PANEL_FLAG, PANEL_META_FLAG } from './constants';
+import { Dispatch, RPCHandler } from './rpc';
+import { flushUnwritten } from './store';
 
 const runningProcesses: Record<string, Set<number>> = {};
 
@@ -30,7 +29,7 @@ function killAllByPanelId(panelId: string) {
 }
 
 export const makeEvalHandler = (
-  subprocessEval?: string
+  runner: string
 ): RPCHandler<PanelBody, PanelResult> => ({
   resource: 'eval',
   handler: async function (
@@ -41,27 +40,21 @@ export const makeEvalHandler = (
     // Flushes desktop panel writes to disk. Not relevant in server context.
     flushUnwritten();
 
-    const { project, panel, panelPage } = await getProjectAndPanel(
-      dispatch,
-      projectId,
-      body.panelId
-    );
-
     const tmp = await makeTmpFile({ prefix: 'resultmeta-' });
     let pid = 0;
 
     try {
       // This means only one user can run a panel at a time
-      killAllByPanelId(panelId);
+      killAllByPanelId(body.panelId);
 
       const child = execFile(
         process.argv[0],
         [
-          subprocess,
+          runner,
           DSPROJ_FLAG,
-          projectName,
+          projectId,
           PANEL_FLAG,
-          panelId,
+          body.panelId,
           PANEL_META_FLAG,
           tmp.path,
         ],
@@ -71,10 +64,10 @@ export const makeEvalHandler = (
       );
 
       pid = child.pid;
-      if (!runningProcesses[panelId]) {
-        runningProcesses[panelId] = new Set();
+      if (!runningProcesses[body.panelId]) {
+        runningProcesses[body.panelId] = new Set();
       }
-      runningProcesses[panelId].add(pid);
+      runningProcesses[body.panelId].add(pid);
 
       let stderr = '';
       child.stderr.on('data', (data) => {
@@ -118,7 +111,7 @@ export const makeEvalHandler = (
     } finally {
       try {
         if (pid) {
-          runningProcesses[panelId].delete(pid);
+          runningProcesses[body.panelId].delete(pid);
         }
 
         tmp.cleanup();

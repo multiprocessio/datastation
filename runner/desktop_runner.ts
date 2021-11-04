@@ -1,62 +1,14 @@
 import fs from 'fs';
 import 'source-map-support/register';
-import {
-  DSPROJ_FLAG,
-  IS_DESKTOP_RUNNER,
-  PANEL_FLAG,
-  PANEL_META_FLAG,
-} from '../desktop/constants';
+import { IS_DESKTOP_RUNNER } from '../desktop/constants';
+import { initialize } from '../desktop/initialize';
 import { configureLogger } from '../desktop/log';
-import { openProjectHandler } from '../desktop/project';
 import { RPCHandler, RPCPayload } from '../desktop/rpc';
-import { ensureSigningKey } from '../desktop/secret';
-import { loadSettings } from '../desktop/settings';
 import { storeHandlers } from '../desktop/store';
 import { APP_NAME, DEBUG, VERSION } from '../shared/constants';
 import log from '../shared/log';
 import '../shared/polyfill';
-import { panelHandlers } from './panel';
-
-export function initialize({
-  subprocess,
-  additionalHandlers,
-}: {
-  subprocess?: string;
-  additionalHandlers?: RPCHandler<any, any>[];
-} = {}) {
-  let project = '';
-  let panel = '';
-  let panelMetaOut = '';
-  for (let i = 0; i < process.argv.length; i++) {
-    if (process.argv[i] === DSPROJ_FLAG) {
-      project = process.argv[i + 1];
-      continue;
-    }
-
-    if (process.argv[i] === PANEL_FLAG) {
-      panel = process.argv[i + 1];
-      continue;
-    }
-
-    if (process.argv[i] === PANEL_META_FLAG) {
-      panelMetaOut = process.argv[i + 1];
-      continue;
-    }
-  }
-
-  ensureSigningKey();
-
-  const settings = loadSettings();
-
-  const handlers: RPCHandler<any, any>[] = [
-    ...panelHandlers(subprocess),
-    openProjectHandler,
-    settings.getUpdateHandler(),
-    ...additionalHandlers,
-  ];
-
-  return { settings, handlers, project, panel, panelMetaOut };
-}
+import { evalHandler } from './eval';
 
 export async function main(additionalHandlers?: RPCHandler<any, any>[]) {
   // These throws are very important! Otherwise the runner will just hang.
@@ -69,7 +21,8 @@ export async function main(additionalHandlers?: RPCHandler<any, any>[]) {
 
   try {
     const { project, handlers, panel, panelMetaOut } = initialize({
-      additionalHandlers,
+      runner: '',
+      additionalHandlers: [...(additionalHandlers || []), evalHandler],
     });
     if (!project) {
       throw new Error('No project given.');

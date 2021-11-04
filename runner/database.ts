@@ -1,3 +1,5 @@
+import { Dispatch } from '../desktop/rpc';
+import { decryptFields } from '../desktop/secret';
 import log from '../shared/log';
 import {
   DatabaseConnectorInfo,
@@ -6,8 +8,6 @@ import {
   ProjectState,
 } from '../shared/state';
 import { fullHttpURL } from '../shared/url';
-import { Dispatch } from '../desktop/rpc';
-import { decryptFields } from '../desktop/secret';
 import { evalClickHouse } from './databases/clickhouse';
 import { evalElasticsearch } from './databases/elasticsearch';
 import { evalInflux } from './databases/influx';

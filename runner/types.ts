@@ -1,4 +1,4 @@
-import { Shape } from 'shape';
+import { Shape } from '@multiprocess/shape';
 import { PanelInfo, PanelInfoType } from '../shared/state';
 
 export type EvalHandlerResponse = {

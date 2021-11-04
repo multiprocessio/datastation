@@ -1,5 +1,5 @@
+import { ArrayShape, ObjectShape, Shape, shape } from '@multiprocess/shape';
 import React from 'react';
-import { ArrayShape, ObjectShape, Shape, shape } from 'shape';
 import { MODE } from '../../shared/constants';
 import { InvalidDependentPanelError } from '../../shared/errors';
 import { LANGUAGES } from '../../shared/languages';

@@ -1,16 +1,9 @@
-import { initialize as initializeBase, main } from '../desktop/runner';
 import { App } from '../server/app';
 import { readConfig } from '../server/config';
 import { getProjectHandlers } from '../server/project';
 import { APP_NAME, DEBUG, VERSION } from '../shared/constants';
 import log from '../shared/log';
-
-export function initialize(app: App, args: { subprocess: string }) {
-  return initializeBase({
-    ...args,
-    additionalHandlers: getProjectHandlers(app),
-  });
-}
+import { main } from './desktop_runner';
 
 async function run() {
   const config = await readConfig();

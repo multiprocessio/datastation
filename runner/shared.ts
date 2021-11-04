@@ -1,5 +1,5 @@
-import { PanelInfo, PanelResult, ProjectState } from '../shared/state';
 import { Dispatch } from '../desktop/rpc';
+import { PanelInfo, PanelResult, ProjectState } from '../shared/state';
 
 export async function getProjectAndPanel(
   dispatch: Dispatch,

@@ -1,0 +1,20 @@
+{
+  "name": "@datastation/server",
+  "version": "0.1.0",
+  "dependencies": {
+    "cookie-parser": "^1.4.5",
+    "express": "^4.17.1",
+    "express-session": "^1.17.2",
+    "jsdom": "^18.0.1",
+    "json5": "^2.2.0",
+    "openid-client": "^5.0.2",
+    "passport": "^0.5.0",
+    "pg": "^8.7.1"
+  },
+  "devDependencies": {
+    "@types/cookie-parser": "^1.4.2",
+    "@types/express": "^4.17.13",
+    "@types/express-session": "^1.17.4",
+    "@types/pg": "^8.6.1"
+  }
+}

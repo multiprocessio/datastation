@@ -3,10 +3,10 @@ import path from 'path';
 import { APP_NAME, DEBUG, VERSION } from '../shared/constants';
 import log from '../shared/log';
 import { IS_DESKTOP_RUNNER } from './constants';
+import { initialize } from './initialize';
 import { configureLogger } from './log';
 import { openWindow } from './project';
 import { registerRPCHandlers } from './rpc';
-import { initialize } from './runner';
 import { flushUnwritten, storeHandlers } from './store';
 
 function main() {
@@ -26,7 +26,7 @@ function main() {
   if (app) {
     app.whenReady().then(async () => {
       const { handlers, project } = initialize({
-        subprocess: path.join(__dirname, 'desktop_runner.js'),
+        runner: path.join(__dirname, 'desktop_runner.js'),
         additionalHandlers: storeHandlers,
       });
 

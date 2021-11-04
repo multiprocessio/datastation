@@ -1,4 +1,5 @@
 import { file as makeTmpFile } from 'tmp-promise';
+import { Dispatch } from '../desktop/rpc';
 import log from '../shared/log';
 import { buildSQLiteQuery } from '../shared/sql';
 import {
@@ -8,7 +9,6 @@ import {
   PanelInfo,
   ProjectState,
 } from '../shared/state';
-import { Dispatch } from '../desktop/rpc';
 import { evalDatabase } from './database';
 import { EvalHandlerExtra, guardPanel } from './types';
 

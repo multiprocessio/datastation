@@ -1,7 +1,7 @@
 import mysql from 'mysql2/promise';
+import { Dispatch } from '../../desktop/rpc';
 import { MYSQL_QUOTE } from '../../shared/sql';
 import { DatabaseConnectorInfo } from '../../shared/state';
-import { Dispatch } from '../../desktop/rpc';
 import { importAndRun, PanelToImport } from './sqlutil';
 
 export async function evalMySQL(

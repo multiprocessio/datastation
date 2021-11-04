@@ -1,4 +1,4 @@
-import { Shape } from 'shape';
+import { Shape } from '@multiprocess/shape';
 import * as uuid from 'uuid';
 import { VERSION } from './constants';
 import { SupportedLanguages } from './languages';

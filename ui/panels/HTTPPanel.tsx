@@ -1,6 +1,6 @@
-import { preview } from 'preview';
+import { preview } from '@multiprocess/preview';
+import { shape } from '@multiprocess/shape';
 import * as React from 'react';
-import { shape } from 'shape';
 import { MODE, MODE_FEATURES } from '../../shared/constants';
 import { request } from '../../shared/http';
 import {

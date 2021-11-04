@@ -1,5 +1,5 @@
-const { shape } = require('shape');
-const { preview } = require('preview');
+const { shape } = require('@multiprocess/shape');
+const { preview } = require('@multiprocess/preview');
 const {
   ProjectState,
   ProjectPage,

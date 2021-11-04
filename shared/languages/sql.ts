@@ -1,5 +1,5 @@
+import { preview } from '@multiprocess/preview';
 import alasql from 'alasql';
-import { preview } from 'preview';
 import { v4 as uuidv4 } from 'uuid';
 import { InvalidDependentPanelError } from '../errors';
 import log from '../log';

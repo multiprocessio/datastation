@@ -1,5 +1,5 @@
+import { preview } from '@multiprocess/preview';
 import circularSafeStringify from 'json-stringify-safe';
-import { preview } from 'preview';
 import { InvalidDependentPanelError, NoResultError } from '../errors';
 import log from '../log';
 import { deepClone, windowOrGlobal } from '../object';

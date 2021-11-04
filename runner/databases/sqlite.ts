@@ -2,13 +2,13 @@ import * as sqlite from 'sqlite';
 import sqlite3 from 'sqlite3';
 import Client from 'ssh2-sftp-client';
 import { file as makeTmpFile } from 'tmp-promise';
+import { Dispatch } from '../../desktop/rpc';
 import { ANSI_SQL_QUOTE } from '../../shared/sql';
 import {
   DatabaseConnectorInfo,
   DatabasePanelInfo,
   ProjectState,
 } from '../../shared/state';
-import { Dispatch } from '../desktop/rpc';
 import { getSSHConfig } from '../tunnel';
 import { importAndRun, PanelToImport } from './sqlutil';
 

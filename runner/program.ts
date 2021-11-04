@@ -3,11 +3,11 @@ import fs from 'fs';
 import { EOL } from 'os';
 import path from 'path';
 import { file as makeTmpFile } from 'tmp-promise';
+import { SETTINGS } from '../desktop/settings';
+import { getProjectResultsFile } from '../desktop/store';
 import { InvalidDependentPanelError, NoResultError } from '../shared/errors';
 import { LANGUAGES } from '../shared/languages';
 import { PanelInfo, ProgramPanelInfo, ProjectState } from '../shared/state';
-import { SETTINGS } from '../desktop/settings';
-import { getProjectResultsFile } from '../desktop/store';
 import { EvalHandlerExtra, EvalHandlerResponse, guardPanel } from './types';
 
 export async function evalProgram(

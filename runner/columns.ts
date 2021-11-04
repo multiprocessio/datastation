@@ -1,5 +1,4 @@
-import fs from 'fs';
-import { PanelBody } from '../shared/rpc';
+import { Dispatch } from '../desktop/rpc';
 import {
   GraphPanelInfo,
   LiteralPanelInfo,
@@ -9,9 +8,7 @@ import {
 } from '../shared/state';
 import { columnsFromObject } from '../shared/table';
 import { parseArrayBuffer } from '../shared/text';
-import { Dispatch, RPCHandler } from '../desktop/rpc';
-import { getProjectResultsFile } from '../desktop/store';
-import { getPanelResult, getProjectAndPanel } from './shared';
+import { getPanelResult } from './shared';
 import { EvalHandlerExtra, EvalHandlerResponse, guardPanel } from './types';
 
 export async function evalColumns(
@@ -62,25 +59,3 @@ export async function evalLiteral(
   } = guardPanel<LiteralPanelInfo>(panel, 'literal');
   return await parseArrayBuffer(contentTypeInfo, '', panel.content);
 }
-
-export const fetchResultsHandler: RPCHandler<PanelBody, EvalHandlerResponse> = {
-  resource: 'fetchResults',
-  handler: async function (
-    projectId: string,
-    body: PanelBody,
-    dispatch: Dispatch
-  ): Promise<EvalHandlerResponse> {
-    const { panel } = await getProjectAndPanel(
-      dispatch,
-      projectId,
-      body.panelId
-    );
-
-    // Maybe the only appropriate place to call this in this package?
-    const projectResultsFile = getProjectResultsFile(projectId);
-    const f = fs.readFileSync(projectResultsFile + panel.id);
-
-    // Everything gets stored as JSON on disk. Even literals and files get rewritten as JSON.
-    return { value: JSON.parse(f.toString()) };
-  },
-};

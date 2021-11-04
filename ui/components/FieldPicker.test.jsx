@@ -1,4 +1,4 @@
-const { shape } = require('shape');
+const { shape } = require('@multiprocess/shape');
 const { orderedObjectFields } = require('./FieldPicker');
 
 const sample1 = shape({

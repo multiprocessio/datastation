@@ -1,5 +1,10 @@
+import {
+  ArrayShape,
+  ObjectShape,
+  ScalarShape,
+  Shape,
+} from '@multiprocess/shape';
 import * as React from 'react';
-import { ArrayShape, ObjectShape, ScalarShape, Shape } from 'shape';
 import { title } from '../../shared/text';
 import { Button } from './Button';
 import { Input } from './Input';
