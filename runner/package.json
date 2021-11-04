@@ -22,6 +22,7 @@
   "devDependencies": {
     "@types/jsesc": "^3.0.1",
     "@types/mssql": "^7.1.4",
-    "@types/ssh2-sftp-client": "^7.0.0"
+    "@types/ssh2-sftp-client": "^7.0.0",
+    "pkg": "^5.4.1"
   }
 }
