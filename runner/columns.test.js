@@ -1,6 +1,6 @@
 const { getProjectResultsFile } = require('@datastation/desktop/store');
-const { shape } = require('shape');
-const { preview } = require('preview');
+const { shape } = require('@multiprocess/shape');
+const { preview } = require('@multiprocess/preview');
 const fs = require('fs');
 const { file: makeTmpFile } = require('tmp-promise');
 const {

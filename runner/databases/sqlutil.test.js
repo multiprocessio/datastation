@@ -1,6 +1,6 @@
 const { getProjectResultsFile } = require('../../desktop/store');
 const fs = require('fs');
-const { shape } = require('shape');
+const { shape } = require('@multiprocess/shape');
 const { MYSQL_QUOTE, ANSI_SQL_QUOTE } = require('@datastation/shared/sql');
 const {
   importAndRun,

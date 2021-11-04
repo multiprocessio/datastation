@@ -1,3 +1,3 @@
-require('./runner');
+require('./server_runner');
 
 test('stub', () => {});

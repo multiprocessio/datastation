@@ -14,7 +14,11 @@ module.exports = {
   preset: 'ts-jest/presets/js-with-ts',
   transformIgnorePatterns: [
     'node_modules/(?!react-syntax-highlighter|refractor|node-fetch|fetch-blob)',
+    //'@datastation/.+\\.(j|t)sx?$'
   ],
+  moduleNameMapper: {
+    '^@datastation/(.*)$': '<rootDir>/$1/'
+  },
   setupFiles: ['./shared/polyfill.ts', './testsetup.js'],
   testURL: 'http://localhost/',
   testEnvironment: 'node',
@@ -23,8 +27,9 @@ module.exports = {
     'ui/**/*.tsx',
     'shared/**/*.ts',
     'desktop/**/*.ts',
+    'runner/**/*.ts',
     'server/**/*.ts',
     'server/**/*.tsx',
   ],
-  modulePathIgnorePatterns: ['<rootDir>/releases/', '<rootDir>/build/'],
+  modulePathIgnorePatterns: ['<rootDir>/releases/', '<rootDir>/build/', 'ui/build/', 'desktop/build/'],
 };

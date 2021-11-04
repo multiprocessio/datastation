@@ -12,9 +12,9 @@
     "tweetnacl-util": "^0.15.1"
   },
   "devDependencies": {
-    "electron": "^15.3.0",
     "@types/electron": "^1.6.10",
     "@types/uuid": "^8.3.1",
+    "electron": "^15.3.0",
     "electron-packager": "^15.4.0"
   }
 }
