@@ -6,7 +6,6 @@
     "@datastation/shared": "./shared",
     "@multiprocess/preview": "^0.2.3",
     "@multiprocess/shape": "^0.2.2",
-    "alasql": "^1.7.3",
     "chart.js": "^3.6.0",
     "date-fns": "^2.25.0",
     "lodash.debounce": "^4.0.8",
@@ -16,8 +15,7 @@
     "react-dom": "^17.0.2",
     "react-syntax-highlighter": "^15.4.4",
     "refractor": "^4.2.1",
-    "uuid": "^8.3.2",
-    "xlsx": "^0.17.3"
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "@multiprocess/cssplus": "^0.4.0",

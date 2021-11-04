@@ -4,7 +4,8 @@
   "version": "0.1.0",
   "dependencies": {
     "@multiprocess/preview": "^0.2.3",
-    "@multiprocess/shape": "^0.2.2"
+    "@multiprocess/shape": "^0.2.2",
+    "alasql": "^1.7.3"
   },
   "devDependencies": {
     "@types/uuid": "^8.3.1"
