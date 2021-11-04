@@ -2,20 +2,24 @@
   "name": "@datastation/runner",
   "version": "0.1.0",
   "dependencies": {
+    "@dsnp/parquetjs": "^1.1.2",
     "@elastic/elasticsearch": "^7.15.0",
     "clickhouse": "^2.4.2",
     "jsesc": "^3.0.2",
+    "mssql": "^7.2.1",
     "mssql2": "^3.3.1",
-    "mysql": "^2.18.1",
+    "mysql2": "^2.3.2",
     "node-fetch": "^3.0.0",
     "pg": "^8.7.1",
     "sqlite": "^4.0.23",
     "sqlite3": "^5.0.2",
     "ssh2": "^1.5.0",
+    "ssh2-promise": "^1.0.2",
     "ssh2-sftp-client": "^7.1.0",
     "tmp-promise": "^3.0.3"
   },
   "devDependencies": {
+    "@types/jsesc": "^3.0.1",
     "@types/mssql": "^7.1.4",
     "@types/ssh2-sftp-client": "^7.0.0"
   }

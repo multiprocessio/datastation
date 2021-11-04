@@ -1,13 +1,11 @@
 mkdir build
 
-cd ui
-
 # This is overwritten in production builds
 setenv_default UI_ESBUILD_ARGS ""
-yarn esbuild --target=es2020,chrome90,firefox90,safari13,edge90 index.tsx --loader:.ts=tsx --loader:.js=jsx "--external:fs" --bundle --sourcemap {UI_ESBUILD_ARGS} --outfile=../build/ui.js
+yarn esbuild --target=es2020,chrome90,firefox90,safari13,edge90 ui/index.tsx --loader:.ts=tsx --loader:.js=jsx "--external:fs" --bundle --sourcemap {UI_ESBUILD_ARGS} --outfile=./build/ui.js
 
 setenv_default UI_CONFIG_OVERRIDES ""
-prepend {UI_CONFIG_OVERRIDES} ../build/ui.js
+prepend {UI_CONFIG_OVERRIDES} ./build/ui.js
 
-cp index.html ../build
-node ./scripts/css.js ./style.css ../build/style.css
+cp ./ui/index.html ./build
+node ./ui/scripts/css.js ./ui/style.css ./build/style.css

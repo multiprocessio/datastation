@@ -7,7 +7,8 @@
     "typecheck": "yarn tsc",
     "build-desktop": "python3 ./scripts/build.py ./desktop/scripts/desktop.build",
     "build-ui": "python3 ./scripts/build.py ./ui/scripts/ui.build",
-    "build-server": "python3 ./scripts/build.py ./server/scripts/server.build",
+      "build-server": "python3 ./scripts/build.py ./server/scripts/server.build",
+      "build-runners": "python3 ./scripts/build.py ./runner/scripts/runner.build",
     "start-server": "yarn build-server && node ./build/server.js",
     "start-desktop": "yarn build-desktop && yarn electron --trace-warning --unhandled-rejection=strict build/desktop.js",
     "start-ui": "./ui/scripts/watch_and_serve.sh",
@@ -27,8 +28,9 @@
     "runner"
   ],
   "dependencies": {
+    "esbuild": "^0.13.12",
     "prettier": "^2.4.1",
-    "typescript": "^4.4.4",
-    "prettier-plugin-organize-imports": "^2.3.4"
+    "prettier-plugin-organize-imports": "^2.3.4",
+    "typescript": "^4.4.4"
   }
 }

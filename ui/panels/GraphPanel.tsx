@@ -1,5 +1,5 @@
 import { preview } from '@multiprocess/preview';
-import Chart from 'chart.js';
+import Chart from 'chart.js/auto';
 import * as React from 'react';
 import log from '../../shared/log';
 import {
