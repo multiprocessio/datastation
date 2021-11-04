@@ -1,9 +1,9 @@
+import { MODE } from '@datastation/shared/constants';
+import { FilePanelInfo, PanelResult } from '@datastation/shared/state';
+import { parseArrayBuffer } from '@datastation/shared/text';
 import { preview } from '@multiprocess/preview';
 import { shape } from '@multiprocess/shape';
 import * as React from 'react';
-import { MODE } from '../../shared/constants';
-import { FilePanelInfo, PanelResult } from '../../shared/state';
-import { parseArrayBuffer } from '../../shared/text';
 import { panelRPC } from '../asyncRPC';
 import { ContentTypePicker } from '../components/ContentTypePicker';
 import { FileInput } from '../components/FileInput';

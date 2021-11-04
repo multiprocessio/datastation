@@ -1,4 +1,4 @@
-import { DatabaseConnectorInfoType } from '../../shared/state';
+import { DatabaseConnectorInfoType } from '@datastation/shared/state';
 import { ElasticsearchDetails } from './ElasticsearchDetails';
 import { GenericDetails, GenericNoDatabaseDetails } from './GenericDetails';
 import { SnowflakeDetails } from './SnowflakeDetails';

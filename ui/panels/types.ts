@@ -4,7 +4,7 @@ import {
   PanelInfoType,
   PanelResult,
   ServerInfo,
-} from '../../shared/state';
+} from '@datastation/shared/state';
 
 export interface PanelDetailsProps<T extends PanelInfo> {
   panel: T;

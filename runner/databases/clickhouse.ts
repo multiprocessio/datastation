@@ -1,6 +1,6 @@
+import { DatabaseConnectorInfo } from '@datastation/shared/state';
+import { fullHttpURL } from '@datastation/shared/url';
 import { ClickHouse } from 'clickhouse';
-import { DatabaseConnectorInfo } from '../../shared/state';
-import { fullHttpURL } from '../../shared/url';
 
 export async function evalClickHouse(
   content: string,

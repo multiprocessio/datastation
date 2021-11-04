@@ -1,4 +1,4 @@
-const { getProjectResultsFile } = require('../desktop/store');
+const { getProjectResultsFile } = require('@datastation/desktop/store');
 const { shape } = require('shape');
 const { preview } = require('preview');
 const fs = require('fs');
@@ -8,7 +8,7 @@ const {
   ProjectPage,
   LiteralPanelInfo,
   TablePanelInfo,
-} = require('../../shared/state');
+} = require('@datastation/shared/state');
 const { makeEvalHandler } = require('./eval');
 const { fetchResultsHandler } = require('./columns');
 

@@ -1,7 +1,7 @@
 const React = require('react');
 const enzyme = require('enzyme');
-const { DatabaseConnectorInfo } = require('../../shared/state');
-const { wait } = require('../../shared/promise');
+const { DatabaseConnectorInfo } = require('@datastation/shared/state');
+const { wait } = require('@datastation/shared/promise');
 const { Database } = require('./Database');
 const { INPUT_SYNC_PERIOD } = require('../components/Input');
 

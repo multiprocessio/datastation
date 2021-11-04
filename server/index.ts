@@ -1,4 +1,4 @@
-import { APP_NAME, DEBUG, VERSION } from '../shared/constants';
+import { APP_NAME, DEBUG, VERSION } from '@datastation/shared/constants';
 import { init } from './app';
 import log from './log';
 

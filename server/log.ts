@@ -1,4 +1,4 @@
-import log from '../shared/log';
+import log from '@datastation/shared/log';
 
 export default {
   ...log,

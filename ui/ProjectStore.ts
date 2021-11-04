@@ -1,11 +1,11 @@
-import * as React from 'react';
 import {
   GetProjectRequest,
   GetProjectResponse,
   UpdateProjectRequest,
   UpdateProjectResponse,
-} from '../shared/rpc';
-import { ProjectState } from '../shared/state';
+} from '@datastation/shared/rpc';
+import { ProjectState } from '@datastation/shared/state';
+import * as React from 'react';
 import { asyncRPC } from './asyncRPC';
 
 // This will store X copies of the entire state. Project state

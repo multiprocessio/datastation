@@ -1,5 +1,5 @@
+import { VERSION } from '@datastation/shared/constants';
 import React from 'react';
-import { VERSION } from '../../shared/constants';
 
 export function Version() {
   return <div className="version">{VERSION}</div>;

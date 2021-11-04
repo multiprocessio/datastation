@@ -7,7 +7,7 @@ const {
   ProjectPage,
   LiteralPanelInfo,
   TablePanelInfo,
-} = require('../../shared/state');
+} = require('@datastation/shared/state');
 const { TablePanel, TablePanelDetails } = require('./TablePanel');
 
 const project = new ProjectState();

@@ -1,15 +1,15 @@
-import { preview } from '@multiprocess/preview';
-import { shape } from '@multiprocess/shape';
-import * as React from 'react';
-import { MODE } from '../../shared/constants';
-import { InvalidDependentPanelError } from '../../shared/errors';
+import { MODE } from '@datastation/shared/constants';
+import { InvalidDependentPanelError } from '@datastation/shared/errors';
 import {
   PanelInfo,
   PanelResult,
   TableColumn,
   TablePanelInfo,
-} from '../../shared/state';
-import { columnsFromObject } from '../../shared/table';
+} from '@datastation/shared/state';
+import { columnsFromObject } from '@datastation/shared/table';
+import { preview } from '@multiprocess/preview';
+import { shape } from '@multiprocess/shape';
+import * as React from 'react';
 import { panelRPC } from '../asyncRPC';
 import { Alert } from '../components/Alert';
 import { Button } from '../components/Button';

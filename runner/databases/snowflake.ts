@@ -1,4 +1,4 @@
-import { DatabaseConnectorInfo } from '../../shared/state';
+import { DatabaseConnectorInfo } from '@datastation/shared/state';
 
 export async function evalSnowflake(
   content: string,

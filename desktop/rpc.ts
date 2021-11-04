@@ -1,6 +1,8 @@
-import { IpcMain, IpcMainEvent } from 'electron';
-import { RPC_ASYNC_REQUEST, RPC_ASYNC_RESPONSE } from '../shared/constants';
-import log from '../shared/log';
+import {
+  RPC_ASYNC_REQUEST,
+  RPC_ASYNC_RESPONSE,
+} from '@datastation/shared/constants';
+import log from '@datastation/shared/log';
 import {
   Endpoint,
   GetProjectRequest,
@@ -10,7 +12,8 @@ import {
   MakeProjectResponse,
   UpdateProjectRequest,
   UpdateProjectResponse,
-} from '../shared/rpc';
+} from '@datastation/shared/rpc';
+import { IpcMain, IpcMainEvent } from 'electron';
 
 export interface RPCPayload {
   messageNumber: number;

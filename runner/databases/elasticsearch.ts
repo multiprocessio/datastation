@@ -1,12 +1,12 @@
-import { Client, ClientOptions } from '@elastic/elasticsearch';
-import log from '../../shared/log';
-import { timestampsFromRange } from '../../shared/sql';
+import log from '@datastation/shared/log';
+import { timestampsFromRange } from '@datastation/shared/sql';
 import {
   DatabaseConnectorInfo,
   DatabasePanelInfo,
   TimeSeriesRange,
-} from '../../shared/state';
-import { fullHttpURL } from '../../shared/url';
+} from '@datastation/shared/state';
+import { fullHttpURL } from '@datastation/shared/url';
+import { Client, ClientOptions } from '@elastic/elasticsearch';
 import { EvalHandlerResponse } from '../types';
 
 export async function evalElasticsearch(

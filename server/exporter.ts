@@ -1,10 +1,17 @@
+import { RPCHandler } from '@datastation/desktop/rpc';
+import { decryptFields } from '@datastation/desktop/secret';
+import { APP_NAME, DEBUG, VERSION } from '@datastation/shared/constants';
+import {
+  GetProjectsRequest,
+  GetProjectsResponse,
+} from '@datastation/shared/rpc';
+import {
+  ProjectPage,
+  ProjectState,
+  ScheduledExport,
+} from '@datastation/shared/state';
 import { JSDOM } from 'jsdom';
 import nodemailer from 'nodemailer';
-import { RPCHandler } from '../desktop/rpc';
-import { decryptFields } from '../desktop/secret';
-import { APP_NAME, DEBUG, VERSION } from '../shared/constants';
-import { GetProjectsRequest, GetProjectsResponse } from '../shared/rpc';
-import { ProjectPage, ProjectState, ScheduledExport } from '../shared/state';
 import { init } from './app';
 import log from './log';
 import { makeDispatch } from './rpc';

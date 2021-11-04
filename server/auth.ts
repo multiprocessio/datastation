@@ -1,3 +1,4 @@
+import { SITE_ROOT } from '@datastation/shared/constants';
 import express from 'express';
 import session from 'express-session';
 import {
@@ -7,7 +8,6 @@ import {
   TokenSet,
 } from 'openid-client';
 import passport from 'passport';
-import { SITE_ROOT } from '../shared/constants';
 import { App } from './app';
 import { Config } from './config';
 import log from './log';

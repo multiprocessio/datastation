@@ -2,6 +2,7 @@
   "name": "@datastation/runner",
   "version": "0.1.0",
   "dependencies": {
+    "@datastation/desktop": "./desktop",
     "@dsnp/parquetjs": "^1.1.2",
     "@elastic/elasticsearch": "^7.15.0",
     "clickhouse": "^2.4.2",

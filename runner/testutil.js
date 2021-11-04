@@ -1,11 +1,11 @@
 const { spawnSync } = require('child_process');
 const fs = require('fs');
 const { file: makeTmpFile } = require('tmp-promise');
-const { ProjectState, ProjectPage } = require('../../shared/state');
+const { ProjectState, ProjectPage } = require('@datastation/shared/state');
 const {
   getProjectResultsFile,
   updateProjectHandler,
-} = require('../desktop/store');
+} = require('@datastation/desktop/store');
 const { makeEvalHandler } = require('./eval');
 const { fetchResultsHandler } = require('./columns');
 

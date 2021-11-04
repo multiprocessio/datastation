@@ -1,5 +1,5 @@
+import { ProjectState, ScheduledExport } from '@datastation/shared/state';
 import React from 'react';
-import { ProjectState, ScheduledExport } from '../../shared/state';
 import { Button } from '../components/Button';
 import { ProjectContext } from '../ProjectStore';
 import { UrlState, UrlStateContext } from '../urlState';

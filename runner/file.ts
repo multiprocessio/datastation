@@ -1,7 +1,11 @@
+import {
+  FilePanelInfo,
+  PanelInfo,
+  ProjectState,
+} from '@datastation/shared/state';
+import { parseArrayBuffer } from '@datastation/shared/text';
 import fs from 'fs';
 import Client from 'ssh2-sftp-client';
-import { FilePanelInfo, PanelInfo, ProjectState } from '../shared/state';
-import { parseArrayBuffer } from '../shared/text';
 import { additionalParsers } from './http';
 import { getSSHConfig, resolvePath } from './tunnel';
 import { EvalHandlerResponse, guardPanel } from './types';

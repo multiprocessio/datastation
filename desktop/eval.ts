@@ -1,11 +1,11 @@
+import { Cancelled } from '@datastation/shared/errors';
+import log from '@datastation/shared/log';
+import { PanelBody } from '@datastation/shared/rpc';
+import { PanelResult } from '@datastation/shared/state';
 import { execFile } from 'child_process';
 import fs from 'fs';
 import { EOL } from 'os';
 import { file as makeTmpFile } from 'tmp-promise';
-import { Cancelled } from '../shared/errors';
-import log from '../shared/log';
-import { PanelBody } from '../shared/rpc';
-import { PanelResult } from '../shared/state';
 import { DSPROJ_FLAG, PANEL_FLAG, PANEL_META_FLAG } from './constants';
 import { Dispatch, RPCHandler } from './rpc';
 import { flushUnwritten } from './store';

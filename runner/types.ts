@@ -1,5 +1,5 @@
+import { PanelInfo, PanelInfoType } from '@datastation/shared/state';
 import { Shape } from '@multiprocess/shape';
-import { PanelInfo, PanelInfoType } from '../shared/state';
 
 export type EvalHandlerResponse = {
   returnValue?: boolean;

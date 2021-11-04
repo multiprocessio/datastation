@@ -1,5 +1,5 @@
-import { MODE } from '../../shared/constants';
-import { PanelInfoType } from '../../shared/state';
+import { MODE } from '@datastation/shared/constants';
+import { PanelInfoType } from '@datastation/shared/state';
 import { databasePanel } from './DatabasePanel';
 import { filePanel } from './FilePanel';
 import { filaggPanel } from './FilterAggregatePanel';

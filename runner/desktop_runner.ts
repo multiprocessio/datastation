@@ -1,13 +1,13 @@
+import { IS_DESKTOP_RUNNER } from '@datastation/desktop/constants';
+import { initialize } from '@datastation/desktop/initialize';
+import { configureLogger } from '@datastation/desktop/log';
+import { RPCHandler, RPCPayload } from '@datastation/desktop/rpc';
+import { storeHandlers } from '@datastation/desktop/store';
+import { APP_NAME, DEBUG, VERSION } from '@datastation/shared/constants';
+import log from '@datastation/shared/log';
+import '@datastation/shared/polyfill';
 import fs from 'fs';
 import 'source-map-support/register';
-import { IS_DESKTOP_RUNNER } from '../desktop/constants';
-import { initialize } from '../desktop/initialize';
-import { configureLogger } from '../desktop/log';
-import { RPCHandler, RPCPayload } from '../desktop/rpc';
-import { storeHandlers } from '../desktop/store';
-import { APP_NAME, DEBUG, VERSION } from '../shared/constants';
-import log from '../shared/log';
-import '../shared/polyfill';
 import { evalHandler } from './eval';
 
 export async function main(additionalHandlers?: RPCHandler<any, any>[]) {

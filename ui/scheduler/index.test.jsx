@@ -7,7 +7,7 @@ const {
   ProjectPage,
   ScheduledExport,
   TablePanelInfo,
-} = require('../../shared/state');
+} = require('@datastation/shared/state');
 const { SchedulerWithDeps } = require('./index');
 
 const project = new ProjectState();

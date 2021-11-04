@@ -1,8 +1,8 @@
+import { LANGUAGES, SupportedLanguages } from '@datastation/shared/languages';
+import log from '@datastation/shared/log';
+import { mergeDeep } from '@datastation/shared/object';
 import fs from 'fs';
 import * as uuid from 'uuid';
-import { LANGUAGES, SupportedLanguages } from '../shared/languages';
-import log from '../shared/log';
-import { mergeDeep } from '../shared/object';
 import { ensureFile } from './fs';
 import { RPCHandler } from './rpc';
 

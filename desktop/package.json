@@ -1,6 +1,5 @@
 {
   "name": "@datastation/desktop",
-  "name": "datastation",
   "productName": "DataStation Community Edition",
   "license": "Apache-2.0",
   "description": "The Data IDE for Developers",

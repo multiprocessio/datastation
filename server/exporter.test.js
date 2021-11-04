@@ -4,7 +4,7 @@ const {
   ScheduledExport,
   TablePanelInfo,
   PanelResultMeta,
-} = require('../shared/state');
+} = require('@datastation/shared/state');
 const { main, fetchAndRunAllExports, Exporter } = require('./exporter');
 
 const project = new ProjectState();

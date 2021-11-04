@@ -1,8 +1,12 @@
+import { MODE } from '@datastation/shared/constants';
+import { LANGUAGES, SupportedLanguages } from '@datastation/shared/languages';
+import {
+  PanelInfo,
+  PanelResult,
+  ProgramPanelInfo,
+} from '@datastation/shared/state';
 import { shape } from '@multiprocess/shape';
 import React from 'react';
-import { MODE } from '../../shared/constants';
-import { LANGUAGES, SupportedLanguages } from '../../shared/languages';
-import { PanelInfo, PanelResult, ProgramPanelInfo } from '../../shared/state';
 import { panelRPC } from '../asyncRPC';
 import { CodeEditor } from '../components/CodeEditor';
 import { Select } from '../components/Select';

@@ -1,7 +1,7 @@
 const {
   RPC_ASYNC_REQUEST,
   RPC_ASYNC_RESPONSE,
-} = require('../shared/constants');
+} = require('@datastation/shared/constants');
 const { registerRPCHandlers } = require('./rpc');
 
 test('registers handlers', async () => {

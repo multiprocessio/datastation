@@ -1,7 +1,11 @@
+import { MODE_FEATURES } from '@datastation/shared/constants';
+import '@datastation/shared/polyfill';
+import {
+  ConnectorInfo,
+  ProjectPage,
+  ServerInfo,
+} from '@datastation/shared/state';
 import * as React from 'react';
-import { MODE_FEATURES } from '../shared/constants';
-import '../shared/polyfill';
-import { ConnectorInfo, ProjectPage, ServerInfo } from '../shared/state';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { Loading } from './components/Loading';
 import { Version } from './components/Version';

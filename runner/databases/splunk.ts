@@ -1,4 +1,7 @@
-import { DatabaseConnectorInfo, TimeSeriesRange } from '../../shared/state';
+import {
+  DatabaseConnectorInfo,
+  TimeSeriesRange,
+} from '@datastation/shared/state';
 import { EvalHandlerResponse } from '../types';
 
 export async function evalSplunk(

@@ -3,7 +3,7 @@ const {
   PanelResultMeta,
   ProjectPage,
   TablePanelInfo,
-} = require('../shared/state');
+} = require('@datastation/shared/state');
 const { renderPage } = require('./exportRenderer');
 
 const project = new ProjectState();

@@ -1,5 +1,5 @@
+import { ProjectPage } from '@datastation/shared/state';
 import React from 'react';
-import { ProjectPage } from '../../shared/state';
 import { Button } from '../components/Button';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import { Select } from '../components/Select';

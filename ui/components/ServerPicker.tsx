@@ -1,5 +1,5 @@
+import { ServerInfo } from '@datastation/shared/state';
 import * as React from 'react';
-import { ServerInfo } from '../../shared/state';
 import { FormGroup } from './FormGroup';
 import { Select } from './Select';
 

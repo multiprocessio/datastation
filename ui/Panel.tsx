@@ -1,19 +1,19 @@
+import { MODE, MODE_FEATURES } from '@datastation/shared/constants';
+import log from '@datastation/shared/log';
+import { deepEquals } from '@datastation/shared/object';
+import {
+  PanelInfo,
+  PanelInfoType,
+  PanelResult,
+  PanelResultMeta,
+} from '@datastation/shared/state';
+import { humanSize } from '@datastation/shared/text';
 import { toString } from '@multiprocess/shape';
 import formatDistanceStrict from 'date-fns/formatDistanceStrict';
 import formatDistanceToNow from 'date-fns/formatDistanceToNow';
 import circularSafeStringify from 'json-stringify-safe';
 import * as CSV from 'papaparse';
 import * as React from 'react';
-import { MODE, MODE_FEATURES } from '../shared/constants';
-import log from '../shared/log';
-import { deepEquals } from '../shared/object';
-import {
-  PanelInfo,
-  PanelInfoType,
-  PanelResult,
-  PanelResultMeta,
-} from '../shared/state';
-import { humanSize } from '../shared/text';
 import { panelRPC } from './asyncRPC';
 import { Alert } from './components/Alert';
 import { Button } from './components/Button';

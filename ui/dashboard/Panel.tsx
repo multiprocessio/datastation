@@ -1,6 +1,6 @@
+import { PanelInfo } from '@datastation/shared/state';
 import formatDistanceToNow from 'date-fns/formatDistanceToNow';
 import React from 'react';
-import { PanelInfo } from '../../shared/state';
 import { PANEL_UI_DETAILS } from '../panels';
 
 export function Panel({ panel }: { panel: PanelInfo }) {

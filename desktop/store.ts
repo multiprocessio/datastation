@@ -1,9 +1,13 @@
+import log from '@datastation/shared/log';
+import { getPath } from '@datastation/shared/object';
+import { GetProjectRequest, MakeProjectRequest } from '@datastation/shared/rpc';
+import {
+  doOnEncryptFields,
+  Encrypt,
+  ProjectState,
+} from '@datastation/shared/state';
 import fs from 'fs';
 import path from 'path';
-import log from '../shared/log';
-import { getPath } from '../shared/object';
-import { GetProjectRequest, MakeProjectRequest } from '../shared/rpc';
-import { doOnEncryptFields, Encrypt, ProjectState } from '../shared/state';
 import { DISK_ROOT, PROJECT_EXTENSION, SYNC_PERIOD } from './constants';
 import { ensureFile } from './fs';
 import {

@@ -1,5 +1,5 @@
+import { Encrypt } from '@datastation/shared/state';
 import * as React from 'react';
-import { Encrypt } from '../../shared/state';
 import { Input } from '../components/Input';
 
 export function Password({

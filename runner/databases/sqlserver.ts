@@ -1,5 +1,5 @@
+import { DatabaseConnectorInfo } from '@datastation/shared/state';
 import sqlserver from 'mssql';
-import { DatabaseConnectorInfo } from '../../shared/state';
 
 export async function evalSQLServer(
   content: string,

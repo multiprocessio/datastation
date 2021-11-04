@@ -1,4 +1,14 @@
 import {
+  APP_NAME,
+  CHAT_LINK,
+  DEBUG,
+  SITE_ROOT,
+} from '@datastation/shared/constants';
+import {
+  OpenProjectRequest,
+  OpenProjectResponse,
+} from '@datastation/shared/rpc';
+import {
   BrowserWindow,
   dialog,
   Menu,
@@ -6,8 +16,6 @@ import {
   shell,
 } from 'electron';
 import path from 'path';
-import { APP_NAME, CHAT_LINK, DEBUG, SITE_ROOT } from '../shared/constants';
-import { OpenProjectRequest, OpenProjectResponse } from '../shared/rpc';
 import { DISK_ROOT, PROJECT_EXTENSION } from './constants';
 import { RPCHandler } from './rpc';
 import { SETTINGS } from './settings';

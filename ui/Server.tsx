@@ -1,6 +1,6 @@
+import { MODE } from '@datastation/shared/constants';
+import { ServerInfo, ServerInfoType } from '@datastation/shared/state';
 import * as React from 'react';
-import { MODE } from '../shared/constants';
-import { ServerInfo, ServerInfoType } from '../shared/state';
 import { Button } from './components/Button';
 import { Confirm } from './components/Confirm';
 import { FileInput } from './components/FileInput';

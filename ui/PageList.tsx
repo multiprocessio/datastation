@@ -1,6 +1,10 @@
+import { EVAL_ERRORS } from '@datastation/shared/errors';
+import {
+  PanelResultMeta,
+  ProjectPage,
+  ProjectState,
+} from '@datastation/shared/state';
 import * as React from 'react';
-import { EVAL_ERRORS } from '../shared/errors';
-import { PanelResultMeta, ProjectPage, ProjectState } from '../shared/state';
 import { Button } from './components/Button';
 import { Confirm } from './components/Confirm';
 import { Input } from './components/Input';

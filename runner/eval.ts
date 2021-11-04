@@ -1,16 +1,16 @@
-import { preview } from '@multiprocess/preview';
-import { shape } from '@multiprocess/shape';
-import fs from 'fs';
-import jsesc from 'jsesc';
-import { Dispatch, RPCHandler } from '../desktop/rpc';
-import { getProjectResultsFile } from '../desktop/store';
-import { PanelBody } from '../shared/rpc';
+import { Dispatch, RPCHandler } from '@datastation/desktop/rpc';
+import { getProjectResultsFile } from '@datastation/desktop/store';
+import { PanelBody } from '@datastation/shared/rpc';
 import {
   PanelInfo,
   PanelInfoType,
   PanelResult,
   ProjectState,
-} from '../shared/state';
+} from '@datastation/shared/state';
+import { preview } from '@multiprocess/preview';
+import { shape } from '@multiprocess/shape';
+import fs from 'fs';
+import jsesc from 'jsesc';
 import { evalColumns, evalLiteral } from './columns';
 import { evalDatabase } from './database';
 import { evalFilterAggregate } from './filagg';

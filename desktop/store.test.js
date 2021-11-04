@@ -1,6 +1,6 @@
 const { SYNC_PERIOD } = require('./constants');
-const { wait } = require('../shared/promise');
-const { getPath } = require('../shared/object');
+const { wait } = require('@datastation/shared/promise');
+const { getPath } = require('@datastation/shared/object');
 const path = require('path');
 const os = require('os');
 const fs = require('fs');
@@ -10,7 +10,7 @@ const {
   Encrypt,
   DatabaseConnectorInfo,
   ServerInfo,
-} = require('../shared/state');
+} = require('@datastation/shared/state');
 const { ensureSigningKey } = require('./secret');
 
 const makeProject = storeHandlers.filter(

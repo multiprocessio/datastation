@@ -1,6 +1,6 @@
+import { ContentTypeInfo } from '@datastation/shared/state';
+import { XLSX_MIME_TYPE } from '@datastation/shared/text';
 import * as React from 'react';
-import { ContentTypeInfo } from '../../shared/state';
-import { XLSX_MIME_TYPE } from '../../shared/text';
 import { Input } from './Input';
 import { Select } from './Select';
 

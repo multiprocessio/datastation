@@ -1,5 +1,5 @@
 const { getProjectHandlers } = require('./project');
-const { ProjectState } = require('../shared/state');
+const { ProjectState } = require('@datastation/shared/state');
 
 test('getProjects', async () => {
   const app = {

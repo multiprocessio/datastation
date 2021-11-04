@@ -1,8 +1,8 @@
-import { App } from '../server/app';
-import { readConfig } from '../server/config';
-import { getProjectHandlers } from '../server/project';
-import { APP_NAME, DEBUG, VERSION } from '../shared/constants';
-import log from '../shared/log';
+import { App } from '@datastation/server/app';
+import { readConfig } from '@datastation/server/config';
+import { getProjectHandlers } from '@datastation/server/project';
+import { APP_NAME, DEBUG, VERSION } from '@datastation/shared/constants';
+import log from '@datastation/shared/log';
 import { main } from './desktop_runner';
 
 async function run() {

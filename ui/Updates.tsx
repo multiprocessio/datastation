@@ -1,8 +1,8 @@
+import { SITE_ROOT, VERSION } from '@datastation/shared/constants';
+import { request } from '@datastation/shared/http';
+import log from '@datastation/shared/log';
+import { ContentTypeInfo } from '@datastation/shared/state';
 import * as React from 'react';
-import { SITE_ROOT, VERSION } from '../shared/constants';
-import { request } from '../shared/http';
-import log from '../shared/log';
-import { ContentTypeInfo } from '../shared/state';
 
 export function Updates() {
   const [updates, setUpdates] = React.useState(null);

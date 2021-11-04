@@ -1,11 +1,11 @@
-import * as React from 'react';
-import { NoConnectorError } from '../../shared/errors';
+import { NoConnectorError } from '@datastation/shared/errors';
 import {
   ConnectorInfo,
   DatabaseConnectorInfo,
   DatabasePanelInfo,
   TimeSeriesRange as TimeSeriesRangeT,
-} from '../../shared/state';
+} from '@datastation/shared/state';
+import * as React from 'react';
 import { panelRPC } from '../asyncRPC';
 import { CodeEditor } from '../components/CodeEditor';
 import { Input } from '../components/Input';

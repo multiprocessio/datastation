@@ -1,7 +1,5 @@
-import { formatDistanceToNow } from 'date-fns';
-import React from 'react';
-import { MODE } from '../shared/constants';
-import '../shared/polyfill';
+import { MODE } from '@datastation/shared/constants';
+import '@datastation/shared/polyfill';
 import {
   GetProjectsRequest,
   GetProjectsResponse,
@@ -9,7 +7,9 @@ import {
   MakeProjectResponse,
   OpenProjectRequest,
   OpenProjectResponse,
-} from '../shared/rpc';
+} from '@datastation/shared/rpc';
+import { formatDistanceToNow } from 'date-fns';
+import React from 'react';
 import { asyncRPC } from './asyncRPC';
 import { Alert } from './components/Alert';
 import { Button } from './components/Button';

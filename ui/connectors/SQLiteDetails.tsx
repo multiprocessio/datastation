@@ -1,5 +1,5 @@
+import { DatabaseConnectorInfo, ServerInfo } from '@datastation/shared/state';
 import * as React from 'react';
-import { DatabaseConnectorInfo, ServerInfo } from '../../shared/state';
 import { FileInput } from '../components/FileInput';
 import { ServerPicker } from '../components/ServerPicker';
 

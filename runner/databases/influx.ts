@@ -1,10 +1,10 @@
-import fetch from 'node-fetch';
 import {
   DatabaseConnectorInfo,
   DatabasePanelInfo,
   TimeSeriesRange,
-} from '../../shared/state';
-import { fullHttpURL, queryParameters } from '../../shared/url';
+} from '@datastation/shared/state';
+import { fullHttpURL, queryParameters } from '@datastation/shared/url';
+import fetch from 'node-fetch';
 import { EvalHandlerResponse } from '../types';
 
 interface InfluxResponse {

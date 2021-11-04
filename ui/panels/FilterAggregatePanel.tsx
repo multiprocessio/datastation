@@ -1,17 +1,17 @@
-import { ArrayShape, ObjectShape, Shape, shape } from '@multiprocess/shape';
-import React from 'react';
-import { MODE } from '../../shared/constants';
-import { InvalidDependentPanelError } from '../../shared/errors';
-import { LANGUAGES } from '../../shared/languages';
-import { buildSQLiteQuery } from '../../shared/sql';
+import { MODE } from '@datastation/shared/constants';
+import { InvalidDependentPanelError } from '@datastation/shared/errors';
+import { LANGUAGES } from '@datastation/shared/languages';
+import { buildSQLiteQuery } from '@datastation/shared/sql';
 import {
   AggregateType,
   FilterAggregatePanelInfo,
   PanelInfo,
   PanelResult,
   TimeSeriesRange as TimeSeriesRangeT,
-} from '../../shared/state';
-import { title } from '../../shared/text';
+} from '@datastation/shared/state';
+import { title } from '@datastation/shared/text';
+import { ArrayShape, ObjectShape, Shape, shape } from '@multiprocess/shape';
+import React from 'react';
 import { panelRPC } from '../asyncRPC';
 import { CodeEditor } from '../components/CodeEditor';
 import { FieldPicker } from '../components/FieldPicker';

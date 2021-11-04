@@ -1,13 +1,13 @@
-import { Shape } from '@multiprocess/shape';
-import subMinutes from 'date-fns/subMinutes';
-import * as React from 'react';
-import * as uuid from 'uuid';
 import {
   TimeSeriesFixedTimes,
   TimeSeriesRange as TimeSeriesRangeT,
   TimeSeriesRelativeTimes,
-} from '../../shared/state';
-import { title } from '../../shared/text';
+} from '@datastation/shared/state';
+import { title } from '@datastation/shared/text';
+import { Shape } from '@multiprocess/shape';
+import subMinutes from 'date-fns/subMinutes';
+import * as React from 'react';
+import * as uuid from 'uuid';
 import { Datetime } from './Datetime';
 import { FieldPicker } from './FieldPicker';
 import { FormGroup } from './FormGroup';

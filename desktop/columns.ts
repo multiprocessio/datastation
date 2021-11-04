@@ -1,7 +1,7 @@
+import { Dispatch, RPCHandler } from '@datastation/desktop/rpc';
+import { getProjectResultsFile } from '@datastation/desktop/store';
+import { PanelBody } from '@datastation/shared/rpc';
 import fs from 'fs';
-import { Dispatch, RPCHandler } from '../desktop/rpc';
-import { getProjectResultsFile } from '../desktop/store';
-import { PanelBody } from '../shared/rpc';
 
 export const fetchResultsHandler: RPCHandler<PanelBody, { value: any }> = {
   resource: 'fetchResults',

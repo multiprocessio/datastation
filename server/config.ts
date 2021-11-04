@@ -1,6 +1,6 @@
+import { mergeDeep, validate } from '@datastation/shared/object';
 import fs from 'fs';
 import JSON5 from 'json5';
-import { mergeDeep, validate } from '../shared/object';
 import log from './log';
 
 const CONFIG_PATH = '/etc/datastation/config.json';

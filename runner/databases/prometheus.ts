@@ -1,11 +1,11 @@
-import fetch from 'node-fetch';
-import log from '../../shared/log';
-import { timestampsFromRange } from '../../shared/sql';
+import log from '@datastation/shared/log';
+import { timestampsFromRange } from '@datastation/shared/sql';
 import {
   DatabaseConnectorInfo,
   DatabasePanelInfo,
   TimeSeriesRange,
-} from '../../shared/state';
+} from '@datastation/shared/state';
+import fetch from 'node-fetch';
 import { EvalHandlerResponse } from '../types';
 
 export interface PrometheusRangeResponse {

@@ -1,5 +1,5 @@
+import { ProjectState, ServerInfo } from '@datastation/shared/state';
 import * as React from 'react';
-import { ProjectState, ServerInfo } from '../shared/state';
 import { Button } from './components/Button';
 import { Server } from './Server';
 

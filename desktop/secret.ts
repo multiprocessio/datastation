@@ -1,3 +1,4 @@
+import { doOnEncryptFields, Encrypt } from '@datastation/shared/state';
 import fs from 'fs';
 import { randomBytes, secretbox } from 'tweetnacl';
 import {
@@ -6,7 +7,6 @@ import {
   encodeBase64,
   encodeUTF8,
 } from 'tweetnacl-util';
-import { doOnEncryptFields, Encrypt } from '../shared/state';
 import { ensureFile } from './fs';
 
 function getSigningKeyPath(signingKeyPath?: string) {

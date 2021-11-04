@@ -1,7 +1,14 @@
+import {
+  RPC_ASYNC_REQUEST,
+  RPC_ASYNC_RESPONSE,
+} from '@datastation/shared/constants';
+import log from '@datastation/shared/log';
+import {
+  Endpoint,
+  IPCRendererResponse,
+  WindowAsyncRPC,
+} from '@datastation/shared/rpc';
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
-import { RPC_ASYNC_REQUEST, RPC_ASYNC_RESPONSE } from '../shared/constants';
-import log from '../shared/log';
-import { Endpoint, IPCRendererResponse, WindowAsyncRPC } from '../shared/rpc';
 
 let messageNumber = -1;
 

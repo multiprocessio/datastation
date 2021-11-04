@@ -1,6 +1,6 @@
+import { CHAT_LINK, MODE } from '@datastation/shared/constants';
+import log from '@datastation/shared/log';
 import * as React from 'react';
-import { CHAT_LINK, MODE } from '../../shared/constants';
-import log from '../../shared/log';
 import { Alert } from './Alert';
 import { Highlight } from './Highlight';
 

@@ -1,5 +1,8 @@
+import {
+  ConnectorInfo,
+  DatabaseConnectorInfo,
+} from '@datastation/shared/state';
 import * as React from 'react';
-import { ConnectorInfo, DatabaseConnectorInfo } from '../shared/state';
 import { Button } from './components/Button';
 import { Confirm } from './components/Confirm';
 import { Input } from './components/Input';

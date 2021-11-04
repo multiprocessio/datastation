@@ -1,7 +1,7 @@
+import { MYSQL_QUOTE } from '@datastation/shared/sql';
+import { DatabaseConnectorInfo } from '@datastation/shared/state';
 import mysql from 'mysql2/promise';
 import { Dispatch } from '../../desktop/rpc';
-import { MYSQL_QUOTE } from '../../shared/sql';
-import { DatabaseConnectorInfo } from '../../shared/state';
 import { importAndRun, PanelToImport } from './sqlutil';
 
 export async function evalMySQL(

@@ -5,8 +5,8 @@ const {
   ProjectPage,
   LiteralPanelInfo,
   ProgramPanelInfo,
-} = require('../shared/state');
-const { LANGUAGES } = require('../shared/languages');
+} = require('@datastation/shared/state');
+const { LANGUAGES } = require('@datastation/shared/languages');
 const { makeReevalPanel } = require('./PageList');
 
 const TESTS = [

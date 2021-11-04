@@ -1,10 +1,10 @@
-import * as React from 'react';
 import {
   PanelInfo,
   PanelResultMeta,
   ProgramPanelInfo,
   ProjectPage,
-} from '../shared/state';
+} from '@datastation/shared/state';
+import * as React from 'react';
 import { Button } from './components/Button';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { Panel } from './Panel';

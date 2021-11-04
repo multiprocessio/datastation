@@ -1,5 +1,5 @@
+import { deepEquals } from '@datastation/shared/object';
 import React from 'react';
-import { deepEquals } from '../shared/object';
 
 function getQueryParameter(param: String) {
   const query = window.location.search.substring(1);

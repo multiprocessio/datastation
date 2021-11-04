@@ -1,13 +1,13 @@
-import { Dispatch } from '../desktop/rpc';
-import { decryptFields } from '../desktop/secret';
-import log from '../shared/log';
+import { Dispatch } from '@datastation/desktop/rpc';
+import { decryptFields } from '@datastation/desktop/secret';
+import log from '@datastation/shared/log';
 import {
   DatabaseConnectorInfo,
   DatabasePanelInfo,
   PanelInfo,
   ProjectState,
-} from '../shared/state';
-import { fullHttpURL } from '../shared/url';
+} from '@datastation/shared/state';
+import { fullHttpURL } from '@datastation/shared/url';
 import { evalClickHouse } from './databases/clickhouse';
 import { evalElasticsearch } from './databases/elasticsearch';
 import { evalInflux } from './databases/influx';

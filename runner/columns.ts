@@ -1,13 +1,13 @@
-import { Dispatch } from '../desktop/rpc';
+import { Dispatch } from '@datastation/desktop/rpc';
 import {
   GraphPanelInfo,
   LiteralPanelInfo,
   PanelInfo,
   ProjectState,
   TablePanelInfo,
-} from '../shared/state';
-import { columnsFromObject } from '../shared/table';
-import { parseArrayBuffer } from '../shared/text';
+} from '@datastation/shared/state';
+import { columnsFromObject } from '@datastation/shared/table';
+import { parseArrayBuffer } from '@datastation/shared/text';
 import { getPanelResult } from './shared';
 import { EvalHandlerExtra, EvalHandlerResponse, guardPanel } from './types';
 

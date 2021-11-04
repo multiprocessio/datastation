@@ -1,10 +1,10 @@
 const { format, subMinutes, subHours, startOfHour } = require('date-fns');
-const { getProjectResultsFile } = require('../desktop/store');
+const { getProjectResultsFile } = require('@datastation/desktop/store');
 const fs = require('fs');
 const {
   LiteralPanelInfo,
   FilterAggregatePanelInfo,
-} = require('../../shared/state');
+} = require('@datastation/shared/state');
 const { makeEvalHandler } = require('./eval');
 const { withSavedPanels } = require('./testutil');
 

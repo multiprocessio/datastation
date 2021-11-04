@@ -1,5 +1,9 @@
+import {
+  DatabaseConnectorInfo,
+  Encrypt,
+  ServerInfo,
+} from '@datastation/shared/state';
 import * as React from 'react';
-import { DatabaseConnectorInfo, Encrypt, ServerInfo } from '../../shared/state';
 import { Input } from '../components/Input';
 import { Select } from '../components/Select';
 import { ServerPicker } from '../components/ServerPicker';

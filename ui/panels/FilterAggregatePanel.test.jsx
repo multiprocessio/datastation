@@ -7,7 +7,7 @@ const {
   ProjectPage,
   LiteralPanelInfo,
   FilterAggregatePanelInfo,
-} = require('../../shared/state');
+} = require('@datastation/shared/state');
 const { FilterAggregatePanelDetails } = require('./FilterAggregatePanel');
 
 const project = new ProjectState();

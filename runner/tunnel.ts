@@ -1,11 +1,11 @@
+import { HOME } from '@datastation/desktop/constants';
+import { decryptFields } from '@datastation/desktop/secret';
+import log from '@datastation/shared/log';
+import { ProjectState } from '@datastation/shared/state';
 import fs from 'fs';
 import path from 'path';
 import SSH2Promise from 'ssh2-promise';
 import SSH2Config from 'ssh2-promise/lib/sshConfig';
-import { HOME } from '../desktop/constants';
-import { decryptFields } from '../desktop/secret';
-import log from '../shared/log';
-import { ProjectState } from '../shared/state';
 
 interface SSHConfig extends SSH2Config {
   retries: number;

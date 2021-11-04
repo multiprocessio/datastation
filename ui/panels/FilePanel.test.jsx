@@ -6,7 +6,7 @@ const {
   PanelResultMeta,
   ProjectPage,
   FilePanelInfo,
-} = require('../../shared/state');
+} = require('@datastation/shared/state');
 const { FilePanelDetails } = require('./FilePanel');
 
 const project = new ProjectState();

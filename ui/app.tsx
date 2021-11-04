@@ -1,9 +1,9 @@
+import { MODE, MODE_FEATURES, VERSION } from '@datastation/shared/constants';
+import { LANGUAGES } from '@datastation/shared/languages';
+import log from '@datastation/shared/log';
+import '@datastation/shared/polyfill';
+import { DEFAULT_PROJECT, ProjectState } from '@datastation/shared/state';
 import * as React from 'react';
-import { MODE, MODE_FEATURES, VERSION } from '../shared/constants';
-import { LANGUAGES } from '../shared/languages';
-import log from '../shared/log';
-import '../shared/polyfill';
-import { DEFAULT_PROJECT, ProjectState } from '../shared/state';
 import { Loading } from './components/Loading';
 import { Dashboard } from './dashboard';
 import { Editor } from './Editor';

@@ -1,6 +1,6 @@
+import { DispatchPayload, RPCHandler } from '@datastation/desktop/rpc';
+import log from '@datastation/shared/log';
 import express from 'express';
-import { DispatchPayload, RPCHandler } from '../desktop/rpc';
-import log from '../shared/log';
 
 export function makeDispatch(handlers: RPCHandler<any, any>[]) {
   return async function dispatch(payload: DispatchPayload, external = false) {

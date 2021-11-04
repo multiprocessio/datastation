@@ -1,5 +1,5 @@
+import { PanelInfo } from '@datastation/shared/state';
 import * as React from 'react';
-import { PanelInfo } from '../../shared/state';
 import { Select } from './Select';
 
 export function PanelSourcePicker({

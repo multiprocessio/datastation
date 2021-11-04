@@ -1,6 +1,6 @@
+import { logger } from '@datastation/shared/log';
 import fs from 'fs';
 import { EOL } from 'os';
-import { logger } from '../shared/log';
 import { LOG_FILE } from './constants';
 import { ensureFile } from './fs';
 

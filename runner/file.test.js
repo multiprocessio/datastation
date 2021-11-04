@@ -1,9 +1,9 @@
-require('../../shared/polyfill');
+require('@datastation/shared/polyfill');
 
-const { CODE_ROOT } = require('../desktop/constants');
+const { CODE_ROOT } = require('@datastation/desktop/constants');
 const path = require('path');
 const fs = require('fs');
-const { FilePanelInfo } = require('../../shared/state');
+const { FilePanelInfo } = require('@datastation/shared/state');
 const { file: makeTmpFile } = require('tmp-promise');
 const { evalFile } = require('./file');
 

@@ -1,5 +1,5 @@
+import { ScheduledExport } from '@datastation/shared/state';
 import React from 'react';
-import { ScheduledExport } from '../../shared/state';
 import { Button } from '../components/Button';
 import { Confirm } from '../components/Confirm';
 import { Input } from '../components/Input';

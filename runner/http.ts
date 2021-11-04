@@ -1,7 +1,11 @@
+import { request } from '@datastation/shared/http';
+import {
+  HTTPPanelInfo,
+  PanelInfo,
+  ProjectState,
+} from '@datastation/shared/state';
 import fetch from 'node-fetch';
 import { URL } from 'url';
-import { request } from '../shared/http';
-import { HTTPPanelInfo, PanelInfo, ProjectState } from '../shared/state';
 import { parseParquet } from './parquet';
 import { tunnel } from './tunnel';
 import { EvalHandlerResponse, guardPanel } from './types';

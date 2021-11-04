@@ -1,4 +1,4 @@
-import { ProjectState } from '../shared/state';
+import { ProjectState } from '@datastation/shared/state';
 export type GetProjectRequest = { projectId: string };
 export type GetProjectResponse = ProjectState | null;
 

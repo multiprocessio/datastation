@@ -16,7 +16,7 @@ const {
   DatabasePanelInfo,
   FilePanelInfo,
   FilterAggregatePanelInfo,
-} = require('../shared/state');
+} = require('@datastation/shared/state');
 const { App } = require('./app');
 const { LocalStorageStore } = require('./ProjectStore');
 

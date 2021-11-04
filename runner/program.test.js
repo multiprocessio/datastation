@@ -1,12 +1,15 @@
 const path = require('path');
-const { LANGUAGES } = require('../../shared/languages');
+const { LANGUAGES } = require('@datastation/shared/languages');
 const {
   updateProjectHandler,
   getProjectResultsFile,
-} = require('../desktop/store');
+} = require('@datastation/desktop/store');
 const fs = require('fs');
-const { LiteralPanelInfo, ProgramPanelInfo } = require('../../shared/state');
-const { CODE_ROOT } = require('../desktop/constants');
+const {
+  LiteralPanelInfo,
+  ProgramPanelInfo,
+} = require('@datastation/shared/state');
+const { CODE_ROOT } = require('@datastation/desktop/constants');
 const { makeEvalHandler } = require('./eval');
 const { inPath, withSavedPanels } = require('./testutil');
 

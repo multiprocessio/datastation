@@ -1,11 +1,11 @@
-import { MODE } from '../shared/constants';
+import { MODE } from '@datastation/shared/constants';
 import {
   Endpoint,
   PanelBody,
   PanelEndpoint,
   WindowAsyncRPC,
-} from '../shared/rpc';
-import { PanelResult } from '../shared/state';
+} from '@datastation/shared/rpc';
+import { PanelResult } from '@datastation/shared/state';
 import { getUrlState } from './urlState';
 
 export async function asyncRPC<Request = void, Response = void>(

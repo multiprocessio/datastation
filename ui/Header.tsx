@@ -1,7 +1,7 @@
+import { APP_NAME, MODE, SITE_ROOT } from '@datastation/shared/constants';
+import '@datastation/shared/polyfill';
+import { DEFAULT_PROJECT } from '@datastation/shared/state';
 import * as React from 'react';
-import { APP_NAME, MODE, SITE_ROOT } from '../shared/constants';
-import '../shared/polyfill';
-import { DEFAULT_PROJECT } from '../shared/state';
 import { Button } from './components/Button';
 import { ProjectContext } from './ProjectStore';
 import { UrlStateContext } from './urlState';

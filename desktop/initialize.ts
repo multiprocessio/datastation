@@ -1,5 +1,5 @@
+import '@datastation/shared/polyfill';
 import 'source-map-support/register';
-import '../shared/polyfill';
 import { DSPROJ_FLAG, PANEL_FLAG, PANEL_META_FLAG } from './constants';
 import { panelHandlers } from './panel';
 import { openProjectHandler } from './project';

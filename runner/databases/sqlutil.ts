@@ -1,3 +1,10 @@
+import { chunk } from '@datastation/shared/array';
+import {
+  NotAnArrayOfObjectsError,
+  UnsupportedError,
+} from '@datastation/shared/errors';
+import log from '@datastation/shared/log';
+import { quote, QuoteType } from '@datastation/shared/sql';
 import {
   ArrayShape,
   ObjectShape,
@@ -6,13 +13,6 @@ import {
   VariedShape,
 } from '@multiprocess/shape';
 import { Dispatch } from '../../desktop/rpc';
-import { chunk } from '../../shared/array';
-import {
-  NotAnArrayOfObjectsError,
-  UnsupportedError,
-} from '../../shared/errors';
-import log from '../../shared/log';
-import { quote, QuoteType } from '../../shared/sql';
 import { getPanelResult } from '../shared';
 
 const JSON_SQL_TYPE_MAP: Record<ScalarShape['name'], string> = {

@@ -1,13 +1,13 @@
-import { preview } from '@multiprocess/preview';
-import { shape } from '@multiprocess/shape';
-import * as React from 'react';
-import { MODE, MODE_FEATURES } from '../../shared/constants';
-import { request } from '../../shared/http';
+import { MODE, MODE_FEATURES } from '@datastation/shared/constants';
+import { request } from '@datastation/shared/http';
 import {
   ContentTypeInfo,
   HTTPConnectorInfoMethod,
   HTTPPanelInfo,
-} from '../../shared/state';
+} from '@datastation/shared/state';
+import { preview } from '@multiprocess/preview';
+import { shape } from '@multiprocess/shape';
+import * as React from 'react';
 import { panelRPC } from '../asyncRPC';
 import { Button } from '../components/Button';
 import { ContentTypePicker } from '../components/ContentTypePicker';

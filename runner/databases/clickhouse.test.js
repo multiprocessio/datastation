@@ -4,7 +4,7 @@ const {
   Encrypt,
   DatabasePanelInfo,
   DatabaseConnectorInfo,
-} = require('../../shared/state');
+} = require('@datastation/shared/state');
 const { withSavedPanels } = require('../testutil');
 
 test(`runs clickhouse query`, async () => {

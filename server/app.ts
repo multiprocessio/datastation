@@ -1,12 +1,12 @@
+import { CODE_ROOT } from '@datastation/desktop/constants';
+import { initialize } from '@datastation/desktop/initialize';
+import { humanSize } from '@datastation/shared/text';
 import cookieParser from 'cookie-parser';
 import express from 'express';
 import fs from 'fs';
 import https from 'https';
 import path from 'path';
 import pg from 'pg';
-import { CODE_ROOT } from '../desktop/constants';
-import { initialize } from '../desktop/initialize';
-import { humanSize } from '../shared/text';
 import { registerAuth } from './auth';
 import { Config, readConfig } from './config';
 import log from './log';

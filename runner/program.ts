@@ -1,13 +1,20 @@
+import { SETTINGS } from '@datastation/desktop/settings';
+import { getProjectResultsFile } from '@datastation/desktop/store';
+import {
+  InvalidDependentPanelError,
+  NoResultError,
+} from '@datastation/shared/errors';
+import { LANGUAGES } from '@datastation/shared/languages';
+import {
+  PanelInfo,
+  ProgramPanelInfo,
+  ProjectState,
+} from '@datastation/shared/state';
 import { spawn } from 'child_process';
 import fs from 'fs';
 import { EOL } from 'os';
 import path from 'path';
 import { file as makeTmpFile } from 'tmp-promise';
-import { SETTINGS } from '../desktop/settings';
-import { getProjectResultsFile } from '../desktop/store';
-import { InvalidDependentPanelError, NoResultError } from '../shared/errors';
-import { LANGUAGES } from '../shared/languages';
-import { PanelInfo, ProgramPanelInfo, ProjectState } from '../shared/state';
 import { EvalHandlerExtra, EvalHandlerResponse, guardPanel } from './types';
 
 export async function evalProgram(

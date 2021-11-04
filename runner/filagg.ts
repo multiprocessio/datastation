@@ -1,14 +1,14 @@
-import { file as makeTmpFile } from 'tmp-promise';
-import { Dispatch } from '../desktop/rpc';
-import log from '../shared/log';
-import { buildSQLiteQuery } from '../shared/sql';
+import { Dispatch } from '@datastation/desktop/rpc';
+import log from '@datastation/shared/log';
+import { buildSQLiteQuery } from '@datastation/shared/sql';
 import {
   DatabaseConnectorInfo,
   DatabasePanelInfo,
   FilterAggregatePanelInfo,
   PanelInfo,
   ProjectState,
-} from '../shared/state';
+} from '@datastation/shared/state';
+import { file as makeTmpFile } from 'tmp-promise';
 import { evalDatabase } from './database';
 import { EvalHandlerExtra, guardPanel } from './types';
 

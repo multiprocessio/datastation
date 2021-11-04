@@ -1,13 +1,16 @@
-import { Pool } from 'pg';
 import {
   GetProjectHandler,
   MakeProjectHandler,
   RPCHandler,
   UpdateProjectHandler,
-} from '../desktop/rpc';
-import { encryptProjectSecrets } from '../desktop/store';
-import { GetProjectsRequest, GetProjectsResponse } from '../shared/rpc';
-import { ProjectState } from '../shared/state';
+} from '@datastation/desktop/rpc';
+import { encryptProjectSecrets } from '@datastation/desktop/store';
+import {
+  GetProjectsRequest,
+  GetProjectsResponse,
+} from '@datastation/shared/rpc';
+import { ProjectState } from '@datastation/shared/state';
+import { Pool } from 'pg';
 import { App } from './app';
 
 export const getProjectHandlers = (app: App) => {

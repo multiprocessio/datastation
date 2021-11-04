@@ -1,13 +1,13 @@
-import { preview } from '@multiprocess/preview';
-import Chart from 'chart.js/auto';
-import * as React from 'react';
-import log from '../../shared/log';
+import log from '@datastation/shared/log';
 import {
   GraphPanelInfo,
   GraphPanelInfoType,
   PanelInfo,
   PanelResult,
-} from '../../shared/state';
+} from '@datastation/shared/state';
+import { preview } from '@multiprocess/preview';
+import Chart from 'chart.js/auto';
+import * as React from 'react';
 import { Button } from '../components/Button';
 import { FieldPicker, unusedFields } from '../components/FieldPicker';
 import { FormGroup } from '../components/FormGroup';
