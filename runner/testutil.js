@@ -7,7 +7,7 @@ const {
   updateProjectHandler,
 } = require('@datastation/desktop/store');
 const { evalHandler } = require('./eval');
-const { fetchResultsHandler } = require('./columns');
+const { fetchResultsHandler } = require('@datastation/desktop/columns');
 
 exports.inPath = function (program) {
   const where = process.platform === 'win32' ? 'where' : 'whereis';

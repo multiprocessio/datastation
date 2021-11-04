@@ -57,45 +57,37 @@ for (const t of TESTS) {
   }
 
   describe(t.type, () => {
-    // First pass runs in process, second pass runs in subprocess
-    for (const subprocessName of [
-      undefined,
-      path.join(CODE_ROOT, 'build', 'desktop_runner.js'),
-    ]) {
-      test(`runs ${t.type} programs to perform addition via ${
-        subprocessName ? subprocessName : 'same-process'
-      }`, async () => {
-        const lp = new LiteralPanelInfo();
-        lp.literal.contentTypeInfo = { type: 'text/csv' };
-        lp.content = 'age,name\n12,Kev\n18,Nyra';
+    test(`runs ${t.type} programs to perform addition`, async () => {
+      const lp = new LiteralPanelInfo();
+      lp.literal.contentTypeInfo = { type: 'text/csv' };
+      lp.content = 'age,name\n12,Kev\n18,Nyra';
 
-        const pp = new ProgramPanelInfo();
-        pp.program.type = t.type;
-        pp.content = t.content;
+      const pp = new ProgramPanelInfo();
+      pp.program.type = t.type;
+      pp.content = t.content;
 
-        let finished = false;
-        const panels = [lp, pp];
-        await withSavedPanels(
-          panels,
-          async (project) => {
-            const panelValueBuffer = fs.readFileSync(
-              getProjectResultsFile(project.projectName) + pp.id
-            );
-            expect(JSON.parse(panelValueBuffer.toString())).toStrictEqual([
-              { name: 'Kev', age: 22 },
-              { name: 'Nyra', age: 28 },
-            ]);
+      let finished = false;
+      const panels = [lp, pp];
+      await withSavedPanels(
+        panels,
+        async (project) => {
+          const panelValueBuffer = fs.readFileSync(
+            getProjectResultsFile(project.projectName) + pp.id
+          );
+          expect(JSON.parse(panelValueBuffer.toString())).toStrictEqual([
+            { name: 'Kev', age: 22 },
+            { name: 'Nyra', age: 28 },
+          ]);
 
-            finished = true;
-          },
-          { evalPanels: true, subprocessName }
-        );
+          finished = true;
+        },
+        { evalPanels: true }
+      );
 
-        if (!finished) {
-          throw new Error('Callback did not finish');
-        }
-      }, 300_000);
-    }
+      if (!finished) {
+        throw new Error('Callback did not finish');
+      }
+    }, 300_000);
 
     for (const n of [0, 1]) {
       test(`${t.type} default content ${

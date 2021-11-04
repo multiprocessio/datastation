@@ -10,7 +10,7 @@ const {
   TablePanelInfo,
 } = require('@datastation/shared/state');
 const { evalHandler } = require('./eval');
-const { fetchResultsHandler } = require('./columns');
+const { fetchResultsHandler } = require('@datastation/desktop/columns');
 
 test('store and retrieve literal, specific columns', async () => {
   const tmp = await makeTmpFile({ prefix: 'columns-project-' });

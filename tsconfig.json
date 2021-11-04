@@ -11,5 +11,12 @@
     "esModuleInterop": true,
     "typeRoots": ["./node_modules/@types", "./type-overrides"]
   },
-  "exclude": ["node_modules", "*.js", "build"]
+  "exclude": [
+    "node_modules",
+    "*.js",
+    "build",
+    "releases",
+    "ui/build",
+    "desktop/build"
+  ]
 }
