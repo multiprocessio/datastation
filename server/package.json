@@ -1,6 +1,7 @@
 {
   "name": "@datastation/server",
-  "version": "0.1.0",
+  "license": "Apache-2.0",
+  "version": "0.0.0",
   "dependencies": {
     "@datastation/desktop": "./desktop",
     "cookie-parser": "^1.4.5",

@@ -1,7 +1,7 @@
 {
   "name": "datastation-ui",
   "private": "true",
-  "version": "0.1.0",
+  "version": "0.0.0",
   "dependencies": {
     "@datastation/shared": "./shared",
     "@multiprocess/preview": "^0.2.3",

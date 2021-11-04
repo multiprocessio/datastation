@@ -1,11 +1,12 @@
 {
   "name": "@datastation/desktop",
+  "license": "Apache-2.0",
   "productName": "DataStation Community Edition",
   "license": "Apache-2.0",
   "description": "The Data IDE for Developers",
   "author": "DataStation Authors",
   "main": "build/desktop.js",
-  "version": "0.1.0",
+  "version": "0.0.0",
   "dependencies": {
     "source-map-support": "^0.5.20",
     "tweetnacl": "^1.0.3",
