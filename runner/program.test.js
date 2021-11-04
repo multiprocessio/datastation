@@ -10,7 +10,6 @@ const {
   ProgramPanelInfo,
 } = require('@datastation/shared/state');
 const { CODE_ROOT } = require('@datastation/desktop/constants');
-const { makeEvalHandler } = require('./eval');
 const { inPath, withSavedPanels } = require('./testutil');
 
 const TESTS = [

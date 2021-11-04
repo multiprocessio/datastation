@@ -5,7 +5,6 @@ const {
   LiteralPanelInfo,
   FilterAggregatePanelInfo,
 } = require('@datastation/shared/state');
-const { makeEvalHandler } = require('./eval');
 const { withSavedPanels } = require('./testutil');
 
 const lp = new LiteralPanelInfo({

@@ -17,7 +17,7 @@ module.exports = {
     //'@datastation/.+\\.(j|t)sx?$'
   ],
   moduleNameMapper: {
-    '^@datastation/(.*)$': '<rootDir>/$1/'
+    '^@datastation/(.*)$': '<rootDir>/$1/',
   },
   setupFiles: ['./shared/polyfill.ts', './testsetup.js'],
   testURL: 'http://localhost/',
@@ -31,5 +31,10 @@ module.exports = {
     'server/**/*.ts',
     'server/**/*.tsx',
   ],
-  modulePathIgnorePatterns: ['<rootDir>/releases/', '<rootDir>/build/', 'ui/build/', 'desktop/build/'],
+  modulePathIgnorePatterns: [
+    '<rootDir>/releases/',
+    '<rootDir>/build/',
+    'ui/build/',
+    'desktop/build/',
+  ],
 };

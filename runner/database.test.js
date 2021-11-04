@@ -6,7 +6,6 @@ const {
   DatabasePanelInfo,
   DatabaseConnectorInfo,
 } = require('@datastation/shared/state');
-const { makeEvalHandler } = require('./eval');
 const { withSavedPanels } = require('./testutil');
 
 const DATABASES = [

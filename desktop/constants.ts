@@ -23,7 +23,8 @@ export const LOG_FILE = path.join(DISK_ROOT, 'log');
 export const CODE_ROOT = (() => {
   for (let mpath of module.paths) {
     if (fs.existsSync(mpath)) {
-      return path.dirname(mpath);
+      // dirname twice since folders have their own package.json now
+      return path.dirname(path.dirname(mpath));
     }
   }
 

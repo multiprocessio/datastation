@@ -6,7 +6,7 @@ const {
   getProjectResultsFile,
   updateProjectHandler,
 } = require('@datastation/desktop/store');
-const { makeEvalHandler } = require('./eval');
+const { evalHandler } = require('./eval');
 const { fetchResultsHandler } = require('./columns');
 
 exports.inPath = function (program) {
@@ -30,7 +30,7 @@ exports.fileIsEmpty = function (fileName) {
 exports.withSavedPanels = async function (
   panels,
   cb,
-  { evalPanels, subprocessName, connectors } = {}
+  { evalPanels, connectors } = {}
 ) {
   const tmp = await makeTmpFile({ prefix: 'saved-panel-project-' });
 
@@ -82,7 +82,7 @@ exports.withSavedPanels = async function (
           );
         }
 
-        panel.resultMeta = await makeEvalHandler(subprocessName).handler(
+        panel.resultMeta = await evalHandler.handler(
           project.projectName,
           { panelId: panel.id },
           dispatch

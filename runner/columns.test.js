@@ -9,7 +9,7 @@ const {
   LiteralPanelInfo,
   TablePanelInfo,
 } = require('@datastation/shared/state');
-const { makeEvalHandler } = require('./eval');
+const { evalHandler } = require('./eval');
 const { fetchResultsHandler } = require('./columns');
 
 test('store and retrieve literal, specific columns', async () => {
@@ -48,7 +48,7 @@ test('store and retrieve literal, specific columns', async () => {
         },
       ],
     };
-    const result = await makeEvalHandler().handler(
+    const result = await evalHandler.handler(
       tmp.path,
       { panelId: id },
       () => projectState
@@ -67,7 +67,7 @@ test('store and retrieve literal, specific columns', async () => {
     );
     expect(valueFromDisk).toStrictEqual(testData);
 
-    const { value: selectColumns } = await makeEvalHandler().handler(
+    const { value: selectColumns } = await evalHandler.handler(
       tmp.path,
       { panelId: id },
       ({ resource }) =>
