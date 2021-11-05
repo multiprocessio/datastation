@@ -7,7 +7,7 @@ import fs from 'fs';
 import { EOL } from 'os';
 import { file as makeTmpFile } from 'tmp-promise';
 import { DSPROJ_FLAG, PANEL_FLAG, PANEL_META_FLAG } from './constants';
-import { Dispatch, RPCHandler } from './rpc';
+import { RPCHandler } from './rpc';
 import { flushUnwritten } from './store';
 
 const runningProcesses: Record<string, Set<number>> = {};
@@ -34,8 +34,7 @@ export const makeEvalHandler = (
   resource: 'eval',
   handler: async function (
     projectId: string,
-    body: PanelBody,
-    dispatch: Dispatch
+    body: PanelBody
   ): Promise<PanelResult> {
     // Flushes desktop panel writes to disk. Not relevant in server context.
     flushUnwritten();

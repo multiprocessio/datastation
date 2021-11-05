@@ -12,7 +12,11 @@ export function renderPage(project: ProjectState, pageId: string) {
     <ProjectContext.Provider value={{ state: project, setState: () => {} }}>
       <UrlStateContext.Provider
         value={{
-          state: { page: page, projectId: project.id, view: 'dashboard' },
+          state: {
+            page: page,
+            projectId: project.projectName,
+            view: 'dashboard',
+          },
           setState: () => {},
         }}
       >
