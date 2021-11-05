@@ -3,6 +3,7 @@ This is a silly wrapper around shell scripting that isn't verbose and
 will work on Windows and the *nixes.
 """
 
+import json
 import os
 import pathlib
 import platform
@@ -54,14 +55,15 @@ def lex_command(command):
             i += 1
             continue
 
-        if c == '"':
+        if c in ['"', "'"]:
+            first = c
             if token:
                 if IS_WINDOWS:
                     token = token.replace('/', '\\')
                 line.append(token)
                 token = ''
             i += 1 # Skip first "
-            while command[i] != '"':
+            while command[i] != first:
                 token += command[i]
                 i += 1
             i += 1 # Skip last "
@@ -119,6 +121,18 @@ for command in script:
         quote_line(line, show=True)
         for todelete in line[2:]:
             shutil.rmtree(todelete, ignore_errors=True)
+        continue
+    elif line[0] == 'replace':
+        what = line[1]
+        _with = line[2]
+        _in = line[3]
+        quote_line(line, show=True)
+        if not what or not _with or not _in:
+            raise Exception("MISSING ARGS IN REPLACE: " + json.dumps(line))
+        with open(_in, 'r') as f:
+            current = f.read()
+        with open(_in, 'w') as f:
+            f.write(current.replace(what, _with))
         continue
     elif line[0] == 'mkdir':
         quote_line(line, show=True)
