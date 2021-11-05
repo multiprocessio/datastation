@@ -22,7 +22,7 @@ const tp = new TablePanelInfo({
   columns: [{ field: 'age', label: 'Age' }],
 });
 
-test('', async () => {
+test('eval calling runner', async () => {
   const { handler } = makeEvalHandler(CODE_ROOT + '/build/desktop_runner.js');
 
   await withSavedPanels([lp, tp], async (project) => {
@@ -41,4 +41,4 @@ test('', async () => {
     );
     expect(tpValue).toEqual([{ age: '12' }, { age: '18' }]);
   });
-});
+}, 10_000);
