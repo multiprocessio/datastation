@@ -1,4 +1,6 @@
 rm -rf build
+rm -rf desktop/build
+
 yarn
 setenv UI_ESBUILD_ARGS "--minify"
 yarn build-desktop
