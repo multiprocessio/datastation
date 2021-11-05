@@ -48,9 +48,8 @@ export const makeEvalHandler = (
       killAllByPanelId(body.panelId);
 
       const child = execFile(
-        process.argv[0],
+        runner,
         [
-          runner,
           DSPROJ_FLAG,
           projectId,
           PANEL_FLAG,
