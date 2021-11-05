@@ -16,7 +16,6 @@ jobs:
     - run: yarn format
     - run: yarn tsc
     - run: ./scripts/fail_on_diff.sh
-    - run: yarn test-licenses
     # Needed so we can have ./build/desktop_runner.js ready for tests
     - run: yarn build-desktop
     - run: yarn test --runInBand --detectOpenHandles --forceExit --verbose
