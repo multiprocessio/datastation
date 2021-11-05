@@ -9,7 +9,7 @@ prepend "global.DS_CONFIG_VERSION='{arg0}';" build/desktop_runner.js
 
 yarn pkg runner/desktop_runner.ts -t node16-{os}-{arch} -o desktop/build/desktop_runner.js
 
-cp -r build desktop/build
+cp -r build desktop
 
 yarn electron-packager desktop --overwrite --out=releases --build-version={arg0} --app-version={arg0} "DataStation Community Edition"
 zip -9 -r releases/{os}-{arch}-{arg0}.zip "releases/DataStation Community Edition-{os}-{arch}"
