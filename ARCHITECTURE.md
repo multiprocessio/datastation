@@ -31,17 +31,17 @@ on a database library. Still, this may be the right way to go at the
 same time as making language setup easier by providing a button or
 something to install all missing dependencies.
 
-### ./desktop/panel
+## ./runner
 
 This is where eval handlers for each panel type (program, database,
 etc.) are defined.
 
 All database-specific handlers are defined in
-./desktop/panel/databases/*.ts since there are so many of them.
+./runner/databases/*.ts since there are so many of them.
 
 Evaluation happens by spawning a Node.js subprocess where all the eval
-handlers are actually run. ./desktop/runner.ts is the entrypoint for
-this on desktop. ./server/runner.ts is the equivalent on the server.
+handlers are actually run. ./runner/desktop_runner.ts is the entrypoint for
+this on desktop. ./runner/server_runner.ts is the equivalent on the server.
 
 This allows easy resource cleanup and easy "kill" panel eval support.
 
@@ -49,7 +49,7 @@ This allows easy resource cleanup and easy "kill" panel eval support.
 
 This directory contains the server (Express) app and code that proxies
 RPC calls over HTTP to "desktop" implementations. Really, the code is
-just located in the ./desktop/panel/ directory but it is run in/by the
+just located in the ./runner directory but it is run in/by the
 server process at the moment.
 
 All state in the server app is stored in PostgreSQL. The result of
