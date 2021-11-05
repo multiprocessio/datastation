@@ -6,7 +6,7 @@ import { execFile } from 'child_process';
 import fs from 'fs';
 import { EOL } from 'os';
 import { file as makeTmpFile } from 'tmp-promise';
-import { NODE, DSPROJ_FLAG, PANEL_FLAG, PANEL_META_FLAG } from './constants';
+import { DSPROJ_FLAG, PANEL_FLAG, PANEL_META_FLAG } from './constants';
 import { Dispatch, RPCHandler } from './rpc';
 import { flushUnwritten } from './store';
 
@@ -48,7 +48,7 @@ export const makeEvalHandler = (
       killAllByPanelId(body.panelId);
 
       const child = execFile(
-        NODE,
+        process.argv[0],
         [
 	  runner,
           DSPROJ_FLAG,

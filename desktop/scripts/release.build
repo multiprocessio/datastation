@@ -7,8 +7,6 @@ prepend "window.DS_CONFIG_VERSION='{arg0}';" build/ui.js
 prepend "global.DS_CONFIG_VERSION='{arg0}';" build/desktop.js
 prepend "global.DS_CONFIG_VERSION='{arg0}';" build/desktop_runner.js
 
-yarn pkg-fetch -n node16 -o build/node
-
 cp -r build desktop
 
 yarn electron-packager desktop --overwrite --out=releases --build-version={arg0} --app-version={arg0} "DataStation Community Edition"
