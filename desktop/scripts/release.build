@@ -7,7 +7,7 @@ prepend "window.DS_CONFIG_VERSION='{arg0}';" build/ui.js
 prepend "global.DS_CONFIG_VERSION='{arg0}';" build/desktop.js
 prepend "global.DS_CONFIG_VERSION='{arg0}';" build/desktop_runner.js
 
-yarn pkg runner/desktop_runner.ts -t node16-{os}-{arch} -o desktop/build/desktop_runner.js
+yarn pkg-fetch -n node16 -o build/node
 
 cp -r build desktop
 

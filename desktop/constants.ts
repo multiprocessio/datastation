@@ -31,6 +31,15 @@ export const CODE_ROOT = (() => {
   return '';
 })();
 
+export const NODE = (() => {
+  const bundledNode = path.join(CODE_ROOT, 'build/node');
+  if (fs.existsSync(bundledNode)) {
+    return bundledNode;
+  }
+
+  return 'node';
+})();
+
 export const IS_DESKTOP_RUNNER = (process.argv[1] || '').includes(
   'desktop_runner.js'
 );
