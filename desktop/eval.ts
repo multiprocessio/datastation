@@ -50,7 +50,7 @@ export const makeEvalHandler = (
       const child = execFile(
         process.argv[0],
         [
-	  runner,
+          runner,
           DSPROJ_FLAG,
           projectId,
           PANEL_FLAG,
