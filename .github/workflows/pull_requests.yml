@@ -35,7 +35,7 @@ jobs:
     - run: mv releases/datastation-server-x64-0.0.0-install.zip /tmp/
     - run: cd /tmp && unzip datastation-server-x64-0.0.0-install.zip
     - run: ls -lah /tmp/build/release
-    - run: cd /tmp && ./build/release/install.sh
+    - run: /tmp/build/release/install.sh
     - run: bash -c '[[ -d /etc/datastation ]]'
     - run: bash -c '[[ -d /usr/share/datastation ]]'
     - run: bash -c '[[ -f /usr/share/datastation/server.js ]]'
