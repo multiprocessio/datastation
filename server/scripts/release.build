@@ -6,8 +6,14 @@ prepend "window.DS_CONFIG_MODE='server';" build/ui.js
 prepend "window.DS_CONFIG_VERSION='{arg0}';" build/ui.js
 prepend "window.DS_CONFIG_VERSION='{arg0}';" build/server_runner.js
 prepend "global.DS_CONFIG_VERSION='{arg0}';" build/server.js
+
+# Production only dependencies
 rm -rf node_modules
 yarn install --production
 mv node_modules build
+
+# Copy in install script and default configs
+cp -r server/release build/release
+
 mkdir -p releases
 zip -9 -r releases/datastation-server-{arch}-{arg0}.zip build
