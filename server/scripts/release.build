@@ -4,7 +4,7 @@ setenv UI_ESBUILD_ARGS "--minify"
 yarn build-server
 prepend "window.DS_CONFIG_MODE='server';" build/ui.js
 prepend "window.DS_CONFIG_VERSION='{arg0}';" build/ui.js
-prepend "window.DS_CONFIG_VERSION='{arg0}';" build/runner.js
+prepend "window.DS_CONFIG_VERSION='{arg0}';" build/desktop_runner.js
 prepend "global.DS_CONFIG_VERSION='{arg0}';" build/server.js
 rm -rf node_modules
 yarn install --production
