@@ -32,8 +32,8 @@ jobs:
         ref: ${{ github.ref }}
 
     - run: yarn release-server 0.0.0-install
-    - run: mv releases/datastation-server-0.0.0-install.zip /tmp/
-    - run: cd /tmp && unzip datastation-server-0.0.0-install.zip
+    - run: mv releases/datastation-server-0.0.0-install-x86.zip /tmp/
+    - run: cd /tmp && unzip datastation-server-0.0.0-install-x86.zip
     - run: ls -lah /tmp
 
   e2e-linux:
