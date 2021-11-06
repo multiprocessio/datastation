@@ -9,6 +9,5 @@ prepend "global.DS_CONFIG_VERSION='{arg0}';" build/server.js
 rm -rf node_modules
 yarn install --production
 mv node_modules build
-ls -lah
-ls -lah build
+mkdir -p releases
 zip -9 -r releases/datastation-server-{arch}-{arg0}.zip build
