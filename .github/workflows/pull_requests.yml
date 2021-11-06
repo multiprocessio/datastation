@@ -35,13 +35,13 @@ jobs:
     - run: mv releases/datastation-server-x64-0.0.0-install.zip /tmp/
     - run: cd /tmp && unzip datastation-server-x64-0.0.0-install.zip
     - run: cd /tmp && ./build/release/install.sh
-    - run: [[ -d /etc/datastation ]]
-    - run: [[ -d /usr/share/datastation ]]
-    - run: [[ -f /usr/share/datastation/server.js ]]
-    - run: [[ -f /usr/share/datastation/server_runner.js ]]
-    - run: [[ -f /etc/datastation/config.json ]]
-    - run: [[ -f /etc/systemd/system/datastation.service ]]
-    - run: [[ -f /etc/systemd/system/datastation-exporter.timer ]]
+    - run: bash -c '[[ -d /etc/datastation ]]'
+    - run: bash -c '[[ -d /usr/share/datastation ]]'
+    - run: bash -c '[[ -f /usr/share/datastation/server.js ]]'
+    - run: bash -c '[[ -f /usr/share/datastation/server_runner.js ]]'
+    - run: bash -c '[[ -f /etc/datastation/config.json ]]'
+    - run: bash -c '[[ -f /etc/systemd/system/datastation.service ]]'
+    - run: bash -c '[[ -f /etc/systemd/system/datastation-exporter.timer ]]'
 
   e2e-linux:
     runs-on: ubuntu-latest
