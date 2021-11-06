@@ -12,7 +12,7 @@ jobs:
     - uses: actions/checkout@master
       with:
         ref: ${{ github.ref }}
-    - run: ./scripts/ci/prepare_linux.sh
+    - run: ./scripts/ci/prepare_linux.sh --integration-tests
     - run: yarn format
     - run: yarn tsc
     - run: ./scripts/fail_on_diff.sh
