@@ -34,8 +34,7 @@ jobs:
     - run: yarn release-server 0.0.0-install
     - run: mv releases/datastation-server-x64-0.0.0-install.zip /tmp/
     - run: cd /tmp && unzip datastation-server-x64-0.0.0-install.zip
-    - run: ls -lah /tmp
-    - run: ls -lah /tmp/build
+    - run: ls -lah /tmp/build/release
     - run: cd /tmp && ./build/release/install.sh
     - run: bash -c '[[ -d /etc/datastation ]]'
     - run: bash -c '[[ -d /usr/share/datastation ]]'
