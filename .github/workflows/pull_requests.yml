@@ -23,6 +23,19 @@ jobs:
     # Test server builds
     - run: yarn build-server
 
+  server-install:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@master
+      with:
+        ref: ${{ github.ref }}
+
+    - run: yarn release-server 0.0.0-install
+    - run: mv releases/datastation-server-0.0.0-install.zip /tmp/
+    - run: cd /tmp && unzip datastation-server-0.0.0-install.zip
+    - run: ls -lah /tmp
+
   e2e-linux:
     runs-on: ubuntu-latest
 
