@@ -163,20 +163,25 @@ export function App() {
     setProjectState(state);
   }
 
-  if (!state && urlState.projectId) {
-    return <Loading />;
-  }
+  let MainChild = Loading;
+  if (!state) {
+    if (urlState.projectId) {
+      return <Loading />;
+    }
 
-  // This allows us to render the sidebar in tests where we
-  // prepopulate connectors and servers
-  const hasSidebar = Boolean(
-    MODE_FEATURES.connectors ||
-      state.connectors?.length ||
-      state.servers?.length
-  );
+    if (!MODE_FEATURES.useDefaultProject) {
+      MainChild = MakeSelectProject;
+    }
+  } else if (urlState.projectId) {
+    console.log(state);
+    // This allows us to render the sidebar in tests where we
+    // prepopulate connectors and servers
+    const hasSidebar = Boolean(
+      MODE_FEATURES.connectors ||
+        state.connectors?.length ||
+        state.servers?.length
+    );
 
-  let MainChild = MakeSelectProject;
-  if (urlState.projectId || MODE_FEATURES.useDefaultProject) {
     MainChild = () => (
       <React.Fragment>
         {urlState.projectId && hasSidebar && (
