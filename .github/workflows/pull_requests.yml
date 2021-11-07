@@ -12,7 +12,7 @@ jobs:
     - uses: actions/checkout@master
       with:
         ref: ${{ github.ref }}
-    - run: ./scripts/ci/prepare_linux.sh
+    - run: ./scripts/ci/prepare_linux.sh --integration-tests
     - run: yarn format
     - run: yarn tsc
     - run: ./scripts/fail_on_diff.sh
@@ -22,6 +22,27 @@ jobs:
     - run: yarn test --runInBand --detectOpenHandles --forceExit --verbose
     # Test server builds
     - run: yarn build-server
+
+  server-install:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@master
+      with:
+        ref: ${{ github.ref }}
+
+    - run: yarn release-server 0.0.0-install
+    - run: mv releases/datastation-server-x64-0.0.0-install.zip /tmp/
+    - run: cd /tmp && unzip datastation-server-x64-0.0.0-install.zip
+    - run: ls -lah /tmp/build/release
+    - run: /tmp/build/release/install.sh
+    - run: bash -c '[[ -d /etc/datastation ]]'
+    - run: bash -c '[[ -d /usr/share/datastation ]]'
+    - run: bash -c '[[ -f /usr/share/datastation/server.js ]]'
+    - run: bash -c '[[ -f /usr/share/datastation/server_runner.js ]]'
+    - run: bash -c '[[ -f /etc/datastation/config.json ]]'
+    - run: bash -c '[[ -f /etc/systemd/system/datastation.service ]]'
+    - run: bash -c '[[ -f /etc/systemd/system/datastation-exporter.timer ]]'
 
   e2e-linux:
     runs-on: ubuntu-latest

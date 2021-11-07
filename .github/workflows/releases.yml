@@ -5,7 +5,28 @@ on:
     types: [published]
 
 jobs:
-  build-linux:
+  build-server:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@master
+      with:
+        ref: ${{ github.ref }}
+
+    - run: ./scripts/ci/prepare_linux.sh
+    - run: echo "GIT_TAG=`git tag --points-at HEAD`" >> $GITHUB_ENV
+    - run: |
+        echo "RELEASE_ID=`curl -H 'Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' https://api.github.com/repos/multiprocessio/datastation/releases/tags/$GIT_TAG | jq '.id'`" >> $GITHUB_ENV
+    - run: yarn release-server $GIT_TAG
+    - name: Upload on release
+      run: |
+        curl --fail \
+          -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+          -H "Content-Type: application/zip" \
+          --data-binary @./releases/datastation-server-x64-$GIT_TAG.zip \
+          "https://uploads.github.com/repos/multiprocessio/datastation/releases/$RELEASE_ID/assets?name=datastation-server-x64-$GIT_TAG.zip"
+
+  build-linux-desktop:
     runs-on: ubuntu-latest
 
     steps:
@@ -23,10 +44,10 @@ jobs:
         curl --fail \
           -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
           -H "Content-Type: application/zip" \
-          --data-binary @./releases/linux-x64-$GIT_TAG.zip \
-          "https://uploads.github.com/repos/multiprocessio/datastation/releases/$RELEASE_ID/assets?name=linux-x64-$GIT_TAG.zip"
+          --data-binary @./releases/datastation-linux-x64-$GIT_TAG.zip \
+          "https://uploads.github.com/repos/multiprocessio/datastation/releases/$RELEASE_ID/assets?name=datastation-linux-x64-$GIT_TAG.zip"
 
-  build-macos:
+  build-macos-desktop:
     runs-on: macos-latest
 
     steps:
@@ -44,10 +65,10 @@ jobs:
         curl --fail \
           -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
           -H "Content-Type: application/zip" \
-          --data-binary @./releases/darwin-x64-$GIT_TAG.zip \
-          "https://uploads.github.com/repos/multiprocessio/datastation/releases/$RELEASE_ID/assets?name=darwin-x64-$GIT_TAG.zip"
+          --data-binary @./releases/datastation-darwin-x64-$GIT_TAG.zip \
+          "https://uploads.github.com/repos/multiprocessio/datastation/releases/$RELEASE_ID/assets?name=datastation-darwin-x64-$GIT_TAG.zip"
 
-  build-windows:
+  build-windows-desktop:
     runs-on: windows-latest
 
     steps:
@@ -62,4 +83,4 @@ jobs:
     - run: yarn release-desktop $Env:GIT_TAG
     - name: Upload release
       run: |
-        curl --fail -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -H "Content-Type: application/zip" --data-binary "@./releases/win32-x64-$Env:GIT_TAG.zip" "https://uploads.github.com/repos/multiprocessio/datastation/releases/$Env:RELEASE_ID/assets?name=win32-x64-$Env:GIT_TAG.zip"
+        curl --fail -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -H "Content-Type: application/zip" --data-binary "@./releases/datastation-win32-x64-$Env:GIT_TAG.zip" "https://uploads.github.com/repos/multiprocessio/datastation/releases/$Env:RELEASE_ID/assets?name=datastation-win32-x64-$Env:GIT_TAG.zip"

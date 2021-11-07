@@ -1,0 +1,25 @@
+{
+  "auth": {
+    "sessionSecret": "", // A strong key for session signing
+    "openId": {
+      "realm": "https://accounts.google.com", // Or some other realm
+      "clientId": "my id",
+      "clientSecret": "my secret"
+    }
+  },
+
+  "server": {
+    "port": 443,
+    "address": "localhost",
+    "publicUrl": "https://datastation.mydomain.com", // The address users will enter into the browser to use the app
+    "tlsKey": "/home/server/certs/datastation.key.pem", // TLS certs are required, should be tied to the publicUrl domain
+    "tlsCert": "/home/server/certs/datastation.cert.pem"
+  },
+
+  "database": {
+    "address": "localhost",
+    "username": "datastation",
+    "password": "some good password",
+    "database": "datastation"
+  }
+}
