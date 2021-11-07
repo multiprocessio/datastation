@@ -1,6 +1,5 @@
 import React from 'react';
 import { ProjectPage } from '../../shared/state';
-import { Button } from '../components/Button';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import { Select } from '../components/Select';
 import { makeReevalPanel } from '../PageList';
@@ -17,7 +16,7 @@ export function Dashboard() {
   } = React.useContext(UrlStateContext);
   const { state: projectState, setState: setProjectState } =
     React.useContext(ProjectContext);
-  const { panels, name } = projectState.pages[pageIndex];
+  const { panels } = projectState.pages[pageIndex];
 
   const reevalPanel = makeReevalPanel(
     projectState.pages[pageIndex],
@@ -70,41 +69,27 @@ export function Dashboard() {
   }, [refreshPeriod, panels.map((p) => p.id).join(',')]);
 
   return (
-    <div className="main-body">
-      <div className="section">
-        <div className="vertical-align-center">
-          <div className="section-title">
-            {name}
-            {!IS_EXPORT && (
-              <span title="Enter editor mode">
-                <Button icon onClick={() => setUrlState({ view: 'editor' })}>
-                  pencil
-                </Button>
-              </span>
-            )}
-          </div>
-          {!IS_EXPORT && (
-            <div className="flex-right">
-              <Select
-                label="Refresh every"
-                onChange={(v: string) => setUrlState({ refreshPeriod: +v })}
-                value={String(+refreshPeriod || 60)}
-              >
-                <option value="30">30 seconds</option>
-                <option value="60">1 minute</option>
-                <option value={String(60 * 5)}>5 minutes</option>
-                <option value={String(60 * 15)}>15 minutes</option>
-                <option value={String(60 * 60)}>1 hour</option>
-              </Select>
-            </div>
-          )}
+    <div className="section">
+      {!IS_EXPORT && (
+        <div className="flex-right">
+          <Select
+            label="Refresh every"
+            onChange={(v: string) => setUrlState({ refreshPeriod: +v })}
+            value={String(+refreshPeriod || 60)}
+          >
+            <option value="30">30 seconds</option>
+            <option value="60">1 minute</option>
+            <option value={String(60 * 5)}>5 minutes</option>
+            <option value={String(60 * 15)}>15 minutes</option>
+            <option value={String(60 * 60)}>1 hour</option>
+          </Select>
         </div>
-        {panels.map((panel) => (
-          <ErrorBoundary key={panel.id}>
-            <Panel panel={panel} />
-          </ErrorBoundary>
-        ))}
-      </div>
+      )}
+      {panels.map((panel) => (
+        <ErrorBoundary key={panel.id}>
+          <Panel panel={panel} />
+        </ErrorBoundary>
+      ))}
     </div>
   );
 }

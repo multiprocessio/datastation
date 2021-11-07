@@ -8,4 +8,3 @@ prepend {UI_CONFIG_OVERRIDES} build/ui.js
 
 cp ui/index.html build
 node ./ui/scripts/css.js ./ui/style.css ./build/style.css
-# cp ui/style.css build

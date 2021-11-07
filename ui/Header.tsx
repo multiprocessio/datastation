@@ -3,6 +3,7 @@ import { APP_NAME, MODE, SITE_ROOT } from '../shared/constants';
 import '../shared/polyfill';
 import { DEFAULT_PROJECT } from '../shared/state';
 import { Button } from './components/Button';
+import { Link } from './components/Link';
 import { ProjectContext } from './ProjectStore';
 import { UrlStateContext } from './urlState';
 
@@ -19,7 +20,9 @@ export function Header({
   return (
     <header ref={setHeaderHeight}>
       <div className="vertical-align-center">
-        <span className="logo">{APP_NAME}</span>
+        <Link args={{ projectId, view: 'editor', page: 0 }} className="logo">
+          {APP_NAME}
+        </Link>
         <div className="flex-right vertical-align-center">
           {MODE === 'browser' ? (
             <React.Fragment>

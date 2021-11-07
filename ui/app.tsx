@@ -3,15 +3,24 @@ import { MODE, MODE_FEATURES, VERSION } from '../shared/constants';
 import { LANGUAGES } from '../shared/languages';
 import log from '../shared/log';
 import '../shared/polyfill';
-import { DEFAULT_PROJECT, ProjectState } from '../shared/state';
+import {
+  ConnectorInfo,
+  DEFAULT_PROJECT,
+  ProjectPage,
+  ProjectState,
+  ServerInfo,
+} from '../shared/state';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { Loading } from './components/Loading';
-import { Dashboard } from './dashboard';
-import { Editor } from './Editor';
+import { Version } from './components/Version';
+import { ConnectorList } from './ConnectorList';
 import { Header } from './Header';
 import { MakeSelectProject } from './MakeSelectProject';
-import { NotFound } from './NotFound';
+import { PageList } from './PageList';
 import { makeStore, ProjectContext, ProjectStore } from './ProjectStore';
-import { Scheduler } from './scheduler';
+import { ServerList } from './ServerList';
+import { Sidebar } from './Sidebar';
+import { Updates } from './Updates';
 import { UrlStateContext, useUrlState } from './urlState';
 
 if (MODE === 'browser') {
@@ -80,18 +89,128 @@ export function App() {
     setHeaderHeightInternal(e.offsetHeight);
   }, []);
 
-  let MainChild =
-    {
-      editor: Editor,
-      dashboard: Dashboard,
-      scheduler: Scheduler,
-    }[urlState.view || 'editor'] || NotFound;
-  if (!urlState.projectId && !MODE_FEATURES.useDefaultProject) {
-    MainChild = MakeSelectProject;
+  React.useEffect(() => {
+    if (state && state.projectName) {
+      document.title = state.projectName;
+    }
+
+    // Set body overflow once on init
+    if (MODE_FEATURES.noBodyYOverflow) {
+      document.body.style.overflowY = 'hidden';
+    }
+  }, [state && state.projectName]);
+
+  function updatePage(page: ProjectPage) {
+    state.pages[urlState.page] = page;
+    setProjectState(state);
+  }
+
+  function addPage(page: ProjectPage) {
+    state.pages.push(page);
+    setProjectState(state);
+  }
+
+  function deletePage(at: number) {
+    state.pages.splice(at, 1);
+    setProjectState(state);
+  }
+
+  function updateConnector(id: string, dc: ConnectorInfo) {
+    const index = (state.connectors || []).findIndex((c) => c.id === id);
+    if (index === -1) {
+      state.connectors.push(dc);
+      return;
+    }
+    state.connectors[index] = dc;
+    setProjectState(state);
+  }
+
+  function addConnector(dc: ConnectorInfo) {
+    state.connectors.push(dc);
+    setProjectState(state);
+  }
+
+  function deleteConnector(id: string) {
+    const at = (state.connectors || []).findIndex((c) => c.id === id);
+    if (at === -1) {
+      return;
+    }
+    state.connectors.splice(at, 1);
+    setProjectState(state);
+  }
+
+  function updateServer(id: string, dc: ServerInfo) {
+    const index = (state.servers || []).findIndex((c) => c.id === id);
+    if (index === -1) {
+      state.servers.push(dc);
+      return;
+    }
+    state.servers[index] = dc;
+    setProjectState(state);
+  }
+
+  function addServer(dc: ServerInfo) {
+    state.servers.push(dc);
+    setProjectState(state);
+  }
+
+  function deleteServer(id: string) {
+    const at = (state.servers || []).findIndex((c) => c.id === id);
+    if (at === -1) {
+      return;
+    }
+    state.servers.splice(at, 1);
+    setProjectState(state);
   }
 
   if (!state && urlState.projectId) {
     return <Loading />;
+  }
+
+  // This allows us to render the sidebar in tests where we
+  // prepopulate connectors and servers
+  const hasSidebar = Boolean(
+    MODE_FEATURES.connectors ||
+      state.connectors?.length ||
+      state.servers?.length
+  );
+
+  let MainChild = MakeSelectProject;
+  if (urlState.projectId || MODE_FEATURES.useDefaultProject) {
+    MainChild = () => (
+      <React.Fragment>
+        {urlState.projectId && hasSidebar && (
+          <Sidebar>
+            <ConnectorList
+              state={state}
+              updateConnector={updateConnector}
+              addConnector={addConnector}
+              deleteConnector={deleteConnector}
+            />
+            <ServerList
+              state={state}
+              updateServer={updateServer}
+              addServer={addServer}
+              deleteServer={deleteServer}
+            />
+            <ErrorBoundary>
+              <Updates />
+            </ErrorBoundary>
+          </Sidebar>
+        )}
+        <div className="main-body">
+          <PageList
+            state={state}
+            updatePage={updatePage}
+            addPage={addPage}
+            deletePage={deletePage}
+            pageIndex={urlState.page}
+            setPageIndex={(i) => setUrlState({ page: i })}
+          />
+          <Version />
+        </div>
+      </React.Fragment>
+    );
   }
 
   return (

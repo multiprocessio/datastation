@@ -16,7 +16,7 @@ export function SchedulerWithDeps({
   urlState: UrlState;
   setUrlState: (a: Partial<UrlState>) => void;
 }) {
-  const { schedules, name } = projectState.pages[pageIndex];
+  const { schedules } = projectState.pages[pageIndex];
 
   function addSchedule() {
     schedules.push(new ScheduledExport());
@@ -36,27 +36,17 @@ export function SchedulerWithDeps({
   }
 
   return (
-    <div className="main-body">
-      <div className="section">
-        <div className="section-title">
-          Schedule Exports for {name}
-          <span title="Enter editor mode">
-            <Button icon onClick={() => setUrlState({ view: 'editor' })}>
-              pencil
-            </Button>
-          </span>
-        </div>
-        {schedules.map((s) => (
-          <Schedule
-            setSchedule={setSchedule}
-            schedule={s}
-            key={s.id}
-            removeSchedule={removeSchedule}
-          />
-        ))}
-        <div className="text-center">
-          <Button onClick={() => addSchedule()}>New Scheduled Export</Button>
-        </div>
+    <div className="section">
+      {schedules.map((s) => (
+        <Schedule
+          setSchedule={setSchedule}
+          schedule={s}
+          key={s.id}
+          removeSchedule={removeSchedule}
+        />
+      ))}
+      <div className="text-center">
+        <Button onClick={() => addSchedule()}>New Scheduled Export</Button>
       </div>
     </div>
   );
