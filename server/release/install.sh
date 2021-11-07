@@ -12,3 +12,5 @@ sudo cp $ROOT_DIR/release/datastation-exporter.timer /etc/systemd/system/
 
 sudo id -u datastation >/dev/null 2>&1 || sudo useradd -r -s /bin/false datastation
 sudo chown -R datastation:datastation /etc/datastation /usr/share/datastation
+
+sudo systemctl enable datastation
