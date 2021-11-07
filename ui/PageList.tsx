@@ -148,7 +148,10 @@ export function PageList({
       <div className="section-title">
         {state.pages.map((page: ProjectPage, i: number) =>
           i === pageIndex ? (
-            <div className="vertical-align-center page-name page-name--current" key={page.id}>
+            <div
+              className="vertical-align-center page-name page-name--current"
+              key={page.id}
+            >
               <span title="Delete Page">
                 <Confirm
                   right
@@ -212,8 +215,8 @@ export function PageList({
           args={{ view: 'editor' }}
         >
           Editor
-    </Link>
-      <Link
+        </Link>
+        <Link
           className={`page-mode ${
             urlState.view === 'scheduler' ? 'page-mode--on' : ''
           }`}

@@ -205,7 +205,7 @@ export function App() {
             addPage={addPage}
             deletePage={deletePage}
             pageIndex={urlState.page}
-            setPageIndex={(i) => setUrlState({ page: i })}
+            setPageIndex={(i) => setUrlState({ page: i, view: 'editor' })}
           />
           <Version />
         </div>

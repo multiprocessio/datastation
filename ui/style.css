@@ -369,13 +369,13 @@ header > div {
 }
 
 .page-mode {
-    padding-right: 15px;
-    text-decoration: none;
-    color: black;
+  padding-right: 15px;
+  text-decoration: none;
+  color: black;
 }
 
 .page-mode:hover {
-    color: black;
+  color: black;
 }
 
 .page-mode--on {
