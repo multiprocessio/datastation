@@ -3,7 +3,7 @@ import { EOL } from './types';
 function preamble(
   resultsFile: string,
   panelId: string,
-  indexIdMap: Array<string>
+  idMap: Record<string | number, string>
 ) {
   return `
 try
@@ -14,10 +14,7 @@ catch e
     import JSON
 end
 function DM_getPanel(i)
-  panelId = JSON.parse("${JSON.stringify(indexIdMap).replaceAll(
-    '"',
-    '\\"'
-  )}")[i+1]
+  panelId = JSON.parse("${JSON.stringify(idMap).replaceAll('"', '\\"')}")[i+1]
   JSON.parsefile(string("${resultsFile}", panelId))
 end
 function DM_setPanel(v)

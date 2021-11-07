@@ -20,7 +20,7 @@ function defaultContent(panelIndex: number) {
 function preamble(
   resultsFile: string,
   panelId: string,
-  indexIdMap: Array<string>
+  idMap: Record<string | number, string>
 ) {
   return '';
 }
@@ -29,7 +29,7 @@ async function inMemoryEval(
   prog: string,
   resultsOrDiskDetails:
     | Array<PanelResult>
-    | { indexIdMap: Array<string>; resultsFile: string }
+    | { idMap: Record<string | number, string>; resultsFile: string }
 ): Promise<{ value: any; preview: string; stdout: string }> {
   // Functions like this can only be declared globally. So we make sure DM_getPanel gets renamed to something unique
   const thisDM_getPanel = 'DM_getPanel_' + uuidv4().replaceAll('-', '_');
@@ -53,7 +53,7 @@ async function inMemoryEval(
       let f;
       try {
         f = fs.readFileSync(
-          resultsOrDiskDetails.resultsFile + resultsOrDiskDetails.indexIdMap[n]
+          resultsOrDiskDetails.resultsFile + resultsOrDiskDetails.idMap[n]
         );
       } catch (e) {
         log.error(e);

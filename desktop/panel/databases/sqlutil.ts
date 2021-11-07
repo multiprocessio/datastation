@@ -1,10 +1,4 @@
-import {
-  ArrayShape,
-  ObjectShape,
-  ScalarShape,
-  Shape,
-  VariedShape,
-} from 'shape';
+import { ArrayShape, ObjectShape, ScalarShape, VariedShape } from 'shape';
 import { chunk } from '../../../shared/array';
 import {
   NotAnArrayOfObjectsError,
@@ -61,15 +55,18 @@ export interface PanelToImport {
 
 export function transformDM_getPanelCalls(
   query: string,
-  indexShapeMap: Array<Shape>,
-  indexIdMap: Array<string>,
+  idShapeMap: Record<string | number, string>,
+  idMap: Record<string | number, string>,
   getPanelCallsAllowed: boolean
 ): { panelsToImport: Array<PanelToImport>; query: string } {
   const panelsToImport: Array<PanelToImport> = [];
   query = query.replace(
-    /DM_getPanel\(([0-9]+)\)/g,
+    /DM_getPanel\(('[0-9a-Z ]+')\)/g,
     function (_: string, panelSource: string) {
-      const s = indexShapeMap[+panelSource];
+      const nameOrIndex = panelSource.startsWith("'")
+        ? panelSource.substring(1, panelSource.length - 2)
+        : +panelSource;
+      const s = idShapeMap[nameOrIndex];
       if (!s || s.kind !== 'array') {
         throw new NotAnArrayOfObjectsError(+panelSource);
       }
@@ -79,7 +76,7 @@ export function transformDM_getPanelCalls(
         throw new NotAnArrayOfObjectsError(+panelSource);
       }
 
-      const id = indexIdMap[+panelSource];
+      const id = idMap[nameOrIndex];
       if (panelsToImport.filter((p) => id === p.id).length) {
         // Don't import the same panel twice.
         return;

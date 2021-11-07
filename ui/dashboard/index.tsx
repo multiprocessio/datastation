@@ -2,30 +2,23 @@ import React from 'react';
 import { ProjectPage } from '../../shared/state';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import { Select } from '../components/Select';
-import { makeReevalPanel } from '../PageList';
-import { ProjectContext } from '../ProjectStore';
 import { UrlStateContext } from '../urlState';
 import { Panel } from './Panel';
 
 const IS_EXPORT = Boolean((window as any).DATASTATION_IS_EXPORT);
 
-export function Dashboard() {
+export function Dashboard({
+  page,
+  reevalPanel,
+}: {
+  page: ProjectPage;
+  reevalPanel: (panelId: string, reset?: boolean) => void;
+}) {
   const {
-    state: { page: pageIndex, refreshPeriod },
+    state: { refreshPeriod },
     setState: setUrlState,
   } = React.useContext(UrlStateContext);
-  const { state: projectState, setState: setProjectState } =
-    React.useContext(ProjectContext);
-  const { panels } = projectState.pages[pageIndex];
-
-  const reevalPanel = makeReevalPanel(
-    projectState.pages[pageIndex],
-    projectState,
-    (p: ProjectPage) => {
-      projectState.pages[pageIndex] = p;
-      setProjectState(projectState);
-    }
-  );
+  const { panels } = page;
 
   async function evalAll() {
     for (let panel of panels) {

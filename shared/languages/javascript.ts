@@ -27,13 +27,13 @@ function defaultContent(panelIndex: number) {
 function preamble(
   resultsFile: string,
   panelId: string,
-  indexIdMap: Array<string>
+  idMap: Record<string | number, string>
 ) {
   return `
 function DM_getPanel(i) {
   const fs = require('fs');
   return JSON.parse(fs.readFileSync('${resultsFile}'+${JSON.stringify(
-    indexIdMap
+    idMap
   )}[i]));
 }
 function DM_setPanel(v) {
@@ -46,7 +46,7 @@ function inMemoryEval(
   prog: string,
   results:
     | Array<PanelResult>
-    | { indexIdMap: Array<string>; resultsFile: string }
+    | { idMap: Record<string | number, string>; resultsFile: string }
 ): Promise<{ value: any; preview: string; stdout: string }> {
   if (!Array.isArray(results)) {
     // This is not a valid situation. Not sure how it could happen.

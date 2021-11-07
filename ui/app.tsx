@@ -73,12 +73,18 @@ const store = makeStore(MODE);
 export function App() {
   const [urlState, setUrlState] = useUrlState();
   const [state, setProjectState] = useProjectState(urlState.projectId, store);
+  const [loadedDefault, setLoadedDefault] = React.useState(false);
   React.useEffect(() => {
-    if (!urlState.projectId && MODE_FEATURES.useDefaultProject) {
+    if (
+      !urlState.projectId &&
+      MODE_FEATURES.useDefaultProject &&
+      !loadedDefault
+    ) {
+      setLoadedDefault(true);
       setUrlState({ projectId: DEFAULT_PROJECT.projectName });
       setProjectState(DEFAULT_PROJECT);
     }
-  });
+  }, [urlState.projectId, loadedDefault]);
 
   const [headerHeight, setHeaderHeightInternal] = React.useState(0);
   const setHeaderHeight = React.useCallback((e: HTMLElement) => {
@@ -163,17 +169,16 @@ export function App() {
     setProjectState(state);
   }
 
-  let MainChild = Loading;
+  let main = <Loading />;
   if (!state) {
     if (urlState.projectId) {
       return <Loading />;
     }
 
     if (!MODE_FEATURES.useDefaultProject) {
-      MainChild = MakeSelectProject;
+      main = <MakeSelectProject />;
     }
   } else if (urlState.projectId) {
-    console.log(state);
     // This allows us to render the sidebar in tests where we
     // prepopulate connectors and servers
     const hasSidebar = Boolean(
@@ -182,7 +187,7 @@ export function App() {
         state.servers?.length
     );
 
-    MainChild = () => (
+    main = (
       <React.Fragment>
         {urlState.projectId && hasSidebar && (
           <Sidebar>
@@ -234,7 +239,7 @@ export function App() {
             }}
             className={'view-' + (urlState.view || 'editor')}
           >
-            <MainChild />
+            {main}
           </main>
         </div>
       </UrlStateContext.Provider>

@@ -1,38 +1,32 @@
 import React from 'react';
-import { ProjectState, ScheduledExport } from '../../shared/state';
+import { ProjectPage, ScheduledExport } from '../../shared/state';
 import { Button } from '../components/Button';
-import { ProjectContext } from '../ProjectStore';
-import { UrlState, UrlStateContext } from '../urlState';
 import { Schedule } from './Schedule';
 
-export function SchedulerWithDeps({
-  projectState,
-  setProjectState,
-  urlState: { page: pageIndex },
-  setUrlState,
+export function Scheduler({
+  page,
+  updatePage,
 }: {
-  projectState: ProjectState;
-  setProjectState: (a: ProjectState) => void;
-  urlState: UrlState;
-  setUrlState: (a: Partial<UrlState>) => void;
+  page: ProjectPage;
+  updatePage: (page: ProjectPage) => void;
 }) {
-  const { schedules } = projectState.pages[pageIndex];
+  const { schedules } = page;
 
   function addSchedule() {
     schedules.push(new ScheduledExport());
-    setProjectState(projectState);
+    updatePage(page);
   }
 
   function removeSchedule(id: string) {
     const at = schedules.findIndex((ps) => ps.id === id);
     schedules.splice(at, 1);
-    setProjectState(projectState);
+    updatePage(page);
   }
 
   function setSchedule(s: ScheduledExport) {
     const i = schedules.findIndex((ps) => ps.id === s.id);
     schedules[i] = s;
-    setProjectState(projectState);
+    updatePage(page);
   }
 
   return (
@@ -49,20 +43,5 @@ export function SchedulerWithDeps({
         <Button onClick={() => addSchedule()}>New Scheduled Export</Button>
       </div>
     </div>
-  );
-}
-
-export function Scheduler() {
-  const { state: urlState, setState: setUrlState } =
-    React.useContext(UrlStateContext);
-  const { state: projectState, setState: setProjectState } =
-    React.useContext(ProjectContext);
-  return (
-    <SchedulerWithDeps
-      projectState={projectState}
-      setProjectState={setProjectState}
-      urlState={urlState}
-      setUrlState={setUrlState}
-    />
   );
 }

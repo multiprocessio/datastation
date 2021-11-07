@@ -26,7 +26,7 @@ export function getUrlState(): UrlState {
   return {
     projectId: getQueryParameter('projectId'),
     page: +getQueryParameter('page') || 0,
-    view: getQueryParameter('view') as UrlState['view'],
+    view: (getQueryParameter('view') || 'editor') as UrlState['view'],
   };
 }
 

@@ -23,7 +23,12 @@ export async function evalProgramPanel(
     throw new Error(`Unknown program type: '${program.type}'`);
   }
 
-  const panelResults = panels.map((p) => p.resultMeta);
+  const panelResults = {};
+  panels.forEach((p, index) => {
+    panelResults[p.name] = p.id;
+    panelResults[index] = p.id;
+  });
+
   const res = await language.inMemoryEval(panel.content, panelResults);
   const s = shape(res.value);
   return {

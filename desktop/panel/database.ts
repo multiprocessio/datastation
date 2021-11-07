@@ -152,8 +152,8 @@ export async function evalDatabase(
 
   const { query, panelsToImport } = transformDM_getPanelCalls(
     content,
-    extra.indexShapeMap,
-    extra.indexIdMap,
+    extra.idShapeMap,
+    extra.idIdMap,
     ['mysql', 'postgres', 'sqlite'].includes(connector.database.type)
   );
 

@@ -19,12 +19,12 @@ function defaultContent(panelIndex: number) {
 function preamble(
   resultsFile: string,
   panelId: string,
-  indexIdMap: Array<string>
+  idMap: Record<string | number, string>
 ) {
   return `
 def DM_getPanel(i):
   import json
-  with open(r'${resultsFile}'+${JSON.stringify(indexIdMap)}[i]) as f:
+  with open(r'${resultsFile}'+${JSON.stringify(idMap)}[i]) as f:
     return json.load(f)
 def DM_setPanel(v):
   import json
@@ -58,9 +58,7 @@ function inMemoryInit() {
 
 function inMemoryEval(
   prog: string,
-  results:
-    | Array<PanelResult>
-    | { indexIdMap: Array<string>; resultsFile: string }
+  results: Array<PanelResult> | { idMap: Array<string>; resultsFile: string }
 ): Promise<{ value: any; preview: string; stdout: string }> {
   if (!Array.isArray(results)) {
     // This is not a valid situation. Not sure how it could happen.

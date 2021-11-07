@@ -174,18 +174,22 @@ export const makeEvalHandler = (
       );
     }
 
-    const indexIdMap = project.pages[panelPage].panels.map((p) => p.id);
-    const indexShapeMap = project.pages[panelPage].panels.map(
-      (p) => p.resultMeta.shape
-    );
+    const idMap: Record<string | number, string> = {};
+    const idShapeMap: Record<string | number, string> = {};
+    project.pages[panelPage].panels.forEach((p, i) => {
+      idMap[p.name] = p.id;
+      idMap[i] = p.id;
+      idShapeMap[p.name] = p.resultMeta.shape;
+      idShapeMap[i] = p.resultMeta.shape;
+    });
 
     const evalHandler = EVAL_HANDLERS[panel.type];
     const res = await evalHandler(
       project,
       panel,
       {
-        indexIdMap,
-        indexShapeMap,
+        idMap,
+        idShapeMap,
       },
       dispatch
     );

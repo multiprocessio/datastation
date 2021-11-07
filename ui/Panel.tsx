@@ -286,9 +286,8 @@ export function Panel({
               ))}
             </Select>
 
-            <span className="material-icons">{panelUIDetails.icon}</span>
-
             <Input
+              label="Name"
               className="panel-name"
               autoWidth
               placeholder={`Untitled panel #${panelIndex}`}

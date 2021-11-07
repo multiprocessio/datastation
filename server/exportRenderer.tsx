@@ -3,22 +3,22 @@ import React from 'react';
 import { renderToString } from 'react-dom/server';
 import { ProjectState } from '../shared/state';
 import { Dashboard } from '../ui/dashboard';
-import { ProjectContext } from '../ui/ProjectStore';
+import { makeReevalPanel } from '../ui/PageList';
 import { UrlStateContext } from '../ui/urlState';
 
 export function renderPage(project: ProjectState, pageId: string) {
-  const page = project.pages.findIndex((p) => p.id === pageId);
+  const pageIndex = project.pages.findIndex((p) => p.id === pageId);
+  const page = project.pages[pageIndex];
+  const reevalPanel = makeReevalPanel(page, project, (p) => {});
   const view = (
-    <ProjectContext.Provider value={{ state: project, setState: () => {} }}>
-      <UrlStateContext.Provider
-        value={{
-          state: { page: page, projectId: project.id, view: 'dashboard' },
-          setState: () => {},
-        }}
-      >
-        <Dashboard />
-      </UrlStateContext.Provider>
-    </ProjectContext.Provider>
+    <UrlStateContext.Provider
+      value={{
+        state: { projectId: project.id, page: pageIndex, view: 'dashboard' },
+        setState: (p) => {},
+      }}
+    >
+      <Dashboard page={page} reevalPanel={reevalPanel} />
+    </UrlStateContext.Provider>
   );
 
   return `<!doctype html>

@@ -131,17 +131,10 @@ export function PageList({
 
   const MainChild =
     {
-      editor: () => (
-        <PanelList
-          page={page}
-          updatePage={updatePage}
-          reevalPanel={reevalPanel}
-          panelResults={panelResults}
-        />
-      ),
+      editor: PanelList,
       dashboard: Dashboard,
       scheduler: Scheduler,
-    }[urlState.view || 'editor'] || NotFound;
+    }[urlState.view] || NotFound;
 
   return (
     <div className="section pages">
@@ -234,7 +227,12 @@ export function PageList({
         </Link>
       </div>
 
-      <MainChild />
+      <MainChild
+        page={page}
+        updatePage={updatePage}
+        reevalPanel={reevalPanel}
+        panelResults={panelResults}
+      />
     </div>
   );
 }
