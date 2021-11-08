@@ -185,9 +185,10 @@ export function PanelPlayWarningWithLinks({
     if (!panel) {
       log.info('Failed to resolve panel ' + c);
       return (
-	<Alert type="warning">
-	  Unable to resolve panel <strong>{c}</strong>. Did you enter a valid panel name or index?
-	</Alert>
+        <Alert type="warning">
+          Unable to resolve panel <strong>{c}</strong>. Did you enter a valid
+          panel name or index?
+        </Alert>
       );
     }
 

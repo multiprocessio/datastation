@@ -87,13 +87,16 @@ export function App() {
   }, [urlState.projectId, loadedDefault]);
 
   const [headerHeight, setHeaderHeightInternal] = React.useState(0);
-  const setHeaderHeight = React.useCallback((e: HTMLElement) => {
-    if (!e) {
-      return;
-    }
+  const setHeaderHeight = React.useCallback(
+    (e: HTMLElement) => {
+      if (!e) {
+        return;
+      }
 
-    setHeaderHeightInternal(e.offsetHeight);
-  }, []);
+      setHeaderHeightInternal(e.offsetHeight);
+    },
+    [setHeaderHeightInternal]
+  );
 
   React.useEffect(() => {
     if (state && state.projectName) {
