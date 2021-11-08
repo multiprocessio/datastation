@@ -694,7 +694,7 @@ export const DEFAULT_PROJECT: ProjectState = (() => {
   const ppi = new ProgramPanelInfo({
     name: 'Transform with SQL',
     type: 'sql',
-    content: 'SELECT name, age+5 AS age FROM DM_getPanel(0);',
+    content: `SELECT name, age+5 AS age FROM DM_getPanel('Raw CSV Text');`,
   });
 
   const gpi = new GraphPanelInfo({ name: 'Display' });
