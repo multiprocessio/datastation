@@ -67,19 +67,23 @@ export function transformDM_getPanelCalls(
 ): { panelsToImport: Array<PanelToImport>; query: string } {
   const panelsToImport: Array<PanelToImport> = [];
   query = query.replace(
-    /DM_getPanel\(('[0-9a-Z ]+')\)/g,
-    function (_: string, panelSource: string) {
-      const nameOrIndex = panelSource.startsWith("'")
-        ? panelSource.substring(1, panelSource.length - 2)
-        : +panelSource;
+    /(DM_getPanel\((?<id>[0-9]+)\))|(DM_getPanel\((?<name>'(?:[^'\\]|\\.)*\')\))/g,
+    function (...args) {
+      const match = args.pop();
+      let nameOrIndex: number | string = '';
+      if (match.name) {
+        nameOrIndex = match.name.substring(1, match.name.length - 1);
+      } else {
+        nameOrIndex = +match.id;
+      }
       const s = idShapeMap[nameOrIndex];
       if (!s || s.kind !== 'array') {
-        throw new NotAnArrayOfObjectsError(+panelSource);
+        throw new NotAnArrayOfObjectsError(nameOrIndex);
       }
 
       const rowShape = (s as ArrayShape).children as ObjectShape;
       if (rowShape.kind !== 'object') {
-        throw new NotAnArrayOfObjectsError(+panelSource);
+        throw new NotAnArrayOfObjectsError(nameOrIndex);
       }
 
       const id = idMap[nameOrIndex];
@@ -88,14 +92,14 @@ export function transformDM_getPanelCalls(
         return;
       }
 
-      const tableName = `t${panelSource}`;
+      const tableName = `t_${nameOrIndex}`;
       const columns = sqlColumnsAndTypesFromShape(rowShape);
       panelsToImport.push({
         id,
         columns,
         tableName,
       });
-      return tableName;
+      return `"${tableName}"`;
     }
   );
 
