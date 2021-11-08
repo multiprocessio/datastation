@@ -15,8 +15,10 @@ export interface LanguageInfo {
   inMemoryInit?: () => Promise<void>;
   inMemoryEval?: (
     prog: string,
-    resultsOrDiskDetails:
-      | Record<string | number, PanelResult>
-      | { idMap: Record<string | number, string>; resultsFile: string }
+    results: Record<string | number, PanelResult>
   ) => Promise<{ stdout: string; preview: string; value: any }>;
+  nodeEval?: (
+    prog: string,
+    results: { idMap: Record<string | number, string>; resultsFile: string }
+  ) => { stdout: string; preview: string; value: any };
 }

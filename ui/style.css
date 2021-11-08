@@ -136,6 +136,11 @@ label.input input[type='file'] {
   border-bottom: 0;
 }
 
+.input-invalid {
+  color: red;
+  font-size: 0.75rem;
+}
+
 .vertical-align-center {
   display: flex;
   align-items: center;
@@ -374,7 +379,8 @@ header > div {
   color: black;
 }
 
-.page-mode:hover {
+.page-mode:hover,
+.page-mode:visited {
   color: black;
 }
 
@@ -574,18 +580,18 @@ header > div {
 .alert {
   margin-top: 15px;
   padding: 15px;
-}
 
-.alert pre {
-  white-space: pre-wrap;
-}
+  pre {
+    white-space: pre-wrap;
+  }
 
-.alert a {
-  padding: 0 5px;
+  a {
+    padding: 0 5px;
+  }
 }
 
 .alert > .material-icons {
-  padding-right: 15px;
+  margin-right: 15px;
   color: #555;
 }
 

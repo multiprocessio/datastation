@@ -29,14 +29,14 @@ export async function evalColumnPanel(
     const panelIndex = (panels || []).findIndex((p) => p.id === panelSource);
     const resultMeta = (panels[panelIndex] || {}).resultMeta;
     if (!resultMeta || !resultMeta.value) {
-      throw new InvalidDependentPanelError(panelIndex);
+      throw new InvalidDependentPanelError(panelSource);
     }
     const { value } = resultMeta;
     try {
       const valueWithRequestedColumns = columnsFromObject(
         value,
         columns,
-        panelIndex
+        panelSource
       );
       const s = shape(valueWithRequestedColumns);
       return {

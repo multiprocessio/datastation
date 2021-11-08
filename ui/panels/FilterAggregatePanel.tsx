@@ -69,7 +69,7 @@ export async function evalFilterAggregatePanel(
     );
     const resultMeta = (panels[panelIndex] || {}).resultMeta;
     if (!resultMeta || !resultMeta.value) {
-      throw new InvalidDependentPanelError(panelIndex);
+      throw new InvalidDependentPanelError(panel.filagg.panelSource);
     }
 
     const idMap: Record<string | number, string> = {};
@@ -77,7 +77,7 @@ export async function evalFilterAggregatePanel(
       idMap[index] = p.id;
       idMap[p.name] = p.id;
     });
-    const query = buildSQLiteQuery(panel, panelResults);
+    const query = buildSQLiteQuery(panel, idMap);
 
     const panelResults: Record<string | number, PanelResult> = {};
     panels.forEach((p, index) => {

@@ -157,7 +157,7 @@ export function buildSQLiteQuery(
     (id) => idMap[id] === panelSource
   );
   if (panelIndex) {
-    throw new InvalidDependentPanelError(+panelIndex);
+    throw new InvalidDependentPanelError(panelSource);
   }
 
   let columns = '*';

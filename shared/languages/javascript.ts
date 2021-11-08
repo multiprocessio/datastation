@@ -44,17 +44,8 @@ function DM_setPanel(v) {
 
 function inMemoryEval(
   prog: string,
-  results:
-    | Record<string | number, PanelResult>
-    | { idMap: Record<string | number, string>; resultsFile: string }
+  results: Record<string | number, PanelResult>
 ): Promise<{ value: any; preview: string; stdout: string }> {
-  if (typeof results.idMap !== 'undefined') {
-    // This is not a valid situation. Not sure how it could happen.
-    throw new Error(
-      'Bad calling convention for in-memory panel. Expected full results object.'
-    );
-  }
-
   const anyWindow = windowOrGlobal as any;
   anyWindow.DM_getPanel = (panelId: number) => {
     if (!results[panelId]) {

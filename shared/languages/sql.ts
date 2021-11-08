@@ -25,13 +25,10 @@ function preamble(
   return '';
 }
 
-async function inMemoryEval(
-  prog: string,
-  resultsOrDiskDetails:
-    | Record<string | number, PanelResult>
-    | { idMap: Record<string | number, string>; resultsFile: string }
-): Promise<{ value: any; preview: string; stdout: string }> {
-  // Functions like this can only be declared globally. So we make sure DM_getPanel gets renamed to something unique
+function runSQL(prog: string, fetchResults: (n: string | number) => any[]) {
+  // Functions like this can only be declared globally. So we make
+  // sure DM_getPanel gets renamed to something unique so they don't
+  // conflict if multiple run at the same time.
   const thisDM_getPanel = 'DM_getPanel_' + uuidv4().replaceAll('-', '_');
   const fromAddons = (alasql as any).from;
   fromAddons[thisDM_getPanel] = function (
@@ -41,26 +38,7 @@ async function inMemoryEval(
     idx: any,
     query: any
   ) {
-    let res: any;
-    if (typeof resultsOrDiskDetails.idMap === 'undefined') {
-      if (!resultsOrDiskDetails[n] || !resultsOrDiskDetails[n].value) {
-        throw new InvalidDependentPanelError(n);
-      }
-
-      res = resultsOrDiskDetails[n].value;
-    } else {
-      const fs = require('fs');
-      let f;
-      try {
-        f = fs.readFileSync(
-          resultsOrDiskDetails.resultsFile + resultsOrDiskDetails.idMap[n]
-        );
-      } catch (e) {
-        log.error(e);
-        throw new InvalidDependentPanelError(n);
-      }
-      res = JSON.parse(f.toString());
-    }
+    let res = fetchResults(n);
     if (cb) {
       res = cb(res, idx, query);
     }
@@ -70,9 +48,7 @@ async function inMemoryEval(
   const patchedProgram = prog.replaceAll(/DM_getPanel/gi, thisDM_getPanel);
 
   try {
-    // It is only asynchronous if you run "multiple" queries, so wrap
-    // the one query in an array.
-    const [value] = await alasql([patchedProgram]);
+    const value = alasql(patchedProgram);
     return {
       value,
       preview: preview(value),
@@ -84,6 +60,38 @@ async function inMemoryEval(
   }
 }
 
+function nodeEval(
+  prog: string,
+  results: { idMap: Record<string | number, string>; resultsFile: string }
+) {
+  return runSQL(prog, (n: string | number) => {
+    const fs = require('fs');
+    let f;
+    try {
+      f = fs.readFileSync(results.resultsFile + results.idMap[n]);
+    } catch (e) {
+      log.error(e);
+      throw new InvalidDependentPanelError(n);
+    }
+    return JSON.parse(f.toString());
+  });
+}
+
+function inMemoryEval(
+  prog: string,
+  results: Record<string | number, PanelResult>
+): Promise<{ value: any; preview: string; stdout: string }> {
+  return Promise.resolve(
+    runSQL(prog, (n: string | number) => {
+      if (!results[n] || !results[n].value) {
+        throw new InvalidDependentPanelError(n);
+      }
+
+      return results[n].value;
+    })
+  );
+}
+
 export const SQL = {
   name: 'SQL',
   defaultPath: '',
@@ -91,4 +99,5 @@ export const SQL = {
   preamble,
   inMemoryEval,
   exceptionRewriter,
+  nodeEval,
 };

@@ -3,7 +3,7 @@ import { NotAnArrayOfObjectsError } from './errors';
 export function columnsFromObject(
   value: any,
   columns: Array<string>,
-  panelSource: number
+  panelSource: number | string
 ) {
   if (!value || !Array.isArray(value)) {
     throw new NotAnArrayOfObjectsError(panelSource);

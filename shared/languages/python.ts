@@ -58,17 +58,8 @@ function inMemoryInit() {
 
 function inMemoryEval(
   prog: string,
-  results:
-    | Record<string | number, PanelResult>
-    | { idMap: Array<string>; resultsFile: string }
+  results: Record<string | number, PanelResult>
 ): Promise<{ value: any; preview: string; stdout: string }> {
-  if (typeof results.idMap !== 'undefined') {
-    // This is not a valid situation. Not sure how it could happen.
-    throw new Error(
-      'Bad calling convention for in-memory panel. Expected full results object.'
-    );
-  }
-
   const anyWindow = windowOrGlobal as any;
 
   const stdout: Array<string> = [];

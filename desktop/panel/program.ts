@@ -21,8 +21,8 @@ export async function evalProgram(
 
   const projectResultsFile = getProjectResultsFile(project.projectName);
 
-  if (!language.defaultPath) {
-    const res = await language.inMemoryEval(ppi.content, {
+  if (language.nodeEval) {
+    const res = language.nodeEval(ppi.content, {
       resultsFile: projectResultsFile,
       idMap,
     });
@@ -96,10 +96,7 @@ export async function evalProgram(
       );
       const match = resultsFileRE.exec(e.message);
       if (match && match.groups && match.groups.id !== ppi.id) {
-        const panelSource = Object.keys(idMap).find(
-          (i) => idMap[i] === match.groups.id
-        );
-        throw new InvalidDependentPanelError(+panelSource);
+        throw new InvalidDependentPanelError(match.groups.id);
       }
       e.message = language.exceptionRewriter(e.message, programTmp.path);
       e.stdout = out;
