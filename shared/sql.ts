@@ -138,7 +138,7 @@ export const MYSQL_QUOTE = {
 
 export function buildSQLiteQuery(
   vp: FilterAggregatePanelInfo,
-  idIndexMap: Array<string>
+  idMap: Record<string | number, string>
 ): string {
   const {
     panelSource,
@@ -153,9 +153,11 @@ export function buildSQLiteQuery(
     windowInterval,
   } = vp.filagg;
 
-  const panelIndex = idIndexMap.findIndex((id) => id === panelSource);
-  if (panelIndex === -1) {
-    throw new InvalidDependentPanelError(panelIndex);
+  const panelIndex = Object.values(idMap).find(
+    (id) => idMap[id] === panelSource
+  );
+  if (panelIndex) {
+    throw new InvalidDependentPanelError(+panelIndex);
   }
 
   let columns = '*';

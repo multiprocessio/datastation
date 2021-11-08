@@ -3,7 +3,7 @@ import fs from 'fs';
 import jsesc from 'jsesc';
 import { EOL } from 'os';
 import { preview } from 'preview';
-import { shape } from 'shape';
+import { shape, Shape } from 'shape';
 import { file as makeTmpFile } from 'tmp-promise';
 import { Cancelled } from '../../shared/errors';
 import log from '../../shared/log';
@@ -175,12 +175,12 @@ export const makeEvalHandler = (
     }
 
     const idMap: Record<string | number, string> = {};
-    const idShapeMap: Record<string | number, string> = {};
+    const idShapeMap: Record<string | number, Shape> = {};
     project.pages[panelPage].panels.forEach((p, i) => {
-      idMap[p.name] = p.id;
       idMap[i] = p.id;
-      idShapeMap[p.name] = p.resultMeta.shape;
+      idMap[p.name] = p.id;
       idShapeMap[i] = p.resultMeta.shape;
+      idShapeMap[p.name] = p.resultMeta.shape;
     });
 
     const evalHandler = EVAL_HANDLERS[panel.type];

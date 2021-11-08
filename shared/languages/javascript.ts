@@ -10,7 +10,7 @@ function exceptionRewriter(msg: string, programPath: string) {
   const matcher = RegExp(`${programPath}:([1-9]*)`.replaceAll('/', '\\/'), 'g');
 
   return msg.replace(matcher, function (_: string, line: string) {
-    return `${programPath}:${+line - preamble('', '', []).split(EOL).length}`;
+    return `${programPath}:${+line - preamble('', '', {}).split(EOL).length}`;
   });
 }
 
@@ -45,10 +45,10 @@ function DM_setPanel(v) {
 function inMemoryEval(
   prog: string,
   results:
-    | Array<PanelResult>
+    | Record<string | number, PanelResult>
     | { idMap: Record<string | number, string>; resultsFile: string }
 ): Promise<{ value: any; preview: string; stdout: string }> {
-  if (!Array.isArray(results)) {
+  if (typeof results.idMap !== 'undefined') {
     // This is not a valid situation. Not sure how it could happen.
     throw new Error(
       'Bad calling convention for in-memory panel. Expected full results object.'

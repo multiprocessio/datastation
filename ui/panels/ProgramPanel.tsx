@@ -23,10 +23,10 @@ export async function evalProgramPanel(
     throw new Error(`Unknown program type: '${program.type}'`);
   }
 
-  const panelResults = {};
+  const panelResults: Record<string | number, PanelResult> = {};
   panels.forEach((p, index) => {
-    panelResults[p.name] = p.id;
-    panelResults[index] = p.id;
+    panelResults[index] = p.resultMeta;
+    panelResults[p.name] = p.resultMeta;
   });
 
   const res = await language.inMemoryEval(panel.content, panelResults);

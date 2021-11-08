@@ -36,7 +36,7 @@ function exceptionRewriter(msg: string, programPath: string) {
   const matcher = RegExp(`${programPath}:([1-9]*)`.replaceAll('/', '\\/'), 'g');
 
   return msg.replace(matcher, function (_: string, line: string) {
-    return `${programPath}:${+line - preamble('', '', []).split(EOL).length}`;
+    return `${programPath}:${+line - preamble('', '', {}).split(EOL).length}`;
   });
 }
 

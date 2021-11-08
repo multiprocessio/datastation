@@ -72,16 +72,20 @@ export async function evalFilterAggregatePanel(
       throw new InvalidDependentPanelError(panelIndex);
     }
 
-    const query = buildSQLiteQuery(
-      panel,
-      panels.map((p) => p.id)
-    );
+    const idMap: Record<string | number, string> = {};
+    panels.forEach((p, index) => {
+      idMap[index] = p.id;
+      idMap[p.name] = p.id;
+    });
+    const query = buildSQLiteQuery(panel, panelResults);
 
+    const panelResults: Record<string | number, PanelResult> = {};
+    panels.forEach((p, index) => {
+      panelResults[index] = p.resultMeta;
+      panelResults[p.name] = p.resultMeta;
+    });
     const language = LANGUAGES.sql;
-    const res = await language.inMemoryEval(
-      query,
-      panels.map((p) => p.resultMeta)
-    );
+    const res = await language.inMemoryEval(query, panelResults);
     const s = shape(res.value);
     return {
       ...res,

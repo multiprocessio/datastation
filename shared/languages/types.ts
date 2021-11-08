@@ -8,7 +8,7 @@ export interface LanguageInfo {
   preamble: (
     resultsFile: string,
     panelId: string,
-    indexIdMap: Record<number, string>
+    idMap: Record<number | string, string>
   ) => string;
   defaultPath: string;
   exceptionRewriter: (msg: string, programPath: string) => string;
@@ -16,7 +16,7 @@ export interface LanguageInfo {
   inMemoryEval?: (
     prog: string,
     resultsOrDiskDetails:
-      | Array<PanelResult>
-      | { indexIdMap: Array<string>; resultsFile: string }
+      | Record<string | number, PanelResult>
+      | { idMap: Record<string | number, string>; resultsFile: string }
   ) => Promise<{ stdout: string; preview: string; value: any }>;
 }

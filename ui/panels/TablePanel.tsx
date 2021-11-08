@@ -22,7 +22,7 @@ export async function evalColumnPanel(
   panelId: string,
   panelSource: string,
   columns: Array<string>,
-  _: Array<string>,
+  _: Record<string | number, string>,
   panels: Array<PanelInfo>
 ) {
   if (MODE === 'browser') {
@@ -59,13 +59,13 @@ export async function evalColumnPanel(
 export function evalTablePanel(
   panel: TablePanelInfo,
   panels: Array<PanelInfo>,
-  indexIdMap: Array<string>
+  idMap: Record<string | number, string>
 ) {
   return evalColumnPanel(
     panel.id,
     panel.table.panelSource,
     panel.table.columns.map((c) => c.field),
-    indexIdMap,
+    idMap,
     panels
   );
 }

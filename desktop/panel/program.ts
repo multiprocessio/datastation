@@ -38,7 +38,7 @@ export async function evalProgram(
     const preamble = language.preamble(
       projectResultsFile.replaceAll('\\', '/'),
       ppi.id,
-      indexIdMap
+      idMap
     );
     const fullProgramBody = [preamble, ppi.content].join(EOL);
     fs.writeFileSync(programTmp.path, fullProgramBody);
@@ -96,8 +96,10 @@ export async function evalProgram(
       );
       const match = resultsFileRE.exec(e.message);
       if (match && match.groups && match.groups.id !== ppi.id) {
-        const panelSource = indexIdMap.indexOf(match.groups.id);
-        throw new InvalidDependentPanelError(panelSource);
+        const panelSource = Object.keys(idMap).find(
+          (i) => idMap[i] === match.groups.id
+        );
+        throw new InvalidDependentPanelError(+panelSource);
       }
       e.message = language.exceptionRewriter(e.message, programTmp.path);
       e.stdout = out;

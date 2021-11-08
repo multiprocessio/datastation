@@ -58,9 +58,11 @@ function inMemoryInit() {
 
 function inMemoryEval(
   prog: string,
-  results: Array<PanelResult> | { idMap: Array<string>; resultsFile: string }
+  results:
+    | Record<string | number, PanelResult>
+    | { idMap: Array<string>; resultsFile: string }
 ): Promise<{ value: any; preview: string; stdout: string }> {
-  if (!Array.isArray(results)) {
+  if (typeof results.idMap !== 'undefined') {
     // This is not a valid situation. Not sure how it could happen.
     throw new Error(
       'Bad calling convention for in-memory panel. Expected full results object.'
@@ -128,7 +130,7 @@ function exceptionRewriter(msg: string, _: string) {
 
   return msg.replace(matcher, function (_: string, line: string) {
     return `, line ${
-      +line - preamble('', '', []).split(EOL).length
+      +line - preamble('', '', {}).split(EOL).length
     }, in <module>`;
   });
 }

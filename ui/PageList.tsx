@@ -37,13 +37,17 @@ export function makeReevalPanel(
     }
 
     try {
-      const indexIdMap: Array<string> = page.panels.map((p) => p.id);
+      const idMap: Record<string | number, string> = {};
+      page.panels.forEach((p, index) => {
+        idMap[index] = p.id;
+        idMap[p.name] = p.id;
+      });
       const panelUIDetails = PANEL_UI_DETAILS[panel.type];
       const { value, size, contentType, preview, stdout, shape, arrayCount } =
         await panelUIDetails.eval(
           panel,
           page.panels,
-          indexIdMap,
+          idMap,
           connectors,
           servers
         );

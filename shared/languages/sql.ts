@@ -28,7 +28,7 @@ function preamble(
 async function inMemoryEval(
   prog: string,
   resultsOrDiskDetails:
-    | Array<PanelResult>
+    | Record<string | number, PanelResult>
     | { idMap: Record<string | number, string>; resultsFile: string }
 ): Promise<{ value: any; preview: string; stdout: string }> {
   // Functions like this can only be declared globally. So we make sure DM_getPanel gets renamed to something unique
@@ -42,7 +42,7 @@ async function inMemoryEval(
     query: any
   ) {
     let res: any;
-    if (Array.isArray(resultsOrDiskDetails)) {
+    if (typeof resultsOrDiskDetails.idMap === 'undefined') {
       if (!resultsOrDiskDetails[n] || !resultsOrDiskDetails[n].value) {
         throw new InvalidDependentPanelError(n);
       }

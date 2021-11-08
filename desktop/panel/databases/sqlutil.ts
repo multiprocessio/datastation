@@ -1,4 +1,10 @@
-import { ArrayShape, ObjectShape, ScalarShape, VariedShape } from 'shape';
+import {
+  ArrayShape,
+  ObjectShape,
+  ScalarShape,
+  Shape,
+  VariedShape,
+} from 'shape';
 import { chunk } from '../../../shared/array';
 import {
   NotAnArrayOfObjectsError,
@@ -55,7 +61,7 @@ export interface PanelToImport {
 
 export function transformDM_getPanelCalls(
   query: string,
-  idShapeMap: Record<string | number, string>,
+  idShapeMap: Record<string | number, Shape>,
   idMap: Record<string | number, string>,
   getPanelCallsAllowed: boolean
 ): { panelsToImport: Array<PanelToImport>; query: string } {
