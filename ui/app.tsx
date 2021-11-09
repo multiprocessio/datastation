@@ -37,12 +37,15 @@ function useProjectState(
 ): [ProjectState, (d: ProjectState) => void] {
   const [state, setProjectState] = React.useState<ProjectState>(null);
 
-  function setState(newState: ProjectState, addToRestoreBuffer = true) {
-    store.update(projectId, newState, addToRestoreBuffer);
-    const c = { ...newState };
-    Object.setPrototypeOf(c, ProjectState.prototype);
-    setProjectState(c);
-  }
+  const setState = React.useCallback(
+    function setState(newState: ProjectState, addToRestoreBuffer = true) {
+      store.update(projectId, newState, addToRestoreBuffer);
+      const c = { ...newState };
+      Object.setPrototypeOf(c, ProjectState.prototype);
+      setProjectState(c);
+    },
+    [projectId, store]
+  );
 
   // Re-read state when projectId changes
   React.useEffect(() => {
