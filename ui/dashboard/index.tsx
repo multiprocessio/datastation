@@ -1,4 +1,5 @@
 import React from 'react';
+import { MODE_FEATURES } from '../../shared/constants';
 import { ProjectPage } from '../../shared/state';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import { Select } from '../components/Select';
@@ -29,7 +30,7 @@ export function Dashboard({
   React.useEffect(() => {
     let done = false;
     let i: ReturnType<typeof setTimeout> = null;
-    if (IS_EXPORT) {
+    if (IS_EXPORT || !MODE_FEATURES.dashboard) {
       return;
     }
 
@@ -60,6 +61,16 @@ export function Dashboard({
       clearInterval(i);
     };
   }, [refreshPeriod, panels.map((p) => p.id).join(',')]);
+
+  if (!MODE_FEATURES.dashboard) {
+    return (
+      <div className="section">
+        <div className="text-center">
+          This feature is only available in server mode.
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="section">

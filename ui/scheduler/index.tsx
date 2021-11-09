@@ -1,4 +1,5 @@
 import React from 'react';
+import { MODE_FEATURES } from '../../shared/constants';
 import { ProjectPage, ScheduledExport } from '../../shared/state';
 import { Button } from '../components/Button';
 import { Schedule } from './Schedule';
@@ -27,6 +28,16 @@ export function Scheduler({
     const i = schedules.findIndex((ps) => ps.id === s.id);
     schedules[i] = s;
     updatePage(page);
+  }
+
+  if (!MODE_FEATURES.scheduledExports) {
+    return (
+      <div className="section">
+        <div className="text-center">
+          This feature is only available in server mode.
+        </div>
+      </div>
+    );
   }
 
   return (
