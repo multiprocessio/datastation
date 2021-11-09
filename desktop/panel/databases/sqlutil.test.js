@@ -35,6 +35,7 @@ test('transform DM_getPanel index calls', () => {
     [panel0Shape],
     ['panel0ID'],
     true
+    { identifier: '"' },
   );
   expect(query).toBe('SELECT * FROM "t_0" WHERE x >= 2');
   expect(panelsToImport).toStrictEqual([
@@ -58,7 +59,8 @@ test('transform DM_getPanel name calls', () => {
     query2,
     { 0: panel0Shape, 'my great name': panel0Shape },
     { 0: 'panel0ID', 'my great name': 'panel0ID' },
-    true
+    true,
+    { identifier: '"' },
   );
   expect(query).toBe('SELECT * FROM "t_my great name" WHERE x >= 2');
   expect(panelsToImport).toStrictEqual([
