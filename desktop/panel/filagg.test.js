@@ -47,7 +47,7 @@ test('filters no group', async () => {
   if (!finished) {
     throw new Error('Callback did not finish');
   }
-}, 10_000);
+}, 30_000);
 
 test('filters with group', async () => {
   const vp = new FilterAggregatePanelInfo({
