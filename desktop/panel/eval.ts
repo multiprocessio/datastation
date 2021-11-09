@@ -17,12 +17,6 @@ import {
 import { DSPROJ_FLAG, PANEL_FLAG, PANEL_META_FLAG } from '../constants';
 import { Dispatch, RPCHandler } from '../rpc';
 import { flushUnwritten, getProjectResultsFile } from '../store';
-import { evalColumns, evalLiteral } from './columns';
-import { evalDatabase } from './database';
-import { evalFilterAggregate } from './filagg';
-import { evalFile } from './file';
-import { evalHTTP } from './http';
-import { evalProgram } from './program';
 import { getProjectAndPanel } from './shared';
 import { EvalHandlerExtra, EvalHandlerResponse } from './types';
 
@@ -34,14 +28,14 @@ type EvalHandler = (
 ) => Promise<EvalHandlerResponse>;
 
 const EVAL_HANDLERS: { [k in PanelInfoType]: EvalHandler } = {
-  filagg: evalFilterAggregate,
-  file: evalFile,
-  http: evalHTTP,
-  program: evalProgram,
-  database: evalDatabase,
-  table: evalColumns,
-  graph: evalColumns,
-  literal: evalLiteral,
+  filagg: () => require('./filagg').evalFilterAggregate,
+  file: () => require('./file').evalFile,
+  http: () => require('./http').evalHTTP,
+  program: () => require('./program').evalProgram,
+  database: () => require('./database').evalDatabase,
+  table: () => require('./columns').evalColumns,
+  graph: () => require('./columns').evalColumns,
+  literal: () => require('./columns').evalLiteral,
 };
 
 const runningProcesses: Record<string, Set<number>> = {};
@@ -183,7 +177,7 @@ export const makeEvalHandler = (
       idShapeMap[p.name] = p.resultMeta.shape;
     });
 
-    const evalHandler = EVAL_HANDLERS[panel.type];
+    const evalHandler = EVAL_HANDLERS[panel.type]();
     const res = await evalHandler(
       project,
       panel,
