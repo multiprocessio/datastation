@@ -9,7 +9,7 @@ test('invalid table', () => {
   }
 
   expect(error.message).toBe(
-    'This panel requires an array of objects as input. Make sure panel [] returns an array of objects.'
+    'This panel requires an array of objects as input. Make sure panel [1] returns an array of objects.'
   );
 });
 
