@@ -13,10 +13,11 @@ function preamble(
   panelId: string,
   idMap: Record<string | number, string>
 ) {
+  console.log(idMap);
   return `
 def DM_getPanel(i)
   require 'json'
-  JSON.parse(File.read('${resultsFile}' + ${JSON.stringify(idMap)}[i]))
+  JSON.parse(File.read('${resultsFile}' + ${JSON.stringify(idMap)}[i.to_s]))
 end
 def DM_setPanel(v)
   require 'json'

@@ -16,7 +16,10 @@ function preamble(
   return `
 tryCatch(library("rjson"), error=function(cond) {install.packages("rjson", repos="https://cloud.r-project.org")}, finally=library("rjson"))
 DM_getPanel <- function(i) {
-  panelId = fromJSON("${JSON.stringify(idMap).replaceAll('"', '\\"')}")[[i]]
+  panelId = fromJSON("${JSON.stringify(idMap).replaceAll(
+    '"',
+    '\\"'
+  )}")[[toString(i)]]
   fromJSON(file=paste("${resultsFile}", panelId, sep=""))
 }
 DM_setPanel <- function(v) {

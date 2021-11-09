@@ -24,7 +24,7 @@ function preamble(
   return `
 def DM_getPanel(i):
   import json
-  with open(r'${resultsFile}'+${JSON.stringify(idMap)}[i]) as f:
+  with open(r'${resultsFile}'+${JSON.stringify(idMap)}[str(i)]) as f:
     return json.load(f)
 def DM_setPanel(v):
   import json

@@ -14,7 +14,10 @@ catch e
     import JSON
 end
 function DM_getPanel(i)
-  panelId = JSON.parse("${JSON.stringify(idMap).replaceAll('"', '\\"')}")[i]
+  panelId = JSON.parse("${JSON.stringify(idMap).replaceAll(
+    '"',
+    '\\"'
+  )}")[string(i)]
   JSON.parsefile(string("${resultsFile}", panelId))
 end
 function DM_setPanel(v)

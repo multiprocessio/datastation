@@ -61,7 +61,7 @@ const TESTS = [
   },
   {
     type: 'julia',
-    content: `prev = DM_getPanel('Raw Data')\nfor row in prev\n  row["age"] = parse(Int64, row["age"]) + 10\nend\nDM_setPanel(prev)`,
+    content: `prev = DM_getPanel("Raw Data")\nfor row in prev\n  row["age"] = parse(Int64, row["age"]) + 10\nend\nDM_setPanel(prev)`,
     condition: process.platform === 'linux' || inPath('julia'),
   },
   {

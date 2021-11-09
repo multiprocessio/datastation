@@ -153,11 +153,13 @@ export function buildSQLiteQuery(
     windowInterval,
   } = vp.filagg;
 
-  const panelIndex = Object.values(idMap).find(
-    (id) => idMap[id] === panelSource
-  );
-  if (panelIndex) {
+  let panelIndex = Object.keys(idMap).find((id) => idMap[id] === panelSource);
+  if (panelIndex === undefined) {
     throw new InvalidDependentPanelError(panelSource);
+  }
+
+  if (isNaN(+panelIndex)) {
+    panelIndex = `"${panelIndex}"`;
   }
 
   let columns = '*';
