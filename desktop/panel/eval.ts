@@ -27,7 +27,7 @@ type EvalHandler = (
   dispatch: Dispatch
 ) => Promise<EvalHandlerResponse>;
 
-const EVAL_HANDLERS: { [k in PanelInfoType]: EvalHandler } = {
+const EVAL_HANDLERS: { [k in PanelInfoType]: () => EvalHandler } = {
   filagg: () => require('./filagg').evalFilterAggregate,
   file: () => require('./file').evalFile,
   http: () => require('./http').evalHTTP,
