@@ -1,4 +1,5 @@
 import log from '../../shared/log';
+import { ANSI_SQL_QUOTE, MYSQL_QUOTE } from '../../shared/sql';
 import {
   DatabaseConnectorInfo,
   DatabasePanelInfo,
@@ -154,7 +155,8 @@ export async function evalDatabase(
     content,
     extra.idShapeMap,
     extra.idMap,
-    ['mysql', 'postgres', 'sqlite'].includes(connector.database.type)
+    ['mysql', 'postgres', 'sqlite'].includes(connector.database.type),
+    connector.database.type === 'mysql' ? MYSQL_QUOTE : ANSI_SQL_QUOTE
   );
 
   // SQLite is file, not network based so handle separately.

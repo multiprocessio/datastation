@@ -63,7 +63,8 @@ export function transformDM_getPanelCalls(
   query: string,
   idShapeMap: Record<string | number, Shape>,
   idMap: Record<string | number, string>,
-  getPanelCallsAllowed: boolean
+  getPanelCallsAllowed: boolean,
+  quoteType: QuoteType
 ): { panelsToImport: Array<PanelToImport>; query: string } {
   const panelsToImport: Array<PanelToImport> = [];
   query = query.replace(
@@ -99,7 +100,7 @@ export function transformDM_getPanelCalls(
         columns,
         tableName,
       });
-      return `"${tableName}"`;
+      return quote(tableName, quoteType.identifier);
     }
   );
 
