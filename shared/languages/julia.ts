@@ -3,7 +3,7 @@ import { EOL } from './types';
 function preamble(
   resultsFile: string,
   panelId: string,
-  indexIdMap: Array<string>
+  idMap: Record<string | number, string>
 ) {
   return `
 try
@@ -14,10 +14,10 @@ catch e
     import JSON
 end
 function DM_getPanel(i)
-  panelId = JSON.parse("${JSON.stringify(indexIdMap).replaceAll(
+  panelId = JSON.parse("${JSON.stringify(idMap).replaceAll(
     '"',
     '\\"'
-  )}")[i+1]
+  )}")[string(i)]
   JSON.parsefile(string("${resultsFile}", panelId))
 end
 function DM_setPanel(v)
@@ -39,7 +39,7 @@ function exceptionRewriter(msg: string, programPath: string) {
   const matcher = RegExp(`${programPath}:([1-9]*)`.replaceAll('/', '\\/'), 'g');
 
   return msg.replace(matcher, function (_: string, line: string) {
-    return `${programPath}:${+line - preamble('', '', []).split(EOL).length}`;
+    return `${programPath}:${+line - preamble('', '', {}).split(EOL).length}`;
   });
 }
 

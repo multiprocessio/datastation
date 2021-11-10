@@ -4,9 +4,13 @@ import { PanelResultMeta, ProjectPage, ProjectState } from '../shared/state';
 import { Button } from './components/Button';
 import { Confirm } from './components/Confirm';
 import { Input } from './components/Input';
+import { Link } from './components/Link';
+import { Dashboard } from './dashboard';
 import { PanelPlayWarning } from './errors';
+import { NotFound } from './NotFound';
 import { PanelList } from './PanelList';
 import { PANEL_UI_DETAILS } from './panels';
+import { Scheduler } from './scheduler';
 import { UrlStateContext } from './urlState';
 
 export function makeReevalPanel(
@@ -33,13 +37,17 @@ export function makeReevalPanel(
     }
 
     try {
-      const indexIdMap: Array<string> = page.panels.map((p) => p.id);
+      const idMap: Record<string | number, string> = {};
+      page.panels.forEach((p, index) => {
+        idMap[index] = p.id;
+        idMap[p.name] = p.id;
+      });
       const panelUIDetails = PANEL_UI_DETAILS[panel.type];
       const { value, size, contentType, preview, stdout, shape, arrayCount } =
         await panelUIDetails.eval(
           panel,
           page.panels,
-          indexIdMap,
+          idMap,
           connectors,
           servers
         );
@@ -94,7 +102,7 @@ export function PageList({
   pageIndex: number;
 }) {
   const page: ProjectPage | null = state.pages[pageIndex] || null;
-  const { setState: setUrlState } = React.useContext(UrlStateContext);
+  const { state: urlState } = React.useContext(UrlStateContext);
 
   if (!page) {
     return (
@@ -125,12 +133,22 @@ export function PageList({
     }
   }
 
+  const MainChild =
+    {
+      editor: PanelList,
+      dashboard: Dashboard,
+      scheduler: Scheduler,
+    }[urlState.view] || NotFound;
+
   return (
     <div className="section pages">
       <div className="section-title">
         {state.pages.map((page: ProjectPage, i: number) =>
           i === pageIndex ? (
-            <div className="vertical-align-center current-page" key={page.id}>
+            <div
+              className="vertical-align-center page-name page-name--current"
+              key={page.id}
+            >
               <span title="Delete Page">
                 <Confirm
                   right
@@ -150,7 +168,6 @@ export function PageList({
               </span>
 
               <Input
-                className="page-name"
                 onChange={(value: string) => {
                   page.name = value;
                   updatePage(page);
@@ -162,18 +179,6 @@ export function PageList({
               <span title="Evaluate all panels sequentially">
                 <Button icon onClick={evalAll} type="primary">
                   play_circle
-                </Button>
-              </span>
-
-              <span title="Enter dashboard mode">
-                <Button icon onClick={() => setUrlState({ view: 'dashboard' })}>
-                  bar_chart
-                </Button>
-              </span>
-
-              <span title="Enter scheduled export mode">
-                <Button icon onClick={() => setUrlState({ view: 'scheduler' })}>
-                  schedule
                 </Button>
               </span>
             </div>
@@ -199,7 +204,34 @@ export function PageList({
         </Button>
       </div>
 
-      <PanelList
+      <div className="vertical-align-center">
+        <Link
+          className={`page-mode ${
+            urlState.view === 'editor' ? 'page-mode--on' : ''
+          }`}
+          args={{ view: 'editor' }}
+        >
+          Editor
+        </Link>
+        <Link
+          className={`page-mode ${
+            urlState.view === 'scheduler' ? 'page-mode--on' : ''
+          }`}
+          args={{ view: 'scheduler' }}
+        >
+          Schedule Exports
+        </Link>
+        <Link
+          className={`page-mode ${
+            urlState.view === 'dashboard' ? 'page-mode--on' : ''
+          }`}
+          args={{ view: 'dashboard' }}
+        >
+          Dashboard
+        </Link>
+      </div>
+
+      <MainChild
         page={page}
         updatePage={updatePage}
         reevalPanel={reevalPanel}

@@ -10,7 +10,7 @@ function exceptionRewriter(msg: string, programPath: string) {
   const matcher = RegExp(`${programPath}:([1-9]*)`.replaceAll('/', '\\/'), 'g');
 
   return msg.replace(matcher, function (_: string, line: string) {
-    return `${programPath}:${+line - preamble('', '', []).split(EOL).length}`;
+    return `${programPath}:${+line - preamble('', '', {}).split(EOL).length}`;
   });
 }
 
@@ -27,13 +27,13 @@ function defaultContent(panelIndex: number) {
 function preamble(
   resultsFile: string,
   panelId: string,
-  indexIdMap: Array<string>
+  idMap: Record<string | number, string>
 ) {
   return `
 function DM_getPanel(i) {
   const fs = require('fs');
   return JSON.parse(fs.readFileSync('${resultsFile}'+${JSON.stringify(
-    indexIdMap
+    idMap
   )}[i]));
 }
 function DM_setPanel(v) {
@@ -44,17 +44,8 @@ function DM_setPanel(v) {
 
 function inMemoryEval(
   prog: string,
-  results:
-    | Array<PanelResult>
-    | { indexIdMap: Array<string>; resultsFile: string }
+  results: Record<string | number, PanelResult>
 ): Promise<{ value: any; preview: string; stdout: string }> {
-  if (!Array.isArray(results)) {
-    // This is not a valid situation. Not sure how it could happen.
-    throw new Error(
-      'Bad calling convention for in-memory panel. Expected full results object.'
-    );
-  }
-
   const anyWindow = windowOrGlobal as any;
   anyWindow.DM_getPanel = (panelId: number) => {
     if (!results[panelId]) {

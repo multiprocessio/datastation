@@ -26,7 +26,7 @@ export function getUrlState(): UrlState {
   return {
     projectId: getQueryParameter('projectId'),
     page: +getQueryParameter('page') || 0,
-    view: getQueryParameter('view') as UrlState['view'],
+    view: (getQueryParameter('view') || 'editor') as UrlState['view'],
   };
 }
 
@@ -53,12 +53,15 @@ export function useUrlState(): [UrlState, (a0: Partial<UrlState>) => void] {
     }
   });
 
-  function setState(newState: Partial<UrlState>) {
+  const setState = React.useCallback(function setState(
+    newState: Partial<UrlState>
+  ) {
     setStateInternal({
       ...state,
       ...newState,
     });
-  }
+  },
+  []);
 
   return [state, setState];
 }

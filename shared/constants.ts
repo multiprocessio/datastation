@@ -35,4 +35,6 @@ export const MODE_FEATURES = {
   useDefaultProject: MODE === 'browser',
   extraLanguages: MODE !== 'browser',
   killProcess: MODE !== 'browser',
+  dashboard: MODE === 'server',
+  scheduledExports: MODE === 'server',
 };

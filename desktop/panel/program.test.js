@@ -16,8 +16,18 @@ const TESTS = [
     condition: true,
   },
   {
+    type: 'javascript',
+    content: `const prev = DM_getPanel('Raw Data'); const next = prev.map((row) => ({ ...row, "age": +row.age + 10 })); DM_setPanel(next);`,
+    condition: true,
+  },
+  {
     type: 'sql',
     content: 'SELECT name, age::INT + 10 AS age FROM DM_getPanel(0)',
+    condition: true,
+  },
+  {
+    type: 'sql',
+    content: `SELECT name, age::INT + 10 AS age FROM DM_getPanel('Raw Data')`,
     condition: true,
   },
   // Rest are only mandatory-tested on Linux to make CI easier for now
@@ -28,9 +38,19 @@ const TESTS = [
     condition: process.platform === 'linux' || inPath('python3'),
   },
   {
+    type: 'python',
+    content: `prev = DM_getPanel('Raw Data')\nnext = [{ **row, "age": int(row["age"]) + 10 } for row in prev]\nDM_setPanel(next)`,
+    condition: process.platform === 'linux' || inPath('python3'),
+  },
+  {
     type: 'ruby',
     content:
       'prev = DM_getPanel(0)\npanel = prev.map { |row| { name: row["name"], age: row["age"].to_i + 10 } }\nDM_setPanel(panel)',
+    condition: process.platform === 'linux' || inPath('ruby'),
+  },
+  {
+    type: 'ruby',
+    content: `prev = DM_getPanel('Raw Data')\npanel = prev.map { |row| { name: row["name"], age: row["age"].to_i + 10 } }\nDM_setPanel(panel)`,
     condition: process.platform === 'linux' || inPath('ruby'),
   },
   {
@@ -40,9 +60,19 @@ const TESTS = [
     condition: process.platform === 'linux' || inPath('julia'),
   },
   {
+    type: 'julia',
+    content: `prev = DM_getPanel("Raw Data")\nfor row in prev\n  row["age"] = parse(Int64, row["age"]) + 10\nend\nDM_setPanel(prev)`,
+    condition: process.platform === 'linux' || inPath('julia'),
+  },
+  {
     type: 'r',
     content:
       'prev = DM_getPanel(0)\nfor (i in 1:length(prev)) {\n  prev[[i]]$age = strtoi(prev[[i]]$age) + 10\n}\nDM_setPanel(prev)',
+    condition: process.platform === 'linux' || inPath('Rscript'),
+  },
+  {
+    type: 'r',
+    content: `prev = DM_getPanel('Raw Data')\nfor (i in 1:length(prev)) {\n  prev[[i]]$age = strtoi(prev[[i]]$age) + 10\n}\nDM_setPanel(prev)`,
     condition: process.platform === 'linux' || inPath('Rscript'),
   },
 ];
@@ -61,13 +91,16 @@ for (const t of TESTS) {
       test(`runs ${t.type} programs to perform addition via ${
         subprocessName ? subprocessName : 'same-process'
       }`, async () => {
-        const lp = new LiteralPanelInfo();
-        lp.literal.contentTypeInfo = { type: 'text/csv' };
-        lp.content = 'age,name\n12,Kev\n18,Nyra';
+        const lp = new LiteralPanelInfo({
+          contentTypeInfo: { type: 'text/csv' },
+          content: 'age,name\n12,Kev\n18,Nyra',
+          name: 'Raw Data',
+        });
 
-        const pp = new ProgramPanelInfo();
-        pp.program.type = t.type;
-        pp.content = t.content;
+        const pp = new ProgramPanelInfo({
+          type: t.type,
+          content: t.content,
+        });
 
         let finished = false;
         const panels = [lp, pp];

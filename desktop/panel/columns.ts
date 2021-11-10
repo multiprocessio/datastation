@@ -17,7 +17,7 @@ import { EvalHandlerExtra, EvalHandlerResponse, guardPanel } from './types';
 export async function evalColumns(
   project: ProjectState,
   panel: PanelInfo,
-  { indexIdMap }: EvalHandlerExtra,
+  { idMap }: EvalHandlerExtra,
   dispatch: Dispatch
 ): Promise<EvalHandlerResponse> {
   let columns: Array<string>;
@@ -44,7 +44,8 @@ export async function evalColumns(
   const valueWithRequestedColumns = columnsFromObject(
     value,
     columns,
-    indexIdMap.indexOf(panelSource)
+    // Assumes that position always comes before panel name in the idmap
+    +Object.keys(idMap).find((key) => idMap[key] === panelSource)
   );
 
   return {

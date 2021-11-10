@@ -29,18 +29,44 @@ const panel0Shape = shape(panel0Data);
 
 const query1 = 'SELECT * FROM DM_getPanel(0) WHERE x >= 2';
 
-test('transform DM_getPanel calls', () => {
+test('transform DM_getPanel index calls', () => {
   const { query, panelsToImport } = transformDM_getPanelCalls(
     query1,
     [panel0Shape],
     ['panel0ID'],
-    true
+    true,
+    { identifier: '"' }
   );
-  expect(query).toBe('SELECT * FROM t0 WHERE x >= 2');
+  expect(query).toBe('SELECT * FROM "t_0" WHERE x >= 2');
   expect(panelsToImport).toStrictEqual([
     {
       id: 'panel0ID',
-      tableName: 't0',
+      tableName: 't_0',
+      columns: [
+        { name: 'a', type: 'TEXT' },
+        { name: 'x', type: 'REAL' },
+        { name: 'z', type: 'TEXT' },
+        { name: 'b', type: 'BOOLEAN' },
+        { name: 'c', type: 'TEXT' },
+      ],
+    },
+  ]);
+});
+
+test('transform DM_getPanel name calls', () => {
+  const query2 = `SELECT * FROM DM_getPanel('my great name') WHERE x >= 2`;
+  const { query, panelsToImport } = transformDM_getPanelCalls(
+    query2,
+    { 0: panel0Shape, 'my great name': panel0Shape },
+    { 0: 'panel0ID', 'my great name': 'panel0ID' },
+    true,
+    { identifier: '"' }
+  );
+  expect(query).toBe('SELECT * FROM "t_my great name" WHERE x >= 2');
+  expect(panelsToImport).toStrictEqual([
+    {
+      id: 'panel0ID',
+      tableName: 't_my great name',
       columns: [
         { name: 'a', type: 'TEXT' },
         { name: 'x', type: 'REAL' },
@@ -89,7 +115,7 @@ test('importAndRun', async () => {
   const panelsToImport = [
     {
       id: panelId,
-      tableName: 't0',
+      tableName: 't_0',
       columns: [
         { name: 'a', type: 'int' },
         { name: 'b', type: 'text' },
@@ -108,12 +134,12 @@ test('importAndRun', async () => {
 
   expect(db.createTable.mock.calls.length).toBe(1);
   expect(db.createTable.mock.calls[0][0]).toBe(
-    'CREATE TEMPORARY TABLE "t0" ("a" int, "b" text);'
+    'CREATE TEMPORARY TABLE "t_0" ("a" int, "b" text);'
   );
 
   expect(db.insert.mock.calls.length).toBe(1);
   expect([...db.insert.mock.calls[0]]).toStrictEqual([
-    'INSERT INTO "t0" ("a", "b") VALUES (?, ?), (?, ?);',
+    'INSERT INTO "t_0" ("a", "b") VALUES (?, ?), (?, ?);',
     [12, 'Mel', 154, 'Karry'],
   ]);
 

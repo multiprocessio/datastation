@@ -132,35 +132,68 @@ function PreviewResults({
   return <Highlight language="json">{results[panelOut]}</Highlight>;
 }
 
-function PanelPlayWarningWithLinks({
+export function getNameOrIdFromNameOrIdOrIndex(
+  panels: Array<PanelInfo>,
+  id: string
+): null | { name: string; id: string } {
+  for (const panel of panels) {
+    if (panel.id === id) {
+      return { name: panel.name, id: panel.id };
+    }
+  }
+
+  for (const panel of panels) {
+    if (panel.name === id) {
+      return { name: panel.name, id: panel.id };
+    }
+  }
+
+  if (!isNaN(+id) && panels[+id]) {
+    return { name: panels[+id].name, id: panels[+id].id };
+  }
+
+  return null;
+}
+
+export function PanelPlayWarningWithLinks({
+  panels,
   msg,
-  indexNameMap,
 }: {
+  panels: Array<PanelInfo>;
   msg: string;
-  indexNameMap: Array<string>;
 }) {
-  const children = msg
-    .split(/(panel #[0-9]+)|(DM_setPanel\([$a-zA-Z]*\))/)
-    .map((c, i) => {
-      if (!c) {
-        return;
-      }
-      const prefix = 'panel #';
-      if (c.startsWith(prefix)) {
-        const index = c.slice(prefix.length);
-        return (
-          <a key={i} href={'#panel-' + index}>
-            [{index}] {indexNameMap[+index]}
-          </a>
-        );
-      }
+  const parts = msg.split(/(\[(?:[^\]\\]|\\.)*\])|(DM_setPanel\([$a-zA-Z]*\))/);
 
-      if (c.startsWith('DM_setPanel(')) {
-        return <code key={i}>{c}</code>;
-      }
+  let children = [];
+  for (const c of parts) {
+    if (!c) {
+      continue;
+    }
 
-      return c;
-    });
+    if (c.startsWith('DM_setPanel(')) {
+      children.push(<code>{c}</code>);
+    }
+
+    if (!(c[0] === '[' && c[c.length - 1] === ']')) {
+      children.push(c);
+      continue;
+    }
+
+    // Drop the surrounding [ and ]
+    const id = c.substring(1, c.length - 1);
+    const panel = getNameOrIdFromNameOrIdOrIndex(panels, id);
+    if (!panel) {
+      log.info('Failed to resolve panel ' + c);
+      return (
+        <Alert type="warning">
+          Unable to resolve panel <strong>{c}</strong>. Did you enter a valid
+          panel name or index?
+        </Alert>
+      );
+    }
+
+    children.push(<a href={'#panel-' + panel.id}>{panel.name}</a>);
+  }
 
   return <Alert type="warning" children={children} />;
 }
@@ -221,9 +254,14 @@ export function Panel({
     return panelRPC('killProcess', panel.id);
   }
 
+  const nameIsDuplicate = panels
+    .filter((p) => p.id !== panel.id)
+    .map((p) => p.name)
+    .includes(panel.name);
+
   return (
     <div
-      id={`panel-${panelIndex}`}
+      id={`panel-${panel.id}`}
       className={`panel ${hidden ? 'panel--hidden' : ''} ${
         panelUIDetails.body === null && !results.exception ? 'panel--empty' : ''
       } ${results.loading ? 'panel--loading' : ''}`}
@@ -286,9 +324,8 @@ export function Panel({
               ))}
             </Select>
 
-            <span className="material-icons">{panelUIDetails.icon}</span>
-
             <Input
+              label="Name"
               className="panel-name"
               autoWidth
               placeholder={`Untitled panel #${panelIndex}`}
@@ -297,6 +334,7 @@ export function Panel({
                 updatePanel(panel);
               }}
               value={panel.name}
+              invalid={nameIsDuplicate ? 'Names should be unique.' : ''}
             />
 
             <span title={details ? 'Hide Details' : 'Show Details'}>
@@ -418,8 +456,8 @@ export function Panel({
                   )}
                   {results.exception instanceof PanelPlayWarning ? (
                     <PanelPlayWarningWithLinks
+                      panels={panels}
                       msg={results.exception.message}
-                      indexNameMap={panels.map(({ name }) => name)}
                     />
                   ) : (
                     results.exception && (

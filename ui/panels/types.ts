@@ -25,7 +25,7 @@ export interface PanelUIDetails<T extends PanelInfo> {
   eval(
     panel: T,
     panels: Array<PanelInfo>,
-    indexIdMap: Array<string>,
+    idMap: Record<number | string, string>,
     connectors: Array<ConnectorInfo>,
     servers: Array<ServerInfo>
   ): Promise<PanelResult>;

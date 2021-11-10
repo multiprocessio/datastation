@@ -11,12 +11,14 @@ function defaultContent(panelIndex: number) {
 function preamble(
   resultsFile: string,
   panelId: string,
-  indexIdMap: Array<string>
+  idMap: Record<string | number, string>
 ) {
   return `
 def DM_getPanel(i)
   require 'json'
-  JSON.parse(File.read('${resultsFile}' + ${JSON.stringify(indexIdMap)}[i]))
+  JSON.parse(File.read('${resultsFile}' + JSON.parse('${JSON.stringify(
+    idMap
+  )}')[i.to_s]))
 end
 def DM_setPanel(v)
   require 'json'

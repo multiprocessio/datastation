@@ -19,13 +19,13 @@ import { PanelBodyProps, PanelDetailsProps, PanelUIDetails } from './types';
 export function evalGraphPanel(
   panel: GraphPanelInfo,
   panels: Array<PanelInfo>,
-  indexIdMap: Array<string>
+  idMap: Record<string | string, string>
 ) {
   return evalColumnPanel(
     panel.id,
     panel.graph.panelSource,
     [panel.graph.x, ...panel.graph.ys.map((y) => y.field)],
-    indexIdMap,
+    idMap,
     panels
   );
 }

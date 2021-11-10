@@ -8,7 +8,8 @@ const {
   ScheduledExport,
   TablePanelInfo,
 } = require('../../shared/state');
-const { SchedulerWithDeps } = require('./index');
+const { MODE_FEATURES } = require('../../shared/constants');
+const { Scheduler } = require('./index');
 
 const project = new ProjectState();
 project.pages = [new ProjectPage('A great page')];
@@ -24,14 +25,14 @@ project.pages[0].schedules = [
 ];
 
 test('shows a basic schedule page', async () => {
-  const component = enzyme.mount(
-    <SchedulerWithDeps
-      projectState={project}
-      setProjectState={() => {}}
-      urlState={{ page: 0 }}
-      setUrlState={() => {}}
-    />
-  );
-  await componentLoad(component);
-  expect(component.find('.panel').length).toBe(1);
+  MODE_FEATURES.scheduledExports = true;
+  try {
+    const component = enzyme.mount(
+      <Scheduler page={project.pages[0]} updatePage={() => {}} />
+    );
+    await componentLoad(component);
+    expect(component.find('.panel').length).toBe(1);
+  } finally {
+    MODE_FEATURES.scheduledExports = false;
+  }
 });

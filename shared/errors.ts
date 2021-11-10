@@ -1,16 +1,24 @@
+function escapedPanelIdentifier(id: number | string) {
+  return `[${String(id).replace(']', '\\]')}]`;
+}
+
 export class NotAnArrayOfObjectsError extends Error {
-  constructor(panelIndex: number) {
+  constructor(id: number | string) {
     super();
     this.name = 'NotAnArrayOfObjectsError';
-    this.message = `This panel requires an array of objects as input. Make sure panel #${panelIndex} returns an array of objects.`;
+    this.message = `This panel requires an array of objects as input. Make sure panel ${escapedPanelIdentifier(
+      id
+    )} returns an array of objects.`;
   }
 }
 
 export class InvalidDependentPanelError extends Error {
-  constructor(panelIndex: number) {
+  constructor(id: number | string) {
     super();
     this.name = 'InvalidDependentPanelError';
-    this.message = `A dependent panel's results are not valid. Did you run panel #${panelIndex}?`;
+    this.message = `A dependent panel's results are not valid. Did you run panel ${escapedPanelIdentifier(
+      id
+    )}?`;
   }
 }
 

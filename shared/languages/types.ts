@@ -8,15 +8,17 @@ export interface LanguageInfo {
   preamble: (
     resultsFile: string,
     panelId: string,
-    indexIdMap: Record<number, string>
+    idMap: Record<number | string, string>
   ) => string;
   defaultPath: string;
   exceptionRewriter: (msg: string, programPath: string) => string;
   inMemoryInit?: () => Promise<void>;
   inMemoryEval?: (
     prog: string,
-    resultsOrDiskDetails:
-      | Array<PanelResult>
-      | { indexIdMap: Array<string>; resultsFile: string }
+    results: Record<string | number, PanelResult>
   ) => Promise<{ stdout: string; preview: string; value: any }>;
+  nodeEval?: (
+    prog: string,
+    results: { idMap: Record<string | number, string>; resultsFile: string }
+  ) => { stdout: string; preview: string; value: any };
 }

@@ -22,21 +22,21 @@ export async function evalColumnPanel(
   panelId: string,
   panelSource: string,
   columns: Array<string>,
-  _: Array<string>,
+  _: Record<string | number, string>,
   panels: Array<PanelInfo>
 ) {
   if (MODE === 'browser') {
     const panelIndex = (panels || []).findIndex((p) => p.id === panelSource);
     const resultMeta = (panels[panelIndex] || {}).resultMeta;
     if (!resultMeta || !resultMeta.value) {
-      throw new InvalidDependentPanelError(panelIndex);
+      throw new InvalidDependentPanelError(panelSource);
     }
     const { value } = resultMeta;
     try {
       const valueWithRequestedColumns = columnsFromObject(
         value,
         columns,
-        panelIndex
+        panelSource
       );
       const s = shape(valueWithRequestedColumns);
       return {
@@ -59,13 +59,13 @@ export async function evalColumnPanel(
 export function evalTablePanel(
   panel: TablePanelInfo,
   panels: Array<PanelInfo>,
-  indexIdMap: Array<string>
+  idMap: Record<string | number, string>
 ) {
   return evalColumnPanel(
     panel.id,
     panel.table.panelSource,
     panel.table.columns.map((c) => c.field),
-    indexIdMap,
+    idMap,
     panels
   );
 }

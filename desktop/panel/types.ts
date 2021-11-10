@@ -10,8 +10,8 @@ export type EvalHandlerResponse = {
 };
 
 export type EvalHandlerExtra = {
-  indexIdMap: Array<string>;
-  indexShapeMap: Array<Shape>;
+  idMap: Record<string | number, string>;
+  idShapeMap: Record<string | number, Shape>;
 };
 
 export function guardPanel<T extends PanelInfo>(

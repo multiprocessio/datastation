@@ -19,12 +19,12 @@ function defaultContent(panelIndex: number) {
 function preamble(
   resultsFile: string,
   panelId: string,
-  indexIdMap: Array<string>
+  idMap: Record<string | number, string>
 ) {
   return `
 def DM_getPanel(i):
   import json
-  with open(r'${resultsFile}'+${JSON.stringify(indexIdMap)}[i]) as f:
+  with open(r'${resultsFile}'+${JSON.stringify(idMap)}[str(i)]) as f:
     return json.load(f)
 def DM_setPanel(v):
   import json
@@ -58,17 +58,8 @@ function inMemoryInit() {
 
 function inMemoryEval(
   prog: string,
-  results:
-    | Array<PanelResult>
-    | { indexIdMap: Array<string>; resultsFile: string }
+  results: Record<string | number, PanelResult>
 ): Promise<{ value: any; preview: string; stdout: string }> {
-  if (!Array.isArray(results)) {
-    // This is not a valid situation. Not sure how it could happen.
-    throw new Error(
-      'Bad calling convention for in-memory panel. Expected full results object.'
-    );
-  }
-
   const anyWindow = windowOrGlobal as any;
 
   const stdout: Array<string> = [];
@@ -130,7 +121,7 @@ function exceptionRewriter(msg: string, _: string) {
 
   return msg.replace(matcher, function (_: string, line: string) {
     return `, line ${
-      +line - preamble('', '', []).split(EOL).length
+      +line - preamble('', '', {}).split(EOL).length
     }, in <module>`;
   });
 }

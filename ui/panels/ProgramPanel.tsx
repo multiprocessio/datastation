@@ -23,7 +23,12 @@ export async function evalProgramPanel(
     throw new Error(`Unknown program type: '${program.type}'`);
   }
 
-  const panelResults = panels.map((p) => p.resultMeta);
+  const panelResults: Record<string | number, PanelResult> = {};
+  panels.forEach((p, index) => {
+    panelResults[index] = p.resultMeta;
+    panelResults[p.name] = p.resultMeta;
+  });
+
   const res = await language.inMemoryEval(panel.content, panelResults);
   const s = shape(res.value);
   return {
@@ -104,10 +109,16 @@ export function ProgramInfo({ panel }: { panel: ProgramPanelInfo }) {
   if (panel.program.type === 'sql') {
     return (
       <React.Fragment>
-        Use <code>DM_getPanel($panel_number)</code> to reference other panels.
-        Once you have called this once for one panel, use{' '}
-        <code>t$panel_number</code> to refer to it again. For example:{' '}
-        <code>SELECT age, name FROM DM_getPanel(0) WHERE t0.age &gt; 1;</code>
+        Use <code>DM_getPanel($panel_number_or_name)</code> to reference other
+        panels. Once you have called this once for one panel, use{' '}
+        <code>t_$panel_number_or_name</code> to refer to it again. For example:{' '}
+        <code>SELECT age, name FROM DM_getPanel(0) WHERE t0.age &gt; 1;</code>{' '}
+        or{' '}
+        <code>
+          SELECT age, name FROM DM_getPanel('my-panel') WHERE "t_my-panel".age
+          &gt; 1;
+        </code>
+        .
       </React.Fragment>
     );
   }

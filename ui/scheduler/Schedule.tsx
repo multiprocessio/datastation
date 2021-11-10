@@ -15,7 +15,6 @@ export function Schedule({
   setSchedule: (s: ScheduledExport) => void;
   removeSchedule: (s: string) => void;
 }) {
-  console.log(schedule, 'HERE!');
   return (
     <div className="panel">
       <div className="panel-head">

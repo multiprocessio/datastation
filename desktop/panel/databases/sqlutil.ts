@@ -61,38 +61,46 @@ export interface PanelToImport {
 
 export function transformDM_getPanelCalls(
   query: string,
-  indexShapeMap: Array<Shape>,
-  indexIdMap: Array<string>,
-  getPanelCallsAllowed: boolean
+  idShapeMap: Record<string | number, Shape>,
+  idMap: Record<string | number, string>,
+  getPanelCallsAllowed: boolean,
+  quoteType: QuoteType
 ): { panelsToImport: Array<PanelToImport>; query: string } {
   const panelsToImport: Array<PanelToImport> = [];
   query = query.replace(
-    /DM_getPanel\(([0-9]+)\)/g,
-    function (_: string, panelSource: string) {
-      const s = indexShapeMap[+panelSource];
+    /(DM_getPanel\((?<id>[0-9]+)\))|(DM_getPanel\((?<name>'(?:[^'\\]|\\.)*\')\))/g,
+    function (...args) {
+      const match = args.pop();
+      let nameOrIndex: number | string = '';
+      if (match.name) {
+        nameOrIndex = match.name.substring(1, match.name.length - 1);
+      } else {
+        nameOrIndex = +match.id;
+      }
+      const s = idShapeMap[nameOrIndex];
       if (!s || s.kind !== 'array') {
-        throw new NotAnArrayOfObjectsError(+panelSource);
+        throw new NotAnArrayOfObjectsError(nameOrIndex);
       }
 
       const rowShape = (s as ArrayShape).children as ObjectShape;
       if (rowShape.kind !== 'object') {
-        throw new NotAnArrayOfObjectsError(+panelSource);
+        throw new NotAnArrayOfObjectsError(nameOrIndex);
       }
 
-      const id = indexIdMap[+panelSource];
+      const id = idMap[nameOrIndex];
       if (panelsToImport.filter((p) => id === p.id).length) {
         // Don't import the same panel twice.
         return;
       }
 
-      const tableName = `t${panelSource}`;
+      const tableName = `t_${nameOrIndex}`;
       const columns = sqlColumnsAndTypesFromShape(rowShape);
       panelsToImport.push({
         id,
         columns,
         tableName,
       });
-      return tableName;
+      return quote(tableName, quoteType.identifier);
     }
   );
 

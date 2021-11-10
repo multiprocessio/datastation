@@ -13,7 +13,7 @@ import { EvalHandlerExtra, EvalHandlerResponse, guardPanel } from './types';
 export async function evalProgram(
   project: ProjectState,
   panel: PanelInfo,
-  { indexIdMap }: EvalHandlerExtra
+  { idMap }: EvalHandlerExtra
 ): Promise<EvalHandlerResponse> {
   const ppi = guardPanel<ProgramPanelInfo>(panel, 'program');
   const programTmp = await makeTmpFile({ prefix: 'program-tmp-' });
@@ -21,10 +21,10 @@ export async function evalProgram(
 
   const projectResultsFile = getProjectResultsFile(project.projectName);
 
-  if (!language.defaultPath) {
-    const res = await language.inMemoryEval(ppi.content, {
+  if (language.nodeEval) {
+    const res = language.nodeEval(ppi.content, {
       resultsFile: projectResultsFile,
-      indexIdMap,
+      idMap,
     });
 
     return { value: res.value, stdout: res.stdout };
@@ -38,7 +38,7 @@ export async function evalProgram(
     const preamble = language.preamble(
       projectResultsFile.replaceAll('\\', '/'),
       ppi.id,
-      indexIdMap
+      idMap
     );
     const fullProgramBody = [preamble, ppi.content].join(EOL);
     fs.writeFileSync(programTmp.path, fullProgramBody);
@@ -96,8 +96,7 @@ export async function evalProgram(
       );
       const match = resultsFileRE.exec(e.message);
       if (match && match.groups && match.groups.id !== ppi.id) {
-        const panelSource = indexIdMap.indexOf(match.groups.id);
-        throw new InvalidDependentPanelError(panelSource);
+        throw new InvalidDependentPanelError(match.groups.id);
       }
       e.message = language.exceptionRewriter(e.message, programTmp.path);
       e.stdout = out;

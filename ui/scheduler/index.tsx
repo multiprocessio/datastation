@@ -1,78 +1,58 @@
 import React from 'react';
-import { ProjectState, ScheduledExport } from '../../shared/state';
+import { MODE_FEATURES } from '../../shared/constants';
+import { ProjectPage, ScheduledExport } from '../../shared/state';
 import { Button } from '../components/Button';
-import { ProjectContext } from '../ProjectStore';
-import { UrlState, UrlStateContext } from '../urlState';
 import { Schedule } from './Schedule';
 
-export function SchedulerWithDeps({
-  projectState,
-  setProjectState,
-  urlState: { page: pageIndex },
-  setUrlState,
+export function Scheduler({
+  page,
+  updatePage,
 }: {
-  projectState: ProjectState;
-  setProjectState: (a: ProjectState) => void;
-  urlState: UrlState;
-  setUrlState: (a: Partial<UrlState>) => void;
+  page: ProjectPage;
+  updatePage: (page: ProjectPage) => void;
 }) {
-  const { schedules, name } = projectState.pages[pageIndex];
+  const { schedules } = page;
 
   function addSchedule() {
     schedules.push(new ScheduledExport());
-    setProjectState(projectState);
+    updatePage(page);
   }
 
   function removeSchedule(id: string) {
     const at = schedules.findIndex((ps) => ps.id === id);
     schedules.splice(at, 1);
-    setProjectState(projectState);
+    updatePage(page);
   }
 
   function setSchedule(s: ScheduledExport) {
     const i = schedules.findIndex((ps) => ps.id === s.id);
     schedules[i] = s;
-    setProjectState(projectState);
+    updatePage(page);
+  }
+
+  if (!MODE_FEATURES.scheduledExports) {
+    return (
+      <div className="section">
+        <div className="text-center">
+          This feature is only available in server mode.
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="main-body">
-      <div className="section">
-        <div className="section-title">
-          Schedule Exports for {name}
-          <span title="Enter editor mode">
-            <Button icon onClick={() => setUrlState({ view: 'editor' })}>
-              pencil
-            </Button>
-          </span>
-        </div>
-        {schedules.map((s) => (
-          <Schedule
-            setSchedule={setSchedule}
-            schedule={s}
-            key={s.id}
-            removeSchedule={removeSchedule}
-          />
-        ))}
-        <div className="text-center">
-          <Button onClick={() => addSchedule()}>New Scheduled Export</Button>
-        </div>
+    <div className="section">
+      {schedules.map((s) => (
+        <Schedule
+          setSchedule={setSchedule}
+          schedule={s}
+          key={s.id}
+          removeSchedule={removeSchedule}
+        />
+      ))}
+      <div className="text-center">
+        <Button onClick={() => addSchedule()}>New Scheduled Export</Button>
       </div>
     </div>
-  );
-}
-
-export function Scheduler() {
-  const { state: urlState, setState: setUrlState } =
-    React.useContext(UrlStateContext);
-  const { state: projectState, setState: setProjectState } =
-    React.useContext(ProjectContext);
-  return (
-    <SchedulerWithDeps
-      projectState={projectState}
-      setProjectState={setProjectState}
-      urlState={urlState}
-      setUrlState={setUrlState}
-    />
   );
 }

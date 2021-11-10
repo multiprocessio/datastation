@@ -46,11 +46,13 @@ export interface InputProps
   autoWidth?: boolean;
   defaultValue?: string;
   tooltip?: React.ReactNode;
+  invalid?: React.ReactNode;
 }
 
 export function Input({
   className,
   onChange,
+  invalid,
   value,
   label,
   autoWidth,
@@ -69,12 +71,19 @@ export function Input({
     defaultValue
   );
 
+  function removeOuterWhitespaceOnFinish() {
+    if (typeof value === 'string') {
+      setLocalValue(value.trim());
+    }
+  }
+
   const input = (
     <React.Fragment>
       <input
         value={localValue}
         type={type}
         className={label ? '' : inputClass}
+        onBlur={removeOuterWhitespaceOnFinish}
         onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
           setLocalValue(String(e.target.value))
         }
@@ -82,6 +91,7 @@ export function Input({
         size={autoWidth ? Math.min(100, String(localValue).length) : undefined}
       />
       {tooltip && <Tooltip children={tooltip} />}
+      {invalid && <small className="input-invalid">{invalid}</small>}
     </React.Fragment>
   );
 
