@@ -29,11 +29,11 @@ In desktop mode and server mode:
 
 ## Install
 
-Install instructions are available [on the website here](https://datastation.multiprocess.io/docs/installation.html).
+Install instructions are available [here](https://github.com/multiprocessio/datastation-documentation/blob/main/Installation.md).
 
 ## Documentation
 
-See [here](https://datastation.multiprocess.io/docs/) for details.
+See [here](https://github.com/multiprocessio/datastation-documentation) for details.
 
 ## Community
 
