@@ -14,6 +14,7 @@ export function Header({
 }) {
   const {
     state: { projectId },
+    setState: setUrlState,
   } = React.useContext(UrlStateContext);
   const { setState: setProjectState } = React.useContext(ProjectContext);
 
@@ -26,14 +27,21 @@ export function Header({
         <div className="flex-right vertical-align-center">
           {MODE === 'browser' ? (
             <React.Fragment>
+              <a href={`${SITE_ROOT}/#online-environment`} target="_blank">
+                About
+              </a>
               <span title="Drop all state and load a sample project.">
                 <Button
                   onClick={() => {
                     setProjectState(DEFAULT_PROJECT);
-                    window.location.reload();
+                    setUrlState({
+                      projectId: DEFAULT_PROJECT.projectName,
+                      page: 0,
+                      view: 'editor',
+                    });
                   }}
                 >
-                  Reset
+                  Load Default Project
                 </Button>
               </span>
               <a
@@ -48,9 +56,6 @@ export function Header({
                   height="20"
                   title="GitHub"
                 ></iframe>
-              </a>
-              <a href={`${SITE_ROOT}/#online-environment`} target="_blank">
-                About
               </a>
             </React.Fragment>
           ) : (

@@ -49,8 +49,17 @@ header a {
 
 header .button,
 header a {
-  margin-left: 15px;
   display: inline-block;
+  color: black;
+  font-size: 0.75rem;
+}
+
+header .vertical-align-center a {
+  margin-right: 15px;
+}
+
+header iframe {
+  margin-left: 15px;
 }
 
 [contenteditable='true'] {
@@ -522,6 +531,10 @@ header > div {
 .panel-preview-results {
   margin: 5px;
   font-size: 0.9rem;
+
+  pre {
+    background: transparent !important;
+  }
 }
 
 .panel-out .button:disabled {

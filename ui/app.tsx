@@ -26,7 +26,7 @@ import { UrlStateContext, useUrlState } from './urlState';
 if (MODE === 'browser') {
   Object.values(LANGUAGES).map((l) => {
     if (l.inMemoryInit) {
-      l.inMemoryInit();
+      // These can be really big, so run it out of band                                                                                     setTimeout(() => l.inMemoryInit(), 0);
     }
   });
 }
