@@ -53,15 +53,15 @@ export function useUrlState(): [UrlState, (a0: Partial<UrlState>) => void] {
     }
   });
 
-  const setState = React.useCallback(function setState(
-    newState: Partial<UrlState>
-  ) {
-    setStateInternal({
-      ...state,
-      ...newState,
-    });
-  },
-  []);
+  const setState = React.useCallback(
+    function setState(newState: Partial<UrlState>) {
+      setStateInternal({
+        ...state,
+        ...newState,
+      });
+    },
+    [state, setStateInternal]
+  );
 
   return [state, setState];
 }

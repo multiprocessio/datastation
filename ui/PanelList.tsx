@@ -48,7 +48,7 @@ export function PanelList({
         <Button
           onClick={() => {
             const panel = new ProgramPanelInfo({
-              name: `Untitled panel #${panelIndex + 1}`,
+              name: `Untitled panel #${page.panels.length + 1}`,
               type: 'python',
             });
             page.panels.splice(panelIndex + 1, 0, panel);

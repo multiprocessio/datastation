@@ -26,7 +26,7 @@ import { UrlStateContext, useUrlState } from './urlState';
 if (MODE === 'browser') {
   Object.values(LANGUAGES).map((l) => {
     if (l.inMemoryInit) {
-      l.inMemoryInit();
+      // These can be really big, so run it out of band                                                                                     setTimeout(() => l.inMemoryInit(), 0);
     }
   });
 }
@@ -44,7 +44,7 @@ function useProjectState(
       Object.setPrototypeOf(c, ProjectState.prototype);
       setProjectState(c);
     },
-    [projectId, store]
+    [projectId, store, setProjectState]
   );
 
   // Re-read state when projectId changes
@@ -184,7 +184,7 @@ export function App() {
     if (!MODE_FEATURES.useDefaultProject) {
       main = <MakeSelectProject />;
     }
-  } else if (urlState.projectId) {
+  } else {
     // This allows us to render the sidebar in tests where we
     // prepopulate connectors and servers
     const hasSidebar = Boolean(

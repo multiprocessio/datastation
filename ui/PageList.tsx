@@ -1,6 +1,12 @@
 import * as React from 'react';
+import { MODE_FEATURES } from '../shared/constants';
 import { EVAL_ERRORS } from '../shared/errors';
-import { PanelResultMeta, ProjectPage, ProjectState } from '../shared/state';
+import {
+  DEFAULT_PROJECT,
+  PanelResultMeta,
+  ProjectPage,
+  ProjectState,
+} from '../shared/state';
 import { Button } from './components/Button';
 import { Confirm } from './components/Confirm';
 import { Input } from './components/Input';
@@ -10,6 +16,7 @@ import { PanelPlayWarning } from './errors';
 import { NotFound } from './NotFound';
 import { PanelList } from './PanelList';
 import { PANEL_UI_DETAILS } from './panels';
+import { ProjectContext } from './ProjectStore';
 import { Scheduler } from './scheduler';
 import { UrlStateContext } from './urlState';
 
@@ -102,7 +109,9 @@ export function PageList({
   pageIndex: number;
 }) {
   const page: ProjectPage | null = state.pages[pageIndex] || null;
-  const { state: urlState } = React.useContext(UrlStateContext);
+  const { state: urlState, setState: setUrlState } =
+    React.useContext(UrlStateContext);
+  const { setState: setProjectState } = React.useContext(ProjectContext);
 
   if (!page) {
     return (
@@ -120,6 +129,24 @@ export function PageList({
           </Button>{' '}
           to get started!
         </p>
+        {MODE_FEATURES.useDefaultProject && (
+          <p>
+            Or,{' '}
+            <Button
+              onClick={() => {
+                setProjectState(DEFAULT_PROJECT);
+                setUrlState({
+                  projectId: DEFAULT_PROJECT.projectName,
+                  page: 0,
+                  view: 'editor',
+                });
+              }}
+            >
+              load the example project
+            </Button>{' '}
+            to get a feel for what DataStation can do.
+          </p>
+        )}
       </div>
     );
   }

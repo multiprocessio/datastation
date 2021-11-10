@@ -126,9 +126,15 @@ export function ProgramInfo({ panel }: { panel: ProgramPanelInfo }) {
   return (
     <React.Fragment>
       Use builtin functions, <code>DM_setPanel($some_array_data)</code> and{' '}
-      <code>DM_getPanel($panel_number)</code>, to interact with other panels.
-      For example:{' '}
-      <code>const passthrough = DM_getPanel(0); DM_setPanel(passthrough);</code>
+      <code>DM_getPanel($panel_number_or_name)</code>, to interact with other
+      panels. For example:{' '}
+      <code>const passthrough = DM_getPanel(0); DM_setPanel(passthrough);</code>{' '}
+      or
+      <code>
+        const passthrough = DM_getPanel('my panel to fetch data');
+        DM_setPanel(passthrough);
+      </code>
+      .
       {panel.program.type === 'julia' && (
         <React.Fragment>
           <br />

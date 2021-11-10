@@ -276,7 +276,6 @@ export function Panel({
               details ? 'panel-header--open' : ''
             } vertical-align-center`}
           >
-            <span className="text-muted">#{panelIndex}</span>
             <span title="Move Up">
               <Button
                 icon
@@ -328,7 +327,7 @@ export function Panel({
               label="Name"
               className="panel-name"
               autoWidth
-              placeholder={`Untitled panel #${panelIndex}`}
+              placeholder={`Untitled panel #${panels.length + 1}`}
               onChange={(value: string) => {
                 panel.name = value;
                 updatePanel(panel);
