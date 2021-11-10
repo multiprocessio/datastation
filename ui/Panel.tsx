@@ -129,7 +129,6 @@ function PreviewResults({
     );
   }
 
-  console.log('here!', results[panelOut]);
   return <Highlight language="json">{results[panelOut]}</Highlight>;
 }
 
