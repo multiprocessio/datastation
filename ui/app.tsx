@@ -109,7 +109,7 @@ export function App() {
     // Set body overflow once on init
     if (MODE_FEATURES.noBodyYOverflow) {
       document.body.style.overflowY = 'hidden';
-   }
+    }
   }, [state && state.projectName]);
 
   function updatePage(page: ProjectPage) {
