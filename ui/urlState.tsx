@@ -61,7 +61,7 @@ export function useUrlState(): [UrlState, (a0: Partial<UrlState>) => void] {
       ...newState,
     });
   },
-  []);
+				     [state, setStateInternal]);
 
   return [state, setState];
 }

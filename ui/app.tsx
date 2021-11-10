@@ -44,7 +44,7 @@ function useProjectState(
       Object.setPrototypeOf(c, ProjectState.prototype);
       setProjectState(c);
     },
-    [projectId, store]
+    [projectId, store, setProjectState]
   );
 
   // Re-read state when projectId changes
@@ -109,7 +109,7 @@ export function App() {
     // Set body overflow once on init
     if (MODE_FEATURES.noBodyYOverflow) {
       document.body.style.overflowY = 'hidden';
-    }
+   }
   }, [state && state.projectName]);
 
   function updatePage(page: ProjectPage) {
@@ -184,7 +184,7 @@ export function App() {
     if (!MODE_FEATURES.useDefaultProject) {
       main = <MakeSelectProject />;
     }
-  } else if (urlState.projectId) {
+  } else {
     // This allows us to render the sidebar in tests where we
     // prepopulate connectors and servers
     const hasSidebar = Boolean(
