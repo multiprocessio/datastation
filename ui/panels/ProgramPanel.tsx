@@ -135,22 +135,6 @@ export function ProgramInfo({ panel }: { panel: ProgramPanelInfo }) {
         DM_setPanel(passthrough);
       </code>
       .
-      {panel.program.type === 'julia' && (
-        <React.Fragment>
-          <br />
-          <br />
-          Install <a href="https://github.com/JuliaIO/JSON.jl">JSON.jl</a> to
-          script with Julia.
-        </React.Fragment>
-      )}
-      {panel.program.type === 'r' && (
-        <React.Fragment>
-          <br />
-          <br />
-          Install <a href="https://rdrr.io/cran/rjson/">rjson</a> to script with
-          R.
-        </React.Fragment>
-      )}
     </React.Fragment>
   );
 }
