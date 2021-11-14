@@ -319,7 +319,7 @@ export interface GraphY {
   label: string;
 }
 
-export type GraphPanelInfoType = 'bar' | 'pie';
+export type GraphPanelInfoType = 'bar' | 'pie' | 'line';
 
 export type GraphPanelInfoWidth = 'small' | 'medium' | 'large';
 

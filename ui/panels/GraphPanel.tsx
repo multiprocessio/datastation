@@ -363,8 +363,9 @@ export function GraphPanelDetails({
                   updatePanel(panel);
                 }}
               >
-                <option value="bar">Bar</option>
-                <option value="pie">Pie</option>
+                <option value="bar">Bar Chart</option>
+                <option value="line">Line Chart</option>
+                <option value="pie">Pie Chart</option>
               </Select>
             </div>
             <div className="form-row">
