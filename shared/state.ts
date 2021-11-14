@@ -314,19 +314,25 @@ export class ProgramPanelInfo extends PanelInfo {
   }
 }
 
-export interface GraphY {
+export interface GraphField {
   field: string;
   label: string;
 }
 
-export type GraphPanelInfoType = 'bar' | 'pie';
+export type GraphPanelInfoType = 'bar' | 'pie' | 'line';
+
+export type GraphPanelInfoWidth = 'small' | 'medium' | 'large';
 
 export class GraphPanelInfo extends PanelInfo {
   graph: {
     panelSource: string;
-    ys: Array<GraphY>;
+    ys: Array<GraphField>;
     x: string;
     type: GraphPanelInfoType;
+    width: GraphPanelInfoWidth;
+    colors: {
+      unique: boolean;
+    };
   };
 
   constructor(
@@ -340,6 +346,10 @@ export class GraphPanelInfo extends PanelInfo {
       x: defaults.x || '',
       ys: defaults.ys || [],
       type: defaults.type || 'bar',
+      width: defaults.width || 'small',
+      colors: defaults.colors || {
+        unique: false,
+      },
     };
   }
 }
