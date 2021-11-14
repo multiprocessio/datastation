@@ -347,7 +347,7 @@ export class GraphPanelInfo extends PanelInfo {
       ys: defaults.ys || [],
       type: defaults.type || 'bar',
       width: defaults.width || 'small',
-      colors: defaults.color || {
+      colors: defaults.colors || {
         unique: false,
       },
     };

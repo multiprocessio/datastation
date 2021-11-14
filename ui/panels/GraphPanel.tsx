@@ -184,13 +184,14 @@ export function GraphPanel({ panel, panels }: PanelBodyProps<GraphPanelInfo>) {
         responsive: true,
         plugins: {
           legend: {
-	    title: {
-	      display: true,
-	      text: panel.name,
-	    },
+            title: {
+              display: true,
+              text: panel.name,
+            },
             labels: {
-	      // Hide legend unless there are multiple Y-es
-	      generateLabels: panel.graph.ys.length < 2 ? () => '' : undefined,
+              // Hide legend unless there are multiple Y-es
+              generateLabels:
+                panel.graph.ys.length < 2 ? ((() => '') as any) : undefined,
             },
           },
         },
@@ -242,7 +243,7 @@ export function GraphPanel({ panel, panels }: PanelBodyProps<GraphPanelInfo>) {
   }, [
     ref.current,
     data,
-    panel.graph.name,
+    panel.name,
     panel.graph.x,
     panel.graph.ys,
     panel.graph.type,
@@ -369,7 +370,7 @@ export function GraphPanelDetails({
             <div className="form-row">
               <Radio
                 label="Unique Colors"
-                value={panel.graph.colors.unique}
+                value={String(panel.graph.colors.unique)}
                 onChange={(value: string) => {
                   panel.graph.colors.unique = value === 'true';
                   updatePanel(panel);
