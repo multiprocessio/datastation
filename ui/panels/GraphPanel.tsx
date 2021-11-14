@@ -182,6 +182,18 @@ export function GraphPanel({ panel, panels }: PanelBodyProps<GraphPanelInfo>) {
       ],
       options: {
         responsive: true,
+        plugins: {
+          legend: {
+	    title: {
+	      display: true,
+	      text: panel.name,
+	    },
+            labels: {
+	      // Hide legend unless there are multiple Y-es
+	      generateLabels: panel.graph.ys.length < 2 ? () => '' : undefined,
+            },
+          },
+        },
       },
       type: panel.graph.type,
       data: {
@@ -227,7 +239,16 @@ export function GraphPanel({ panel, panels }: PanelBodyProps<GraphPanelInfo>) {
     });
 
     return () => chart.destroy();
-  }, [ref.current, data, panel.graph.x, panel.graph.ys, panel.graph.type, panel.graph.colors.unique, panel.graph.width]);
+  }, [
+    ref.current,
+    data,
+    panel.graph.name,
+    panel.graph.x,
+    panel.graph.ys,
+    panel.graph.type,
+    panel.graph.colors.unique,
+    panel.graph.width,
+  ]);
 
   if (!value || !value.length) {
     return null;
@@ -358,8 +379,8 @@ export function GraphPanelDetails({
                   { label: 'No', value: 'false' },
                 ]}
               />
-      </div>
-    <div className="form-row">
+            </div>
+            <div className="form-row">
               <Radio
                 label="Width"
                 value={panel.graph.width}
@@ -367,9 +388,9 @@ export function GraphPanelDetails({
                   panel.graph.width = value as GraphPanelInfoWidth;
                   updatePanel(panel);
                 }}
-    options={[
-      { label: 'Small', value: 'small' },
-      { label: 'Medium', value: 'medium' },
+                options={[
+                  { label: 'Small', value: 'small' },
+                  { label: 'Medium', value: 'medium' },
                   { label: 'Large', value: 'large' },
                 ]}
               />
