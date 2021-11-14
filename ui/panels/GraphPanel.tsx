@@ -3,10 +3,10 @@ import { preview } from 'preview';
 import * as React from 'react';
 import log from '../../shared/log';
 import {
+  GraphField,
   GraphPanelInfo,
   GraphPanelInfoType,
   GraphPanelInfoWidth,
-  GraphY,
   PanelInfo,
   PanelResult,
 } from '../../shared/state';
@@ -101,7 +101,7 @@ function getNDifferentColors(
 }
 
 function colorForDataset(
-  ys: Array<GraphY>,
+  ys: Array<GraphField>,
   graphType: GraphPanelInfoType | undefined,
   unique: boolean,
   valueLabels: Array<string>,
@@ -128,13 +128,39 @@ function colorForDataset(
     return colors[0];
   }
 
-  // This keeps color consistent for _label_ name even as the order of
-  // labels may change.
-  const colorsSortedByLabelOrder = valueLabels
-    .map((label, i) => ({ label, color: colors[i] }))
-    .sort((a, b) => (a.label > b.label ? 1 : -1))
-    .map((l) => l.color);
-  return colorsSortedByLabelOrder;
+  const copyOfValueLabels = [...valueLabels]; // So we can sort this
+
+  // Assign colors based on labels alphabetic order
+  const colorsSortedByLabelAlphabeticOrder = copyOfValueLabels
+    .sort()
+    .map((label, i) => ({ label, color: colors[i] }));
+  // Then resort based on label real order. This keeps colors
+  // consistent for the same label even as the order of labels changes
+  const colorsSortedByRealLabelOrder = colorsSortedByLabelAlphabeticOrder
+    .sort((a, b) => valueLabels.indexOf(a.label) - valueLabels.indexOf(b.label))
+    .map((c) => c.color);
+  return colorsSortedByRealLabelOrder;
+}
+
+// SOURCE: https://stackoverflow.com/a/13532993/1507139
+function shadeRGBPercent(color: string, percent: number) {
+  let R = parseInt(color.substring(1, 3), 16);
+  let G = parseInt(color.substring(3, 5), 16);
+  let B = parseInt(color.substring(5, 7), 16);
+
+  R = (R * (100 + percent)) / 100;
+  G = (G * (100 + percent)) / 100;
+  B = (B * (100 + percent)) / 100;
+
+  R = R < 255 ? R : 255;
+  G = G < 255 ? G : 255;
+  B = B < 255 ? B : 255;
+
+  const RR = R.toString(16).length == 1 ? '0' + R.toString(16) : R.toString(16);
+  const GG = G.toString(16).length == 1 ? '0' + G.toString(16) : G.toString(16);
+  const BB = B.toString(16).length == 1 ? '0' + B.toString(16) : B.toString(16);
+
+  return '#' + RR + GG + BB;
 }
 
 export function GraphPanel({ panel, panels }: PanelBodyProps<GraphPanelInfo>) {
@@ -181,6 +207,10 @@ export function GraphPanel({ panel, panels }: PanelBodyProps<GraphPanelInfo>) {
         },
       ],
       options: {
+        scales:
+          ys.length === 1
+            ? { y: { title: { display: true, text: ys[0].label } } }
+            : undefined,
         responsive: true,
         plugins: {
           legend: {
@@ -208,10 +238,16 @@ export function GraphPanel({ panel, panels }: PanelBodyProps<GraphPanelInfo>) {
             field
           );
 
+          const borderColor = Array.isArray(backgroundColor)
+            ? backgroundColor.map((c) => shadeRGBPercent(c, -10))
+            : shadeRGBPercent(backgroundColor, -10);
+
           return {
             label,
             data: value.map((d) => +d[field]),
             backgroundColor,
+            borderColor,
+            borderWidth: 1,
             tooltip: {
               callbacks:
                 panel.graph.type === 'pie'

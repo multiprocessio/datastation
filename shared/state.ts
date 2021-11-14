@@ -314,7 +314,7 @@ export class ProgramPanelInfo extends PanelInfo {
   }
 }
 
-export interface GraphY {
+export interface GraphField {
   field: string;
   label: string;
 }
@@ -326,7 +326,7 @@ export type GraphPanelInfoWidth = 'small' | 'medium' | 'large';
 export class GraphPanelInfo extends PanelInfo {
   graph: {
     panelSource: string;
-    ys: Array<GraphY>;
+    ys: Array<GraphField>;
     x: string;
     type: GraphPanelInfoType;
     width: GraphPanelInfoWidth;
