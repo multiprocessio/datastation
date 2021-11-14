@@ -5,6 +5,7 @@ import log from '../../shared/log';
 import {
   GraphPanelInfo,
   GraphPanelInfoType,
+  GraphY,
   PanelInfo,
   PanelResult,
 } from '../../shared/state';
@@ -97,6 +98,38 @@ function getNDifferentColors(
   return colors;
 }
 
+function colorForDataset(
+  ys: Array<GraphY>,
+  graphType: GraphPanelInfoType | undefined,
+  valueLabels: Array<string>,
+  field: string
+): string | string[] {
+  const colors = getNDifferentColors(
+    ys.length > 1 ? ys.length : valueLabels.length,
+    1,
+    0
+  );
+
+  // This is the multiple Y-es case. Color needs to be consistent
+  // across _field_.  Multiple Y-es isn't a thing for pie graphs
+  // though.
+  if (ys.length > 1 && graphType !== 'pie') {
+    // This keeps color consistent for a field name even as the order
+    // of the field may change.
+    const sortedFields = ys.map((y) => y.field).sort();
+    const index = sortedFields.indexOf(field);
+    return colors[index];
+  }
+
+  // This keeps color consistent for _label_ name even as the order of
+  // labels may change.
+  const colorsSortedByLabelOrder = valueLabels
+    .map((label, i) => ({ label, color: colors[i] }))
+    .sort((a, b) => (a.label > b.label ? 1 : -1))
+    .map((l) => l.color);
+  return colorsSortedByLabelOrder;
+}
+
 export function GraphPanel({ panel, panels }: PanelBodyProps<GraphPanelInfo>) {
   const data = panel.resultMeta || new PanelResult();
   const value = (data || {}).value || [];
@@ -119,11 +152,7 @@ export function GraphPanel({ panel, panels }: PanelBodyProps<GraphPanelInfo>) {
       ys.reverse();
     }
 
-    const colors = getNDifferentColors(
-      ys.length > 1 ? ys.length : value.length,
-      1,
-      0
-    );
+    const labels = value.map((d) => d[panel.graph.x]);
 
     const ctx = ref.current.getContext('2d');
     const chart = new Chart(ctx, {
@@ -149,17 +178,19 @@ export function GraphPanel({ panel, panels }: PanelBodyProps<GraphPanelInfo>) {
       },
       type: panel.graph.type,
       data: {
-        labels: value.map((d) => d[panel.graph.x]),
-        datasets: ys.map(({ field, label }, i) => {
+        labels,
+        datasets: ys.map(({ field, label }) => {
+          const backgroundColor = colorForDataset(
+            ys,
+            panel.graph.type,
+            labels,
+            field
+          );
+
           return {
             label,
             data: value.map((d) => +d[field]),
-            backgroundColor:
-              ys.length > 1 && panel.graph.type !== 'pie'
-                ? colors[i]
-                : panel.graph.type
-                ? getNDifferentColors(value.length, ys.length, i)
-                : colors,
+            backgroundColor,
             tooltip: {
               callbacks:
                 panel.graph.type === 'pie'
