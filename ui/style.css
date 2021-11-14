@@ -105,7 +105,10 @@ header iframe {
   max-width: 100%;
 }
 
-label {
+label,
+.radio-label,
+.input-label,
+.select-label {
   padding-right: 15px;
   color: #777;
   font-size: 0.75rem;
@@ -116,8 +119,12 @@ input[type='radio'] {
   margin-left: 3px;
 }
 
-.radio--vertical {
-  display: block;
+.radio {
+  .input-label {
+    padding-right: 5px;
+    font-size: initial;
+    color: initial;
+  }
 }
 
 .radio--vertical .radio-element {
@@ -462,7 +469,8 @@ header > div {
 }
 
 .panel-details {
-  margin-top: 15px;
+  margin: 15px auto 0 auto;
+  max-width: 1024px;
 }
 
 .panel-details label.select select,
@@ -702,6 +710,20 @@ header > div {
 
 canvas {
   max-height: 100%;
+  margin: 30px auto;
+}
+
+.canvas--small {
+  width: 1024px !important;
+  max-width: 100%;
+}
+
+.canvas--medium {
+  width: 75% !important;
+}
+
+.canvas--large {
+  width: 100% !important;
 }
 
 .modal {

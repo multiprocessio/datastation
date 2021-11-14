@@ -98,7 +98,7 @@ export function Input({
   if (label) {
     return (
       <label className={inputClass + ' vertical-align-center'}>
-        {label}
+        <span className="input-label">{label}</span>
         {input}
       </label>
     );

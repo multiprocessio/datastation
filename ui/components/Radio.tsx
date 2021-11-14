@@ -6,7 +6,13 @@ export interface RadioProps extends InputProps {
   vertical?: boolean;
 }
 
-export function Radio({ options, value, vertical, ...props }: RadioProps) {
+export function Radio({
+  options,
+  value,
+  label,
+  vertical,
+  ...props
+}: RadioProps) {
   React.useEffect(() => {
     if (!options.length) {
       return;
@@ -17,8 +23,15 @@ export function Radio({ options, value, vertical, ...props }: RadioProps) {
     }
   });
 
-  return (
-    <span className={`radio ${vertical ? 'radio--vertical' : ''}`}>
+  const radioClass = 'radio';
+
+  const radio = (
+    <span
+      className={
+        (label ? '' : radioClass + ' ') +
+        (vertical ? '' : 'vertical-align-center')
+      }
+    >
       {options.map((o) => (
         <Input
           className="radio-element"
@@ -32,4 +45,15 @@ export function Radio({ options, value, vertical, ...props }: RadioProps) {
       ))}
     </span>
   );
+
+  if (label) {
+    return (
+      <label className={radioClass + ' vertical-align-center'}>
+        <span className="radio-label">{label}</span>
+        {radio}
+      </label>
+    );
+  }
+
+  return radio;
 }
