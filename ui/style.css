@@ -695,10 +695,9 @@ header > div {
 
 .form-row {
   padding: 5px 0;
-}
-
-.form-row > * {
-  padding-right: 10px;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
 }
 
 .version {
