@@ -101,7 +101,7 @@ export function Select({
   if (label) {
     return (
       <label className={selectClass}>
-        {label}
+        <span className="select-label">{label}</span>
         {select}
       </label>
     );

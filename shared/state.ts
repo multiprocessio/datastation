@@ -321,12 +321,18 @@ export interface GraphY {
 
 export type GraphPanelInfoType = 'bar' | 'pie';
 
+export type GraphPanelInfoWidth = 'small' | 'medium' | 'large';
+
 export class GraphPanelInfo extends PanelInfo {
   graph: {
     panelSource: string;
     ys: Array<GraphY>;
     x: string;
     type: GraphPanelInfoType;
+    width: GraphPanelInfoWidth;
+    colors: {
+      unique: boolean;
+    };
   };
 
   constructor(
@@ -340,6 +346,10 @@ export class GraphPanelInfo extends PanelInfo {
       x: defaults.x || '',
       ys: defaults.ys || [],
       type: defaults.type || 'bar',
+      width: defaults.width || 'small',
+      colors: defaults.color || {
+        unique: false,
+      },
     };
   }
 }

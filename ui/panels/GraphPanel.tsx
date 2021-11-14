@@ -5,6 +5,7 @@ import log from '../../shared/log';
 import {
   GraphPanelInfo,
   GraphPanelInfoType,
+  GraphPanelInfoWidth,
   GraphY,
   PanelInfo,
   PanelResult,
@@ -13,6 +14,7 @@ import { Button } from '../components/Button';
 import { FieldPicker, unusedFields } from '../components/FieldPicker';
 import { FormGroup } from '../components/FormGroup';
 import { PanelSourcePicker } from '../components/PanelSourcePicker';
+import { Radio } from '../components/Radio';
 import { Select } from '../components/Select';
 import { evalColumnPanel } from './TablePanel';
 import { PanelBodyProps, PanelDetailsProps, PanelUIDetails } from './types';
@@ -101,6 +103,7 @@ function getNDifferentColors(
 function colorForDataset(
   ys: Array<GraphY>,
   graphType: GraphPanelInfoType | undefined,
+  unique: boolean,
   valueLabels: Array<string>,
   field: string
 ): string | string[] {
@@ -119,6 +122,10 @@ function colorForDataset(
     const sortedFields = ys.map((y) => y.field).sort();
     const index = sortedFields.indexOf(field);
     return colors[index];
+  }
+
+  if (!unique) {
+    return colors[0];
   }
 
   // This keeps color consistent for _label_ name even as the order of
@@ -159,7 +166,7 @@ export function GraphPanel({ panel, panels }: PanelBodyProps<GraphPanelInfo>) {
       plugins: [
         {
           id: 'background-white',
-          // Pretty ridiculous there's no builtin way to set a background color
+          // Pretty silly there's no builtin way to set a background color
           // https://stackoverflow.com/a/38493678/1507139
           beforeDraw: function () {
             if (!ref || !ref.current) {
@@ -183,6 +190,7 @@ export function GraphPanel({ panel, panels }: PanelBodyProps<GraphPanelInfo>) {
           const backgroundColor = colorForDataset(
             ys,
             panel.graph.type,
+            panel.graph.colors.unique,
             labels,
             field
           );
@@ -219,13 +227,13 @@ export function GraphPanel({ panel, panels }: PanelBodyProps<GraphPanelInfo>) {
     });
 
     return () => chart.destroy();
-  }, [ref.current, data, panel.graph.x, panel.graph.ys, panel.graph.type]);
+  }, [ref.current, data, panel.graph.x, panel.graph.ys, panel.graph.type, panel.graph.colors.unique, panel.graph.width]);
 
   if (!value || !value.length) {
     return null;
   }
 
-  return <canvas ref={ref} />;
+  return <canvas className={`canvas--${panel.graph.width}`} ref={ref} />;
 }
 
 export function GraphPanelDetails({
@@ -255,83 +263,120 @@ export function GraphPanelDetails({
 
   return (
     <React.Fragment>
-      <FormGroup label="General">
-        <div className="form-row">
-          <Select
-            label="Graph"
-            value={panel.graph.type}
-            onChange={(value: string) => {
-              panel.graph.type = value as GraphPanelInfoType;
-              updatePanel(panel);
-            }}
+      <div className="flex">
+        <div>
+          <FormGroup label="General">
+            <div className="form-row">
+              <PanelSourcePicker
+                currentPanel={panel.id}
+                panels={panels}
+                value={panel.graph.panelSource}
+                onChange={(value: string) => {
+                  panel.graph.panelSource = value;
+                  updatePanel(panel);
+                }}
+              />
+            </div>
+          </FormGroup>
+          <FormGroup label={panel.graph.type === 'pie' ? 'Slice' : 'X-Axis'}>
+            <div className="form-row">
+              <FieldPicker
+                label="Field"
+                shape={data?.shape}
+                value={panel.graph.x}
+                onChange={(value: string) => {
+                  panel.graph.x = value;
+                  updatePanel(panel);
+                }}
+              />
+            </div>
+          </FormGroup>
+          <FormGroup
+            label={
+              panel.graph.type === 'pie' ? 'Slice Size Series' : 'Y-Axis Series'
+            }
           >
-            <option value="bar">Bar</option>
-            <option value="pie">Pie</option>
-          </Select>
-        </div>
-        <div className="form-row">
-          <PanelSourcePicker
-            currentPanel={panel.id}
-            panels={panels}
-            value={panel.graph.panelSource}
-            onChange={(value: string) => {
-              panel.graph.panelSource = value;
-              updatePanel(panel);
-            }}
-          />
-        </div>
-      </FormGroup>
-      <FormGroup label={panel.graph.type === 'pie' ? 'Slice' : 'X-Axis'}>
-        <div className="form-row">
-          <FieldPicker
-            label="Field"
-            shape={data?.shape}
-            value={panel.graph.x}
-            onChange={(value: string) => {
-              panel.graph.x = value;
-              updatePanel(panel);
-            }}
-          />
-        </div>
-      </FormGroup>
-      <FormGroup
-        label={
-          panel.graph.type === 'pie' ? 'Slice Size Series' : 'Y-Axis Series'
-        }
-      >
-        {panel.graph.ys.map((y, i) => (
-          <div className="form-row vertical-align-center" key={y.field + i}>
-            <FieldPicker
-              used={[...panel.graph.ys.map((y) => y.field), panel.graph.x]}
-              onDelete={() => {
-                panel.graph.ys.splice(i, 1);
+            {panel.graph.ys.map((y, i) => (
+              <div className="form-row vertical-align-center" key={y.field + i}>
+                <FieldPicker
+                  used={[...panel.graph.ys.map((y) => y.field), panel.graph.x]}
+                  onDelete={() => {
+                    panel.graph.ys.splice(i, 1);
+                    updatePanel(panel);
+                  }}
+                  preferredDefaultType="number"
+                  label="Field"
+                  value={y.field}
+                  shape={data?.shape}
+                  onChange={(value: string) => {
+                    y.field = value;
+                    updatePanel(panel);
+                  }}
+                  labelValue={y.label}
+                  labelOnChange={(value: string) => {
+                    y.label = value;
+                    updatePanel(panel);
+                  }}
+                />
+              </div>
+            ))}
+            <Button
+              onClick={() => {
+                panel.graph.ys.push({ label: '', field: '' });
                 updatePanel(panel);
               }}
-              preferredDefaultType="number"
-              label="Field"
-              value={y.field}
-              shape={data?.shape}
-              onChange={(value: string) => {
-                y.field = value;
-                updatePanel(panel);
-              }}
-              labelValue={y.label}
-              labelOnChange={(value: string) => {
-                y.label = value;
-                updatePanel(panel);
-              }}
-            />
-          </div>
-        ))}
-        <Button
-          onClick={() => {
-            panel.graph.ys.push({ label: '', field: '' });
-            updatePanel(panel);
-          }}
-        >
-          Add Series
-        </Button>
-      </FormGroup>
+            >
+              Add Series
+            </Button>
+          </FormGroup>
+        </div>
+        <div>
+          <FormGroup label="Display">
+            <div className="form-row">
+              <Select
+                label="Graph Type"
+                value={panel.graph.type}
+                onChange={(value: string) => {
+                  panel.graph.type = value as GraphPanelInfoType;
+                  updatePanel(panel);
+                }}
+              >
+                <option value="bar">Bar</option>
+                <option value="pie">Pie</option>
+              </Select>
+            </div>
+            <div className="form-row">
+              <Radio
+                label="Unique Colors"
+                value={panel.graph.colors.unique}
+                onChange={(value: string) => {
+                  panel.graph.colors.unique = value === 'true';
+                  updatePanel(panel);
+                }}
+                options={[
+                  { label: 'Yes', value: 'true' },
+                  { label: 'No', value: 'false' },
+                ]}
+              />
+      </div>
+    <div className="form-row">
+              <Radio
+                label="Width"
+                value={panel.graph.width}
+                onChange={(value: string) => {
+                  panel.graph.width = value as GraphPanelInfoWidth;
+                  updatePanel(panel);
+                }}
+    options={[
+      { label: 'Small', value: 'small' },
+      { label: 'Medium', value: 'medium' },
+                  { label: 'Large', value: 'large' },
+                ]}
+              />
+            </div>
+          </FormGroup>
+        </div>
+      </div>
     </React.Fragment>
   );
 }
