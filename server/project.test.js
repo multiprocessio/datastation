@@ -11,6 +11,7 @@ test('getProjects', async () => {
         database: '',
       },
     },
+    dbpool: {},
   };
 
   const handlers = getProjectHandlers(app);
@@ -55,6 +56,7 @@ test('getProject', async () => {
         database: '',
       },
     },
+    dbpool: {},
   };
 
   const handlers = getProjectHandlers(app);
@@ -99,6 +101,7 @@ test('makeProject', async () => {
         database: '',
       },
     },
+    dbpool: {},
   };
 
   const handlers = getProjectHandlers(app);
