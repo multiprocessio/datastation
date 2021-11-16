@@ -22,3 +22,11 @@ accurate. It doesn't seem to handle syntax errors pretty terribly in
 general.
 
 Should move to something that is not ts-jest eventually.
+
+## Run a single test
+
+Pass the test file name to `yarn test`.
+
+```bash
+yarn test server/exporter.test.js
+```

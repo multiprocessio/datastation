@@ -1,7 +1,7 @@
 const { App, init } = require('./app');
 
 describe('app.migrate', function () {
-  test('no existing migrations', async function () {
+  describe('zero existing', function () {
     const client = {
       query: jest.fn(function query(sql) {
         if (sql === 'SELECT migration_name FROM migrations') {
@@ -10,141 +10,159 @@ describe('app.migrate', function () {
       }),
       release: jest.fn(),
     };
-    function pgPoolFactory() {
-      return {
-        connect() {
-          return client;
+
+    beforeAll(async () => {
+      function pgPoolFactory() {
+        return {
+          connect() {
+            return client;
+          },
+        };
+      }
+
+      const app = new App(
+        {
+          database: {
+            address: '',
+            username: '',
+            password: '',
+            database: '',
+          },
+        },
+        pgPoolFactory
+      );
+
+      app.fs = {
+        readdirSync() {
+          return ['2_some_change.sql', '1_init.sql'];
+        },
+        readFileSync(name) {
+          return {
+            '2_some_change.sql': 'SELECT 2',
+            '1_init.sql': 'SELECT 1',
+          }[name.split('/').pop()];
         },
       };
-    }
 
-    const app = new App(
-      {
-        database: {
-          address: '',
-          username: '',
-          password: '',
-          database: '',
-        },
-      },
-      pgPoolFactory
-    );
+      await app.migrate();
+    });
 
-    app.fs = {
-      readdirSync() {
-        return ['2_some_change.sql', '1_init.sql'];
-      },
-      readFileSync(name) {
-        return {
-          '2_some_change.sql': 'SELECT 2',
-          '1_init.sql': 'SELECT 1',
-        }[name];
-      },
-    };
+    test('all database queries', () => {
+      expect([...client.query.mock.calls]).toMatchObject([
+        ['SELECT migration_name FROM migrations'],
+        ['BEGIN'],
+        ['SELECT 1'],
+        ['INSERT INTO migrations (migration_name) VALUES ($1)', ['1_init.sql']],
+        ['COMMIT'],
+        ['BEGIN'],
+        ['SELECT 2'],
+        [
+          'INSERT INTO migrations (migration_name) VALUES ($1)',
+          ['2_some_change.sql'],
+        ],
+        ['COMMIT'],
+      ]);
+    });
 
-    await app.migrate();
-
-    expect(client.query.mock.calls).toStrictEqual([
-      ['SELECT migration_name FROM migrations'],
-      ['BEGIN'],
-      ['SELECT 1'],
-      ['INSERT INTO migrations (migration_name) VALUES ($1)', ['1_init.sql']],
-      ['COMMIT'],
-      ['BEGIN'],
-      ['SELECT 2'],
-      [
-        'INSERT INTO migrations (migration_name) VALUES ($1)',
-        ['2_some_change.sql'],
-      ],
-      ['COMMIT'],
-    ]);
-
-    expect(client.release.mock.calls.length).toBe(1);
+    test('release called', () => {
+      expect(client.release.mock.calls.length).toBe(1);
+    });
   });
 
-  test('one existing migration', async function () {
-    function expressFactory() {}
-
+  describe('one existing', function () {
     const client = {
       query: jest.fn(function query(sql) {
         if (sql === 'SELECT migration_name FROM migrations') {
-          return ['1_init.sql'];
+          return { rows: [{ migration_name: '1_init.sql' }] };
         }
       }),
       release: jest.fn(),
     };
-    function pgPoolFactory() {
-      return {
-        connect() {
-          return client;
+
+    beforeAll(async () => {
+      function pgPoolFactory() {
+        return {
+          connect() {
+            return client;
+          },
+        };
+      }
+
+      const app = new App(
+        {
+          database: {
+            address: '',
+            username: '',
+            password: '',
+            database: '',
+          },
+        },
+        pgPoolFactory
+      );
+
+      app.fs = {
+        readdirSync() {
+          return ['2_some_change.sql', '1_init.sql'];
+        },
+        readFileSync(name) {
+          return {
+            '2_some_change.sql': 'SELECT 2',
+            '1_init.sql': 'SELECT 1',
+          }[name.split('/').pop()];
         },
       };
-    }
 
-    const app = new App(
-      {
-        database: {
-          address: '',
-          username: '',
-          password: '',
-          database: '',
-        },
-      },
-      expressFactory,
-      pgPoolFactory
-    );
+      await app.migrate();
+    });
 
-    app.fs = {
-      readdirSync() {
-        return ['2_some_change.sql', '1_init.sql'];
-      },
-      readFileSync(name) {
-        return {
-          '2_some_change.sql': 'SELECT 2',
-          '1_init.sql': 'SELECT 1',
-        }[name.split('/').pop()];
-      },
-    };
+    test('all database queries', () => {
+      expect([...client.query.mock.calls]).toMatchObject([
+        ['SELECT migration_name FROM migrations'],
+        ['BEGIN'],
+        ['SELECT 2'],
+        [
+          'INSERT INTO migrations (migration_name) VALUES ($1)',
+          ['2_some_change.sql'],
+        ],
+        ['COMMIT'],
+      ]);
+    });
 
-    await app.migrate();
-
-    expect(client.query.mock.calls).toStrictEqual([
-      ['SELECT migration_name FROM migrations'],
-      ['BEGIN'],
-      ['SELECT 2'],
-      [
-        'INSERT INTO migrations (migration_name) VALUES ($1)',
-        ['2_some_change.sql'],
-      ],
-      ['COMMIT'],
-    ]);
-
-    expect(client.release.mock.calls.length).toBe(1);
+    test('release called', () => {
+      expect(client.release.mock.calls.length).toBe(1);
+    });
   });
 });
 
 describe('app.serve', function () {
-  test('it listens', async function () {
-    const { app } = await init(App.make);
+  const server = { listen: jest.fn() };
+  let app;
+  beforeAll(async function () {
+    ({ app } = await init(App.make));
 
-    const server = { listen: jest.fn };
-    app.http.createServer = jest.fn(server);
-    app.https.createServer = jest.fn(server);
+    app.http.createServer = jest.fn(() => server);
+    app.https.createServer = jest.fn(() => server);
 
     await app.serve();
+  });
 
-    expect(app.http.createServer.mock.calls.length).toBe(1);
-    expect(app.https.createServer.mock.calls.length).toBe(0);
+  test('it creates server', () => {
+    expect(app.http.createServer.mock.calls.length).toBe(0);
+    expect(app.https.createServer.mock.calls.length).toBe(1);
+  });
 
+  test('it listens', () => {
     expect(server.listen.mock.calls.length).toBe(1);
   });
 });
 
 describe('init', function () {
-  const factoryApp = { migrate: jest.fn() };
-  const appFactory = (c) => factoryApp;
-  // TODO: test { handlers } in response
-  const { app } = init(appFactory);
-  expect(app).toBe(factoryApp);
-  expect(app.migrate.mock.calls.length).toBe(1);
+  test('calls migrate', async function () {
+    const factoryApp = { migrate: jest.fn(), projectHandlers: [] };
+    const appFactory = (c) => factoryApp;
+    // TODO: test { handlers } in response
+    const { app } = await init(appFactory);
+    expect(app).toBe(factoryApp);
+    expect(factoryApp.migrate.mock.calls.length).toBe(1);
+  });
 });

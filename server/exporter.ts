@@ -35,6 +35,7 @@ export class Exporter {
 
     (global as any).window = window;
     global.document = window.document;
+
     global.requestAnimationFrame = function (callback) {
       return setTimeout(callback, 0);
     };
@@ -170,17 +171,21 @@ export async function fetchAndRunAllExports(
 
 export async function main(
   appFactory: AppFactory,
-  nodemailerFactory: NodemailerFactory
+  nodemailerFactory: NodemailerFactory,
+  runPeriods: {
+    daily: boolean;
+    weekly: boolean;
+    monthly: boolean;
+  }
 ) {
   const { handlers } = await init(appFactory);
-  const now = new Date();
-  fetchAndRunAllExports(handlers, nodemailerFactory, {
-    daily: true,
-    weekly: now.getDay() === 1,
-    monthly: now.getDate() === 1,
-  });
+  fetchAndRunAllExports(handlers, nodemailerFactory, runPeriods);
 }
 
 if (process.argv.some((a) => a.includes('exporter.js'))) {
-  main(App.make, () => nodemailer);
+  main(App.make, () => nodemailer, {
+    daily: true,
+    weekly: new Date().getDay() === 1,
+    monthly: new Date().getDate() === 1,
+  });
 }

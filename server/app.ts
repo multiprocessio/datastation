@@ -25,6 +25,7 @@ export class App {
   fs: typeof fs;
   http: typeof http;
   https: typeof https;
+  projectHandlers: RPCHandler<any, any>[];
 
   constructor(config: Config, poolFactory: PgPoolFactory) {
     this.express = express();
@@ -44,6 +45,8 @@ export class App {
       host,
       port: +port || undefined,
     });
+
+    this.projectHandlers = getProjectHandlers(this.dbpool);
   }
 
   static make(config: Config) {
@@ -171,7 +174,7 @@ export async function init(appFactory: AppFactory) {
 
   const { handlers } = initialize({
     subprocess: path.join(__dirname, 'server_runner.js'),
-    additionalHandlers: getProjectHandlers(app.dbpool),
+    additionalHandlers: app.projectHandlers,
   });
 
   return { handlers, app };
