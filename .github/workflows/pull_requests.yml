@@ -123,7 +123,7 @@ jobs:
     - run: ./scripts/ci/prepare_macos.sh
     # Needed so we can have ./build/desktop_runner.js ready for tests
     - run: yarn build-desktop
-    - run: yarn test --runInBand --detectOpenHandles --forceExit --verbose
+    - run: yarn test --runInBand --detectOpenHandles --forceExit --verbose shared ui desktop
     - run: yarn release-desktop 0.0.0-e2etest
     - run: yarn e2e-test
 
@@ -152,6 +152,6 @@ jobs:
       shell: pwsh
     # Needed so we can have ./build/desktop_runner.js ready for tests
     - run: yarn build-desktop
-    - run: yarn test --runInBand --detectOpenHandles --forceExit --verbose
+    - run: yarn test --runInBand --detectOpenHandles --forceExit --verbose shared ui desktop
     - run: yarn release-desktop 0.0.0-e2etest
     - run: yarn e2e-test
