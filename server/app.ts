@@ -16,23 +16,25 @@ import { getProjectHandlers } from './project';
 import { handleRPC } from './rpc';
 
 export type AppFactory = (c: Config) => App;
-type ExpressFactory = typeof express;
 type PgPoolFactory = (c: pg.PoolConfig) => pg.Pool;
 
 export class App {
-  express: express.Express;
   config: Config;
   dbpool: pg.Pool;
+  express: express.Express;
   fs: typeof fs;
+  http: typeof http;
+  https: typeof https;
 
-  constructor(
-    config: Config,
-    expressFactory: ExpressFactory,
-    poolFactory: PgPoolFactory
-  ) {
-    this.express = expressFactory();
+  constructor(config: Config, poolFactory: PgPoolFactory) {
+    this.express = express();
     this.config = config;
+
+    // So these can be overridden in tests
     this.fs = fs;
+    this.http = http;
+    this.https = https;
+    // Done for overrides
 
     const [host, port] = this.config.database.address.split(':');
     this.dbpool = poolFactory({
@@ -45,7 +47,7 @@ export class App {
   }
 
   static make(config: Config) {
-    return new App(config, express, (c: pg.PoolConfig) => new pg.Pool(c));
+    return new App(config, (c: pg.PoolConfig) => new pg.Pool(c));
   }
 
   async migrate() {
@@ -133,14 +135,14 @@ export class App {
     });
 
     const server = this.config.server.tlsKey
-      ? https.createServer(
+      ? this.https.createServer(
           {
             key: this.fs.readFileSync(this.config.server.tlsKey),
             cert: this.fs.readFileSync(this.config.server.tlsCert),
           },
           this.express
         )
-      : http.createServer(this.express);
+      : this.http.createServer(this.express);
     const location = this.config.server.address + ':' + this.config.server.port;
     server.listen(
       {
