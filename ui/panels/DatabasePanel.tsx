@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { SITE_ROOT } from '../../shared/constants';
 import { NoConnectorError } from '../../shared/errors';
 import {
   ConnectorInfo,
@@ -175,6 +176,27 @@ export function DatabasePanelBody({
   );
 }
 
+export function DatabaseInfo({ panel }: { panel: DatabasePanelInfo }) {
+  const { connectors } = React.useContext(ProjectContext).state;
+  const connector = connectors.find(
+    (c) => c.id === panel.database.connectorId
+  ) as DatabaseConnectorInfo;
+
+  const vendor = VENDORS[connector?.database.type]?.name;
+  if (!['postgres', 'mysql', 'sqlite'].includes(vendor)) {
+    return null;
+  }
+
+  return (
+    <React.Fragment>
+      Use <code>DM_getPanel($panel_number_or_name)</code> to reference other
+      panels. Once you have called this once for one panel, use{' '}
+      <code>t_$panel_number_or_name</code> to refer to it again. Read more{' '}
+      <a href={SITE_ROOT + '/docs/Panels/Code_Panels.html'}>here</a>.
+    </React.Fragment>
+  );
+}
+
 export const databasePanel: PanelUIDetails<DatabasePanelInfo> = {
   icon: 'table_rows',
   eval: evalDatabasePanel,
@@ -185,5 +207,5 @@ export const databasePanel: PanelUIDetails<DatabasePanelInfo> = {
   previewable: true,
   factory: () => new DatabasePanelInfo(),
   hasStdout: false,
-  info: null,
+  info: DatabaseInfo,
 };

@@ -43,7 +43,7 @@ export class Auth {
       });
     } else {
       log.fatal(
-        `Missing auth scheme. Review ${SITE_ROOT}/docs/authentication.html for how to configure auth.`
+        `Missing auth scheme. Review ${SITE_ROOT}/docs/Installation.html#configuration for how to configure auth.`
       );
     }
   }

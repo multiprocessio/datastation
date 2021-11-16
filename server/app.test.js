@@ -9,6 +9,8 @@ basicConfig.auth.openId = {
   clientId: '12',
   clientSecret: '89',
 };
+basicConfig.server.tlsKey = '';
+basicConfig.server.tlsCert = '';
 
 describe('app.migrate', function () {
   describe('zero existing', function () {
@@ -135,8 +137,8 @@ describe('app.serve', function () {
   });
 
   test('it creates server', () => {
-    expect(app.http.createServer.mock.calls.length).toBe(0);
-    expect(app.https.createServer.mock.calls.length).toBe(1);
+    expect(app.http.createServer.mock.calls.length).toBe(1);
+    expect(app.https.createServer.mock.calls.length).toBe(0);
   });
 
   test('it listens', () => {
