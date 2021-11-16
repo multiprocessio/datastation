@@ -92,15 +92,11 @@ describe('fetchAndRunAllExports', () => {
   };
   const app = { migrate: jest.fn(), projectHandlers: handlers };
   beforeAll(async () => {
-    await main(
-      () => app,
-      () => nodemailer,
-      {
-        daily: true,
-        weekly: true,
-        monthly: true,
-      }
-    );
+    await main(app, () => nodemailer, {
+      daily: true,
+      weekly: true,
+      monthly: true,
+    });
   });
 
   test('createTransport', () => {

@@ -1,5 +1,6 @@
 import { APP_NAME, DEBUG, VERSION } from '../shared/constants';
 import { App, init } from './app';
+import { readConfig } from './config';
 import log from './log';
 
 process.on('unhandledRejection', (e) => {
@@ -12,7 +13,8 @@ process.on('uncaughtException', (e) => {
 log.info(APP_NAME, VERSION, DEBUG ? 'DEBUG' : '');
 
 async function main() {
-  const { app, handlers } = await init(App.make);
+  const app = App.make(readConfig());
+  const { handlers } = await init(app);
   await app.migrate();
   await app.serve(handlers);
 }

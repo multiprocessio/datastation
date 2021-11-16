@@ -10,12 +10,11 @@ import { RPCHandler } from '../desktop/rpc';
 import { initialize } from '../desktop/runner';
 import { humanSize } from '../shared/text';
 import { registerAuth } from './auth';
-import { Config, readConfig } from './config';
+import { Config } from './config';
 import log from './log';
 import { getProjectHandlers } from './project';
 import { handleRPC } from './rpc';
 
-export type AppFactory = (c: Config) => App;
 type PgPoolFactory = (c: pg.PoolConfig) => pg.Pool;
 
 export class App {
@@ -167,10 +166,7 @@ export class App {
   }
 }
 
-export async function init(appFactory: AppFactory, withSubprocess = true) {
-  const config = readConfig();
-  const app = appFactory(config);
-
+export async function init(app: App, withSubprocess = true) {
   const { handlers } = initialize({
     subprocess: withSubprocess
       ? path.join(__dirname, 'server_runner.js')
@@ -178,5 +174,5 @@ export async function init(appFactory: AppFactory, withSubprocess = true) {
     additionalHandlers: app.projectHandlers,
   });
 
-  return { handlers, app };
+  return { handlers };
 }

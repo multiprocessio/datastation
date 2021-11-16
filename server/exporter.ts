@@ -5,7 +5,8 @@ import { decryptFields } from '../desktop/secret';
 import { APP_NAME, DEBUG, VERSION } from '../shared/constants';
 import { GetProjectsRequest, GetProjectsResponse } from '../shared/rpc';
 import { ProjectPage, ProjectState, ScheduledExport } from '../shared/state';
-import { App, AppFactory, init } from './app';
+import { App, init } from './app';
+import { readConfig } from './config';
 import log from './log';
 import { makeDispatch } from './rpc';
 
@@ -170,7 +171,7 @@ export async function fetchAndRunAllExports(
 }
 
 export async function main(
-  appFactory: AppFactory,
+  app: App,
   nodemailerFactory: NodemailerFactory,
   runPeriods: {
     daily: boolean;
@@ -178,13 +179,14 @@ export async function main(
     monthly: boolean;
   }
 ) {
-  const { handlers, app } = await init(appFactory);
+  const { handlers } = await init(app);
   await app.migrate();
   fetchAndRunAllExports(handlers, nodemailerFactory, runPeriods);
 }
 
 if (process.argv.some((a) => a.includes('exporter.js'))) {
-  main(App.make, () => nodemailer, {
+  const app = App.make(readConfig());
+  main(app, () => nodemailer, {
     daily: true,
     weekly: new Date().getDay() === 1,
     monthly: new Date().getDate() === 1,

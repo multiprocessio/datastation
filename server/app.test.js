@@ -1,4 +1,14 @@
+const { Config } = require('./config');
 const { App, init } = require('./app');
+
+const basicConfig = new Config();
+basicConfig.auth.sessionSecret = 'a secret test secret';
+// Not great but for now the tests need a working openid server, set up with garbage configuration.
+basicConfig.auth.openId = {
+  realm: 'https://accounts.google.com',
+  clientId: '12',
+  clientSecret: '89',
+};
 
 describe('app.migrate', function () {
   describe('zero existing', function () {
@@ -20,17 +30,7 @@ describe('app.migrate', function () {
         };
       }
 
-      const app = new App(
-        {
-          database: {
-            address: '',
-            username: '',
-            password: '',
-            database: '',
-          },
-        },
-        pgPoolFactory
-      );
+      const app = new App(basicConfig, pgPoolFactory);
 
       app.fs = {
         readdirSync() {
@@ -88,17 +88,7 @@ describe('app.migrate', function () {
         };
       }
 
-      const app = new App(
-        {
-          database: {
-            address: '',
-            username: '',
-            password: '',
-            database: '',
-          },
-        },
-        pgPoolFactory
-      );
+      const app = new App(basicConfig, pgPoolFactory);
 
       app.fs = {
         readdirSync() {
@@ -136,13 +126,11 @@ describe('app.migrate', function () {
 
 describe('app.serve', function () {
   const server = { listen: jest.fn() };
-  let app;
+  let app = new App(basicConfig, () => {});
+  app.http.createServer = jest.fn(() => server);
+  app.https.createServer = jest.fn(() => server);
+
   beforeAll(async function () {
-    ({ app } = await init(App.make));
-
-    app.http.createServer = jest.fn(() => server);
-    app.https.createServer = jest.fn(() => server);
-
     await app.serve();
   });
 
@@ -158,10 +146,8 @@ describe('app.serve', function () {
 
 describe('init', function () {
   test('calls migrate', async function () {
-    const factoryApp = { projectHandlers: [] };
-    const appFactory = (c) => factoryApp;
-    // TODO: test { handlers } in response
-    const { app } = await init(appFactory);
-    expect(app).toBe(factoryApp);
+    const app = { projectHandlers: [] };
+    const { handlers } = await init(app);
+    expect(handlers.length).toBe(5);
   });
 });
