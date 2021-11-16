@@ -1,4 +1,4 @@
-const { App } = require('./app');
+const { App, init } = require('./app');
 
 describe('app.migrate', function () {
   test('no existing migrations', async function () {
