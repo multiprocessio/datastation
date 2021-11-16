@@ -1,4 +1,4 @@
-import { Pool } from 'pg';
+import pg from 'pg';
 import {
   GetProjectHandler,
   MakeProjectHandler,
@@ -8,24 +8,14 @@ import {
 import { encryptProjectSecrets } from '../desktop/store';
 import { GetProjectsRequest, GetProjectsResponse } from '../shared/rpc';
 import { ProjectState } from '../shared/state';
-import { App } from './app';
 
-export const getProjectHandlers = (app: App) => {
-  const [host, port] = app.config.database.address.split(':');
-  app.dbpool = new Pool({
-    user: app.config.database.username || '',
-    password: app.config.database.password || '',
-    database: app.config.database.database,
-    host,
-    port: +port || undefined,
-  });
-
+export const getProjectHandlers = (dbpool: pg.Pool) => {
   const getProjects: RPCHandler<GetProjectsRequest, GetProjectsResponse> = {
     resource: 'getProjects',
     handler: async function getProjectsHandler(): Promise<
       Array<{ name: string; createdAt: string }>
     > {
-      const client = await app.dbpool.connect();
+      const client = await dbpool.connect();
       try {
         const res = await client.query(
           'SELECT project_name, project_created_at FROM projects;'
@@ -48,7 +38,7 @@ export const getProjectHandlers = (app: App) => {
       _1: unknown,
       external: boolean
     ): Promise<ProjectState> {
-      const client = await app.dbpool.connect();
+      const client = await dbpool.connect();
       try {
         const res = await client.query(
           'SELECT project_value FROM projects WHERE project_name = $1;',
@@ -68,7 +58,7 @@ export const getProjectHandlers = (app: App) => {
       projectId: string,
       newState: ProjectState
     ) {
-      const client = await app.dbpool.connect();
+      const client = await dbpool.connect();
 
       try {
         await client.query('BEGIN');
@@ -98,7 +88,7 @@ export const getProjectHandlers = (app: App) => {
       _: string,
       { projectId }: { projectId: string }
     ) {
-      const client = await app.dbpool.connect();
+      const client = await dbpool.connect();
       try {
         await client.query(
           'INSERT INTO projects (project_name, project_value) VALUES ($1, $2)',

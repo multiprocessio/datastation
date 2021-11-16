@@ -6,4 +6,9 @@ CREATE TABLE projects (
        project_created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+CREATE TABLE migrations (
+       migration_name TEXT PRIMARY KEY,
+       migration_created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 COMMIT;

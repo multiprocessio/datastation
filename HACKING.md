@@ -80,27 +80,27 @@ fill out the following fields:
 ```
 {
   "auth": {
-    "sessionSecret": "", // A strong key for session signing
+    "sessionSecret": "", // Any strong random string for signing sessions
     "openId": {
       "realm": "https://accounts.google.com", // Or some other realm
       "clientId": "my id",
-      "clientSecret": "my secret",
-    },
+      "clientSecret": "my secret"
+    }
   },
 
   "server": {
     "port": 443,
     "address": "localhost",
-    "publicUrl": "https://datastation.mydomain.com", // The address users will enter into the browser to use the app
-    "tlsKey": "/home/server/certs/datastation.key.pem", // TLS certs are required, should be tied to the publicUrl domain
+    "publicUrl": "https://datastation.mydomain.com" // The address users will enter into the browser to use the app
+    "tlsKey": "/home/server/certs/datastation.key.pem", // Can be left blank and set at the reverse-proxy level if desired
     "tlsCert": "/home/server/certs/datastation.cert.pem",
   },
 
   "database": {
-    "address": "localhost",
-    "username": "datastation",
+    "address": "localhost", // Address of your PostgreSQL instance
+    "username": "datastation", // Should be a dedicated PostgreSQL user for DataStation
     "password": "some good password",
-    "database": "datastation",
-  },
+    "database": "datastation" // Should be a dedicated database within PostgreSQL for DataStation
+  }
 }
 ```

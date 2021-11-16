@@ -61,8 +61,6 @@ export function readConfig(): Config {
     'auth.openId?.realm',
     'auth.openId?.clientId',
     'auth.openId?.clientSecret',
-    'server.tlsKey',
-    'server.tlsCert',
     'server.publicUrl',
     'database.address',
     'database.database',

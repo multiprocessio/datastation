@@ -601,6 +601,7 @@ header > div {
 .alert {
   margin-top: 15px;
   padding: 15px;
+  font-size: 0.75rem;
 
   pre {
     white-space: pre-wrap;
@@ -608,6 +609,14 @@ header > div {
 
   a {
     padding: 0 5px;
+  }
+
+  code {
+    border: 1px solid #ddd;
+    background: rgba(255, 255, 255, 0.5);
+    margin: 0 3px;
+    padding: 3px;
+    line-height: 26px;
   }
 }
 

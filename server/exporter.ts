@@ -5,16 +5,19 @@ import { decryptFields } from '../desktop/secret';
 import { APP_NAME, DEBUG, VERSION } from '../shared/constants';
 import { GetProjectsRequest, GetProjectsResponse } from '../shared/rpc';
 import { ProjectPage, ProjectState, ScheduledExport } from '../shared/state';
-import { init } from './app';
+import { App, init } from './app';
+import { readConfig } from './config';
 import log from './log';
 import { makeDispatch } from './rpc';
 
 log.info(APP_NAME, VERSION, DEBUG ? 'DEBUG' : '');
 
+export type NodemailerFactory = () => typeof nodemailer;
+
 export class Exporter {
   nodemailer: typeof nodemailer;
-  constructor(n: typeof nodemailer) {
-    this.nodemailer = n;
+  constructor(nodemailerFactory: NodemailerFactory) {
+    this.nodemailer = nodemailerFactory();
   }
 
   getRenderer() {
@@ -33,6 +36,7 @@ export class Exporter {
 
     (global as any).window = window;
     global.document = window.document;
+
     global.requestAnimationFrame = function (callback) {
       return setTimeout(callback, 0);
     };
@@ -124,7 +128,7 @@ export class Exporter {
 
 export async function fetchAndRunAllExports(
   handlers: Array<RPCHandler<any, any>>,
-  n: typeof nodemailer,
+  nodemailerFactory: NodemailerFactory,
   runPeriods: {
     daily: boolean;
     weekly: boolean;
@@ -133,7 +137,7 @@ export async function fetchAndRunAllExports(
 ) {
   const dispatch = makeDispatch(handlers);
 
-  const exporter = new Exporter(n);
+  const exporter = new Exporter(nodemailerFactory);
 
   // It really sucks that this is untyped at this point.
   const { handler: getProjects } = handlers.find(
@@ -166,21 +170,25 @@ export async function fetchAndRunAllExports(
   }
 }
 
-// Weird but allows this to be easily unit tested.
 export async function main(
-  getHandlers: typeof init,
-  run: typeof fetchAndRunAllExports
+  app: App,
+  nodemailerFactory: NodemailerFactory,
+  runPeriods: {
+    daily: boolean;
+    weekly: boolean;
+    monthly: boolean;
+  }
 ) {
-  const runServer = false;
-  const handlers = await getHandlers(runServer);
-  const now = new Date();
-  run(handlers, nodemailer, {
-    daily: true,
-    weekly: now.getDay() === 1,
-    monthly: now.getDate() === 1,
-  });
+  const { handlers } = await init(app);
+  await app.migrate();
+  fetchAndRunAllExports(handlers, nodemailerFactory, runPeriods);
 }
 
 if (process.argv.some((a) => a.includes('exporter.js'))) {
-  main(init, fetchAndRunAllExports);
+  const app = App.make(readConfig());
+  main(app, () => nodemailer, {
+    daily: true,
+    weekly: new Date().getDay() === 1,
+    monthly: new Date().getDate() === 1,
+  });
 }

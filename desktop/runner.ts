@@ -49,10 +49,11 @@ export function initialize({
   const settings = loadSettings();
 
   const handlers: RPCHandler<any, any>[] = [
+    // Additional handlers come first to allow for overriding defaults
+    ...additionalHandlers,
     ...panelHandlers(subprocess),
     openProjectHandler,
     settings.getUpdateHandler(),
-    ...additionalHandlers,
   ];
 
   return { settings, handlers, project, panel, panelMetaOut };

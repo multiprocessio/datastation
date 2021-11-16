@@ -11,10 +11,8 @@ test('getProjects', async () => {
         database: '',
       },
     },
+    dbpool: {},
   };
-
-  const handlers = getProjectHandlers(app);
-  const handler = handlers.find((h) => h.resource === 'getProjects');
 
   let done = false;
   app.dbpool.connect = () => {
@@ -36,6 +34,9 @@ test('getProjects', async () => {
     };
   };
 
+  const handlers = getProjectHandlers(app.dbpool);
+  const handler = handlers.find((h) => h.resource === 'getProjects');
+
   const projects = await handler.handler();
   expect(projects).toStrictEqual([
     { name: 'x', createdAt: '2021' },
@@ -55,10 +56,8 @@ test('getProject', async () => {
         database: '',
       },
     },
+    dbpool: {},
   };
-
-  const handlers = getProjectHandlers(app);
-  const handler = handlers.find((h) => h.resource === 'getProject');
 
   let done = false;
   app.dbpool.connect = () => {
@@ -77,6 +76,9 @@ test('getProject', async () => {
       },
     };
   };
+
+  const handlers = getProjectHandlers(app.dbpool);
+  const handler = handlers.find((h) => h.resource === 'getProject');
 
   const project = await handler.handler(
     null,
@@ -99,10 +101,8 @@ test('makeProject', async () => {
         database: '',
       },
     },
+    dbpool: {},
   };
-
-  const handlers = getProjectHandlers(app);
-  const handler = handlers.find((h) => h.resource === 'makeProject');
 
   let done = false;
   app.dbpool.connect = () => {
@@ -120,6 +120,9 @@ test('makeProject', async () => {
     };
   };
 
+  const handlers = getProjectHandlers(app.dbpool);
+  const handler = handlers.find((h) => h.resource === 'makeProject');
   await handler.handler(null, { projectId: 'my great project' });
+
   expect(done).toBe(true);
 });

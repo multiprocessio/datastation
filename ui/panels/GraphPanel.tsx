@@ -148,9 +148,9 @@ function shadeRGBPercent(color: string, percent: number) {
   let G = parseInt(color.substring(3, 5), 16);
   let B = parseInt(color.substring(5, 7), 16);
 
-  R = (R * (100 + percent)) / 100;
-  G = (G * (100 + percent)) / 100;
-  B = (B * (100 + percent)) / 100;
+  R = Math.floor((R * (100 + percent)) / 100);
+  G = Math.floor((G * (100 + percent)) / 100);
+  B = Math.floor((B * (100 + percent)) / 100);
 
   R = R < 255 ? R : 255;
   G = G < 255 ? G : 255;
@@ -160,6 +160,7 @@ function shadeRGBPercent(color: string, percent: number) {
   const GG = G.toString(16).length == 1 ? '0' + G.toString(16) : G.toString(16);
   const BB = B.toString(16).length == 1 ? '0' + B.toString(16) : B.toString(16);
 
+  console.log(RR, GG, BB);
   return '#' + RR + GG + BB;
 }
 
@@ -239,15 +240,15 @@ export function GraphPanel({ panel, panels }: PanelBodyProps<GraphPanelInfo>) {
           );
 
           const borderColor = Array.isArray(backgroundColor)
-            ? backgroundColor.map((c) => shadeRGBPercent(c, -10))
-            : shadeRGBPercent(backgroundColor, -10);
+            ? backgroundColor.map((c) => shadeRGBPercent(c, -20))
+            : shadeRGBPercent(backgroundColor, -20);
 
           return {
             label,
             data: value.map((d) => +d[field]),
             backgroundColor,
             borderColor,
-            borderWidth: 1,
+            borderWidth: 2,
             tooltip: {
               callbacks:
                 panel.graph.type === 'pie'

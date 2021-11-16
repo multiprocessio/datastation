@@ -1,6 +1,6 @@
 import React from 'react';
 import { shape } from 'shape';
-import { MODE } from '../../shared/constants';
+import { MODE, SITE_ROOT } from '../../shared/constants';
 import { LANGUAGES, SupportedLanguages } from '../../shared/languages';
 import { PanelInfo, PanelResult, ProgramPanelInfo } from '../../shared/state';
 import { panelRPC } from '../asyncRPC';
@@ -111,14 +111,8 @@ export function ProgramInfo({ panel }: { panel: ProgramPanelInfo }) {
       <React.Fragment>
         Use <code>DM_getPanel($panel_number_or_name)</code> to reference other
         panels. Once you have called this once for one panel, use{' '}
-        <code>t_$panel_number_or_name</code> to refer to it again. For example:{' '}
-        <code>SELECT age, name FROM DM_getPanel(0) WHERE t0.age &gt; 1;</code>{' '}
-        or{' '}
-        <code>
-          SELECT age, name FROM DM_getPanel('my-panel') WHERE "t_my-panel".age
-          &gt; 1;
-        </code>
-        .
+        <code>t_$panel_number_or_name</code> to refer to it again. Read more{' '}
+        <a href={SITE_ROOT + '/docs/Panels/Code_Panels.html'}>here</a>.
       </React.Fragment>
     );
   }
@@ -127,30 +121,8 @@ export function ProgramInfo({ panel }: { panel: ProgramPanelInfo }) {
     <React.Fragment>
       Use builtin functions, <code>DM_setPanel($some_array_data)</code> and{' '}
       <code>DM_getPanel($panel_number_or_name)</code>, to interact with other
-      panels. For example:{' '}
-      <code>const passthrough = DM_getPanel(0); DM_setPanel(passthrough);</code>{' '}
-      or
-      <code>
-        const passthrough = DM_getPanel('my panel to fetch data');
-        DM_setPanel(passthrough);
-      </code>
-      .
-      {panel.program.type === 'julia' && (
-        <React.Fragment>
-          <br />
-          <br />
-          Install <a href="https://github.com/JuliaIO/JSON.jl">JSON.jl</a> to
-          script with Julia.
-        </React.Fragment>
-      )}
-      {panel.program.type === 'r' && (
-        <React.Fragment>
-          <br />
-          <br />
-          Install <a href="https://rdrr.io/cran/rjson/">rjson</a> to script with
-          R.
-        </React.Fragment>
-      )}
+      panels. Read more{' '}
+      <a href={SITE_ROOT + '/docs/Panels/Code_Panels.html'}>here</a>.
     </React.Fragment>
   );
 }

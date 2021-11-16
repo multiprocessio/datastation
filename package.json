@@ -18,7 +18,7 @@
     "format": "yarn prettier --write \"**/*.js\" \"**/*.test.js\" \"**/*.test.jsx\" \"**/*.ts\" \"**/*.tsx\" \"**/*.css\" \"**/*.json\"",
     "test-licenses": "yarn license-checker --production --onlyAllow 'AFLv2.1;BSD;MIT;Apache-2.0;Apache 2.0;Apache*;ISC;BSD-3-Clause;MIT*;BSD-2-Clause;Unlicense'",
     "generate-test-data": "node --unhandled-rejections=strict ./scripts/generate_test_data.js",
-    "test": "yarn jest --passWithNoTests --coverage",
+    "test": "jest --passWithNoTests --coverage",
     "e2e-test": "node --unhandled-rejections=throw ./e2e/index.js"
   },
   "dependencies": {

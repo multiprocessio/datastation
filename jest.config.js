@@ -4,10 +4,10 @@ module.exports = {
     process.platform === 'linux'
       ? {
           global: {
-            statements: 66,
+            statements: 68,
             branches: 56,
-            functions: 56,
-            lines: 66,
+            functions: 58,
+            lines: 68,
           },
         }
       : undefined,
