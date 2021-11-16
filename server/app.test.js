@@ -158,11 +158,10 @@ describe('app.serve', function () {
 
 describe('init', function () {
   test('calls migrate', async function () {
-    const factoryApp = { migrate: jest.fn(), projectHandlers: [] };
+    const factoryApp = { projectHandlers: [] };
     const appFactory = (c) => factoryApp;
     // TODO: test { handlers } in response
     const { app } = await init(appFactory);
     expect(app).toBe(factoryApp);
-    expect(factoryApp.migrate.mock.calls.length).toBe(1);
   });
 });

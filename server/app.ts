@@ -167,13 +167,14 @@ export class App {
   }
 }
 
-export async function init(appFactory: AppFactory) {
+export async function init(appFactory: AppFactory, withSubprocess = true) {
   const config = readConfig();
   const app = appFactory(config);
-  await app.migrate();
 
   const { handlers } = initialize({
-    subprocess: path.join(__dirname, 'server_runner.js'),
+    subprocess: withSubprocess
+      ? path.join(__dirname, 'server_runner.js')
+      : undefined,
     additionalHandlers: app.projectHandlers,
   });
 

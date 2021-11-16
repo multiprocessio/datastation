@@ -178,7 +178,8 @@ export async function main(
     monthly: boolean;
   }
 ) {
-  const { handlers } = await init(appFactory);
+  const { handlers, app } = await init(appFactory);
+  await app.migrate();
   fetchAndRunAllExports(handlers, nodemailerFactory, runPeriods);
 }
 

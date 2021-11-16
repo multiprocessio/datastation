@@ -13,6 +13,7 @@ log.info(APP_NAME, VERSION, DEBUG ? 'DEBUG' : '');
 
 async function main() {
   const { app, handlers } = await init(App.make);
+  await app.migrate();
   await app.serve(handlers);
 }
 

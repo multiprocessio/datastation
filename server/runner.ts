@@ -4,7 +4,7 @@ import log from '../shared/log';
 import { App, AppFactory, init } from './app';
 
 export async function main(appFactory: AppFactory) {
-  const { handlers } = await init(appFactory);
+  const { handlers } = await init(appFactory, false);
   log.info(APP_NAME + ' Panel Runner', VERSION, DEBUG ? 'DEBUG' : '');
   await baseMain(handlers);
 }
