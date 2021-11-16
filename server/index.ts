@@ -1,5 +1,5 @@
 import { APP_NAME, DEBUG, VERSION } from '../shared/constants';
-import { init } from './app';
+import { App, init } from './app';
 import log from './log';
 
 process.on('unhandledRejection', (e) => {
@@ -11,4 +11,9 @@ process.on('uncaughtException', (e) => {
 });
 log.info(APP_NAME, VERSION, DEBUG ? 'DEBUG' : '');
 
-init();
+async function main() {
+  const { app, handlers } = await init(App.make);
+  await app.serve(handlers);
+}
+
+main();

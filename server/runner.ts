@@ -1,25 +1,14 @@
-import { initialize as initializeBase, main } from '../desktop/runner';
+import { main as baseMain } from '../desktop/runner';
 import { APP_NAME, DEBUG, VERSION } from '../shared/constants';
 import log from '../shared/log';
-import { App } from './app';
-import { readConfig } from './config';
-import { getProjectHandlers } from './project';
+import { App, AppFactory, init } from './app';
 
-export function initialize(app: App, args: { subprocess: string }) {
-  return initializeBase({
-    ...args,
-    additionalHandlers: getProjectHandlers(app),
-  });
-}
-
-async function run() {
-  const config = await readConfig();
-  const app = new App(config);
-  await app.migrate();
+export async function main(appFactory: AppFactory) {
+  const { handlers } = await init(appFactory);
   log.info(APP_NAME + ' Panel Runner', VERSION, DEBUG ? 'DEBUG' : '');
-  await main(getProjectHandlers(app));
+  await baseMain(handlers);
 }
 
 if ((process.argv[1] || '').includes('server_runner.js')) {
-  run();
+  main(App.make);
 }

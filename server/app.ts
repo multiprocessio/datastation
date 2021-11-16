@@ -4,26 +4,38 @@ import fs from 'fs';
 import http from 'http';
 import https from 'https';
 import path from 'path';
-import pg, { Pool } from 'pg';
+import pg from 'pg';
 import { CODE_ROOT } from '../desktop/constants';
+import { RPCHandler } from '../desktop/rpc';
+import { initialize } from '../desktop/runner';
 import { humanSize } from '../shared/text';
 import { registerAuth } from './auth';
 import { Config, readConfig } from './config';
 import log from './log';
+import { getProjectHandlers } from './project';
 import { handleRPC } from './rpc';
-import { initialize } from './runner';
+
+export type AppFactory = (c: Config) => App;
+type ExpressFactory = typeof express;
+type PgPoolFactory = (c: pg.PoolConfig) => pg.Pool;
 
 export class App {
   express: express.Express;
   config: Config;
   dbpool: pg.Pool;
+  fs: typeof fs;
 
-  constructor(config: Config) {
-    this.express = express();
+  constructor(
+    config: Config,
+    expressFactory: ExpressFactory,
+    poolFactory: PgPoolFactory
+  ) {
+    this.express = expressFactory();
     this.config = config;
+    this.fs = fs;
 
     const [host, port] = this.config.database.address.split(':');
-    this.dbpool = new Pool({
+    this.dbpool = poolFactory({
       user: this.config.database.username || '',
       password: this.config.database.password || '',
       database: this.config.database.database,
@@ -32,10 +44,14 @@ export class App {
     });
   }
 
+  static make(config: Config) {
+    return new App(config, express, (c: pg.PoolConfig) => new pg.Pool(c));
+  }
+
   async migrate() {
     log.info('Starting migrations');
     const migrationsDirectory = path.join(__dirname, 'migrations');
-    const files = fs.readdirSync(migrationsDirectory);
+    const files = this.fs.readdirSync(migrationsDirectory);
     files.sort();
     const client = await this.dbpool.connect();
     let migrations: Array<string> = [];
@@ -55,7 +71,7 @@ export class App {
         log.info('Starting migration: ' + file);
         await client.query('BEGIN');
         try {
-          const migration = fs
+          const migration = this.fs
             .readFileSync(path.join(migrationsDirectory, file))
             .toString();
           await client.query(migration);
@@ -77,22 +93,12 @@ export class App {
 
     log.info('Done migrations');
   }
-}
 
-export async function init(runServer = true) {
-  const config = readConfig();
-  const app = new App(config);
-  await app.migrate();
+  async serve(handlers: RPCHandler<any, any>[]) {
+    this.express.use(cookieParser());
+    this.express.use(express.json());
 
-  const { handlers } = initialize(app, {
-    subprocess: path.join(__dirname, 'server_runner.js'),
-  });
-
-  if (runServer) {
-    app.express.use(cookieParser());
-    app.express.use(express.json());
-
-    app.express.use((req, res, next) => {
+    this.express.use((req, res, next) => {
       const start = new Date();
       res.on('finish', () => {
         const end = new Date();
@@ -104,9 +110,9 @@ export async function init(runServer = true) {
       });
       next();
     });
-    const auth = await registerAuth('/a/auth', app, config);
+    const auth = await registerAuth('/a/auth', this, this.config);
 
-    app.express.post('/a/rpc', auth.requireAuth, (req, rsp) =>
+    this.express.post('/a/rpc', auth.requireAuth, (req, rsp) =>
       handleRPC(req, rsp, handlers)
     );
 
@@ -115,36 +121,36 @@ export async function init(runServer = true) {
     const staticFiles = ['index.html', 'style.css', 'ui.js', 'ui.js.map'];
     staticFiles.map((f) => {
       if (f === 'index.html') {
-        app.express.get('/', (req, rsp) =>
+        this.express.get('/', (req, rsp) =>
           rsp.sendFile(path.join(CODE_ROOT, '/build/index.html'))
         );
         return;
       }
 
-      app.express.get('/' + f, (req, rsp) =>
+      this.express.get('/' + f, (req, rsp) =>
         rsp.sendFile(path.join(CODE_ROOT, 'build', f))
       );
     });
 
-    const server = config.server.tlsKey
+    const server = this.config.server.tlsKey
       ? https.createServer(
           {
-            key: fs.readFileSync(config.server.tlsKey),
-            cert: fs.readFileSync(config.server.tlsCert),
+            key: this.fs.readFileSync(this.config.server.tlsKey),
+            cert: this.fs.readFileSync(this.config.server.tlsCert),
           },
-          app.express
+          this.express
         )
-      : http.createServer(app.express);
-    const location = config.server.address + ':' + config.server.port;
+      : http.createServer(this.express);
+    const location = this.config.server.address + ':' + this.config.server.port;
     server.listen(
       {
-        port: config.server.port,
-        host: config.server.address,
+        port: this.config.server.port,
+        host: this.config.server.address,
       },
       () => {
-        const protocol = config.server.tlsKey ? 'https' : 'http';
+        const protocol = this.config.server.tlsKey ? 'https' : 'http';
         log.info(
-          `Server running on ${protocol}://${location}, publicly accessible at ${config.server.publicUrl}`
+          `Server running on ${protocol}://${location}, publicly accessible at ${this.config.server.publicUrl}`
         );
       }
     );
@@ -154,6 +160,17 @@ export async function init(runServer = true) {
       server.close(() => process.exit(1));
     });
   }
+}
 
-  return handlers;
+export async function init(appFactory: AppFactory) {
+  const config = readConfig();
+  const app = appFactory(config);
+  await app.migrate();
+
+  const { handlers } = initialize({
+    subprocess: path.join(__dirname, 'server_runner.js'),
+    additionalHandlers: getProjectHandlers(app.dbpool),
+  });
+
+  return { handlers, app };
 }
