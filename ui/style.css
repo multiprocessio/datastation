@@ -611,7 +611,7 @@ header > div {
     padding: 0 5px;
   }
 
-  code {
+  p code {
     border: 1px solid #ddd;
     background: rgba(255, 255, 255, 0.5);
     margin: 0 3px;

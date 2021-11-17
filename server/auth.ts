@@ -7,7 +7,7 @@ import {
   TokenSet,
 } from 'openid-client';
 import passport from 'passport';
-import { SITE_ROOT } from '../shared/constants';
+import { DOCS_ROOT } from '../shared/constants';
 import { App } from './app';
 import { Config } from './config';
 import log from './log';
@@ -43,7 +43,7 @@ export class Auth {
       });
     } else {
       log.fatal(
-        `Missing auth scheme. Review ${SITE_ROOT}/docs/Installation.html#configuration for how to configure auth.`
+        `Missing auth scheme. Review ${DOCS_ROOT}/Installation.html#configuration for how to configure auth.`
       );
     }
   }

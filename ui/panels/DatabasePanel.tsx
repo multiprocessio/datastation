@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { SITE_ROOT } from '../../shared/constants';
+import { DOCS_ROOT } from '../../shared/constants';
 import { NoConnectorError } from '../../shared/errors';
 import {
   ConnectorInfo,
@@ -192,7 +192,7 @@ export function DatabaseInfo({ panel }: { panel: DatabasePanelInfo }) {
       Use <code>DM_getPanel($panel_number_or_name)</code> to reference other
       panels. Once you have called this once for one panel, use{' '}
       <code>t_$panel_number_or_name</code> to refer to it again. Read more{' '}
-      <a href={SITE_ROOT + '/docs/Panels/Code_Panels.html'}>here</a>.
+      <a href={DOCS_ROOT + '/Panels/Code_Panels.html'}>here</a>.
     </React.Fragment>
   );
 }
