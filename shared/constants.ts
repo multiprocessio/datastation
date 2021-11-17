@@ -38,3 +38,5 @@ export const MODE_FEATURES = {
   dashboard: MODE === 'server',
   scheduledExports: MODE === 'server',
 };
+
+export const DOCS_ROOT = SITE_ROOT + '/docs/' + VERSION;
