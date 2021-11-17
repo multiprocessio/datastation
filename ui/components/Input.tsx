@@ -72,8 +72,8 @@ export function Input({
   );
 
   function removeOuterWhitespaceOnFinish() {
-    if (typeof value === 'string') {
-      setLocalValue(value.trim());
+    if (typeof localValue === 'string') {
+      setLocalValue(localValue.trim());
     }
   }
 
