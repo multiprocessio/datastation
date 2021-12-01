@@ -55,7 +55,7 @@ export function PanelList({
             updatePage(page);
           }}
         >
-          New Panel
+          Add Panel
         </Button>
       </div>
     );

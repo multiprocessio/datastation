@@ -26,7 +26,8 @@ import { UrlStateContext, useUrlState } from './urlState';
 if (MODE === 'browser') {
   Object.values(LANGUAGES).map((l) => {
     if (l.inMemoryInit) {
-      // These can be really big, so run it out of band                                                                                     setTimeout(() => l.inMemoryInit(), 0);
+      // These can be really big, so run it out of band
+      setTimeout(() => l.inMemoryInit(), 0);
     }
   });
 }
@@ -89,26 +90,9 @@ export function App() {
     }
   }, [urlState.projectId, loadedDefault]);
 
-  const [headerHeight, setHeaderHeightInternal] = React.useState(0);
-  const setHeaderHeight = React.useCallback(
-    (e: HTMLElement) => {
-      if (!e) {
-        return;
-      }
-
-      setHeaderHeightInternal(e.offsetHeight);
-    },
-    [setHeaderHeightInternal]
-  );
-
   React.useEffect(() => {
     if (state && state.projectName) {
       document.title = state.projectName;
-    }
-
-    // Set body overflow once on init
-    if (MODE_FEATURES.noBodyYOverflow) {
-      document.body.style.overflowY = 'hidden';
     }
   }, [state && state.projectName]);
 
@@ -229,20 +213,18 @@ export function App() {
     );
   }
 
+  const theme = 'light';
+
   return (
     <ProjectContext.Provider value={{ state, setState: setProjectState }}>
       <UrlStateContext.Provider
         value={{ state: urlState, setState: setUrlState }}
       >
-        <div className={`app app--${MODE}`}>
+        <div className={`app app--${MODE} app--${theme}`}>
           {MODE_FEATURES.appHeader && (
-            <Header setHeaderHeight={setHeaderHeight} />
+            <Header />
           )}
           <main
-            style={{
-              marginTop: headerHeight,
-              height: `calc(100% - ${headerHeight}px)`,
-            }}
             className={'view-' + (urlState.view || 'editor')}
           >
             {main}

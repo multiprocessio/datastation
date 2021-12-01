@@ -392,7 +392,7 @@ export function Panel({
                   }
                   type="primary"
                 >
-                  {results.loading ? 'close' : 'play_circle'}
+                  {results.loading ? 'close' : 'play_arrow'}
                 </Button>
               </span>
               <span

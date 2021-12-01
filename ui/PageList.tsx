@@ -203,11 +203,13 @@ export function PageList({
                 value={page.name}
               />
 
+	      {/*
               <span title="Evaluate all panels sequentially">
                 <Button icon onClick={evalAll} type="primary">
-                  play_circle
+                  play_arrow
                 </Button>
               </span>
+	       */}
             </div>
           ) : (
             <Button
@@ -221,17 +223,16 @@ export function PageList({
         )}
         <Button
           type="primary"
-          className="flex-right"
           onClick={() => {
             addPage(new ProjectPage('Untitled Page'));
             setPageIndex(state.pages.length - 1);
           }}
         >
-          New Page
+          +
         </Button>
       </div>
 
-      <div className="vertical-align-center">
+      <div className="vertical-align-center section-subtitle">
         <Link
           className={`page-mode ${
             urlState.view === 'editor' ? 'page-mode--on' : ''

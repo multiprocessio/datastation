@@ -7,11 +7,7 @@ import { Link } from './components/Link';
 import { ProjectContext } from './ProjectStore';
 import { UrlStateContext } from './urlState';
 
-export function Header({
-  setHeaderHeight,
-}: {
-  setHeaderHeight: (e: HTMLElement) => void;
-}) {
+export function Header() {
   const {
     state: { projectId },
     setState: setUrlState,
@@ -19,7 +15,7 @@ export function Header({
   const { setState: setProjectState } = React.useContext(ProjectContext);
 
   return (
-    <header ref={setHeaderHeight}>
+    <header>
       <div className="vertical-align-center">
         <Link args={{ projectId, view: 'editor', page: 0 }} className="logo">
           {APP_NAME}
@@ -49,10 +45,10 @@ export function Header({
                 target="_blank"
               >
                 <iframe
-                  src="https://ghbtns.com/github-btn.html?user=multiprocessio&repo=datastation&type=star&count=true&size=medium"
+                  src="https://datastation.multiprocess.io/stars.html"
                   frameBorder="0"
                   scrolling="0"
-                  width="80"
+                  width="100"
                   height="20"
                   title="GitHub"
                 ></iframe>
