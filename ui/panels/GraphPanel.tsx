@@ -160,7 +160,6 @@ function shadeRGBPercent(color: string, percent: number) {
   const GG = G.toString(16).length == 1 ? '0' + G.toString(16) : G.toString(16);
   const BB = B.toString(16).length == 1 ? '0' + B.toString(16) : B.toString(16);
 
-  console.log(RR, GG, BB);
   return '#' + RR + GG + BB;
 }
 
