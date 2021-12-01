@@ -203,7 +203,7 @@ export function PageList({
                 value={page.name}
               />
 
-	      {/*
+              {/*
               <span title="Evaluate all panels sequentially">
                 <Button icon onClick={evalAll} type="primary">
                   play_arrow

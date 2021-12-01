@@ -1,23 +1,23 @@
 * {
-    box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 body {
-    font-family: sans-serif;
-    padding: 0;
-    margin: 0;
+  font-family: sans-serif;
+  padding: 0;
+  margin: 0;
 }
 
 a,
 a:visited,
 a:focus,
 a:hover {
-    color: blue;
+  color: blue;
 }
 
 .button {
-    border: 1px solid #ccc;
-    background: #fbfbfb;
+  border: 1px solid #ccc;
+  background: #fbfbfb;
 }
 
 .loading {
@@ -26,7 +26,7 @@ a:hover {
 }
 
 .app {
-    background: #fbfbfb;
+  background: #fbfbfb;
 }
 
 .app--desktop,
@@ -40,15 +40,15 @@ a:hover {
 }
 
 header {
-    background: white;
-    padding: 8px 15px;
-    border-bottom: 2px solid #e5e5ec;
-    color: black;
+  background: white;
+  padding: 8px 15px;
+  border-bottom: 2px solid #e5e5ec;
+  color: black;
 }
 
 header a {
-    text-decoration: none;
-    color: black !important;
+  text-decoration: none;
+  color: black !important;
 }
 
 header .button,
@@ -76,7 +76,7 @@ header iframe {
 }
 
 .editor {
-    background: #fbfbfb;
+  background: #fbfbfb;
   width: 100%;
   border: 0;
   font-family: monospace;
@@ -87,7 +87,7 @@ header iframe {
 }
 
 .ace_gutter-layer {
-    background: #d5d5d5;
+  background: #d5d5d5;
 }
 
 .editor-container:not(.editor-container--singleLine) {
@@ -291,16 +291,16 @@ label.select select {
 }
 
 .section-title > .button--primary {
-    padding: 8px 15px;
-    background: transparent;
-    border: 0;
-    color: black;
-    font-size: 1.2rem;
-    font-weight: bold;
+  padding: 8px 15px;
+  background: transparent;
+  border: 0;
+  color: black;
+  font-size: 1.2rem;
+  font-weight: bold;
 }
 
 .section-subtitle {
-    padding: 15px;
+  padding: 15px;
 }
 
 .sidebar {
@@ -363,23 +363,23 @@ label.select select {
 }
 
 .pages {
-    .page-name,
-    .button.page-name {
-      border-radius: 0;
-      border: 0;
-      border-right: 1px solid #fbfbfb;
-      padding: 15px;
-      background: transparent;
+  .page-name,
+  .button.page-name {
+    border-radius: 0;
+    border: 0;
+    border-right: 1px solid #fbfbfb;
+    padding: 15px;
+    background: transparent;
   }
 
   .page-name--current {
-      font-size: 1rem;
-      padding: 8px 15px;
-      background: #fbfbfb;
+    font-size: 1rem;
+    padding: 8px 15px;
+    background: #fbfbfb;
 
-      .input {
-	  margin: 0 8px;
-      }
+    .input {
+      margin: 0 8px;
+    }
   }
 }
 
@@ -441,9 +441,9 @@ label.select select {
 }
 
 .panel-head {
-    padding: 8px;
-    background: #eaeaf1;
-    border-bottom: 1px solid #ccc;
+  padding: 8px;
+  background: #eaeaf1;
+  border-bottom: 1px solid #ccc;
 }
 
 .panel--hidden .panel-head,
@@ -505,7 +505,7 @@ label.select select {
 }
 
 .panel-out-header {
-    background: #eaeaf1;
+  background: #eaeaf1;
 }
 
 .panel--empty .panel-out {
@@ -555,7 +555,7 @@ label.select select {
 }
 
 .new-panel:not(:last-child) {
-    margin-bottom: 15px;
+  margin-bottom: 15px;
 }
 
 .panel p {
@@ -819,7 +819,7 @@ tbody tr:nth-child(odd) {
 .app.app--dark a:visited,
 .app.app--dark a:focus,
 .app.app--dark a:hover {
-    color: white;
+  color: white;
 }
 
 .app.app--dark .editor-container .input,
@@ -827,105 +827,106 @@ tbody tr:nth-child(odd) {
 .app.app--dark label.input input:not([type='radio']),
 .app.app--dark select.select,
 .app.app--dark label.select select {
-    background: #29293c;
-    border: 1px solid black;
-    color: white;
+  background: #29293c;
+  border: 1px solid black;
+  color: white;
 }
 /* End cssplus break */
 
 .app.app--dark {
+  background: #29293c;
+
+  header {
+    background: #29293c;
+    border-bottom-color: black;
+  }
+
+  header a {
+    color: white !important;
+  }
+
+  .button {
+    border: 1px solid black;
+    background: #4a4a6a;
+    color: #ddd;
+  }
+
+  .button.material-icons,
+  .button.material-icons-outlined {
+    border: 0;
+    background: transparent;
+    color: #999;
+    padding: 0;
+  }
+
+  .page-name {
+    border-right-color: black;
+  }
+
+  .page-name--current {
     background: #29293c;
 
-    header {
-	background: #29293c;
-	border-bottom-color: black;
+    .input {
+      background: #404066 !important;
     }
+  }
 
-    header a {
-	color: white !important;
+  .section-title {
+    background: #0a0a1d;
+  }
+
+  .section-title > .button {
+    background: transparent !important;
+    border: 0 !important;
+  }
+
+  .panel-out,
+  .ace_gutter-layer {
+    background: #181824;
+  }
+
+  .panel,
+  .editor {
+    background: #484860;
+  }
+
+  .panel {
+    border-color: black;
+  }
+
+  .editor {
+    color: white;
+  }
+
+  .panel-head {
+    border-bottom: 1px solid black;
+    background: #31314e;
+  }
+
+  .panel-header--open {
+    border-bottom: 1px solid black;
+  }
+
+  .pages {
+    .button.page-name {
+      border-right: 1px solid #ccc;
     }
+  }
 
-    .button {
-	border: 1px solid black;
-	background: #4a4a6a;
-	color: #ddd;
-    }
+  .panel-out-header {
+    background: #31314e;
+  }
 
-    .button.material-icons,
-    .button.material-icons-outlined {
-	border: 0;
-	background: transparent;
-	color: #999;
-	padding: 0;
-    }
+  .panel-out-header .button {
+    background: transparent;
+  }
 
-    .page-name {
-	border-right-color: black;
-    }
+  .panel-out-header .button.selected {
+    background: #181824;
+    color: white;
+  }
 
-    .page-name--current {
-	background: #29293c;
-
-	.input {
-	    background: #404066 !important;
-	}
-    }
-
-    .section-title {
-	background: #0a0a1d;
-    }
-
-    .section-title >.button {
-	background: transparent !important;
-	border: 0 !important;
-    }
-
-    .panel-out,
-    .ace_gutter-layer {
-	background: #181824;
-    }
-
-    .panel, .editor {
-	background: #484860;
-    }
-
-    .panel {
-	border-color: black;
-    }
-
-    .editor {
-	color: white;
-    }
-
-    .panel-head {
-	border-bottom: 1px solid black;
-	background: #31314e;
-    }
-
-    .panel-header--open {
-	border-bottom: 1px solid black;
-    }
-
-    .pages {
-	.button.page-name {
-	    border-right: 1px solid #ccc;
-	}
-    }
-
-    .panel-out-header {
-	background: #31314e;
-    }
-
-    .panel-out-header .button {
-	background: transparent;
-    }
-
-    .panel-out-header .button.selected {
-	background: #181824;
-	color: white;
-    }
-
-    .text-muted {
-	color: #999;
-    }
+  .text-muted {
+    color: #999;
+  }
 }

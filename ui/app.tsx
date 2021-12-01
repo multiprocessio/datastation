@@ -221,14 +221,8 @@ export function App() {
         value={{ state: urlState, setState: setUrlState }}
       >
         <div className={`app app--${MODE} app--${theme}`}>
-          {MODE_FEATURES.appHeader && (
-            <Header />
-          )}
-          <main
-            className={'view-' + (urlState.view || 'editor')}
-          >
-            {main}
-          </main>
+          {MODE_FEATURES.appHeader && <Header />}
+          <main className={'view-' + (urlState.view || 'editor')}>{main}</main>
         </div>
       </UrlStateContext.Provider>
     </ProjectContext.Provider>
