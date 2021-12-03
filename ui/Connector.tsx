@@ -34,23 +34,20 @@ export function Connector({
         <div className="flex-right">
           {!expanded && (
             <Button
-              type="outline"
               icon
               data-testid="show-hide-connector"
               className="flex-right hover-button"
               onClick={() => setExpanded(true)}
               title="Edit"
             >
-              edit_outline
+              edit
             </Button>
           )}
           <span title="Delete data source">
             <Confirm
-              right
               onConfirm={deleteConnector}
               message="delete this data source"
               action="Delete"
-              className="hover-button"
               render={(confirm: () => void) => (
                 <Button icon onClick={confirm} type="outline">
                   delete

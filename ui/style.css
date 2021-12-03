@@ -34,11 +34,18 @@ a:hover {
   border-top: 1px solid #ccc;
 }
 
+.app main {
+  display: flex;
+  width: 100%;
+}
+
 .app--desktop main,
 .app--server main {
-  display: flex;
   height: 100%;
-  width: 100%;
+}
+
+.main-body {
+  flex: 1;
 }
 
 header {
@@ -337,16 +344,14 @@ label.select select {
   border-right: 1px solid #ccc;
   border-bottom: 1px solid #ccc;
   background: white;
-  flex: 0 0 350px;
+  width: 350px;
   overflow-y: auto;
-  display: flex;
-  flex-direction: column;
   background: #fbfbfb;
   padding: 15px;
 }
 
 .sidebar--collapsed {
-  flex: initial;
+  width: initial;
 }
 
 .connector-group {
@@ -368,15 +373,14 @@ label.select select {
 
 .server .hover-button,
 .connector .hover-button {
-  visibility: hidden;
-  margin-left: 10px;
+  display: none;
 }
 
 .server:hover .hover-button,
 .server--expanded .hover-button,
 .connector:hover .hover-button,
 .connector--expanded .hover-button {
-  visibility: initial;
+  display: initial;
 }
 
 .server:hover,
@@ -867,6 +871,18 @@ tbody tr:nth-child(odd) {
   border: 1px solid black;
   color: white;
 }
+
+.app.app--dark .server:hover,
+.app.app--dark .connector:hover,
+.app.app--dark .server--expanded,
+.app.app--dark .connector--expanded {
+  background: #31314e;
+  border-color: black;
+}
+
+.app.app--dark .button:hover {
+  background: #383852;
+}
 /* End cssplus break */
 
 .app.app--dark {
@@ -970,7 +986,8 @@ tbody tr:nth-child(odd) {
   .radio-label,
   .input-label,
   .select-label,
-  .text-muted {
+  .text-muted,
+  .title {
     color: #999;
   }
 
@@ -980,5 +997,24 @@ tbody tr:nth-child(odd) {
 
   .toggle .toggle-mover {
     background: #999;
+  }
+
+  .sidebar {
+    background: #29293c;
+    border-right-color: black;
+    border-bottom-color: black;
+  }
+
+  .server,
+  .connector {
+    border-bottom-color: black;
+    color: white;
+  }
+
+  .confirm-popup {
+    background: #29293c;
+    color: white;
+    border-color: black;
+    box-shadow: 0 1px 3px 0 #111;
   }
 }

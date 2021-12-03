@@ -39,7 +39,7 @@ export function Server({
   }
 
   return (
-    <div className="server">
+    <div className={`server ${expanded ? 'server--expanded' : ''}`}>
       <div className="server-header vertical-align-center">
         {expanded ? (
           <Input
@@ -56,7 +56,6 @@ export function Server({
         <div className="flex-right">
           {!expanded && (
             <Button
-              type="outline"
               icon
               className="hover-button"
               onClick={function toggleExpanded() {
@@ -64,16 +63,14 @@ export function Server({
               }}
               title="Edit"
             >
-              edit_outline
+              edit
             </Button>
           )}
           <span title="Delete server">
             <Confirm
-              right
               onConfirm={deleteServer}
               message="delete this server"
               action="Delete"
-              className="hover-button"
               render={function renderDelete(confirm: () => void) {
                 return (
                   <Button icon onClick={confirm} type="outline">
