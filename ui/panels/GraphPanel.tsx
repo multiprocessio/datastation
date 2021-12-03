@@ -16,6 +16,7 @@ import { FormGroup } from '../components/FormGroup';
 import { PanelSourcePicker } from '../components/PanelSourcePicker';
 import { Radio } from '../components/Radio';
 import { Select } from '../components/Select';
+import { SettingsContext } from '../settings';
 import { evalColumnPanel } from './TablePanel';
 import { PanelBodyProps, PanelDetailsProps, PanelUIDetails } from './types';
 
@@ -164,6 +165,9 @@ function shadeRGBPercent(color: string, percent: number) {
 }
 
 export function GraphPanel({ panel, panels }: PanelBodyProps<GraphPanelInfo>) {
+  const {
+    state: { theme },
+  } = React.useContext(SettingsContext);
   const data = panel.resultMeta || new PanelResult();
   const value = (data || {}).value || [];
   const ref = React.useRef(null);
@@ -180,6 +184,12 @@ export function GraphPanel({ panel, panels }: PanelBodyProps<GraphPanelInfo>) {
       return;
     }
 
+    const style = window.getComputedStyle(ref.current.closest('.panel'));
+    const background = style.getPropertyValue('background-color');
+    Chart.defaults.color = window
+      .getComputedStyle(document.querySelector('input'))
+      .getPropertyValue('color');
+
     const ys = [...panel.graph.ys];
     if (panel.graph.type === 'pie') {
       ys.reverse();
@@ -191,7 +201,7 @@ export function GraphPanel({ panel, panels }: PanelBodyProps<GraphPanelInfo>) {
     const chart = new Chart(ctx, {
       plugins: [
         {
-          id: 'background-white',
+          id: 'background-of-chart',
           // Pretty silly there's no builtin way to set a background color
           // https://stackoverflow.com/a/38493678/1507139
           beforeDraw: function () {
@@ -200,7 +210,7 @@ export function GraphPanel({ panel, panels }: PanelBodyProps<GraphPanelInfo>) {
             }
 
             ctx.save();
-            ctx.fillStyle = 'white';
+            ctx.fillStyle = background;
             ctx.fillRect(0, 0, ref.current.width, ref.current.height);
             ctx.restore();
           },
@@ -246,8 +256,12 @@ export function GraphPanel({ panel, panels }: PanelBodyProps<GraphPanelInfo>) {
             label,
             data: value.map((d) => +d[field]),
             backgroundColor,
-            borderColor,
-            borderWidth: 2,
+            ...(theme === 'dark'
+              ? {}
+              : {
+                  borderColor,
+                  borderWidth: 2,
+                }),
             tooltip: {
               callbacks:
                 panel.graph.type === 'pie'

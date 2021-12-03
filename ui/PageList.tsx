@@ -154,12 +154,6 @@ export function PageList({
   const panelResults = page.panels.map((p) => p.resultMeta);
   const reevalPanel = makeReevalPanel(page, state, updatePage);
 
-  async function evalAll() {
-    for (let panel of page.panels) {
-      await reevalPanel(panel.id);
-    }
-  }
-
   const MainChild =
     {
       editor: PanelList,
@@ -222,7 +216,7 @@ export function PageList({
           )
         )}
         <Button
-          type="primary"
+          className="add-page"
           onClick={() => {
             addPage(new ProjectPage('Untitled Page'));
             setPageIndex(state.pages.length - 1);

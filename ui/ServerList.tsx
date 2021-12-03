@@ -27,12 +27,11 @@ export function ServerList({
       ))}
       <div className="text-center">
         <Button
-          type="primary"
           onClick={() => {
             addServer(new ServerInfo());
           }}
         >
-          New Server
+          Add Server
         </Button>
       </div>
     </div>

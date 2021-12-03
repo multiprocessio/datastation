@@ -21,7 +21,7 @@ export async function asyncRPC<Request = void, Response = void>(
   }
 
   const rsp = await window.fetch(
-    `/a/rpc?resource=${resource}&projectId=${projectId}`,
+    `/a/rpc?resource=${resource}&projectI=d${projectId}`,
     {
       method: 'post',
       headers: {

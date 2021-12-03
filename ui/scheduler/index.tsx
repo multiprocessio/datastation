@@ -51,7 +51,7 @@ export function Scheduler({
         />
       ))}
       <div className="text-center">
-        <Button onClick={() => addSchedule()}>New Scheduled Export</Button>
+        <Button onClick={() => addSchedule()}>Add Scheduled Export</Button>
       </div>
     </div>
   );

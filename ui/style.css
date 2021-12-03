@@ -37,6 +37,8 @@ a:hover {
 .app--desktop main,
 .app--server main {
   display: flex;
+  height: 100%;
+  width: 100%;
 }
 
 header {
@@ -63,16 +65,6 @@ header .vertical-align-center a {
 
 header iframe {
   margin-left: 15px;
-}
-
-[contenteditable='true'] {
-  border-bottom: 1px dashed #4eb5ff;
-}
-
-[contenteditable='true']:focus {
-  outline: none;
-  border-bottom-style: solid;
-  font-style: italic;
 }
 
 .editor {
@@ -117,8 +109,8 @@ label,
 .radio-label,
 .input-label,
 .select-label {
-  padding-right: 15px;
-  color: #777;
+  padding-right: 8px;
+  color: #333;
   font-size: 0.75rem;
 }
 
@@ -149,7 +141,7 @@ label.select select {
   padding: 5px;
   background: transparent;
   border: 1px solid #ccc;
-  background: #eeeef9;
+  background: white;
   /* Since many inputs are within label, keep the label font size small and the input font size normal */
   font-size: initial;
   display: inline-block;
@@ -290,7 +282,7 @@ label.select select {
   background: #f3f3f3;
 }
 
-.section-title > .button--primary {
+.section-title .add-page {
   padding: 8px 15px;
   background: transparent;
   border: 0;
@@ -305,25 +297,27 @@ label.select select {
 
 .sidebar {
   border-right: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
   background: white;
   flex: 0 0 350px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
   background: #fbfbfb;
+  padding: 15px;
 }
 
 .sidebar--collapsed {
-  flex: auto;
-}
-
-.connectors {
-  flex: 1;
+  flex: initial;
 }
 
 .connector-group {
   display: inline-block;
   padding-bottom: 5px;
+}
+
+.servers {
+  margin-top: 30px;
 }
 
 .server,
@@ -452,7 +446,7 @@ label.select select {
 }
 
 .panel-header--open {
-  padding-bottom: 15px;
+  padding-bottom: 8px;
   border-bottom: 1px solid #ccc;
 }
 
@@ -621,6 +615,10 @@ label.select select {
 .alert > .material-icons {
   margin-right: 15px;
   color: #555;
+}
+
+.alert.alert-fatal {
+  font-size: initial;
 }
 
 .alert-warning {
@@ -926,6 +924,10 @@ tbody tr:nth-child(odd) {
     color: white;
   }
 
+  label,
+  .radio-label,
+  .input-label,
+  .select-label,
   .text-muted {
     color: #999;
   }

@@ -5,6 +5,7 @@ import log from '../shared/log';
 import '../shared/polyfill';
 import {
   ConnectorInfo,
+  DatabaseConnectorInfo,
   DEFAULT_PROJECT,
   ProjectPage,
   ProjectState,
@@ -19,6 +20,7 @@ import { MakeSelectProject } from './MakeSelectProject';
 import { PageList } from './PageList';
 import { makeStore, ProjectContext, ProjectStore } from './ProjectStore';
 import { ServerList } from './ServerList';
+import { SettingsContext, useSettings } from './settings';
 import { Sidebar } from './Sidebar';
 import { Updates } from './Updates';
 import { UrlStateContext, useUrlState } from './urlState';
@@ -96,6 +98,8 @@ export function App() {
     }
   }, [state && state.projectName]);
 
+  const [settings, setSettings] = useSettings();
+
   function updatePage(page: ProjectPage) {
     state.pages[urlState.page] = page;
     setProjectState(state);
@@ -160,8 +164,8 @@ export function App() {
   }
 
   let main = <Loading />;
-  if (!state) {
-    if (urlState.projectId) {
+  if (!state || !settings) {
+    if (urlState.projectId || !settings) {
       return <Loading />;
     }
 
@@ -169,6 +173,8 @@ export function App() {
       main = <MakeSelectProject />;
     }
   } else {
+    state.connectors = [new DatabaseConnectorInfo()];
+    state.servers = [new ServerInfo()];
     // This allows us to render the sidebar in tests where we
     // prepopulate connectors and servers
     const hasSidebar = Boolean(
@@ -213,17 +219,21 @@ export function App() {
     );
   }
 
-  const theme = 'light';
-
   return (
     <ProjectContext.Provider value={{ state, setState: setProjectState }}>
       <UrlStateContext.Provider
         value={{ state: urlState, setState: setUrlState }}
       >
-        <div className={`app app--${MODE} app--${theme}`}>
-          {MODE_FEATURES.appHeader && <Header />}
-          <main className={'view-' + (urlState.view || 'editor')}>{main}</main>
-        </div>
+        <SettingsContext.Provider
+          value={{ state: settings, setState: setSettings }}
+        >
+          <div className={`app app--${MODE} app--${settings.theme}`}>
+            {MODE_FEATURES.appHeader && <Header />}
+            <main className={'view-' + (urlState.view || 'editor')}>
+              {main}
+            </main>
+          </div>
+        </SettingsContext.Provider>
       </UrlStateContext.Provider>
     </ProjectContext.Provider>
   );
