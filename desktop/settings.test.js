@@ -1,10 +1,10 @@
 const { file: makeTmpFile } = require('tmp-promise');
-const { Settings, loadSettings } = require('./settings');
+const { DesktopSettings, loadSettings } = require('./settings');
 
 test('loadSettings with and without existing settings', async () => {
   const tmp = await makeTmpFile({ prefix: 'settings-project-' });
 
-  const testSettings = new Settings();
+  const testSettings = new DesktopSettings();
   testSettings.file = tmp.path;
 
   try {

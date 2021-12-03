@@ -13,10 +13,12 @@ import 'ace-builds/src-min-noconflict/mode-ruby';
 import 'ace-builds/src-min-noconflict/mode-sql';
 // UI theme
 import 'ace-builds/src-min-noconflict/theme-github';
+import 'ace-builds/src-min-noconflict/theme-dracula';
 import * as React from 'react';
 // Shortcuts support, TODO: support non-emacs
 // This steals Ctrl-a so this should not be a default
 //import 'ace-builds/src-min-noconflict/keybinding-emacs';
+import { SettingsContext } from '../settings';
 import { useDebouncedLocalState } from './Input';
 import { Tooltip } from './Tooltip';
 
@@ -45,6 +47,9 @@ export function CodeEditor({
   label?: string;
   tooltip?: string;
 }) {
+  const {
+    state: { theme },
+  } = React.useContext(SettingsContext);
   const [localValue, setLocalValue] = useDebouncedLocalState(value, onChange);
 
   return (
@@ -56,7 +61,7 @@ export function CodeEditor({
       {label && <label className="label">{label}</label>}
       <AceEditor
         mode={language}
-        theme="github"
+        theme={theme === 'dark' ? 'dracula' : 'github'}
         maxLines={singleLine ? 1 : undefined}
         onChange={setLocalValue}
         name={id}

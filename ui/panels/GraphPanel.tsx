@@ -16,6 +16,7 @@ import { FormGroup } from '../components/FormGroup';
 import { PanelSourcePicker } from '../components/PanelSourcePicker';
 import { Radio } from '../components/Radio';
 import { Select } from '../components/Select';
+import { SettingsContext } from '../settings';
 import { evalColumnPanel } from './TablePanel';
 import { PanelBodyProps, PanelDetailsProps, PanelUIDetails } from './types';
 
@@ -142,29 +143,10 @@ function colorForDataset(
   return colorsSortedByRealLabelOrder;
 }
 
-// SOURCE: https://stackoverflow.com/a/13532993/1507139
-function shadeRGBPercent(color: string, percent: number) {
-  let R = parseInt(color.substring(1, 3), 16);
-  let G = parseInt(color.substring(3, 5), 16);
-  let B = parseInt(color.substring(5, 7), 16);
-
-  R = Math.floor((R * (100 + percent)) / 100);
-  G = Math.floor((G * (100 + percent)) / 100);
-  B = Math.floor((B * (100 + percent)) / 100);
-
-  R = R < 255 ? R : 255;
-  G = G < 255 ? G : 255;
-  B = B < 255 ? B : 255;
-
-  const RR = R.toString(16).length == 1 ? '0' + R.toString(16) : R.toString(16);
-  const GG = G.toString(16).length == 1 ? '0' + G.toString(16) : G.toString(16);
-  const BB = B.toString(16).length == 1 ? '0' + B.toString(16) : B.toString(16);
-
-  console.log(RR, GG, BB);
-  return '#' + RR + GG + BB;
-}
-
 export function GraphPanel({ panel, panels }: PanelBodyProps<GraphPanelInfo>) {
+  const {
+    state: { theme },
+  } = React.useContext(SettingsContext);
   const data = panel.resultMeta || new PanelResult();
   const value = (data || {}).value || [];
   const ref = React.useRef(null);
@@ -181,6 +163,16 @@ export function GraphPanel({ panel, panels }: PanelBodyProps<GraphPanelInfo>) {
       return;
     }
 
+    // Only doesn't exist in tests
+    const parent = ref.current.closest('.panel-body');
+    let background = 'white';
+    if (parent) {
+      const style = window.getComputedStyle(parent);
+      background = style.getPropertyValue('background-color');
+      // TODO: don't hardcode this
+      Chart.defaults.color = theme === 'light' ? 'black' : 'white';
+    }
+
     const ys = [...panel.graph.ys];
     if (panel.graph.type === 'pie') {
       ys.reverse();
@@ -192,7 +184,7 @@ export function GraphPanel({ panel, panels }: PanelBodyProps<GraphPanelInfo>) {
     const chart = new Chart(ctx, {
       plugins: [
         {
-          id: 'background-white',
+          id: 'background-of-chart',
           // Pretty silly there's no builtin way to set a background color
           // https://stackoverflow.com/a/38493678/1507139
           beforeDraw: function () {
@@ -201,7 +193,7 @@ export function GraphPanel({ panel, panels }: PanelBodyProps<GraphPanelInfo>) {
             }
 
             ctx.save();
-            ctx.fillStyle = 'white';
+            ctx.fillStyle = background;
             ctx.fillRect(0, 0, ref.current.width, ref.current.height);
             ctx.restore();
           },
@@ -239,16 +231,10 @@ export function GraphPanel({ panel, panels }: PanelBodyProps<GraphPanelInfo>) {
             field
           );
 
-          const borderColor = Array.isArray(backgroundColor)
-            ? backgroundColor.map((c) => shadeRGBPercent(c, -20))
-            : shadeRGBPercent(backgroundColor, -20);
-
           return {
             label,
             data: value.map((d) => +d[field]),
             backgroundColor,
-            borderColor,
-            borderWidth: 2,
             tooltip: {
               callbacks:
                 panel.graph.type === 'pie'
@@ -286,6 +272,7 @@ export function GraphPanel({ panel, panels }: PanelBodyProps<GraphPanelInfo>) {
     panel.graph.type,
     panel.graph.colors.unique,
     panel.graph.width,
+    theme,
   ]);
 
   if (!value || !value.length) {

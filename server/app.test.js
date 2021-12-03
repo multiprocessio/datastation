@@ -150,6 +150,6 @@ describe('init', function () {
   test('calls migrate', async function () {
     const app = { projectHandlers: [] };
     const { handlers } = await init(app);
-    expect(handlers.length).toBe(5);
+    expect(handlers.length).toBe(6);
   });
 });

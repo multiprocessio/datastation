@@ -1,48 +1,17 @@
 import fs from 'fs';
-import * as uuid from 'uuid';
-import { LANGUAGES, SupportedLanguages } from '../shared/languages';
 import log from '../shared/log';
 import { mergeDeep } from '../shared/object';
+import {
+  GetSettingsRequest,
+  GetSettingsResponse,
+  UpdateSettingsRequest,
+  UpdateSettingsResponse,
+} from '../shared/rpc';
+import { Settings } from '../shared/settings';
 import { ensureFile } from './fs';
 import { RPCHandler } from './rpc';
 
-export class LanguageSettings {
-  path: string;
-
-  constructor(path?: string) {
-    this.path = path || '';
-  }
-}
-
-export class Settings {
-  id: string;
-  lastProject?: string;
-  languages: Record<SupportedLanguages, LanguageSettings>;
-  file: string;
-  stdoutMaxSize: number;
-
-  constructor(
-    file: string,
-    id?: string,
-    lastProject?: string,
-    languages?: Record<SupportedLanguages, LanguageSettings>,
-    stdoutMaxSize?: number
-  ) {
-    this.id = id || uuid.v4();
-    this.lastProject = lastProject || '';
-    this.languages =
-      languages ||
-      Object.keys(LANGUAGES).reduce(
-        (agg, lang) => ({
-          ...agg,
-          [lang]: new LanguageSettings(),
-        }),
-        {}
-      );
-    this.stdoutMaxSize = stdoutMaxSize || 5000;
-    this.file = file;
-  }
-
+export class DesktopSettings extends Settings {
   static fromFile(settingsFile: string) {
     let existingSettingsString: Buffer | null = null;
     try {
@@ -73,14 +42,17 @@ export class Settings {
       }
     }
 
-    return mergeDeep(new Settings(settingsFile), existingSettings);
+    return mergeDeep(new DesktopSettings(settingsFile), existingSettings);
   }
 
   save() {
     return fs.writeFileSync(this.file, JSON.stringify(this));
   }
 
-  getUpdateHandler(): RPCHandler<Settings, void> {
+  getUpdateHandler(): RPCHandler<
+    UpdateSettingsRequest,
+    UpdateSettingsResponse
+  > {
     return {
       resource: 'updateSettings',
       handler: async (_: string, settings: Settings) => {
@@ -89,15 +61,24 @@ export class Settings {
       },
     };
   }
+
+  getGetHandler(): RPCHandler<GetSettingsRequest, GetSettingsResponse> {
+    return {
+      resource: 'getSettings',
+      handler: async () => {
+        return this;
+      },
+    };
+  }
 }
 
-export let SETTINGS: Settings = new Settings('');
+export let SETTINGS = new DesktopSettings('');
 
-export function loadSettings(settingsFile?: string): Settings {
+export function loadSettings(settingsFile?: string): DesktopSettings {
   if (!settingsFile) {
     settingsFile = '.settings';
   }
   const fullName = ensureFile(settingsFile);
-  SETTINGS = Settings.fromFile(fullName);
+  SETTINGS = DesktopSettings.fromFile(fullName);
   return SETTINGS;
 }

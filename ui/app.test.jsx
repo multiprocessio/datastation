@@ -96,9 +96,10 @@ test(
     for (let i = 0; i < connectors.length; i++) {
       const c = connectors.at(i);
       act(() => {
+        console.log(c.debug());
         c.find({
           'data-testid': 'show-hide-connector',
-          type: 'outline',
+          icon: true,
         }).simulate('click');
       });
     }

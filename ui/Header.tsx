@@ -4,22 +4,22 @@ import '../shared/polyfill';
 import { DEFAULT_PROJECT } from '../shared/state';
 import { Button } from './components/Button';
 import { Link } from './components/Link';
+import { Toggle } from './components/Toggle';
 import { ProjectContext } from './ProjectStore';
+import { SettingsContext } from './settings';
 import { UrlStateContext } from './urlState';
 
-export function Header({
-  setHeaderHeight,
-}: {
-  setHeaderHeight: (e: HTMLElement) => void;
-}) {
+export function Header() {
   const {
     state: { projectId },
     setState: setUrlState,
   } = React.useContext(UrlStateContext);
   const { setState: setProjectState } = React.useContext(ProjectContext);
+  const { state: settings, setState: setSettings } =
+    React.useContext(SettingsContext);
 
   return (
-    <header ref={setHeaderHeight}>
+    <header>
       <div className="vertical-align-center">
         <Link args={{ projectId, view: 'editor', page: 0 }} className="logo">
           {APP_NAME}
@@ -47,12 +47,13 @@ export function Header({
               <a
                 href="https://github.com/multiprocessio/datastation"
                 target="_blank"
+                className="stars"
               >
                 <iframe
-                  src="https://ghbtns.com/github-btn.html?user=multiprocessio&repo=datastation&type=star&count=true&size=medium"
+                  src="https://datastation.multiprocess.io/stars.html"
                   frameBorder="0"
                   scrolling="0"
-                  width="80"
+                  width="100"
                   height="20"
                   title="GitHub"
                 ></iframe>
@@ -61,6 +62,14 @@ export function Header({
           ) : (
             <span>{projectId}</span>
           )}
+          <Toggle
+            label={settings.theme === 'light' ? 'Light Mode' : 'Dark Mode'}
+            value={settings.theme !== 'light'}
+            onChange={function handleLightModeToggle() {
+              settings.theme = settings.theme === 'light' ? 'dark' : 'light';
+              setSettings(settings);
+            }}
+          />
         </div>
       </div>
     </header>

@@ -1,4 +1,6 @@
-import { ProjectState } from '../shared/state';
+import { Settings } from './settings';
+import { ProjectState } from './state';
+
 export type GetProjectRequest = { projectId: string };
 export type GetProjectResponse = ProjectState | null;
 
@@ -14,6 +16,12 @@ export type OpenProjectResponse = void;
 export type GetProjectsRequest = void;
 export type GetProjectsResponse = Array<{ name: string; createdAt: string }>;
 
+export type UpdateSettingsRequest = Settings;
+export type UpdateSettingsResponse = void;
+
+export type GetSettingsRequest = void;
+export type GetSettingsResponse = Settings;
+
 export type PanelBody = { panelId: string };
 
 export type StoreEndpoint =
@@ -22,6 +30,7 @@ export type StoreEndpoint =
   | 'updateProject'
   | 'getProject'
   | 'openProject'
+  | 'getSettings'
   | 'updateSettings';
 
 export type PanelEndpoint = 'killProcess' | 'fetchResults' | 'eval';

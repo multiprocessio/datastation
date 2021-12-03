@@ -39,12 +39,12 @@ export function Server({
   }
 
   return (
-    <div className="server">
+    <div className={`server ${expanded ? 'server--expanded' : ''}`}>
       <div className="server-header vertical-align-center">
         {expanded ? (
           <Input
             className="server-name"
-            onChange={(value: string) => {
+            onChange={function handleNameChange(value: string) {
               server.name = value;
               updateServer(server);
             }}
@@ -56,27 +56,28 @@ export function Server({
         <div className="flex-right">
           {!expanded && (
             <Button
-              type="outline"
               icon
               className="hover-button"
-              onClick={() => setExpanded(true)}
+              onClick={function toggleExpanded() {
+                return setExpanded(true);
+              }}
               title="Edit"
             >
-              edit_outline
+              edit
             </Button>
           )}
           <span title="Delete server">
             <Confirm
-              right
               onConfirm={deleteServer}
               message="delete this server"
               action="Delete"
-              className="hover-button"
-              render={(confirm: () => void) => (
-                <Button icon onClick={confirm} type="outline">
-                  delete
-                </Button>
-              )}
+              render={function renderDelete(confirm: () => void) {
+                return (
+                  <Button icon onClick={confirm} type="outline">
+                    delete
+                  </Button>
+                );
+              }}
             />
           </span>
         </div>
@@ -88,7 +89,7 @@ export function Server({
               label="Address"
               value={server.address}
               type="url"
-              onChange={(value: string) => {
+              onChange={function handleAddressChange(value: string) {
                 server.address = value;
                 updateServer(server);
               }}
@@ -99,7 +100,7 @@ export function Server({
               label="Port"
               value={String(server.port)}
               type="number"
-              onChange={(value: string) => {
+              onChange={function handlePortChange(value: string) {
                 server.port = +value;
                 updateServer(server);
               }}
@@ -109,7 +110,7 @@ export function Server({
             <Select
               label="Method"
               value={server.type}
-              onChange={(value: string) => {
+              onChange={function handleMethodChange(value: string) {
                 server.type = value as ServerInfoType;
                 updateServer(server);
               }}
@@ -124,7 +125,7 @@ export function Server({
               <Input
                 label="Username"
                 value={server.username}
-                onChange={(value: string) => {
+                onChange={function handleUsernameChange(value: string) {
                   server.username = value;
                   updateServer(server);
                 }}
@@ -140,7 +141,7 @@ export function Server({
                   placeholder="~/.ssh/id_ed25519"
                   allowManualEntry
                   allowFilePicker={MODE === 'desktop'}
-                  onChange={(fileName: string) => {
+                  onChange={function handlePrivateKeyChange(fileName: string) {
                     server.privateKeyFile = fileName;
                     updateServer(server);
                   }}
@@ -162,19 +163,23 @@ export function Server({
                 value={password.password}
                 type="password"
                 onChange={syncPassword.bind(null, 'password')}
-                onBlur={
-                  () =>
-                    syncPassword(
-                      'password',
-                      null
-                    ) /* Turns off continued attempts to encrypt */
-                }
+                onBlur={function passwordOnBlur() {
+                  syncPassword(
+                    'password',
+                    null
+                  ); /* Turns off continued attempts to encrypt */
+                }}
               />
             </div>
           ) : null}
           {expanded && (
             <div className="text-center">
-              <Button type="outline" onClick={() => setExpanded(false)}>
+              <Button
+                type="outline"
+                onClick={function closeServer() {
+                  setExpanded(false);
+                }}
+              >
                 Close
               </Button>
             </div>

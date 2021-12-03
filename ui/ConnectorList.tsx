@@ -51,12 +51,11 @@ export function ConnectorList({
       ))}
       <div className="text-center">
         <Button
-          type="primary"
           onClick={() => {
             addConnector(new DatabaseConnectorInfo());
           }}
         >
-          New Connector
+          Add Connector
         </Button>
       </div>
     </div>

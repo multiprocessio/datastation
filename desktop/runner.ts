@@ -54,6 +54,7 @@ export function initialize({
     ...panelHandlers(subprocess),
     openProjectHandler,
     settings.getUpdateHandler(),
+    settings.getGetHandler(),
   ];
 
   return { settings, handlers, project, panel, panelMetaOut };

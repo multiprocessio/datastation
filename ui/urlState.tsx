@@ -38,11 +38,13 @@ export function useUrlState(): [UrlState, (a0: Partial<UrlState>) => void] {
     page: defaultState.page || +localStorage.getItem(lastPageIndexKey) || 0,
   });
 
-  React.useEffect(() => {
+  React.useEffect(function compareUrlStates() {
     const currentState = getUrlState();
     if (!deepEquals(currentState, state)) {
       const serialized = Object.keys(state)
-        .map((k) => `${k}=${encodeURIComponent(state[k as keyof UrlState])}`)
+        .map(function mapKey(k) {
+          return `${k}=${encodeURIComponent(state[k as keyof UrlState])}`;
+        })
         .join('&');
       const newUrl = window.location.pathname + '?' + serialized;
       history.pushState({}, document.title, newUrl);

@@ -26,7 +26,9 @@ export async function evalColumnPanel(
   panels: Array<PanelInfo>
 ) {
   if (MODE === 'browser') {
-    const panelIndex = (panels || []).findIndex((p) => p.id === panelSource);
+    const panelIndex = (panels || []).findIndex(function findIndex(p) {
+      return p.id === panelSource;
+    });
     const resultMeta = (panels[panelIndex] || {}).resultMeta;
     if (!resultMeta || !resultMeta.value) {
       throw new InvalidDependentPanelError(panelSource);
@@ -56,6 +58,10 @@ export async function evalColumnPanel(
   return await panelRPC('eval', panelId);
 }
 
+function mapColumnToField(c: TableColumn) {
+  return c.field;
+}
+
 export function evalTablePanel(
   panel: TablePanelInfo,
   panels: Array<PanelInfo>,
@@ -64,7 +70,7 @@ export function evalTablePanel(
   return evalColumnPanel(
     panel.id,
     panel.table.panelSource,
-    panel.table.columns.map((c) => c.field),
+    panel.table.columns.map(mapColumnToField),
     idMap,
     panels
   );
@@ -76,19 +82,25 @@ export function TablePanelDetails({
   updatePanel,
 }: PanelDetailsProps<TablePanelInfo>) {
   const data =
-    ((panels || []).find((p) => p.id === panel.table.panelSource) || {})
-      .resultMeta || new PanelResult();
-  React.useEffect(() => {
-    const fields = unusedFields(
-      data?.shape,
-      ...panel.table.columns.map((c) => c.field)
-    );
+    (
+      (panels || []).find(function mapPanelsToResults(p) {
+        return p.id === panel.table.panelSource;
+      }) || {}
+    ).resultMeta || new PanelResult();
+  React.useEffect(
+    function addInitialFields() {
+      const fields = unusedFields(
+        data?.shape,
+        ...panel.table.columns.map(mapColumnToField)
+      );
 
-    if (fields) {
-      panel.table.columns.push({ label: '', field: '' });
-      updatePanel(panel);
-    }
-  }, [panel.table.panelSource, data]);
+      if (fields) {
+        panel.table.columns.push({ label: '', field: '' });
+        updatePanel(panel);
+      }
+    },
+    [panel.table.panelSource, data]
+  );
 
   return (
     <React.Fragment>
@@ -98,7 +110,7 @@ export function TablePanelDetails({
             currentPanel={panel.id}
             panels={panels}
             value={panel.table.panelSource}
-            onChange={(value: string) => {
+            onChange={function handlePanelSourceChange(value: string) {
               panel.table.panelSource = value;
               updatePanel(panel);
             }}
@@ -106,31 +118,33 @@ export function TablePanelDetails({
         </div>
       </FormGroup>
       <FormGroup label="Columns">
-        {panel.table.columns.map((c, i) => (
-          <div className="form-row vertical-align-center" key={c.field + i}>
-            <FieldPicker
-              used={panel.table.columns.map((c) => c.field)}
-              onDelete={() => {
-                panel.table.columns.splice(i, 1);
-                updatePanel(panel);
-              }}
-              label="Field"
-              value={c.field}
-              shape={data?.shape}
-              onChange={(value: string) => {
-                c.field = value;
-                updatePanel(panel);
-              }}
-              labelValue={c.label}
-              labelOnChange={(value: string) => {
-                c.label = value;
-                updatePanel(panel);
-              }}
-            />
-          </div>
-        ))}
+        {panel.table.columns.map(function mapColumnRender(c, i) {
+          return (
+            <div className="form-row vertical-align-center" key={c.field + i}>
+              <FieldPicker
+                used={panel.table.columns.map(mapColumnToField)}
+                onDelete={function handleColumnDelete() {
+                  panel.table.columns.splice(i, 1);
+                  updatePanel(panel);
+                }}
+                label="Field"
+                value={c.field}
+                shape={data?.shape}
+                onChange={function handleFieldChange(value: string) {
+                  c.field = value;
+                  updatePanel(panel);
+                }}
+                labelValue={c.label}
+                labelOnChange={function handleFieldLabelChange(value: string) {
+                  c.label = value;
+                  updatePanel(panel);
+                }}
+              />
+            </div>
+          );
+        })}
         <Button
-          onClick={() => {
+          onClick={function handleAddColumn() {
             panel.table.columns.push({ label: '', field: '' });
             updatePanel(panel);
           }}
@@ -164,21 +178,29 @@ export function TablePanel({ panel, panels }: PanelBodyProps<TablePanelInfo>) {
     <table>
       <thead>
         <tr>
-          {panel.table.columns.map((column: TableColumn, i: number) => (
-            <th key={column.field + i}>{column.label}</th>
-          ))}
+          {panel.table.columns.map(function mapColumnToHeader(
+            column: TableColumn,
+            i: number
+          ) {
+            return <th key={column.field + i}>{column.label}</th>;
+          })}
         </tr>
       </thead>
       <tbody>
-        {valueAsArray.map((row: any) => (
-          /* probably a better way to do this... */ <tr
-            key={Object.values(row).join(',')}
-          >
-            {panel.table.columns.map((column: TableColumn, i: number) => (
-              <td key={column.field + i}>{row[column.field]}</td>
-            ))}
-          </tr>
-        ))}
+        {valueAsArray.map(function mapRows(row: any) {
+          return (
+            /* probably a better way to do this... */ <tr
+              key={Object.values(row).join(',')}
+            >
+              {panel.table.columns.map(function mapColumnToCell(
+                column: TableColumn,
+                i: number
+              ) {
+                return <td key={column.field + i}>{row[column.field]}</td>;
+              })}
+            </tr>
+          );
+        })}
       </tbody>
     </table>
   );
@@ -192,7 +214,9 @@ export const tablePanel: PanelUIDetails<TablePanelInfo> = {
   details: TablePanelDetails,
   body: TablePanel,
   previewable: false,
-  factory: () => new TablePanelInfo(),
+  factory: function () {
+    return new TablePanelInfo();
+  },
   hasStdout: false,
   info: null,
   dashboard: true,

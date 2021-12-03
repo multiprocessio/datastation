@@ -19,14 +19,18 @@ import { MakeSelectProject } from './MakeSelectProject';
 import { PageList } from './PageList';
 import { makeStore, ProjectContext, ProjectStore } from './ProjectStore';
 import { ServerList } from './ServerList';
+import { SettingsContext, useSettings } from './settings';
 import { Sidebar } from './Sidebar';
 import { Updates } from './Updates';
 import { UrlStateContext, useUrlState } from './urlState';
 
 if (MODE === 'browser') {
-  Object.values(LANGUAGES).map((l) => {
+  Object.values(LANGUAGES).map(function processLanguageInit(l) {
     if (l.inMemoryInit) {
-      // These can be really big, so run it out of band                                                                                     setTimeout(() => l.inMemoryInit(), 0);
+      // These can be really big, so run it out of band
+      setTimeout(function () {
+        l.inMemoryInit();
+      }, 0);
     }
   });
 }
@@ -47,26 +51,28 @@ function useProjectState(
     [projectId, store, setProjectState]
   );
 
-  // Re-read state when projectId changes
-  React.useEffect(() => {
-    async function fetch() {
-      let state;
-      try {
-        let rawState = await store.get(projectId);
-        state = await ProjectState.fromJSON(rawState);
-      } catch (e) {
-        log.error(e);
+  React.useEffect(
+    function reReadStateWhenProjectIdChanges() {
+      async function fetch() {
+        let state;
+        try {
+          let rawState = await store.get(projectId);
+          state = await ProjectState.fromJSON(rawState);
+        } catch (e) {
+          log.error(e);
+        }
+
+        state.projectName = projectId;
+        state.lastVersion = VERSION;
+        setProjectState(state);
       }
 
-      state.projectName = projectId;
-      state.lastVersion = VERSION;
-      setProjectState(state);
-    }
-
-    if (projectId) {
-      fetch();
-    }
-  }, [projectId]);
+      if (projectId) {
+        fetch();
+      }
+    },
+    [projectId]
+  );
 
   return [state, setState];
 }
@@ -77,40 +83,39 @@ export function App() {
   const [urlState, setUrlState] = useUrlState();
   const [state, setProjectState] = useProjectState(urlState.projectId, store);
   const [loadedDefault, setLoadedDefault] = React.useState(false);
-  React.useEffect(() => {
-    if (
-      !urlState.projectId &&
-      MODE_FEATURES.useDefaultProject &&
-      !loadedDefault
-    ) {
-      setLoadedDefault(true);
-      setUrlState({ projectId: DEFAULT_PROJECT.projectName });
-      setProjectState(DEFAULT_PROJECT);
-    }
-  }, [urlState.projectId, loadedDefault]);
-
-  const [headerHeight, setHeaderHeightInternal] = React.useState(0);
-  const setHeaderHeight = React.useCallback(
-    (e: HTMLElement) => {
-      if (!e) {
-        return;
+  React.useEffect(
+    function loadDefaultProject() {
+      if (
+        !urlState.projectId &&
+        MODE_FEATURES.useDefaultProject &&
+        !loadedDefault
+      ) {
+        setLoadedDefault(true);
+        setUrlState({ projectId: DEFAULT_PROJECT.projectName });
+        setProjectState(DEFAULT_PROJECT);
       }
-
-      setHeaderHeightInternal(e.offsetHeight);
     },
-    [setHeaderHeightInternal]
+    [urlState.projectId, loadedDefault]
   );
 
-  React.useEffect(() => {
-    if (state && state.projectName) {
-      document.title = state.projectName;
-    }
+  React.useEffect(
+    function setDocumentTitle() {
+      if (state && state.projectName) {
+        document.title = state.projectName;
+      }
+    },
+    [state && state.projectName]
+  );
 
-    // Set body overflow once on init
-    if (MODE_FEATURES.noBodyYOverflow) {
-      document.body.style.overflowY = 'hidden';
-    }
-  }, [state && state.projectName]);
+  const [settings, setSettings] = useSettings();
+  React.useEffect(
+    function updateBodyBackground() {
+      if (settings) {
+        document.body.className = settings.theme;
+      }
+    },
+    [settings && settings.theme]
+  );
 
   function updatePage(page: ProjectPage) {
     state.pages[urlState.page] = page;
@@ -176,8 +181,8 @@ export function App() {
   }
 
   let main = <Loading />;
-  if (!state) {
-    if (urlState.projectId) {
+  if (!state || !settings) {
+    if (urlState.projectId || !settings) {
       return <Loading />;
     }
 
@@ -234,20 +239,18 @@ export function App() {
       <UrlStateContext.Provider
         value={{ state: urlState, setState: setUrlState }}
       >
-        <div className={`app app--${MODE}`}>
-          {MODE_FEATURES.appHeader && (
-            <Header setHeaderHeight={setHeaderHeight} />
-          )}
-          <main
-            style={{
-              marginTop: headerHeight,
-              height: `calc(100% - ${headerHeight}px)`,
-            }}
-            className={'view-' + (urlState.view || 'editor')}
-          >
-            {main}
-          </main>
-        </div>
+        <SettingsContext.Provider
+          value={{ state: settings, setState: setSettings }}
+        >
+          <div className={`app app--${MODE} app--${settings.theme}`}>
+            <div>
+              {MODE_FEATURES.appHeader && <Header />}
+              <main className={'view-' + (urlState.view || 'editor')}>
+                {main}
+              </main>
+            </div>
+          </div>
+        </SettingsContext.Provider>
       </UrlStateContext.Provider>
     </ProjectContext.Provider>
   );
