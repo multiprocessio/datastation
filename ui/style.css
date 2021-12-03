@@ -890,12 +890,12 @@ body.dark .button:hover {
 /* End cssplus break */
 
 body.dark {
-    background: #29293c;
-    color: white;
+  background: #29293c;
+  color: white;
 
-    .alert {
-	color: black;
-    }
+  .alert {
+    color: black;
+  }
 
   header {
     background: #29293c;
@@ -922,7 +922,7 @@ body.dark {
 
   .button.material-icons.button--primary,
   .button.material-icons-outlined.button--primary {
-      color: #bc4fff;
+    color: #bc4fff;
   }
 
   .page-name {
