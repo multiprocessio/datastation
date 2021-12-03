@@ -108,6 +108,14 @@ export function App() {
   );
 
   const [settings, setSettings] = useSettings();
+  React.useEffect(
+    function updateBodyBackground() {
+      if (settings) {
+        document.body.className = settings.theme;
+      }
+    },
+    [settings && settings.theme]
+  );
 
   function updatePage(page: ProjectPage) {
     state.pages[urlState.page] = page;

@@ -6,6 +6,7 @@ body {
   font-family: sans-serif;
   padding: 0;
   margin: 0;
+  background: #fbfbfb;
 }
 
 a,
@@ -23,10 +24,6 @@ a:hover {
 .loading {
   text-align: center;
   margin: 100px auto;
-}
-
-.app {
-  background: #fbfbfb;
 }
 
 .app--desktop,
@@ -373,14 +370,14 @@ label.select select {
 
 .server .hover-button,
 .connector .hover-button {
-    visibility: hidden;
+  visibility: hidden;
 }
 
 .server:hover .hover-button,
 .server--expanded .hover-button,
 .connector:hover .hover-button,
 .connector--expanded .hover-button {
-    visibility: initial;
+  visibility: initial;
 }
 
 .server:hover,
@@ -855,38 +852,50 @@ tbody tr:nth-child(odd) {
 }
 
 /* These rules break cssplus */
-.app.app--dark a,
-.app.app--dark a:visited,
-.app.app--dark a:focus,
-.app.app--dark a:hover {
+body.dark a,
+body.dark a:visited,
+body.dark a:focus,
+body.dark a:hover {
   color: white;
 }
 
-.app.app--dark .editor-container .input,
-.app.app--dark input.input:not([type='radio']),
-.app.app--dark label.input input:not([type='radio']),
-.app.app--dark select.select,
-.app.app--dark label.select select {
+body.dark .alert a,
+body.dark .alert a:visited,
+body.dark .alert a:focus,
+body.dark .alert a:hover {
+  color: black;
+}
+
+body.dark .editor-container .input,
+body.dark input.input:not([type='radio']),
+body.dark label.input input:not([type='radio']),
+body.dark select.select,
+body.dark label.select select {
   background: #29293c;
   border: 1px solid black;
   color: white;
 }
 
-.app.app--dark .server:hover,
-.app.app--dark .connector:hover,
-.app.app--dark .server--expanded,
-.app.app--dark .connector--expanded {
-  background: #31314e;
+body.dark .server:hover,
+body.dark .connector:hover,
+body.dark .server--expanded,
+body.dark .connector--expanded {
+  background: #484860;
   border-color: black;
 }
 
-.app.app--dark .button:hover {
+body.dark .button:hover {
   background: #383852;
 }
 /* End cssplus break */
 
-.app.app--dark {
-  background: #29293c;
+body.dark {
+    background: #29293c;
+    color: white;
+
+    .alert {
+	color: black;
+    }
 
   header {
     background: #29293c;
@@ -909,6 +918,11 @@ tbody tr:nth-child(odd) {
     background: transparent;
     color: #999;
     padding: 0;
+  }
+
+  .button.material-icons.button--primary,
+  .button.material-icons-outlined.button--primary {
+      color: #bc4fff;
   }
 
   .page-name {
@@ -1000,7 +1014,7 @@ tbody tr:nth-child(odd) {
   }
 
   .sidebar {
-    background: #29293c;
+    background: #31314e;
     border-right-color: black;
     border-bottom-color: black;
   }

@@ -184,15 +184,14 @@ export function GraphPanel({ panel, panels }: PanelBodyProps<GraphPanelInfo>) {
       return;
     }
 
+    // Only doesn't exist in tests
+    const parent = ref.current.closest('.panel-body');
     let background = 'white';
-    const panelParent = ref.current.closest('.panel');
-    // Only doesn't exist in tests.
-    if (panelParent) {
-      const style = window.getComputedStyle(panelParent);
+    if (parent) {
+      const style = window.getComputedStyle(parent);
       background = style.getPropertyValue('background-color');
-      Chart.defaults.color = window
-        .getComputedStyle(document.querySelector('input'))
-        .getPropertyValue('color');
+      // TODO: don't hardcode this
+      Chart.defaults.color = theme === 'light' ? 'black' : 'white';
     }
 
     const ys = [...panel.graph.ys];
@@ -253,20 +252,10 @@ export function GraphPanel({ panel, panels }: PanelBodyProps<GraphPanelInfo>) {
             field
           );
 
-          const borderColor = Array.isArray(backgroundColor)
-            ? backgroundColor.map((c) => shadeRGBPercent(c, -20))
-            : shadeRGBPercent(backgroundColor, -20);
-
           return {
             label,
             data: value.map((d) => +d[field]),
             backgroundColor,
-            ...(theme === 'dark'
-              ? {}
-              : {
-                  borderColor,
-                  borderWidth: 2,
-                }),
             tooltip: {
               callbacks:
                 panel.graph.type === 'pie'
@@ -304,6 +293,7 @@ export function GraphPanel({ panel, panels }: PanelBodyProps<GraphPanelInfo>) {
     panel.graph.type,
     panel.graph.colors.unique,
     panel.graph.width,
+    theme,
   ]);
 
   if (!value || !value.length) {
