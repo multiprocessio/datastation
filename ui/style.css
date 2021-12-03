@@ -884,10 +884,11 @@ tbody tr:nth-child(odd) {
   }
 
   .ace_layer.ace_marker-layer .ace_active-line {
-      background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.5);
   }
 
-  .panel, .editor {
+  .panel,
+  .editor {
     background: #484860;
   }
 

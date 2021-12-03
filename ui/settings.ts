@@ -34,7 +34,6 @@ export function useSettings(): [Settings, (s: Settings) => Promise<void>] {
           );
         } catch (e) {}
 
-        settings.theme = 'dark';
         setSettingsInternal(settings);
       }
 

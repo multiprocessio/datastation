@@ -184,11 +184,17 @@ export function GraphPanel({ panel, panels }: PanelBodyProps<GraphPanelInfo>) {
       return;
     }
 
-    const style = window.getComputedStyle(ref.current.closest('.panel'));
-    const background = style.getPropertyValue('background-color');
-    Chart.defaults.color = window
-      .getComputedStyle(document.querySelector('input'))
-      .getPropertyValue('color');
+    let background = 'white';
+    const panelParent = ref.current.closest('.panel');
+    // Only doesn't exist in tests.
+    if (panelParent) {
+      console.log();
+      const style = window.getComputedStyle(panelParent);
+      background = style.getPropertyValue('background-color');
+      Chart.defaults.color = window
+        .getComputedStyle(document.querySelector('input'))
+        .getPropertyValue('color');
+    }
 
     const ys = [...panel.graph.ys];
     if (panel.graph.type === 'pie') {

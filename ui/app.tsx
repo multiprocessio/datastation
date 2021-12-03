@@ -5,7 +5,6 @@ import log from '../shared/log';
 import '../shared/polyfill';
 import {
   ConnectorInfo,
-  DatabaseConnectorInfo,
   DEFAULT_PROJECT,
   ProjectPage,
   ProjectState,
@@ -173,8 +172,6 @@ export function App() {
       main = <MakeSelectProject />;
     }
   } else {
-    state.connectors = [new DatabaseConnectorInfo()];
-    state.servers = [new ServerInfo()];
     // This allows us to render the sidebar in tests where we
     // prepopulate connectors and servers
     const hasSidebar = Boolean(
