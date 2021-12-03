@@ -23,31 +23,34 @@ export const SettingsContext = React.createContext<{
 export function useSettings(): [Settings, (s: Settings) => Promise<void>] {
   const [settings, setSettingsInternal] = React.useState(null);
 
-  React.useEffect(() => {
-    async function loadSettings() {
-      if (MODE === 'browser') {
-        let settings = new Settings('');
-        try {
-          settings = mergeDeep(
-            settings,
-            JSON.parse(localStorage.getItem('settings'))
-          );
-        } catch (e) {}
+  React.useEffect(
+    function checkForSettings() {
+      async function loadSettings() {
+        if (MODE === 'browser') {
+          let settings = new Settings('');
+          try {
+            settings = mergeDeep(
+              settings,
+              JSON.parse(localStorage.getItem('settings'))
+            );
+          } catch (e) {}
 
+          setSettingsInternal(settings);
+        }
+
+        const settings = await asyncRPC<
+          GetSettingsRequest,
+          GetSettingsResponse
+        >('getSettings', null);
         setSettingsInternal(settings);
       }
 
-      const settings = await asyncRPC<GetSettingsRequest, GetSettingsResponse>(
-        'getSettings',
-        null
-      );
-      setSettingsInternal(settings);
-    }
-
-    if (!settings) {
-      loadSettings();
-    }
-  }, [settings]);
+      if (!settings) {
+        loadSettings();
+      }
+    },
+    [settings]
+  );
 
   function setSettings(s: Settings) {
     if (MODE === 'browser') {

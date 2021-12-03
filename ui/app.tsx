@@ -25,10 +25,12 @@ import { Updates } from './Updates';
 import { UrlStateContext, useUrlState } from './urlState';
 
 if (MODE === 'browser') {
-  Object.values(LANGUAGES).map((l) => {
+  Object.values(LANGUAGES).map(function processLanguageInit(l) {
     if (l.inMemoryInit) {
       // These can be really big, so run it out of band
-      setTimeout(() => l.inMemoryInit(), 0);
+      setTimeout(function () {
+        l.inMemoryInit();
+      }, 0);
     }
   });
 }
@@ -49,26 +51,28 @@ function useProjectState(
     [projectId, store, setProjectState]
   );
 
-  // Re-read state when projectId changes
-  React.useEffect(() => {
-    async function fetch() {
-      let state;
-      try {
-        let rawState = await store.get(projectId);
-        state = await ProjectState.fromJSON(rawState);
-      } catch (e) {
-        log.error(e);
+  React.useEffect(
+    function reReadStateWhenProjectIdChanges() {
+      async function fetch() {
+        let state;
+        try {
+          let rawState = await store.get(projectId);
+          state = await ProjectState.fromJSON(rawState);
+        } catch (e) {
+          log.error(e);
+        }
+
+        state.projectName = projectId;
+        state.lastVersion = VERSION;
+        setProjectState(state);
       }
 
-      state.projectName = projectId;
-      state.lastVersion = VERSION;
-      setProjectState(state);
-    }
-
-    if (projectId) {
-      fetch();
-    }
-  }, [projectId]);
+      if (projectId) {
+        fetch();
+      }
+    },
+    [projectId]
+  );
 
   return [state, setState];
 }
@@ -79,23 +83,29 @@ export function App() {
   const [urlState, setUrlState] = useUrlState();
   const [state, setProjectState] = useProjectState(urlState.projectId, store);
   const [loadedDefault, setLoadedDefault] = React.useState(false);
-  React.useEffect(() => {
-    if (
-      !urlState.projectId &&
-      MODE_FEATURES.useDefaultProject &&
-      !loadedDefault
-    ) {
-      setLoadedDefault(true);
-      setUrlState({ projectId: DEFAULT_PROJECT.projectName });
-      setProjectState(DEFAULT_PROJECT);
-    }
-  }, [urlState.projectId, loadedDefault]);
+  React.useEffect(
+    function loadDefaultProject() {
+      if (
+        !urlState.projectId &&
+        MODE_FEATURES.useDefaultProject &&
+        !loadedDefault
+      ) {
+        setLoadedDefault(true);
+        setUrlState({ projectId: DEFAULT_PROJECT.projectName });
+        setProjectState(DEFAULT_PROJECT);
+      }
+    },
+    [urlState.projectId, loadedDefault]
+  );
 
-  React.useEffect(() => {
-    if (state && state.projectName) {
-      document.title = state.projectName;
-    }
-  }, [state && state.projectName]);
+  React.useEffect(
+    function setDocumentTitle() {
+      if (state && state.projectName) {
+        document.title = state.projectName;
+      }
+    },
+    [state && state.projectName]
+  );
 
   const [settings, setSettings] = useSettings();
 

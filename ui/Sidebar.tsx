@@ -11,7 +11,9 @@ export function Sidebar({ children }: { children: React.ReactNode }) {
         <Button
           icon
           className="flex-right"
-          onClick={() => setExpanded(!expanded)}
+          onClick={function toggleExpanded() {
+            return setExpanded(!expanded);
+          }}
         >
           {expanded ? 'keyboard_arrow_left' : 'keyboard_arrow_right'}
         </Button>

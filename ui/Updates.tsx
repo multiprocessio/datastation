@@ -6,7 +6,7 @@ import { ContentTypeInfo } from '../shared/state';
 
 export function Updates() {
   const [updates, setUpdates] = React.useState(null);
-  React.useEffect(() => {
+  React.useEffect(function getUpdates() {
     async function run() {
       try {
         const updates = await request(
@@ -35,7 +35,7 @@ export function Updates() {
     <div>
       <div className="title">Updates</div>
       <ul>
-        {updates.updates.map((u: string) => {
+        {updates.updates.map(function renderUpdate(u: string) {
           return <li>{u}</li>;
         })}
       </ul>
