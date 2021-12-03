@@ -373,14 +373,14 @@ label.select select {
 
 .server .hover-button,
 .connector .hover-button {
-  display: none;
+    visibility: hidden;
 }
 
 .server:hover .hover-button,
 .server--expanded .hover-button,
 .connector:hover .hover-button,
 .connector--expanded .hover-button {
-  display: initial;
+    visibility: initial;
 }
 
 .server:hover,
