@@ -4,7 +4,9 @@ import '../shared/polyfill';
 import { DEFAULT_PROJECT } from '../shared/state';
 import { Button } from './components/Button';
 import { Link } from './components/Link';
+import { Toggle } from './components/Toggle';
 import { ProjectContext } from './ProjectStore';
+import { SettingsContext } from './settings';
 import { UrlStateContext } from './urlState';
 
 export function Header() {
@@ -13,6 +15,8 @@ export function Header() {
     setState: setUrlState,
   } = React.useContext(UrlStateContext);
   const { setState: setProjectState } = React.useContext(ProjectContext);
+  const { state: settings, setState: setSettings } =
+    React.useContext(SettingsContext);
 
   return (
     <header>
@@ -43,6 +47,7 @@ export function Header() {
               <a
                 href="https://github.com/multiprocessio/datastation"
                 target="_blank"
+                className="stars"
               >
                 <iframe
                   src="https://datastation.multiprocess.io/stars.html"
@@ -57,6 +62,14 @@ export function Header() {
           ) : (
             <span>{projectId}</span>
           )}
+          <Toggle
+            label="Theme"
+            value={settings.theme !== 'light'}
+            onChange={function handleLightModeToggle() {
+              settings.theme = settings.theme === 'light' ? 'dark' : 'light';
+              setSettings(settings);
+            }}
+          />
         </div>
       </div>
     </header>

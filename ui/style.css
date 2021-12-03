@@ -59,7 +59,7 @@ header a {
   font-size: 0.75rem;
 }
 
-header .vertical-align-center a {
+header .vertical-align-center a:not(.stars) {
   margin-right: 15px;
 }
 
@@ -131,6 +131,44 @@ input[type='radio'] {
   display: block;
   padding: 5px;
   text-align: right;
+}
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+
+  input[type='checkbox'] {
+    appearance: none;
+    margin: 0;
+  }
+
+  .toggle-container {
+    display: block;
+    background: transparent;
+    width: calc(
+      calc(14px * 2) + 4px
+    ); /* Twice the inner circle + border width */
+    height: 18px;
+    border: 2px solid #ccc;
+    border-radius: 15px;
+    margin-left: 8px;
+    position: relative;
+  }
+
+  .toggle-mover {
+    background: #777;
+    height: 14px;
+    width: 14px;
+    border-radius: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+    transition: left 0.5s;
+  }
+}
+
+.toggle input[type='checkbox']:checked + .toggle-container span.toggle-mover {
+  left: 14px !important;
 }
 
 .editor-container .input,
@@ -934,5 +972,13 @@ tbody tr:nth-child(odd) {
   .select-label,
   .text-muted {
     color: #999;
+  }
+
+  .toggle .toggle-container {
+    border-color: black;
+  }
+
+  .toggle .toggle-mover {
+    background: #999;
   }
 }

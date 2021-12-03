@@ -58,7 +58,9 @@ export function useSettings(): [Settings, (s: Settings) => Promise<void>] {
     [settings]
   );
 
-  function setSettings(s: Settings) {
+  async function setSettings(s: Settings) {
+    setSettingsInternal({ ...s });
+
     if (MODE === 'browser') {
       localStorage.setItem('settings', JSON.stringify(s));
       return;
