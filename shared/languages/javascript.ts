@@ -38,7 +38,7 @@ function DM_getPanel(i) {
 }
 function DM_setPanel(v) {
   const fs = require('fs');
-  const fd = fs.openFileSync('${resultsFile + panelId}', 'w');
+  const fd = fs.openSync('${resultsFile + panelId}', 'w');
   if (Array.isArray(v)) {
     fd.writeSync(fd, '[');
     for (let i = 0; i < v.length; i++) {
