@@ -10,10 +10,10 @@ import { SETTINGS } from '../settings';
 import { getProjectResultsFile } from '../store';
 import { EvalHandlerExtra, EvalHandlerResponse, guardPanel } from './types';
 
-export function parsePartialJSONFile(file, maxBytesToRead) {
+export function parsePartialJSONFile(file: string, maxBytesToRead: number) {
   let fd: number;
   try {
-    fd = fs.openSync(file);
+    fd = fs.openSync(file, 'r');
   } catch (e) {
     throw new NoResultError();
   }
@@ -34,7 +34,7 @@ export function parsePartialJSONFile(file, maxBytesToRead) {
     while (!done) {
       const bufferSize = 1024;
       const b = Buffer.alloc(bufferSize);
-      fs.readSync(fd, b, 0, bufferSize);
+      fs.readSync(fd, b);
 
       // To be able to iterate over code points
       let bs = Array.from(b.toString());
@@ -48,13 +48,15 @@ export function parsePartialJSONFile(file, maxBytesToRead) {
 	    break;
 	  case ']':
 	  case '}':
-	    incomplete.pop();
 	    if (f.length + bufferSize >= maxBytesToRead) {
 	      bs = bs.slice(0, i);
 	      // Need to not count additional openings after this
 	      done = true;
 	      break outer;
 	    }
+
+	    // Otherwise, pop it
+	    incomplete.pop();
 	    break;
 	}
       }
@@ -70,9 +72,10 @@ export function parsePartialJSONFile(file, maxBytesToRead) {
       }
     }
 
+    console.log({f});
     const value = JSON.parse(f.toString());
 
-    return { size, value, arrayCount: value.charAt(0) === '[' ? ('More than ' + value.length) : null };
+    return { size, value, arrayCount: f.charAt(0) === '[' ? ('More than ' + value.length) : null };
   } finally {
     fs.closeSync(fd);
   }
