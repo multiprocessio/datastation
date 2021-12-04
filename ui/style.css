@@ -42,8 +42,8 @@ a:hover {
 }
 
 .main-body {
-    flex: 1;
-    overflow-y: auto;
+  flex: 1;
+  overflow-y: auto;
 }
 
 header {
