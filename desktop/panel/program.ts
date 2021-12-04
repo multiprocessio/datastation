@@ -31,7 +31,7 @@ export function parsePartialJSONFile(file, maxBytesToRead) {
     let f = '';
     const incomplete = []
 
-    while (true) {
+    while (!done) {
       const bufferSize = 1024;
       const b = Buffer.alloc(bufferSize);
       fs.readSync(fd, b, 0, bufferSize);
@@ -52,6 +52,7 @@ export function parsePartialJSONFile(file, maxBytesToRead) {
 	    if (f.length + bufferSize >= maxBytesToRead) {
 	      bs = bs.slice(0, i);
 	      // Need to not count additional openings after this
+	      done = true;
 	      break outer;
 	    }
 	    break;
