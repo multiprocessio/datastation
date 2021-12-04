@@ -42,7 +42,8 @@ a:hover {
 }
 
 .main-body {
-  flex: 1;
+    flex: 1;
+    overflow-y: auto;
 }
 
 header {
@@ -342,7 +343,6 @@ label.select select {
   border-bottom: 1px solid #ccc;
   background: white;
   width: 350px;
-  overflow-y: auto;
   background: #fbfbfb;
   padding: 15px;
 }
