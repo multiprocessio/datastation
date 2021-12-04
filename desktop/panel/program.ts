@@ -10,6 +10,73 @@ import { SETTINGS } from '../settings';
 import { getProjectResultsFile } from '../store';
 import { EvalHandlerExtra, EvalHandlerResponse, guardPanel } from './types';
 
+export function parsePartialJSONFile(file, maxBytesToRead) {
+  let fd: number;
+  try {
+    fd = fs.openSync(file);
+  } catch (e) {
+    throw new NoResultError();
+  }
+
+  const { size } = fs.statSync(file);
+
+  if (size < maxBytesToRead) {
+    const f = fs.readFileSync(file).toString();
+    const value = JSON.parse(f);
+    return { size, value, arrayCount: f.charAt(0) === '[' ? value.length : null};
+  }
+
+  try {
+    let done = false;
+    let f = '';
+    const incomplete = []
+
+    while (true) {
+      const b = new Buffer();
+      const bufferSize = 1024;
+      fs.readSync(fd, b, 0, bufferSize);
+      const bs = b.toString();
+
+      let closingIndex = bufferSize;
+      outer:
+      for (let i = 0; i < bs.length; i++) {
+	const c = bs.charAt(i);
+	switch (c) {
+	  case '{':
+	  case '[':
+	    incomplete.push(c);
+	    break;
+	  case ']':
+	  case '}':
+	    incomplete.pop();
+	    closingIndex = i;
+	    if (f.length + bufferSize >= maxBytesToRead) {
+	      // Need to not count additional openings after this
+	      break outer;
+	    }
+	    break;
+	}
+      }
+
+      f += bs.slice(0, closingIndex);
+    }
+
+    while (incomplete.length) {
+      if (incomplete.pop() === '{') {
+	f += '}';
+      } else {
+	f += ']';
+      }
+    }
+
+    const value = JSON.parse(f.toString());
+
+    return { size, value, arrayCount: value.charAt(0) === '[' ? ('More than ' + value.length) : null };
+  } finally {
+    fs.closeSync(fd);
+  }
+}
+
 export async function evalProgram(
   project: ProjectState,
   panel: PanelInfo,
@@ -76,18 +143,14 @@ export async function evalProgram(
         throw new Error(stderr);
       }
 
-      let f: Buffer;
-      try {
-        f = fs.readFileSync(projectResultsFile + ppi.id);
-      } catch (e) {
-        throw new NoResultError();
-      }
-      const value = JSON.parse(f.toString());
+      const { size, value, arrayCount } = parsePartialJSONFile(projectResultsFile + ppi.id, 100_000);
 
       return {
         skipWrite: true,
         value,
         stdout: out,
+	size,
+	arrayCount,
       };
     } catch (e) {
       const resultsFileRE = new RegExp(

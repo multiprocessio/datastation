@@ -7,6 +7,8 @@ export type EvalHandlerResponse = {
   stdout?: string;
   contentType?: string;
   value: any;
+  size?: any;
+  arrayCount?: any;
 };
 
 export type EvalHandlerExtra = {
