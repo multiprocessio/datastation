@@ -58,6 +58,7 @@ export function parsePartialJSONFile(file, maxBytesToRead) {
 	}
       }
 
+      console.log(closingIndex);
       f += bs.slice(0, closingIndex);
     }
 
