@@ -32,8 +32,8 @@ export function parsePartialJSONFile(file, maxBytesToRead) {
     const incomplete = []
 
     while (true) {
-      const b = new Buffer();
       const bufferSize = 1024;
+      const b = Buffer.alloc(bufferSize);
       fs.readSync(fd, b, 0, bufferSize);
       const bs = b.toString();
 
