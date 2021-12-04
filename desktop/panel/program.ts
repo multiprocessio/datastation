@@ -49,8 +49,8 @@ export function parsePartialJSONFile(file, maxBytesToRead) {
 	  case ']':
 	  case '}':
 	    incomplete.pop();
-	    closingIndex = i;
 	    if (f.length + bufferSize >= maxBytesToRead) {
+	      closingIndex = i;
 	      // Need to not count additional openings after this
 	      break outer;
 	    }
@@ -58,7 +58,6 @@ export function parsePartialJSONFile(file, maxBytesToRead) {
 	}
       }
 
-      console.log(closingIndex);
       f += bs.slice(0, closingIndex);
     }
 
