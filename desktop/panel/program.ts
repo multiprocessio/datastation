@@ -72,7 +72,6 @@ export function parsePartialJSONFile(file: string, maxBytesToRead: number) {
       }
     }
 
-    console.log({f});
     const value = JSON.parse(f.toString());
 
     return { size, value, arrayCount: f.charAt(0) === '[' ? ('More than ' + value.length) : null };

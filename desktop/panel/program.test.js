@@ -183,7 +183,7 @@ describe('parsePartialJSONFile', function parsePartialJSONFileTest() {
       fs.writeFileSync(f.path, whole);
       const { value, size } = parsePartialJSONFile(f.path, 3);
       expect(size).toBe(whole.length);
-      expect(value).toStrictEqual([{ "foo": "bar" }]);
+      expect(value).toStrictEqual([{ foo: 'bar' }]);
     } finally {
       f.cleanup();
     }
