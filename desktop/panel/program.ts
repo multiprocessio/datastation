@@ -45,18 +45,23 @@ export function parsePartialJSONFile(file: string, maxBytesToRead: number) {
       let bs = Array.from(b.toString());
       outer: for (let i = 0; i < bs.length; i++) {
         const c = bs[i];
-	if (c !== '"' && inString) {
-	  continue;
-	}
+        if (c !== '"' && inString) {
+          continue;
+        }
 
-	switch (c) {
-	  case '"':
-	    const previous = (i + bs.length) === 0 ? '' : (i > 0 ? bs[i-1] : f.charAt(f.length-1));
-	    const isEscaped = previous === '\\';
-	    if (!isEscaped) {
-	      inString = !inString;
-	    }
-	    break;
+        switch (c) {
+          case '"':
+            const previous =
+              i + bs.length === 0
+                ? ''
+                : i > 0
+                ? bs[i - 1]
+                : f.charAt(f.length - 1);
+            const isEscaped = previous === '\\';
+            if (!isEscaped) {
+              inString = !inString;
+            }
+            break;
           case '{':
           case '[':
             incomplete.push(c);
@@ -78,7 +83,7 @@ export function parsePartialJSONFile(file: string, maxBytesToRead: number) {
 
       f += bs.join('');
       if (bytesRead < bufferSize) {
-	break;
+        break;
       }
     }
 

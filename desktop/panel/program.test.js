@@ -193,13 +193,13 @@ describe('parsePartialJSONFile', function parsePartialJSONFileTest() {
     for (const c of ['{', '}', '[', ']']) {
       const f = await makeTmpFile();
       try {
-	const whole = `[{"foo": "${c}bar"}, {"big": "bad"}]`;
-	fs.writeFileSync(f.path, whole);
-	const { value, size } = parsePartialJSONFile(f.path, 3);
-	expect(size).toBe(whole.length);
-	expect(value).toStrictEqual([{ foo: `${c}bar` }]);
+        const whole = `[{"foo": "${c}bar"}, {"big": "bad"}]`;
+        fs.writeFileSync(f.path, whole);
+        const { value, size } = parsePartialJSONFile(f.path, 3);
+        expect(size).toBe(whole.length);
+        expect(value).toStrictEqual([{ foo: `${c}bar` }]);
       } finally {
-	f.cleanup();
+        f.cleanup();
       }
     }
   });
