@@ -205,8 +205,13 @@ export const makeEvalHandler = (
       preview: preview(res.value),
       shape: s,
       value: res.returnValue ? res.value : null,
-      size: json.length,
-      arrayCount: s.kind === 'array' ? (res.value || []).length : null,
+      size: res.size === undefined ? json.length : res.size,
+      arrayCount:
+        res.arrayCount === undefined
+          ? s.kind === 'array'
+            ? (res.value || []).length
+            : null
+          : res.arrayCount,
       contentType: res.contentType || 'application/json',
     };
   },

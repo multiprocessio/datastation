@@ -38,7 +38,21 @@ function DM_getPanel(i) {
 }
 function DM_setPanel(v) {
   const fs = require('fs');
-  fs.writeFileSync('${resultsFile + panelId}', JSON.stringify(v));
+  const fd = fs.openSync('${resultsFile + panelId}', 'w');
+  if (Array.isArray(v)) {
+    fs.writeSync(fd, '[');
+    for (let i = 0; i < v.length; i++) {
+      const row = v[i];
+      let rowJSON = JSON.stringify(row);
+      if (i < v.length - 1) {
+        rowJSON += ',';
+      }
+      fs.writeSync(fd, rowJSON);
+    }
+    fs.writeSync(fd, ']');
+  } else {
+    fs.writeSync(fd, JSON.stringify(v));
+  }
 }`;
 }
 

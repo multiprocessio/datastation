@@ -43,6 +43,7 @@ a:hover {
 
 .main-body {
   flex: 1;
+  overflow-y: auto;
 }
 
 header {
@@ -342,7 +343,6 @@ label.select select {
   border-bottom: 1px solid #ccc;
   background: white;
   width: 350px;
-  overflow-y: auto;
   background: #fbfbfb;
   padding: 15px;
 }
@@ -812,7 +812,7 @@ th {
 }
 
 tbody tr:nth-child(odd) {
-  background: #f9f0ff;
+  background: #f2f2f7;
 }
 
 .confirm-wrapper {
@@ -886,6 +886,10 @@ body.dark .connector--expanded {
 
 body.dark .button:hover {
   background: #383852;
+}
+
+body.dark tbody tr:nth-child(odd) {
+  background: #31314e;
 }
 /* End cssplus break */
 
