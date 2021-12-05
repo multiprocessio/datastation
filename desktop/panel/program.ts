@@ -34,17 +34,29 @@ export function parsePartialJSONFile(file: string, maxBytesToRead: number) {
     let done = false;
     let f = '';
     const incomplete = [];
+    let inString = false;
 
     while (!done) {
       const bufferSize = 1024;
       const b = Buffer.alloc(bufferSize);
-      fs.readSync(fd, b);
+      const bytesRead = fs.readSync(fd, b);
 
       // To be able to iterate over code points
       let bs = Array.from(b.toString());
       outer: for (let i = 0; i < bs.length; i++) {
         const c = bs[i];
-        switch (c) {
+	if (c !== '"' && inString) {
+	  continue;
+	}
+
+	switch (c) {
+	  case '"':
+	    const previous = (i + bs.length) === 0 ? '' : (i > 0 ? bs[i-1] : f.charAt(f.length-1));
+	    const isEscaped = previous === '\\';
+	    if (!isEscaped) {
+	      inString = !inString;
+	    }
+	    break;
           case '{':
           case '[':
             incomplete.push(c);
@@ -65,6 +77,9 @@ export function parsePartialJSONFile(file: string, maxBytesToRead: number) {
       }
 
       f += bs.join('');
+      if (bytesRead < bufferSize) {
+	break;
+      }
     }
 
     while (incomplete.length) {
@@ -75,7 +90,7 @@ export function parsePartialJSONFile(file: string, maxBytesToRead: number) {
       }
     }
 
-    const value = JSON.parse(f.toString());
+    const value = JSON.parse(f);
 
     return {
       size,
