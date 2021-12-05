@@ -38,18 +38,18 @@ function DM_getPanel(i) {
 }
 function DM_setPanel(v) {
   const fs = require('fs');
-  const fd = fs.openFileSync('${resultsFile + panelId}', 'w');
+  const fd = fs.openSync('${resultsFile + panelId}', 'w');
   if (Array.isArray(v)) {
-    fd.writeSync(fd, '[');
+    fs.writeSync(fd, '[');
     for (let i = 0; i < v.length; i++) {
       const row = v[i];
       let rowJSON = JSON.stringify(row);
       if (i < v.length - 1) {
         rowJSON += ',';
       }
-      fd.writeSync(rowJSON);
+      fs.writeSync(rowJSON);
     }
-    fd.writeSync(fd, ']');
+    fs.writeSync(fd, ']');
   } else {
     fs.writeSync(fd, JSON.stringify(v));
   }
