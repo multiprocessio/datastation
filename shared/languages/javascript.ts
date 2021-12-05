@@ -47,7 +47,7 @@ function DM_setPanel(v) {
       if (i < v.length - 1) {
         rowJSON += ',';
       }
-      fs.writeSync(rowJSON);
+      fs.writeSync(fd, rowJSON);
     }
     fs.writeSync(fd, ']');
   } else {
