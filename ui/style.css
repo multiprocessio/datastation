@@ -964,7 +964,8 @@ body.dark {
     background: #181824;
   }
 
-  .ace_layer.ace_marker-layer .ace_active-line {
+  .ace_layer.ace_marker-layer .ace_active-line,
+  .ace_layer.ace_marker-layer .ace_selection {
     background: rgba(0, 0, 0, 0.5);
   }
 

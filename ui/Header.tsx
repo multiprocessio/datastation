@@ -63,10 +63,10 @@ export function Header() {
             <span>{projectId}</span>
           )}
           <Toggle
-            label={settings.theme === 'light' ? 'Light Mode' : 'Dark Mode'}
-            value={settings.theme !== 'light'}
+            label={settings.theme !== 'dark' ? 'Light Mode' : 'Dark Mode'}
+            value={settings.theme === 'dark'}
             onChange={function handleLightModeToggle() {
-              settings.theme = settings.theme === 'light' ? 'dark' : 'light';
+              settings.theme = settings.theme === 'dark' ? 'light' : 'dark';
               setSettings(settings);
             }}
           />
