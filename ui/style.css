@@ -29,6 +29,7 @@ a:hover {
 .app--desktop,
 .app--server {
   border-top: 1px solid #ccc;
+  height: calc(100% - 1px);
 }
 
 .app main {
@@ -345,6 +346,8 @@ label.select select {
   width: 350px;
   background: #fbfbfb;
   padding: 15px;
+  max-height: 100%;
+  overflow-y: hidden;
 }
 
 .sidebar--collapsed {
@@ -896,6 +899,12 @@ body.dark tbody tr:nth-child(odd) {
 body.dark {
   background: #29293c;
   color: white;
+
+  .app--desktop,
+  .app--server {
+    border: 0;
+    height: 100%;
+  }
 
   .alert {
     color: black;

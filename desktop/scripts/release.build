@@ -6,5 +6,7 @@ prepend "window.DS_CONFIG_MODE='desktop';" build/ui.js
 prepend "window.DS_CONFIG_VERSION='{arg0}';" build/ui.js
 prepend "window.DS_CONFIG_VERSION='{arg0}';" build/desktop_runner.js
 prepend "global.DS_CONFIG_VERSION='{arg0}';" build/desktop.js
-yarn electron-packager --asar --icon=icon.png --overwrite --out=releases --build-version={arg0} --app-version={arg0} . "DataStation Community Edition"
-zip -9 -r releases/datastation-{os}-{arch}-{arg0}.zip "releases/DataStation Community Edition-{os}-{arch}"
+cp icon.png build/icon.png
+cp icon.ico build/icon.ico
+yarn electron-packager --asar --overwrite --icon=build/icon.png --out=releases --build-version={arg0} --app-version={arg0} . "DataStation Community Edition"
+# zip -9 -r releases/datastation-{os}-{arch}-{arg0}.zip "releases/DataStation Community Edition-{os}-{arch}"
