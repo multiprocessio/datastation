@@ -45,6 +45,7 @@ a:hover {
 .main-body {
   flex: 1;
   overflow-y: auto;
+  min-width: 900px;
 }
 
 header {
@@ -343,7 +344,7 @@ label.select select {
   border-right: 1px solid #ccc;
   border-bottom: 1px solid #ccc;
   background: white;
-  width: 350px;
+  min-width: 350px;
   background: #fbfbfb;
   padding: 15px;
   max-height: 100%;
@@ -351,7 +352,7 @@ label.select select {
 }
 
 .sidebar--collapsed {
-  width: initial;
+  min-width: initial;
 }
 
 .connector-group {
@@ -435,7 +436,6 @@ label.select select {
 }
 
 .panel {
-  min-width: 900px;
   background: white;
   border: 1px solid #ccc;
   margin: 15px;
@@ -1027,10 +1027,10 @@ body.dark {
     background: #999;
   }
 
-  .sidebar {
+  .sidebar,
+  .project-name {
     background: #31314e;
-    border-right-color: black;
-    border-bottom-color: black;
+    border-color: black;
   }
 
   .server,
@@ -1044,5 +1044,9 @@ body.dark {
     color: white;
     border-color: black;
     box-shadow: 0 1px 3px 0 #111;
+  }
+
+  .project-existing {
+    border-color: black;
   }
 }
