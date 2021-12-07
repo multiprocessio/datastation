@@ -7,6 +7,8 @@ You'll also need a C++ compiler for some native Node.js
 packages. Install MSVC++ (Visual Studio) on Windows or XCode on
 macOS. On Linux install gcc or clang.
 
+You'll need Go 1.17 or newer.
+
 If you want to have hot-reloading, install
 [fswatch](https://github.com/emcrisostomo/fswatch).
 
