@@ -12,7 +12,7 @@ const {
 const { makeEvalHandler } = require('./eval');
 const { fetchResultsHandler } = require('./columns');
 
-for (const runner of [undefined, 'build/go_desktop_runner']) {
+for (const runner of [undefined, { go: 'build/go_desktop_runner' }]) {
   test(`store and retrieve literal${
     runner ? 'using ' + runner : ''
   }, specific columns`, async () => {
@@ -25,7 +25,6 @@ for (const runner of [undefined, 'build/go_desktop_runner']) {
 
     const id = 'my-uuid';
 
-    console.log('PHIL!', { projectName: tmp.path });
     try {
       const projectState = {
         ...new ProjectState(),

@@ -153,7 +153,6 @@ export async function evalInSubprocess(
 
           // TODO: fix cancell
           //if (code === 1 || code === null) {
-          //  console.log('PHIL!!!!!!', { code, stderr })
           //  reject(new Cancelled());
           //}
 

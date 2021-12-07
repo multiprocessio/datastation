@@ -86,10 +86,10 @@ for (const t of TESTS) {
     // First pass runs in process, second pass runs in subprocess
     for (const subprocessName of [
       undefined,
-      path.join(CODE_ROOT, 'build', 'desktop_runner.js'),
-      path.join(CODE_ROOT, 'build', 'go_desktop_runner'),
+      { node: path.join(CODE_ROOT, 'build', 'desktop_runner.js') },
+      { go: path.join(CODE_ROOT, 'build', 'go_desktop_runner') },
     ]) {
-      if (t.type === 'sql' && subprocessName?.endsWith('go_desktop_runner')) {
+      if (t.type === 'sql' && subprocessName?.go) {
         continue;
       }
 
