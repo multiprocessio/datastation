@@ -2,7 +2,7 @@ import { app, ipcMain } from 'electron';
 import path from 'path';
 import { APP_NAME, DEBUG, VERSION } from '../shared/constants';
 import log from '../shared/log';
-import { IS_DESKTOP_RUNNER, CODE_ROOT } from './constants';
+import { CODE_ROOT, IS_DESKTOP_RUNNER } from './constants';
 import { configureLogger } from './log';
 import { openWindow } from './project';
 import { registerRPCHandlers } from './rpc';
