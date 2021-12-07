@@ -2,7 +2,7 @@ import { app, ipcMain } from 'electron';
 import path from 'path';
 import { APP_NAME, DEBUG, VERSION } from '../shared/constants';
 import log from '../shared/log';
-import { IS_DESKTOP_RUNNER } from './constants';
+import { IS_DESKTOP_RUNNER, CODE_ROOT } from './constants';
 import { configureLogger } from './log';
 import { openWindow } from './project';
 import { registerRPCHandlers } from './rpc';
@@ -28,7 +28,7 @@ function main() {
       const { handlers, project } = initialize({
         subprocess: {
           node: path.join(__dirname, 'desktop_runner.js'),
-          go: path.join(__dirname, 'go_desktop_runner'),
+          go: path.join(CODE_ROOT, 'build', 'go_desktop_runner'),
         },
         additionalHandlers: storeHandlers,
       });

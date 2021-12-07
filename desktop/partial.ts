@@ -9,6 +9,7 @@ export function parsePartialJSONFile(
 ) {
   let fd: number;
   try {
+    console.log(file);
     fd = fs.openSync(file, 'r');
   } catch (e) {
     throw new NoResultError();

@@ -7,7 +7,14 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strconv"
 )
+
+type UnicodeEscape string
+
+func (ue UnicodeEscape) MarshalJSON() ([]byte, error) {
+	return []byte(strconv.QuoteToASCII(string(ue))), nil
+}
 
 func transformCSV(in io.Reader, out string) error {
 	r := csv.NewReader(in)
@@ -44,9 +51,9 @@ func transformCSV(in io.Reader, out string) error {
 			continue
 		}
 
-		row := map[string]string{}
+		row := map[string]UnicodeEscape{}
 		for i, field := range fields {
-			row[field] = record[i]
+			row[field] = UnicodeEscape(record[i])
 		}
 
 		encoder := json.NewEncoder(w)
@@ -112,9 +119,9 @@ func evalFilePanel(project *ProjectState, pageIndex int, panel *PanelInfo) error
 	assumedType := panel.File.ContentTypeInfo.Type
 	if assumedType == "" {
 		switch filepath.Ext(panel.File.Name) {
-		case "csv":
+		case ".csv":
 			assumedType = "text/csv"
-		case "json":
+		case ".json":
 			assumedType = "application/json"
 		}
 	}

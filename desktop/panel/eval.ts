@@ -118,6 +118,7 @@ export async function evalInSubprocess(
       args.shift();
     }
 
+    log.info(`Launching "${base} ${args.join(' ')}"`);
     const child = execFile(base, args, {
       windowsHide: true,
     });

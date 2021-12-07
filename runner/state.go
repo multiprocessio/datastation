@@ -5,7 +5,7 @@ import (
 )
 
 type PanelResult struct {
-	Exception   *string        `json:"exception"`
+	Exception   interface{}    `json:"exception"`
 	Value       *[]interface{} `json:"value"`
 	Preview     string         `json:"preview"`
 	Stdout      string         `json:"stdout"`

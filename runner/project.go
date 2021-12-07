@@ -7,6 +7,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 )
 
 var home, _ = os.UserHomeDir()
@@ -29,7 +30,7 @@ func readJSONFileInto(file string, into interface{}) error {
 }
 
 func getProjectFile(projectId string) string {
-	if projectId[0] == '/' {
+	if filepath.IsAbs(projectId) {
 		return projectId
 	}
 
@@ -58,7 +59,12 @@ func getProjectPanel(projectId, panelId string) (*ProjectState, int, *PanelInfo,
 }
 
 func getProjectResultsFile(projectId string) string {
-	return path.Join(base, "."+filepath.Base(projectId)+".results")
+	project := filepath.Base(projectId)
+	// Drop .dsproj from project id
+	if strings.HasSuffix(project, ".dsproj") {
+		project = project[0:len(project) - len(".dsproj")]
+	}
+	return strings.ReplaceAll(path.Join(base, "."+project+".results"), "\\", "/")
 }
 
 func getPanelResultsFile(projectId string, panelId string) string {

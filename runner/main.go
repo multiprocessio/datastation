@@ -35,7 +35,11 @@ func fatal(msg string, args ...interface{}) {
 	os.Exit(2)
 }
 
+const VERSION = "development"
+const APP_NAME = "DataStation Runner (Go)"
+
 func main() {
+	log.Println(APP_NAME + " " + VERSION)
 	projectId := ""
 	panelId := ""
 	panelMetaOut := ""

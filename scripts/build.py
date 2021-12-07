@@ -28,6 +28,11 @@ BUILTIN_VARIABLES = {
         'darwin': '.app',
         'windows': '.exe',
     }[platform.system().lower()],
+    'required_ext': {
+        'linux': '',
+        'darwin': '',
+        'windows': '.exe',
+    }[platform.system().lower()]
 }
 for i, arg in enumerate(sys.argv[2:]):
     BUILTIN_VARIABLES['arg'+str(i)] = arg
