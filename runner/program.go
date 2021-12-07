@@ -30,7 +30,21 @@ func getIdMapJson(page ProjectPage) string {
 	return string(bts)
 }
 
+func evalProgramSQLPanel(project *ProjectState, pageIndex int, panel *PanelInfo) error {
+	tmp, err := os.CreateTemp("", "sql-program-panel-")
+	if err != nil {
+		return err
+	}
+	defer os.Remove(tmp.Name())
+
+	return nil
+}
+
 func evalProgramPanel(project *ProjectState, pageIndex int, panel *PanelInfo) error {
+	if panel.Program.Type == "sql" {
+		return evalProgramSQLPanel(project, pageIndex, panel)
+	}
+
 	var p ProgramEvalInfo
 	err := readJSONFileInto(path.Join("shared", "languages", string(panel.Program.Type)+".json"), &p)
 	if err != nil {
