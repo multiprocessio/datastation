@@ -120,15 +120,15 @@ export function DatabasePanelDetails({
           {['elasticsearch', 'prometheus'].includes(
             connector.database.type
           ) && (
-              <TimeSeriesRange
-                range={panel.database.range}
-                hideField={['prometheus'].includes(connector.database.type)}
-                updateRange={(r: TimeSeriesRangeT) => {
-                  panel.database.range = r;
-                  updatePanel(panel);
-                }}
-              />
-            )}
+            <TimeSeriesRange
+              range={panel.database.range}
+              hideField={['prometheus'].includes(connector.database.type)}
+              updateRange={(r: TimeSeriesRangeT) => {
+                panel.database.range = r;
+                updatePanel(panel);
+              }}
+            />
+          )}
           {connector.database.type === 'prometheus' && (
             <Input
               label="Step (seconds)"
