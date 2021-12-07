@@ -2,8 +2,8 @@ package main
 
 import (
 	"encoding/json"
-	"os"
 	"fmt"
+	"os"
 )
 
 func eval(panelId, projectId string) (*PanelResult, error) {
@@ -15,6 +15,8 @@ func eval(panelId, projectId string) (*PanelResult, error) {
 	switch panel.Type {
 	case FilePanel:
 		return evalFilePanel(project, pageIndex, panel)
+	case LiteralPanel:
+		return evalLiteralPanel(project, pageIndex, panel)
 	case ProgramPanel:
 		return evalProgramPanel(project, pageIndex, panel)
 	}

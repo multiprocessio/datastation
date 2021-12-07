@@ -1,5 +1,5 @@
 package main
 
-type Shape struct {}
+type Shape struct{}
 
 var defaultShape = Shape{}

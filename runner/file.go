@@ -1,22 +1,16 @@
 package main
 
 import (
-	"os"
-	"io"
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
+	"io"
+	"os"
 	"path/filepath"
 )
 
-func transformCSV(in, out string) (*PanelResult, error) {
-	f, err := os.Open(in)
-	if err != nil {
-		return nil, err
-	}
-	defer f.Close()
-
-	r := csv.NewReader(f)
+func transformCSV(in io.Reader, out string) (*PanelResult, error) {
+	r := csv.NewReader(in)
 
 	w, err := os.OpenFile(out, os.O_WRONLY|os.O_CREATE, os.ModePerm)
 	if err != nil {
@@ -72,21 +66,35 @@ func transformCSV(in, out string) (*PanelResult, error) {
 	}, nil
 }
 
-func transformJSON(in, out string) (*PanelResult, error) {
-	r, err := os.Open(in)
+func transformCSVFile(in, out string) (*PanelResult, error) {
+	f, err := os.Open(in)
 	if err != nil {
 		return nil, err
 	}
-	defer r.Close()
+	defer f.Close()
 
+	return transformCSV(f, out)
+}
+
+func transformJSON(in io.Reader, out string) (*PanelResult, error) {
 	w, err := os.OpenFile(out, os.O_WRONLY|os.O_CREATE, os.ModePerm)
 	if err != nil {
 		return nil, err
 	}
 	defer w.Close()
 
-	_, err = w.ReadFrom(r)
+	_, err = w.ReadFrom(in)
 	return &PanelResult{}, err
+}
+
+func transformJSONFile(in, out string) (*PanelResult, error) {
+	r, err := os.Open(in)
+	if err != nil {
+		return nil, err
+	}
+	defer r.Close()
+
+	return transformJSON(r, out)
 }
 
 func evalFilePanel(project *ProjectState, pageIndex int, panel *PanelInfo) (*PanelResult, error) {
@@ -108,9 +116,9 @@ func evalFilePanel(project *ProjectState, pageIndex int, panel *PanelInfo) (*Pan
 
 	switch assumedType {
 	case "application/json":
-		return transformJSON(panel.File.Name, out)
+		return transformJSONFile(panel.File.Name, out)
 	case "text/csv":
-		return transformCSV(panel.File.Name, out)
+		return transformCSVFile(panel.File.Name, out)
 	}
 
 	return nil, fmt.Errorf("Unsupported type " + assumedType)

@@ -10,10 +10,10 @@ type PanelResult struct {
 	Preview     string         `json:"preview"`
 	Stdout      string         `json:"stdout"`
 	Shape       Shape          `json:"shape"`
-	ArrayCount  *float64        `json:"float64"`
-	Size        float64         `json:"size"`
+	ArrayCount  *float64       `json:"float64"`
+	Size        float64        `json:"size"`
 	ContentType string         `json:"contentType"`
-	Elapsed     *float64        `json:"elapsed"`
+	Elapsed     *float64       `json:"elapsed"`
 }
 
 var defaultPanelResult = PanelResult{
@@ -43,7 +43,7 @@ const (
 type ServerInfo struct {
 	Name               string         `json:"name"`
 	Address            string         `json:"address"`
-	Port               float64         `json:"port"`
+	Port               float64        `json:"port"`
 	Type               ServerInfoType `json:"type"`
 	Username           string         `json:"username"`
 	Password_encrypt   Encrypt        `json:"password_encrypt"`
@@ -94,12 +94,13 @@ type PanelInfo struct {
 }
 
 type SupportedLanguages string
+
 const (
-	Python SupportedLanguages = "python"
-	JavaScript = "javascript"
-	Ruby = "ruby"
-	R = "r"
-	Julia = "julia"
+	Python     SupportedLanguages = "python"
+	JavaScript                    = "javascript"
+	Ruby                          = "ruby"
+	R                             = "r"
+	Julia                         = "julia"
 )
 
 type ProgramPanelInfo struct {
@@ -122,10 +123,10 @@ type LiteralPanelInfo struct {
 }
 
 type ProjectPage struct {
-	Panels    []PanelInfo `json:"panels"`
+	Panels    []PanelInfo   `json:"panels"`
 	Schedules []interface{} `json:"schedules"`
-	Name      string      `json:"name"`
-	Id        string      `json:"id"`
+	Name      string        `json:"name"`
+	Id        string        `json:"id"`
 }
 
 type ProjectState struct {
