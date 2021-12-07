@@ -9,6 +9,8 @@ import { file as makeTmpFile } from 'tmp-promise';
 import log from '../../shared/log';
 import { PanelBody } from '../../shared/rpc';
 import {
+  ConnectorInfo,
+  DatabaseConnectorInfo,
   DatabasePanelInfo,
   FilePanelInfo,
   LiteralPanelInfo,
@@ -63,7 +65,7 @@ function killAllByPanelId(panelId: string) {
   }
 }
 
-function canUseGoRunner(panel: PanelInfo) {
+function canUseGoRunner(panel: PanelInfo, connectors: ConnectorInfo[]) {
   if (panel.serverId) {
     return false;
   }
@@ -76,11 +78,15 @@ function canUseGoRunner(panel: PanelInfo) {
     'sqlserver',
     'clickhouse',
   ];
-  if (
-    panel.type === 'database' &&
-    supportedDatabases.includes((panel as DatabasePanelInfo).database.type)
-  ) {
-    return true;
+  if (panel.type === 'database') {
+    const dp = panel as DatabasePanelInfo;
+    for (const c of connectors) {
+      if (c.id === dp.database.connectorId) {
+        const dc = c as DatabaseConnectorInfo;
+        return supportedDatabases.includes(dc.database.type);
+      }
+    }
+    return false;
   }
 
   if (
@@ -114,7 +120,8 @@ export async function evalInSubprocess(
     go?: string;
   },
   projectName: string,
-  panel: PanelInfo
+  panel: PanelInfo,
+  connectors: ConnectorInfo[]
 ) {
   const tmp = await makeTmpFile({ prefix: 'resultmeta-' });
   let pid = 0;
@@ -133,7 +140,7 @@ export async function evalInSubprocess(
       PANEL_META_FLAG,
       tmp.path,
     ];
-    if (subprocess.go && canUseGoRunner(panel)) {
+    if (subprocess.go && canUseGoRunner(panel, connectors)) {
       base = subprocess.go;
       args.shift();
     }
@@ -227,7 +234,12 @@ export const makeEvalHandler = (subprocessEval?: {
     );
 
     if (subprocessEval) {
-      return evalInSubprocess(subprocessEval, project.projectName, panel);
+      return evalInSubprocess(
+        subprocessEval,
+        project.projectName,
+        panel,
+        project.connectors
+      );
     }
 
     const idMap: Record<string | number, string> = {};
