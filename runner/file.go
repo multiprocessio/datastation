@@ -23,7 +23,7 @@ func transformCSV(in io.Reader, out string) error {
 		return err
 	}
 
-	elements := 0
+	isHeader := true
 	var fields []string
 	for {
 		record, err := r.Read()
@@ -36,14 +36,14 @@ func transformCSV(in io.Reader, out string) error {
 			return err
 		}
 
-		if elements == 0 {
+		if isHeader {
 			for _, field := range record {
 				fields = append(fields, field)
 			}
+			isHeader = false
 			continue
 		}
 
-		elements += 1
 		row := map[string]string{}
 		for i, field := range fields {
 			row[field] = record[i]
@@ -54,9 +54,22 @@ func transformCSV(in io.Reader, out string) error {
 		if err != nil {
 			return err
 		}
+
+		w.Write([]byte(","))
 	}
 
-	_, err = w.Write([]byte("]"))
+	// Find current offset
+	lastChar, err := w.Seek(0, io.SeekCurrent)
+	if err != nil {
+		return err
+	}
+
+	if lastChar > 1 {
+		// Overwrite the last comma
+		lastChar = lastChar - 1
+	}
+
+	_, err = w.WriteAt([]byte("]"), lastChar)
 	return err
 }
 

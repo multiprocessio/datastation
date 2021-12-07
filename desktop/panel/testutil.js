@@ -43,6 +43,7 @@ exports.withSavedPanels = async function (
     ],
     connectors: connectors || [],
   };
+  fs.writeFileSync(tmp.path, JSON.stringify(project));
 
   try {
     await updateProjectHandler.handler(project.projectName, project);

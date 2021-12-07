@@ -133,13 +133,12 @@ export async function evalInSubprocess(
     });
 
     const resultMeta = fs.readFileSync(tmp.path).toString();
-    const meta = JSON.parse(resultMeta);
-    if (meta.size === null || meta.size === undefined) {
+    if (!resultMeta) {
       const projectResultsFile = getProjectResultsFile(projectName);
       return parsePartialJSONFile(projectResultsFile + panelId);
     }
 
-    return meta;
+    return JSON.parse(resultMeta);
   } finally {
     try {
       if (pid) {

@@ -18,6 +18,7 @@ export function parsePartialJSONFile(
 
   if (size < maxBytesToRead) {
     const f = fs.readFileSync(file).toString();
+    console.log(f);
     const value = JSON.parse(f);
     return {
       size,
