@@ -9,6 +9,7 @@ import { file as makeTmpFile } from 'tmp-promise';
 import log from '../../shared/log';
 import { PanelBody } from '../../shared/rpc';
 import {
+  DatabasePanelInfo,
   FilePanelInfo,
   LiteralPanelInfo,
   PanelInfo,
