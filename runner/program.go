@@ -61,7 +61,13 @@ func evalProgramPanel(project *ProjectState, pageIndex int, panel *PanelInfo) er
 	path := p.DefaultPath
 
 	cmd := exec.Command(path, tmp.Name())
-	out, err := cmd.CombinedOutput()
-	os.Stdout.Write(out)
-	return err
+	cmd.Stderr = os.Stderr
+	cmd.Stdout = os.Stdout
+
+	err = cmd.Start()
+	if err != nil {
+		return err
+	}
+
+	return cmd.Wait()
 }
