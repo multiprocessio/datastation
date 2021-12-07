@@ -169,7 +169,7 @@ export class App {
 export async function init(app: App, withSubprocess = true) {
   const { handlers } = initialize({
     subprocess: withSubprocess
-      ? path.join(__dirname, 'server_runner.js')
+      ? { node: path.join(__dirname, 'server_runner.js') }
       : undefined,
     additionalHandlers: app.projectHandlers,
   });

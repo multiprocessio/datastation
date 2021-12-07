@@ -9,11 +9,15 @@ import { file as makeTmpFile } from 'tmp-promise';
 import log from '../../shared/log';
 import { PanelBody } from '../../shared/rpc';
 import {
+  FilePanelInfo,
+  LiteralPanelInfo,
   PanelInfo,
   PanelInfoType,
   PanelResult,
+  ProgramPanelInfo,
   ProjectState,
 } from '../../shared/state';
+import { getMimeType } from '../../shared/text';
 import { DSPROJ_FLAG, PANEL_FLAG, PANEL_META_FLAG } from '../constants';
 import { parsePartialJSONFile } from '../partial';
 import { Dispatch, RPCHandler } from '../rpc';
@@ -58,29 +62,60 @@ function killAllByPanelId(panelId: string) {
   }
 }
 
+function canUseGoRunner(panel: PanelInfo) {
+  if (
+    panel.type === 'program' &&
+    (panel as ProgramPanelInfo).program.type !== 'sql'
+  ) {
+    return true;
+  }
+
+  const fileLike = panel.type === 'literal' || panel.type === 'file';
+  if (!fileLike) {
+    return false;
+  }
+
+  const supportedTypes = ['text/csv', 'application/json'];
+  let mimetype = '';
+  if (panel.type === 'literal') {
+    const lp = panel as LiteralPanelInfo;
+    mimetype = getMimeType(lp.literal.contentTypeInfo, '');
+  } else {
+    const fp = panel as FilePanelInfo;
+    mimetype = getMimeType(fp.file.contentTypeInfo, fp.file.name);
+  }
+
+  return supportedTypes.includes(mimetype);
+}
+
 export async function evalInSubprocess(
-  subprocess: string,
+  subprocess: {
+    node: string;
+    go?: string;
+  },
   projectName: string,
-  panelId: string
+  panel: PanelInfo
 ) {
   const tmp = await makeTmpFile({ prefix: 'resultmeta-' });
   let pid = 0;
 
   try {
     // This means only one user can run a panel at a time
-    killAllByPanelId(panelId);
+    killAllByPanelId(panel.id);
 
-    const base = subprocess.endsWith('.js') ? process.argv[0] : subprocess;
+    let base = process.argv[0];
     const args = [
+      subprocess.node,
       DSPROJ_FLAG,
       projectName,
       PANEL_FLAG,
-      panelId,
+      panel.id,
       PANEL_META_FLAG,
       tmp.path,
     ];
-    if (base !== subprocess) {
-      args.unshift(subprocess);
+    if (subprocess.go && canUseGoRunner(panel)) {
+      base = subprocess.go;
+      args.shift();
     }
 
     const child = execFile(base, args, {
@@ -88,10 +123,10 @@ export async function evalInSubprocess(
     });
 
     pid = child.pid;
-    if (!runningProcesses[panelId]) {
-      runningProcesses[panelId] = new Set();
+    if (!runningProcesses[panel.id]) {
+      runningProcesses[panel.id] = new Set();
     }
-    runningProcesses[panelId].add(pid);
+    runningProcesses[panel.id].add(pid);
 
     let stderr = '';
     child.stderr.on('data', (data) => {
@@ -135,14 +170,14 @@ export async function evalInSubprocess(
     const resultMeta = fs.readFileSync(tmp.path).toString();
     if (!resultMeta) {
       const projectResultsFile = getProjectResultsFile(projectName);
-      return parsePartialJSONFile(projectResultsFile + panelId);
+      return parsePartialJSONFile(projectResultsFile + panel.id);
     }
 
     return JSON.parse(resultMeta);
   } finally {
     try {
       if (pid) {
-        runningProcesses[panelId].delete(pid);
+        runningProcesses[panel.id].delete(pid);
       }
 
       tmp.cleanup();
@@ -152,9 +187,10 @@ export async function evalInSubprocess(
   }
 }
 
-export const makeEvalHandler = (
-  subprocessEval?: string
-): RPCHandler<PanelBody, PanelResult> => ({
+export const makeEvalHandler = (subprocessEval?: {
+  node: string;
+  go?: string;
+}): RPCHandler<PanelBody, PanelResult> => ({
   resource: 'eval',
   handler: async function (
     projectId: string,
@@ -171,11 +207,7 @@ export const makeEvalHandler = (
     );
 
     if (subprocessEval) {
-      return evalInSubprocess(
-        subprocessEval,
-        project.projectName,
-        body.panelId
-      );
+      return evalInSubprocess(subprocessEval, project.projectName, panel);
     }
 
     const idMap: Record<string | number, string> = {};
