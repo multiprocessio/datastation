@@ -67,7 +67,7 @@ function canUseGoRunner(panel: PanelInfo) {
     return false;
   }
 
-  const supportedDatabases = ['postgres', 'sqlite', 'mysql'];
+  const supportedDatabases = ['postgres', 'sqlite', 'mysql', 'oracle', 'sqlserver', 'clickhouse'];
   if (panel.type === 'database' &&
     supportedDatabases.includes((panel as DatabasePanelInfo).database.type)) {
     return true;
