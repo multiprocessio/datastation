@@ -57,7 +57,10 @@ func getProjectPanel(projectId, panelId string) (*ProjectState, int, *PanelInfo,
 	return nil, 0, nil, fmt.Errorf("Panel not found")
 }
 
-func getPanelResultsFile(projectId string, panel *PanelInfo) string {
-	projectId = filepath.Base(projectId)
-	return path.Join(base, "."+projectId+".results"+panel.Id)
+func getProjectResultsFile(projectId string) string {
+	return path.Join(base, "."+filepath.Base(projectId)+".results")
+}
+
+func getPanelResultsFile(projectId string, panelId string) string {
+	return getProjectResultsFile(projectId) + panelId
 }

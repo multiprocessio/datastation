@@ -123,7 +123,7 @@ func evalFilePanel(project *ProjectState, pageIndex int, panel *PanelInfo) error
 		return fmt.Errorf("Unknown type")
 	}
 
-	out := getPanelResultsFile(project.ProjectName, panel)
+	out := getPanelResultsFile(project.ProjectName, panel.Id)
 
 	switch assumedType {
 	case "application/json":

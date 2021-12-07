@@ -11,7 +11,7 @@ func evalLiteralPanel(project *ProjectState, pageIndex int, panel *PanelInfo) er
 		return fmt.Errorf("Unknown type")
 	}
 
-	out := getPanelResultsFile(project.ProjectName, panel)
+	out := getPanelResultsFile(project.ProjectName, panel.Id)
 	buf := bytes.NewBuffer([]byte(panel.Content))
 
 	switch t {

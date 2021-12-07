@@ -89,6 +89,10 @@ for (const t of TESTS) {
       path.join(CODE_ROOT, 'build', 'desktop_runner.js'),
       path.join(CODE_ROOT, 'build', 'go_desktop_runner'),
     ]) {
+      if (t.type === 'sql' && subprocessName?.endsWith('go_desktop_runner')) {
+        continue;
+      }
+
       test(`runs ${t.type} programs to perform addition via ${
         subprocessName ? subprocessName : 'same-process'
       }`, async () => {
