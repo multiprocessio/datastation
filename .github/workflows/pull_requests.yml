@@ -29,6 +29,7 @@ jobs:
     - run: ./scripts/ci/prepare_linux.sh --integration-tests
     - run: yarn format
     - run: yarn tsc
+    - run: cd runner && gofmt -w .
     - run: ./scripts/fail_on_diff.sh
     - run: yarn test-licenses
     # Needed so we can have ./build/desktop_runner.js ready for tests
