@@ -12,6 +12,9 @@ var base = path.Join(home, "DataStationProjects")
 
 func getProjectPanel(projectId, panelId string) (*ProjectState, int, *PanelInfo, error) {
 	file := path.Join(base, projectId)
+	if projectId[0] == '/' {
+		file = projectId
+	}
 	f, err := os.Open(file)
 	if err != nil {
 		return nil, 0, nil, err

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"path/filepath"
 )
@@ -28,6 +29,7 @@ func transformCSV(in io.Reader, out string) (*PanelResult, error) {
 	for {
 		record, err := r.Read()
 		if err == io.EOF {
+			err = nil
 			break
 		}
 
@@ -84,6 +86,11 @@ func transformJSON(in io.Reader, out string) (*PanelResult, error) {
 	defer w.Close()
 
 	_, err = w.ReadFrom(in)
+	if err == io.EOF {
+		err = nil
+	}
+	log.Println("HEY PHIL IM HERE", err)
+
 	return &PanelResult{}, err
 }
 

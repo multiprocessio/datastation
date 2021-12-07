@@ -92,7 +92,63 @@ def quote_line(line, join=True, show=False):
         print(l)
     else:
         return l
-    
+
+
+def eval_line(line):
+    if line[0] == 'setenv':
+        os.environ[line[1]] = line[2]
+        quote_line(line, show=True)
+        return
+    if line[0] == 'setenv_default':
+        if line[1] not in os.environ:
+            os.environ[line[1]] = line[2]
+        quote_line(line, show=True)
+        return
+    if line[0] == 'cd' and line[2] == '&&':
+        previousdir = os.getcwd()
+        os.chdir(line[1])
+        eval_line(line[3:])
+        os.chdir(previousdir)
+        return
+    if line[0] == 'cp' and IS_WINDOWS:
+        line[0] = 'copy'
+    elif line[0] == 'rm' and line[1] == '-rf' and IS_WINDOWS:
+        quote_line(line, show=True)
+        for todelete in line[2:]:
+            shutil.rmtree(todelete, ignore_errors=True)
+        return
+    elif line[0] == 'mkdir':
+        quote_line(line, show=True)
+        for tomake in line[1:]:
+            pathlib.Path(tomake).mkdir(parents=True, exist_ok=True)
+        return
+    elif line[0] == 'append':
+        what = line[1]
+        to = line[2]
+        quote_line(line, show=True)
+        with open(to, 'a') as to:
+            to.write('\n'+what)
+        return
+    elif line[0] == 'prepend':
+        what = line[1]
+        to = line[2]
+        quote_line(line, show=True)
+        if not what:
+            return
+        with open(to, 'r+') as to:
+            current = to.read()
+            to.seek(0)
+            to.write(what+'\n'+current)
+            to.truncate()
+        return
+
+    quote_line(line, show=True)
+    if 'powershell' in str(os.environ.get('COMSPEC')):
+        subprocess.run(line, check=True, shell=True, env=env)
+    else:
+        if os.system(quote_line(line)):
+            raise Exception('non-zero exit code')
+
 
 for command in script:
     if command.strip().startswith('#') or not command.strip():
@@ -104,50 +160,5 @@ for command in script:
             continue
         # Do basic variable substitition
         line[i] = token.format(**BUILTIN_VARIABLES, **os.environ)
-    if line[0] == 'setenv':
-        os.environ[line[1]] = line[2]
-        quote_line(line, show=True)
-        continue
-    if line[0] == 'setenv_default':
-        if line[1] not in os.environ:
-            os.environ[line[1]] = line[2]
-        quote_line(line, show=True)
-        continue
-    if line[0] == 'cp' and IS_WINDOWS:
-        line[0] = 'copy'
-    elif line[0] == 'rm' and line[1] == '-rf' and IS_WINDOWS:
-        quote_line(line, show=True)
-        for todelete in line[2:]:
-            shutil.rmtree(todelete, ignore_errors=True)
-        continue
-    elif line[0] == 'mkdir':
-        quote_line(line, show=True)
-        for tomake in line[1:]:
-            pathlib.Path(tomake).mkdir(parents=True, exist_ok=True)
-        continue
-    elif line[0] == 'append':
-        what = line[1]
-        to = line[2]
-        quote_line(line, show=True)
-        with open(to, 'a') as to:
-            to.write('\n'+what)
-        continue
-    elif line[0] == 'prepend':
-        what = line[1]
-        to = line[2]
-        quote_line(line, show=True)
-        if not what:
-            continue
-        with open(to, 'r+') as to:
-            current = to.read()
-            to.seek(0)
-            to.write(what+'\n'+current)
-            to.truncate()
-        continue
 
-    quote_line(line, show=True)
-    if 'powershell' in str(os.environ.get('COMSPEC')):
-        subprocess.run(line, check=True, shell=True, env=env)
-    else:
-        if os.system(quote_line(line)):
-            raise Exception('non-zero exit code')
+    eval_line(line)

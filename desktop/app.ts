@@ -26,7 +26,7 @@ function main() {
   if (app) {
     app.whenReady().then(async () => {
       const { handlers, project } = initialize({
-        subprocess: 'runner/runner',
+        subprocess: path.join(__dirname, 'go_desktop_runner'),
         additionalHandlers: storeHandlers,
       });
 

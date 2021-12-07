@@ -5,7 +5,7 @@ import { EOL } from 'os';
 import { preview } from 'preview';
 import { shape, Shape } from 'shape';
 import { file as makeTmpFile } from 'tmp-promise';
-import { Cancelled } from '../../shared/errors';
+//import { Cancelled } from '../../shared/errors';
 import log from '../../shared/log';
 import { PanelBody } from '../../shared/rpc';
 import {
@@ -45,6 +45,7 @@ function killAllByPanelId(panelId: string) {
   if (workers) {
     Array.from(workers).map((pid) => {
       try {
+	log.info('Killing existing process');
         process.kill(pid, 'SIGINT');
       } catch (e) {
         // If process doesn't exist, that's ok
@@ -68,17 +69,21 @@ export async function evalInSubprocess(
     // This means only one user can run a panel at a time
     killAllByPanelId(panelId);
 
-    const child = execFile(
-      process.argv[0],
-      [
-        subprocess,
+    const base = subprocess.endsWith('.js') ? process.argv[0] : subprocess;
+    const args = [
         DSPROJ_FLAG,
         projectName,
         PANEL_FLAG,
         panelId,
         PANEL_META_FLAG,
         tmp.path,
-      ],
+    ];
+    if (base !== subprocess) {
+      args.unshift(subprocess);
+    }
+
+    const child = execFile(
+      base, args,
       {
         windowsHide: true,
       }
@@ -113,9 +118,11 @@ export async function evalInSubprocess(
             resolve();
           }
 
-          if (code === 1 || code === null) {
-            reject(new Cancelled());
-          }
+	  // TODO: fix cancell
+          //if (code === 1 || code === null) {
+	  //  console.log('PHIL!!!!!!', { code, stderr })
+          //  reject(new Cancelled());
+          //}
 
           reject(new Error(stderr));
         });
