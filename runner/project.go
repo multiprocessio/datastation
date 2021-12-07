@@ -7,7 +7,8 @@ import (
 	"path"
 )
 
-const base = path.Join(os.UserHomeDir(), "DataStationProjects")
+var home, _ = os.UserHomeDir()
+var base = path.Join(home, "DataStationProjects")
 
 func getProjectPanel(projectId, panelId string) (*ProjectState, int, *PanelInfo, error) {
 	file := path.Join(base, projectId)

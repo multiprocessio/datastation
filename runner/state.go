@@ -10,10 +10,10 @@ type PanelResult struct {
 	Preview     string         `json:"preview"`
 	Stdout      string         `json:"stdout"`
 	Shape       Shape          `json:"shape"`
-	ArrayCount  *number        `json:"number"`
-	Size        number         `json:"size"`
+	ArrayCount  *float64        `json:"float64"`
+	Size        float64         `json:"size"`
 	ContentType string         `json:"contentType"`
-	Elapsed     *number        `json:"elapsed"`
+	Elapsed     *float64        `json:"elapsed"`
 }
 
 var defaultPanelResult = PanelResult{
@@ -22,10 +22,9 @@ var defaultPanelResult = PanelResult{
 	Preview:     "",
 	Size:        0,
 	ContentType: "unknown",
-	Elapsed:     0,
-	Value:       null,
-	Exception:   null,
-	ArrayCount:  null,
+	Value:       nil,
+	Exception:   nil,
+	ArrayCount:  nil,
 }
 
 type Encrypt struct {
@@ -44,7 +43,7 @@ const (
 type ServerInfo struct {
 	Name               string         `json:"name"`
 	Address            string         `json:"address"`
-	Port               number         `json:"port"`
+	Port               float64         `json:"port"`
 	Type               ServerInfoType `json:"type"`
 	Username           string         `json:"username"`
 	Password_encrypt   Encrypt        `json:"password_encrypt"`
@@ -65,68 +64,12 @@ var defaultServerInfo = ServerInfo{
 	Id:                 uuid.New().String(),
 }
 
-type ConnectorInfoType string
-
-const (
-	ConnectorDatabase = "database"
-	ConnectorHttp     = "http"
-)
-
-type ConnectorInfo struct {
-	Name     string            `json:"name"`
-	Type     ConnectorInfoType `json:"type"`
-	Id       string            `json:"id"`
-	ServerId *string           `json:"serverId"`
-}
-
-var defaultConnectorInfo = ConnectorInfo{
-	Name:     "Untitled Connector",
-	Type:     ConnectorDatabase,
-	ServerId: "",
-	Id:       uuid.New().String(),
-}
-
-type HTTPConnectorInfoMethod string
-
-const (
-	HTTPGet    = "GET"
-	HTTPHead   = "HEAD"
-	HTTPPut    = "PUT"
-	HTTPPost   = "POST"
-	HTTPDelete = "DELETE"
-)
-
 type ContentTypeInfo struct {
 	Type             string `json:"type"`
 	CustomLineRegexp string `json:"customLineRegexp"`
 }
 
 var defaultContentTypeInfo = ContentTypeInfo{}
-
-type HTTPConnectorInfo struct {
-	ConnectorInfo
-	HTTP struct {
-		Headers []struct {
-			Value string `json:"value"`
-			Name  string `json:"name"`
-		} `json:"headers"`
-		Url             string                  `json:"url"`
-		Method          HTTPConnectorInfoMethod `json:"method"`
-		ContentTypeInfo ContentTypeInfo         `json:"contentTypeInfo"`
-	} `json:"http"`
-}
-
-var defaultHTTPConnectorInfo = HTTPConnectorInfo{
-	ConnectorInfo{
-		Name:     "Untitled HTTP Connector",
-		Id:       uuid.New().String(),
-		Type:     ConnectorHttp,
-		ServerId: "",
-	},
-	Headers:         nil,
-	Method:          HTTPGet,
-	ContentTypeInfo: defaultContentTypeInfo,
-}
 
 type PanelInfoType string
 
@@ -150,6 +93,15 @@ type PanelInfo struct {
 	*LiteralPanelInfo
 }
 
+type SupportedLanguages string
+const (
+	Python SupportedLanguages = "python"
+	JavaScript = "javascript"
+	Ruby = "ruby"
+	R = "r"
+	Julia = "julia"
+)
+
 type ProgramPanelInfo struct {
 	Program struct {
 		Type SupportedLanguages `json:"type"`
@@ -171,7 +123,7 @@ type LiteralPanelInfo struct {
 
 type ProjectPage struct {
 	Panels    []PanelInfo `json:"panels"`
-	Schedules []Scheduled `json:"schedules"`
+	Schedules []interface{} `json:"schedules"`
 	Name      string      `json:"name"`
 	Id        string      `json:"id"`
 }

@@ -1,29 +1,33 @@
 package main
 
 import (
+	"os"
+	"io"
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"path/filepath"
 )
 
 func transformCSV(in, out string) (*PanelResult, error) {
 	f, err := os.Open(in)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	defer f.Close()
 
 	r := csv.NewReader(f)
 
-	w, err := os.OpenFile(out, os.WR_ONLY|os.O_CREATE, os.ModePerm)
+	w, err := os.OpenFile(out, os.O_WRONLY|os.O_CREATE, os.ModePerm)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer w.Close()
 
-	w.Write("[")
+	_, err = w.Write([]byte("["))
+	if err != nil {
+		return nil, err
+	}
 
 	elements := 0
 	var fields []string
@@ -57,30 +61,35 @@ func transformCSV(in, out string) (*PanelResult, error) {
 		}
 	}
 
-	w.Write("]")
+	_, err = w.Write([]byte("]"))
+	if err != nil {
+		return nil, err
+	}
 
+	arrayCount := float64(elements)
 	return &PanelResult{
-		ArrayCount: elements,
+		ArrayCount: &arrayCount,
 	}, nil
 }
 
 func transformJSON(in, out string) (*PanelResult, error) {
 	r, err := os.Open(in)
 	if err != nil {
-		return error
+		return nil, err
 	}
 	defer r.Close()
 
-	w, err := os.OpenFile(out, os.WR_ONLY|os.O_CREATE, os.ModePerm)
+	w, err := os.OpenFile(out, os.O_WRONLY|os.O_CREATE, os.ModePerm)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer w.Close()
 
-	return &PanelResult{}, w.ReadFrom(r)
+	_, err = w.ReadFrom(r)
+	return &PanelResult{}, err
 }
 
-func evalFilePanel(project string, pageIndex int, panel PanelInfo) (*PanelResult, error) {
+func evalFilePanel(project *ProjectState, pageIndex int, panel *PanelInfo) (*PanelResult, error) {
 	assumedType := panel.File.ContentTypeInfo.Type
 	if assumedType == "" {
 		switch filepath.Ext(panel.File.Name) {
@@ -95,7 +104,7 @@ func evalFilePanel(project string, pageIndex int, panel PanelInfo) (*PanelResult
 		return nil, fmt.Errorf("Unknown type")
 	}
 
-	out := getPanelResultsFile(project, panel)
+	out := getPanelResultsFile(project.ProjectName, panel)
 
 	switch assumedType {
 	case "application/json":
@@ -103,4 +112,6 @@ func evalFilePanel(project string, pageIndex int, panel PanelInfo) (*PanelResult
 	case "text/csv":
 		return transformCSV(panel.File.Name, out)
 	}
+
+	return nil, fmt.Errorf("Unsupported type " + assumedType)
 }

@@ -3,9 +3,10 @@ package main
 import (
 	"encoding/json"
 	"os"
+	"fmt"
 )
 
-func eval(panelId, projectId string) (*panelResult, error) {
+func eval(panelId, projectId string) (*PanelResult, error) {
 	project, pageIndex, panel, err := getProjectPanel(projectId, panelId)
 	if err != nil {
 		return nil, err
@@ -17,6 +18,8 @@ func eval(panelId, projectId string) (*panelResult, error) {
 	case ProgramPanel:
 		return evalProgramPanel(project, pageIndex, panel)
 	}
+
+	return nil, fmt.Errorf("Unsupported panel type " + string(panel.Type))
 }
 
 func main() {
@@ -25,7 +28,7 @@ func main() {
 	panelMetaOut := ""
 
 	args := os.Args
-	for i := 0; i < args.length-1; i++ {
+	for i := 0; i < len(args)-1; i++ {
 		if args[i] == "--dsproj" {
 			projectId = args[i+1]
 			i++
