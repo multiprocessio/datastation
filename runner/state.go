@@ -41,27 +41,27 @@ const (
 )
 
 type ServerInfo struct {
-	Name               string         `json:"name"`
-	Address            string         `json:"address"`
-	Port               float64        `json:"port"`
-	Type               ServerInfoType `json:"type"`
-	Username           string         `json:"username"`
-	Password_encrypt   Encrypt        `json:"password_encrypt"`
-	PrivateKeyFile     string         `json:"privateKeyFile"`
-	Passphrase_encrypt Encrypt        `json:"passphrase_encrypt"`
-	Id                 string         `json:"id"`
+	Name           string         `json:"name"`
+	Address        string         `json:"address"`
+	Port           float64        `json:"port"`
+	Type           ServerInfoType `json:"type"`
+	Username       string         `json:"username"`
+	Password       Encrypt        `json:"password_encrypt"`
+	PrivateKeyFile string         `json:"privateKeyFile"`
+	Passphrase     Encrypt        `json:"passphrase_encrypt"`
+	Id             string         `json:"id"`
 }
 
 var defaultServerInfo = ServerInfo{
-	Type:               SSHPrivateKey,
-	Name:               "Untitled Server",
-	Address:            "",
-	Port:               22,
-	Username:           "",
-	Password_encrypt:   Encrypt{},
-	PrivateKeyFile:     "~/.ssh/id_rsa",
-	Passphrase_encrypt: Encrypt{},
-	Id:                 uuid.New().String(),
+	Type:           SSHPrivateKey,
+	Name:           "Untitled Server",
+	Address:        "",
+	Port:           22,
+	Username:       "",
+	Password:       Encrypt{},
+	PrivateKeyFile: "~/.ssh/id_rsa",
+	Passphrase:     Encrypt{},
+	Id:             uuid.New().String(),
 }
 
 type ContentTypeInfo struct {
@@ -168,13 +168,13 @@ const (
 
 type DatabaseConnectorInfo struct {
 	Database struct {
-		Type             DatabaseConnectorInfoType `json:"type"`
-		Database         string                    `json:"database"`
-		Username         string                    `json:"username"`
-		Password_encrypt Encrypt                   `json:"password_encrypt"`
-		Address          string                    `json:"address"`
-		ApiKey_encrypt   Encrypt                   `json:"apiKey_encrypt"`
-		Extra            map[string]string         `json:"extra"`
+		Type     DatabaseConnectorInfoType `json:"type"`
+		Database string                    `json:"database"`
+		Username string                    `json:"username"`
+		Password Encrypt                   `json:"password_encrypt"`
+		Address  string                    `json:"address"`
+		ApiKey   Encrypt                   `json:"apiKey_encrypt"`
+		Extra    map[string]string         `json:"extra"`
 	} `json:"database"`
 }
 

@@ -52,13 +52,48 @@ func (e *Encrypt) decrypt() (string, error) {
 	return string(decrypted), nil
 }
 
-func getConnectionString(connector *ConnectorInfo) (string, string) {
-	switch connector.Database.Type {
-	case PostgresDatabase:
-		return "postgres", fmt.Sprintf("postgres://%s@%s/%s")
+func getConnectionString(connector *ConnectorInfo) (string, string, error) {
+	address := connector.Database.Address
+	database := connector.Database.Database
+	username := connector.Database.Username
+
+	genericUserPass := ""
+	var pass string
+	if username != "" || connector.Database.Password.Value != "" {
+		var err error
+		pass, err = connector.Database.Password.decrypt()
+		if err != nil {
+			return "", "", err
+		}
+		genericUserPass = fmt.Sprintf("%s:%s", username, pass)
 	}
 
-	return "", ""
+	genericString := fmt.Sprintf("%s://%s@%s/%s", connector.Database.Type, genericUserPass, address, database)
+
+	switch connector.Database.Type {
+	case PostgresDatabase:
+		return "postgres", genericString, nil
+	case MySQLDatabase:
+		return "mysql", genericString, nil
+	case SQLServerDatabase:
+		return "sqlserver", genericString, nil
+	case OracleDatabase:
+		return "oracle", genericString, nil
+	case ClickhouseDatabase:
+		query := ""
+		if genericUserPass != "" {
+			query = fmt.Sprintf("username=%s&password=%s&", username, pass)
+		}
+
+		if database != "" {
+			query += "database=" + database
+		}
+		return "clickhouse", fmt.Sprintf("tcp://%s?%s", address, query), nil
+	case SQLiteDatabase:
+		return "sqlite3", address, nil
+	}
+
+	return "", "", nil
 }
 
 func evalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo) error {
@@ -75,7 +110,11 @@ func evalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo) e
 		return fmt.Errorf("Unknown connector " + panel.Database.ConnectorId)
 	}
 
-	vendor, connStr := getConnectionString(connector)
+	vendor, connStr, err := getConnectionString(connector)
+	if err != nil {
+		return err
+	}
+
 	db, err := sqlx.Open(vendor, connStr)
 	if err != nil {
 		return err

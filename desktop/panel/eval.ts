@@ -67,6 +67,12 @@ function canUseGoRunner(panel: PanelInfo) {
     return false;
   }
 
+  const supportedDatabases = ['postgres', 'sqlite', 'mysql'];
+  if (panel.type === 'database' &&
+    supportedDatabases.includes((panel as DatabasePanelInfo).database.type)) {
+    return true;
+  }
+
   if (
     panel.type === 'program' &&
     (panel as ProgramPanelInfo).program.type !== 'sql'
