@@ -22,6 +22,9 @@ func eval(panelId, projectId string) error {
 	case ProgramPanel:
 		log.Println("Evaling program panel")
 		return evalProgramPanel(project, pageIndex, panel)
+	case DatabasePanel:
+		log.Println("Evaling database panel")
+		return evalDatabasePanel(project, pageIndex, panel)
 	}
 
 	return fmt.Errorf("Unsupported panel type " + string(panel.Type))

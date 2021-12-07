@@ -62,7 +62,7 @@ func getProjectResultsFile(projectId string) string {
 	project := filepath.Base(projectId)
 	// Drop .dsproj from project id
 	if strings.HasSuffix(project, ".dsproj") {
-		project = project[0:len(project) - len(".dsproj")]
+		project = project[0 : len(project)-len(".dsproj")]
 	}
 	return strings.ReplaceAll(path.Join(base, "."+project+".results"), "\\", "/")
 }

@@ -63,6 +63,10 @@ function killAllByPanelId(panelId: string) {
 }
 
 function canUseGoRunner(panel: PanelInfo) {
+  if (panel.serverId) {
+    return false;
+  }
+
   if (
     panel.type === 'program' &&
     (panel as ProgramPanelInfo).program.type !== 'sql'

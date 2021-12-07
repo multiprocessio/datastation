@@ -74,11 +74,12 @@ var defaultContentTypeInfo = ContentTypeInfo{}
 type PanelInfoType string
 
 const (
-	HttpPanel    = "http"
-	ProgramPanel = "program"
-	LiteralPanel = "literal"
-	FilePanel    = "file"
-	FilaggPanel  = "filagg"
+	HttpPanel     = "http"
+	ProgramPanel  = "program"
+	LiteralPanel  = "literal"
+	FilePanel     = "file"
+	FilaggPanel   = "filagg"
+	DatabasePanel = "database"
 )
 
 type PanelInfo struct {
@@ -91,6 +92,7 @@ type PanelInfo struct {
 	*ProgramPanelInfo
 	*FilePanelInfo
 	*LiteralPanelInfo
+	*DatabasePanelInfo
 }
 
 type SupportedLanguages string
@@ -122,6 +124,60 @@ type LiteralPanelInfo struct {
 	} `json:"literal"`
 }
 
+type DatabasePanelInfo struct {
+	Database struct {
+		ConnectorId string      `json:"connectorId"`
+		Range       interface{} `json:"range"` // TODO: support these
+		Table       string      `json:"table"`
+		Step        float64     `json:"step"`
+	} `json:"database"`
+}
+
+type ConnectorInfoType string
+
+const (
+	DatabaseConnector ConnectorInfoType = "database"
+	HTTPConnector                       = "http"
+)
+
+type ConnectorInfo struct {
+	Name     string            `json:"name"`
+	Type     ConnectorInfoType `json:"type"`
+	Id       string            `json:"id"`
+	ServerId string            `json:"serverId"`
+	*DatabaseConnectorInfo
+}
+
+type DatabaseConnectorInfoType string
+
+const (
+	PostgresDatabase      DatabaseConnectorInfoType = "postgres"
+	MySQLDatabase                                   = "mysql"
+	SQLiteDatabase                                  = "sqlite"
+	OracleDatabase                                  = "oracle"
+	SQLServerDatabase                               = "sqlserver"
+	PrestoDatabase                                  = "presto"
+	ClickhouseDatabase                              = "clickhouse"
+	SnowflakeDatabase                               = "snowflake"
+	CassandraDatabase                               = "cassandra"
+	ElasticsearchDatabase                           = "elasticsearch"
+	SplunkDatabase                                  = "splunk"
+	PrometheusDatabase                              = "prometheus"
+	InfluxDatabase                                  = "influx"
+)
+
+type DatabaseConnectorInfo struct {
+	Database struct {
+		Type             DatabaseConnectorInfoType `json:"type"`
+		Database         string                    `json:"database"`
+		Username         string                    `json:"username"`
+		Password_encrypt Encrypt                   `json:"password_encrypt"`
+		Address          string                    `json:"address"`
+		ApiKey_encrypt   Encrypt                   `json:"apiKey_encrypt"`
+		Extra            map[string]string         `json:"extra"`
+	} `json:"database"`
+}
+
 type ProjectPage struct {
 	Panels    []PanelInfo   `json:"panels"`
 	Schedules []interface{} `json:"schedules"`
@@ -130,9 +186,10 @@ type ProjectPage struct {
 }
 
 type ProjectState struct {
-	Pages           []ProjectPage `json:"pages"`
-	ProjectName     string        `json:"projectName"`
-	Id              string        `json:"id"`
-	OriginalVersion string        `json:"originalVersion"`
-	LastVersion     string        `json:"lastVersion"`
+	Pages           []ProjectPage   `json:"pages"`
+	Connectors      []ConnectorInfo `json:"connectors"`
+	ProjectName     string          `json:"projectName"`
+	Id              string          `json:"id"`
+	OriginalVersion string          `json:"originalVersion"`
+	LastVersion     string          `json:"lastVersion"`
 }
