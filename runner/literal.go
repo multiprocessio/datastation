@@ -5,10 +5,10 @@ import (
 	"fmt"
 )
 
-func evalLiteralPanel(project *ProjectState, pageIndex int, panel *PanelInfo) (*PanelResult, error) {
+func evalLiteralPanel(project *ProjectState, pageIndex int, panel *PanelInfo) error {
 	t := panel.Literal.ContentTypeInfo.Type
 	if t == "" {
-		return nil, fmt.Errorf("Unknown type")
+		return fmt.Errorf("Unknown type")
 	}
 
 	out := getPanelResultsFile(project.ProjectName, panel)
@@ -21,5 +21,5 @@ func evalLiteralPanel(project *ProjectState, pageIndex int, panel *PanelInfo) (*
 		return transformCSV(buf, out)
 	}
 
-	return nil, fmt.Errorf("Unsupported type " + t)
+	return fmt.Errorf("Unsupported type " + t)
 }

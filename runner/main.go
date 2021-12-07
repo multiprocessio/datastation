@@ -1,16 +1,15 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"os"
 )
 
-func eval(panelId, projectId string) (*PanelResult, error) {
+func eval(panelId, projectId string) error {
 	project, pageIndex, panel, err := getProjectPanel(projectId, panelId)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	switch panel.Type {
@@ -25,7 +24,7 @@ func eval(panelId, projectId string) (*PanelResult, error) {
 		return evalProgramPanel(project, pageIndex, panel)
 	}
 
-	return nil, fmt.Errorf("Unsupported panel type " + string(panel.Type))
+	return fmt.Errorf("Unsupported panel type " + string(panel.Type))
 }
 
 func fatal(msg string, args ...interface{}) {
@@ -74,21 +73,8 @@ func main() {
 		fatal("No panel meta out given.")
 	}
 
-	result, err := eval(panelId, projectId)
+	err := eval(panelId, projectId)
 	if err != nil {
 		fatal("Failed to eval: %s", err)
-	}
-
-	// Write result to disk
-	file, err := os.OpenFile(panelMetaOut, os.O_WRONLY|os.O_CREATE, os.ModePerm)
-	if err != nil {
-		fatal("Failed to open panel meta out: %s", err)
-	}
-
-	defer file.Close()
-	encoder := json.NewEncoder(file)
-	err = encoder.Encode(result)
-	if err != nil {
-		fatal("Failed to encode JSON panel meta out: %s", err)
 	}
 }

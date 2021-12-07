@@ -1,3 +1,5 @@
+import { genericPreamble } from './javascript';
+import julia from './julia.json';
 import { EOL } from './types';
 
 function preamble(
@@ -5,26 +7,7 @@ function preamble(
   panelId: string,
   idMap: Record<string | number, string>
 ) {
-  return `
-try
-    import JSON
-catch e
-    import Pkg
-    Pkg.add("JSON")
-    import JSON
-end
-function DM_getPanel(i)
-  panelId = JSON.parse("${JSON.stringify(idMap).replaceAll(
-    '"',
-    '\\"'
-  )}")[string(i)]
-  JSON.parsefile(string("${resultsFile}", panelId))
-end
-function DM_setPanel(v)
-  open("${resultsFile + panelId}", "w") do f
-    JSON.print(f, v)
-  end
-end`;
+  return genericPreamble(python.preamble, resultsFile, panelId, idMap);
 }
 
 function defaultContent(panelIndex: number) {
@@ -44,8 +27,8 @@ function exceptionRewriter(msg: string, programPath: string) {
 }
 
 export const JULIA = {
-  name: 'Julia',
-  defaultPath: 'julia',
+  name: julia.name,
+  defaultPath: julia.defaultPath,
   defaultContent,
   preamble,
   exceptionRewriter,

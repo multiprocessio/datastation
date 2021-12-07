@@ -1,0 +1,5 @@
+{
+  "name": "Python",
+  "defaultPath": "python3",
+  "preamble": "\ndef DM_getPanel(i):\n  import json\n  with open(r'$$RESULTS_FILE$$'+$$JSON_ID_MAP$$[str(i)]) as f:\n    return json.load(f)\ndef DM_setPanel(v):\n  import json\n  with open(r'$$PANEL_RESULTS_FILE$$', 'w') as f:\n    json.dump(v, f)"
+}

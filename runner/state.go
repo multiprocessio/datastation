@@ -11,7 +11,7 @@ type PanelResult struct {
 	Stdout      string         `json:"stdout"`
 	Shape       Shape          `json:"shape"`
 	ArrayCount  *float64       `json:"float64"`
-	Size        float64        `json:"size"`
+	Size        *float64       `json:"size"`
 	ContentType string         `json:"contentType"`
 	Elapsed     *float64       `json:"elapsed"`
 }
@@ -20,7 +20,7 @@ var defaultPanelResult = PanelResult{
 	Stdout:      "",
 	Shape:       defaultShape,
 	Preview:     "",
-	Size:        0,
+	Size:        nil,
 	ContentType: "unknown",
 	Value:       nil,
 	Exception:   nil,
@@ -111,14 +111,14 @@ type ProgramPanelInfo struct {
 
 type FilePanelInfo struct {
 	File struct {
-		ContentTypeInfo ContentTypeInfo `json:"contentInfoType"`
+		ContentTypeInfo ContentTypeInfo `json:"contentTypeInfo"`
 		Name            string          `json:"name"`
 	} `json:"file"`
 }
 
 type LiteralPanelInfo struct {
 	Literal struct {
-		ContentTypeInfo ContentTypeInfo `json:"contentInfoType"`
+		ContentTypeInfo ContentTypeInfo `json:"contentTypeInfo"`
 	} `json:"literal"`
 }
 

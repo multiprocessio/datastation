@@ -15,6 +15,7 @@ import {
   ProjectState,
 } from '../../shared/state';
 import { DSPROJ_FLAG, PANEL_FLAG, PANEL_META_FLAG } from '../constants';
+import { parsePartialJSONFile } from '../partial';
 import { Dispatch, RPCHandler } from '../rpc';
 import { flushUnwritten, getProjectResultsFile } from '../store';
 import { getProjectAndPanel } from './shared';
@@ -45,7 +46,7 @@ function killAllByPanelId(panelId: string) {
   if (workers) {
     Array.from(workers).map((pid) => {
       try {
-	log.info('Killing existing process');
+        log.info('Killing existing process');
         process.kill(pid, 'SIGINT');
       } catch (e) {
         // If process doesn't exist, that's ok
@@ -71,23 +72,20 @@ export async function evalInSubprocess(
 
     const base = subprocess.endsWith('.js') ? process.argv[0] : subprocess;
     const args = [
-        DSPROJ_FLAG,
-        projectName,
-        PANEL_FLAG,
-        panelId,
-        PANEL_META_FLAG,
-        tmp.path,
+      DSPROJ_FLAG,
+      projectName,
+      PANEL_FLAG,
+      panelId,
+      PANEL_META_FLAG,
+      tmp.path,
     ];
     if (base !== subprocess) {
       args.unshift(subprocess);
     }
 
-    const child = execFile(
-      base, args,
-      {
-        windowsHide: true,
-      }
-    );
+    const child = execFile(base, args, {
+      windowsHide: true,
+    });
 
     pid = child.pid;
     if (!runningProcesses[panelId]) {
@@ -118,9 +116,9 @@ export async function evalInSubprocess(
             resolve();
           }
 
-	  // TODO: fix cancell
+          // TODO: fix cancell
           //if (code === 1 || code === null) {
-	  //  console.log('PHIL!!!!!!', { code, stderr })
+          //  console.log('PHIL!!!!!!', { code, stderr })
           //  reject(new Cancelled());
           //}
 
@@ -134,8 +132,14 @@ export async function evalInSubprocess(
       }
     });
 
-    const resultMeta = fs.readFileSync(tmp.path);
-    return JSON.parse(resultMeta.toString());
+    const resultMeta = fs.readFileSync(tmp.path).toString();
+    const meta = JSON.parse(resultMeta);
+    if (meta.size === null || meta.size === undefined) {
+      const projectResultsFile = getProjectResultsFile(projectName);
+      return parsePartialJSONFile(projectResultsFile + panelId);
+    }
+
+    return meta;
   } finally {
     try {
       if (pid) {
