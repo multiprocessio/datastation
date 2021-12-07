@@ -7,7 +7,7 @@ function preamble(
   panelId: string,
   idMap: Record<string | number, string>
 ) {
-  return genericPreamble(python.preamble, resultsFile, panelId, idMap);
+  return genericPreamble(julia.preamble, resultsFile, panelId, idMap);
 }
 
 function defaultContent(panelIndex: number) {

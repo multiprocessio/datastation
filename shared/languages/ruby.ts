@@ -1,5 +1,5 @@
 import { genericPreamble } from './javascript';
-import ruby from './ruby';
+import ruby from './ruby.json';
 
 function defaultContent(panelIndex: number) {
   if (panelIndex === 0) {

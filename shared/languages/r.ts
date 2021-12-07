@@ -16,7 +16,7 @@ function preamble(
   panelId: string,
   idMap: Record<string | number, string>
 ) {
-  return genericPreamble(python.preamble, resultsFile, panelId, idMap);
+  return genericPreamble(r.preamble, resultsFile, panelId, idMap);
 }
 
 export const R = {

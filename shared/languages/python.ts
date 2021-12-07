@@ -5,6 +5,7 @@ import log from '../log';
 import { deepClone, windowOrGlobal } from '../object';
 import { PanelResult } from '../state';
 import { genericPreamble } from './javascript';
+import python from './python.json';
 import { EOL } from './types';
 
 function defaultContent(panelIndex: number) {
