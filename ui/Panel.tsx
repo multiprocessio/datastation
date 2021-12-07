@@ -259,6 +259,14 @@ export function Panel({
     .map((p) => p.name)
     .includes(panel.name);
 
+  let info = null;
+  if (panelUIDetails.info) {
+    info = <panelUIDetails.info panel={panel} />;
+    if (info) {
+      info = <Alert type="info">{info}</Alert>;
+    }
+  }
+
   return (
     <div
       id={`panel-${panel.id}`}
@@ -472,11 +480,7 @@ export function Panel({
                       </Alert>
                     )
                   )}
-                  {panelUIDetails.info && (
-                    <Alert type="info">
-                      <panelUIDetails.info panel={panel} />
-                    </Alert>
-                  )}
+                  {info}
                 </div>
                 {panelUIDetails.previewable && (
                   <div className="panel-out resize resize--left resize--horizontal">

@@ -182,7 +182,7 @@ export function DatabaseInfo({ panel }: { panel: DatabasePanelInfo }) {
     (c) => c.id === panel.database.connectorId
   ) as DatabaseConnectorInfo;
 
-  const vendor = VENDORS[connector?.database.type]?.name;
+  const vendor = VENDORS[connector?.database.type]?.id;
   if (!['postgres', 'mysql', 'sqlite'].includes(vendor)) {
     return null;
   }
