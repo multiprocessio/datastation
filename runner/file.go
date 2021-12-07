@@ -16,9 +16,22 @@ func (ue UnicodeEscape) MarshalJSON() ([]byte, error) {
 	return []byte(strconv.QuoteToASCII(string(ue))), nil
 }
 
-func transformCSV(in io.Reader, out string) error {
-	r := csv.NewReader(in)
+type JSONArrayWriter struct {
+	w io.Writer
+}
 
+func (j JSONArrayWriter) Write(row interface{}) error {
+	encoder := json.NewEncoder(j.w)
+	err := encoder.Encode(row)
+	if err != nil {
+		return err
+	}
+
+	_, err = j.w.Write([]byte(","))
+	return err
+}
+
+func withJSONArrayOutWriter(out string, cb func(w JSONArrayWriter) error) error {
 	w, err := os.OpenFile(out, os.O_WRONLY|os.O_CREATE, os.ModePerm)
 	if err != nil {
 		return err
@@ -30,39 +43,9 @@ func transformCSV(in io.Reader, out string) error {
 		return err
 	}
 
-	isHeader := true
-	var fields []string
-	for {
-		record, err := r.Read()
-		if err == io.EOF {
-			err = nil
-			break
-		}
-
-		if err != nil {
-			return err
-		}
-
-		if isHeader {
-			for _, field := range record {
-				fields = append(fields, field)
-			}
-			isHeader = false
-			continue
-		}
-
-		row := map[string]UnicodeEscape{}
-		for i, field := range fields {
-			row[field] = UnicodeEscape(record[i])
-		}
-
-		encoder := json.NewEncoder(w)
-		err = encoder.Encode(row)
-		if err != nil {
-			return err
-		}
-
-		w.Write([]byte(","))
+	err = cb(JSONArrayWriter{w})
+	if err != nil {
+		return err
 	}
 
 	// Find current offset
@@ -78,6 +61,46 @@ func transformCSV(in io.Reader, out string) error {
 
 	_, err = w.WriteAt([]byte("]"), lastChar)
 	return err
+}
+
+func transformCSV(in io.Reader, out string) error {
+	r := csv.NewReader(in)
+
+	return withJSONArrayOutWriter(out, func(w JSONArrayWriter) error {
+		isHeader := true
+		var fields []string
+		for {
+			record, err := r.Read()
+			if err == io.EOF {
+				err = nil
+				break
+			}
+
+			if err != nil {
+				return err
+			}
+
+			if isHeader {
+				for _, field := range record {
+					fields = append(fields, field)
+				}
+				isHeader = false
+				continue
+			}
+
+			row := map[string]UnicodeEscape{}
+			for i, field := range fields {
+				row[field] = UnicodeEscape(record[i])
+			}
+
+			err = w.Write(row)
+			if err != nil {
+				return err
+			}
+		}
+
+		return nil
+	})
 }
 
 func transformCSVFile(in, out string) error {

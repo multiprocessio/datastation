@@ -10,8 +10,8 @@ import (
 	"strings"
 )
 
-var home, _ = os.UserHomeDir()
-var base = path.Join(home, "DataStationProjects")
+var HOME, _ = os.UserHomeDir()
+var FS_BASE = path.Join(HOME, "DataStationProjects")
 
 func readJSONFileInto(file string, into interface{}) error {
 	f, err := os.Open(file)
@@ -34,7 +34,7 @@ func getProjectFile(projectId string) string {
 		return projectId
 	}
 
-	return path.Join(base, projectId)
+	return path.Join(FS_BASE, projectId)
 }
 
 func getProjectPanel(projectId, panelId string) (*ProjectState, int, *PanelInfo, error) {
@@ -64,7 +64,7 @@ func getProjectResultsFile(projectId string) string {
 	if strings.HasSuffix(project, ".dsproj") {
 		project = project[0 : len(project)-len(".dsproj")]
 	}
-	return strings.ReplaceAll(path.Join(base, "."+project+".results"), "\\", "/")
+	return strings.ReplaceAll(path.Join(FS_BASE, "."+project+".results"), "\\", "/")
 }
 
 func getPanelResultsFile(projectId string, panelId string) string {
