@@ -25,7 +25,7 @@ var ansiSQLQuoteType = quoteType{
 }
 
 var mysqlQuoteType = quoteType{
-	identifier: `'`,
+	identifier: "`",
 }
 
 func quote(value string, quoteChar string) string {

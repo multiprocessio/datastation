@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"path"
 	"strings"
 
@@ -17,6 +18,10 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 	_ "github.com/sijms/go-ora/v2"
 )
+
+func debug(obj interface{}) {
+	log.Printf("%#v\n", obj)
+}
 
 func (e *Encrypt) decrypt() (string, error) {
 	if !e.Encrypted {
@@ -57,8 +62,8 @@ var defaultPorts = map[string]string{
 	"mysql": "3306",
 }
 
-func getConnectionString(connector *ConnectorInfo) (string, string, error) {
-	address := connector.Database.Address
+func getConnectionString(dbInfo DatabaseConnectorInfoDatabase) (string, string, error) {
+	address := dbInfo.Address
 	split := strings.Split(address, "?")
 	address = split[0]
 	extraArgs := ""
@@ -66,23 +71,23 @@ func getConnectionString(connector *ConnectorInfo) (string, string, error) {
 		extraArgs = strings.Join(split[1:], "?")
 	}
 
-	database := connector.Database.Database
-	username := connector.Database.Username
+	database := dbInfo.Database
+	username := dbInfo.Username
 
 	genericUserPass := ""
 	var pass string
-	if username != "" || connector.Database.Password.Value != "" {
+	if username != "" || dbInfo.Password.Value != "" {
 		var err error
-		pass, err = connector.Database.Password.decrypt()
+		pass, err = dbInfo.Password.decrypt()
 		if err != nil {
 			return "", "", err
 		}
 		genericUserPass = fmt.Sprintf("%s:%s@", username, pass)
 	}
 
-	genericString := fmt.Sprintf("%s://%s%s/%s?%s", connector.Database.Type, genericUserPass, address, database, extraArgs)
+	genericString := fmt.Sprintf("%s://%s%s/%s?%s", dbInfo.Type, genericUserPass, address, database, extraArgs)
 
-	switch connector.Database.Type {
+	switch dbInfo.Type {
 	case PostgresDatabase:
 		return "postgres", genericString, nil
 	case MySQLDatabase:
@@ -140,7 +145,9 @@ func evalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo) e
 		return fmt.Errorf("Unknown connector " + panel.Database.ConnectorId)
 	}
 
-	vendor, connStr, err := getConnectionString(connector)
+	dbInfo := connector.Database
+
+	vendor, connStr, err := getConnectionString(dbInfo)
 	if err != nil {
 		return err
 	}
@@ -152,11 +159,11 @@ func evalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo) e
 
 	mangleInsert := defaultMangleInsert
 	qt := ansiSQLQuoteType
-	if connector.Type == "postgres" {
+	if dbInfo.Type == "postgres" {
 		mangleInsert = postgresMangleInsert
 	}
 
-	if connector.Type == "mysql" {
+	if dbInfo.Type == "mysql" {
 		qt = mysqlQuoteType
 	}
 
@@ -167,9 +174,12 @@ func evalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo) e
 		panel.Content,
 		idShapeMap,
 		idMap,
-		connector.Type == "mysql" || connector.Type == "sqlite" || connector.Type == "postgres",
+		dbInfo.Type == "mysql" || dbInfo.Type == "sqlite" || dbInfo.Type == "postgres",
 		qt,
 	)
+	if err != nil {
+		return err
+	}
 
 	out := getPanelResultsFile(project.ProjectName, panel.Id)
 
