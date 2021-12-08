@@ -166,16 +166,18 @@ const (
 	InfluxDatabase                                  = "influx"
 )
 
+type DatabaseConnectorInfoDatabase struct {
+	Type     DatabaseConnectorInfoType `json:"type"`
+	Database string                    `json:"database"`
+	Username string                    `json:"username"`
+	Password Encrypt                   `json:"password_encrypt"`
+	Address  string                    `json:"address"`
+	ApiKey   Encrypt                   `json:"apiKey_encrypt"`
+	Extra    map[string]string         `json:"extra"`
+}
+
 type DatabaseConnectorInfo struct {
-	Database struct {
-		Type     DatabaseConnectorInfoType `json:"type"`
-		Database string                    `json:"database"`
-		Username string                    `json:"username"`
-		Password Encrypt                   `json:"password_encrypt"`
-		Address  string                    `json:"address"`
-		ApiKey   Encrypt                   `json:"apiKey_encrypt"`
-		Extra    map[string]string         `json:"extra"`
-	} `json:"database"`
+	Database DatabaseConnectorInfoDatabase `json:"database"`
 }
 
 type ProjectPage struct {

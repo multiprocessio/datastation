@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"regexp"
+	"sort"
 	"strings"
 )
 
@@ -39,7 +40,15 @@ type column struct {
 func sqlColumnsAndTypesFromShape(rowShape ObjectShape) []column {
 	var columns []column
 
-	for key, childShape := range rowShape.Children {
+	var keys []string
+	for key := range rowShape.Children {
+		keys = append(keys, key)
+	}
+
+	sort.Strings(keys)
+
+	for _, key := range keys {
+		childShape := rowShape.Children[key]
 		columnType := ""
 
 		// Look for simple type: X

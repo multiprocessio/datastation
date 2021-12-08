@@ -73,10 +73,10 @@ func getConnectionString(connector *ConnectorInfo) (string, string, error) {
 		if err != nil {
 			return "", "", err
 		}
-		genericUserPass = fmt.Sprintf("%s:%s", username, pass)
+		genericUserPass = fmt.Sprintf("%s:%s@", username, pass)
 	}
 
-	genericString := fmt.Sprintf("%s://%s@%s/%s?%s", connector.Database.Type, genericUserPass, address, database, extraArgs)
+	genericString := fmt.Sprintf("%s://%s%s/%s?%s", connector.Database.Type, genericUserPass, address, database, extraArgs)
 
 	switch connector.Database.Type {
 	case PostgresDatabase:
