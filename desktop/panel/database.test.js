@@ -13,11 +13,12 @@ const { withSavedPanels } = require('./testutil');
 const DATABASES = [
   {
     type: 'postgres',
-    query: 'SELECT 1 AS "1"',
+    query: `SELECT 1 AS "1", 2.2 AS "2", true AS "true", 'string' AS "string", CAST('2021-01-01' AS DATE) AS "date"`,
   },
   {
     type: 'mysql',
-    query: 'SELECT 1 AS "1"',
+    query:
+      'SELECT 1 AS `1`, 2.2 AS `2`, true AS `true`, "string" AS `string`, CAST("2021-01-01" AS DATE) AS `date`',
   },
   {
     type: 'postgres',
@@ -56,7 +57,8 @@ for (const subprocess of [
             new DatabaseConnectorInfo({
               type: t.type,
               database: 'test',
-              address: 'localhost' + (t.type === 'postgres' ? '?sslmode=disable' : ''),
+              address:
+                'localhost' + (t.type === 'postgres' ? '?sslmode=disable' : ''),
               username: 'test',
               password_encrypt: new Encrypt('test'),
             }),
@@ -75,8 +77,21 @@ for (const subprocess of [
               );
 
               expect(JSON.parse(panelValueBuffer.toString())).toStrictEqual(
-                t.query === 'SELECT 1 AS "1"'
-                  ? [{ 1: 1 }]
+                t.query.startsWith('SELECT 1')
+                  ? [
+                      {
+                        1: 1,
+                        2: 2.2,
+                        true: t.type === 'mysql' ? 1 : true,
+                        string: 'string',
+                        date:
+                          t.type === 'postgres'
+                            ? new Date('2021-01-01')
+                                .toISOString()
+                                .split('.')[0] + 'Z'
+                            : '2021-01-01',
+                      },
+                    ]
                   : [
                       { name: 'Kate', age: 9 },
                       { name: 'Bake', age: 10 },

@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"path"
+	"strconv"
 	"strings"
 
 	"golang.org/x/crypto/nacl/secretbox"
@@ -131,6 +132,16 @@ func getConnectionString(dbInfo DatabaseConnectorInfoDatabase) (string, string, 
 	return "", "", nil
 }
 
+var textTypes = map[string]bool{
+	"TEXT":      true,
+	"VARCHAR":   true,
+	"CHAR":      true,
+	"VARCHAR2":  true,
+	"DATE":      true,
+	"TIMESTAMP": true,
+	"DATETIME":  true,
+}
+
 func evalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo) error {
 	var connector *ConnectorInfo
 	for _, c := range project.Connectors {
@@ -183,6 +194,7 @@ func evalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo) e
 
 	out := getPanelResultsFile(project.ProjectName, panel.Id)
 
+	wroteFirstRow := false
 	return withJSONArrayOutWriter(out, func(w JSONArrayWriter) error {
 		_, err := importAndRun(
 			func(createTableStmt string) error {
@@ -201,17 +213,61 @@ func evalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo) e
 				defer rows.Close()
 
 				for rows.Next() {
-					// TODO: UnicodeEscape these columns?
 					row := map[string]interface{}{}
 					err := rows.MapScan(row)
 					if err != nil {
 						return nil, err
 					}
 
+					colTypes, err := rows.ColumnTypes()
+					if err != nil {
+						return nil, err
+					}
+
+					// The MySQL driver is not friendly about unknown data types.
+					// https://github.com/go-sql-driver/mysql/issues/441
+					for _, s := range colTypes {
+						col := s.Name()
+						bs, isBytes := row[col].([]uint8)
+
+						if isBytes {
+							switch t := strings.ToUpper(s.DatabaseTypeName()); t {
+							// Explicitly skip binary types
+							case "BINARY", "VARBINARY", "BLOB":
+								break
+
+								// Do conversion for ints, floats, and bools
+							case "INT", "BIGINT", "INT1", "INT2", "INT4", "INT8":
+								if dbInfo.Type == "mysql" {
+									row[col], _ = strconv.Atoi(string(row[col].([]uint8)))
+								}
+							case "REAL", "BIGREAL", "NUMERIC", "DECIMAL":
+								if bs, ok := row[col].([]uint8); ok {
+									row[col], _ = strconv.ParseFloat(string(bs), 64)
+								}
+							case "BOOLEAN", "BOOL":
+								row[col] = string(bs) == "true" || string(bs) == "TRUE" || string(bs) == "1"
+
+							default:
+								// Default to treating everything as a string
+								row[col] = string(bs)
+								if !wroteFirstRow && !textTypes[t] {
+									log.Println("Skipping unknown type: " + s.DatabaseTypeName())
+								}
+							}
+						}
+
+						if s, ok := row[col].(string); ok {
+							row[col] = UnicodeEscape(s)
+						}
+					}
+
 					err = w.Write(row)
 					if err != nil {
 						return nil, err
 					}
+
+					wroteFirstRow = true
 				}
 
 				return nil, rows.Err()
