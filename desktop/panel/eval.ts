@@ -83,7 +83,11 @@ function canUseGoRunner(panel: PanelInfo, connectors: ConnectorInfo[]) {
     for (const c of connectors) {
       if (c.id === dp.database.connectorId) {
         const dc = c as DatabaseConnectorInfo;
-        return supportedDatabases.includes(dc.database.type);
+	if (c.serverId) {
+	  return false;
+	}
+
+	return supportedDatabases.includes(dc.database.type);
       }
     }
     return false;
@@ -166,6 +170,7 @@ export async function evalInSubprocess(
     });
 
     child.stdout.on('data', (data) => {
+      stderr += data;
       process.stdout.write(data);
     });
 

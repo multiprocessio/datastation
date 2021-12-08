@@ -60,7 +60,11 @@ func withJSONArrayOutWriter(out string, cb func(w JSONArrayWriter) error) error 
 	}
 
 	_, err = w.WriteAt([]byte("]"), lastChar)
-	return err
+	if err != nil {
+		return err
+	}
+
+	return w.Truncate(lastChar + 1)
 }
 
 func transformCSV(in io.Reader, out string) error {

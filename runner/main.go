@@ -34,7 +34,7 @@ func fatal(msg string, args ...interface{}) {
 	if msg[len(msg)-1] != '\n' {
 		msg += "\n"
 	}
-	fmt.Printf(msg, args...)
+	log.Printf(msg, args...)
 	os.Exit(2)
 }
 

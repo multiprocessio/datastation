@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/base64"
+	"strings"
 	"fmt"
 	"io/ioutil"
 	"path"
@@ -54,6 +55,13 @@ func (e *Encrypt) decrypt() (string, error) {
 
 func getConnectionString(connector *ConnectorInfo) (string, string, error) {
 	address := connector.Database.Address
+	split := strings.Split(address, "?")
+	address = split[0]
+	extraArgs := ""
+	if len(split) > 1 {
+		extraArgs = strings.Join(split[1:], "?")
+	}
+
 	database := connector.Database.Database
 	username := connector.Database.Username
 
@@ -68,7 +76,7 @@ func getConnectionString(connector *ConnectorInfo) (string, string, error) {
 		genericUserPass = fmt.Sprintf("%s:%s", username, pass)
 	}
 
-	genericString := fmt.Sprintf("%s://%s@%s/%s", connector.Database.Type, genericUserPass, address, database)
+	genericString := fmt.Sprintf("%s://%s@%s/%s?%s", connector.Database.Type, genericUserPass, address, database, extraArgs)
 
 	switch connector.Database.Type {
 	case PostgresDatabase:
@@ -88,6 +96,8 @@ func getConnectionString(connector *ConnectorInfo) (string, string, error) {
 		if database != "" {
 			query += "database=" + database
 		}
+
+		query += extraArgs
 		return "clickhouse", fmt.Sprintf("tcp://%s?%s", address, query), nil
 	case SQLiteDatabase:
 		return "sqlite3", address, nil
@@ -131,7 +141,7 @@ func evalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo) e
 	err = withJSONArrayOutWriter(out, func(w JSONArrayWriter) error {
 		for rows.Next() {
 			// TODO: UnicodeEscape these columns?
-			var row map[string]interface{}
+			row :=  map[string]interface{}{}
 			err := rows.MapScan(row)
 			if err != nil {
 				return err
