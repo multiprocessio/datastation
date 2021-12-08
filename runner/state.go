@@ -1,9 +1,5 @@
 package main
 
-import (
-	"github.com/google/uuid"
-)
-
 type PanelResult struct {
 	Exception   interface{}    `json:"exception"`
 	Value       *[]interface{} `json:"value"`
@@ -61,7 +57,6 @@ var defaultServerInfo = ServerInfo{
 	Password:       Encrypt{},
 	PrivateKeyFile: "~/.ssh/id_rsa",
 	Passphrase:     Encrypt{},
-	Id:             uuid.New().String(),
 }
 
 type ContentTypeInfo struct {
