@@ -65,7 +65,10 @@ export function portHostFromAddress(
   const port =
     +connector.database.address.split(':')[1] ||
     DEFAULT_PORT[connector.database.type];
-  const host = connector.database.address.split(':')[0];
+  let host = connector.database.address.split(':')[0];
+  if (host.includes('?')) {
+    host = host.split('?')[0];
+  }
   return { port, host };
 }
 
