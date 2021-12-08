@@ -105,7 +105,7 @@ export const updateProjectHandler: UpdateProjectHandler = {
     try {
       // This is a race condition but not sure if it matters because
       // it is only used to preserve the current project secret.
-      // Maybe secrets should be stored somewhere els.e
+      // Maybe secrets should be stored somewhere else
       const f = fs.readFileSync(fileName);
       existingState = JSON.parse(f.toString());
     } catch (e) {
