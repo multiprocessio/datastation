@@ -76,7 +76,7 @@ for (const subprocess of [
 
               expect(JSON.parse(panelValueBuffer.toString())).toStrictEqual(
                 t.query === 'SELECT 1'
-                  ? 1
+                  ? { 1: 1 }
                   : [
                       { name: 'Kate', age: 9 },
                       { name: 'Bake', age: 10 },
