@@ -19,6 +19,14 @@ type quoteType struct {
 	identifier string
 }
 
+var ansiSQLQuoteType = quoteType{
+	identifier: `"`,
+}
+
+var mysqlQuoteType = quoteType{
+	identifier: `'`,
+}
+
 func quote(value string, quoteChar string) string {
 	return quoteChar + strings.ReplaceAll(value, quoteChar, quoteChar+quoteChar) + quoteChar
 }
@@ -203,14 +211,14 @@ func chunk(a []map[string]interface{}, size int) [][]map[string]interface{} {
 func importAndRun(
 	createTable func(string) error,
 	insert func(string, []interface{}) error,
-	makeQuery func(string) error,
+	makeQuery func(string) ([]map[string]interface{}, error),
 	projectId string,
 	query string,
 	panelsToImport []panelToImport,
 	qt quoteType,
 	// Postgres uses $1, mysql/sqlite use ?
 	mangleInsert func(string) string,
-) error {
+) ([]map[string]interface{}, error) {
 	rowsIngested := 0
 	for _, panel := range panelsToImport {
 		var ddlColumns []string
@@ -224,7 +232,7 @@ func importAndRun(
 			strings.Join(ddlColumns, ", "))
 		err := createTable(createQuery)
 		if err != nil {
-			return err
+			return nil, err
 		}
 
 		var res []map[string]interface{}
@@ -238,7 +246,7 @@ func importAndRun(
 				qt)
 			err = insert(mangleInsert(query), values)
 			if err != nil {
-				return err
+				return nil, err
 			}
 			rowsIngested += len(resChunk)
 		}

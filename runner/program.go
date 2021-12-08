@@ -24,6 +24,16 @@ func getIdMap(page ProjectPage) map[string]string {
 	return m
 }
 
+func getIdShapeMap(page ProjectPage) map[string]Shape {
+	m := map[string]Shape{}
+	for i, panel := range page.Panels {
+		m[panel.Name] = panel.ResultMeta.Shape
+		m[fmt.Sprintf("%d", i)] = panel.ResultMeta.Shape
+	}
+
+	return m
+}
+
 func getIdMapJson(page ProjectPage) string {
 	idMap := getIdMap(page)
 	bts, _ := json.Marshal(idMap)

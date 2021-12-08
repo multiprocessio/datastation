@@ -130,34 +130,70 @@ func evalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo) e
 		return err
 	}
 
-	rows, err := db.Queryx(panel.Content)
-	if err != nil {
-		return err
+	mangleInsert := defaultMangleInsert
+	qt := ansiSQLQuoteType
+	if connector.Type == "postgres" {
+		mangleInsert = postgresMangleInsert
 	}
-	defer rows.Close()
+
+	if connector.Type == "mysql" {
+		qt = mysqlQuoteType
+	}
+
+	idMap := getIdMap(project.Pages[pageIndex])
+	idShapeMap := getIdShapeMap(project.Pages[pageIndex])
+
+	panelsToImport, query, err := transformDM_getPanelCalls(
+		panel.Content,
+		idShapeMap,
+		idMap,
+		connector.Type == "mysql" || connector.Type == "sqlite" || connector.Type == "postgres",
+		qt,
+	)
 
 	out := getPanelResultsFile(project.ProjectName, panel.Id)
 
-	err = withJSONArrayOutWriter(out, func(w JSONArrayWriter) error {
-		for rows.Next() {
-			// TODO: UnicodeEscape these columns?
-			row := map[string]interface{}{}
-			err := rows.MapScan(row)
-			if err != nil {
+	return withJSONArrayOutWriter(out, func(w JSONArrayWriter) error {
+		_, err := importAndRun(
+			func(createTableStmt string) error {
+				_, err := db.Exec(createTableStmt)
 				return err
-			}
-
-			err = w.Write(row)
-			if err != nil {
+			},
+			func(insertStmt string, values []interface{}) error {
+				_, err := db.Exec(insertStmt, values...)
 				return err
-			}
-		}
+			},
+			func(query string) ([]map[string]interface{}, error) {
+				rows, err := db.Queryx(query)
+				if err != nil {
+					return nil, err
+				}
+				defer rows.Close()
 
-		return nil
-	})
-	if err != nil {
+				for rows.Next() {
+					// TODO: UnicodeEscape these columns?
+					row := map[string]interface{}{}
+					err := rows.MapScan(row)
+					if err != nil {
+						return nil, err
+					}
+
+					err = w.Write(row)
+					if err != nil {
+						return nil, err
+					}
+				}
+
+				return nil, rows.Err()
+
+			},
+			project.ProjectName,
+			query,
+			panelsToImport,
+			qt,
+			mangleInsert,
+		)
+
 		return err
-	}
-
-	return rows.Err()
+	})
 }

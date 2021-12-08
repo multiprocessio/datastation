@@ -35,11 +35,6 @@ for (const subprocess of [
   { go: path.join(CODE_ROOT, 'build', 'go_desktop_runner') },
 ]) {
   for (const t of DATABASES) {
-    // Go runner doesn't support DM_getPanel yet
-    if (t.query !== 'SELECT 1' && subprocess.go) {
-      continue;
-    }
-
     describe(
       t.type + 'running via ' + (subprocess.node || subprocess.go),
       () => {
