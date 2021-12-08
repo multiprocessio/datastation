@@ -102,7 +102,6 @@ func getConnectionString(connector *ConnectorInfo) (string, string, error) {
 		}
 
 		dsn += "/" + database + "?" + extraArgs
-		fmt.Println("HERE PHIL", dsn)
 		return "mysql", dsn, nil
 	case SQLServerDatabase:
 		return "sqlserver", genericString, nil

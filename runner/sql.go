@@ -119,7 +119,6 @@ func transformDM_getPanelCalls(
 			return ""
 		}
 
-		fmt.Printf("%#v\n", s.ArrayShape)
 		rowShape := s.ArrayShape.Children
 		if rowShape.Kind != ObjectKind {
 			err = makeErrNotAnArrayOfObjects(nameOrIndex)

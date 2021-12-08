@@ -31,8 +31,8 @@ const DATABASES = [
 ];
 
 for (const subprocess of [
-  undefined,
-  { node: path.join(CODE_ROOT, 'build', 'desktop_runner.js') },
+  //undefined,
+  //{ node: path.join(CODE_ROOT, 'build', 'desktop_runner.js') },
   { go: path.join(CODE_ROOT, 'build', 'go_desktop_runner') },
 ]) {
   for (const t of DATABASES) {
@@ -56,7 +56,7 @@ for (const subprocess of [
             new DatabaseConnectorInfo({
               type: t.type,
               database: 'test',
-              address: 'localhost?sslmode=disable',
+              address: 'localhost' + (t.type === 'postgres' ? '?sslmode=disable' : ''),
               username: 'test',
               password_encrypt: new Encrypt('test'),
             }),
