@@ -36,7 +36,7 @@ for (const subprocess of [
 ]) {
   for (const t of DATABASES) {
     describe(
-      t.type + ' running via ' + (subprocess.node || subprocess.go),
+      t.type + ' running via ' + (subprocess.node || subprocess.go) + ': ' + t.query,
       () => {
         test(`runs ${t.type} query`, async () => {
           if (process.platform !== 'linux') {
