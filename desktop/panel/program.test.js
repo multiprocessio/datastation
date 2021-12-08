@@ -94,7 +94,9 @@ for (const t of TESTS) {
       }
 
       test(`runs ${t.type} programs to perform addition via ${
-        subprocessName ? subprocessName : 'same-process'
+        subprocessName
+          ? subprocessName.node || subprocessName.go
+          : 'same-process'
       }`, async () => {
         const lp = new LiteralPanelInfo({
           contentTypeInfo: { type: 'text/csv' },
