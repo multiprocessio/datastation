@@ -13,7 +13,7 @@ const { makeEvalHandler } = require('./eval');
 const { fetchResultsHandler } = require('./columns');
 
 for (const runner of [undefined, { go: 'build/go_desktop_runner' }]) {
-  test(`store and retrieve literal${
+  test(`store and retrieve literal ${
     runner ? 'using ' + runner : ''
   }, specific columns`, async () => {
     const tmp = await makeTmpFile({ prefix: 'columns-project-' });
@@ -51,7 +51,7 @@ for (const runner of [undefined, { go: 'build/go_desktop_runner' }]) {
           },
         ],
       };
-      fs.writeFileSync(tmp.path, JSON.stringify(projectState));
+      fs.writeFileSync(tmp.path + '.dsproj', JSON.stringify(projectState));
       const result = await makeEvalHandler(runner).handler(
         tmp.path,
         { panelId: id },

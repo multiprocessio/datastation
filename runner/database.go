@@ -60,7 +60,19 @@ func (e *Encrypt) decrypt() (string, error) {
 }
 
 var defaultPorts = map[string]string{
-	"mysql": "3306",
+	"postgres":      "5432",
+	"mysql":         "3306",
+	"sqlite":        "0",
+	"sqlserver":     "1433",
+	"oracle":        "1521",
+	"clickhouse":    "8123",
+	"cassandra":     "9160",
+	"snowflake":     "443",
+	"presto":        "8080",
+	"elasticsearch": "9200",
+	"influx":        "8086",
+	"splunk":        "443",
+	"prometheus":    "9090",
 }
 
 func getConnectionString(dbInfo DatabaseConnectorInfoDatabase) (string, string, error) {
@@ -121,6 +133,10 @@ func getConnectionString(dbInfo DatabaseConnectorInfoDatabase) (string, string, 
 
 		if database != "" {
 			query += "database=" + database
+		}
+
+		if !strings.Contains(address, ":") {
+			address += ":" + defaultPorts["clickhouse"]
 		}
 
 		query += extraArgs
