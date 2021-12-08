@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 )
 
@@ -75,62 +76,66 @@ type panelToImport struct {
 	tableName string
 }
 
-/*
-
 func transformDM_getPanelCalls(
-  query: string,
-  idShapeMap: Record<string | number, Shape>,
-  idMap: Record<string | number, string>,
-  getPanelCallsAllowed: boolean,
-  quoteType: QuoteType
-): { panelsToImport: Array<panelToImport>; query: string } {
-  panelsToImport: Array<panelToImport> = [];
-  query = query.replace(
-    /(DM_getPanel\((?<id>[0-9]+)\))|(DM_getPanel\((?<name>'(?:[^'\\]|\\.)*\')\))/g,
-    func (...args) {
-      match = args.pop();
-      let nameOrIndex: number | string = '';
-      if (match.Name) {
-        nameOrIndex = match.Name.substring(1, match.Name.length - 1);
-      } else {
-        nameOrIndex = +match.id;
-      }
-      s = idShapeMap[nameOrIndex];
-      if (!s || s.Kind != 'array') {
-        throw new NotAnArrayOfObjectsError(nameOrIndex);
-      }
+	query string,
+	idShapeMap map[string]Shape,
+	idMap map[string]string,
+	getPanelCallsAllowed bool,
+	qt quoteType,
+) ([]panelToImport, string, error) {
+	var panelsToImport []panelToImport
 
-      rowShape = (s as ArrayShape).Children as ObjectShape;
-      if (rowShape.Kind != 'object') {
-        throw new NotAnArrayOfObjectsError(nameOrIndex);
-      }
+	r := regexp.MustCompile(`(DM_getPanel\(([0-9]+)\))|(DM_getPanel\(('(?:[^'\\]|\\.)*\')\))`)
+	r2 := regexp.MustCompile(`('(?:[^'\\]|\\.)*\')|([0-9]+)`)
 
-      id = idMap[nameOrIndex];
-      if (panelsToImport.filter((p) => id == p.id).length) {
-        // Don't import the same panel twice.
-        return;
-      }
+	var err error
+	query = r.ReplaceAllStringFunc(query, func(m string) string {
+		nameOrIndex := string(r2.Find([]byte(m)))
+		if nameOrIndex[0] == '\'' {
+			nameOrIndex = nameOrIndex[1 : len(nameOrIndex)-1]
+		}
 
-      tableName = `t_${nameOrIndex}`;
-      columns = sqlColumnsAndTypesFromShape(rowShape);
-      panelsToImport.push({
-        id,
-        columns,
-        tableName,
-      });
-      return quote(tableName, quoteType.identifier);
-    }
-  );
+		s, ok := idShapeMap[nameOrIndex]
+		if !ok || s.Kind != ArrayKind {
+			err = makeErrNotAnArrayOfObjects(nameOrIndex)
+			return ""
+		}
 
-  if (panelsToImport.length && !getPanelCallsAllowed) {
-    throw new UnsupportedError(
-      'DM_getPanel() is not yet supported by this connector.'
-    );
-  }
+		rowShape := s.ArrayShape.Children
+		if rowShape.Kind != ObjectKind {
+			err = makeErrNotAnArrayOfObjects(nameOrIndex)
+			return ""
+		}
 
-  return { panelsToImport, query };
+		id := idMap[nameOrIndex]
+		tableName := "t_" + nameOrIndex
+		for _, p := range panelsToImport {
+			if p.id == id {
+				// Don't import the same panel twice.
+				return quote(tableName, qt.identifier)
+			}
+		}
+
+		columns := sqlColumnsAndTypesFromShape(*rowShape.ObjectShape)
+		panelsToImport = append(panelsToImport, panelToImport{
+			id:        id,
+			columns:   columns,
+			tableName: tableName,
+		})
+
+		return quote(tableName, qt.identifier)
+	})
+
+	if err != nil {
+		return nil, "", err
+	}
+
+	if len(panelsToImport) > 0 && !getPanelCallsAllowed {
+		return nil, "", makeErrUnsupported("DM_getPanel() is not yet supported by this connector.")
+	}
+
+	return panelsToImport, query, nil
 }
-*/
 
 func formatImportQueryAndRows(
 	tableName string,
