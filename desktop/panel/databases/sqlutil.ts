@@ -91,8 +91,8 @@ export function transformDM_getPanelCalls(
       const tableName = `t_${nameOrIndex}`;
       if (panelsToImport.filter((p) => id === p.id).length) {
         // Don't import the same panel twice.
-	// TODO: test this
-	return quote(tableName, quoteType.identifier);
+        // TODO: test this
+        return quote(tableName, quoteType.identifier);
       }
 
       const columns = sqlColumnsAndTypesFromShape(rowShape);

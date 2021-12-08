@@ -1,8 +1,8 @@
 package main
 
 import (
-	"testing"
 	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 func Test_transformDM_getPanelCalls(t *testing.T) {
@@ -12,14 +12,14 @@ func Test_transformDM_getPanelCalls(t *testing.T) {
 			Children: Shape{
 				Kind: ObjectKind,
 				ObjectShape: &ObjectShape{
-					Children: map[string]Shape {
-						"age": Shape{
+					Children: map[string]Shape{
+						"age": {
 							Kind: ScalarKind,
 							ScalarShape: &ScalarShape{
 								Name: NumberScalar,
 							},
 						},
-						"name": Shape{
+						"name": {
 							Kind: ScalarKind,
 							ScalarShape: &ScalarShape{
 								Name: StringScalar,
@@ -33,11 +33,11 @@ func Test_transformDM_getPanelCalls(t *testing.T) {
 	panels, query, err := transformDM_getPanelCalls(
 		"SELECT * FROM DM_getPanel(0), DM_getPanel('my great panel')",
 		map[string]Shape{
-			"0": shape,
+			"0":              shape,
 			"my great panel": shape,
 		},
 		map[string]string{
-			"0": " a great id 2",
+			"0":              " a great id 2",
 			"my great panel": " a great id",
 		},
 		true,
