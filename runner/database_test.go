@@ -27,7 +27,7 @@ func Test_getConnectionString(t *testing.T) {
 		{
 			DatabaseConnectorInfoDatabase{Type: "mysql", Username: "jim", Password: Encrypt{Encrypted: false, Value: "pw"}, Database: "test", Address: "localhost:9090"},
 			"mysql",
-			"jim:pw@localhost:9090/test?",
+			"jim:pw@tcp(localhost:9090)/test?",
 			nil,
 		},
 		{

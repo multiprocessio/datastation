@@ -88,6 +88,9 @@ func getConnectionString(connector *ConnectorInfo) (string, string, error) {
 		}
 
 		if address != "" {
+			if !strings.Contains(address, ")") {
+				address = "tcp(" + address + ")"
+			}
 			dsn += address
 		}
 
