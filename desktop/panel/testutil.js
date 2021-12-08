@@ -58,7 +58,14 @@ exports.withSavedPanels = async function (
               getProjectResultsFile(project.projectName) + panels[i - 1].id
             )
           ).toBe(false);
-	  console.log(fs.readFileSync(getProjectResultsFile(project.projectName) + panels[i - 1].id).toString(), 'PHIL PREVIOUS RESULTS');
+          console.log(
+            fs
+              .readFileSync(
+                getProjectResultsFile(project.projectName) + panels[i - 1].id
+              )
+              .toString(),
+            'PHIL PREVIOUS RESULTS'
+          );
         }
         // And make sure current panel results file is empty
         expect(
