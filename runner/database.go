@@ -2,10 +2,10 @@ package main
 
 import (
 	"encoding/base64"
-	"strings"
 	"fmt"
 	"io/ioutil"
 	"path"
+	"strings"
 
 	"golang.org/x/crypto/nacl/secretbox"
 
@@ -141,7 +141,7 @@ func evalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo) e
 	err = withJSONArrayOutWriter(out, func(w JSONArrayWriter) error {
 		for rows.Next() {
 			// TODO: UnicodeEscape these columns?
-			row :=  map[string]interface{}{}
+			row := map[string]interface{}{}
 			err := rows.MapScan(row)
 			if err != nil {
 				return err

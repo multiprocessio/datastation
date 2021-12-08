@@ -83,11 +83,11 @@ function canUseGoRunner(panel: PanelInfo, connectors: ConnectorInfo[]) {
     for (const c of connectors) {
       if (c.id === dp.database.connectorId) {
         const dc = c as DatabaseConnectorInfo;
-	if (c.serverId) {
-	  return false;
-	}
+        if (c.serverId) {
+          return false;
+        }
 
-	return supportedDatabases.includes(dc.database.type);
+        return supportedDatabases.includes(dc.database.type);
       }
     }
     return false;
