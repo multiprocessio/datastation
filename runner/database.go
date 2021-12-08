@@ -53,6 +53,10 @@ func (e *Encrypt) decrypt() (string, error) {
 	return string(decrypted), nil
 }
 
+var defaultPorts = map[string]string{
+	"mysql": "3306",
+}
+
 func getConnectionString(connector *ConnectorInfo) (string, string, error) {
 	address := connector.Database.Address
 	split := strings.Split(address, "?")
@@ -89,6 +93,9 @@ func getConnectionString(connector *ConnectorInfo) (string, string, error) {
 
 		if address != "" {
 			if !strings.Contains(address, ")") {
+				if !strings.Contains(address, ":") {
+					address += ":" + defaultPorts["mysql"]
+				}
 				address = "tcp(" + address + ")"
 			}
 			dsn += address
