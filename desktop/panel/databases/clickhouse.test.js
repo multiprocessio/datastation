@@ -1,7 +1,7 @@
 const path = require('path');
 const fs = require('fs');
 const { getProjectResultsFile } = require('../../store');
-const { CODE_ROOT } = require('../constants');
+const { CODE_ROOT } = require('../../constants');
 const {
   Encrypt,
   DatabasePanelInfo,
