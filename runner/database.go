@@ -65,7 +65,7 @@ var defaultPorts = map[string]string{
 	"sqlite":        "0",
 	"sqlserver":     "1433",
 	"oracle":        "1521",
-	"clickhouse":    "8123",
+	"clickhouse":    "9000",
 	"cassandra":     "9160",
 	"snowflake":     "443",
 	"presto":        "8080",
@@ -128,7 +128,7 @@ func getConnectionString(dbInfo DatabaseConnectorInfoDatabase) (string, string, 
 	case ClickhouseDatabase:
 		query := ""
 		if genericUserPass != "" {
-			query = fmt.Sprintf("username=%s&password=%s&", username, pass)
+			query = fmt.Sprintf("username=%s&password=%s", username, pass)
 		}
 
 		if database != "" {
