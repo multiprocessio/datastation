@@ -255,6 +255,7 @@ export const makeEvalHandler = (subprocessEval?: {
       idShapeMap[i] = p.resultMeta.shape;
       idShapeMap[p.name] = p.resultMeta.shape;
     });
+    console.log('in eval', idMap, idShapeMap, JSON.stringify(project, null, 2));
 
     const evalHandler = EVAL_HANDLERS[panel.type]();
     const res = await evalHandler(

@@ -43,7 +43,6 @@ exports.withSavedPanels = async function (
     ],
     connectors: connectors || [],
   };
-  fs.writeFileSync(tmp.path, JSON.stringify(project));
 
   try {
     await updateProjectHandler.handler(project.projectName, project);
@@ -58,14 +57,6 @@ exports.withSavedPanels = async function (
               getProjectResultsFile(project.projectName) + panels[i - 1].id
             )
           ).toBe(false);
-          console.log(
-            fs
-              .readFileSync(
-                getProjectResultsFile(project.projectName) + panels[i - 1].id
-              )
-              .toString(),
-            'PHIL PREVIOUS RESULTS'
-          );
         }
         // And make sure current panel results file is empty
         expect(
@@ -94,6 +85,10 @@ exports.withSavedPanels = async function (
           { panelId: panel.id },
           dispatch
         );
+
+        console.log('Writing project back to disk with result meta');
+        // Write results back to disk
+        await updateProjectHandler.handler(project.projectName, project);
 
         // Make panel results are saved to disk
         expect(
