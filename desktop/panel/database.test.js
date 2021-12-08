@@ -31,8 +31,9 @@ const DATABASES = [
 ];
 
 for (const subprocess of [
-  { node: path.join(CODE_ROOT, 'build', 'desktop_runner.js') },
-  { go: path.join(CODE_ROOT, 'build', 'go_desktop_runner') },
+  undefined,
+  //{ node: path.join(CODE_ROOT, 'build', 'desktop_runner.js') },
+  //{ go: path.join(CODE_ROOT, 'build', 'go_desktop_runner') },
 ]) {
   for (const t of DATABASES) {
     describe(
