@@ -69,7 +69,13 @@ exports.withSavedPanels = async function (
 
         function dispatch(r) {
           if (r.resource === 'getProject') {
-            return project;
+            const p = ProjectState.fromJSON(
+              JSON.parse(
+                fs.readFileSync(project.projectName + '.dsproj').toString()
+              ),
+              false
+            );
+            return p;
           }
 
           if (r.resource === 'fetchResults') {

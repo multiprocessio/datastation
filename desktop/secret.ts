@@ -79,6 +79,7 @@ export function decryptFields(a: any) {
     }
 
     f.value = decrypt(f.value);
+    f.encrypted = false;
     return f;
   });
 }

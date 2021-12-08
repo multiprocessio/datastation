@@ -56,13 +56,16 @@ export function getProjectResultsFile(projectId: string) {
 
 function checkAndEncrypt(e: Encrypt, existing?: Encrypt) {
   existing = existing || new Encrypt('');
-  const new_ = new Encrypt('');
-  if (e.value === null) {
-    new_.value = existing.value;
-    new_.encrypted = true;
-  } else if (!e.encrypted) {
-    new_.value = encrypt(e.value);
-    new_.encrypted = true;
+  const new_ = existing;
+
+  if (e.value !== null && e.value !== undefined) {
+    new_.value = e.value;
+    new_.encrypted = e.encrypted;
+
+    if (!e.encrypted) {
+      new_.value = encrypt(e.value);
+      new_.encrypted = true;
+    }
   }
 
   return new_;
