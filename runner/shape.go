@@ -3,11 +3,11 @@ package main
 type ShapeKind string
 
 const (
-	Scalar  ShapeKind = "scalar"
-	Unknown           = "unknown"
-	Object            = "object"
-	Array             = "array"
-	Varied            = "varied"
+	ScalarKind  ShapeKind = "scalar"
+	UnknownKind           = "unknown"
+	ObjectKind            = "object"
+	ArrayKind             = "array"
+	VariedKind            = "varied"
 )
 
 type Shape struct {
@@ -44,5 +44,5 @@ type VariedShape struct {
 	Children []Shape `json:"children"`
 }
 
-var unknownShape = Shape{Kind: Unknown}
+var unknownShape = Shape{Kind: UnknownKind}
 var defaultShape = unknownShape
