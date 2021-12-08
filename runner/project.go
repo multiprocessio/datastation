@@ -30,6 +30,11 @@ func readJSONFileInto(file string, into interface{}) error {
 }
 
 func getProjectFile(projectId string) string {
+	ext := ".dsproj"
+	if !strings.HasSuffix(projectId, ext) {
+		projectId += ext
+	}
+
 	if filepath.IsAbs(projectId) {
 		return projectId
 	}

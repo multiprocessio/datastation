@@ -79,7 +79,6 @@ export async function evalDatabase(
   const info = guardPanel<DatabasePanelInfo>(panel, 'database');
 
   const connector = getAndDecryptConnector(project, info.database.connectorId);
-
   const serverId = connector.serverId || info.serverId;
 
   if (
