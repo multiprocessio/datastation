@@ -82,7 +82,17 @@ func getConnectionString(connector *ConnectorInfo) (string, string, error) {
 	case PostgresDatabase:
 		return "postgres", genericString, nil
 	case MySQLDatabase:
-		return "mysql", genericString, nil
+		dsn := ""
+		if genericUserPass != "" {
+			dsn += genericUserPass
+		}
+
+		if address != "" {
+			dsn += address
+		}
+
+		dsn += "/" + database + "?" + extraArgs
+		return "mysql", dsn, nil
 	case SQLServerDatabase:
 		return "sqlserver", genericString, nil
 	case OracleDatabase:
