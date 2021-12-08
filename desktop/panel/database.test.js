@@ -13,11 +13,11 @@ const { withSavedPanels } = require('./testutil');
 const DATABASES = [
   {
     type: 'postgres',
-    query: 'SELECT 1',
+    query: 'SELECT 1 AS "1"',
   },
   {
     type: 'mysql',
-    query: 'SELECT 1',
+    query: 'SELECT 1 AS "1"',
   },
   {
     type: 'postgres',
