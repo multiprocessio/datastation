@@ -78,3 +78,29 @@ func Test_transformDM_getPanelCalls(t *testing.T) {
 		id: " a great id",
 	})
 }
+
+func Test_chunk(t *testing.T) {
+	a := []map[string]interface{}{
+		{"a": 1},
+		{"b": 2},
+		{"c": 3},
+		{"d": 4},
+		{"e": 5},
+		{"f": 6},
+		{"g": 7},
+	}
+	chunks := chunk(a, 3)
+	assert.Equal(t, len(chunks), 3)
+	assert.Equal(t, len(chunks[0]), 3)
+	assert.Equal(t, len(chunks[1]), 3)
+	assert.Equal(t, len(chunks[2]), 1)
+	assert.Equal(t, chunks[2][0], map[string]interface{}{
+		"g": 7,
+	})
+}
+
+func Test_postgresMangleInsert(t *testing.T) {
+	assert.Equal(t,
+		postgresMangleInsert("INSERT INTO x VALUES (?, ?, ?)"),
+		"INSERT INTO x VALUES ($1, $2, $3)")
+}

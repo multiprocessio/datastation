@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"regexp"
 	"strings"
 )
@@ -171,55 +172,84 @@ func formatImportQueryAndRows(
 	return query, values
 }
 
-/*
-func importAndRun(
-  dispatch: Dispatch,
-  db: {
-    createTable: (stmt: string) => Promise<unknown>;
-    insert: (stmt: string, values: any[]) => Promise<unknown>;
-    query: (stmt: string) => Promise<any>;
-  },
-  projectId: string,
-  query: string,
-  panelsToImport: Array<panelToImport>,
-  quoteType: QuoteType,
-  // Postgres uses $1, mysql/sqlite use ?
-  mangleInsert?: (stmt: string) => string
-) {
-  let rowsIngested = 0;
-  for (panel of panelsToImport) {
-    ddlColumns = panel.columns
-      .map((c) => `${quote(c.Name, quoteType.identifier)} ${c.type}`)
-      .join(', ');
-    log.info('Creating temp table ' + panel.tableName);
-    await db.createTable(
-      `CREATE TEMPORARY TABLE ${quote(
-        panel.tableName,
-        quoteType.identifier
-      )} (${ddlColumns});`
-    );
-
-    res = await getPanelResult(dispatch, projectId, panel.id);
-    { value } = res;
-
-    for (data of chunk(value, 1000)) {
-      [query, rows] = formatImportQueryAndRows(
-        panel.tableName,
-        panel.columns,
-        data,
-        quoteType
-      );
-      await db.insert(mangleInsert ? mangleInsert(query) : query, rows);
-      rowsIngested += data.length;
-    }
-  }
-
-  if (panelsToImport.length) {
-    log.info(
-      `Ingested ${rowsIngested} rows in ${panelsToImport.length} tables.`
-    );
-  }
-
-  return db.query(query);
+func postgresMangleInsert(stmt string) string {
+	r := regexp.MustCompile("\\?")
+	counter := 0
+	return r.ReplaceAllStringFunc(stmt, func(m string) string {
+		counter += 1
+		return fmt.Sprintf("$%d", counter)
+	})
 }
-*/
+
+func defaultMangleInsert(stmt string) string {
+	return stmt
+}
+
+func chunk(a []map[string]interface{}, size int) [][]map[string]interface{} {
+	var chunks [][]map[string]interface{}
+	for i := 0; i < len(a); i += size {
+		end := i + size
+
+		if end > len(a) {
+			end = len(a)
+		}
+
+		chunks = append(chunks, a[i:end])
+	}
+
+	return chunks
+}
+
+func importAndRun(
+	createTable func(string) error,
+	insert func(string, []interface{}) error,
+	makeQuery func(string) error,
+	projectId string,
+	query string,
+	panelsToImport []panelToImport,
+	qt quoteType,
+	// Postgres uses $1, mysql/sqlite use ?
+	mangleInsert func(string) string,
+) error {
+	rowsIngested := 0
+	for _, panel := range panelsToImport {
+		var ddlColumns []string
+		for _, c := range panel.columns {
+			ddlColumns = append(ddlColumns, quote(c.name, qt.identifier)+" "+c.kind)
+		}
+
+		log.Println("Creating temp table " + panel.tableName)
+		createQuery := fmt.Sprintf("CREATE TEMPORARY TABLE %s (%s);",
+			quote(panel.tableName, qt.identifier),
+			strings.Join(ddlColumns, ", "))
+		err := createTable(createQuery)
+		if err != nil {
+			return err
+		}
+
+		var res []map[string]interface{}
+		err = readJSONFileInto(getPanelResultsFile(projectId, panel.id), &res)
+
+		for _, resChunk := range chunk(res, 1000) {
+			query, values := formatImportQueryAndRows(
+				panel.tableName,
+				panel.columns,
+				resChunk,
+				qt)
+			err = insert(mangleInsert(query), values)
+			if err != nil {
+				return err
+			}
+			rowsIngested += len(resChunk)
+		}
+	}
+
+	if len(panelsToImport) > 0 {
+		log.Printf(
+			"Ingested %d rows in %d tables.\n",
+			rowsIngested,
+			len(panelsToImport))
+	}
+
+	return makeQuery(query)
+}
