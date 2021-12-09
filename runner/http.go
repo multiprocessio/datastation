@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -55,13 +56,21 @@ func evalHttpPanel(project *ProjectState, pageIndex int, panel *PanelInfo) error
 		}
 		return transformXLSX(r, out)
 	case "parquet":
-		file, err := ioutil.TempFile("", "http-parquet-temp")
+		w, err := ioutil.TempFile("", "http-parquet-temp")
 		if err != nil {
 			return err
 		}
-		defer os.Remove(file.Name())
+		defer os.Remove(w.Name())
 
-		return transformParquetFile(file.Name(), out)
+		_, err = w.ReadFrom(rsp.Body)
+		if err == io.EOF {
+			err = nil
+		}
+		if err != nil {
+			return err
+		}
+
+		return transformParquetFile(w.Name(), out)
 	}
 
 	return fmt.Errorf("Unsupported type " + assumedType)
