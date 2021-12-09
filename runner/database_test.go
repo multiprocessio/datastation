@@ -45,7 +45,7 @@ func Test_getConnectionString(t *testing.T) {
 		{
 			DatabaseConnectorInfoDatabase{Type: "sqlserver", Username: "jim", Password: Encrypt{Encrypted: false, Value: "pw"}, Database: "test", Address: "localhost"},
 			"sqlserver",
-			"sqlserver://jim:pw@localhost/test?",
+			"sqlserver://jim:pw@localhost?database=test",
 			nil,
 		},
 		{
