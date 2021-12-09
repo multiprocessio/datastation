@@ -149,7 +149,8 @@ for (const subprocess of [
             }
           }
         });
-      }
+      },
+      30_000
     );
   }
 }
