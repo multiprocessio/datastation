@@ -17,7 +17,7 @@ const baseline = JSON.parse(
   fs.readFileSync(path.join(testPath, 'userdata.json').toString())
 );
 
-const USERDATA_FILES = ['json', 'xlsx', 'csv', 'parquet']; //, 'parquet'];
+const USERDATA_FILES = ['json', 'xlsx', 'csv', 'parquet'];
 
 const cp = spawn('python3', ['-m', 'http.server', '9799']);
 cp.stdout.on('data', (data) => {
@@ -29,14 +29,11 @@ cp.stderr.on('data', (data) => {
 });
 
 for (const subprocessName of [
-  //undefined,
-  //{ node: path.join(CODE_ROOT, 'build', 'desktop_runner.js') },
+  undefined,
+  { node: path.join(CODE_ROOT, 'build', 'desktop_runner.js') },
   { go: path.join(CODE_ROOT, 'build', 'go_desktop_runner') },
 ]) {
   for (const userdataFileType of USERDATA_FILES) {
-    if (userdataFileType !== 'parquet') {
-      continue;
-    }
     const hp = new HTTPPanelInfo(
       '',
       new HTTPConnectorInfo(
