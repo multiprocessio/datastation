@@ -7,6 +7,8 @@ import (
 	"os/exec"
 	"path"
 	"strings"
+
+	"github.com/google/uuid"
 )
 
 type ProgramEvalInfo struct {
@@ -47,11 +49,32 @@ func evalProgramSQLPanel(project *ProjectState, pageIndex int, panel *PanelInfo)
 	}
 	defer os.Remove(tmp.Name())
 
-	return nil
+	connector := ConnectorInfo{
+		Type: DatabaseConnector,
+		Id:   uuid.New().String(),
+		DatabaseConnectorInfo: &DatabaseConnectorInfo{
+			Database: DatabaseConnectorInfoDatabase{
+				Type:     SQLiteDatabase,
+				Database: tmp.Name(),
+			},
+		},
+	}
+	project.Connectors = append(project.Connectors, connector)
+
+	return evalDatabasePanel(project, pageIndex, &PanelInfo{
+		Type:    DatabasePanel,
+		Id:      panel.Id,
+		Content: panel.Content,
+		DatabasePanelInfo: &DatabasePanelInfo{
+			Database: DatabasePanelInfoDatabase{
+				ConnectorId: connector.Id,
+			},
+		},
+	})
 }
 
 func evalProgramPanel(project *ProjectState, pageIndex int, panel *PanelInfo) error {
-	if panel.Program.Type == "sql" {
+	if panel.Program.Type == SQL {
 		return evalProgramSQLPanel(project, pageIndex, panel)
 	}
 

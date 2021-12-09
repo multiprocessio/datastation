@@ -22,12 +22,12 @@ const TESTS = [
   },
   {
     type: 'sql',
-    content: 'SELECT name, age::INT + 10 AS age FROM DM_getPanel(0)',
+    content: 'SELECT name, CAST(age AS INT) + 10 AS age FROM DM_getPanel(0)',
     condition: true,
   },
   {
     type: 'sql',
-    content: `SELECT name, age::INT + 10 AS age FROM DM_getPanel('Raw Data')`,
+    content: `SELECT name, CAST(age AS INT) + 10 AS age FROM DM_getPanel('Raw Data')`,
     condition: true,
   },
   // Rest are only mandatory-tested on Linux to make CI easier for now
@@ -89,10 +89,6 @@ for (const t of TESTS) {
       { node: path.join(CODE_ROOT, 'build', 'desktop_runner.js') },
       { go: path.join(CODE_ROOT, 'build', 'go_desktop_runner') },
     ]) {
-      if (t.type === 'sql' && subprocessName?.go) {
-        continue;
-      }
-
       test(`runs ${t.type} programs to perform addition via ${
         subprocessName
           ? subprocessName.node || subprocessName.go

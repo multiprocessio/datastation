@@ -18,7 +18,6 @@ import {
   PanelInfo,
   PanelInfoType,
   PanelResult,
-  ProgramPanelInfo,
   ProjectState,
 } from '../../shared/state';
 import { getMimeType, XLSX_MIME_TYPE } from '../../shared/text';
@@ -95,10 +94,7 @@ function canUseGoRunner(panel: PanelInfo, connectors: ConnectorInfo[]) {
     return false;
   }
 
-  if (
-    panel.type === 'program' &&
-    (panel as ProgramPanelInfo).program.type !== 'sql'
-  ) {
+  if (panel.type === 'program') {
     return true;
   }
 
