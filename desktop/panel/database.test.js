@@ -52,7 +52,6 @@ const vendorOverride = {
   },
   sqlserver: {
     address: 'tcp://localhost',
-    database: '',
     username: 'sa',
     password: '1StrongPwd!!',
   },
@@ -87,9 +86,7 @@ for (const subprocess of [
           const connectors = [
             new DatabaseConnectorInfo({
               type: t.type,
-              database: vendorOverride[t.type]?.database
-                ? vendorOverride[t.type]?.database
-                : 'test',
+              database: 'test',
               address: vendorOverride[t.type]?.address || 'localhost',
               username: vendorOverride[t.type]?.username || 'test',
               password_encrypt: new Encrypt(
