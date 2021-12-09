@@ -23,7 +23,6 @@ export async function evalSQLServer(
     server: host,
     port: port,
   };
-  console.log('DEBUG', config);
   const client = await sqlserver.connect(config);
   try {
     const res = await client.query(content);

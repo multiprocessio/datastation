@@ -60,8 +60,8 @@ const vendorOverride = {
 
 for (const subprocess of [
   undefined,
-  //  { node: path.join(CODE_ROOT, 'build', 'desktop_runner.js') },
-  //  { go: path.join(CODE_ROOT, 'build', 'go_desktop_runner') },
+  { node: path.join(CODE_ROOT, 'build', 'desktop_runner.js') },
+  { go: path.join(CODE_ROOT, 'build', 'go_desktop_runner') },
 ]) {
   for (const t of DATABASES) {
     if (t.skip) {
@@ -147,6 +147,7 @@ for (const subprocess of [
               }
             }
           }
+	  // sqlserver at least can take longer than 5s to fail
         }, 30_000);
       }
     );
