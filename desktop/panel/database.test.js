@@ -1,6 +1,7 @@
 const path = require('path');
 const { CODE_ROOT } = require('../constants');
 const { getProjectResultsFile } = require('../store');
+const { ensureSigningKey } = require('../secret');
 const fs = require('fs');
 const {
   LiteralPanelInfo,
@@ -14,6 +15,12 @@ const DATABASES = [
   {
     type: 'postgres',
     query: `SELECT 1 AS "1", 2.2 AS "2", true AS "true", 'string' AS "string", CAST('2021-01-01' AS DATE) AS "date"`,
+  },
+  {
+    type: 'sqlserver',
+    // SQL Server doesn't have true/false literals
+    query: `SELECT 1 AS "1", 2.2 AS "2", 1 AS "true", 'string' AS "string", CAST('2021-01-01' AS DATE) AS "date"`,
+    skip: process.platform !== 'linux',
   },
   {
     type: 'sqlite',
@@ -38,12 +45,30 @@ const DATABASES = [
   },
 ];
 
+ensureSigningKey();
+
+const vendorOverride = {
+  postgres: {
+    address: 'localhost?sslmode=disable',
+  },
+  sqlserver: {
+    address: 'localhost',
+    username: 'sa',
+    password: '1StrongPwd!!',
+    database: 'master',
+  },
+};
+
 for (const subprocess of [
   undefined,
   { node: path.join(CODE_ROOT, 'build', 'desktop_runner.js') },
   { go: path.join(CODE_ROOT, 'build', 'go_desktop_runner') },
 ]) {
   for (const t of DATABASES) {
+    if (t.skip) {
+      continue;
+    }
+
     describe(
       t.type +
         ' running via ' +
@@ -63,11 +88,12 @@ for (const subprocess of [
           const connectors = [
             new DatabaseConnectorInfo({
               type: t.type,
-              database: 'test',
-              address:
-                'localhost' + (t.type === 'postgres' ? '?sslmode=disable' : ''),
-              username: 'test',
-              password_encrypt: new Encrypt('test'),
+              database: vendorOverride[t.type]?.database || 'test',
+              address: vendorOverride[t.type]?.address || 'localhost',
+              username: vendorOverride[t.type]?.username || 'test',
+              password_encrypt: new Encrypt(
+                vendorOverride[t.type]?.password || 'test'
+              ),
             }),
           ];
           const dp = new DatabasePanelInfo();
@@ -121,7 +147,8 @@ for (const subprocess of [
               }
             }
           }
-        });
+          // sqlserver at least can take longer than 5s to fail
+        }, 30_000);
       }
     );
   }

@@ -26,13 +26,16 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-yarn-
 
+    # Start up sqlserver
+    - run: docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=1StrongPwd!!" -p 1433:1433 -d mcr.microsoft.com/mssql/server:2019-latest
+
     - run: ./scripts/ci/prepare_linux.sh --integration-tests
     - run: yarn format
     - run: yarn tsc
     - run: cd runner && gofmt -w .
     - run: ./scripts/fail_on_diff.sh
     - run: yarn test-licenses
-    # Needed so we can have ./build/desktop_runner.js ready for tests
+    # Needed so we can have ./build/desktop_runner.js and ./build/go_desktop_runner ready for tests
     - run: yarn build-desktop
     - run: yarn test --runInBand --detectOpenHandles --forceExit --verbose
     - run: cd runner && go test -cover
