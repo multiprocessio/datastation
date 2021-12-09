@@ -13,6 +13,7 @@ import {
   DatabaseConnectorInfo,
   DatabasePanelInfo,
   FilePanelInfo,
+  HTTPPanelInfo,
   LiteralPanelInfo,
   PanelInfo,
   PanelInfoType,
@@ -101,7 +102,7 @@ function canUseGoRunner(panel: PanelInfo, connectors: ConnectorInfo[]) {
     return true;
   }
 
-  const fileLike = panel.type === 'literal' || panel.type === 'file';
+  const fileLike = ['literal', 'http', 'file'].includes(panel.type);
   if (!fileLike) {
     return false;
   }
@@ -122,6 +123,15 @@ function canUseGoRunner(panel: PanelInfo, connectors: ConnectorInfo[]) {
         additionalParsers,
       },
       ''
+    );
+  } else if (panel.type === 'http') {
+    const hp = panel as HTTPPanelInfo;
+    mimetype = getMimeType(
+      {
+        ...hp.http.http.contentTypeInfo,
+        additionalParsers,
+      },
+      hp.http.http.url
     );
   } else {
     const fp = panel as FilePanelInfo;
