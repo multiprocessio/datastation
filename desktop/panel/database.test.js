@@ -42,6 +42,17 @@ const DATABASES = [
   },
 ];
 
+const vendorOverride = {
+  postgres: {
+    address: 'localhost?sslmode=disable',
+  },
+  sqlserver: {
+    database: '',
+    username: 'sa',
+    password: '1Secure*Password1',
+  },
+};
+
 for (const subprocess of [
   undefined,
   { node: path.join(CODE_ROOT, 'build', 'desktop_runner.js') },
@@ -67,11 +78,14 @@ for (const subprocess of [
           const connectors = [
             new DatabaseConnectorInfo({
               type: t.type,
-              database: t.type === 'sqlserver' ? '' : 'test',
-              address:
-                'localhost' + (t.type === 'postgres' ? '?sslmode=disable' : ''),
-              username: t.type === 'sqlserver' ? 'sa' : 'test',
-              password_encrypt: new Encrypt('test'),
+              database: vendorOverride[t.type].database
+                ? vendorOverride[t.type].database
+                : 'test',
+              address: vendorOverride[t.type].address || 'localhost',
+              username: vendorOverride[t.type].username || 'test',
+              password_encrypt: new Encrypt(
+                vendorOverride[t.type].password || 'test'
+              ),
             }),
           ];
           const dp = new DatabasePanelInfo();
