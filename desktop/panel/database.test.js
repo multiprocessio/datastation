@@ -83,13 +83,13 @@ for (const subprocess of [
           const connectors = [
             new DatabaseConnectorInfo({
               type: t.type,
-              database: vendorOverride[t.type].database
-                ? vendorOverride[t.type].database
+              database: vendorOverride[t.type]?.database
+                ? vendorOverride[t.type]?.database
                 : 'test',
-              address: vendorOverride[t.type].address || 'localhost',
-              username: vendorOverride[t.type].username || 'test',
+              address: vendorOverride[t.type]?.address || 'localhost',
+              username: vendorOverride[t.type]?.username || 'test',
               password_encrypt: new Encrypt(
-                vendorOverride[t.type].password || 'test'
+                vendorOverride[t.type]?.password || 'test'
               ),
             }),
           ];
