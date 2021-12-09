@@ -66,6 +66,7 @@ export class DesktopSettings extends Settings {
     return {
       resource: 'getSettings',
       handler: async () => {
+        Object.assign(this, DesktopSettings.fromFile(this.file));
         return this;
       },
     };

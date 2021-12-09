@@ -32,7 +32,7 @@ const DATABASES = [
 ];
 
 for (const subprocess of [
-  // undefined // uncomment this for debugging in the local process
+  undefined,
   { node: path.join(CODE_ROOT, 'build', 'desktop_runner.js') },
   { go: path.join(CODE_ROOT, 'build', 'go_desktop_runner') },
 ]) {
