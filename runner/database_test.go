@@ -31,7 +31,7 @@ func Test_getConnectionString(t *testing.T) {
 			nil,
 		},
 		{
-			DatabaseConnectorInfoDatabase{Type: "sqlite", Address: "test.sql"},
+			DatabaseConnectorInfoDatabase{Type: "sqlite", Database: "test.sql"},
 			"sqlite3",
 			"test.sql",
 			nil,
@@ -51,23 +51,18 @@ func Test_getConnectionString(t *testing.T) {
 		{
 			DatabaseConnectorInfoDatabase{Type: "clickhouse", Username: "jim", Password: Encrypt{Encrypted: false, Value: "pw"}, Database: "test", Address: "localhost"},
 			"clickhouse",
-			"tcp://localhost?username=jim&password=pw&database=test",
+			"tcp://localhost:9000?username=jim&password=pw&database=test",
 			nil,
 		},
 		{
-			DatabaseConnectorInfoDatabase{Type: "clickhouse", Password: Encrypt{Encrypted: false, Value: ""}, Database: "test", Address: "localhost"},
+			DatabaseConnectorInfoDatabase{Type: "clickhouse", Password: Encrypt{Encrypted: false, Value: ""}, Database: "test", Address: "localhost:9001"},
 			"clickhouse",
-			"tcp://localhost?database=test",
+			"tcp://localhost:9001?database=test",
 			nil,
 		},
 	}
 	for _, test := range tests {
-		vendor, connStr, err := getConnectionString(&ConnectorInfo{
-			Type: DatabaseConnector,
-			DatabaseConnectorInfo: &DatabaseConnectorInfo{
-				test.conn,
-			},
-		})
+		vendor, connStr, err := getConnectionString(test.conn)
 		assert.Equal(t, test.expectedVendor, vendor)
 		assert.Equal(t, test.expectedConnStr, connStr)
 		assert.Equal(t, test.expectedErr, err)

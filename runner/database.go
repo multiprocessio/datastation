@@ -128,7 +128,7 @@ func getConnectionString(dbInfo DatabaseConnectorInfoDatabase) (string, string, 
 	case ClickhouseDatabase:
 		query := ""
 		if genericUserPass != "" {
-			query = fmt.Sprintf("username=%s&password=%s", username, pass)
+			query = fmt.Sprintf("username=%s&password=%s&", username, pass)
 		}
 
 		if database != "" {
