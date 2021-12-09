@@ -2,7 +2,7 @@ import fs from 'fs';
 import Client from 'ssh2-sftp-client';
 import { FilePanelInfo, PanelInfo, ProjectState } from '../../shared/state';
 import { parseArrayBuffer } from '../../shared/text';
-import { additionalParsers } from './http';
+import { additionalParsers } from './parquet';
 import { getSSHConfig, resolvePath } from './tunnel';
 import { EvalHandlerResponse, guardPanel } from './types';
 

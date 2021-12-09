@@ -3,9 +3,11 @@ require('../../shared/polyfill');
 const { CODE_ROOT } = require('../constants');
 const path = require('path');
 const fs = require('fs');
+const { getProjectResultsFile } = require('../store');
 const { FilePanelInfo } = require('../../shared/state');
 const { file: makeTmpFile } = require('tmp-promise');
 const { evalFile } = require('./file');
+const { withSavedPanels } = require('./testutil');
 
 const USERDATA_FILES = ['json', 'xlsx', 'csv', 'parquet'];
 
@@ -58,39 +60,55 @@ function translateBaselineForType(baseline, fileType) {
   return data;
 }
 
-for (const userdataFileType of USERDATA_FILES) {
-  const dynamicF = {
-    // Do this so that its name shows up in stack traces
-    [userdataFileType + 'Test']: async () => {
-      const tmp = await makeTmpFile({
-        prefix: userdataFileType + '-file-project-',
-      });
+for (const subprocessName of [
+  undefined,
+  { node: path.join(CODE_ROOT, 'build', 'desktop_runner.js') },
+  { go: path.join(CODE_ROOT, 'build', 'go_desktop_runner') },
+]) {
+  for (const userdataFileType of USERDATA_FILES) {
+    const fp = new FilePanelInfo({
+      name: path.join(testPath, 'userdata.' + userdataFileType),
+    });
 
-      try {
-        const { value } = await evalFile(
-          tmp.path,
-          new FilePanelInfo({
-            name: path.join(testPath, 'userdata.' + userdataFileType),
-          })
-        );
-        const typeBaseline = translateBaselineForType(
-          baseline,
-          userdataFileType
-        );
-        // Parquet results seem to come out unsorted
-        if (userdataFileType === 'parquet') {
-          value.sort((r) => r.Street);
-          typeBaseline.sort((r) => r.Street);
-        }
-        expect(replaceBigInt(value)).toStrictEqual(replaceBigInt(typeBaseline));
-      } finally {
-        await tmp.cleanup();
+    const panels = [fp];
+
+    describe(
+      'eval ' +
+        userdataFileType +
+        ' file via ' +
+        (subprocessName ? subprocessName.go || subprocessName.node : 'memory'),
+      () => {
+        test('correct result', () => {
+          return withSavedPanels(
+            panels,
+            (project) => {
+              // Grab result
+              const value = JSON.parse(
+                fs
+                  .readFileSync(
+                    getProjectResultsFile(project.projectName) + fp.id
+                  )
+                  .toString()
+              );
+
+              const typeBaseline = translateBaselineForType(
+                baseline,
+                userdataFileType
+              );
+
+              // Parquet results seem to come out unsorted
+              if (userdataFileType === 'parquet') {
+                value.sort((r) => r.Street);
+                typeBaseline.sort((r) => r.Street);
+              }
+              expect(replaceBigInt(value)).toStrictEqual(
+                replaceBigInt(typeBaseline)
+              );
+            },
+            { evalPanels: true, subprocessName }
+          );
+        }, 10_000);
       }
-    },
-  };
-  test(
-    `load ${userdataFileType} userdata file`,
-    dynamicF[userdataFileType + 'Test'],
-    10_000
-  );
+    );
+  }
 }

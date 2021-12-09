@@ -20,11 +20,12 @@ import {
   ProgramPanelInfo,
   ProjectState,
 } from '../../shared/state';
-import { getMimeType } from '../../shared/text';
+import { getMimeType, XLSX_MIME_TYPE } from '../../shared/text';
 import { DSPROJ_FLAG, PANEL_FLAG, PANEL_META_FLAG } from '../constants';
 import { parsePartialJSONFile } from '../partial';
 import { Dispatch, RPCHandler } from '../rpc';
 import { flushUnwritten, getProjectResultsFile } from '../store';
+import { additionalParsers } from './parquet';
 import { getProjectAndPanel } from './shared';
 import { EvalHandlerExtra, EvalHandlerResponse } from './types';
 
@@ -105,14 +106,32 @@ function canUseGoRunner(panel: PanelInfo, connectors: ConnectorInfo[]) {
     return false;
   }
 
-  const supportedTypes = ['text/csv', 'application/json'];
+  const supportedTypes = [
+    'text/csv',
+    'application/json',
+    'parquet',
+    XLSX_MIME_TYPE,
+    'application/vnd.ms-excel',
+  ];
   let mimetype = '';
   if (panel.type === 'literal') {
     const lp = panel as LiteralPanelInfo;
-    mimetype = getMimeType(lp.literal.contentTypeInfo, '');
+    mimetype = getMimeType(
+      {
+        ...lp.literal.contentTypeInfo,
+        additionalParsers,
+      },
+      ''
+    );
   } else {
     const fp = panel as FilePanelInfo;
-    mimetype = getMimeType(fp.file.contentTypeInfo, fp.file.name);
+    mimetype = getMimeType(
+      {
+        ...fp.file.contentTypeInfo,
+        additionalParsers,
+      },
+      fp.file.name
+    );
   }
 
   return supportedTypes.includes(mimetype);

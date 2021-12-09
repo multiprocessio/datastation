@@ -212,7 +212,7 @@ func evalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo) e
 	out := getPanelResultsFile(project.ProjectName, panel.Id)
 
 	wroteFirstRow := false
-	return withJSONArrayOutWriter(out, func(w JSONArrayWriter) error {
+	return withJSONArrayOutWriterFile(out, func(w JSONArrayWriter) error {
 		_, err := importAndRun(
 			func(createTableStmt string) error {
 				_, err := db.Exec(createTableStmt)
