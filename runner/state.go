@@ -121,7 +121,6 @@ type LiteralPanelInfo struct {
 	} `json:"literal"`
 }
 
-
 type HttpPanelInfo struct {
 	Http HttpConnectorInfo `json:"http"`
 }
