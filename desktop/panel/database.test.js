@@ -18,6 +18,7 @@ const DATABASES = [
   {
     type: 'sqlserver',
     query: `SELECT 1 AS "1", 2.2 AS "2", true AS "true", 'string' AS "string", CAST('2021-01-01' AS DATE) AS "date"`,
+    skip: process.platform !== 'linux',
   },
   {
     type: 'sqlite',
@@ -59,6 +60,10 @@ for (const subprocess of [
   { go: path.join(CODE_ROOT, 'build', 'go_desktop_runner') },
 ]) {
   for (const t of DATABASES) {
+    if (!t.skip) {
+      continue;
+    }
+
     describe(
       t.type +
         ' running via ' +
