@@ -51,7 +51,7 @@ const vendorOverride = {
     address: 'localhost?sslmode=disable',
   },
   sqlserver: {
-    address: 'tcp://127.0.0.1',
+    address: 'tcp://0.0.0.0',
     username: 'sa',
     password: '1StrongPwd!!',
     database: 'test',
