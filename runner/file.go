@@ -304,21 +304,27 @@ func transformXLSXFile(in, out string) error {
 	return transformXLSX(f, out)
 }
 
-func evalFilePanel(project *ProjectState, pageIndex int, panel *PanelInfo) error {
-	assumedType := panel.File.ContentTypeInfo.Type
-	if assumedType == "" {
-		switch filepath.Ext(panel.File.Name) {
-		case ".csv":
-			assumedType = "text/csv"
-		case ".json":
-			assumedType = "application/json"
-		case ".xls", ".xlsx":
-			assumedType = "application/vnd.ms-excel"
-		case ".parquet":
-			assumedType = "parquet"
-		}
+func getMimeType(fileName string, ct ContentTypeInfo) string {
+	if ct.Type != "" {
+		return ct.Type
 	}
 
+	switch filepath.Ext(fileName) {
+	case ".csv":
+		return "text/csv"
+	case ".json":
+		return "application/json"
+	case ".xls", ".xlsx":
+		return "application/vnd.ms-excel"
+	case ".parquet":
+		return "parquet"
+	}
+
+	return ""
+}
+
+func evalFilePanel(project *ProjectState, pageIndex int, panel *PanelInfo) error {
+	assumedType := getMimeType(panel.File.Name, panel.File.ContentTypeInfo)
 	if assumedType == "" {
 		return fmt.Errorf("Unknown type")
 	}

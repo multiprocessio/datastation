@@ -88,6 +88,7 @@ type PanelInfo struct {
 	*FilePanelInfo
 	*LiteralPanelInfo
 	*DatabasePanelInfo
+	*HttpPanelInfo
 }
 
 type SupportedLanguages string
@@ -117,6 +118,10 @@ type LiteralPanelInfo struct {
 	Literal struct {
 		ContentTypeInfo ContentTypeInfo `json:"contentTypeInfo"`
 	} `json:"literal"`
+}
+
+type HttpPanelInfo struct {
+	Http HttpConnectorInfo `json:"http"`
 }
 
 type DatabasePanelInfo struct {
@@ -173,6 +178,17 @@ type DatabaseConnectorInfoDatabase struct {
 
 type DatabaseConnectorInfo struct {
 	Database DatabaseConnectorInfoDatabase `json:"database"`
+}
+
+type HttpConnectorInfoHttp struct {
+	Method          string            `json:"method"`
+	Url             string            `json:"url"`
+	ContentTypeInfo ContentTypeInfo   `json:"contentTypeInfo"`
+	Headers         map[string]string `json:"headers"`
+}
+
+type HttpConnectorInfo struct {
+	Http HttpConnectorInfoHttp `json:"http"`
 }
 
 type ProjectPage struct {
