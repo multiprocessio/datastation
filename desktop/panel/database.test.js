@@ -14,21 +14,21 @@ const { withSavedPanels } = require('./testutil');
 const DATABASES = [
   // {
   //   type: 'postgres',
-  //   query: `SELECT 1 AS "1", 2.2 AS "2", true AS "true", 'string' AS "string", CAST('2021-01-01' AS DATE) AS "date"`,
+  //   query: `SELECT 1 AS "1", 2.2 AS "2", true AS "truec", 'string' AS "string", CAST('2021-01-01' AS DATE) AS "date"`,
   // },
   {
     type: 'sqlserver',
-    query: `SELECT 1 AS "1", 2.2 AS "2", true AS "true", 'string' AS "string", CAST('2021-01-01' AS DATE) AS "date"`,
+    query: `SELECT 1 AS "1", 2.2 AS "2", true AS "truec", 'string' AS "string", CAST('2021-01-01' AS DATE) AS "date"`,
     skip: process.platform !== 'linux',
   },
   // {
   //   type: 'sqlite',
-  //   query: `SELECT 1 AS "1", 2.2 AS "2", true AS "true", 'string' AS "string", DATE('2021-01-01') AS "date"`,
+  //   query: `SELECT 1 AS "1", 2.2 AS "2", true AS "truec", 'string' AS "string", DATE('2021-01-01') AS "date"`,
   // },
   // {
   //   type: 'mysql',
   //   query:
-  //     'SELECT 1 AS `1`, 2.2 AS `2`, true AS `true`, "string" AS `string`, CAST("2021-01-01" AS DATE) AS `date`',
+  //     'SELECT 1 AS `1`, 2.2 AS `2`, true AS `truec`, "string" AS `string`, CAST("2021-01-01" AS DATE) AS `date`',
   // },
   // {
   //   type: 'postgres',
@@ -117,7 +117,7 @@ for (const subprocess of [
                   // Close enough is fine I guess.
                   expect(v[0]['1']).toBe(1);
                   expect(String(v[0]['2'])).toBe('2.2');
-                  expect(v[0]['true'] == '1').toBe(true);
+                  expect(v[0]['truec'] == '1').toBe(true);
                   expect(v[0].string).toBe('string');
                   expect(new Date(v[0].date)).toStrictEqual(
                     new Date('2021-01-01')
