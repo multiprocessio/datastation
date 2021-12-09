@@ -73,5 +73,6 @@ func evalHttpPanel(project *ProjectState, pageIndex int, panel *PanelInfo) error
 		return transformParquetFile(w.Name(), out)
 	}
 
+	// TODO: Need to just copy it as a string instead of this
 	return fmt.Errorf("Unsupported type " + assumedType)
 }
