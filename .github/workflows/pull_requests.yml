@@ -27,7 +27,7 @@ jobs:
           ${{ runner.os }}-yarn-
 
     # Start up sqlserver
-    - run: docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=test" -p 1433:1433 -d mcr.microsoft.com/mssql/server:2019-CU14-ubuntu-20.04
+    - run: docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=test" -p 1433:1433 -d mcr.microsoft.com/mssql/server:2019-latest
 
     - run: ./scripts/ci/prepare_linux.sh --integration-tests
     - run: yarn format
