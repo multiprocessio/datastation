@@ -16,6 +16,10 @@ const DATABASES = [
     query: `SELECT 1 AS "1", 2.2 AS "2", true AS "true", 'string' AS "string", CAST('2021-01-01' AS DATE) AS "date"`,
   },
   {
+    type: 'sqlserver',
+    query: `SELECT 1 AS "1", 2.2 AS "2", true AS "true", 'string' AS "string", CAST('2021-01-01' AS DATE) AS "date"`,
+  },
+  {
     type: 'sqlite',
     query: `SELECT 1 AS "1", 2.2 AS "2", true AS "true", 'string' AS "string", DATE('2021-01-01') AS "date"`,
   },
@@ -63,10 +67,10 @@ for (const subprocess of [
           const connectors = [
             new DatabaseConnectorInfo({
               type: t.type,
-              database: 'test',
+              database: t.type === 'sqlserver' ? '' : 'test',
               address:
                 'localhost' + (t.type === 'postgres' ? '?sslmode=disable' : ''),
-              username: 'test',
+              username: t.type === 'sqlserver' ? 'sa' : 'test',
               password_encrypt: new Encrypt('test'),
             }),
           ];

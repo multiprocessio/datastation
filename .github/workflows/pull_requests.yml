@@ -26,6 +26,9 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-yarn-
 
+    # Start up sqlserver
+    - run: docker run -e 'ACCEPT_EULA=Y' -e 'SA_PASSWORD=test' -e 'MSSQL_PID=Developer' -p 1433:1433 --name msssql -d mcr.microsoft.com/mssql/server:2017-latest-ubuntu
+
     - run: ./scripts/ci/prepare_linux.sh --integration-tests
     - run: yarn format
     - run: yarn tsc
