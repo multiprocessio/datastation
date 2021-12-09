@@ -16,19 +16,26 @@ const DATABASES = [
     query: `SELECT 1 AS "1", 2.2 AS "2", true AS "true", 'string' AS "string", CAST('2021-01-01' AS DATE) AS "date"`,
   },
   {
+    type: 'sqlite',
+    query: `SELECT 1 AS "1", 2.2 AS "2", true AS "true", 'string' AS "string", DATE('2021-01-01') AS "date"`,
+  },
+  {
     type: 'mysql',
     query:
       'SELECT 1 AS `1`, 2.2 AS `2`, true AS `true`, "string" AS `string`, CAST("2021-01-01" AS DATE) AS `date`',
   },
   {
     type: 'postgres',
-    query: 'SELECT name, age::INT - 10 AS age FROM DM_getPanel(0)',
+    query: 'SELECT name, CAST(age AS INT) - 10 AS age FROM DM_getPanel(0)',
+  },
+  {
+    type: 'sqlite',
+    query: 'SELECT name, CAST(age AS INT) - 10 AS age FROM DM_getPanel(0)',
   },
   {
     type: 'mysql',
     query: 'SELECT name, CAST(age AS SIGNED) - 10 AS age FROM DM_getPanel(0)',
   },
-  // TODO: add sqlite tests
 ];
 
 for (const subprocess of [
@@ -69,39 +76,50 @@ for (const subprocess of [
 
           let finished = false;
           const panels = [lp, dp];
-          await withSavedPanels(
-            panels,
-            async (project) => {
-              const panelValueBuffer = fs.readFileSync(
-                getProjectResultsFile(project.projectName) + dp.id
-              );
-
-              const v = JSON.parse(panelValueBuffer.toString());
-              if (t.query.startsWith('SELECT 1')) {
-                expect(v.length).toBe(1);
-                // These database drivers are all over the place between Node and Go.
-                // Close enough is fine I guess.
-                expect(v[0]['1']).toBe(1);
-                expect(String(v[0]['2'])).toBe('2.2');
-                expect(v[0]['true'] == '1').toBe(true);
-                expect(v[0].string).toBe('string');
-                expect(new Date(v[0].date)).toStrictEqual(
-                  new Date('2021-01-01')
+          try {
+            await withSavedPanels(
+              panels,
+              async (project) => {
+                const panelValueBuffer = fs.readFileSync(
+                  getProjectResultsFile(project.projectName) + dp.id
                 );
-              } else {
-                expect(v).toStrictEqual([
-                  { name: 'Kate', age: 9 },
-                  { name: 'Bake', age: 10 },
-                ]);
+
+                const v = JSON.parse(panelValueBuffer.toString());
+                if (t.query.startsWith('SELECT 1')) {
+                  expect(v.length).toBe(1);
+                  // These database drivers are all over the place between Node and Go.
+                  // Close enough is fine I guess.
+                  expect(v[0]['1']).toBe(1);
+                  expect(String(v[0]['2'])).toBe('2.2');
+                  expect(v[0]['true'] == '1').toBe(true);
+                  expect(v[0].string).toBe('string');
+                  expect(new Date(v[0].date)).toStrictEqual(
+                    new Date('2021-01-01')
+                  );
+                } else {
+                  expect(v).toStrictEqual([
+                    { name: 'Kate', age: 9 },
+                    { name: 'Bake', age: 10 },
+                  ]);
+                }
+
+                finished = true;
+              },
+              { evalPanels: true, connectors, subprocessName: subprocess }
+            );
+
+            if (!finished) {
+              throw new Error('Callback did not finish');
+            }
+          } finally {
+            // Delete sqlite file
+            if (t.type === 'sqlite') {
+              try {
+                fs.unlinkSync('test');
+              } catch (e) {
+                console.error(e);
               }
-
-              finished = true;
-            },
-            { evalPanels: true, connectors, subprocessName: subprocess }
-          );
-
-          if (!finished) {
-            throw new Error('Callback did not finish');
+            }
           }
         });
       }

@@ -142,7 +142,7 @@ func getConnectionString(dbInfo DatabaseConnectorInfoDatabase) (string, string, 
 		query += extraArgs
 		return "clickhouse", fmt.Sprintf("tcp://%s?%s", address, query), nil
 	case SQLiteDatabase:
-		return "sqlite3", address, nil
+		return "sqlite3", database, nil
 	}
 
 	return "", "", nil
