@@ -12,11 +12,15 @@ import (
 
 func evalHttpPanel(project *ProjectState, pageIndex int, panel *PanelInfo) error {
 	h := panel.Http.Http
-	var body *bytes.Buffer = nil
+	var req *http.Request
+	var err error
+	// Convoluted logic to not pass in a typed nil
+	// https://github.com/golang/go/issues/32897
 	if panel.Content != "" && h.Method != "GET" {
-		body = bytes.NewBuffer([]byte(panel.Content))
+		req, err = http.NewRequest(h.Method, h.Url, bytes.NewBuffer([]byte(panel.Content)))
+	} else {
+		req, err = http.NewRequest(h.Method, h.Url, nil)
 	}
-	req, err := http.NewRequest(h.Method, h.Url, body)
 	if err != nil {
 		return err
 	}
