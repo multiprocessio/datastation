@@ -37,7 +37,7 @@ jobs:
     - run: yarn test-licenses
     # Needed so we can have ./build/desktop_runner.js ready for tests
     - run: yarn build-desktop
-    - run: yarn test --runInBand --detectOpenHandles --forceExit --verbose desktop/secret.test.js desktop/panel/database.test.js
+    - run: yarn test --runInBand --detectOpenHandles --forceExit --verbose desktop/panel/database.test.js desktop/secret.test.js
     - run: cd runner && go test -cover
     # Test server builds
     - run: yarn build-server
