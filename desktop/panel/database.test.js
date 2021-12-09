@@ -60,7 +60,7 @@ for (const subprocess of [
   { go: path.join(CODE_ROOT, 'build', 'go_desktop_runner') },
 ]) {
   for (const t of DATABASES) {
-    if (!t.skip) {
+    if (t.skip) {
       continue;
     }
 
