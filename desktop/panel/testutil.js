@@ -121,3 +121,47 @@ exports.withSavedPanels = async function (
     }
   }
 };
+
+module.exports.replaceBigInt = function (rows) {
+  for (const row of rows) {
+    for (const [key, val] of Object.entries(row)) {
+      if (val instanceof BigInt) {
+        row[key] = val.toString();
+      }
+    }
+  }
+};
+
+module.exports.translateBaselineForType = function (baseline, fileType) {
+  if (fileType === 'json') {
+    return baseline;
+  }
+
+  const data = [];
+  for (const row of baseline) {
+    const translatedRow = {};
+    Object.keys(row).forEach((k) => {
+      // All non-json, non-parquet get the column header trimmed
+      const columnHeader = ['json', 'parquet'].includes(fileType)
+        ? k
+        : k.trim();
+      translatedRow[columnHeader] = row[k];
+
+      // CSVs are just strings
+      if (fileType === 'csv') {
+        translatedRow[columnHeader] = String(row[k]);
+      }
+
+      // Parquet dates are in integer format
+      if (
+        fileType === 'parquet' &&
+        String(new Date(row[k])) !== 'Invalid Date'
+      ) {
+        translatedRow[columnHeader] = new Date(row[k]).valueOf();
+      }
+    });
+    data.push(translatedRow);
+  }
+
+  return data;
+};
