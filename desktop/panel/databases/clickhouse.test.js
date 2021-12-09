@@ -15,7 +15,8 @@ for (const subprocess of [
   { go: path.join(CODE_ROOT, 'build', 'go_desktop_runner') },
 ]) {
   test(
-    'runs clickhouse query via ' + (subprocess.node || subprocess.go),
+    'runs clickhouse query via ' +
+      (subprocess ? subprocess.node || subprocess.go : 'memory'),
     async () => {
       if (process.platform !== 'linux') {
         return;
