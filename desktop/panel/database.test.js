@@ -12,37 +12,37 @@ const {
 const { withSavedPanels } = require('./testutil');
 
 const DATABASES = [
-  // {
-  //   type: 'postgres',
-  //   query: `SELECT 1 AS "1", 2.2 AS "2", true AS "true", 'string' AS "string", CAST('2021-01-01' AS DATE) AS "date"`,
-  // },
+  {
+    type: 'postgres',
+    query: `SELECT 1 AS "1", 2.2 AS "2", true AS "true", 'string' AS "string", CAST('2021-01-01' AS DATE) AS "date"`,
+  },
   {
     type: 'sqlserver',
     // SQL Server doesn't have true/false literals
     query: `SELECT 1 AS "1", 2.2 AS "2", 1 AS "true", 'string' AS "string", CAST('2021-01-01' AS DATE) AS "date"`,
     skip: process.platform !== 'linux',
   },
-  // {
-  //   type: 'sqlite',
-  //   query: `SELECT 1 AS "1", 2.2 AS "2", true AS "true", 'string' AS "string", DATE('2021-01-01') AS "date"`,
-  // },
-  // {
-  //   type: 'mysql',
-  //   query:
-  //     'SELECT 1 AS `1`, 2.2 AS `2`, true AS `true`, "string" AS `string`, CAST("2021-01-01" AS DATE) AS `date`',
-  // },
-  // {
-  //   type: 'postgres',
-  //   query: 'SELECT name, CAST(age AS INT) - 10 AS age FROM DM_getPanel(0)',
-  // },
-  // {
-  //   type: 'sqlite',
-  //   query: 'SELECT name, CAST(age AS INT) - 10 AS age FROM DM_getPanel(0)',
-  // },
-  // {
-  //   type: 'mysql',
-  //   query: 'SELECT name, CAST(age AS SIGNED) - 10 AS age FROM DM_getPanel(0)',
-  // },
+  {
+    type: 'sqlite',
+    query: `SELECT 1 AS "1", 2.2 AS "2", true AS "true", 'string' AS "string", DATE('2021-01-01') AS "date"`,
+  },
+  {
+    type: 'mysql',
+    query:
+      'SELECT 1 AS `1`, 2.2 AS `2`, true AS `true`, "string" AS `string`, CAST("2021-01-01" AS DATE) AS `date`',
+  },
+  {
+    type: 'postgres',
+    query: 'SELECT name, CAST(age AS INT) - 10 AS age FROM DM_getPanel(0)',
+  },
+  {
+    type: 'sqlite',
+    query: 'SELECT name, CAST(age AS INT) - 10 AS age FROM DM_getPanel(0)',
+  },
+  {
+    type: 'mysql',
+    query: 'SELECT name, CAST(age AS SIGNED) - 10 AS age FROM DM_getPanel(0)',
+  },
 ];
 
 ensureSigningKey();
@@ -96,7 +96,6 @@ for (const subprocess of [
               ),
             }),
           ];
-          console.log('PHIL', JSON.stringify(connectors[0].database));
           const dp = new DatabasePanelInfo();
           dp.database.connectorId = connectors[0].id;
           dp.content = t.query;

@@ -180,7 +180,6 @@ func evalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo) e
 		return err
 	}
 
-	log.Println("[DEBUG] Connecting with %s", connStr)
 	db, err := sqlx.Open(vendor, connStr)
 	if err != nil {
 		return err
