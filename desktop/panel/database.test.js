@@ -11,36 +11,36 @@ const {
 const { withSavedPanels } = require('./testutil');
 
 const DATABASES = [
-  {
-    type: 'postgres',
-    query: `SELECT 1 AS "1", 2.2 AS "2", true AS "true", 'string' AS "string", CAST('2021-01-01' AS DATE) AS "date"`,
-  },
+  // {
+  //   type: 'postgres',
+  //   query: `SELECT 1 AS "1", 2.2 AS "2", true AS "true", 'string' AS "string", CAST('2021-01-01' AS DATE) AS "date"`,
+  // },
   {
     type: 'sqlserver',
     query: `SELECT 1 AS "1", 2.2 AS "2", true AS "true", 'string' AS "string", CAST('2021-01-01' AS DATE) AS "date"`,
     skip: process.platform !== 'linux',
   },
-  {
-    type: 'sqlite',
-    query: `SELECT 1 AS "1", 2.2 AS "2", true AS "true", 'string' AS "string", DATE('2021-01-01') AS "date"`,
-  },
-  {
-    type: 'mysql',
-    query:
-      'SELECT 1 AS `1`, 2.2 AS `2`, true AS `true`, "string" AS `string`, CAST("2021-01-01" AS DATE) AS `date`',
-  },
-  {
-    type: 'postgres',
-    query: 'SELECT name, CAST(age AS INT) - 10 AS age FROM DM_getPanel(0)',
-  },
-  {
-    type: 'sqlite',
-    query: 'SELECT name, CAST(age AS INT) - 10 AS age FROM DM_getPanel(0)',
-  },
-  {
-    type: 'mysql',
-    query: 'SELECT name, CAST(age AS SIGNED) - 10 AS age FROM DM_getPanel(0)',
-  },
+  // {
+  //   type: 'sqlite',
+  //   query: `SELECT 1 AS "1", 2.2 AS "2", true AS "true", 'string' AS "string", DATE('2021-01-01') AS "date"`,
+  // },
+  // {
+  //   type: 'mysql',
+  //   query:
+  //     'SELECT 1 AS `1`, 2.2 AS `2`, true AS `true`, "string" AS `string`, CAST("2021-01-01" AS DATE) AS `date`',
+  // },
+  // {
+  //   type: 'postgres',
+  //   query: 'SELECT name, CAST(age AS INT) - 10 AS age FROM DM_getPanel(0)',
+  // },
+  // {
+  //   type: 'sqlite',
+  //   query: 'SELECT name, CAST(age AS INT) - 10 AS age FROM DM_getPanel(0)',
+  // },
+  // {
+  //   type: 'mysql',
+  //   query: 'SELECT name, CAST(age AS SIGNED) - 10 AS age FROM DM_getPanel(0)',
+  // },
 ];
 
 const vendorOverride = {
@@ -48,16 +48,17 @@ const vendorOverride = {
     address: 'localhost?sslmode=disable',
   },
   sqlserver: {
+    address: 'tcp://localhost',
     database: '',
     username: 'sa',
-    password: '1Secure*Password1',
+    password: '1StrongPwd!!',
   },
 };
 
 for (const subprocess of [
   undefined,
-  { node: path.join(CODE_ROOT, 'build', 'desktop_runner.js') },
-  { go: path.join(CODE_ROOT, 'build', 'go_desktop_runner') },
+  //  { node: path.join(CODE_ROOT, 'build', 'desktop_runner.js') },
+  //  { go: path.join(CODE_ROOT, 'build', 'go_desktop_runner') },
 ]) {
   for (const t of DATABASES) {
     if (t.skip) {

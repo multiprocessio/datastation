@@ -27,7 +27,7 @@ jobs:
           ${{ runner.os }}-yarn-
 
     # Start up sqlserver
-    - run: docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=1Secure*Password1" -p 1433:1433 -d mcr.microsoft.com/mssql/server:2019-latest
+    - run: docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=1StrongPwd!!" -p 1433:1433 -d mcr.microsoft.com/mssql/server:2019-latest
 
     - run: ./scripts/ci/prepare_linux.sh --integration-tests
     - run: yarn format
@@ -37,7 +37,7 @@ jobs:
     - run: yarn test-licenses
     # Needed so we can have ./build/desktop_runner.js ready for tests
     - run: yarn build-desktop
-    - run: yarn test --runInBand --detectOpenHandles --forceExit --verbose
+    - run: yarn test --runInBand --detectOpenHandles --forceExit --verbose desktop/panel/database.test.js
     - run: cd runner && go test -cover
     # Test server builds
     - run: yarn build-server
