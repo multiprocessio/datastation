@@ -1,6 +1,7 @@
 const path = require('path');
 const { CODE_ROOT } = require('../constants');
 const { getProjectResultsFile } = require('../store');
+const { ensureSigningKey } = require('../secret');
 const fs = require('fs');
 const {
   LiteralPanelInfo,
@@ -42,6 +43,8 @@ const DATABASES = [
   //   query: 'SELECT name, CAST(age AS SIGNED) - 10 AS age FROM DM_getPanel(0)',
   // },
 ];
+
+ensureSigningKey();
 
 const vendorOverride = {
   postgres: {
