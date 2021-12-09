@@ -119,13 +119,15 @@ type LiteralPanelInfo struct {
 	} `json:"literal"`
 }
 
+type DatabasePanelInfoDatabase struct {
+	ConnectorId string      `json:"connectorId"`
+	Range       interface{} `json:"range"` // TODO: support these
+	Table       string      `json:"table"`
+	Step        float64     `json:"step"`
+}
+
 type DatabasePanelInfo struct {
-	Database struct {
-		ConnectorId string      `json:"connectorId"`
-		Range       interface{} `json:"range"` // TODO: support these
-		Table       string      `json:"table"`
-		Step        float64     `json:"step"`
-	} `json:"database"`
+	Database DatabasePanelInfoDatabase `json:"database"`
 }
 
 type ConnectorInfoType string

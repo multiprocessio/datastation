@@ -93,10 +93,7 @@ function canUseGoRunner(panel: PanelInfo, connectors: ConnectorInfo[]) {
     return false;
   }
 
-  if (
-    panel.type === 'program' &&
-    (panel as ProgramPanelInfo).program.type !== 'sql'
-  ) {
+  if (panel.type === 'program') {
     return true;
   }
 
