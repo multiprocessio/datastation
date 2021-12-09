@@ -89,10 +89,6 @@ for (const t of TESTS) {
       { node: path.join(CODE_ROOT, 'build', 'desktop_runner.js') },
       { go: path.join(CODE_ROOT, 'build', 'go_desktop_runner') },
     ]) {
-      if (t.type === 'sql' && subprocessName?.go) {
-        continue;
-      }
-
       test(`runs ${t.type} programs to perform addition via ${
         subprocessName
           ? subprocessName.node || subprocessName.go
