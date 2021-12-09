@@ -122,7 +122,8 @@ func getConnectionString(dbInfo DatabaseConnectorInfoDatabase) (string, string, 
 		dsn += "/" + database + "?" + extraArgs
 		return "mysql", dsn, nil
 	case SQLServerDatabase:
-		return "sqlserver", genericString, nil
+		dsn := fmt.Sprintf("%s://%s%s?database=%s%s", dbInfo.Type, genericUserPass, address, database, extraArgs)
+		return "sqlserver", dsn, nil
 	case OracleDatabase:
 		return "oracle", genericString, nil
 	case ClickhouseDatabase:
