@@ -95,6 +95,7 @@ for (const subprocess of [
               ),
             }),
           ];
+          console.log('PHIL', JSON.stringify(connectors[0].database));
           const dp = new DatabasePanelInfo();
           dp.database.connectorId = connectors[0].id;
           dp.content = t.query;
