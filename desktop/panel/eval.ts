@@ -17,7 +17,6 @@ import {
   PanelInfo,
   PanelInfoType,
   PanelResult,
-  ProgramPanelInfo,
   ProjectState,
 } from '../../shared/state';
 import { getMimeType } from '../../shared/text';

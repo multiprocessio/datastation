@@ -74,7 +74,7 @@ func evalProgramSQLPanel(project *ProjectState, pageIndex int, panel *PanelInfo)
 }
 
 func evalProgramPanel(project *ProjectState, pageIndex int, panel *PanelInfo) error {
-	if panel.Program.Type == "sql" {
+	if panel.Program.Type == SQL {
 		return evalProgramSQLPanel(project, pageIndex, panel)
 	}
 

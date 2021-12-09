@@ -22,12 +22,12 @@ const TESTS = [
   },
   {
     type: 'sql',
-    content: 'SELECT name, age::INT + 10 AS age FROM DM_getPanel(0)',
+    content: 'SELECT name, CAST(age AS INT) + 10 AS age FROM DM_getPanel(0)',
     condition: true,
   },
   {
     type: 'sql',
-    content: `SELECT name, age::INT + 10 AS age FROM DM_getPanel('Raw Data')`,
+    content: `SELECT name, CAST(age AS INT) + 10 AS age FROM DM_getPanel('Raw Data')`,
     condition: true,
   },
   // Rest are only mandatory-tested on Linux to make CI easier for now

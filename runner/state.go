@@ -98,6 +98,7 @@ const (
 	Ruby                          = "ruby"
 	R                             = "r"
 	Julia                         = "julia"
+	SQL                           = "sql"
 )
 
 type ProgramPanelInfo struct {
