@@ -54,7 +54,7 @@ const vendorOverride = {
     address: 'tcp://127.0.0.1',
     username: 'sa',
     password: '1StrongPwd!!',
-    database: 'test',
+    database: 'master',
   },
 };
 
