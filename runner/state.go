@@ -184,10 +184,10 @@ type DatabaseConnectorInfo struct {
 }
 
 type HttpConnectorInfoHttp struct {
-	Method          string            `json:"method"`
-	Url             string            `json:"url"`
-	ContentTypeInfo ContentTypeInfo   `json:"contentTypeInfo"`
-	Headers         map[string]string `json:"headers"`
+	Method          string          `json:"method"`
+	Url             string          `json:"url"`
+	ContentTypeInfo ContentTypeInfo `json:"contentTypeInfo"`
+	Headers         [][]string      `json:"headers"`
 }
 
 type HttpConnectorInfo struct {
