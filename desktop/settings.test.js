@@ -18,6 +18,9 @@ test('loadSettings with and without existing settings', async () => {
     // And recheck from disk that save happened
     const reloaded = loadSettings(tmp.path);
     expect(reloaded.lastProject).toBe('my new project');
+
+    const settings = await loaded.getGetHandler().handler();
+    expect(settings).toStrictEqual(reloaded);
   } finally {
     await tmp.cleanup();
   }

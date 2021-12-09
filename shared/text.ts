@@ -82,6 +82,32 @@ function trimExcelHeaders(ws: XLSX.WorkSheet) {
 export const XLSX_MIME_TYPE =
   'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 
+export function getMimeType(
+  { type, additionalParsers }: ContentTypeInfoPlusParsers,
+  fileName: string
+): string {
+  let realType = type.split(';')[0];
+  if (realType === '') {
+    const fileBits = fileName.split('.');
+    const fileExtension = fileBits[fileBits.length - 1];
+    const builtinTypes: Record<string, string> = {
+      csv: 'text/csv',
+      json: 'application/json',
+      xls: XLSX_MIME_TYPE,
+      xlsx: XLSX_MIME_TYPE,
+    };
+    if (builtinTypes[fileExtension]) {
+      realType = builtinTypes[fileExtension];
+    }
+
+    if (additionalParsers && additionalParsers[fileExtension]) {
+      realType = fileExtension;
+    }
+  }
+
+  return realType;
+}
+
 export async function parseArrayBuffer(
   { type, additionalParsers, customLineRegexp }: ContentTypeInfoPlusParsers,
   fileName: string,
@@ -102,24 +128,8 @@ export async function parseArrayBuffer(
 
     return new TextDecoder('utf-8').decode(body);
   };
-  let realType = type.split(';')[0];
-  if (realType === '') {
-    const fileBits = fileName.split('.');
-    const fileExtension = fileBits[fileBits.length - 1];
-    const builtinTypes: Record<string, string> = {
-      csv: 'text/csv',
-      json: 'application/json',
-      xls: XLSX_MIME_TYPE,
-      xlsx: XLSX_MIME_TYPE,
-    };
-    if (builtinTypes[fileExtension]) {
-      realType = builtinTypes[fileExtension];
-    }
 
-    if (additionalParsers && additionalParsers[fileExtension]) {
-      realType = fileExtension;
-    }
-  }
+  const realType = getMimeType({ type, additionalParsers }, fileName);
 
   log.info(
     `Assumed '${realType}' from '${type}' given '${fileName}' when parsing array buffer`

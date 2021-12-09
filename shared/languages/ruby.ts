@@ -1,3 +1,6 @@
+import { genericPreamble } from './javascript';
+import ruby from './ruby.json';
+
 function defaultContent(panelIndex: number) {
   if (panelIndex === 0) {
     return 'result = []\n# Your logic here\nDM_setPanel(result)';
@@ -13,17 +16,7 @@ function preamble(
   panelId: string,
   idMap: Record<string | number, string>
 ) {
-  return `
-def DM_getPanel(i)
-  require 'json'
-  JSON.parse(File.read('${resultsFile}' + JSON.parse('${JSON.stringify(
-    idMap
-  )}')[i.to_s]))
-end
-def DM_setPanel(v)
-  require 'json'
-  File.write('${resultsFile + panelId}', v.to_json)
-end`;
+  return genericPreamble(ruby.preamble, resultsFile, panelId, idMap);
 }
 
 function exceptionRewriter(msg: string, _: string) {
@@ -31,8 +24,8 @@ function exceptionRewriter(msg: string, _: string) {
 }
 
 export const RUBY = {
-  name: 'Ruby',
-  defaultPath: 'ruby',
+  name: ruby.name,
+  defaultPath: ruby.defaultPath,
   defaultContent,
   preamble,
   exceptionRewriter,

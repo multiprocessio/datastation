@@ -5,16 +5,24 @@ import { EOL } from 'os';
 import { preview } from 'preview';
 import { shape, Shape } from 'shape';
 import { file as makeTmpFile } from 'tmp-promise';
-import { Cancelled } from '../../shared/errors';
+//import { Cancelled } from '../../shared/errors';
 import log from '../../shared/log';
 import { PanelBody } from '../../shared/rpc';
 import {
+  ConnectorInfo,
+  DatabaseConnectorInfo,
+  DatabasePanelInfo,
+  FilePanelInfo,
+  LiteralPanelInfo,
   PanelInfo,
   PanelInfoType,
   PanelResult,
+  ProgramPanelInfo,
   ProjectState,
 } from '../../shared/state';
+import { getMimeType } from '../../shared/text';
 import { DSPROJ_FLAG, PANEL_FLAG, PANEL_META_FLAG } from '../constants';
+import { parsePartialJSONFile } from '../partial';
 import { Dispatch, RPCHandler } from '../rpc';
 import { flushUnwritten, getProjectResultsFile } from '../store';
 import { getProjectAndPanel } from './shared';
@@ -45,6 +53,7 @@ function killAllByPanelId(panelId: string) {
   if (workers) {
     Array.from(workers).map((pid) => {
       try {
+        log.info('Killing existing process');
         process.kill(pid, 'SIGINT');
       } catch (e) {
         // If process doesn't exist, that's ok
@@ -56,39 +65,100 @@ function killAllByPanelId(panelId: string) {
   }
 }
 
+function canUseGoRunner(panel: PanelInfo, connectors: ConnectorInfo[]) {
+  if (panel.serverId) {
+    return false;
+  }
+
+  const supportedDatabases = [
+    'postgres',
+    'sqlite',
+    'mysql',
+    'oracle',
+    'sqlserver',
+    'clickhouse',
+  ];
+  if (panel.type === 'database') {
+    const dp = panel as DatabasePanelInfo;
+    for (const c of connectors) {
+      if (c.id === dp.database.connectorId) {
+        const dc = c as DatabaseConnectorInfo;
+        if (c.serverId) {
+          return false;
+        }
+
+        return supportedDatabases.includes(dc.database.type);
+      }
+    }
+    return false;
+  }
+
+  if (
+    panel.type === 'program' &&
+    (panel as ProgramPanelInfo).program.type !== 'sql'
+  ) {
+    return true;
+  }
+
+  const fileLike = panel.type === 'literal' || panel.type === 'file';
+  if (!fileLike) {
+    return false;
+  }
+
+  const supportedTypes = ['text/csv', 'application/json'];
+  let mimetype = '';
+  if (panel.type === 'literal') {
+    const lp = panel as LiteralPanelInfo;
+    mimetype = getMimeType(lp.literal.contentTypeInfo, '');
+  } else {
+    const fp = panel as FilePanelInfo;
+    mimetype = getMimeType(fp.file.contentTypeInfo, fp.file.name);
+  }
+
+  return supportedTypes.includes(mimetype);
+}
+
 export async function evalInSubprocess(
-  subprocess: string,
+  subprocess: {
+    node: string;
+    go?: string;
+  },
   projectName: string,
-  panelId: string
+  panel: PanelInfo,
+  connectors: ConnectorInfo[]
 ) {
   const tmp = await makeTmpFile({ prefix: 'resultmeta-' });
   let pid = 0;
 
   try {
     // This means only one user can run a panel at a time
-    killAllByPanelId(panelId);
+    killAllByPanelId(panel.id);
 
-    const child = execFile(
-      process.argv[0],
-      [
-        subprocess,
-        DSPROJ_FLAG,
-        projectName,
-        PANEL_FLAG,
-        panelId,
-        PANEL_META_FLAG,
-        tmp.path,
-      ],
-      {
-        windowsHide: true,
-      }
-    );
+    let base = process.argv[0];
+    const args = [
+      subprocess.node,
+      DSPROJ_FLAG,
+      projectName,
+      PANEL_FLAG,
+      panel.id,
+      PANEL_META_FLAG,
+      tmp.path,
+    ];
+    if (subprocess.go && canUseGoRunner(panel, connectors)) {
+      base = subprocess.go;
+      args.shift();
+    }
+
+    log.info(`Launching "${base} ${args.join(' ')}"`);
+    const child = execFile(base, args, {
+      windowsHide: true,
+    });
 
     pid = child.pid;
-    if (!runningProcesses[panelId]) {
-      runningProcesses[panelId] = new Set();
+    if (!runningProcesses[panel.id]) {
+      runningProcesses[panel.id] = new Set();
     }
-    runningProcesses[panelId].add(pid);
+    runningProcesses[panel.id].add(pid);
 
     let stderr = '';
     child.stderr.on('data', (data) => {
@@ -100,6 +170,7 @@ export async function evalInSubprocess(
     });
 
     child.stdout.on('data', (data) => {
+      stderr += data;
       process.stdout.write(data);
     });
 
@@ -113,9 +184,10 @@ export async function evalInSubprocess(
             resolve();
           }
 
-          if (code === 1 || code === null) {
-            reject(new Cancelled());
-          }
+          // TODO: fix cancell
+          //if (code === 1 || code === null) {
+          //  reject(new Cancelled());
+          //}
 
           reject(new Error(stderr));
         });
@@ -127,12 +199,17 @@ export async function evalInSubprocess(
       }
     });
 
-    const resultMeta = fs.readFileSync(tmp.path);
-    return JSON.parse(resultMeta.toString());
+    const resultMeta = fs.readFileSync(tmp.path).toString();
+    if (!resultMeta) {
+      const projectResultsFile = getProjectResultsFile(projectName);
+      return parsePartialJSONFile(projectResultsFile + panel.id);
+    }
+
+    return JSON.parse(resultMeta);
   } finally {
     try {
       if (pid) {
-        runningProcesses[panelId].delete(pid);
+        runningProcesses[panel.id].delete(pid);
       }
 
       tmp.cleanup();
@@ -142,9 +219,10 @@ export async function evalInSubprocess(
   }
 }
 
-export const makeEvalHandler = (
-  subprocessEval?: string
-): RPCHandler<PanelBody, PanelResult> => ({
+export const makeEvalHandler = (subprocessEval?: {
+  node: string;
+  go?: string;
+}): RPCHandler<PanelBody, PanelResult> => ({
   resource: 'eval',
   handler: async function (
     projectId: string,
@@ -164,7 +242,8 @@ export const makeEvalHandler = (
       return evalInSubprocess(
         subprocessEval,
         project.projectName,
-        body.panelId
+        panel,
+        project.connectors
       );
     }
 

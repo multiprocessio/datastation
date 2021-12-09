@@ -105,7 +105,7 @@ function PreviewResults({
       { name: 'Inferred Content-Type', value: results.contentType },
       { name: 'Size', value: humanSize(results.size) },
       {
-        name: 'Number of Elements',
+        name: 'Estimated # of Elements',
         value:
           results.arrayCount === null
             ? 'Not an array'

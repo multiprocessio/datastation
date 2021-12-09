@@ -4,6 +4,8 @@ import { InvalidDependentPanelError, NoResultError } from '../errors';
 import log from '../log';
 import { deepClone, windowOrGlobal } from '../object';
 import { PanelResult } from '../state';
+import { genericPreamble } from './javascript';
+import python from './python.json';
 import { EOL } from './types';
 
 function defaultContent(panelIndex: number) {
@@ -21,15 +23,7 @@ function preamble(
   panelId: string,
   idMap: Record<string | number, string>
 ) {
-  return `
-def DM_getPanel(i):
-  import json
-  with open(r'${resultsFile}'+${JSON.stringify(idMap)}[str(i)]) as f:
-    return json.load(f)
-def DM_setPanel(v):
-  import json
-  with open(r'${resultsFile + panelId}', 'w') as f:
-    json.dump(v, f)`;
+  return genericPreamble(python.preamble, resultsFile, panelId, idMap);
 }
 
 function inMemoryInit() {
@@ -127,8 +121,8 @@ function exceptionRewriter(msg: string, _: string) {
 }
 
 export const PYTHON = {
-  name: 'Python',
-  defaultPath: 'python3',
+  name: python.name,
+  defaultPath: python.defaultPath,
   defaultContent,
   preamble,
   inMemoryEval,

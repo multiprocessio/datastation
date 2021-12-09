@@ -17,8 +17,15 @@ test('encrypt, decrypt same key', () =>
   withTmpSigningKey(async (tmp) => {
     const original = 'my great string';
     const encrypted = await encrypt(original, tmp.path);
-    const decrypted = await decrypt(encrypted, tmp.path);
-    expect(decrypted).toBe(original);
+    const tmp2 = await makeTmpFile({ prefix: 'stored-secret-' });
+    try {
+      fs.writeFileSync(tmp2.path, JSON.stringify(encrypted));
+      const eFromDisk = JSON.parse(fs.readFileSync(tmp2.path).toString());
+      const decrypted = await decrypt(eFromDisk, tmp.path);
+      expect(decrypted).toBe(original);
+    } finally {
+      tmp2.cleanup();
+    }
   }));
 
 test('encrypt, decrypt different key', () =>

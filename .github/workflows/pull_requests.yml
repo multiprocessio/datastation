@@ -29,11 +29,13 @@ jobs:
     - run: ./scripts/ci/prepare_linux.sh --integration-tests
     - run: yarn format
     - run: yarn tsc
+    - run: cd runner && gofmt -w .
     - run: ./scripts/fail_on_diff.sh
     - run: yarn test-licenses
     # Needed so we can have ./build/desktop_runner.js ready for tests
     - run: yarn build-desktop
     - run: yarn test --runInBand --detectOpenHandles --forceExit --verbose
+    - run: cd runner && go test -cover
     # Test server builds
     - run: yarn build-server
 
@@ -124,6 +126,7 @@ jobs:
     # Needed so we can have ./build/desktop_runner.js ready for tests
     - run: yarn build-desktop
     - run: yarn test --runInBand --detectOpenHandles --forceExit --verbose shared ui desktop
+    - run: cd runner && go test -cover
     - run: yarn release-desktop 0.0.0-e2etest
     - run: yarn e2e-test
 
@@ -153,5 +156,6 @@ jobs:
     # Needed so we can have ./build/desktop_runner.js ready for tests
     - run: yarn build-desktop
     - run: yarn test --runInBand --detectOpenHandles --forceExit --verbose shared ui desktop
+    - run: cd runner && go test -cover
     - run: yarn release-desktop 0.0.0-e2etest
     - run: yarn e2e-test

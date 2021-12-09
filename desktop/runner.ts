@@ -21,7 +21,10 @@ export function initialize({
   subprocess,
   additionalHandlers,
 }: {
-  subprocess?: string;
+  subprocess?: {
+    node: string;
+    go?: string;
+  };
   additionalHandlers?: RPCHandler<any, any>[];
 } = {}) {
   let project = '';

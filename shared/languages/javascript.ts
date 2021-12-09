@@ -4,6 +4,7 @@ import { InvalidDependentPanelError, NoResultError } from '../errors';
 import log from '../log';
 import { deepClone, windowOrGlobal } from '../object';
 import { PanelResult } from '../state';
+import javascript from './javascript.json';
 import { EOL } from './types';
 
 function exceptionRewriter(msg: string, programPath: string) {
@@ -24,36 +25,28 @@ function defaultContent(panelIndex: number) {
   });\n// Your logic here\nDM_setPanel(transform);`;
 }
 
+export function genericPreamble(
+  preamble: string,
+  resultsFile: string,
+  panelId: string,
+  idMap: Record<string | number, string>
+) {
+  const panelResultsFile = resultsFile + panelId;
+  const jsonIdMap = JSON.stringify(idMap);
+  const jsonIdMapQuoteEscaped = jsonIdMap.replaceAll('"', '\\"');
+  return preamble
+    .replaceAll('$$PANEL_RESULTS_FILE$$', panelResultsFile)
+    .replaceAll('$$RESULTS_FILE$$', resultsFile)
+    .replaceAll('$$JSON_ID_MAP$$', jsonIdMap)
+    .replaceAll('$$JSON_ID_MAP_QUOTE_ESCAPED$$', jsonIdMapQuoteEscaped);
+}
+
 function preamble(
   resultsFile: string,
   panelId: string,
   idMap: Record<string | number, string>
 ) {
-  return `
-function DM_getPanel(i) {
-  const fs = require('fs');
-  return JSON.parse(fs.readFileSync('${resultsFile}'+${JSON.stringify(
-    idMap
-  )}[i]));
-}
-function DM_setPanel(v) {
-  const fs = require('fs');
-  const fd = fs.openSync('${resultsFile + panelId}', 'w');
-  if (Array.isArray(v)) {
-    fs.writeSync(fd, '[');
-    for (let i = 0; i < v.length; i++) {
-      const row = v[i];
-      let rowJSON = JSON.stringify(row);
-      if (i < v.length - 1) {
-        rowJSON += ',';
-      }
-      fs.writeSync(fd, rowJSON);
-    }
-    fs.writeSync(fd, ']');
-  } else {
-    fs.writeSync(fd, JSON.stringify(v));
-  }
-}`;
+  return genericPreamble(javascript.preamble, resultsFile, panelId, idMap);
 }
 
 function inMemoryEval(
@@ -104,8 +97,8 @@ function inMemoryEval(
 }
 
 export const JAVASCRIPT = {
-  name: 'JavaScript',
-  defaultPath: 'node',
+  name: javascript.name,
+  defaultPath: javascript.defaultPath,
   defaultContent,
   preamble,
   inMemoryEval,

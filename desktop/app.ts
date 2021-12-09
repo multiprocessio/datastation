@@ -2,7 +2,7 @@ import { app, ipcMain } from 'electron';
 import path from 'path';
 import { APP_NAME, DEBUG, VERSION } from '../shared/constants';
 import log from '../shared/log';
-import { IS_DESKTOP_RUNNER } from './constants';
+import { CODE_ROOT, IS_DESKTOP_RUNNER } from './constants';
 import { configureLogger } from './log';
 import { openWindow } from './project';
 import { registerRPCHandlers } from './rpc';
@@ -26,7 +26,10 @@ function main() {
   if (app) {
     app.whenReady().then(async () => {
       const { handlers, project } = initialize({
-        subprocess: path.join(__dirname, 'desktop_runner.js'),
+        subprocess: {
+          node: path.join(__dirname, 'desktop_runner.js'),
+          go: path.join(CODE_ROOT, 'build', 'go_desktop_runner'),
+        },
         additionalHandlers: storeHandlers,
       });
 

@@ -3,7 +3,7 @@ const { getProjectResultsFile } = require('../store');
 const fs = require('fs');
 const { file: makeTmpFile } = require('tmp-promise');
 const { ProjectState, ProjectPage } = require('../../shared/state');
-const { updateProjectHandler } = require('../store');
+const { updateProjectHandler, flushUnwritten } = require('../store');
 const { makeEvalHandler } = require('./eval');
 const { fetchResultsHandler } = require('./columns');
 
@@ -46,6 +46,8 @@ exports.withSavedPanels = async function (
 
   try {
     await updateProjectHandler.handler(project.projectName, project);
+    await flushUnwritten();
+    expect(exports.fileIsEmpty(project.projectName + '.dsproj')).toBe(false);
 
     if (evalPanels) {
       for (let i = 0; i < panels.length; i++) {
@@ -67,7 +69,13 @@ exports.withSavedPanels = async function (
 
         function dispatch(r) {
           if (r.resource === 'getProject') {
-            return project;
+            const p = ProjectState.fromJSON(
+              JSON.parse(
+                fs.readFileSync(project.projectName + '.dsproj').toString()
+              ),
+              false
+            );
+            return p;
           }
 
           if (r.resource === 'fetchResults') {
@@ -85,6 +93,10 @@ exports.withSavedPanels = async function (
           { panelId: panel.id },
           dispatch
         );
+
+        // Write results back to disk
+        await updateProjectHandler.handler(project.projectName, project);
+        await flushUnwritten();
 
         // Make panel results are saved to disk
         expect(
