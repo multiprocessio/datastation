@@ -7,7 +7,7 @@ export async function evalSQLServer(
   port: number,
   { database }: DatabaseConnectorInfo
 ) {
-  const client = await sqlserver.connect({
+  const config = {
     user: database.username,
     password: database.password_encrypt.value,
     database: database.database,
@@ -22,7 +22,9 @@ export async function evalSQLServer(
     },
     server: host,
     port: port,
-  });
+  };
+  console.log('DEBUG', config);
+  const client = await sqlserver.connect(config);
   try {
     const res = await client.query(content);
     return { value: res.recordset };
