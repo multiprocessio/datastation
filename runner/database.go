@@ -20,7 +20,7 @@ import (
 	_ "github.com/sijms/go-ora/v2"
 )
 
-func debug(obj interface{}) {
+func debugObject(obj interface{}) {
 	log.Printf("%#v\n", obj)
 }
 
@@ -179,6 +179,7 @@ func evalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo) e
 		return err
 	}
 
+	log.Println("[DEBUG] Connecting with %s", connStr)
 	db, err := sqlx.Open(vendor, connStr)
 	if err != nil {
 		return err
