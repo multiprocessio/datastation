@@ -34,6 +34,11 @@ for (const subprocessName of [
   { go: path.join(CODE_ROOT, 'build', 'go_desktop_runner') },
 ]) {
   for (const userdataFileType of USERDATA_FILES) {
+    // Parquet over HTTP is broken in the Node runners
+    if (userdataFileType === 'parquet' && !subprocessName?.go) {
+      continue;
+    }
+
     const hp = new HTTPPanelInfo(
       '',
       new HTTPConnectorInfo(

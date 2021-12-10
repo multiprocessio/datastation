@@ -36,7 +36,10 @@ export async function request(
   const body = await res.arrayBuffer();
   if (!contentTypeInfo.type) {
     let type = res.headers.get('content-type');
-    if (type.startsWith('text/plain')) {
+    if (
+      type.startsWith('text/plain') ||
+      type.startsWith('application/octet-stream')
+    ) {
       type = '';
     }
     contentTypeInfo.type = type;
