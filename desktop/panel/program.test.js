@@ -87,7 +87,7 @@ for (const t of TESTS) {
     for (const subprocessName of [
       undefined,
       { node: path.join(CODE_ROOT, 'build', 'desktop_runner.js') },
-      { go: path.join(CODE_ROOT, 'build', 'go_desktop_runner') },
+      { go: path.join(CODE_ROOT, 'build', 'go_desktop_runner_test') },
     ]) {
       test(`runs ${t.type} programs to perform addition via ${
         subprocessName

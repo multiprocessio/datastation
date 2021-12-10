@@ -5,6 +5,7 @@ import { EOL } from 'os';
 import { preview } from 'preview';
 import { shape, Shape } from 'shape';
 import { file as makeTmpFile } from 'tmp-promise';
+import * as uuid from 'uuid';
 //import { Cancelled } from '../../shared/errors';
 import log from '../../shared/log';
 import { PanelBody } from '../../shared/rpc';
@@ -13,17 +14,19 @@ import {
   DatabaseConnectorInfo,
   DatabasePanelInfo,
   FilePanelInfo,
+  HTTPPanelInfo,
   LiteralPanelInfo,
   PanelInfo,
   PanelInfoType,
   PanelResult,
   ProjectState,
 } from '../../shared/state';
-import { getMimeType } from '../../shared/text';
+import { getMimeType, XLSX_MIME_TYPE } from '../../shared/text';
 import { DSPROJ_FLAG, PANEL_FLAG, PANEL_META_FLAG } from '../constants';
 import { parsePartialJSONFile } from '../partial';
 import { Dispatch, RPCHandler } from '../rpc';
 import { flushUnwritten, getProjectResultsFile } from '../store';
+import { additionalParsers } from './parquet';
 import { getProjectAndPanel } from './shared';
 import { EvalHandlerExtra, EvalHandlerResponse } from './types';
 
@@ -96,19 +99,46 @@ function canUseGoRunner(panel: PanelInfo, connectors: ConnectorInfo[]) {
     return true;
   }
 
-  const fileLike = panel.type === 'literal' || panel.type === 'file';
+  const fileLike = ['literal', 'http', 'file'].includes(panel.type);
   if (!fileLike) {
     return false;
   }
 
-  const supportedTypes = ['text/csv', 'application/json'];
+  const supportedTypes = [
+    'text/csv',
+    'application/json',
+    'parquet',
+    XLSX_MIME_TYPE,
+    'application/vnd.ms-excel',
+  ];
   let mimetype = '';
   if (panel.type === 'literal') {
     const lp = panel as LiteralPanelInfo;
-    mimetype = getMimeType(lp.literal.contentTypeInfo, '');
+    mimetype = getMimeType(
+      {
+        ...lp.literal.contentTypeInfo,
+        additionalParsers,
+      },
+      ''
+    );
+  } else if (panel.type === 'http') {
+    const hp = panel as HTTPPanelInfo;
+    mimetype = getMimeType(
+      {
+        ...hp.http.http.contentTypeInfo,
+        additionalParsers,
+      },
+      hp.http.http.url
+    );
   } else {
     const fp = panel as FilePanelInfo;
-    mimetype = getMimeType(fp.file.contentTypeInfo, fp.file.name);
+    mimetype = getMimeType(
+      {
+        ...fp.file.contentTypeInfo,
+        additionalParsers,
+      },
+      fp.file.name
+    );
   }
 
   return supportedTypes.includes(mimetype);
@@ -143,6 +173,13 @@ export async function evalInSubprocess(
     if (subprocess.go && canUseGoRunner(panel, connectors)) {
       base = subprocess.go;
       args.shift();
+    }
+
+    // https://blog.cloudflare.com/go-coverage-with-external-tests/
+    if (subprocess.go && subprocess.go.includes('_test')) {
+      args.unshift('-test.run');
+      args.unshift('^TestRunMain$');
+      args.unshift('-test.coverprofile=gorunner.' + uuid.v4() + '.cov');
     }
 
     log.info(`Launching "${base} ${args.join(' ')}"`);

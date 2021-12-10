@@ -16,6 +16,9 @@ func eval(panelId, projectId string) error {
 	case FilePanel:
 		log.Println("Evaling file panel")
 		return evalFilePanel(project, pageIndex, panel)
+	case HttpPanel:
+		log.Println("Evaling http panel")
+		return evalHttpPanel(project, pageIndex, panel)
 	case LiteralPanel:
 		log.Println("Evaling literal panel")
 		return evalLiteralPanel(project, pageIndex, panel)

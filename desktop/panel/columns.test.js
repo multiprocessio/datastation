@@ -12,7 +12,7 @@ const {
 const { makeEvalHandler } = require('./eval');
 const { fetchResultsHandler } = require('./columns');
 
-for (const runner of [undefined, { go: 'build/go_desktop_runner' }]) {
+for (const runner of [undefined, { go: 'build/go_desktop_runner_test' }]) {
   test(`store and retrieve literal ${
     runner ? 'using ' + runner : ''
   }, specific columns`, async () => {

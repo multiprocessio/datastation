@@ -8,6 +8,7 @@
   "scripts": {
     "typecheck": "yarn tsc",
     "build-desktop": "python3 ./scripts/build.py ./desktop/scripts/desktop.build",
+    "build-test-runner": "python3 ./scripts/build.py ./runner/scripts/runner_test.build",
     "build-ui": "python3 ./scripts/build.py ./ui/scripts/ui.build",
     "build-server": "python3 ./scripts/build.py ./server/scripts/server.build",
     "start-server": "yarn build-server && node ./build/server.js",

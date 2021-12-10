@@ -61,7 +61,7 @@ const vendorOverride = {
 for (const subprocess of [
   undefined,
   { node: path.join(CODE_ROOT, 'build', 'desktop_runner.js') },
-  { go: path.join(CODE_ROOT, 'build', 'go_desktop_runner') },
+  { go: path.join(CODE_ROOT, 'build', 'go_desktop_runner_test') },
 ]) {
   for (const t of DATABASES) {
     describe(

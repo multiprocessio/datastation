@@ -7,8 +7,17 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strconv"
+	"strings"
+
+	"github.com/xitongsys/parquet-go-source/local"
+	"github.com/xitongsys/parquet-go/reader"
+	"github.com/xitongsys/parquet-go/source"
+	"github.com/xuri/excelize/v2"
 )
+
+var preferredParallelism = runtime.NumCPU() * 2
 
 type UnicodeEscape string
 
@@ -31,14 +40,8 @@ func (j JSONArrayWriter) Write(row interface{}) error {
 	return err
 }
 
-func withJSONArrayOutWriter(out string, cb func(w JSONArrayWriter) error) error {
-	w, err := os.OpenFile(out, os.O_WRONLY|os.O_CREATE, os.ModePerm)
-	if err != nil {
-		return err
-	}
-	defer w.Close()
-
-	_, err = w.Write([]byte("["))
+func withJSONArrayOutWriter(w *os.File, cb func(w JSONArrayWriter) error) error {
+	_, err := w.Write([]byte("["))
 	if err != nil {
 		return err
 	}
@@ -67,10 +70,20 @@ func withJSONArrayOutWriter(out string, cb func(w JSONArrayWriter) error) error 
 	return w.Truncate(lastChar + 1)
 }
 
+func withJSONArrayOutWriterFile(out string, cb func(w JSONArrayWriter) error) error {
+	w, err := os.OpenFile(out, os.O_WRONLY|os.O_CREATE, os.ModePerm)
+	if err != nil {
+		return err
+	}
+	defer w.Close()
+
+	return withJSONArrayOutWriter(w, cb)
+}
+
 func transformCSV(in io.Reader, out string) error {
 	r := csv.NewReader(in)
 
-	return withJSONArrayOutWriter(out, func(w JSONArrayWriter) error {
+	return withJSONArrayOutWriterFile(out, func(w JSONArrayWriter) error {
 		isHeader := true
 		var fields []string
 		for {
@@ -142,17 +155,176 @@ func transformJSONFile(in, out string) error {
 	return transformJSON(r, out)
 }
 
-func evalFilePanel(project *ProjectState, pageIndex int, panel *PanelInfo) error {
-	assumedType := panel.File.ContentTypeInfo.Type
-	if assumedType == "" {
-		switch filepath.Ext(panel.File.Name) {
-		case ".csv":
-			assumedType = "text/csv"
-		case ".json":
-			assumedType = "application/json"
+func transformParquet(in source.ParquetFile, out string) error {
+	r, err := reader.NewParquetReader(in, nil, int64(preferredParallelism))
+	if err != nil {
+		return err
+	}
+	defer r.ReadStop()
+
+	return withJSONArrayOutWriterFile(out, func(w JSONArrayWriter) error {
+		size := 1000
+		var offset int64 = 0
+		for {
+			err := r.SkipRows(offset)
+			if err != nil {
+				return err
+			}
+
+			rows, err := r.ReadByNumber(size)
+			if err != nil {
+				return err
+			}
+
+			for _, row := range rows {
+				err := w.Write(row)
+				if err != nil {
+					return err
+				}
+			}
+
+			offset += int64(size)
+
+			if len(rows) < size {
+				return nil
+			}
+		}
+	})
+}
+
+func transformParquetFile(in, out string) error {
+	r, err := local.NewLocalFileReader(in)
+	if err != nil {
+		return err
+	}
+	defer r.Close()
+
+	return transformParquet(r, out)
+}
+
+func writeXLSXSheet(rows [][]string, w JSONArrayWriter) error {
+	var header []string
+	isHeader := true
+
+	for _, r := range rows {
+		if isHeader {
+			header = r
+			isHeader = false
+			continue
+		}
+
+		row := map[string]interface{}{}
+		for i, cell := range r {
+			row[header[i]] = cell
+		}
+
+		err := w.Write(row)
+		if err != nil {
+			return err
 		}
 	}
 
+	return nil
+}
+
+func transformXLSX(in *excelize.File, out string) error {
+	sheets := in.GetSheetList()
+
+	// Single sheet files get flattened into just an array, not a dict mapping sheet name to sheet contents
+	if len(sheets) == 1 {
+		return withJSONArrayOutWriterFile(out, func(w JSONArrayWriter) error {
+			rows, err := in.GetRows(sheets[0])
+			if err != nil {
+				return err
+			}
+
+			return writeXLSXSheet(rows, w)
+		})
+	}
+
+	w, err := os.OpenFile(out, os.O_WRONLY|os.O_CREATE, os.ModePerm)
+	if err != nil {
+		return err
+	}
+	defer w.Close()
+
+	_, err = w.Write([]byte("{"))
+	if err != nil {
+		return err
+	}
+
+	for _, sheet := range sheets {
+		_, err = w.Write([]byte(`"` + strings.ReplaceAll(sheet, `"`, `\\"`) + `":`))
+		if err != nil {
+			return err
+		}
+
+		err = withJSONArrayOutWriter(w, func(w JSONArrayWriter) error {
+			rows, err := in.GetRows(sheet)
+			if err != nil {
+				return err
+			}
+			return writeXLSXSheet(rows, w)
+		})
+		if err != nil {
+			return err
+		}
+
+		_, err = w.Write([]byte(","))
+		if err != nil {
+			return err
+		}
+	}
+
+	// Find current offset
+	lastChar, err := w.Seek(0, io.SeekCurrent)
+	if err != nil {
+		return err
+	}
+
+	if lastChar > 1 {
+		// Overwrite the last comma
+		lastChar = lastChar - 1
+	}
+
+	_, err = w.WriteAt([]byte("}"), lastChar)
+	if err != nil {
+		return err
+	}
+
+	return w.Truncate(lastChar + 1)
+}
+
+func transformXLSXFile(in, out string) error {
+	f, err := excelize.OpenFile(in)
+	if err != nil {
+		return err
+	}
+
+	return transformXLSX(f, out)
+}
+
+func getMimeType(fileName string, ct ContentTypeInfo) string {
+	if ct.Type != "" {
+		return ct.Type
+	}
+
+	switch filepath.Ext(fileName) {
+	case ".csv":
+		return "text/csv"
+	case ".json":
+		return "application/json"
+	case ".xls", ".xlsx":
+		return "application/vnd.ms-excel"
+	case ".parquet":
+		return "parquet"
+	}
+
+	return ""
+}
+
+func evalFilePanel(project *ProjectState, pageIndex int, panel *PanelInfo) error {
+	assumedType := getMimeType(panel.File.Name, panel.File.ContentTypeInfo)
 	if assumedType == "" {
 		return fmt.Errorf("Unknown type")
 	}
@@ -164,7 +336,12 @@ func evalFilePanel(project *ProjectState, pageIndex int, panel *PanelInfo) error
 		return transformJSONFile(panel.File.Name, out)
 	case "text/csv":
 		return transformCSVFile(panel.File.Name, out)
+	case "application/vnd.ms-excel", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
+		return transformXLSXFile(panel.File.Name, out)
+	case "parquet":
+		return transformParquetFile(panel.File.Name, out)
 	}
 
+	// TODO: Need to just copy it as a string instead of this
 	return fmt.Errorf("Unsupported type " + assumedType)
 }

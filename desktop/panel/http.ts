@@ -2,13 +2,9 @@ import fetch from 'node-fetch';
 import { URL } from 'url';
 import { request } from '../../shared/http';
 import { HTTPPanelInfo, PanelInfo, ProjectState } from '../../shared/state';
-import { parseParquet } from './parquet';
+import { additionalParsers } from './parquet';
 import { tunnel } from './tunnel';
 import { EvalHandlerResponse, guardPanel } from './types';
-
-export const additionalParsers = {
-  parquet: parseParquet,
-};
 
 export async function evalHTTP(
   project: ProjectState,
