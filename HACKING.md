@@ -4,7 +4,9 @@ You'll need a recent Node.js, Python3, cmake, and
 [yarn](https://yarnpkg.com/).
 
 You'll also need a C++ compiler for some native Node.js
-packages. Install MSVC++ (Visual Studio) on Windows or XCode on
+packages. Install [tdm-gcc](https://jmeubank.github.io/tdm-gcc/) on
+Windows (yes, you need this not MSVC because some Go packages [require
+gcc](https://github.com/mattn/go-sqlite3/issues/684)) or XCode on
 macOS. On Linux install gcc or clang.
 
 You'll need Go 1.17 or newer.
