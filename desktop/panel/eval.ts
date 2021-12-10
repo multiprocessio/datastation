@@ -1,4 +1,3 @@
-import * as uuid from 'uuid';
 import { execFile } from 'child_process';
 import fs from 'fs';
 import jsesc from 'jsesc';
@@ -6,6 +5,7 @@ import { EOL } from 'os';
 import { preview } from 'preview';
 import { shape, Shape } from 'shape';
 import { file as makeTmpFile } from 'tmp-promise';
+import * as uuid from 'uuid';
 //import { Cancelled } from '../../shared/errors';
 import log from '../../shared/log';
 import { PanelBody } from '../../shared/rpc';
