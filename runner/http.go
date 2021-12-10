@@ -2,11 +2,12 @@ package main
 
 import (
 	"bytes"
-	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
+	"regexp"
 
 	"github.com/xuri/excelize/v2"
 )
@@ -38,9 +39,7 @@ func evalHttpPanel(project *ProjectState, pageIndex int, panel *PanelInfo) error
 	defer rsp.Body.Close()
 
 	assumedType := getMimeType(h.Url, h.ContentTypeInfo)
-	if assumedType == "" {
-		return fmt.Errorf("Unknown type")
-	}
+	log.Printf("Assumed '%s' from '%s' given '%s' when loading file", assumedType, h.ContentTypeInfo.Type, h.Url)
 
 	out := getPanelResultsFile(project.ProjectName, panel.Id)
 
@@ -71,8 +70,13 @@ func evalHttpPanel(project *ProjectState, pageIndex int, panel *PanelInfo) error
 		}
 
 		return transformParquetFile(w.Name(), out)
+	case "text/regexplines":
+		return transformRegexp(rsp.Body, out, regexp.MustCompile(h.ContentTypeInfo.CustomLineRegexp))
 	}
 
-	// TODO: Need to just copy it as a string instead of this
-	return fmt.Errorf("Unsupported type " + assumedType)
+	if re, ok := BUILTIN_REGEX[assumedType]; ok {
+		return transformRegexp(rsp.Body, out, re)
+	}
+
+	return transformGeneric(rsp.Body, out)
 }
