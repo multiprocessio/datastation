@@ -36,8 +36,9 @@ jobs:
     - run: ./scripts/fail_on_diff.sh
     - run: yarn test-licenses
     # Needed so we can have ./build/desktop_runner.js and ./build/go_desktop_runner ready for tests
-    - run: yarn build-desktop
+    - run: yarn build-test-runner
     - run: yarn test --runInBand --detectOpenHandles --forceExit --verbose
+    - run: ./runner/scripts/test_coverage.sh
     - run: cd runner && go test -cover
     # Test server builds
     - run: yarn build-server
@@ -127,7 +128,7 @@ jobs:
 
     - run: ./scripts/ci/prepare_macos.sh
     # Needed so we can have ./build/desktop_runner.js ready for tests
-    - run: yarn build-desktop
+    - run: yarn build-test-runner
     - run: yarn test --runInBand --detectOpenHandles --forceExit --verbose shared ui desktop
     - run: cd runner && go test -cover
     - run: yarn release-desktop 0.0.0-e2etest
@@ -157,7 +158,7 @@ jobs:
     - run: ./scripts/ci/prepare_windows.ps1
       shell: pwsh
     # Needed so we can have ./build/desktop_runner.js ready for tests
-    - run: yarn build-desktop
+    - run: yarn build-test-runner
     - run: yarn test --runInBand --detectOpenHandles --forceExit --verbose shared ui desktop
     - run: cd runner && go test -cover
     - run: yarn release-desktop 0.0.0-e2etest

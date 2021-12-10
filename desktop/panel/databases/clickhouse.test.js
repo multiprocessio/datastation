@@ -12,7 +12,7 @@ const { withSavedPanels } = require('../testutil');
 for (const subprocess of [
   undefined,
   { node: path.join(CODE_ROOT, 'build', 'desktop_runner.js') },
-  { go: path.join(CODE_ROOT, 'build', 'go_desktop_runner') },
+  { go: path.join(CODE_ROOT, 'build', 'go_desktop_runner_test') },
 ]) {
   test(
     'runs clickhouse query via ' +

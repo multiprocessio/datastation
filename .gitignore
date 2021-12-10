@@ -8,3 +8,6 @@ coverage
 certs
 .dir-locals.el
 TAGS
+*.cov
+all.out
+runner/report

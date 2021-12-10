@@ -22,7 +22,7 @@ const baseline = JSON.parse(
 for (const subprocessName of [
   undefined,
   { node: path.join(CODE_ROOT, 'build', 'desktop_runner.js') },
-  { go: path.join(CODE_ROOT, 'build', 'go_desktop_runner') },
+  { go: path.join(CODE_ROOT, 'build', 'go_desktop_runner_test') },
 ]) {
   for (const userdataFileType of USERDATA_FILES) {
     const fp = new FilePanelInfo({

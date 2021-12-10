@@ -1,3 +1,4 @@
+import * as uuid from 'uuid';
 import { execFile } from 'child_process';
 import fs from 'fs';
 import jsesc from 'jsesc';
@@ -172,6 +173,13 @@ export async function evalInSubprocess(
     if (subprocess.go && canUseGoRunner(panel, connectors)) {
       base = subprocess.go;
       args.shift();
+    }
+
+    // https://blog.cloudflare.com/go-coverage-with-external-tests/
+    if (subprocess.go && subprocess.go.includes('_test')) {
+      args.unshift('-test.run');
+      args.unshift('^TestRunMain$');
+      args.unshift('-test.coverprofile=gorunner.' + uuid.v4() + '.cov');
     }
 
     log.info(`Launching "${base} ${args.join(' ')}"`);
