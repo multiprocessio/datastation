@@ -23,13 +23,16 @@ const TESTS = [
   },
   {
     type: 'javascript',
+    // Explicitly testing no quotes here
     content: `const prev = DM_getPanel(1000)`,
     condition: true,
     exception: InvalidDependentPanelError,
   },
   {
     type: 'javascript',
-    content: `const prev = DM_getPanel(0); const next = DM_getPanel('flubberydeedoodad');`,
+    // Explicitly test both single and double quotes here
+    // Explicitly testing that all calls to DM_getPanel are checked (the first one is valid, the second one is not)
+    content: `const prev = DM_getPanel("0"); const next = DM_getPanel('flubberydeedoodad');`,
     condition: true,
     exception: InvalidDependentPanelError,
   },

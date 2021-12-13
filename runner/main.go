@@ -48,7 +48,9 @@ func allImportedPanelResultsExist(project ProjectState, page ProjectPage, panel 
 			case "singlequote", "doublequote":
 				// Remove quotes
 				nameOrIndex = match[i]
-				nameOrIndex = nameOrIndex[1 : len(nameOrIndex)-1]
+				if nameOrIndex != "" {
+					nameOrIndex = nameOrIndex[1 : len(nameOrIndex)-1]
+				}
 			}
 
 			if nameOrIndex != "" {
