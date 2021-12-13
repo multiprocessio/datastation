@@ -40,7 +40,7 @@ func evalHttpPanel(project *ProjectState, pageIndex int, panel *PanelInfo) error
 	assumedType := getMimeType(h.Url, h.ContentTypeInfo)
 	logln("Assumed '%s' from '%s' given '%s' when loading file", assumedType, h.ContentTypeInfo.Type, h.Url)
 
-	out := getPanelResultsFile(project.ProjectName, panel.Id)
+	out := getPanelResultsFile(project.Id, panel.Id)
 
 	switch assumedType {
 	case "application/json":

@@ -90,8 +90,8 @@ func evalProgramPanel(project *ProjectState, pageIndex int, panel *PanelInfo) er
 	}
 	defer os.Remove(tmp.Name())
 
-	resultsFile := getProjectResultsFile(project.ProjectName)
-	panelResultsFile := getPanelResultsFile(project.ProjectName, panel.Id)
+	resultsFile := getProjectResultsFile(project.Id)
+	panelResultsFile := getPanelResultsFile(project.Id, panel.Id)
 	jsonIdMap := getIdMapJson(project.Pages[pageIndex])
 	preamble := strings.ReplaceAll(p.Preamble, "$$RESULTS_FILE$$", resultsFile)
 	preamble = strings.ReplaceAll(preamble, "$$PANEL_RESULTS_FILE$$", panelResultsFile)

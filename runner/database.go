@@ -209,7 +209,7 @@ func evalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo) e
 		return err
 	}
 
-	out := getPanelResultsFile(project.ProjectName, panel.Id)
+	out := getPanelResultsFile(project.Id, panel.Id)
 
 	wroteFirstRow := false
 	return withJSONArrayOutWriterFile(out, func(w JSONArrayWriter) error {
@@ -290,7 +290,7 @@ func evalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo) e
 				return nil, rows.Err()
 
 			},
-			project.ProjectName,
+			project.Id,
 			query,
 			panelsToImport,
 			qt,

@@ -10,6 +10,10 @@ export class NotAnArrayOfObjectsError extends Error {
       id
     )} returns an array of objects.`;
   }
+
+  static fromJSON(j: any) {
+    return new NotAnArrayOfObjectsError(j.targetPanelId);
+  }
 }
 
 export class InvalidDependentPanelError extends Error {
@@ -19,6 +23,10 @@ export class InvalidDependentPanelError extends Error {
     this.message = `A dependent panel's results are not valid. Did you run panel ${escapedPanelIdentifier(
       id
     )}?`;
+  }
+
+  static fromJSON(j: any) {
+    return new InvalidDependentPanelError(j.targetPanelId);
   }
 }
 
@@ -52,6 +60,10 @@ export class UnsupportedError extends Error {
     super();
     this.name = 'UnsupportedError';
     this.message = msg;
+  }
+
+  static fromJSON(j: any) {
+    return new InvalidDependentPanelError(j.message);
   }
 }
 

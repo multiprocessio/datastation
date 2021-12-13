@@ -6,7 +6,7 @@ import { preview } from 'preview';
 import { shape, Shape } from 'shape';
 import { file as makeTmpFile } from 'tmp-promise';
 import * as uuid from 'uuid';
-import { Cancelled } from '../../shared/errors';
+import { Cancelled, EVAL_ERRORS } from '../../shared/errors';
 import log from '../../shared/log';
 import { PanelBody } from '../../shared/rpc';
 import {
@@ -58,7 +58,7 @@ function killAllByPanelId(panelId: string) {
       try {
         log.info('Killing existing process');
         process.kill(pid, 'SIGINT');
-	cancelledPids.add(pid);
+        cancelledPids.add(pid);
       } catch (e) {
         // If process doesn't exist, that's ok
         if (!e.message.includes('ESRCH')) {
@@ -218,14 +218,14 @@ export async function evalInSubprocess(
               process.stderr.write(stderr + EOL);
             }
             resolve();
-	    return;
+            return;
           }
 
-	  if (cancelledPids.has(pid)) {
-	    cancelledPids.delete(pid);
+          if (cancelledPids.has(pid)) {
+            cancelledPids.delete(pid);
             reject(new Cancelled());
-	    return;
-	  }
+            return;
+          }
 
           reject(new Error(stderr));
         });
@@ -238,12 +238,26 @@ export async function evalInSubprocess(
     });
 
     const resultMeta = fs.readFileSync(tmp.path).toString();
-    if (!resultMeta) {
-      const projectResultsFile = getProjectResultsFile(projectName);
-      return parsePartialJSONFile(projectResultsFile + panel.id);
+    let parsePartial = !resultMeta;
+    if (!parsePartial) {
+      const rm = JSON.parse(resultMeta);
+      if (rm.exception) {
+        const e =
+          EVAL_ERRORS.find((e) => e.name === rm.exception.name) || Error;
+        if (e.fromJSON) {
+          throw e.fromJSON(rm.exception);
+        }
+
+        throw new e(...rm.exception);
+      }
+
+      // Case of existing Node.js runner
+      return rm;
     }
 
-    return JSON.parse(resultMeta);
+    // Case of new Go runner
+    const projectResultsFile = getProjectResultsFile(projectName);
+    return parsePartialJSONFile(projectResultsFile + panel.id);
   } finally {
     try {
       if (pid) {
