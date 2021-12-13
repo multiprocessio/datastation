@@ -36,7 +36,8 @@ func panelResultsExist(projectId, panelId string) bool {
 	return err == nil
 }
 
-func allImportedPanelResultsExist(project ProjectState, panel PanelInfo) (string, bool) {
+func allImportedPanelResultsExist(project ProjectState, page ProjectPage, panel PanelInfo) (string, bool) {
+	idMap := getIdMap(page)
 	matchesForSubexps := dmGetPanelRe.FindAllStringSubmatch(panel.Content, -1)
 	for _, match := range matchesForSubexps {
 		nameOrIndex := ""
@@ -51,7 +52,7 @@ func allImportedPanelResultsExist(project ProjectState, panel PanelInfo) (string
 			}
 
 			if nameOrIndex != "" {
-				if !panelResultsExist(project.Id, panel.Id) {
+				if !panelResultsExist(project.Id, idMap[nameOrIndex]) {
 					return nameOrIndex, false
 				}
 			}
@@ -71,7 +72,7 @@ func (ec evalContext) eval(panelId, projectId string) error {
 		return err
 	}
 
-	panelId, ok := allImportedPanelResultsExist(*project, *panel)
+	panelId, ok := allImportedPanelResultsExist(*project, project.Pages[pageIndex], *panel)
 	if !ok {
 		return makeErrInvalidDependentPanelError(panelId)
 	}
