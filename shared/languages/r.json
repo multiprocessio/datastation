@@ -1,4 +1,5 @@
 {
+  "id": "r",
   "name": "R",
   "defaultPath": "Rscript",
   "preamble": "\ntryCatch(library(\"rjson\"), error=function(cond) {install.packages(\"rjson\", repos=\"https://cloud.r-project.org\")}, finally=library(\"rjson\"))\nDM_getPanel <- function(i) {\n  panelId = fromJSON(\"$$JSON_ID_MAP_QUOTE_ESCAPED$$\")[[toString(i)]]\n  fromJSON(file=paste(\"$$RESULTS_FILE$$\", panelId, sep=\"\"))\n}\nDM_setPanel <- function(v) {\n  write(toJSON(v), \"$$PANEL_RESULTS_FILE$$\")\n}"

@@ -61,7 +61,11 @@ func allImportedPanelResultsExist(project ProjectState, panel PanelInfo) (string
 	return "", true
 }
 
-func eval(panelId, projectId string) error {
+type evalContext struct {
+	settings Settings
+}
+
+func (ec evalContext) eval(panelId, projectId string) error {
 	project, pageIndex, panel, err := getProjectPanel(projectId, panelId)
 	if err != nil {
 		return err
@@ -84,7 +88,7 @@ func eval(panelId, projectId string) error {
 		return evalLiteralPanel(project, pageIndex, panel)
 	case ProgramPanel:
 		logln("Evaling program panel")
-		return evalProgramPanel(project, pageIndex, panel)
+		return ec.evalProgramPanel(project, pageIndex, panel)
 	case DatabasePanel:
 		logln("Evaling database panel")
 		return evalDatabasePanel(project, pageIndex, panel)
@@ -135,7 +139,15 @@ func main() {
 		fatalln("No panel meta out given.")
 	}
 
-	err := eval(panelId, projectId)
+	settings, err := loadSettings()
+	if err != nil {
+		logln("Could not load settings, assuming defaults.")
+		settings = defaultSettings
+	}
+
+	ec := evalContext{*settings}
+
+	err = ec.eval(panelId, projectId)
 	if err != nil {
 		dse := edse(err)
 		if d, ok := err.(*DSError); ok {
