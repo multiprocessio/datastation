@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"io"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 	"regexp"
@@ -39,7 +38,7 @@ func evalHttpPanel(project *ProjectState, pageIndex int, panel *PanelInfo) error
 	defer rsp.Body.Close()
 
 	assumedType := getMimeType(h.Url, h.ContentTypeInfo)
-	log.Printf("Assumed '%s' from '%s' given '%s' when loading file", assumedType, h.ContentTypeInfo.Type, h.Url)
+	logln("Assumed '%s' from '%s' given '%s' when loading file", assumedType, h.ContentTypeInfo.Type, h.Url)
 
 	out := getPanelResultsFile(project.ProjectName, panel.Id)
 

@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"io"
 	"io/ioutil"
-	"log"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -402,7 +401,7 @@ func evalFilePanel(project *ProjectState, pageIndex int, panel *PanelInfo) error
 	fileName := panel.File.Name
 	cti := panel.File.ContentTypeInfo
 	assumedType := getMimeType(fileName, cti)
-	log.Printf("Assumed '%s' from '%s' given '%s' when loading file", assumedType, cti.Type, fileName)
+	logln("Assumed '%s' from '%s' given '%s' when loading file", assumedType, cti.Type, fileName)
 
 	out := getPanelResultsFile(project.ProjectName, panel.Id)
 

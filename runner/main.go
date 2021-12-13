@@ -4,34 +4,8 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 )
-
-func eval(panelId, projectId string) error {
-	project, pageIndex, panel, err := getProjectPanel(projectId, panelId)
-	if err != nil {
-		return err
-	}
-
-	switch panel.Type {
-	case FilePanel:
-		log.Println("Evaling file panel")
-		return evalFilePanel(project, pageIndex, panel)
-	case HttpPanel:
-		log.Println("Evaling http panel")
-		return evalHttpPanel(project, pageIndex, panel)
-	case LiteralPanel:
-		log.Println("Evaling literal panel")
-		return evalLiteralPanel(project, pageIndex, panel)
-	case ProgramPanel:
-		log.Println("Evaling program panel")
-		return evalProgramPanel(project, pageIndex, panel)
-	case DatabasePanel:
-		log.Println("Evaling database panel")
-		return evalDatabasePanel(project, pageIndex, panel)
-	}
-
-	return fmt.Errorf("Unsupported panel type " + string(panel.Type))
-}
 
 func fatal(msg string, args ...interface{}) {
 	if msg[len(msg)-1] != '\n' {
@@ -41,11 +15,52 @@ func fatal(msg string, args ...interface{}) {
 	os.Exit(2)
 }
 
+var logPrefixSet = false
+
+func logln(msg string, args ...interface{}) {
+	if !logPrefixSet {
+		log.SetPrefix("")
+		logPrefixSet = true
+	}
+	baseMsg := "[INFO] " + time.Now().Format(time.RFC3339) + " " + msg
+	if msg[len(msg)-1] != '\n' {
+		msg += "\n"
+	}
+	log.Printf(baseMsg, args...)
+}
+
+func eval(panelId, projectId string) error {
+	project, pageIndex, panel, err := getProjectPanel(projectId, panelId)
+	if err != nil {
+		return err
+	}
+
+	switch panel.Type {
+	case FilePanel:
+		logln("Evaling file panel")
+		return evalFilePanel(project, pageIndex, panel)
+	case HttpPanel:
+		logln("Evaling http panel")
+		return evalHttpPanel(project, pageIndex, panel)
+	case LiteralPanel:
+		logln("Evaling literal panel")
+		return evalLiteralPanel(project, pageIndex, panel)
+	case ProgramPanel:
+		logln("Evaling program panel")
+		return evalProgramPanel(project, pageIndex, panel)
+	case DatabasePanel:
+		logln("Evaling database panel")
+		return evalDatabasePanel(project, pageIndex, panel)
+	}
+
+	return fmt.Errorf("Unsupported panel type " + string(panel.Type))
+}
+
 const VERSION = "development"
 const APP_NAME = "DataStation Runner (Go)"
 
 func main() {
-	log.Println(APP_NAME + " " + VERSION)
+	logln(APP_NAME + " " + VERSION)
 	projectId := ""
 	panelId := ""
 	panelMetaOut := ""

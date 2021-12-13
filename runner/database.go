@@ -269,7 +269,7 @@ func evalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo) e
 								// Default to treating everything as a string
 								row[col] = string(bs)
 								if !wroteFirstRow && !textTypes[t] {
-									log.Println("Skipping unknown type: " + s.DatabaseTypeName())
+									logln("Skipping unknown type: " + s.DatabaseTypeName())
 								}
 							}
 						}

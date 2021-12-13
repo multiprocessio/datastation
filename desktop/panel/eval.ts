@@ -217,7 +217,6 @@ export async function evalInSubprocess(
             resolve();
           }
 
-          // TODO: fix cancell
           //if (code === 1 || code === null) {
           //  reject(new Cancelled());
           //}

@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"regexp"
 	"sort"
 	"strings"
@@ -235,7 +234,7 @@ func importAndRun(
 			ddlColumns = append(ddlColumns, quote(c.name, qt.identifier)+" "+c.kind)
 		}
 
-		log.Println("Creating temp table " + panel.tableName)
+		logln("Creating temp table " + panel.tableName)
 		createQuery := fmt.Sprintf("CREATE TEMPORARY TABLE %s (%s);",
 			quote(panel.tableName, qt.identifier),
 			strings.Join(ddlColumns, ", "))
@@ -262,7 +261,7 @@ func importAndRun(
 	}
 
 	if len(panelsToImport) > 0 {
-		log.Printf(
+		logln(
 			"Ingested %d rows in %d tables.\n",
 			rowsIngested,
 			len(panelsToImport))
