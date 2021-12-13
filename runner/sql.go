@@ -93,7 +93,7 @@ type panelToImport struct {
 	tableName string
 }
 
-var dmGetPanelRe := r := regexp.MustCompile(`(DM_getPanel\((?P<number>[0-9]+)\))|(DM_getPanel\((?P<singlequote>'(?:[^'\\]|\\.)*\')\))|(DM_getPanel\((?P<doublequote>"(?:[^"\\]|\\.)*\")\))`)
+var dmGetPanelRe = regexp.MustCompile(`(DM_getPanel\((?P<number>[0-9]+)\))|(DM_getPanel\((?P<singlequote>'(?:[^'\\]|\\.)*\')\))|(DM_getPanel\((?P<doublequote>"(?:[^"\\]|\\.)*\")\))`)
 
 func transformDM_getPanelCalls(
 	query string,

@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 	"os"
-	"errors"
 	"time"
 )
 
@@ -15,7 +14,7 @@ func _logln(level, msg string, args ...interface{}) {
 		log.SetFlags(0)
 		logPrefixSet = true
 	}
-	baseMsg := "["+level+"] " + time.Now().Format(iso8601Format) + " " + msg
+	baseMsg := "[" + level + "] " + time.Now().Format(iso8601Format) + " " + msg
 	if msg[len(msg)-1] != '\n' {
 		msg += "\n"
 	}
@@ -31,27 +30,28 @@ func fatalln(msg string, args ...interface{}) {
 	os.Exit(2)
 }
 
-func panelResultsExist(project ProjectInfo, page PageInfo, panel PanelInfo) bool {
-	resultsFile := getPanelResultsFile(project.Id,)
+func panelResultsExist(projectId, panelId string) bool {
+	resultsFile := getPanelResultsFile(projectId, panelId)
+	_, err := os.Stat(resultsFile)
+	return err == nil
 }
 
-func allImportedPanelResultsExist(project ProjectInfo, page PageInfo, panel PanelInfo) (string, bool) {
-	idMap := getIdMap(project.Id, panel.Id)
-	matchesForSubexps := dmGetPanelRe.FindAllStringSubmatch(panel.Content)
+func allImportedPanelResultsExist(project ProjectState, panel PanelInfo) (string, bool) {
+	matchesForSubexps := dmGetPanelRe.FindAllStringSubmatch(panel.Content, -1)
 	for _, match := range matchesForSubexps {
 		nameOrIndex := ""
 		for i, name := range dmGetPanelRe.SubexpNames() {
 			switch name {
 			case "number":
-				nameOrIndex = matchForSubexps[i]
+				nameOrIndex = match[i]
 			case "singlequote", "doublequote":
 				// Remove quotes
-				nameOrIndex = matchForSubexps[i]
+				nameOrIndex = match[i]
 				nameOrIndex = nameOrIndex[1 : len(nameOrIndex)-1]
 			}
 
 			if nameOrIndex != "" {
-				if !panelResultsExist {
+				if !panelResultsExist(project.Id, panel.Id) {
 					return nameOrIndex, false
 				}
 			}
@@ -67,9 +67,9 @@ func eval(panelId, projectId string) error {
 		return err
 	}
 
-	panelId, ok := allImportedPanelResultsExist(project, project.Pages[pageIndex], panel)
+	panelId, ok := allImportedPanelResultsExist(*project, *panel)
 	if !ok {
-		return makeErrInvalidDependentPanelResults(panelId)
+		return makeErrInvalidDependentPanelError(panelId)
 	}
 
 	switch panel.Type {
@@ -138,8 +138,8 @@ func main() {
 	err := eval(panelId, projectId)
 	if err != nil {
 		dse := edse(err)
-		if errors.Is(err, &DSError{}) {
-			dse = err.(*DSError)	
+		if d, ok := err.(*DSError); ok {
+			dse = d
 		}
 		err := writeJSONFile(panelMetaOut, map[string]DSError{
 			"exception": *dse,
@@ -148,6 +148,7 @@ func main() {
 			fatalln("Could not write panel meta out: %s", err)
 		}
 
-		fatalln("Failed to eval: %s", dse)
+		logln("Failed to eval: %s", dse)
+		// Explicitly don't fail here so that the parent can read the exception from disk
 	}
 }

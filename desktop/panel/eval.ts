@@ -6,7 +6,11 @@ import { preview } from 'preview';
 import { shape, Shape } from 'shape';
 import { file as makeTmpFile } from 'tmp-promise';
 import * as uuid from 'uuid';
-import { Cancelled, EVAL_ERRORS } from '../../shared/errors';
+import {
+  Cancelled,
+  EVAL_ERRORS,
+  InvalidDependentPanelError,
+} from '../../shared/errors';
 import log from '../../shared/log';
 import { PanelBody } from '../../shared/rpc';
 import {
@@ -244,11 +248,11 @@ export async function evalInSubprocess(
       if (rm.exception) {
         const e =
           EVAL_ERRORS.find((e) => e.name === rm.exception.name) || Error;
-        if (e.fromJSON) {
-          throw e.fromJSON(rm.exception);
+        if ((e as any).fromJSON) {
+          throw (e as any).fromJSON(rm.exception);
         }
 
-        throw new e(...rm.exception);
+        throw new e(rm.exception);
       }
 
       // Case of existing Node.js runner
@@ -267,6 +271,30 @@ export async function evalInSubprocess(
       tmp.cleanup();
     } catch (e) {
       log.error(e);
+    }
+  }
+}
+
+function assertValidDependentPanels(
+  projectId: string,
+  content: string,
+  idMap: Record<string | number, string>
+) {
+  const projectResultsFile = getProjectResultsFile(projectId);
+  const re =
+    /(DM_getPanel\((?<number>[0-9]+)\))|(DM_getPanel\((?<singlequote>'(?:[^'\\]|\\.)*\')\))|(DM_getPanel\((?<doublequote>"(?:[^"\\]|\\.)*\")\))/g;
+  let match = null;
+  while ((match = re.exec(content)) !== null) {
+    if (match && match.groups) {
+      const { number, singlequote, doublequote } = match.groups;
+      let m = doublequote || singlequote || number;
+      if (["'", '"'].includes(m.charAt(0))) {
+        m = m.slice(1, m.length - 1);
+      }
+
+      if (!fs.existsSync(projectResultsFile + idMap[m])) {
+        throw new InvalidDependentPanelError(m);
+      }
     }
   }
 }
@@ -307,6 +335,8 @@ export const makeEvalHandler = (subprocessEval?: {
       idShapeMap[i] = p.resultMeta.shape;
       idShapeMap[p.name] = p.resultMeta.shape;
     });
+
+    assertValidDependentPanels(projectId, panel.content, idMap);
 
     const evalHandler = EVAL_HANDLERS[panel.type]();
     const res = await evalHandler(

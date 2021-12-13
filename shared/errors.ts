@@ -3,9 +3,11 @@ function escapedPanelIdentifier(id: number | string) {
 }
 
 export class NotAnArrayOfObjectsError extends Error {
+  targetPanelId: number | string;
   constructor(id: number | string) {
     super();
     this.name = 'NotAnArrayOfObjectsError';
+    this.targetPanelId = id;
     this.message = `This panel requires an array of objects as input. Make sure panel ${escapedPanelIdentifier(
       id
     )} returns an array of objects.`;
@@ -17,9 +19,11 @@ export class NotAnArrayOfObjectsError extends Error {
 }
 
 export class InvalidDependentPanelError extends Error {
+  targetPanelId: number | string;
   constructor(id: number | string) {
     super();
     this.name = 'InvalidDependentPanelError';
+    this.targetPanelId = id;
     this.message = `A dependent panel's results are not valid. Did you run panel ${escapedPanelIdentifier(
       id
     )}?`;

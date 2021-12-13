@@ -1,42 +1,43 @@
 package main
 
 import (
-	"fmt"
+	"encoding/json"
 	"runtime/debug"
 )
 
 type DSError struct {
-	Name string `json:"name"`
-	Message string `json:"message"`
-	Stack string `json:"stack"`
-	TargetPanelId string `json:"targetPanelId"`
-	Extra map[string]interface{} `json:"extra"`
+	Name          string                 `json:"name"`
+	Message       string                 `json:"message"`
+	Stack         string                 `json:"stack"`
+	TargetPanelId string                 `json:"targetPanelId"`
+	Extra         map[string]interface{} `json:"extra"`
 }
 
 func (dse *DSError) Error() string {
-	return fmt.Sprintf("%#v", dse)
+	s, _ := json.MarshalIndent(dse, "", "  ")
+	return "DSError" + string(s) + "\n" + dse.Stack
 }
 
 func makeErrNotAnArrayOfObjects(id string) *DSError {
 	return &DSError{
-		Name: "NotAnArrayOfObjects",
+		Name:          "NotAnArrayOfObjects",
 		TargetPanelId: id,
-		Stack: string(debug.Stack()),
+		Stack:         string(debug.Stack()),
 	}
 }
 
 func makeErrUnsupported(msg string) *DSError {
 	return &DSError{
-		Name: "Unsupported",
+		Name:    "Unsupported",
 		Message: msg,
-		Stack: string(debug.Stack()),
+		Stack:   string(debug.Stack()),
 	}
 }
 
 func makeErrInvalidDependentPanelError(id string) *DSError {
 	return &DSError{
-		Name: "InvalidDependentPanelError",
-		Stack: string(debug.Stack()),
+		Name:          "InvalidDependentPanelError",
+		Stack:         string(debug.Stack()),
 		TargetPanelId: id,
 	}
 }
@@ -47,9 +48,9 @@ func makeErrException(e error) *DSError {
 	}
 
 	return &DSError{
-		Name: "Error",
+		Name:    "Error",
 		Message: e.Error(),
-		Stack: string(debug.Stack()),
+		Stack:   string(debug.Stack()),
 	}
 }
 
