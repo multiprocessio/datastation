@@ -2,6 +2,7 @@ import { execFile } from 'child_process';
 import fs from 'fs';
 import jsesc from 'jsesc';
 import { EOL } from 'os';
+import path from 'path';
 import { preview } from 'preview';
 import { shape, Shape } from 'shape';
 import { file as makeTmpFile } from 'tmp-promise';
@@ -26,7 +27,13 @@ import {
   ProjectState,
 } from '../../shared/state';
 import { getMimeType, XLSX_MIME_TYPE } from '../../shared/text';
-import { DSPROJ_FLAG, PANEL_FLAG, PANEL_META_FLAG } from '../constants';
+import {
+  CODE_ROOT,
+  DSPROJ_FLAG,
+  PANEL_FLAG,
+  PANEL_META_FLAG,
+} from '../constants';
+import { ensureFile } from '../fs';
 import { parsePartialJSONFile } from '../partial';
 import { Dispatch, RPCHandler } from '../rpc';
 import { flushUnwritten, getProjectResultsFile } from '../store';
@@ -181,8 +188,10 @@ export async function evalInSubprocess(
       args.shift();
     }
 
+    // Only run during tests, triggering Go code coverage
     // https://blog.cloudflare.com/go-coverage-with-external-tests/
     if (subprocess.go && subprocess.go.includes('_test')) {
+      ensureFile(path.join(CODE_ROOT, 'coverage', 'fake.cov'));
       args.unshift('-test.run');
       args.unshift('^TestRunMain$');
       args.unshift(
