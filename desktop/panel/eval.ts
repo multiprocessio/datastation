@@ -6,7 +6,7 @@ import { preview } from 'preview';
 import { shape, Shape } from 'shape';
 import { file as makeTmpFile } from 'tmp-promise';
 import * as uuid from 'uuid';
-//import { Cancelled } from '../../shared/errors';
+import { Cancelled } from '../../shared/errors';
 import log from '../../shared/log';
 import { PanelBody } from '../../shared/rpc';
 import {
@@ -49,6 +49,7 @@ const EVAL_HANDLERS: { [k in PanelInfoType]: () => EvalHandler } = {
 };
 
 const runningProcesses: Record<string, Set<number>> = {};
+const cancelledPids = new Set<number>();
 
 function killAllByPanelId(panelId: string) {
   const workers = runningProcesses[panelId];
@@ -57,6 +58,7 @@ function killAllByPanelId(panelId: string) {
       try {
         log.info('Killing existing process');
         process.kill(pid, 'SIGINT');
+	cancelledPids.add(pid);
       } catch (e) {
         // If process doesn't exist, that's ok
         if (!e.message.includes('ESRCH')) {
@@ -200,6 +202,7 @@ export async function evalInSubprocess(
         return;
       }
       stderr += data;
+      process.stderr.write(data);
     });
 
     child.stdout.on('data', (data) => {
@@ -215,11 +218,14 @@ export async function evalInSubprocess(
               process.stderr.write(stderr + EOL);
             }
             resolve();
+	    return;
           }
 
-          //if (code === 1 || code === null) {
-          //  reject(new Cancelled());
-          //}
+	  if (cancelledPids.has(pid)) {
+	    cancelledPids.delete(pid);
+            reject(new Cancelled());
+	    return;
+	  }
 
           reject(new Error(stderr));
         });

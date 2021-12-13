@@ -15,14 +15,15 @@ func fatal(msg string, args ...interface{}) {
 	os.Exit(2)
 }
 
+var iso8601Format = "2006-01-02T15:04:05.999Z"
 var logPrefixSet = false
 
 func logln(msg string, args ...interface{}) {
 	if !logPrefixSet {
-		log.SetPrefix("")
+		log.SetFlags(0)
 		logPrefixSet = true
 	}
-	baseMsg := "[INFO] " + time.Now().Format(time.RFC3339) + " " + msg
+	baseMsg := "[INFO] " + time.Now().Format(iso8601Format) + " " + msg
 	if msg[len(msg)-1] != '\n' {
 		msg += "\n"
 	}
