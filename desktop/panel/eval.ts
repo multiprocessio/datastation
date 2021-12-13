@@ -185,7 +185,7 @@ export async function evalInSubprocess(
     if (subprocess.go && subprocess.go.includes('_test')) {
       args.unshift('-test.run');
       args.unshift('^TestRunMain$');
-      args.unshift('-test.coverprofile=gorunner.' + uuid.v4() + '.cov');
+      args.unshift('-test.coverprofile=coverage/gorunner.' + uuid.v4() + '.cov');
     }
 
     log.info(`Launching "${base} ${args.join(' ')}"`);
