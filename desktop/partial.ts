@@ -105,7 +105,7 @@ export function parsePartialJSONFile(
         averageRowSize += JSON.stringify(row).length;
       }
 
-      arrayCount = size / (averageRowSize / n);
+      arrayCount = Math.ceil(size / (averageRowSize / n));
     }
 
     return {

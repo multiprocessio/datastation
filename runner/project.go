@@ -23,10 +23,21 @@ func readJSONFileInto(file string, into interface{}) error {
 	decoder := json.NewDecoder(f)
 	err = decoder.Decode(into)
 	if err == io.EOF {
-		return fmt.Errorf("Project file is empty")
+		return fmt.Errorf("File is empty")
 	}
 
 	return err
+}
+
+func writeJSONFile(file string, value interface{}) error {
+	f, err := os.OpenFile(file, os.O_WRONLY|os.O_CREATE, os.ModePerm)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	encoder := json.NewEncoder(f)
+	return encoder.Encode(value)
 }
 
 func getProjectFile(projectId string) string {

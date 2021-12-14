@@ -82,7 +82,7 @@ export function FileInput({
 
   return (
     <label className={inputClass}>
-      {label}
+      {label && <span className="input-label">{label}</span>}
       {allowManualEntry && manualInput}
       {allowFilePicker && input}
     </label>

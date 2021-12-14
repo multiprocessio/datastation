@@ -72,10 +72,13 @@ export async function main(additionalHandlers?: RPCHandler<any, any>[]) {
     });
   });
 
+  let panelMetaOut;
   try {
-    const { project, handlers, panel, panelMetaOut } = initialize({
+    const i = initialize({
       additionalHandlers,
     });
+    const { project, handlers, panel } = i;
+    panelMetaOut = i.panelMetaOut;
     if (!project) {
       throw new Error('No project given.');
     }
@@ -113,8 +116,15 @@ export async function main(additionalHandlers?: RPCHandler<any, any>[]) {
     // Must explicitly exit
     process.exit(0);
   } catch (e) {
+    fs.writeFileSync(
+      panelMetaOut,
+      JSON.stringify({
+        exception: { ...e },
+      })
+    );
     log.error(e);
-    process.exit(2);
+    // Explicitly exit as zero, exception gets written to meta out
+    process.exit(0);
   }
 }
 

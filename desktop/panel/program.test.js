@@ -1,5 +1,6 @@
 const path = require('path');
 const { LANGUAGES } = require('../../shared/languages');
+const { InvalidDependentPanelError } = require('../../shared/errors');
 const { getProjectResultsFile } = require('../store');
 const fs = require('fs');
 const { LiteralPanelInfo, ProgramPanelInfo } = require('../../shared/state');
@@ -19,6 +20,21 @@ const TESTS = [
     type: 'javascript',
     content: `const prev = DM_getPanel('Raw Data'); const next = prev.map((row) => ({ ...row, "age": +row.age + 10 })); DM_setPanel(next);`,
     condition: true,
+  },
+  {
+    type: 'javascript',
+    // Explicitly testing no quotes here
+    content: `const prev = DM_getPanel(1000)`,
+    condition: true,
+    exception: InvalidDependentPanelError,
+  },
+  {
+    type: 'javascript',
+    // Explicitly test both single and double quotes here
+    // Explicitly testing that all calls to DM_getPanel are checked (the first one is valid, the second one is not)
+    content: `const prev = DM_getPanel("0"); const next = DM_getPanel('flubberydeedoodad');`,
+    condition: true,
+    exception: InvalidDependentPanelError,
   },
   {
     type: 'sql',
@@ -94,37 +110,43 @@ for (const t of TESTS) {
           ? subprocessName.node || subprocessName.go
           : 'same-process'
       }`, async () => {
-        const lp = new LiteralPanelInfo({
-          contentTypeInfo: { type: 'text/csv' },
-          content: 'age,name\n12,Kev\n18,Nyra',
-          name: 'Raw Data',
-        });
+        try {
+          const lp = new LiteralPanelInfo({
+            contentTypeInfo: { type: 'text/csv' },
+            content: 'age,name\n12,Kev\n18,Nyra',
+            name: 'Raw Data',
+          });
 
-        const pp = new ProgramPanelInfo({
-          type: t.type,
-          content: t.content,
-        });
+          const pp = new ProgramPanelInfo({
+            type: t.type,
+            content: t.content,
+          });
 
-        let finished = false;
-        const panels = [lp, pp];
-        await withSavedPanels(
-          panels,
-          async (project) => {
-            const panelValueBuffer = fs.readFileSync(
-              getProjectResultsFile(project.projectName) + pp.id
-            );
-            expect(JSON.parse(panelValueBuffer.toString())).toStrictEqual([
-              { name: 'Kev', age: 22 },
-              { name: 'Nyra', age: 28 },
-            ]);
+          let finished = false;
+          const panels = [lp, pp];
+          await withSavedPanels(
+            panels,
+            async (project) => {
+              const panelValueBuffer = fs.readFileSync(
+                getProjectResultsFile(project.projectName) + pp.id
+              );
+              expect(JSON.parse(panelValueBuffer.toString())).toStrictEqual([
+                { name: 'Kev', age: 22 },
+                { name: 'Nyra', age: 28 },
+              ]);
 
-            finished = true;
-          },
-          { evalPanels: true, subprocessName }
-        );
+              finished = true;
+            },
+            { evalPanels: true, subprocessName }
+          );
 
-        if (!finished) {
-          throw new Error('Callback did not finish');
+          if (!finished) {
+            throw new Error('Callback did not finish');
+          }
+        } catch (e) {
+          if (!t.exception || !(e instanceof t.exception)) {
+            throw e;
+          }
         }
       }, 300_000);
     }
@@ -171,6 +193,7 @@ for (const t of TESTS) {
         if (!finished) {
           throw new Error('Callback did not finish');
         }
+        // Otherwise is an expected error.
       }, 300_000);
     }
   });

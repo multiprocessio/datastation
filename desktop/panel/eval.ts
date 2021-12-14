@@ -2,11 +2,16 @@ import { execFile } from 'child_process';
 import fs from 'fs';
 import jsesc from 'jsesc';
 import { EOL } from 'os';
+import path from 'path';
 import { preview } from 'preview';
 import { shape, Shape } from 'shape';
 import { file as makeTmpFile } from 'tmp-promise';
 import * as uuid from 'uuid';
-//import { Cancelled } from '../../shared/errors';
+import {
+  Cancelled,
+  EVAL_ERRORS,
+  InvalidDependentPanelError,
+} from '../../shared/errors';
 import log from '../../shared/log';
 import { PanelBody } from '../../shared/rpc';
 import {
@@ -22,7 +27,13 @@ import {
   ProjectState,
 } from '../../shared/state';
 import { getMimeType, XLSX_MIME_TYPE } from '../../shared/text';
-import { DSPROJ_FLAG, PANEL_FLAG, PANEL_META_FLAG } from '../constants';
+import {
+  CODE_ROOT,
+  DSPROJ_FLAG,
+  PANEL_FLAG,
+  PANEL_META_FLAG,
+} from '../constants';
+import { ensureFile } from '../fs';
 import { parsePartialJSONFile } from '../partial';
 import { Dispatch, RPCHandler } from '../rpc';
 import { flushUnwritten, getProjectResultsFile } from '../store';
@@ -49,6 +60,7 @@ const EVAL_HANDLERS: { [k in PanelInfoType]: () => EvalHandler } = {
 };
 
 const runningProcesses: Record<string, Set<number>> = {};
+const cancelledPids = new Set<number>();
 
 function killAllByPanelId(panelId: string) {
   const workers = runningProcesses[panelId];
@@ -57,6 +69,7 @@ function killAllByPanelId(panelId: string) {
       try {
         log.info('Killing existing process');
         process.kill(pid, 'SIGINT');
+        cancelledPids.add(pid);
       } catch (e) {
         // If process doesn't exist, that's ok
         if (!e.message.includes('ESRCH')) {
@@ -175,11 +188,15 @@ export async function evalInSubprocess(
       args.shift();
     }
 
+    // Only run during tests, triggering Go code coverage
     // https://blog.cloudflare.com/go-coverage-with-external-tests/
     if (subprocess.go && subprocess.go.includes('_test')) {
+      ensureFile(path.join(CODE_ROOT, 'coverage', 'fake.cov'));
       args.unshift('-test.run');
       args.unshift('^TestRunMain$');
-      args.unshift('-test.coverprofile=gorunner.' + uuid.v4() + '.cov');
+      args.unshift(
+        '-test.coverprofile=coverage/gorunner.' + uuid.v4() + '.cov'
+      );
     }
 
     log.info(`Launching "${base} ${args.join(' ')}"`);
@@ -200,6 +217,7 @@ export async function evalInSubprocess(
         return;
       }
       stderr += data;
+      process.stderr.write(data);
     });
 
     child.stdout.on('data', (data) => {
@@ -215,12 +233,14 @@ export async function evalInSubprocess(
               process.stderr.write(stderr + EOL);
             }
             resolve();
+            return;
           }
 
-          // TODO: fix cancell
-          //if (code === 1 || code === null) {
-          //  reject(new Cancelled());
-          //}
+          if (cancelledPids.has(pid)) {
+            cancelledPids.delete(pid);
+            reject(new Cancelled());
+            return;
+          }
 
           reject(new Error(stderr));
         });
@@ -233,12 +253,26 @@ export async function evalInSubprocess(
     });
 
     const resultMeta = fs.readFileSync(tmp.path).toString();
-    if (!resultMeta) {
-      const projectResultsFile = getProjectResultsFile(projectName);
-      return parsePartialJSONFile(projectResultsFile + panel.id);
+    let parsePartial = !resultMeta;
+    if (!parsePartial) {
+      const rm = JSON.parse(resultMeta);
+      if (rm.exception) {
+        const e =
+          EVAL_ERRORS.find((e) => e.name === rm.exception.name) || Error;
+        if ((e as any).fromJSON) {
+          throw (e as any).fromJSON(rm.exception);
+        }
+
+        throw new e(rm.exception);
+      }
+
+      // Case of existing Node.js runner
+      return rm;
     }
 
-    return JSON.parse(resultMeta);
+    // Case of new Go runner
+    const projectResultsFile = getProjectResultsFile(projectName);
+    return parsePartialJSONFile(projectResultsFile + panel.id);
   } finally {
     try {
       if (pid) {
@@ -248,6 +282,30 @@ export async function evalInSubprocess(
       tmp.cleanup();
     } catch (e) {
       log.error(e);
+    }
+  }
+}
+
+function assertValidDependentPanels(
+  projectId: string,
+  content: string,
+  idMap: Record<string | number, string>
+) {
+  const projectResultsFile = getProjectResultsFile(projectId);
+  const re =
+    /(DM_getPanel\((?<number>[0-9]+)\))|(DM_getPanel\((?<singlequote>'(?:[^'\\]|\\.)*\')\))|(DM_getPanel\((?<doublequote>"(?:[^"\\]|\\.)*\")\))/g;
+  let match = null;
+  while ((match = re.exec(content)) !== null) {
+    if (match && match.groups) {
+      const { number, singlequote, doublequote } = match.groups;
+      let m = doublequote || singlequote || number;
+      if (["'", '"'].includes(m.charAt(0))) {
+        m = m.slice(1, m.length - 1);
+      }
+
+      if (!fs.existsSync(projectResultsFile + idMap[m])) {
+        throw new InvalidDependentPanelError(m);
+      }
     }
   }
 }
@@ -288,6 +346,8 @@ export const makeEvalHandler = (subprocessEval?: {
       idShapeMap[i] = p.resultMeta.shape;
       idShapeMap[p.name] = p.resultMeta.shape;
     });
+
+    assertValidDependentPanels(projectId, panel.content, idMap);
 
     const evalHandler = EVAL_HANDLERS[panel.type]();
     const res = await evalHandler(

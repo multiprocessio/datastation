@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"regexp"
 	"sort"
 	"strings"
@@ -94,6 +93,8 @@ type panelToImport struct {
 	tableName string
 }
 
+var dmGetPanelRe = regexp.MustCompile(`(DM_getPanel\((?P<number>[0-9]+)\))|(DM_getPanel\((?P<singlequote>'(?:[^'\\]|\\.)*\')\))|(DM_getPanel\((?P<doublequote>"(?:[^"\\]|\\.)*\")\))`)
+
 func transformDM_getPanelCalls(
 	query string,
 	idShapeMap map[string]Shape,
@@ -103,14 +104,23 @@ func transformDM_getPanelCalls(
 ) ([]panelToImport, string, error) {
 	var panelsToImport []panelToImport
 
-	r := regexp.MustCompile(`(DM_getPanel\(([0-9]+)\))|(DM_getPanel\(('(?:[^'\\]|\\.)*\')\))`)
-	r2 := regexp.MustCompile(`('(?:[^'\\]|\\.)*\')|([0-9]+)`)
-
 	var err error
-	query = r.ReplaceAllStringFunc(query, func(m string) string {
-		nameOrIndex := string(r2.Find([]byte(m)))
-		if nameOrIndex[0] == '\'' {
-			nameOrIndex = nameOrIndex[1 : len(nameOrIndex)-1]
+	query = dmGetPanelRe.ReplaceAllStringFunc(query, func(m string) string {
+		matchForSubexps := dmGetPanelRe.FindStringSubmatch(m)
+		nameOrIndex := ""
+		for i, name := range dmGetPanelRe.SubexpNames() {
+			switch name {
+			case "number":
+				nameOrIndex = matchForSubexps[i]
+			case "singlequote", "doublequote":
+				// Remove quotes
+				nameOrIndex = matchForSubexps[i]
+				nameOrIndex = nameOrIndex[1 : len(nameOrIndex)-1]
+			}
+
+			if nameOrIndex != "" {
+				break
+			}
 		}
 
 		s, ok := idShapeMap[nameOrIndex]
@@ -235,7 +245,7 @@ func importAndRun(
 			ddlColumns = append(ddlColumns, quote(c.name, qt.identifier)+" "+c.kind)
 		}
 
-		log.Println("Creating temp table " + panel.tableName)
+		logln("Creating temp table " + panel.tableName)
 		createQuery := fmt.Sprintf("CREATE TEMPORARY TABLE %s (%s);",
 			quote(panel.tableName, qt.identifier),
 			strings.Join(ddlColumns, ", "))
@@ -262,7 +272,7 @@ func importAndRun(
 	}
 
 	if len(panelsToImport) > 0 {
-		log.Printf(
+		logln(
 			"Ingested %d rows in %d tables.\n",
 			rowsIngested,
 			len(panelsToImport))

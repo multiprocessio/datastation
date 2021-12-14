@@ -12,8 +12,10 @@ import (
 )
 
 type ProgramEvalInfo struct {
-	Preamble    string `json:"preamble"`
-	DefaultPath string `json:"defaultPath"`
+	Id          SupportedLanguages `json:"id"`
+	Name        string             `json:"name"`
+	Preamble    string             `json:"preamble"`
+	DefaultPath string             `json:"defaultPath"`
 }
 
 func getIdMap(page ProjectPage) map[string]string {
@@ -73,7 +75,7 @@ func evalProgramSQLPanel(project *ProjectState, pageIndex int, panel *PanelInfo)
 	})
 }
 
-func evalProgramPanel(project *ProjectState, pageIndex int, panel *PanelInfo) error {
+func (ec evalContext) evalProgramPanel(project *ProjectState, pageIndex int, panel *PanelInfo) error {
 	if panel.Program.Type == SQL {
 		return evalProgramSQLPanel(project, pageIndex, panel)
 	}
@@ -90,8 +92,8 @@ func evalProgramPanel(project *ProjectState, pageIndex int, panel *PanelInfo) er
 	}
 	defer os.Remove(tmp.Name())
 
-	resultsFile := getProjectResultsFile(project.ProjectName)
-	panelResultsFile := getPanelResultsFile(project.ProjectName, panel.Id)
+	resultsFile := getProjectResultsFile(project.Id)
+	panelResultsFile := getPanelResultsFile(project.Id, panel.Id)
 	jsonIdMap := getIdMapJson(project.Pages[pageIndex])
 	preamble := strings.ReplaceAll(p.Preamble, "$$RESULTS_FILE$$", resultsFile)
 	preamble = strings.ReplaceAll(preamble, "$$PANEL_RESULTS_FILE$$", panelResultsFile)
@@ -104,8 +106,10 @@ func evalProgramPanel(project *ProjectState, pageIndex int, panel *PanelInfo) er
 		return err
 	}
 
-	// TODO: support defaultPath overrides
 	path := p.DefaultPath
+	if ec.settings.Languages != nil && ec.settings.Languages[p.Id].Path != "" {
+		path = ec.settings.Languages[p.Id].Path
+	}
 
 	cmd := exec.Command(path, tmp.Name())
 	cmd.Stderr = os.Stderr

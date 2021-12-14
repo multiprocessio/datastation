@@ -179,8 +179,8 @@ input[type='radio'] {
 }
 
 .editor-container .input,
-input.input:not([type='radio']),
-label.input input:not([type='radio']),
+input.input:not([type='radio']):not([type='file']),
+label.input input:not([type='radio']):not([type='file']),
 select.select,
 label.select select {
   padding: 5px;
@@ -190,6 +190,10 @@ label.select select {
   /* Since many inputs are within label, keep the label font size small and the input font size normal */
   font-size: initial;
   display: inline-block;
+}
+
+input + input[type='file'] {
+  margin-left: 8px;
 }
 
 .input-invalid {
@@ -870,8 +874,8 @@ body.dark .alert a:hover {
 }
 
 body.dark .editor-container .input,
-body.dark input.input:not([type='radio']),
-body.dark label.input input:not([type='radio']),
+body.dark input.input:not([type='radio']):not([type='file']),
+body.dark label.input input:not([type='radio']):not([type='file']),
 body.dark select.select,
 body.dark label.select select {
   background: #29293c;
