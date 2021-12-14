@@ -13,6 +13,8 @@ import (
 	"strconv"
 	"strings"
 
+	"golang.org/x/crypto/ssh"
+
 	"github.com/xitongsys/parquet-go-source/local"
 	"github.com/xitongsys/parquet-go/reader"
 	"github.com/xitongsys/parquet-go/source"
@@ -423,4 +425,65 @@ func evalFilePanel(project *ProjectState, pageIndex int, panel *PanelInfo) error
 	}
 
 	return transformGenericFile(panel.File.Name, out)
+}
+
+func copyRemoteFileToTmp(si ServerInfo, remoteFileName string) (*os.File, error) {
+	si = decryptServerInfo(si)
+
+	config := ssh.ClientConfig{
+		User: si.Username,
+	}
+	switch si.Type {
+	case SSHPassword:
+		config.Auth = []ssh.AuthMethod{ssh.Password(si.Password.Value)}
+	case SSHPrivateKey:
+		key, err := ioutil.ReadFile()
+		if err != nil {
+			log.Fatalf("unable to read private key: %v", err)
+		}
+
+		// Create the Signer for this private key.
+		signer, err := ssh.ParsePrivateKey(key)
+		if err != nil {
+			log.Fatalf("unable to parse private key: %v", err)
+		}
+		config.Auth = []ssh.AuthMethod{ssh.PublicKeys()}
+	}
+	conn, err := ssh.Dial("tcp", si.Address, config)
+	if err != nil {
+		return err
+	}
+
+	session, err := conn.NewSession()
+	if err != nil {
+		return err
+	}
+	defer session.Close()
+
+	r, err := session.StdoutPipe()
+	if err != nil {
+		return err
+	}
+
+	name := fmt.Sprintf("%s/backup_folder_%v.tar.gz", path, time.Now().Unix())
+	file, err := os.OpenFile(name, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	if err := session.Start(cmd); err != nil {
+		return err
+	}
+
+	n, err := io.Copy(file, r)
+	if err != nil {
+		return err
+	}
+
+	if err := session.Wait(); err != nil {
+		return err
+	}
+
+	return nil
 }
