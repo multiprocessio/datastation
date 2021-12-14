@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"encoding/csv"
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
@@ -323,52 +324,6 @@ func transformGenericFile(in, out string) error {
 	return transformGeneric(r, out)
 }
 
-var BUILTIN_REGEX = map[string]*regexp.Regexp{
-	"text/syslogrfc3164":  regexp.MustCompile(`^\<(?P<pri>[0-9]+)\>(?P<time>[^ ]* {1,2}[^ ]* [^ ]*) (?P<host>[^ ]*) (?P<ident>[^ :\[]*)(?:\[(?P<pid>[0-9]+)\])?(?:[^\:]*\:)? *(?P<message>.*)$`),
-	"text/syslogrfc5424":  regexp.MustCompile(""), // TODO: implementme
-	"text/apache2DSError": regexp.MustCompile(`^(?P<host>[^ ]*) [^ ]* (?P<user>[^ ]*) \[(?P<time>[^\]]*)\] "(?P<method>\S+)(?: +(?P<path>(?:[^\"]|\.)*?)(?: +\S*)?)?" (?P<code>[^ ]*) (?P<size>[^ ]*)(?: "(?P<referer>(?:[^\"]|\.)*)" "(?P<agent>(?:[^\"]|\.)*)")?$`),
-	"text/apache2access":  regexp.MustCompile(`^(?P<host>[^ ]*) [^ ]* (?P<user>[^ ]*) \[(?P<time>[^\]]*)\] "(?P<method>\S+)(?: +(?P<path>(?:[^\"]|\.)*?)(?: +\S*)?)?" (?P<code>[^ ]*) (?P<size>[^ ]*)(?: "(?P<referer>(?:[^\"]|\.)*)" "(?P<agent>(?:[^\"]|\.)*)")?$`),
-	"text/nginxaccess":    regexp.MustCompile(`^(?P<remote>[^ ]*) (?P<host>[^ ]*) (?P<user>[^ ]*) \[(?P<time>[^\]]*)\] "(?P<method>\S+)(?: +(?P<path>[^\"]*?)(?: +\S*)?)?" (?P<code>[^ ]*) (?P<size>[^ ]*)(?: "(?P<referer>[^\"]*)" "(?P<agent>[^\"]*)"(?:\s+(?P<http_x_forwarded_for>[^ ]+))?)?$`),
-}
-
-func transformRegexp(in io.Reader, out string, re *regexp.Regexp) error {
-	w, err := os.OpenFile(out, os.O_WRONLY|os.O_CREATE, os.ModePerm)
-	if err != nil {
-		return err
-	}
-	defer w.Close()
-
-	scanner := bufio.NewScanner(in)
-	return withJSONArrayOutWriterFile(out, func(w JSONArrayWriter) error {
-		for scanner.Scan() {
-			var row map[string]string
-			match := re.FindStringSubmatch(scanner.Text())
-			for i, name := range re.SubexpNames() {
-				if i != 0 && name != "" {
-					row[name] = match[i]
-				}
-			}
-
-			err := w.Write(row)
-			if err != nil {
-				return err
-			}
-		}
-
-		return scanner.Err()
-	})
-}
-
-func transformRegexpFile(in, out string, re *regexp.Regexp) error {
-	r, err := os.Open(in)
-	if err != nil {
-		return err
-	}
-	defer r.Close()
-
-	return transformRegexp(r, out, re)
-}
-
 func transformJSONLines(in io.Reader, out string) error {
 	w, err := os.OpenFile(out, os.O_WRONLY|os.O_CREATE, os.ModePerm)
 	if err != nil {
@@ -393,32 +348,6 @@ func transformJSONLinesFile(in, out string) error {
 	defer r.Close()
 
 	return transformJSONLines(r, out)
-}
-
-func transformGeneric(in io.Reader, out string) error {
-	bs, err := ioutil.ReadAll(in)
-	if err != nil {
-		return nil
-	}
-
-	w, err := os.OpenFile(out, os.O_WRONLY|os.O_CREATE, os.ModePerm)
-	if err != nil {
-		return err
-	}
-	defer w.Close()
-
-	encoder := json.NewEncoder(w)
-	return encoder.Encode(bs)
-}
-
-func transformGenericFile(in, out string) error {
-	r, err := os.Open(in)
-	if err != nil {
-		return err
-	}
-	defer r.Close()
-
-	return transformGeneric(r, out)
 }
 
 var BUILTIN_REGEX = map[string]*regexp.Regexp{
