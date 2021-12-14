@@ -36,7 +36,7 @@ export class App {
     this.https = https;
     // Done for overrides
 
-    const [host, port] = this.config.database.address.split(':');
+    const [host, port] = this.config.database.address.split('?')[0].split(':');
     this.dbpool = poolFactory({
       user: this.config.database.username || '',
       password: this.config.database.password || '',
@@ -169,7 +169,10 @@ export class App {
 export async function init(app: App, withSubprocess = true) {
   const { handlers } = initialize({
     subprocess: withSubprocess
-      ? { node: path.join(__dirname, 'server_runner.js') }
+      ? {
+          node: path.join(__dirname, 'server_runner.js'),
+          go: path.join(CODE_ROOT, 'build', 'go_server_runner'),
+        }
       : undefined,
     additionalHandlers: app.projectHandlers,
   });

@@ -74,6 +74,10 @@ header iframe {
   margin-left: 15px;
 }
 
+.header-project-name {
+  padding-right: 15px;
+}
+
 .editor {
   background: #fbfbfb;
   width: 100%;
@@ -812,6 +816,11 @@ canvas {
   border-top: 1px solid #ccc;
   padding-top: 15px;
   margin-top: 15px;
+
+  .project-selector,
+  .project-timestamp {
+    margin-right: 15px;
+  }
 }
 
 th {

@@ -97,8 +97,8 @@ export function MakeSelectProject() {
           <p>Or open an existing project.</p>
           {projects.map(({ name, createdAt }) => (
             <div className="form-row">
-              <h3>{name}</h3>
-              <div>
+              <h3 className="project-selector">{name}</h3>
+              <div className="project-timestamp">
                 Created{' '}
                 {formatDistanceToNow(new Date(createdAt), {
                   addSuffix: true,

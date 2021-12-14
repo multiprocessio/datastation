@@ -18,7 +18,7 @@ If you want to have hot-reloading, install
 
 * Keep things simple and don't abstract early
 * Node packages bring in tons of dependencies. So be very careful before adding new depencies and don't bring in small dependencies or dependencies that can be easily written and fully unit-tested.
-* Keep adding unit tests and bumping 
+* Keep adding unit tests and bumping
 
 ## Build and run the online environment
 
@@ -78,33 +78,27 @@ You'll need to have PostgreSQL install and running. Create a
 Then run migrations: `psql -U datastation -f
 ./server/migrations/1_init.sql`.
 
-Create a config file at `/etc/datastation/config.json` and
+Create a config file at `/etc/datastation/config.yaml` and
 fill out the following fields:
 
-```
-{
-  "auth": {
-    "sessionSecret": "", // Any strong random string for signing sessions
-    "openId": {
-      "realm": "https://accounts.google.com", // Or some other realm
-      "clientId": "my id",
-      "clientSecret": "my secret"
-    }
-  },
+```yaml
+auth:
+  sessionSecret: "" # Any strong random string for signing sessions
+  openId:
+    realm: "https://accounts.google.com" # Or some other realm
+    clientId: "my id"
+    clientSecret: "my secret"
 
-  "server": {
-    "port": 443,
-    "address": "localhost",
-    "publicUrl": "https://datastation.mydomain.com" // The address users will enter into the browser to use the app
-    "tlsKey": "/home/server/certs/datastation.key.pem", // Can be left blank and set at the reverse-proxy level if desired
-    "tlsCert": "/home/server/certs/datastation.cert.pem",
-  },
+server:
+  port: 443
+  address: "localhost"
+  publicUrl: "https://datastation.mydomain.com" # The address users will enter into the browser to use the app
+  tlsKey: "/home/server/certs/datastation.key.pem" # Can be left blank and set at the reverse-proxy level if desired
+  tlsCert: "/home/server/certs/datastation.cert.pem"
 
-  "database": {
-    "address": "localhost", // Address of your PostgreSQL instance
-    "username": "datastation", // Should be a dedicated PostgreSQL user for DataStation
-    "password": "some good password",
-    "database": "datastation" // Should be a dedicated database within PostgreSQL for DataStation
-  }
-}
+database:
+  address: "localhost" # Address of your PostgreSQL instance
+  username: "datastation" # Should be a dedicated PostgreSQL user for DataStation
+  password: "some good password"
+  database: "datastation" # Should be a dedicated database within PostgreSQL for DataStation
 ```

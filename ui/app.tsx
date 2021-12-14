@@ -60,6 +60,7 @@ function useProjectState(
           state = await ProjectState.fromJSON(rawState);
         } catch (e) {
           log.error(e);
+          window.location = '/';
         }
 
         state.projectName = projectId;

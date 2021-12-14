@@ -60,7 +60,7 @@ export function Header() {
               </a>
             </React.Fragment>
           ) : (
-            <span>{projectId}</span>
+            <span className="header-project-name">{projectId}</span>
           )}
           <Toggle
             label={settings.theme !== 'dark' ? 'Light Mode' : 'Dark Mode'}

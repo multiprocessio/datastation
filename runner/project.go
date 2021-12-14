@@ -53,7 +53,15 @@ func getProjectFile(projectId string) string {
 	return path.Join(FS_BASE, projectId)
 }
 
+func makeErrNoSuchPanel(panelId string) error {
+	return fmt.Errorf("Panel not found: " + panelId)
+}
+
 func getProjectPanel(projectId, panelId string) (*ProjectState, int, *PanelInfo, error) {
+	if strings.Contains(os.Args[0], "go_server_runner") {
+		return getProjectPanelFromDatabase(projectId, panelId)
+	}
+
 	file := getProjectFile(projectId)
 
 	var project ProjectState
@@ -71,7 +79,7 @@ func getProjectPanel(projectId, panelId string) (*ProjectState, int, *PanelInfo,
 		}
 	}
 
-	return nil, 0, nil, fmt.Errorf("Panel not found")
+	return nil, 0, nil, makeErrNoSuchPanel(panelId)
 }
 
 func getProjectResultsFile(projectId string) string {
