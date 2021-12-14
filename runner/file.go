@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"encoding/csv"
+	"encoding/gzip"
 	"encoding/json"
 	"io"
 	"io/ioutil"
@@ -427,6 +428,19 @@ func evalFilePanel(project *ProjectState, pageIndex int, panel *PanelInfo) error
 	return transformGenericFile(panel.File.Name, out)
 }
 
+func getSSHPrivateKeySigner(privateKeyFile, passphrase string) (*ssh.Signer, error) {
+	key, err := ioutil.ReadFile(privateKeyFile)
+	if err != nil {
+		return nil, fmt.Errorf("Unable to read private key: %v", err)
+	}
+
+	signer, err := ssh.ParsePrivateKey(key)
+	if err != nil {
+		return nil, fmt.Errorf("Unable to parse private key: %v", err)
+	}
+	config.Auth = []ssh.AuthMethod{ssh.PublicKeys(signer)}
+}
+
 func copyRemoteFileToTmp(si ServerInfo, remoteFileName string) (*os.File, error) {
 	si = decryptServerInfo(si)
 
@@ -437,53 +451,57 @@ func copyRemoteFileToTmp(si ServerInfo, remoteFileName string) (*os.File, error)
 	case SSHPassword:
 		config.Auth = []ssh.AuthMethod{ssh.Password(si.Password.Value)}
 	case SSHPrivateKey:
-		key, err := ioutil.ReadFile()
+		signer, err := getSSHPrivateKeySigner(si.PrivateKeyFile, si.Passphrase.Value)
 		if err != nil {
-			log.Fatalf("unable to read private key: %v", err)
+			return nil, err
 		}
-
-		// Create the Signer for this private key.
-		signer, err := ssh.ParsePrivateKey(key)
-		if err != nil {
-			log.Fatalf("unable to parse private key: %v", err)
-		}
-		config.Auth = []ssh.AuthMethod{ssh.PublicKeys()}
+		config.Auth = []ssh.AuthMethod{ssh.PublicKey(signer)}
 	}
 	conn, err := ssh.Dial("tcp", si.Address, config)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	session, err := conn.NewSession()
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer session.Close()
 
 	r, err := session.StdoutPipe()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	name := fmt.Sprintf("%s/backup_folder_%v.tar.gz", path, time.Now().Unix())
-	file, err := os.OpenFile(name, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
+	name := ioutil.TempFile("", "sftp-copy")
+	file, err := os.OpenFile(name, os.O_WRONLY|os.O_CREATE, 0644)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	defer file.Close()
 
+	cmd := fmt.Sprintf(`if command -v gzip > /dev/null 2>&1; then
+  cat %s | gzip
+else
+  cat %s
+fi`, remoteFileName, remoteFileName)
 	if err := session.Start(cmd); err != nil {
-		return err
+		return nil, err
 	}
 
-	n, err := io.Copy(file, r)
+	fz, err := gzip.NewReader(r)
 	if err != nil {
-		return err
+		return nil, err
+	}
+	defer fz.Close()
+
+	_, err := file.ReadFrom(fz)
+	if err != nil {
+		return nil, err
 	}
 
 	if err := session.Wait(); err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return file, nil
 }
