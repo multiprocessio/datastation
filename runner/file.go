@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"compress/gzip"
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
@@ -14,8 +13,6 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
-
-	"golang.org/x/crypto/ssh"
 
 	"github.com/xitongsys/parquet-go-source/local"
 	"github.com/xitongsys/parquet-go/reader"
@@ -471,82 +468,4 @@ func evalFilePanel(project *ProjectState, pageIndex int, panel *PanelInfo) error
 	}
 
 	return transformGenericFile(panel.File.Name, out)
-}
-
-func getSSHPrivateKeySigner(privateKeyFile, passphrase string) (ssh.AuthMethod, error) {
-	key, err := ioutil.ReadFile(privateKeyFile)
-	if err != nil {
-		return nil, fmt.Errorf("Unable to read private key: %v", err)
-	}
-
-	signer, err := ssh.ParsePrivateKey(key)
-	if err != nil {
-		return nil, fmt.Errorf("Unable to parse private key: %v", err)
-	}
-	return ssh.PublicKeys(signer), nil
-}
-
-func remoteFileReader(si ServerInfo, remoteFileName string, callback func(r io.Reader) error) error {
-	config := &ssh.ClientConfig{
-		User: si.Username,
-	}
-	switch si.Type {
-	case SSHPassword:
-		password, err := si.Password.decrypt()
-		if err != nil {
-			return fmt.Errorf("Could not decrypt server SSH password: " + err.Error())
-		}
-		config.Auth = []ssh.AuthMethod{ssh.Password(password)}
-	case SSHPrivateKey:
-		passphrase, err := si.Passphrase.decrypt()
-		if err != nil {
-			return fmt.Errorf("Could not decrypt server SSH passphrase: " + err.Error())
-		}
-		authmethod, err := getSSHPrivateKeySigner(si.PrivateKeyFile, passphrase)
-		if err != nil {
-			return err
-		}
-		config.Auth = []ssh.AuthMethod{authmethod}
-	}
-	conn, err := ssh.Dial("tcp", si.Address, config)
-	if err != nil {
-		return err
-	}
-
-	session, err := conn.NewSession()
-	if err != nil {
-		return err
-	}
-	defer session.Close()
-
-	r, err := session.StdoutPipe()
-	if err != nil {
-		return err
-	}
-
-	cmd := fmt.Sprintf(`if command -v gzip > /dev/null 2>&1; then
-  cat %s | gzip
-else
-  cat %s
-fi`, remoteFileName, remoteFileName)
-	if err := session.Start(cmd); err != nil {
-		return err
-	}
-
-	fz, err := gzip.NewReader(r)
-	if err != nil {
-		return err
-	}
-	defer fz.Close()
-
-	err = callback(fz)
-	if err != nil {
-		return err
-	}
-
-	if err := session.Wait(); err != nil {
-		return err
-	}
-
-	return nil
 }
