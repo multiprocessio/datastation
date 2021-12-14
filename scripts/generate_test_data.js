@@ -40,7 +40,10 @@ async function write() {
 
   // Write as JSON lines
   const jsonlinesnames = directory + 'userdata.jsonl';
-  fs.writeFileSync(jsonlinesnames, data.map(row => JSON.stringify(row).replace(/\n/g, '')).join('\n'));
+  fs.writeFileSync(
+    jsonlinesnames,
+    data.map((row) => JSON.stringify(row).replace(/\n/g, '')).join('\n')
+  );
   console.log(`Wrote ${jsonlinesnames}`);
 
   // Write as Excel file
