@@ -17,6 +17,7 @@ sudo ln -s /usr/local/go/bin/gofmt /usr/local/bin/gofmt
 # Set up coverage tools
 go install github.com/axw/gocov/gocov@v1.0.0
 go install github.com/wadey/gocovmerge@b5bfa59
+sudo ln -s $HOME/go/bin/* /usr/local/bin/
 
 if [[ "$1" == "--integration-tests" ]]; then
     # Install xvfb for headless gui

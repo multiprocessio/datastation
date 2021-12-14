@@ -1,3 +1,5 @@
+set -eu
+
 gocovmerge coverage/gorunner*.cov > runner/all.out
 cd runner
 gocov convert all.out | gocov report | tee report
