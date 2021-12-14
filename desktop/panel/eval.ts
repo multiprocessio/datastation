@@ -120,6 +120,7 @@ function canUseGoRunner(panel: PanelInfo, connectors: ConnectorInfo[]) {
   const supportedTypes = [
     'text/csv',
     'application/json',
+    'application/jsonlines',
     'parquet',
     XLSX_MIME_TYPE,
     'application/vnd.ms-excel',

@@ -407,7 +407,7 @@ func getMimeType(fileName string, ct ContentTypeInfo) string {
 	case ".json":
 		return "application/json"
 	case ".jsonl":
-		return "text/jsonlines"
+		return "application/jsonlines"
 	case ".xls", ".xlsx":
 		return "application/vnd.ms-excel"
 	case ".parquet":
@@ -459,7 +459,7 @@ func evalFilePanel(project *ProjectState, pageIndex int, panel *PanelInfo) error
 		return transformParquetFile(panel.File.Name, out)
 	case "text/regexplines":
 		return transformRegexpFile(panel.File.Name, out, regexp.MustCompile(cti.CustomLineRegexp))
-	case "text/jsonlines":
+	case "application/jsonlines":
 		return transformJSONLinesFile(panel.File.Name, out)
 	}
 
