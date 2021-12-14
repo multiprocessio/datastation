@@ -2,9 +2,10 @@ package main
 
 import (
 	"bufio"
+	"compress/gzip"
 	"encoding/csv"
-	"encoding/gzip"
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
@@ -45,17 +46,7 @@ func (j JSONArrayWriter) Write(row interface{}) error {
 	return err
 }
 
-func withJSONArrayOutWriter(w *os.File, cb func(w JSONArrayWriter) error) error {
-	_, err := w.Write([]byte("["))
-	if err != nil {
-		return err
-	}
-
-	err = cb(JSONArrayWriter{w})
-	if err != nil {
-		return err
-	}
-
+func overwriteLastChar(w *os.File, c string) error {
 	// Find current offset
 	lastChar, err := w.Seek(0, io.SeekCurrent)
 	if err != nil {
@@ -67,12 +58,32 @@ func withJSONArrayOutWriter(w *os.File, cb func(w JSONArrayWriter) error) error 
 		lastChar = lastChar - 1
 	}
 
-	_, err = w.WriteAt([]byte("]"), lastChar)
+	_, err = w.WriteAt([]byte(c), lastChar)
 	if err != nil {
 		return err
 	}
 
 	return w.Truncate(lastChar + 1)
+}
+
+func withJSONOutWriter(w *os.File, first, last string, cb func() error) error {
+	_, err := w.WriteString(first)
+	if err != nil {
+		return err
+	}
+
+	err = cb()
+	if err != nil {
+		return err
+	}
+
+	return overwriteLastChar(w, last)
+}
+
+func withJSONArrayOutWriter(w *os.File, cb func(w JSONArrayWriter) error) error {
+	return withJSONOutWriter(w, "[", "]", func() error {
+		return cb(JSONArrayWriter{w})
+	})
 }
 
 func withJSONArrayOutWriterFile(out string, cb func(w JSONArrayWriter) error) error {
@@ -253,51 +264,32 @@ func transformXLSX(in *excelize.File, out string) error {
 	}
 	defer w.Close()
 
-	_, err = w.Write([]byte("{"))
-	if err != nil {
-		return err
-	}
-
-	for _, sheet := range sheets {
-		_, err = w.Write([]byte(`"` + strings.ReplaceAll(sheet, `"`, `\\"`) + `":`))
-		if err != nil {
-			return err
-		}
-
-		err = withJSONArrayOutWriter(w, func(w JSONArrayWriter) error {
-			rows, err := in.GetRows(sheet)
+	return withJSONOutWriter(w, "{", "}", func() error {
+		for _, sheet := range sheets {
+			_, err = w.WriteString(`"` + strings.ReplaceAll(sheet, `"`, `\\"`) + `":`)
 			if err != nil {
 				return err
 			}
-			return writeXLSXSheet(rows, w)
-		})
-		if err != nil {
-			return err
+
+			err = withJSONArrayOutWriter(w, func(w JSONArrayWriter) error {
+				rows, err := in.GetRows(sheet)
+				if err != nil {
+					return err
+				}
+				return writeXLSXSheet(rows, w)
+			})
+			if err != nil {
+				return err
+			}
+
+			_, err = w.WriteString(",")
+			if err != nil {
+				return err
+			}
 		}
 
-		_, err = w.Write([]byte(","))
-		if err != nil {
-			return err
-		}
-	}
-
-	// Find current offset
-	lastChar, err := w.Seek(0, io.SeekCurrent)
-	if err != nil {
-		return err
-	}
-
-	if lastChar > 1 {
-		// Overwrite the last comma
-		lastChar = lastChar - 1
-	}
-
-	_, err = w.WriteAt([]byte("}"), lastChar)
-	if err != nil {
-		return err
-	}
-
-	return w.Truncate(lastChar + 1)
+		return nil
+	})
 }
 
 func transformXLSXFile(in, out string) error {
@@ -381,6 +373,32 @@ func transformRegexpFile(in, out string, re *regexp.Regexp) error {
 	return transformRegexp(r, out, re)
 }
 
+func transformJSONLines(in io.Reader, out string) error {
+	w, err := os.OpenFile(out, os.O_WRONLY|os.O_CREATE, os.ModePerm)
+	if err != nil {
+		return err
+	}
+	defer w.Close()
+
+	return withJSONOutWriter(w, "[", "]", func() error {
+		scanner := bufio.NewScanner(in)
+		for scanner.Scan() {
+			w.WriteString(scanner.Text() + ",")
+		}
+		return scanner.Err()
+	})
+}
+
+func transformJSONLinesFile(in, out string) error {
+	r, err := os.Open(in)
+	if err != nil {
+		return err
+	}
+	defer r.Close()
+
+	return transformJSONLines(r, out)
+}
+
 func getMimeType(fileName string, ct ContentTypeInfo) string {
 	if ct.Type != "" {
 		return ct.Type
@@ -391,6 +409,8 @@ func getMimeType(fileName string, ct ContentTypeInfo) string {
 		return "text/csv"
 	case ".json":
 		return "application/json"
+	case ".jsonl":
+		return "text/jsonlines"
 	case ".xls", ".xlsx":
 		return "application/vnd.ms-excel"
 	case ".parquet":
@@ -401,8 +421,31 @@ func getMimeType(fileName string, ct ContentTypeInfo) string {
 }
 
 func evalFilePanel(project *ProjectState, pageIndex int, panel *PanelInfo) error {
-	fileName := panel.File.Name
 	cti := panel.File.ContentTypeInfo
+	fileName := panel.File.Name
+	if panel.ServerId != "" {
+		var server *ServerInfo
+		for _, s := range project.Servers {
+			if s.Id == panel.ServerId {
+				cp := s
+				server = &cp
+				break
+			}
+		}
+
+		if server == nil {
+			return fmt.Errorf("Unknown server: %d" + panel.ServerId)
+		}
+
+		out := getPanelResultsFile(project.Id, panel.Id)
+		err := remoteFileReader(*server, fileName, func(r io.Reader) error {
+			return transformReader(r, fileName, cti, out)
+		})
+		if err != nil {
+			return err
+		}
+	}
+
 	assumedType := getMimeType(fileName, cti)
 	logln("Assumed '%s' from '%s' given '%s' when loading file", assumedType, cti.Type, fileName)
 
@@ -419,6 +462,8 @@ func evalFilePanel(project *ProjectState, pageIndex int, panel *PanelInfo) error
 		return transformParquetFile(panel.File.Name, out)
 	case "text/regexplines":
 		return transformRegexpFile(panel.File.Name, out, regexp.MustCompile(cti.CustomLineRegexp))
+	case "text/jsonlines":
+		return transformJSONLinesFile(panel.File.Name, out)
 	}
 
 	if re, ok := BUILTIN_REGEX[assumedType]; ok {
@@ -428,7 +473,7 @@ func evalFilePanel(project *ProjectState, pageIndex int, panel *PanelInfo) error
 	return transformGenericFile(panel.File.Name, out)
 }
 
-func getSSHPrivateKeySigner(privateKeyFile, passphrase string) (*ssh.Signer, error) {
+func getSSHPrivateKeySigner(privateKeyFile, passphrase string) (ssh.AuthMethod, error) {
 	key, err := ioutil.ReadFile(privateKeyFile)
 	if err != nil {
 		return nil, fmt.Errorf("Unable to read private key: %v", err)
@@ -438,45 +483,45 @@ func getSSHPrivateKeySigner(privateKeyFile, passphrase string) (*ssh.Signer, err
 	if err != nil {
 		return nil, fmt.Errorf("Unable to parse private key: %v", err)
 	}
-	config.Auth = []ssh.AuthMethod{ssh.PublicKeys(signer)}
+	return ssh.PublicKeys(signer), nil
 }
 
-func copyRemoteFileToTmp(si ServerInfo, remoteFileName string) (*os.File, error) {
-	si = decryptServerInfo(si)
-
-	config := ssh.ClientConfig{
+func remoteFileReader(si ServerInfo, remoteFileName string, callback func(r io.Reader) error) error {
+	config := &ssh.ClientConfig{
 		User: si.Username,
 	}
 	switch si.Type {
 	case SSHPassword:
-		config.Auth = []ssh.AuthMethod{ssh.Password(si.Password.Value)}
-	case SSHPrivateKey:
-		signer, err := getSSHPrivateKeySigner(si.PrivateKeyFile, si.Passphrase.Value)
+		password, err := si.Password.decrypt()
 		if err != nil {
-			return nil, err
+			return fmt.Errorf("Could not decrypt server SSH password: " + err.Error())
 		}
-		config.Auth = []ssh.AuthMethod{ssh.PublicKey(signer)}
+		config.Auth = []ssh.AuthMethod{ssh.Password(password)}
+	case SSHPrivateKey:
+		passphrase, err := si.Passphrase.decrypt()
+		if err != nil {
+			return fmt.Errorf("Could not decrypt server SSH passphrase: " + err.Error())
+		}
+		authmethod, err := getSSHPrivateKeySigner(si.PrivateKeyFile, passphrase)
+		if err != nil {
+			return err
+		}
+		config.Auth = []ssh.AuthMethod{authmethod}
 	}
 	conn, err := ssh.Dial("tcp", si.Address, config)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	session, err := conn.NewSession()
 	if err != nil {
-		return nil, err
+		return err
 	}
 	defer session.Close()
 
 	r, err := session.StdoutPipe()
 	if err != nil {
-		return nil, err
-	}
-
-	name := ioutil.TempFile("", "sftp-copy")
-	file, err := os.OpenFile(name, os.O_WRONLY|os.O_CREATE, 0644)
-	if err != nil {
-		return nil, err
+		return err
 	}
 
 	cmd := fmt.Sprintf(`if command -v gzip > /dev/null 2>&1; then
@@ -485,23 +530,23 @@ else
   cat %s
 fi`, remoteFileName, remoteFileName)
 	if err := session.Start(cmd); err != nil {
-		return nil, err
+		return err
 	}
 
 	fz, err := gzip.NewReader(r)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	defer fz.Close()
 
-	_, err := file.ReadFrom(fz)
+	err = callback(fz)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	if err := session.Wait(); err != nil {
-		return nil, err
+		return err
 	}
 
-	return file, nil
+	return nil
 }

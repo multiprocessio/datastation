@@ -37,18 +37,21 @@ func evalHttpPanel(project *ProjectState, pageIndex int, panel *PanelInfo) error
 	}
 	defer rsp.Body.Close()
 
-	assumedType := getMimeType(h.Url, h.ContentTypeInfo)
-	logln("Assumed '%s' from '%s' given '%s' when loading file", assumedType, h.ContentTypeInfo.Type, h.Url)
-
 	out := getPanelResultsFile(project.Id, panel.Id)
+	return transformReader(rsp.Body, h.Url, h.ContentTypeInfo, out)
+}
+
+func transformReader(r io.Reader, fileName string, cti ContentTypeInfo, out string) error {
+	assumedType := getMimeType(fileName, cti)
+	logln("Assumed '%s' from '%s' given '%s' when loading file", assumedType, cti.Type, fileName)
 
 	switch assumedType {
 	case "application/json":
-		return transformJSON(rsp.Body, out)
+		return transformJSON(r, out)
 	case "text/csv":
-		return transformCSV(rsp.Body, out)
+		return transformCSV(r, out)
 	case "application/vnd.ms-excel", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
-		r, err := excelize.OpenReader(rsp.Body)
+		r, err := excelize.OpenReader(r)
 		if err != nil {
 			return err
 		}
@@ -60,7 +63,7 @@ func evalHttpPanel(project *ProjectState, pageIndex int, panel *PanelInfo) error
 		}
 		defer os.Remove(w.Name())
 
-		_, err = w.ReadFrom(rsp.Body)
+		_, err = w.ReadFrom(r)
 		if err == io.EOF {
 			err = nil
 		}
@@ -70,12 +73,12 @@ func evalHttpPanel(project *ProjectState, pageIndex int, panel *PanelInfo) error
 
 		return transformParquetFile(w.Name(), out)
 	case "text/regexplines":
-		return transformRegexp(rsp.Body, out, regexp.MustCompile(h.ContentTypeInfo.CustomLineRegexp))
+		return transformRegexp(r, out, regexp.MustCompile(cti.CustomLineRegexp))
 	}
 
 	if re, ok := BUILTIN_REGEX[assumedType]; ok {
-		return transformRegexp(rsp.Body, out, re)
+		return transformRegexp(r, out, re)
 	}
 
-	return transformGeneric(rsp.Body, out)
+	return transformGeneric(r, out)
 }

@@ -204,6 +204,7 @@ type ProjectPage struct {
 type ProjectState struct {
 	Pages      []ProjectPage   `json:"pages"`
 	Connectors []ConnectorInfo `json:"connectors"`
+	Servers    []ServerInfo    `json:"servers"`
 	Id         string          `json:"projectName"`
 	// Basically never use uuid
 	Uuid            string `json:"id"`
