@@ -12,7 +12,7 @@ const {
   replaceBigInt,
 } = require('./testutil');
 
-const USERDATA_FILES = ['json', 'xlsx', 'csv', 'parquet'];
+const USERDATA_FILES = ['json', 'xlsx', 'csv', 'parquet', 'jsonl'];
 
 const testPath = path.join(CODE_ROOT, 'testdata');
 const baseline = JSON.parse(

@@ -17,7 +17,7 @@ const baseline = JSON.parse(
   fs.readFileSync(path.join(testPath, 'userdata.json').toString())
 );
 
-const USERDATA_FILES = ['json', 'xlsx', 'csv', 'parquet'];
+const USERDATA_FILES = ['json', 'xlsx', 'csv', 'parquet', 'jsonl'];
 
 const cp = spawn('python3', ['-m', 'http.server', '9799']);
 cp.stdout.on('data', (data) => {

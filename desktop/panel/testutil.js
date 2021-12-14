@@ -133,7 +133,7 @@ module.exports.replaceBigInt = function (rows) {
 };
 
 module.exports.translateBaselineForType = function (baseline, fileType) {
-  if (fileType === 'json') {
+  if (fileType === 'json' || fileType === 'jsonl') {
     return baseline;
   }
 

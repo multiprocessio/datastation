@@ -74,6 +74,8 @@ func transformReader(r io.Reader, fileName string, cti ContentTypeInfo, out stri
 		return transformParquetFile(w.Name(), out)
 	case "text/regexplines":
 		return transformRegexp(r, out, regexp.MustCompile(cti.CustomLineRegexp))
+	case "text/jsonlines":
+		return transformJSONLines(r, out)
 	}
 
 	if re, ok := BUILTIN_REGEX[assumedType]; ok {
