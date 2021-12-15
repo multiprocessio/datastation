@@ -74,7 +74,7 @@ jobs:
     - run: bash -c '[[ -d /usr/share/datastation ]]'
     - run: bash -c '[[ -f /usr/share/datastation/server.js ]]'
     - run: bash -c '[[ -f /usr/share/datastation/server_runner.js ]]'
-    - run: bash -c '[[ -f /etc/datastation/config.json ]]'
+    - run: bash -c '[[ -f /etc/datastation/config.yaml ]]'
     - run: bash -c '[[ -f /etc/systemd/system/datastation.service ]]'
     - run: bash -c '[[ -f /etc/systemd/system/datastation-exporter.timer ]]'
 
