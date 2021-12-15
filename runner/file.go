@@ -28,11 +28,12 @@ func (ue UnicodeEscape) MarshalJSON() ([]byte, error) {
 }
 
 type JSONArrayWriter struct {
-	w io.Writer
+	w     io.Writer
+	first bool
 }
 
-func (j JSONArrayWriter) Write(row interface{}, isFirst bool) error {
-	if !isFirst {
+func (j *JSONArrayWriter) Write(row interface{}) error {
+	if !j.first {
 		_, err := j.w.Write([]byte(",\n"))
 		if err != nil {
 			return edsef("Failed to write JSON delimiter: %s", err)
@@ -44,6 +45,7 @@ func (j JSONArrayWriter) Write(row interface{}, isFirst bool) error {
 		return edsef("Failed to encode JSON: %s", err)
 	}
 
+	j.first = false
 	return nil
 }
 
@@ -66,9 +68,9 @@ func withJSONOutWriter(w *os.File, first, last string, cb func() error) error {
 	return nil
 }
 
-func withJSONArrayOutWriter(w *os.File, cb func(w JSONArrayWriter) error) error {
+func withJSONArrayOutWriter(w *os.File, cb func(w *JSONArrayWriter) error) error {
 	return withJSONOutWriter(w, "[", "]", func() error {
-		return cb(JSONArrayWriter{w})
+		return cb(&JSONArrayWriter{w, true})
 	})
 }
 
@@ -76,7 +78,7 @@ func openTruncate(out string) (*os.File, error) {
 	return os.OpenFile(out, os.O_TRUNC|os.O_WRONLY|os.O_CREATE, os.ModePerm)
 }
 
-func withJSONArrayOutWriterFile(out string, cb func(w JSONArrayWriter) error) error {
+func withJSONArrayOutWriterFile(out string, cb func(w *JSONArrayWriter) error) error {
 	w, err := openTruncate(out)
 	if err != nil {
 		return err
@@ -89,7 +91,7 @@ func withJSONArrayOutWriterFile(out string, cb func(w JSONArrayWriter) error) er
 func transformCSV(in io.Reader, out string) error {
 	r := csv.NewReader(in)
 
-	return withJSONArrayOutWriterFile(out, func(w JSONArrayWriter) error {
+	return withJSONArrayOutWriterFile(out, func(w *JSONArrayWriter) error {
 		isHeader := true
 		var fields []string
 		for {
@@ -116,7 +118,7 @@ func transformCSV(in io.Reader, out string) error {
 				row[field] = UnicodeEscape(record[i])
 			}
 
-			err = w.Write(row, isHeader)
+			err = w.Write(row)
 			if err != nil {
 				return err
 			}
@@ -168,8 +170,7 @@ func transformParquet(in source.ParquetFile, out string) error {
 	}
 	defer r.ReadStop()
 
-	return withJSONArrayOutWriterFile(out, func(w JSONArrayWriter) error {
-		isFirstRow := true
+	return withJSONArrayOutWriterFile(out, func(w *JSONArrayWriter) error {
 		size := 1000
 		var offset int64 = 0
 		for {
@@ -184,12 +185,10 @@ func transformParquet(in source.ParquetFile, out string) error {
 			}
 
 			for _, row := range rows {
-				err := w.Write(row, isFirstRow)
+				err := w.Write(row)
 				if err != nil {
 					return err
 				}
-
-				isFirstRow = false
 			}
 
 			offset += int64(size)
@@ -211,7 +210,7 @@ func transformParquetFile(in, out string) error {
 	return transformParquet(r, out)
 }
 
-func writeXLSXSheet(rows [][]string, w JSONArrayWriter) error {
+func writeXLSXSheet(rows [][]string, w *JSONArrayWriter) error {
 	var header []string
 	isHeader := true
 
@@ -227,7 +226,7 @@ func writeXLSXSheet(rows [][]string, w JSONArrayWriter) error {
 			row[header[i]] = cell
 		}
 
-		err := w.Write(row, isHeader)
+		err := w.Write(row)
 		if err != nil {
 			return err
 		}
@@ -241,7 +240,7 @@ func transformXLSX(in *excelize.File, out string) error {
 
 	// Single sheet files get flattened into just an array, not a dict mapping sheet name to sheet contents
 	if len(sheets) == 1 {
-		return withJSONArrayOutWriterFile(out, func(w JSONArrayWriter) error {
+		return withJSONArrayOutWriterFile(out, func(w *JSONArrayWriter) error {
 			rows, err := in.GetRows(sheets[0])
 			if err != nil {
 				return err
@@ -259,9 +258,8 @@ func transformXLSX(in *excelize.File, out string) error {
 
 	return withJSONOutWriter(w, "{", "}", func() error {
 		for i, sheet := range sheets {
-
 			if i == 0 {
-				_, err = w.WriteString(",")
+				_, err = w.WriteString(",\n")
 				if err != nil {
 					return err
 				}
@@ -272,7 +270,7 @@ func transformXLSX(in *excelize.File, out string) error {
 				return err
 			}
 
-			err = withJSONArrayOutWriter(w, func(w JSONArrayWriter) error {
+			err = withJSONArrayOutWriter(w, func(w *JSONArrayWriter) error {
 				rows, err := in.GetRows(sheet)
 				if err != nil {
 					return err
@@ -336,9 +334,17 @@ func transformJSONLines(in io.Reader, out string) error {
 		scanner := bufio.NewScanner(in)
 		for scanner.Scan() {
 			if !first {
-				w.WriteString(",\n")
+				_, err := w.WriteString(",\n")
+				if err != nil {
+					return edsef("Could not write delimiter: %s", err)
+				}
 			}
-			w.WriteString(scanner.Text())
+
+			_, err := w.WriteString(scanner.Text())
+			if err != nil {
+				return edsef("Could not write string: %s", err)
+			}
+
 			first = false
 		}
 		return scanner.Err()
@@ -369,8 +375,7 @@ func transformRegexp(in io.Reader, out string, re *regexp.Regexp) error {
 	defer w.Close()
 
 	scanner := bufio.NewScanner(in)
-	isFirstRow := true
-	return withJSONArrayOutWriterFile(out, func(w JSONArrayWriter) error {
+	return withJSONArrayOutWriterFile(out, func(w *JSONArrayWriter) error {
 		for scanner.Scan() {
 			row := map[string]interface{}{}
 			match := re.FindStringSubmatch(scanner.Text())
@@ -384,12 +389,10 @@ func transformRegexp(in io.Reader, out string, re *regexp.Regexp) error {
 				}
 			}
 
-			err := w.Write(row, isFirstRow)
+			err := w.Write(row)
 			if err != nil {
 				return err
 			}
-
-			isFirstRow = false
 		}
 
 		return scanner.Err()
