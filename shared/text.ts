@@ -15,7 +15,7 @@ export interface ContentTypeInfoPlusParsers {
 const APACHE2_ACCESS_RE =
   /^(?<host>[^ ]*) [^ ]* (?<user>[^ ]*) \[(?<time>[^\]]*)\] "(?<method>\S+)(?: +(?<path>(?:[^\"]|\.)*?)(?: +\S*)?)?" (?<code>[^ ]*) (?<size>[^ ]*)(?: "(?<referer>(?:[^\"]|\.)*)" "(?<agent>(?:[^\"]|\.)*)")?$/;
 const APACHE2_ERROR_RE =
-  /^\[[^ ]* (?<time>[^\]]*)\] \[(?<level>[^\]]*)\](?: \[pid (?<pid>[^\]]*)\])? \[client (?<client>[^\]]*)\] (?<message>.*)$/;
+  /^\[[^ ]* (?<time>[^\]]*)\] \[(?<level>[^\]]*)\](?: \[pid (?<pid>[^:\]]*)(:[^\]]+)*\])? \[client (?<client>[^\]]*)\] (?<message>.*)$/;
 const NGINX_ACCESS_RE =
   /^(?<remote>[^ ]*) (?<host>[^ ]*) (?<user>[^ ]*) \[(?<time>[^\]]*)\] "(?<method>\S+)(?: +(?<path>[^\"]*?)(?: +\S*)?)?" (?<code>[^ ]*) (?<size>[^ ]*)(?: "(?<referer>[^\"]*)" "(?<agent>[^\"]*)"(?:\s+(?<http_x_forwarded_for>[^ ]+))?)?$/;
 const SYSLOG_RFC3164_RE =
@@ -27,7 +27,7 @@ export function parseWithRegex(body: string, re: RegExp) {
   return body
     .split('\n')
     .filter(Boolean)
-    .map((line) => re.exec(line).groups);
+    .map((line) => re.exec(line)?.groups);
 }
 
 export function parseCSV(csvString: string) {
