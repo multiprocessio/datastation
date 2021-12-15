@@ -10,6 +10,7 @@ const {
   withSavedPanels,
   translateBaselineForType,
   replaceBigInt,
+  REGEXP_TESTS,
 } = require('./testutil');
 
 const testPath = path.join(CODE_ROOT, 'testdata');
@@ -81,6 +82,46 @@ for (const subprocessName of [
               expect(replaceBigInt(value)).toStrictEqual(
                 replaceBigInt(typeBaseline)
               );
+            },
+            { evalPanels: true, subprocessName }
+          );
+        }, 10_000);
+      }
+    );
+  }
+
+  for (const t of REGEXP_TESTS) {
+    const hp = new HTTPPanelInfo(
+      '',
+      new HTTPConnectorInfo(
+        '',
+        'http://localhost:9799/testdata/logs/' + t.filename
+      )
+    );
+    hp.http.http.contentTypeInfo = t.contentTypeInfo;
+
+    const panels = [hp];
+
+    describe(
+      'read ' +
+        t.filename +
+        ' file from disk via ' +
+        (subprocessName ? subprocessName.go || subprocessName.node : 'memory'),
+      () => {
+        test('correct result', () => {
+          return withSavedPanels(
+            panels,
+            (project) => {
+              // Grab result
+              const value = JSON.parse(
+                fs
+                  .readFileSync(
+                    getProjectResultsFile(project.projectName) + hp.id
+                  )
+                  .toString()
+              );
+
+              expect(value).toStrictEqual(t.expected);
             },
             { evalPanels: true, subprocessName }
           );
