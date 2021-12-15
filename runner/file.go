@@ -419,25 +419,28 @@ func getMimeType(fileName string, ct ContentTypeInfo) string {
 	return ""
 }
 
+func getServer(project *ProjectState, serverId string) (*ServerInfo, error) {
+	for _, s := range project.Servers {
+		if s.Id == serverId {
+			cp := s
+			return &cp, nil
+		}
+	}
+
+	return nil, fmt.Errorf("Unknown server: %d" + serverId)
+}
+
 func evalFilePanel(project *ProjectState, pageIndex int, panel *PanelInfo) error {
 	cti := panel.File.ContentTypeInfo
 	fileName := panel.File.Name
 	if panel.ServerId != "" {
-		var server *ServerInfo
-		for _, s := range project.Servers {
-			if s.Id == panel.ServerId {
-				cp := s
-				server = &cp
-				break
-			}
-		}
-
-		if server == nil {
-			return fmt.Errorf("Unknown server: %d" + panel.ServerId)
+		server, err := getServer(project, panel.ServerId)
+		if err != nil {
+			return err
 		}
 
 		out := getPanelResultsFile(project.Id, panel.Id)
-		err := remoteFileReader(*server, fileName, func(r io.Reader) error {
+		err = remoteFileReader(*server, fileName, func(r io.Reader) error {
 			return transformReader(r, fileName, cti, out)
 		})
 		if err != nil {

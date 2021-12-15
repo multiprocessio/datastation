@@ -3,8 +3,10 @@ package main
 import (
 	"encoding/base64"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
+	"os"
 	"path"
 	"strconv"
 	"strings"
@@ -217,6 +219,32 @@ func evalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo) e
 	)
 	if err != nil {
 		return err
+	}
+
+	// Copy remote sqlite database to tmp file if remote
+	if dbInfo.Type == "sqlite" && panel.ServerId != "" {
+		server, err := getServer(project, panel.ServerId)
+		if err != nil {
+			return err
+		}
+
+		tmp, err := ioutil.TempFile("", "sqlite-copy")
+		if err != nil {
+			return err
+		}
+
+		defer os.Remove(tmp.Name())
+
+		err = remoteFileReader(*server, dbInfo.Database, func(r io.Reader) error {
+			_, err := io.Copy(tmp, r)
+			return err
+		})
+		if err != nil {
+			return err
+		}
+
+		dbInfo.Database = tmp.Name()
+		tmp.Close()
 	}
 
 	out := getPanelResultsFile(project.Id, panel.Id)
