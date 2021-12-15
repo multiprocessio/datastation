@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"regexp"
+	"strings"
 
 	"github.com/xuri/excelize/v2"
 )
@@ -73,7 +74,11 @@ func transformReader(r io.Reader, fileName string, cti ContentTypeInfo, out stri
 
 		return transformParquetFile(w.Name(), out)
 	case "text/regexplines":
-		return transformRegexp(r, out, regexp.MustCompile(cti.CustomLineRegexp))
+		// There are probably weird cases this won't work but
+		// let's wait for a bug report to do more intelligent
+		// translation of JavaScript -> Go regexp.
+		goRegexp := strings.ReplaceAll(cti.CustomLineRegexp, "(?<", "(?P<")
+		return transformRegexp(r, out, regexp.MustCompile(goRegexp))
 	case "application/jsonlines":
 		return transformJSONLines(r, out)
 	}

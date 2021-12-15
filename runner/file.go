@@ -368,11 +368,13 @@ func transformRegexp(in io.Reader, out string, re *regexp.Regexp) error {
 	scanner := bufio.NewScanner(in)
 	return withJSONArrayOutWriterFile(out, func(w JSONArrayWriter) error {
 		for scanner.Scan() {
-			var row map[string]string
+			row := map[string]string{}
 			match := re.FindStringSubmatch(scanner.Text())
 			for i, name := range re.SubexpNames() {
-				if i != 0 && name != "" {
-					row[name] = match[i]
+				if name != "" {
+					if match[i] != "" {
+						row[name] = match[i]
+					}
 				}
 			}
 
@@ -461,7 +463,7 @@ func evalFilePanel(project *ProjectState, pageIndex int, panel *PanelInfo) error
 		// There are probably weird cases this won't work but
 		// let's wait for a bug report to do more intelligent
 		// translation of JavaScript -> Go regexp.
-		goRegexp := strings.ReplaceAll(cti.CustomLineRegexp, "(?<", "(?P<)")
+		goRegexp := strings.ReplaceAll(cti.CustomLineRegexp, "(?<", "(?P<")
 		return transformRegexpFile(panel.File.Name, out, regexp.MustCompile(goRegexp))
 	case "application/jsonlines":
 		return transformJSONLinesFile(panel.File.Name, out)

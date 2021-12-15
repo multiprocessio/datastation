@@ -18,15 +18,11 @@ import {
   ConnectorInfo,
   DatabaseConnectorInfo,
   DatabasePanelInfo,
-  FilePanelInfo,
-  HTTPPanelInfo,
-  LiteralPanelInfo,
   PanelInfo,
   PanelInfoType,
   PanelResult,
   ProjectState,
 } from '../../shared/state';
-import { getMimeType, XLSX_MIME_TYPE } from '../../shared/text';
 import {
   CODE_ROOT,
   DSPROJ_FLAG,
@@ -37,7 +33,6 @@ import { ensureFile } from '../fs';
 import { parsePartialJSONFile } from '../partial';
 import { Dispatch, RPCHandler } from '../rpc';
 import { flushUnwritten, getProjectResultsFile } from '../store';
-import { additionalParsers } from './parquet';
 import { getProjectAndPanel } from './shared';
 import { EvalHandlerExtra, EvalHandlerResponse } from './types';
 
