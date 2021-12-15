@@ -217,6 +217,10 @@ export async function evalInSubprocess(
         const e = EVAL_ERRORS.find((e) => e.name === rm.exception.name);
 
         if (!e) {
+          if (typeof rm.exception === 'string') {
+            throw new Error(rm.exception);
+          }
+
           throw rm.exception;
         }
 

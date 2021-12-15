@@ -154,8 +154,8 @@ func main() {
 	if err != nil {
 		logln("Failed to eval: %s", err)
 
-		err := writeJSONFile(panelMetaOut, map[string]error{
-			"exception": err,
+		err := writeJSONFile(panelMetaOut, map[string]string{
+			"exception": err.Error(),
 		})
 		if err != nil {
 			fatalln("Could not write panel meta out: %s", err)

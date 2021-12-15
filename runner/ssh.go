@@ -85,6 +85,8 @@ func parsePemBlock(block *pem.Block) (interface{}, error) {
 func getSSHSession(si ServerInfo) (*ssh.Session, error) {
 	config := &ssh.ClientConfig{
 		User: si.Username,
+		// TODO: figure out if we want to validate host keys
+		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 	}
 	switch si.Type {
 	case SSHPassword:
@@ -111,7 +113,7 @@ func getSSHSession(si ServerInfo) (*ssh.Session, error) {
 
 	conn, err := ssh.Dial("tcp", si.Address, config)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Could not connect to remote server: %s", err)
 	}
 
 	return conn.NewSession()
@@ -126,7 +128,7 @@ func remoteFileReader(si ServerInfo, remoteFileName string, callback func(r io.R
 
 	r, err := session.StdoutPipe()
 	if err != nil {
-		return err
+		return fmt.Errorf("Could not create stdout pipe: %s", err)
 	}
 
 	cmd := fmt.Sprintf(`if command -v gzip > /dev/null 2>&1; then
@@ -135,12 +137,12 @@ else
   cat %s
 fi`, remoteFileName, remoteFileName)
 	if err := session.Start(cmd); err != nil {
-		return err
+		return fmt.Errorf("Could not start session command: %s", err)
 	}
 
 	fz, err := gzip.NewReader(r)
 	if err != nil {
-		return err
+		return fmt.Errorf("Could not create gzip reader: %s", err)
 	}
 	defer fz.Close()
 
@@ -150,7 +152,7 @@ fi`, remoteFileName, remoteFileName)
 	}
 
 	if err := session.Wait(); err != nil {
-		return err
+		return fmt.Errorf("Could not complete session: %s", err)
 	}
 
 	return nil
