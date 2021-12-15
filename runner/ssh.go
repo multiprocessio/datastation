@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"compress/gzip"
 	"crypto/x509"
 	"encoding/pem"
@@ -140,15 +141,25 @@ fi`, remoteFileName, remoteFileName)
 		return edsef("Could not start session command: %s", err)
 	}
 
-	var reader io.Reader = r
-	fz, err := gzip.NewReader(r)
-	if err == nil {
+	// Clone the stream to peak if it is gzipped
+	buffer := bufio.NewReader(r)
+	magicBytes, err := buffer.Peek(2)
+	if err != nil {
+		return edsef("Could not read magic number from stream: %s", err)
+	}
+
+	// Set default reader to be plain text
+	var reader io.Reader = buffer
+
+	// If it is gzipped, set the reader to be a gzip reader
+	if magicBytes[0] == 0x1F && magicBytes[1] == 0x8B {
+		fz, err := gzip.NewReader(buffer)
+		if err != nil {
+			return edsef("Could not create gzip reader: %s", err)
+		}
+
 		reader = fz
 		defer fz.Close()
-	} else if err == gzip.ErrHeader {
-		// gzip isn't available, this is ok. We just won't use gzip.
-	} else {
-		return edsef("Could not create gzip reader: %s", err)
 	}
 
 	err = callback(reader)
