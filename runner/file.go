@@ -311,7 +311,8 @@ func transformGeneric(in io.Reader, out string) error {
 	defer w.Close()
 
 	encoder := json.NewEncoder(w)
-	return encoder.Encode(bs)
+	// string(bs) otherwise it's converted to bas64
+	return encoder.Encode(string(bs))
 }
 
 func transformGenericFile(in, out string) error {

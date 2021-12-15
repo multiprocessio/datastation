@@ -1,13 +1,16 @@
 const path = require('path');
 const { LANGUAGES } = require('../../shared/languages');
-const { InvalidDependentPanelError } = require('../../shared/errors');
+const {
+  InvalidDependentPanelError,
+  NotAnArrayOfObjectsError,
+} = require('../../shared/errors');
 const { getProjectResultsFile } = require('../store');
 const fs = require('fs');
 const { LiteralPanelInfo, ProgramPanelInfo } = require('../../shared/state');
 const { updateProjectHandler } = require('../store');
 const { CODE_ROOT } = require('../constants');
 const { makeEvalHandler } = require('./eval');
-const { inPath, withSavedPanels } = require('./testutil');
+const { inPath, withSavedPanels, RUNNERS } = require('./testutil');
 
 const TESTS = [
   {
@@ -40,6 +43,12 @@ const TESTS = [
     type: 'sql',
     content: 'SELECT name, CAST(age AS INT) + 10 AS age FROM DM_getPanel(0)',
     condition: true,
+  },
+  {
+    type: 'sql',
+    content: 'SELECT name FROM DM_getPanel("Not Array Data")',
+    condition: true,
+    exception: NotAnArrayOfObjectsError,
   },
   {
     type: 'sql',
@@ -100,11 +109,7 @@ for (const t of TESTS) {
 
   describe(t.type, () => {
     // First pass runs in process, second pass runs in subprocess
-    for (const subprocessName of [
-      undefined,
-      { node: path.join(CODE_ROOT, 'build', 'desktop_runner.js') },
-      { go: path.join(CODE_ROOT, 'build', 'go_desktop_runner_test') },
-    ]) {
+    for (const subprocessName of RUNNERS) {
       test(`runs ${t.type} programs to perform addition via ${
         subprocessName
           ? subprocessName.node || subprocessName.go
@@ -117,13 +122,20 @@ for (const t of TESTS) {
             name: 'Raw Data',
           });
 
+          // Not valid array data
+          const lp2 = new LiteralPanelInfo({
+            contentTypeInfo: {},
+            content: '',
+            name: 'Not Array Data',
+          });
+
           const pp = new ProgramPanelInfo({
             type: t.type,
             content: t.content,
           });
 
           let finished = false;
-          const panels = [lp, pp];
+          const panels = [lp, lp2, pp];
           await withSavedPanels(
             panels,
             async (project) => {

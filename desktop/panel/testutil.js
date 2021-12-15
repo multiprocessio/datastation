@@ -1,4 +1,6 @@
+const path = require('path');
 const { spawnSync } = require('child_process');
+const { CODE_ROOT } = require('../constants');
 const { getProjectResultsFile } = require('../store');
 const fs = require('fs');
 const { file: makeTmpFile } = require('tmp-promise');
@@ -54,6 +56,7 @@ exports.withSavedPanels = async function (
     expect(exports.fileIsEmpty(project.projectName + '.dsproj')).toBe(false);
 
     if (evalPanels) {
+      console.log('Eval-ing panels');
       for (let i = 0; i < panels.length; i++) {
         const panel = panels[i];
         if (i > 0) {
@@ -109,6 +112,8 @@ exports.withSavedPanels = async function (
           )
         ).toBe(false);
       }
+    } else {
+      console.log('YOU DIDNT ASK ME TO EVAL THESE PANELS SO IM NOT GOING TO!');
     }
 
     return await cb(project);
@@ -295,3 +300,33 @@ module.exports.REGEXP_TESTS = [
     ],
   },
 ];
+
+module.exports.RUNNERS = [
+  undefined,
+  { node: path.join(CODE_ROOT, 'build', 'desktop_runner.js') },
+  { go: path.join(CODE_ROOT, 'build', 'go_desktop_runner_test') },
+].filter(function (r) {
+  const runners = ['memory', 'node', 'go'];
+
+  let runner = 'memory';
+  if (r) {
+    if (r.node) {
+      runner = 'node';
+    } else {
+      runner = 'go';
+    }
+  }
+
+  let runnerSpecified = undefined;
+  for (r of runners) {
+    if (process.argv.includes('--dsrunner=' + r)) {
+      runnerSpecified = r;
+    }
+  }
+
+  if (!runnerSpecified) {
+    return true;
+  }
+
+  return runnerSpecified === runner;
+});

@@ -11,6 +11,7 @@ const {
   translateBaselineForType,
   replaceBigInt,
   REGEXP_TESTS,
+  RUNNERS,
 } = require('./testutil');
 
 const testPath = path.join(CODE_ROOT, 'testdata');
@@ -29,11 +30,33 @@ cp.stderr.on('data', (data) => {
   console.warn(data.toString());
 });
 
-for (const subprocessName of [
-  undefined,
-  { node: path.join(CODE_ROOT, 'build', 'desktop_runner.js') },
-  { go: path.join(CODE_ROOT, 'build', 'go_desktop_runner_test') },
-]) {
+for (const subprocessName of RUNNERS) {
+  describe(
+    'eval generic file via ' +
+      (subprocessName ? subprocessName.go || subprocessName.node : 'memory'),
+    () => {
+      test('correct result', () => {
+        const hp = new HTTPPanelInfo(
+          '',
+          new HTTPConnectorInfo('', 'http://localhost:9799/testdata/unknown')
+        );
+
+        const panels = [hp];
+
+        return withSavedPanels(panels, (project) => {
+          // Grab result
+          const value = JSON.parse(
+            fs
+              .readFileSync(getProjectResultsFile(project.projectName) + hp.id)
+              .toString()
+          );
+
+          expect(value).toEqual('hey this is unknown');
+        });
+      }, { evalPanels: true, subprocessName });
+    }
+  );
+
   for (const userdataFileType of USERDATA_FILES) {
     // Parquet over HTTP is broken in the Node runners
     if (userdataFileType === 'parquet' && !subprocessName?.go) {

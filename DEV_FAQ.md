@@ -30,3 +30,16 @@ Pass the test file name to `yarn test`.
 ```bash
 yarn test server/exporter.test.js
 ```
+
+## Run tests on only a single runner type
+
+All (or should be all) tests on panels run both against a Node version
+and a Go version. To quickly filter on only a specific runner, you can
+pass `--dsrunner=X` where X is `memory` or `go` or `node` and only
+tests against that runner will be run.
+
+For example:
+
+```bash
+yarn test desktop/panel/file.test.js --dsrunner=memory
+```
