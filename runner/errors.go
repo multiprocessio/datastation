@@ -16,7 +16,7 @@ type DSError struct {
 
 func (dse *DSError) Error() string {
 	s, _ := json.MarshalIndent(dse, "", "  ")
-	return "DSError" + string(s) + "\n" + dse.Stack
+	return "DSError " + string(s) + "\n" + dse.Stack
 }
 
 func makeErrNotAnArrayOfObjects(id string) *DSError {
@@ -46,6 +46,10 @@ func makeErrInvalidDependentPanelError(id string) *DSError {
 func makeErrException(e error) *DSError {
 	if e == nil {
 		return nil
+	}
+
+	if dse, ok := e.(*DSError); ok {
+		return dse
 	}
 
 	return &DSError{

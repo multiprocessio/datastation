@@ -201,7 +201,7 @@ input + input[type='file'] {
 }
 
 .input-invalid {
-    padding-left: 5px;
+  padding-left: 5px;
   color: red;
   font-size: 0.75rem;
 }
@@ -1066,6 +1066,6 @@ body.dark {
 
   .input-invalid,
   .text-failure {
-      color: #e35172;
+    color: #e35172;
   }
 }

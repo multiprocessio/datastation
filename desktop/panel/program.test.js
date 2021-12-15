@@ -10,7 +10,7 @@ const { LiteralPanelInfo, ProgramPanelInfo } = require('../../shared/state');
 const { updateProjectHandler } = require('../store');
 const { CODE_ROOT } = require('../constants');
 const { makeEvalHandler } = require('./eval');
-const { inPath, withSavedPanels, RUNNERS } = require('./testutil');
+const { inPath, withSavedPanels, RUNNERS, VERBOSE } = require('./testutil');
 
 const TESTS = [
   {
@@ -110,57 +110,61 @@ for (const t of TESTS) {
   describe(t.type, () => {
     // First pass runs in process, second pass runs in subprocess
     for (const subprocessName of RUNNERS) {
-      test(`runs ${t.type} program to perform addition via ${
-        subprocessName
-          ? subprocessName.node || subprocessName.go
-          : 'same-process'
-      }`, async () => {
-        try {
-          const lp = new LiteralPanelInfo({
-            contentTypeInfo: { type: 'text/csv' },
-            content: 'age,name\n12,Kev\n18,Nyra',
-            name: 'Raw Data',
-          });
+      test(
+        `runs ${t.type} program to perform addition via ${
+          subprocessName
+            ? subprocessName.node || subprocessName.go
+            : 'same-process'
+        }` + (VERBOSE ? ', program: `' + t.content + '`' : ''),
+        async () => {
+          try {
+            const lp = new LiteralPanelInfo({
+              contentTypeInfo: { type: 'text/csv' },
+              content: 'age,name\n12,Kev\n18,Nyra',
+              name: 'Raw Data',
+            });
 
-          // Not valid array data
-          const lp2 = new LiteralPanelInfo({
-            contentTypeInfo: {},
-            content: '',
-            name: 'Not Array Data',
-          });
+            // Not valid array data
+            const lp2 = new LiteralPanelInfo({
+              contentTypeInfo: {},
+              content: '',
+              name: 'Not Array Data',
+            });
 
-          const pp = new ProgramPanelInfo({
-            type: t.type,
-            content: t.content,
-          });
+            const pp = new ProgramPanelInfo({
+              type: t.type,
+              content: t.content,
+            });
 
-          let finished = false;
-          const panels = [lp, lp2, pp];
-          await withSavedPanels(
-            panels,
-            async (project) => {
-              const panelValueBuffer = fs.readFileSync(
-                getProjectResultsFile(project.projectName) + pp.id
-              );
-              expect(JSON.parse(panelValueBuffer.toString())).toStrictEqual([
-                { name: 'Kev', age: 22 },
-                { name: 'Nyra', age: 28 },
-              ]);
+            let finished = false;
+            const panels = [lp, lp2, pp];
+            await withSavedPanels(
+              panels,
+              async (project) => {
+                const panelValueBuffer = fs.readFileSync(
+                  getProjectResultsFile(project.projectName) + pp.id
+                );
+                expect(JSON.parse(panelValueBuffer.toString())).toStrictEqual([
+                  { name: 'Kev', age: 22 },
+                  { name: 'Nyra', age: 28 },
+                ]);
 
-              finished = true;
-            },
-            { evalPanels: true, subprocessName }
-          );
+                finished = true;
+              },
+              { evalPanels: true, subprocessName }
+            );
 
-          if (!finished) {
-            throw new Error('Callback did not finish');
+            if (!finished) {
+              throw new Error('Callback did not finish');
+            }
+          } catch (e) {
+            if (!t.exception || !(e instanceof t.exception)) {
+              throw e;
+            }
           }
-        } catch (e) {
-          if (!t.exception || !(e instanceof t.exception)) {
-            throw e;
-          }
-        }
-      }, 300_000);
+        },
+        300_000
+      );
     }
 
     for (const n of [0, 1]) {

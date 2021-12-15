@@ -330,3 +330,5 @@ module.exports.RUNNERS = [
 
   return runnerSpecified === runner;
 });
+
+module.exports.VERBOSE = process.argv.includes('--dsverbose=true');
