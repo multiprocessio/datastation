@@ -216,18 +216,17 @@ export async function evalInSubprocess(
       if (rm.exception) {
         const e = EVAL_ERRORS.find((e) => e.name === rm.exception.name);
 
+	// Just a generic exception, we already caught all info in `stderr`, so just throw that.
         if (!e) {
-          if (typeof rm.exception === 'string') {
-            throw new Error(rm.exception);
-          }
-
-          throw rm.exception;
+	  throw new Error(stderr);
         }
 
+	// These are specific exceptions that will be handled specially in the UI such as InvalidDependentPanelError
         if (e && (e as any).fromJSON) {
           throw (e as any).fromJSON(rm.exception);
         }
 
+	// Unclear what case this is, probably a developer mistake.
         throw new e(rm.exception);
       }
 

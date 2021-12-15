@@ -21,6 +21,11 @@ import (
 
 var preferredParallelism = runtime.NumCPU() * 2
 
+// QuoteToASCII actually quotes a string. We most often don't want that.
+func toAscii(s string) string {
+	return strings.Trim(strconv.QuoteToASCII(s), `"`)
+}
+
 type UnicodeEscape string
 
 func (ue UnicodeEscape) MarshalJSON() ([]byte, error) {
@@ -221,9 +226,9 @@ func writeXLSXSheet(rows [][]string, w *JSONArrayWriter) error {
 			continue
 		}
 
-		row := map[string]interface{}{}
+		row := map[string]UnicodeEscape{}
 		for i, cell := range r {
-			row[header[i]] = cell
+			row[header[i]] = UnicodeEscape(cell)
 		}
 
 		err := w.Write(row)
@@ -265,7 +270,8 @@ func transformXLSX(in *excelize.File, out string) error {
 				}
 			}
 
-			_, err = w.WriteString(`"` + strings.ReplaceAll(sheet, `"`, `\\"`) + `":`)
+			sheetNameKey := `"` + strings.ReplaceAll(sheet, `"`, `\\"`) + `":`
+			_, err = w.WriteString(sheetNameKey)
 			if err != nil {
 				return err
 			}
@@ -340,7 +346,7 @@ func transformJSONLines(in io.Reader, out string) error {
 				}
 			}
 
-			_, err := w.WriteString(scanner.Text())
+			_, err := w.WriteString(toAscii(scanner.Text()))
 			if err != nil {
 				return edsef("Could not write string: %s", err)
 			}
@@ -382,7 +388,7 @@ func transformRegexp(in io.Reader, out string, re *regexp.Regexp) error {
 			for i, name := range re.SubexpNames() {
 				if name != "" {
 					if match[i] != "" {
-						row[name] = match[i]
+						row[name] = UnicodeEscape(match[i])
 					} else {
 						row[name] = nil
 					}
