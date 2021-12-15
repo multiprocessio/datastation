@@ -64,6 +64,7 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-yarn-
 
+    - run: ./scripts/ci/prepare_go.sh
     - run: yarn release-server 0.0.0-install
     - run: mv releases/datastation-server-x64-0.0.0-install.zip /tmp/
     - run: cd /tmp && unzip datastation-server-x64-0.0.0-install.zip

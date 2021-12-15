@@ -8,11 +8,7 @@ sudo apt-get update -y
 sudo apt-get install -y nodejs cmake jq
 
 # Set up Go
-sudo curl -LO https://go.dev/dl/go1.17.4.linux-amd64.tar.gz
-sudo rm -rf /usr/local/go
-sudo tar -C /usr/local -xzf go1.17.4.linux-amd64.tar.gz
-sudo ln -s /usr/local/go/bin/go /usr/local/bin/go
-sudo ln -s /usr/local/go/bin/gofmt /usr/local/bin/gofmt
+./scripts/ci/prepare_go.sh
 
 # Set up coverage tools
 go install github.com/axw/gocov/gocov@v1.0.0
