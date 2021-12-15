@@ -211,8 +211,13 @@ export async function evalInSubprocess(
       const rm = JSON.parse(resultMeta);
       if (rm.exception) {
         const e =
-          EVAL_ERRORS.find((e) => e.name === rm.exception.name) || Error;
-        if ((e as any).fromJSON) {
+          EVAL_ERRORS.find((e) => e.name === rm.exception.name);
+
+	if (!e) {
+	  throw rm.exception;
+	}
+
+	if (e && (e as any).fromJSON) {
           throw (e as any).fromJSON(rm.exception);
         }
 
