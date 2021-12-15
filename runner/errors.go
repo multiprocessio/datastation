@@ -20,7 +20,7 @@ func (dse *DSError) Error() string {
 
 func makeErrNotAnArrayOfObjects(id string) *DSError {
 	return &DSError{
-		Name:          "NotAnArrayOfObjects",
+		Name:          "NotAnArrayOfObjectsError",
 		TargetPanelId: id,
 		Stack:         string(debug.Stack()),
 	}
@@ -28,7 +28,7 @@ func makeErrNotAnArrayOfObjects(id string) *DSError {
 
 func makeErrUnsupported(msg string) *DSError {
 	return &DSError{
-		Name:    "Unsupported",
+		Name:    "UnsupportedError",
 		Message: msg,
 		Stack:   string(debug.Stack()),
 	}

@@ -110,7 +110,7 @@ for (const t of TESTS) {
   describe(t.type, () => {
     // First pass runs in process, second pass runs in subprocess
     for (const subprocessName of RUNNERS) {
-      test(`runs ${t.type} programs to perform addition via ${
+      test(`runs ${t.type} program to perform addition via ${
         subprocessName
           ? subprocessName.node || subprocessName.go
           : 'same-process'

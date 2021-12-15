@@ -1,15 +1,15 @@
 package main
 
 type PanelResult struct {
-	Exception   interface{}    `json:"exception" db:"exception"`
-	Value       *[]interface{} `json:"value" db:"value"`
-	Preview     string         `json:"preview" db:"preview"`
-	Stdout      string         `json:"stdout" db:"stdout"`
-	Shape       Shape          `json:"shape" db:"shape"`
-	ArrayCount  *float64       `json:"arrayCount" db:"arrayCount"`
-	Size        *float64       `json:"size" db:"size"`
-	ContentType string         `json:"contentType" db:"contentType"`
-	Elapsed     *float64       `json:"elapsed" db:"elapsed"`
+	Exception   interface{} `json:"exception" db:"exception"`
+	Value       interface{} `json:"value" db:"value"`
+	Preview     string      `json:"preview" db:"preview"`
+	Stdout      string      `json:"stdout" db:"stdout"`
+	Shape       Shape       `json:"shape" db:"shape"`
+	ArrayCount  *float64    `json:"arrayCount" db:"arrayCount"`
+	Size        *float64    `json:"size" db:"size"`
+	ContentType string      `json:"contentType" db:"contentType"`
+	Elapsed     *float64    `json:"elapsed" db:"elapsed"`
 }
 
 var defaultPanelResult = PanelResult{
