@@ -38,8 +38,8 @@ jobs:
     # Needed so we can have ./build/desktop_runner.js and ./build/go_desktop_runner ready for tests
     - run: yarn build-test-runner
     - run: yarn test --runInBand --detectOpenHandles --forceExit --verbose
+    - run: cd runner && go test -coverprofile ../coverage/gounit.cov
     - run: ./runner/scripts/test_coverage.sh
-    - run: cd runner && go test -cover
     # Test server builds
     - run: yarn build-server
 
