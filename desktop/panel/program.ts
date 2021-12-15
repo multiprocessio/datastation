@@ -14,7 +14,7 @@ import { EvalHandlerExtra, EvalHandlerResponse, guardPanel } from './types';
 export async function evalProgram(
   project: ProjectState,
   panel: PanelInfo,
-  { idMap }: EvalHandlerExtra
+  { idMap, idShapeMap }: EvalHandlerExtra
 ): Promise<EvalHandlerResponse> {
   const ppi = guardPanel<ProgramPanelInfo>(panel, 'program');
   const programTmp = await makeTmpFile({ prefix: 'program-tmp-' });
@@ -26,6 +26,7 @@ export async function evalProgram(
     const res = language.nodeEval(ppi.content, {
       resultsFile: projectResultsFile,
       idMap,
+      idShapeMap,
     });
 
     return { value: res.value, stdout: res.stdout };

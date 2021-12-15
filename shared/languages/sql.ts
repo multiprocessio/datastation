@@ -1,7 +1,11 @@
 import alasql from 'alasql';
 import { preview } from 'preview';
+import { Shape } from 'shape';
 import { v4 as uuidv4 } from 'uuid';
-import { InvalidDependentPanelError } from '../errors';
+import {
+  InvalidDependentPanelError,
+  NotAnArrayOfObjectsError,
+} from '../errors';
 import log from '../log';
 import { PanelResult } from '../state';
 
@@ -62,9 +66,18 @@ function runSQL(prog: string, fetchResults: (n: string | number) => any[]) {
 
 function nodeEval(
   prog: string,
-  results: { idMap: Record<string | number, string>; resultsFile: string }
+  results: {
+    idMap: Record<string | number, string>;
+    idShapeMap: Record<string | number, Shape>;
+    resultsFile: string;
+  }
 ) {
   return runSQL(prog, (n: string | number) => {
+    const s = results.idShapeMap[n];
+    if (!s || s.kind !== 'array') {
+      throw new NotAnArrayOfObjectsError(n);
+    }
+
     const fs = require('fs');
     let f;
     try {
