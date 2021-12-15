@@ -87,6 +87,7 @@ function canUseGoRunner(panel: PanelInfo, connectors: ConnectorInfo[]) {
     'oracle',
     'sqlserver',
     'clickhouse',
+    'snowflake',
   ];
   if (panel.type === 'database') {
     const dp = panel as DatabasePanelInfo;
