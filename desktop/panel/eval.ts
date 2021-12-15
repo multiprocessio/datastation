@@ -76,10 +76,6 @@ function killAllByPanelId(panelId: string) {
 }
 
 function canUseGoRunner(panel: PanelInfo, connectors: ConnectorInfo[]) {
-  if (panel.serverId) {
-    return false;
-  }
-
   const supportedDatabases = [
     'postgres',
     'sqlite',
@@ -94,7 +90,9 @@ function canUseGoRunner(panel: PanelInfo, connectors: ConnectorInfo[]) {
     for (const c of connectors) {
       if (c.id === dp.database.connectorId) {
         const dc = c as DatabaseConnectorInfo;
-        if (c.serverId) {
+
+        // Only sqlite supports remote
+        if (c.serverId && dc.database.type !== 'sqlite') {
           return false;
         }
 
@@ -104,11 +102,16 @@ function canUseGoRunner(panel: PanelInfo, connectors: ConnectorInfo[]) {
     return false;
   }
 
-  if (panel.type === 'program') {
+  if (['program', 'file'].includes(panel.type)) {
     return true;
   }
 
-  return ['literal', 'http', 'file'].includes(panel.type);
+  // Remote not supported in http
+  if (panel.serverId) {
+    return false;
+  }
+
+  return ['literal', 'http'].includes(panel.type);
 }
 
 export async function evalInSubprocess(
