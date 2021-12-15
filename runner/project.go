@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"os"
 	"path"
@@ -23,14 +22,14 @@ func readJSONFileInto(file string, into interface{}) error {
 	decoder := json.NewDecoder(f)
 	err = decoder.Decode(into)
 	if err == io.EOF {
-		return fmt.Errorf("File is empty")
+		return edsef("File is empty")
 	}
 
 	return err
 }
 
 func writeJSONFile(file string, value interface{}) error {
-	f, err := os.OpenFile(file, os.O_WRONLY|os.O_CREATE, os.ModePerm)
+	f, err := openTruncate(file)
 	if err != nil {
 		return err
 	}
@@ -54,7 +53,7 @@ func getProjectFile(projectId string) string {
 }
 
 func makeErrNoSuchPanel(panelId string) error {
-	return fmt.Errorf("Panel not found: " + panelId)
+	return edsef("Panel not found: " + panelId)
 }
 
 func getProjectPanel(projectId, panelId string) (*ProjectState, int, *PanelInfo, error) {

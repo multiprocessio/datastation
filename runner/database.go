@@ -56,7 +56,7 @@ func (e *Encrypt) decrypt() (string, error) {
 
 	decrypted, ok := secretbox.Open(nil, message, &nonce, &key)
 	if !ok {
-		return "", fmt.Errorf("NACL open failed")
+		return "", edsef("NACL open failed")
 	}
 
 	return string(decrypted), nil
@@ -182,7 +182,7 @@ func evalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo) e
 	}
 
 	if connector == nil {
-		return fmt.Errorf("Unknown connector " + panel.Database.ConnectorId)
+		return edsef("Unknown connector " + panel.Database.ConnectorId)
 	}
 
 	dbInfo := connector.Database
@@ -317,7 +317,7 @@ func evalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo) e
 						}
 					}
 
-					err = w.Write(row)
+					err = w.Write(row, !wroteFirstRow)
 					if err != nil {
 						return nil, err
 					}

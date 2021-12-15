@@ -1,9 +1,6 @@
 package main
 
-import (
-	"encoding/json"
-	"fmt"
-)
+import "encoding/json"
 
 type ShapeKind string
 
@@ -32,12 +29,12 @@ func (s *Shape) UnmarshalJSON(data []byte) error {
 
 	k, ok := m["kind"]
 	if !ok {
-		return fmt.Errorf(`Missing required key: "kind"`)
+		return edsef(`Missing required key: "kind"`)
 	}
 
 	ks, ok := k.(string)
 	if !ok {
-		return fmt.Errorf(`Invalid kind, expected string got: "%v"`, k)
+		return edsef(`Invalid kind, expected string got: "%v"`, k)
 	}
 
 	s.Kind = ShapeKind(ks)
@@ -58,7 +55,7 @@ func (s *Shape) UnmarshalJSON(data []byte) error {
 		return nil
 	}
 
-	return fmt.Errorf(`Invalid kind: "%s"`, ks)
+	return edsef(`Invalid kind: "%s"`, ks)
 }
 
 type ScalarName string

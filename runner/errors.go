@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"runtime/debug"
 )
 
@@ -55,3 +56,7 @@ func makeErrException(e error) *DSError {
 }
 
 var edse = makeErrException
+
+func edsef(msg string, args ...interface{}) *DSError {
+	return edse(fmt.Errorf(msg, args...))
+}

@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"encoding/csv"
 	"encoding/json"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
@@ -32,41 +31,26 @@ type JSONArrayWriter struct {
 	w io.Writer
 }
 
-func (j JSONArrayWriter) Write(row interface{}) error {
+func (j JSONArrayWriter) Write(row interface{}, isFirst bool) error {
+	if !isFirst {
+		_, err := j.w.Write([]byte(",\n"))
+		if err != nil {
+			return edsef("Failed to write JSON delimiter: %s", err)
+		}
+	}
 	encoder := json.NewEncoder(j.w)
 	err := encoder.Encode(row)
 	if err != nil {
-		return err
+		return edsef("Failed to encode JSON: %s", err)
 	}
 
-	_, err = j.w.Write([]byte(","))
-	return err
-}
-
-func overwriteLastChar(w *os.File, c string) error {
-	// Find current offset
-	lastChar, err := w.Seek(0, io.SeekCurrent)
-	if err != nil {
-		return err
-	}
-
-	if lastChar > 1 {
-		// Overwrite the last comma
-		lastChar = lastChar - 1
-	}
-
-	_, err = w.WriteAt([]byte(c), lastChar)
-	if err != nil {
-		return err
-	}
-
-	return w.Truncate(lastChar + 1)
+	return nil
 }
 
 func withJSONOutWriter(w *os.File, first, last string, cb func() error) error {
 	_, err := w.WriteString(first)
 	if err != nil {
-		return err
+		return edsef("Failed to write JSON start marker: %s", err)
 	}
 
 	err = cb()
@@ -74,7 +58,12 @@ func withJSONOutWriter(w *os.File, first, last string, cb func() error) error {
 		return err
 	}
 
-	return overwriteLastChar(w, last)
+	_, err = w.WriteString(last)
+	if err != nil {
+		return edsef("Failed to write JSON end marker: %s", err)
+	}
+
+	return nil
 }
 
 func withJSONArrayOutWriter(w *os.File, cb func(w JSONArrayWriter) error) error {
@@ -83,8 +72,12 @@ func withJSONArrayOutWriter(w *os.File, cb func(w JSONArrayWriter) error) error 
 	})
 }
 
+func openTruncate(out string) (*os.File, error) {
+	return os.OpenFile(out, os.O_TRUNC|os.O_WRONLY|os.O_CREATE, os.ModePerm)
+}
+
 func withJSONArrayOutWriterFile(out string, cb func(w JSONArrayWriter) error) error {
-	w, err := os.OpenFile(out, os.O_WRONLY|os.O_CREATE, os.ModePerm)
+	w, err := openTruncate(out)
 	if err != nil {
 		return err
 	}
@@ -123,7 +116,7 @@ func transformCSV(in io.Reader, out string) error {
 				row[field] = UnicodeEscape(record[i])
 			}
 
-			err = w.Write(row)
+			err = w.Write(row, isHeader)
 			if err != nil {
 				return err
 			}
@@ -144,7 +137,7 @@ func transformCSVFile(in, out string) error {
 }
 
 func transformJSON(in io.Reader, out string) error {
-	w, err := os.OpenFile(out, os.O_WRONLY|os.O_CREATE, os.ModePerm)
+	w, err := openTruncate(out)
 	if err != nil {
 		return err
 	}
@@ -176,6 +169,7 @@ func transformParquet(in source.ParquetFile, out string) error {
 	defer r.ReadStop()
 
 	return withJSONArrayOutWriterFile(out, func(w JSONArrayWriter) error {
+		isFirstRow := true
 		size := 1000
 		var offset int64 = 0
 		for {
@@ -190,10 +184,12 @@ func transformParquet(in source.ParquetFile, out string) error {
 			}
 
 			for _, row := range rows {
-				err := w.Write(row)
+				err := w.Write(row, isFirstRow)
 				if err != nil {
 					return err
 				}
+
+				isFirstRow = false
 			}
 
 			offset += int64(size)
@@ -231,7 +227,7 @@ func writeXLSXSheet(rows [][]string, w JSONArrayWriter) error {
 			row[header[i]] = cell
 		}
 
-		err := w.Write(row)
+		err := w.Write(row, isHeader)
 		if err != nil {
 			return err
 		}
@@ -255,7 +251,7 @@ func transformXLSX(in *excelize.File, out string) error {
 		})
 	}
 
-	w, err := os.OpenFile(out, os.O_WRONLY|os.O_CREATE, os.ModePerm)
+	w, err := openTruncate(out)
 	if err != nil {
 		return err
 	}
@@ -304,7 +300,7 @@ func transformGeneric(in io.Reader, out string) error {
 		return nil
 	}
 
-	w, err := os.OpenFile(out, os.O_WRONLY|os.O_CREATE, os.ModePerm)
+	w, err := openTruncate(out)
 	if err != nil {
 		return err
 	}
@@ -326,7 +322,7 @@ func transformGenericFile(in, out string) error {
 }
 
 func transformJSONLines(in io.Reader, out string) error {
-	w, err := os.OpenFile(out, os.O_WRONLY|os.O_CREATE, os.ModePerm)
+	w, err := openTruncate(out)
 	if err != nil {
 		return err
 	}
@@ -358,13 +354,14 @@ var BUILTIN_REGEX = map[string]*regexp.Regexp{
 }
 
 func transformRegexp(in io.Reader, out string, re *regexp.Regexp) error {
-	w, err := os.OpenFile(out, os.O_WRONLY|os.O_CREATE, os.ModePerm)
+	w, err := openTruncate(out)
 	if err != nil {
 		return err
 	}
 	defer w.Close()
 
 	scanner := bufio.NewScanner(in)
+	isFirstRow := true
 	return withJSONArrayOutWriterFile(out, func(w JSONArrayWriter) error {
 		for scanner.Scan() {
 			row := map[string]interface{}{}
@@ -379,10 +376,12 @@ func transformRegexp(in io.Reader, out string, re *regexp.Regexp) error {
 				}
 			}
 
-			err := w.Write(row)
+			err := w.Write(row, isFirstRow)
 			if err != nil {
 				return err
 			}
+
+			isFirstRow = false
 		}
 
 		return scanner.Err()
@@ -428,7 +427,7 @@ func getServer(project *ProjectState, serverId string) (*ServerInfo, error) {
 		}
 	}
 
-	return nil, fmt.Errorf("Unknown server: %d" + serverId)
+	return nil, edsef("Unknown server: %d" + serverId)
 }
 
 func evalFilePanel(project *ProjectState, pageIndex int, panel *PanelInfo) error {
@@ -445,12 +444,9 @@ func evalFilePanel(project *ProjectState, pageIndex int, panel *PanelInfo) error
 		fileName = strings.ReplaceAll(fileName, "~", "/home/"+server.Username)
 
 		out := getPanelResultsFile(project.Id, panel.Id)
-		err = remoteFileReader(*server, fileName, func(r io.Reader) error {
+		return remoteFileReader(*server, fileName, func(r io.Reader) error {
 			return transformReader(r, fileName, cti, out)
 		})
-		if err != nil {
-			return err
-		}
 	}
 
 	fileName = resolvePath(fileName)
