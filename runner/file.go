@@ -440,6 +440,10 @@ func evalFilePanel(project *ProjectState, pageIndex int, panel *PanelInfo) error
 			return err
 		}
 
+		// Resolve ~ to foreign home path.
+		// Will break if the server is not Linux.
+		fileName = strings.ReplaceAll(fileName, "~", "/home/"+server.Username)
+
 		out := getPanelResultsFile(project.Id, panel.Id)
 		err = remoteFileReader(*server, fileName, func(r io.Reader) error {
 			return transformReader(r, fileName, cti, out)
@@ -449,6 +453,8 @@ func evalFilePanel(project *ProjectState, pageIndex int, panel *PanelInfo) error
 		}
 	}
 
+	fileName = resolvePath(fileName)
+
 	assumedType := getMimeType(fileName, cti)
 	logln("Assumed '%s' from '%s' given '%s' when loading file", assumedType, cti.Type, fileName)
 
@@ -456,26 +462,30 @@ func evalFilePanel(project *ProjectState, pageIndex int, panel *PanelInfo) error
 
 	switch assumedType {
 	case "application/json":
-		return transformJSONFile(panel.File.Name, out)
+		return transformJSONFile(fileName, out)
 	case "text/csv":
-		return transformCSVFile(panel.File.Name, out)
+		return transformCSVFile(fileName, out)
 	case "application/vnd.ms-excel", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
-		return transformXLSXFile(panel.File.Name, out)
+		return transformXLSXFile(fileName, out)
 	case "parquet":
-		return transformParquetFile(panel.File.Name, out)
+		return transformParquetFile(fileName, out)
 	case "text/regexplines":
 		// There are probably weird cases this won't work but
 		// let's wait for a bug report to do more intelligent
 		// translation of JavaScript -> Go regexp.
 		goRegexp := strings.ReplaceAll(cti.CustomLineRegexp, "(?<", "(?P<")
-		return transformRegexpFile(panel.File.Name, out, regexp.MustCompile(goRegexp))
+		return transformRegexpFile(fileName, out, regexp.MustCompile(goRegexp))
 	case "application/jsonlines":
-		return transformJSONLinesFile(panel.File.Name, out)
+		return transformJSONLinesFile(fileName, out)
 	}
 
 	if re, ok := BUILTIN_REGEX[assumedType]; ok {
-		return transformRegexpFile(panel.File.Name, out, re)
+		return transformRegexpFile(fileName, out, re)
 	}
 
-	return transformGenericFile(panel.File.Name, out)
+	return transformGenericFile(fileName, out)
+}
+
+func resolvePath(p string) string {
+	return strings.ReplaceAll(p, "~", HOME)
 }
