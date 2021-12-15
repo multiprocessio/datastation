@@ -121,16 +121,16 @@ for (const subprocessName of [
 
   for (const t of REGEXP_TESTS) {
     const fp = new FilePanelInfo({
-      name: path.join(testPath, t.filename),
+      name: path.join(testPath, 'logs', t.filename),
       contentTypeInfo: t.contentTypeInfo,
     });
 
     const panels = [fp];
 
     describe(
-      'eval ' +
-        t.filename
-        ' file via ' +
+      'read ' +
+        t.filename +
+        ' file from disk via ' +
         (subprocessName ? subprocessName.go || subprocessName.node : 'memory'),
       () => {
         test('correct result', () => {

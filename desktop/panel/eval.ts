@@ -112,50 +112,7 @@ function canUseGoRunner(panel: PanelInfo, connectors: ConnectorInfo[]) {
     return true;
   }
 
-  const fileLike = ['literal', 'http', 'file'].includes(panel.type);
-  if (!fileLike) {
-    return false;
-  }
-
-  const supportedTypes = [
-    'text/csv',
-    'application/json',
-    'application/jsonlines',
-    'parquet',
-    XLSX_MIME_TYPE,
-    'application/vnd.ms-excel',
-  ];
-  let mimetype = '';
-  if (panel.type === 'literal') {
-    const lp = panel as LiteralPanelInfo;
-    mimetype = getMimeType(
-      {
-        ...lp.literal.contentTypeInfo,
-        additionalParsers,
-      },
-      ''
-    );
-  } else if (panel.type === 'http') {
-    const hp = panel as HTTPPanelInfo;
-    mimetype = getMimeType(
-      {
-        ...hp.http.http.contentTypeInfo,
-        additionalParsers,
-      },
-      hp.http.http.url
-    );
-  } else {
-    const fp = panel as FilePanelInfo;
-    mimetype = getMimeType(
-      {
-        ...fp.file.contentTypeInfo,
-        additionalParsers,
-      },
-      fp.file.name
-    );
-  }
-
-  return supportedTypes.includes(mimetype);
+  return ['literal', 'http', 'file'].includes(panel.type);
 }
 
 export async function evalInSubprocess(

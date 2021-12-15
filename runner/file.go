@@ -458,7 +458,11 @@ func evalFilePanel(project *ProjectState, pageIndex int, panel *PanelInfo) error
 	case "parquet":
 		return transformParquetFile(panel.File.Name, out)
 	case "text/regexplines":
-		return transformRegexpFile(panel.File.Name, out, regexp.MustCompile(cti.CustomLineRegexp))
+		// There are probably weird cases this won't work but
+		// let's wait for a bug report to do more intelligent
+		// translation of JavaScript -> Go regexp.
+		goRegexp := strings.ReplaceAll(cti.CustomLineRegexp, "(?<", "(?P<)")
+		return transformRegexpFile(panel.File.Name, out, regexp.MustCompile(goRegexp))
 	case "application/jsonlines":
 		return transformJSONLinesFile(panel.File.Name, out)
 	}
