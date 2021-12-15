@@ -18,10 +18,6 @@ const APACHE2_ERROR_RE =
   /^\[[^ ]* (?<time>[^\]]*)\] \[(?<level>[^\]]*)\](?: \[pid (?<pid>[^:\]]*)(:[^\]]+)*\])? \[client (?<client>[^\]]*)\] (?<message>.*)$/;
 const NGINX_ACCESS_RE =
   /^(?<remote>[^ ]*) (?<host>[^ ]*) (?<user>[^ ]*) \[(?<time>[^\]]*)\] "(?<method>\S+)(?: +(?<path>[^\"]*?)(?: +\S*)?)?" (?<code>[^ ]*) (?<size>[^ ]*)(?: "(?<referer>[^\"]*)" "(?<agent>[^\"]*)"(?:\s+(?<http_x_forwarded_for>[^ ]+))?)?$/;
-const SYSLOG_RFC3164_RE =
-  /^\<(?<pri>[0-9]+)\>(?<time>[^ ]* {1,2}[^ ]* [^ ]*) (?<host>[^ ]*) (?<ident>[^ :\[]*)(?:\[(?<pid>[0-9]+)\])?(?:[^\:]*\:)? *(?<message>.*)$/;
-const SYSLOG_RFC5424_RE =
-  /\A\<(?<pri>[0-9]{1,3})\>[1-9]\d{0,2} (?<time>[^ ]+) (?<host>[!-~]{1,255}) (?<ident>[!-~]{1,48}) (?<pid>[!-~]{1,128}) (?<msgid>[!-~]{1,32}) (?<extradata>(?:\-|(?:\[.*?(?<!\\)\])+))(?: (?<message>.+))?\z/;
 
 export function parseWithRegex(body: string, re: RegExp) {
   return body
@@ -144,16 +140,6 @@ export async function parseArrayBuffer(
     case 'text/regexplines':
       return {
         value: parseWithRegex(bodyAsString(), new RegExp(customLineRegexp)),
-        contentType: realType,
-      };
-    case 'text/syslogrfc3164':
-      return {
-        value: parseWithRegex(bodyAsString(), SYSLOG_RFC3164_RE),
-        contentType: realType,
-      };
-    case 'text/syslogrfc5424':
-      return {
-        value: parseWithRegex(bodyAsString(), SYSLOG_RFC5424_RE),
         contentType: realType,
       };
     case 'text/apache2error':

@@ -40,11 +40,11 @@ export function ContentTypePicker({
             <option value="application/json">JSON</option>
           </optgroup>
           <optgroup label="Logs">
-            <option value="text/apache2access">Apache2 Access Logs</option>
+            <option value="text/apache2access">
+              Apache2 Access Logs (Common Log Format)
+            </option>
             <option value="text/apache2error">Apache2 Error Logs</option>
             <option value="text/nginxaccess">Nginx Access Logs</option>
-            <option value="text/syslogrfc3164">Syslog RFC-3164</option>
-            <option value="text/syslogrfc5424">Syslog RFC-5424</option>
             <option value="application/jsonlines">
               Newline-delimited JSON
             </option>

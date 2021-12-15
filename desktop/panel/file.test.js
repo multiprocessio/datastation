@@ -67,54 +67,6 @@ const REGEXP_TESTS = [
       },
     ],
   },
-  // {
-  //   filename: 'syslogrfc3164.log',
-  //   contentTypeInfo: new ContentTypeInfo('text/syslogrfc3164'),
-  //   expected: [
-  //     {
-  //       pri: '34',
-  //       time: 'Oct 11 22:14:15',
-  //       host: 'mymachine',
-  //       ident: '',
-  //       pid: '',
-  //       message: 'failed for lonvick on /dev/pts/9',
-  //     },
-  //     {
-  //       pri: '0',
-  //       time: '1990 Oct 22 10:52:01 TZ-6',
-  //       host: 'scapegoat.dmz.example.org 10.1.2.3',
-  //       ident: 'sched',
-  //       pid: '0',
-  //       message: "That's All Folks!",
-  //     },
-  //   ],
-  // },
-  // {
-  //   filename: 'syslogrfc5424.log',
-  //   contentTypeInfo: new ContentTypeInfo('text/syslogrfc5424'),
-  //   expected: [
-  //     {
-  //       pri: '34',
-  //       time: '2003-10-11T22:14:15.003Z',
-  //       host: 'mymachine.example.com',
-  //       ident: 'su',
-  //       pid: '',
-  //       msgid: 'ID47',
-  //       extradata: '',
-  //       message: "BOM'su root' failed for lonvick on /dev/pts/8",
-  //     },
-  //     {
-  //       pri: '165',
-  //       time: '2003-08-24T05:14:15.003Z',
-  //       host: 'mymachine.example.com',
-  //       ident: 'su',
-  //       pid: '',
-  //       msgid: 'ID47',
-  //       extradata: '',
-  //       message: "BOM'su root' failed for lonvick on /dev/pts/8",
-  //     },
-  //   ],
-  // },
   {
     filename: 'commonlogformat.log',
     contentTypeInfo: new ContentTypeInfo('text/apache2access'),
@@ -195,10 +147,9 @@ const REGEXP_TESTS = [
 for (const subprocessName of [
   undefined,
   { node: path.join(CODE_ROOT, 'build', 'desktop_runner.js') },
-  //{ go: path.join(CODE_ROOT, 'build', 'go_desktop_runner_test') },
+  { go: path.join(CODE_ROOT, 'build', 'go_desktop_runner_test') },
 ]) {
   for (const userdataFileType of USERDATA_FILES) {
-    continue; // TODO: REMOVE
     const fp = new FilePanelInfo({
       name: path.join(testPath, 'userdata.' + userdataFileType),
     });
