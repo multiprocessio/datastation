@@ -133,7 +133,7 @@ func remoteFileReader(si ServerInfo, remoteFileName string, callback func(r io.R
 	}
 
 	cmd := fmt.Sprintf(`if command -v gzip > /dev/null 2>&1; then
-  cat %s
+  cat %s | gzip
 else
   cat %s
 fi`, remoteFileName, remoteFileName)
