@@ -44,6 +44,18 @@ func Test_getConnectionString(t *testing.T) {
 			nil,
 		},
 		{
+			DatabaseConnectorInfoDatabase{Type: "snowflake", Username: "jim", Password: Encrypt{Encrypted: false, Value: ""}, Database: "test", Address: "myid"},
+			"snowflake",
+			"jim@myid/test?",
+			nil,
+		},
+		{
+			DatabaseConnectorInfoDatabase{Type: "snowflake", Username: "jim", Password: Encrypt{Encrypted: false, Value: "pw"}, Database: "test", Address: "myid?x=y"},
+			"snowflake",
+			"jim:pw@myid/test?x=y",
+			nil,
+		},
+		{
 			DatabaseConnectorInfoDatabase{Type: "sqlserver", Username: "jim", Password: Encrypt{Encrypted: false, Value: "pw"}, Database: "test", Address: "localhost"},
 			"sqlserver",
 			"sqlserver://jim:pw@localhost?database=test",

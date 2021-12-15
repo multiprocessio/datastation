@@ -18,6 +18,7 @@ import (
 	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
 	_ "github.com/sijms/go-ora/v2"
+	_ "github.com/snowflakedb/gosnowflake"
 )
 
 func debugObject(obj interface{}) {
@@ -95,7 +96,13 @@ func getConnectionString(dbInfo DatabaseConnectorInfoDatabase) (string, string, 
 		if err != nil {
 			return "", "", err
 		}
-		genericUserPass = fmt.Sprintf("%s:%s@", username, pass)
+
+		genericUserPass = username
+		if pass != "" {
+			genericUserPass += ":" + pass
+		}
+
+		genericUserPass += "@"
 	}
 
 	genericString := fmt.Sprintf("%s://%s%s/%s?%s", dbInfo.Type, genericUserPass, address, database, extraArgs)
@@ -126,6 +133,9 @@ func getConnectionString(dbInfo DatabaseConnectorInfoDatabase) (string, string, 
 		return "sqlserver", dsn, nil
 	case OracleDatabase:
 		return "oracle", genericString, nil
+	case SnowflakeDatabase:
+		dsn := fmt.Sprintf("%s%s/%s?%s", genericUserPass, address, database, extraArgs)
+		return "snowflake", dsn, nil
 	case ClickhouseDatabase:
 		query := ""
 		if genericUserPass != "" {
