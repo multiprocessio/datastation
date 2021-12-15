@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"strings"
 
 	"golang.org/x/crypto/ssh"
 )
@@ -103,6 +104,11 @@ func getSSHSession(si ServerInfo) (*ssh.Session, error) {
 		}
 		config.Auth = []ssh.AuthMethod{authmethod}
 	}
+
+	if !strings.Contains(si.Address, ":") {
+		si.Address = si.Address + ":22"
+	}
+
 	conn, err := ssh.Dial("tcp", si.Address, config)
 	if err != nil {
 		return nil, err
