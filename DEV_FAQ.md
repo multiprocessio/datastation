@@ -23,7 +23,7 @@ general.
 
 Should move to something that is not ts-jest eventually.
 
-## Run a single test
+## Run a single JavaScript test file
 
 Pass the test file name to `yarn test`.
 

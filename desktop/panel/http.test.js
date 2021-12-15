@@ -43,17 +43,23 @@ for (const subprocessName of RUNNERS) {
 
         const panels = [hp];
 
-        return withSavedPanels(panels, (project) => {
-          // Grab result
-          const value = JSON.parse(
-            fs
-              .readFileSync(getProjectResultsFile(project.projectName) + hp.id)
-              .toString()
-          );
+        return withSavedPanels(
+          panels,
+          (project) => {
+            // Grab result
+            const value = JSON.parse(
+              fs
+                .readFileSync(
+                  getProjectResultsFile(project.projectName) + hp.id
+                )
+                .toString()
+            );
 
-          expect(value).toEqual('hey this is unknown');
-        });
-      }, { evalPanels: true, subprocessName });
+            expect(value).toEqual('hey this is unknown');
+          },
+          { evalPanels: true, subprocessName }
+        );
+      });
     }
   );
 
