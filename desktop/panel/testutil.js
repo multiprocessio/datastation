@@ -2,7 +2,11 @@ const { spawnSync } = require('child_process');
 const { getProjectResultsFile } = require('../store');
 const fs = require('fs');
 const { file: makeTmpFile } = require('tmp-promise');
-const { ProjectState, ProjectPage, ContentTypeInfo } = require('../../shared/state');
+const {
+  ProjectState,
+  ProjectPage,
+  ContentTypeInfo,
+} = require('../../shared/state');
 const { updateProjectHandler, flushUnwritten } = require('../store');
 const { makeEvalHandler } = require('./eval');
 const { fetchResultsHandler } = require('./columns');
