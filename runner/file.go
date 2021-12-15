@@ -258,7 +258,15 @@ func transformXLSX(in *excelize.File, out string) error {
 	defer w.Close()
 
 	return withJSONOutWriter(w, "{", "}", func() error {
-		for _, sheet := range sheets {
+		for i, sheet := range sheets {
+
+			if i == 0 {
+				_, err = w.WriteString(",")
+				if err != nil {
+					return err
+				}
+			}
+
 			_, err = w.WriteString(`"` + strings.ReplaceAll(sheet, `"`, `\\"`) + `":`)
 			if err != nil {
 				return err
@@ -271,11 +279,6 @@ func transformXLSX(in *excelize.File, out string) error {
 				}
 				return writeXLSXSheet(rows, w)
 			})
-			if err != nil {
-				return err
-			}
-
-			_, err = w.WriteString(",")
 			if err != nil {
 				return err
 			}
@@ -328,10 +331,15 @@ func transformJSONLines(in io.Reader, out string) error {
 	}
 	defer w.Close()
 
+	first := true
 	return withJSONOutWriter(w, "[", "]", func() error {
 		scanner := bufio.NewScanner(in)
 		for scanner.Scan() {
-			w.WriteString(scanner.Text() + ",")
+			if !first {
+				w.WriteString(",\n")
+			}
+			w.WriteString(scanner.Text())
+			first = false
 		}
 		return scanner.Err()
 	})
