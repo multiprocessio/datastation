@@ -10,7 +10,6 @@ import (
 	"path/filepath"
 	"regexp"
 	"runtime"
-	"strconv"
 	"strings"
 
 	"github.com/xitongsys/parquet-go-source/local"
@@ -20,17 +19,6 @@ import (
 )
 
 var preferredParallelism = runtime.NumCPU() * 2
-
-// QuoteToASCII actually quotes a string. We most often don't want that.
-func toAscii(s string) string {
-	return strings.Trim(strconv.QuoteToASCII(s), `"`)
-}
-
-type UnicodeEscape string
-
-func (ue UnicodeEscape) MarshalJSON() ([]byte, error) {
-	return []byte(strconv.QuoteToASCII(string(ue))), nil
-}
 
 type JSONArrayWriter struct {
 	w     io.Writer
@@ -118,9 +106,9 @@ func transformCSV(in io.Reader, out string) error {
 				continue
 			}
 
-			row := map[string]UnicodeEscape{}
+			row := map[string]string{}
 			for i, field := range fields {
-				row[field] = UnicodeEscape(record[i])
+				row[field] = record[i]
 			}
 
 			err = w.Write(row)
@@ -226,9 +214,9 @@ func writeXLSXSheet(rows [][]string, w *JSONArrayWriter) error {
 			continue
 		}
 
-		row := map[string]UnicodeEscape{}
+		row := map[string]string{}
 		for i, cell := range r {
-			row[header[i]] = UnicodeEscape(cell)
+			row[header[i]] = cell
 		}
 
 		err := w.Write(row)
@@ -346,7 +334,7 @@ func transformJSONLines(in io.Reader, out string) error {
 				}
 			}
 
-			_, err := w.WriteString(toAscii(scanner.Text()))
+			_, err := w.WriteString(scanner.Text())
 			if err != nil {
 				return edsef("Could not write string: %s", err)
 			}
@@ -388,7 +376,7 @@ func transformRegexp(in io.Reader, out string, re *regexp.Regexp) error {
 			for i, name := range re.SubexpNames() {
 				if name != "" {
 					if match[i] != "" {
-						row[name] = UnicodeEscape(match[i])
+						row[name] = match[i]
 					} else {
 						row[name] = nil
 					}

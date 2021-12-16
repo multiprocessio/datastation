@@ -311,10 +311,6 @@ func evalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo) e
 								}
 							}
 						}
-
-						if s, ok := row[col].(string); ok {
-							row[col] = UnicodeEscape(s)
-						}
 					}
 
 					err = w.Write(row)
