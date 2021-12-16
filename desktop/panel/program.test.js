@@ -216,7 +216,7 @@ for (const t of TESTS) {
 }
 
 for (const subprocessName of RUNNERS) {
-  for (const language of Object.keys(LANGUAGES).filter(f => f !== 'sql')) {
+  for (const language of Object.keys(LANGUAGES).filter((f) => f !== 'sql')) {
     describe(`runs ${language} program to fetch panel file name via ${
       subprocessName ? subprocessName.node || subprocessName.go : 'same-process'
     }`, function () {
