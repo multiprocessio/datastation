@@ -242,7 +242,7 @@ for (const subprocessName of RUNNERS) {
         if (!finished) {
           throw new Error('Callback did not finish');
         }
-      });
+      }, 15_000);
     });
   }
 }
