@@ -233,7 +233,7 @@ for (const subprocessName of RUNNERS) {
           async (project) => {
             const fileName = getProjectResultsFile(project.projectName) + pp.id;
             const result = JSON.parse(fs.readFileSync(fileName).toString());
-            expect(result).toEqual(fileName);
+            expect(result).toEqual(fileName.replace('\\', '/'));
             finished = true;
           },
           { evalPanels: true }
