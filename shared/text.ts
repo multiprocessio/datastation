@@ -163,7 +163,7 @@ export async function parseArrayBuffer(
       return { value: JSON.parse(bodyAsString()), contentType: realType };
     case 'application/jsonlines': {
       const value = bodyAsString()
-        .split('\n')
+        .split(/\r?\n/)
         .filter(Boolean)
         .map((l) => {
           try {
