@@ -105,7 +105,7 @@ func getSSHClient(si ServerInfo) (*ssh.Client, error) {
 		}
 		config.Auth = []ssh.AuthMethod{ssh.Password(password)}
 	case SSHPrivateKey:
-		if si.PrivateKeyFile == "" {
+		if si.PrivateKeyFile != "" {
 			passphrase, err := si.Passphrase.decrypt()
 			if err != nil {
 				return nil, edsef("Could not decrypt server SSH passphrase: " + err.Error())

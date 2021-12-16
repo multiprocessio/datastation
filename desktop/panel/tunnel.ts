@@ -35,15 +35,15 @@ export function getServer(project: ProjectState, serverId: string): ServerInfo {
   // If private key file is not set, guess the first common name that exists.
   if (server.type === 'private-key' && !server.privateKeyFile) {
     const defaultPaths = [
-      '~/.ssh/id_rsa',
-      '~/.ssh/id_dsa',
       '~/.ssh/id_ed25519',
+      '~/.ssh/id_dsa',
+      '~/.ssh/id_rsa',
     ];
 
     for (const path of defaultPaths) {
       const resolved = resolvePath(path);
       if (fs.existsSync(resolved)) {
-        server.privateKeyFile = path;
+        server.privateKeyFile = resolved;
         break;
       }
     }
@@ -58,6 +58,7 @@ export async function getSSHConfig(
 ): Promise<SSHConfig> {
   const server = getServer(project, serverId);
   decryptFields(server);
+  console.log(server);
 
   const config: SSHConfig = {
     host: server.address,

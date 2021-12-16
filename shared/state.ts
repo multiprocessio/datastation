@@ -79,7 +79,7 @@ export class ServerInfo {
     this.port = panel.port || 22;
     this.username = panel.username || '';
     this.password_encrypt = panel.password_encrypt || new Encrypt('');
-    this.privateKeyFile = panel.privateKeyFile || '~/.ssh/id_rsa';
+    this.privateKeyFile = panel.privateKeyFile || '';
     this.passphrase_encrypt = panel.passphrase_encrypt || new Encrypt('');
     this.id = uuid.v4();
   }
