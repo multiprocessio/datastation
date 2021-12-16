@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/base64"
 	"fmt"
+	"net"
 	"io"
 	"io/ioutil"
 	"log"
@@ -22,6 +23,18 @@ import (
 	_ "github.com/sijms/go-ora/v2"
 	_ "github.com/snowflakedb/gosnowflake"
 )
+
+func getDatabaseHostPort(raw, defaultPort string) (string, string, error) {
+	beforeQuery := strings.Split(raw, "?")[0]
+	_, _, err := net.SplitHostPort(beforeQuery)
+	if strings.HasSuffix(err.Error(), "missing port in address") {
+		beforeQuery += ":" + defaultPort
+	} else if err != nil {
+		return "", "", edsef("Could not split host-port: %s", err)
+	}
+
+	return net.SplitHostPort(beforeQuery)
+}
 
 func debugObject(obj interface{}) {
 	log.Printf("%#v\n", obj)
@@ -62,7 +75,7 @@ func (e *Encrypt) decrypt() (string, error) {
 	return string(decrypted), nil
 }
 
-var defaultPorts = map[string]string{
+var defaultPorts = map[DatabaseConnectorInfoType]string{
 	"postgres":      "5432",
 	"mysql":         "3306",
 	"sqlite":        "0",
@@ -171,6 +184,61 @@ var textTypes = map[string]bool{
 	"DATETIME":  true,
 }
 
+func writeRowFromDatabase(dbInfo DatabaseConnectorInfoDatabase, w *JSONArrayWriter, rows *sqlx.Rows, wroteFirstRow bool) error {
+	row := map[string]interface{}{}
+	err := rows.MapScan(row)
+	if err != nil {
+		return  err
+	}
+
+	colTypes, err := rows.ColumnTypes()
+	if err != nil {
+		return err
+	}
+
+	// The MySQL driver is not friendly about unknown data types.
+	// https://github.com/go-sql-driver/mysql/issues/441
+	for _, s := range colTypes {
+		col := s.Name()
+		bs, isBytes := row[col].([]uint8)
+
+		if isBytes {
+			switch t := strings.ToUpper(s.DatabaseTypeName()); t {
+			// Explicitly skip binary types
+			case "BINARY", "VARBINARY", "BLOB":
+				break
+
+				// Do conversion for ints, floats, and bools
+			case "INT", "BIGINT", "INT1", "INT2", "INT4", "INT8":
+				if dbInfo.Type == "mysql" {
+					row[col], _ = strconv.Atoi(string(row[col].([]uint8)))
+				}
+			case "REAL", "BIGREAL", "NUMERIC", "DECIMAL":
+				if bs, ok := row[col].([]uint8); ok {
+					row[col], _ = strconv.ParseFloat(string(bs), 64)
+				}
+			case "BOOLEAN", "BOOL":
+				row[col] = string(bs) == "true" || string(bs) == "TRUE" || string(bs) == "1"
+
+			default:
+				// Default to treating everything as a string
+				row[col] = string(bs)
+				if !wroteFirstRow && !textTypes[t] {
+					logln("Skipping unknown type: " + s.DatabaseTypeName())
+				}
+			}
+		}
+	}
+
+	err = w.Write(row)
+	if err != nil {
+		return err
+	}
+
+	return nil
+
+}
+
 func evalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo) error {
 	var connector *ConnectorInfo
 	for _, c := range project.Connectors {
@@ -221,13 +289,13 @@ func evalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo) e
 		return err
 	}
 
-	// Copy remote sqlite database to tmp file if remote
-	if dbInfo.Type == "sqlite" && panel.ServerId != "" {
-		server, err := getServer(project, panel.ServerId)
-		if err != nil {
-			return err
-		}
+	server, err := getServer(project, panel.ServerId)
+	if err != nil {
+		return err
+	}
 
+	// Copy remote sqlite database to tmp file if remote
+	if dbInfo.Type == "sqlite" && server != nil {
 		tmp, err := ioutil.TempFile("", "sqlite-copy")
 		if err != nil {
 			return err
@@ -247,90 +315,52 @@ func evalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo) e
 		tmp.Close()
 	}
 
-	out := getPanelResultsFile(project.Id, panel.Id)
-
-	wroteFirstRow := false
-	return withJSONArrayOutWriterFile(out, func(w *JSONArrayWriter) error {
-		_, err := importAndRun(
-			func(createTableStmt string) error {
-				_, err := db.Exec(createTableStmt)
-				return err
-			},
-			func(insertStmt string, values []interface{}) error {
-				_, err := db.Exec(insertStmt, values...)
-				return err
-			},
-			func(query string) ([]map[string]interface{}, error) {
-				rows, err := db.Queryx(query)
-				if err != nil {
-					return nil, err
-				}
-				defer rows.Close()
-
-				for rows.Next() {
-					row := map[string]interface{}{}
-					err := rows.MapScan(row)
-					if err != nil {
-						return nil, err
-					}
-
-					colTypes, err := rows.ColumnTypes()
-					if err != nil {
-						return nil, err
-					}
-
-					// The MySQL driver is not friendly about unknown data types.
-					// https://github.com/go-sql-driver/mysql/issues/441
-					for _, s := range colTypes {
-						col := s.Name()
-						bs, isBytes := row[col].([]uint8)
-
-						if isBytes {
-							switch t := strings.ToUpper(s.DatabaseTypeName()); t {
-							// Explicitly skip binary types
-							case "BINARY", "VARBINARY", "BLOB":
-								break
-
-								// Do conversion for ints, floats, and bools
-							case "INT", "BIGINT", "INT1", "INT2", "INT4", "INT8":
-								if dbInfo.Type == "mysql" {
-									row[col], _ = strconv.Atoi(string(row[col].([]uint8)))
-								}
-							case "REAL", "BIGREAL", "NUMERIC", "DECIMAL":
-								if bs, ok := row[col].([]uint8); ok {
-									row[col], _ = strconv.ParseFloat(string(bs), 64)
-								}
-							case "BOOLEAN", "BOOL":
-								row[col] = string(bs) == "true" || string(bs) == "TRUE" || string(bs) == "1"
-
-							default:
-								// Default to treating everything as a string
-								row[col] = string(bs)
-								if !wroteFirstRow && !textTypes[t] {
-									logln("Skipping unknown type: " + s.DatabaseTypeName())
-								}
-							}
-						}
-					}
-
-					err = w.Write(row)
-					if err != nil {
-						return nil, err
-					}
-
-					wroteFirstRow = true
-				}
-
-				return nil, rows.Err()
-
-			},
-			project.Id,
-			query,
-			panelsToImport,
-			qt,
-			mangleInsert,
-		)
-
+	host, port, err := getDatabaseHostPort(dbInfo.Address, defaultPorts[dbInfo.Type])
+	if err != nil {
 		return err
+	}
+
+	return withRemoteConnection(server, host, port, func(host, port string) error {
+		out := getPanelResultsFile(project.Id, panel.Id)
+
+		wroteFirstRow := false
+		return withJSONArrayOutWriterFile(out, func(w *JSONArrayWriter) error {
+			_, err := importAndRun(
+				func(createTableStmt string) error {
+					_, err := db.Exec(createTableStmt)
+					return err
+				},
+				func(insertStmt string, values []interface{}) error {
+					_, err := db.Exec(insertStmt, values...)
+					return err
+				},
+				func(query string) ([]map[string]interface{}, error) {
+					rows, err := db.Queryx(query)
+					if err != nil {
+						return nil, err
+					}
+					defer rows.Close()
+
+					for rows.Next() {
+						err := writeRowFromDatabase(dbInfo, w, rows, wroteFirstRow)
+						if err != nil {
+							return nil, err
+						}
+
+						wroteFirstRow = true
+					}
+
+					return nil, rows.Err()
+
+				},
+				project.Id,
+				query,
+				panelsToImport,
+				qt,
+				mangleInsert,
+			)
+
+			return err
+		})
 	})
 }

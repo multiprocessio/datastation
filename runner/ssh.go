@@ -2,6 +2,8 @@ package main
 
 import (
 	"bufio"
+	"net"
+	"sync"
 	"compress/gzip"
 	"crypto/x509"
 	"encoding/pem"
@@ -83,7 +85,7 @@ func parsePemBlock(block *pem.Block) (interface{}, error) {
 	return nil, edsef("Unsupported private key type: %s", block.Type)
 }
 
-func getSSHSession(si ServerInfo) (*ssh.Session, error) {
+func getSSHClient(si ServerInfo) (*ssh.Client, error) {
 	config := &ssh.ClientConfig{
 		User: si.Username,
 		// TODO: figure out if we want to validate host keys
@@ -117,11 +119,16 @@ func getSSHSession(si ServerInfo) (*ssh.Session, error) {
 		return nil, edsef("Could not connect to remote server: %s", err)
 	}
 
-	return conn.NewSession()
+	return conn, nil
 }
 
 func remoteFileReader(si ServerInfo, remoteFileName string, callback func(r io.Reader) error) error {
-	session, err := getSSHSession(si)
+	client, err := getSSHClient(si)
+	if err != nil {
+		return err
+	}
+
+	session, err := client.NewSession()
 	if err != nil {
 		return err
 	}
@@ -172,4 +179,59 @@ fi`, remoteFileName, remoteFileName)
 	}
 
 	return nil
+}
+
+func withRemoteConnection(si *ServerInfo, host, port string, cb func (host, port string) error) error {
+	if si == nil {
+		return cb(host, port)
+	}
+
+	// Pick any open port
+	localListener, err := net.Listen("tcp", "localhost:0")
+	if err != nil {
+		return err
+	}
+
+	localConn, err := localListener.Accept()
+	if err != nil {
+		return err
+	}
+
+	client, err := getSSHClient(*si)
+	if err != nil {
+		return err
+	}
+
+	remoteConn, err := client.Dial("tcp", host + ":" + port)
+	if err != nil {
+		return err
+	}
+
+	var wg sync.WaitGroup
+
+	// Write to remote
+	go func() {
+		wg.Add(1)
+		defer wg.Done()
+
+		_, err = io.Copy(remoteConn, localConn)
+	}()
+
+	// Read from remote
+	go func() {
+		wg.Add(1)
+		defer wg.Done()
+		_, err = io.Copy(localConn, remoteConn)
+	}()
+
+	// TODO! How to close goroutines when this fails/finishes
+	localPort := localListener.Addr().(*net.TCPAddr).Port
+	cbErr := cb("localhost", fmt.Sprintf("%d", localPort))
+	if cbErr != nil {
+		return err
+	}
+
+	wg.Wait()
+
+	return err
 }

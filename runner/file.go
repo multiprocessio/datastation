@@ -425,6 +425,10 @@ func getMimeType(fileName string, ct ContentTypeInfo) string {
 }
 
 func getServer(project *ProjectState, serverId string) (*ServerInfo, error) {
+	if serverId == "" {
+		return nil, nil
+	}
+
 	for _, s := range project.Servers {
 		if s.Id == serverId {
 			cp := s
@@ -438,12 +442,12 @@ func getServer(project *ProjectState, serverId string) (*ServerInfo, error) {
 func evalFilePanel(project *ProjectState, pageIndex int, panel *PanelInfo) error {
 	cti := panel.File.ContentTypeInfo
 	fileName := panel.File.Name
-	if panel.ServerId != "" {
-		server, err := getServer(project, panel.ServerId)
-		if err != nil {
-			return err
-		}
+	server, err := getServer(project, panel.ServerId)
+	if err != nil {
+		return err
+	}
 
+	if server != nil {
 		// Resolve ~ to foreign home path.
 		// Will break if the server is not Linux.
 		fileName = strings.ReplaceAll(fileName, "~", "/home/"+server.Username)
