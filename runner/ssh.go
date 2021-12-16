@@ -11,7 +11,6 @@ import (
 	"net"
 	"os"
 	"strings"
-	"sync"
 
 	"golang.org/x/crypto/ssh"
 )
@@ -206,15 +205,11 @@ func withRemoteConnection(si *ServerInfo, host, port string, cb func(host, port 
 	}
 
 	// Pick any open port
-	localListener, err := net.Listen("tcp", "localhost:0")
+	localConn, err := net.Listen("tcp", "localhost:0")
 	if err != nil {
 		return err
 	}
-
-	localConn, err := localListener.Accept()
-	if err != nil {
-		return err
-	}
+	defer localConn.Close()
 
 	client, err := getSSHClient(*si)
 	if err != nil {
@@ -225,32 +220,43 @@ func withRemoteConnection(si *ServerInfo, host, port string, cb func(host, port 
 	if err != nil {
 		return err
 	}
+	defer remoteConn.Close()
 
-	var wg sync.WaitGroup
+	errC := make(chan error)
 
-	// Write to remote
+	// Local server
 	go func() {
-		wg.Add(1)
-		defer wg.Done()
+		localConn, err := localConn.Accept()
+		if err != nil {
+			errC <- err
+			return
+		}
 
-		_, err = io.Copy(remoteConn, localConn)
+		go func() {
+			_, err = io.Copy(remoteConn, localConn)
+			if errC != nil {
+				errC <- err
+			}
+
+		}()
+
+		// Remote server
+		go func() {
+			_, err = io.Copy(localConn, remoteConn)
+			errC <- err
+		}()
 	}()
 
-	// Read from remote
-	go func() {
-		wg.Add(1)
-		defer wg.Done()
-		_, err = io.Copy(localConn, remoteConn)
-	}()
-
-	// TODO! How to close goroutines when this fails/finishes
-	localPort := localListener.Addr().(*net.TCPAddr).Port
+	localPort := localConn.Addr().(*net.TCPAddr).Port
 	cbErr := cb("localhost", fmt.Sprintf("%d", localPort))
 	if cbErr != nil {
 		return err
 	}
 
-	wg.Wait()
+	err = <-errC
+	if err == io.EOF {
+		return nil
+	}
 
 	return err
 }

@@ -45,6 +45,10 @@ func (e *Encrypt) decrypt() (string, error) {
 		return e.Value, nil
 	}
 
+	if len(e.Value) == 0 {
+		return "", nil
+	}
+
 	v := e.Value
 	keyBytes, err := ioutil.ReadFile(path.Join(FS_BASE, ".signingKey"))
 	if err != nil {
