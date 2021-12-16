@@ -66,7 +66,7 @@ for (const subprocessName of RUNNERS) {
           },
           { evalPanels: true, subprocessName }
         );
-      });
+      }, 10_000);
     }
   );
 
