@@ -21,7 +21,7 @@ const NGINX_ACCESS_RE =
 
 export function parseWithRegex(body: string, re: RegExp) {
   return body
-    .split('\n')
+    .split(/\r?\n/)
     .filter(Boolean)
     .map((line) => re.exec(line)?.groups);
 }
