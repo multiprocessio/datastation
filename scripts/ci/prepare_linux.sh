@@ -5,7 +5,7 @@ set -ex
 # Set up Node.js
 curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
 sudo apt-get update -y
-sudo apt-get install -y nodejs cmake jq julia
+sudo apt-get install -y nodejs cmake jq julia openssh-server
 
 # Set up Go
 ./scripts/ci/prepare_go.sh

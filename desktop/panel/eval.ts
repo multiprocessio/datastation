@@ -90,28 +90,13 @@ function canUseGoRunner(panel: PanelInfo, connectors: ConnectorInfo[]) {
     for (const c of connectors) {
       if (c.id === dp.database.connectorId) {
         const dc = c as DatabaseConnectorInfo;
-
-        // Only sqlite supports remote
-        if (c.serverId && dc.database.type !== 'sqlite') {
-          return false;
-        }
-
         return supportedDatabases.includes(dc.database.type);
       }
     }
     return false;
   }
 
-  if (['program', 'file'].includes(panel.type)) {
-    return true;
-  }
-
-  // Remote not supported in http
-  if (panel.serverId) {
-    return false;
-  }
-
-  return ['literal', 'http'].includes(panel.type);
+  return ['program', 'file', 'http', 'literal'].includes(panel.type);
 }
 
 export async function evalInSubprocess(

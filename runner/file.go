@@ -7,6 +7,7 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"os/user"
 	"path/filepath"
 	"regexp"
 	"runtime"
@@ -445,6 +446,12 @@ func evalFilePanel(project *ProjectState, pageIndex int, panel *PanelInfo) error
 	server, err := getServer(project, panel.ServerId)
 	if err != nil {
 		return err
+	}
+
+	if server.Username == "" {
+		if current, _ := user.Current(); current != nil {
+			server.Username = current.Username
+		}
 	}
 
 	if server != nil {

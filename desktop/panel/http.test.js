@@ -5,7 +5,11 @@ const { CODE_ROOT } = require('../constants');
 const path = require('path');
 const fs = require('fs');
 const { getProjectResultsFile } = require('../store');
-const { HTTPPanelInfo, HTTPConnectorInfo } = require('../../shared/state');
+const {
+  HTTPPanelInfo,
+  HTTPConnectorInfo,
+  ServerInfo,
+} = require('../../shared/state');
 const {
   withSavedPanels,
   translateBaselineForType,
@@ -153,6 +157,47 @@ for (const subprocessName of RUNNERS) {
               expect(value).toStrictEqual(t.expected);
             },
             { evalPanels: true, subprocessName }
+          );
+        }, 10_000);
+      }
+    );
+  }
+
+  // REMOVE
+  if (process.platform === 'linux' && false) {
+    describe(
+      'eval file over server via ' +
+        (subprocessName ? subprocessName.go || subprocessName.node : 'memory'),
+      () => {
+        test('correct result', () => {
+          const server = new ServerInfo({
+            address: 'localhost',
+            type: 'ssh-agent',
+          });
+          const hp = new HTTPPanelInfo(
+            '',
+            new HTTPConnectorInfo('', 'http://localhost:9799/testdata/unknown')
+          );
+          hp.serverId = server.id;
+
+          const servers = [server];
+          const panels = [hp];
+
+          return withSavedPanels(
+            panels,
+            (project) => {
+              // Grab result
+              const value = JSON.parse(
+                fs
+                  .readFileSync(
+                    getProjectResultsFile(project.projectName) + hp.id
+                  )
+                  .toString()
+              );
+
+              expect(value).toEqual('hey this is unknown');
+            },
+            { evalPanels: true, subprocessName, servers }
           );
         }, 10_000);
       }

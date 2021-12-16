@@ -9,6 +9,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net"
+	"os"
 	"strings"
 	"sync"
 
@@ -85,6 +86,12 @@ func parsePemBlock(block *pem.Block) (interface{}, error) {
 	return nil, edsef("Unsupported private key type: %s", block.Type)
 }
 
+var defaultKeyFiles = []string{
+	"~/.ssh/id_rsa",
+	"~/.ssh/id_dsa",
+	"~/.ssh/id_ed25519",
+}
+
 func getSSHClient(si ServerInfo) (*ssh.Client, error) {
 	config := &ssh.ClientConfig{
 		User: si.Username,
@@ -108,6 +115,18 @@ func getSSHClient(si ServerInfo) (*ssh.Client, error) {
 			return nil, err
 		}
 		config.Auth = []ssh.AuthMethod{authmethod}
+	default:
+		// Try all default path ssh files
+		for _, f := range defaultKeyFiles {
+			resolved := resolvePath(f)
+			if _, err := os.Stat(resolved); err == nil {
+				authmethod, err := getSSHPrivateKeySigner(resolved, "")
+				if err != nil {
+					return nil, err
+				}
+				config.Auth = []ssh.AuthMethod{authmethod}
+			}
+		}
 	}
 
 	if !strings.Contains(si.Address, ":") {

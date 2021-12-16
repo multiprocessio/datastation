@@ -4,7 +4,11 @@ const { CODE_ROOT } = require('../constants');
 const path = require('path');
 const fs = require('fs');
 const { getProjectResultsFile } = require('../store');
-const { FilePanelInfo, ContentTypeInfo } = require('../../shared/state');
+const {
+  FilePanelInfo,
+  ContentTypeInfo,
+  ServerInfo,
+} = require('../../shared/state');
 const {
   withSavedPanels,
   translateBaselineForType,
@@ -51,7 +55,6 @@ for (const subprocessName of RUNNERS) {
       });
     }
   );
-  continue;
 
   for (const userdataFileType of USERDATA_FILES) {
     const fp = new FilePanelInfo({
@@ -130,6 +133,45 @@ for (const subprocessName of RUNNERS) {
               expect(value).toStrictEqual(t.expected);
             },
             { evalPanels: true, subprocessName }
+          );
+        }, 10_000);
+      }
+    );
+  }
+
+  if (process.platform === 'linux') {
+    describe(
+      'eval file over server via ' +
+        (subprocessName ? subprocessName.go || subprocessName.node : 'memory'),
+      () => {
+        test('correct result', () => {
+          const server = new ServerInfo({
+            address: 'localhost',
+            type: 'ssh-agent',
+          });
+          const fp = new FilePanelInfo({
+            name: path.join(testPath, 'unknown'),
+          });
+          fp.serverId = server.id;
+
+          const servers = [server];
+          const panels = [fp];
+
+          return withSavedPanels(
+            panels,
+            (project) => {
+              // Grab result
+              const value = JSON.parse(
+                fs
+                  .readFileSync(
+                    getProjectResultsFile(project.projectName) + fp.id
+                  )
+                  .toString()
+              );
+
+              expect(value).toEqual('hey this is unknown');
+            },
+            { evalPanels: true, subprocessName, servers }
           );
         }, 10_000);
       }

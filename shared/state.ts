@@ -72,24 +72,15 @@ export class ServerInfo {
   passphrase_encrypt: Encrypt;
   id: string;
 
-  constructor(
-    name?: string,
-    address?: string,
-    port?: number,
-    type?: ServerInfoType,
-    username?: string,
-    password?: Encrypt,
-    privateKeyFile?: string,
-    passphrase?: Encrypt
-  ) {
-    this.type = type || 'private-key';
-    this.name = name || 'Untitled Server';
-    this.address = address || '';
-    this.port = port || 22;
-    this.username = username || '';
-    this.password_encrypt = password || new Encrypt('');
-    this.privateKeyFile = privateKeyFile || '~/.ssh/id_rsa';
-    this.passphrase_encrypt = passphrase || new Encrypt('');
+  constructor(panel: Partial<ServerInfo> = {}) {
+    this.type = panel.type || 'private-key';
+    this.name = panel.name || 'Untitled Server';
+    this.address = panel.address || '';
+    this.port = panel.port || 22;
+    this.username = panel.username || '';
+    this.password_encrypt = panel.password_encrypt || new Encrypt('');
+    this.privateKeyFile = panel.privateKeyFile || '~/.ssh/id_rsa';
+    this.passphrase_encrypt = panel.passphrase_encrypt || new Encrypt('');
     this.id = uuid.v4();
   }
 
