@@ -8,12 +8,12 @@ import (
 
 func Test_getConnectionString(t *testing.T) {
 	tests := []struct {
-		conn            DatabaseConnectorInfoDatabase
+		conn       DatabaseConnectorInfoDatabase
 		expVendor  string
 		expConnStr string
 		expErr     error
-		expHost string
-		expPort string
+		expHost    string
+		expPort    string
 	}{
 		{
 			DatabaseConnectorInfoDatabase{Type: "postgres", Username: "jim", Password: Encrypt{Encrypted: false, Value: "pw"}, Database: "test", Address: "localhost?sslmode=disable"},
