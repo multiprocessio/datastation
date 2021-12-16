@@ -214,3 +214,35 @@ for (const t of TESTS) {
     }
   });
 }
+
+for (const subprocessName of RUNNERS) {
+  for (const language of Object.keys(LANGUAGES).filter(f => f !== 'sql')) {
+    describe(`runs ${language} program to fetch panel file name via ${
+      subprocessName ? subprocessName.node || subprocessName.go : 'same-process'
+    }`, function () {
+      test('it returns its own file name', async () => {
+        const pp = new ProgramPanelInfo({
+          type: language,
+          content: 'DM_setPanel(DM_getPanelFile(0))',
+        });
+
+        let finished = false;
+        const panels = [pp];
+        await withSavedPanels(
+          panels,
+          async (project) => {
+            const fileName = getProjectResultsFile(project.projectName) + pp.id;
+            const result = JSON.parse(fs.readFileSync(fileName).toString());
+            expect(result).toEqual(fileName);
+            finished = true;
+          },
+          { evalPanels: true }
+        );
+
+        if (!finished) {
+          throw new Error('Callback did not finish');
+        }
+      });
+    });
+  }
+}
