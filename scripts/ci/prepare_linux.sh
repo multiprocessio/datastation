@@ -2,26 +2,28 @@
 
 set -ex
 
-# Set up Node.js, jq, julia, openssh
+# Set up Node.js, jq
 curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
 sudo apt-get update -y
-sudo apt-get install -y nodejs cmake jq julia openssh-server
+sudo apt-get install -y nodejs cmake
 
 # Set up Go
 ./scripts/ci/prepare_go.sh
 
-
-# Set up SSH
-ssh-keygen -q -t rsa -N '' -f ~/.ssh/id_rsa <<<y >/dev/null 2>&1
-cp ~/.ssh/id_rsa.pub ~/.ssh/known_hosts
-cp ~/.ssh/id_rsa.pub ~/.ssh/authorized_keys
-
-# Set up coverage tools
-go install github.com/axw/gocov/gocov@v1.0.0
-go install github.com/wadey/gocovmerge@b5bfa59
-sudo ln -s $HOME/go/bin/* /usr/local/bin/
-
 if [[ "$1" == "--integration-tests" ]]; then
+    # Set up Julia, SSH, etc.
+    sudo apt-get install -y jq julia openssh-server
+
+    # Set up coverage tools
+    go install github.com/axw/gocov/gocov@v1.0.0
+    go install github.com/wadey/gocovmerge@b5bfa59
+    sudo ln -s $HOME/go/bin/* /usr/local/bin/
+
+    # Set up SSH keys
+    ssh-keygen -q -t rsa -N '' -f ~/.ssh/id_rsa <<<y >/dev/null 2>&1
+    cp ~/.ssh/id_rsa.pub ~/.ssh/known_hosts
+    cp ~/.ssh/id_rsa.pub ~/.ssh/authorized_keys
+
     # Install xvfb for headless gui
     sudo apt-get install -y xvfb
 
