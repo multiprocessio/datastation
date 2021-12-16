@@ -2,13 +2,19 @@
 
 set -ex
 
-# Set up Node.js
+# Set up Node.js, jq, julia, openssh
 curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
 sudo apt-get update -y
 sudo apt-get install -y nodejs cmake jq julia openssh-server
 
 # Set up Go
 ./scripts/ci/prepare_go.sh
+
+
+# Set up SSH
+ssh-keygen -q -t rsa -N '' -f ~/.ssh/id_rsa <<<y >/dev/null 2>&1
+cp ~/.ssh/id_rsa.pub ~/.ssh/known_hosts
+cp ~/.ssh/id_rsa.pub ~/.ssh/authorized_keys
 
 # Set up coverage tools
 go install github.com/axw/gocov/gocov@v1.0.0
