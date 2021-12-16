@@ -105,27 +105,31 @@ func getSSHClient(si ServerInfo) (*ssh.Client, error) {
 		}
 		config.Auth = []ssh.AuthMethod{ssh.Password(password)}
 	case SSHPrivateKey:
-		passphrase, err := si.Passphrase.decrypt()
-		if err != nil {
-			return nil, edsef("Could not decrypt server SSH passphrase: " + err.Error())
-		}
-		authmethod, err := getSSHPrivateKeySigner(si.PrivateKeyFile, passphrase)
-		if err != nil {
-			return nil, err
-		}
-		config.Auth = []ssh.AuthMethod{authmethod}
-	default:
-		// Try all default path ssh files
-		for _, f := range defaultKeyFiles {
-			resolved := resolvePath(f)
-			if _, err := os.Stat(resolved); err == nil {
-				authmethod, err := getSSHPrivateKeySigner(resolved, "")
-				if err != nil {
-					return nil, err
+		if si.PrivateKeyFile == "" {
+			passphrase, err := si.Passphrase.decrypt()
+			if err != nil {
+				return nil, edsef("Could not decrypt server SSH passphrase: " + err.Error())
+			}
+			authmethod, err := getSSHPrivateKeySigner(si.PrivateKeyFile, passphrase)
+			if err != nil {
+				return nil, err
+			}
+			config.Auth = []ssh.AuthMethod{authmethod}
+		} else {
+			// Try all default path ssh files
+			for _, f := range defaultKeyFiles {
+				resolved := resolvePath(f)
+				if _, err := os.Stat(resolved); err == nil {
+					authmethod, err := getSSHPrivateKeySigner(resolved, "")
+					if err != nil {
+						return nil, err
+					}
+					config.Auth = []ssh.AuthMethod{authmethod}
 				}
-				config.Auth = []ssh.AuthMethod{authmethod}
 			}
 		}
+	default:
+		return nil, edsef("SSH Agent authentication is not supported yet.")
 	}
 
 	if !strings.Contains(si.Address, ":") {

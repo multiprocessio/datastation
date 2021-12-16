@@ -433,6 +433,12 @@ func getServer(project *ProjectState, serverId string) (*ServerInfo, error) {
 	for _, s := range project.Servers {
 		if s.Id == serverId {
 			cp := s
+
+			if cp.Username == "" {
+				if current, _ := user.Current(); current != nil {
+					cp.Username = current.Username
+				}
+			}
 			return &cp, nil
 		}
 	}
@@ -446,12 +452,6 @@ func evalFilePanel(project *ProjectState, pageIndex int, panel *PanelInfo) error
 	server, err := getServer(project, panel.ServerId)
 	if err != nil {
 		return err
-	}
-
-	if server.Username == "" {
-		if current, _ := user.Current(); current != nil {
-			server.Username = current.Username
-		}
 	}
 
 	if server != nil {

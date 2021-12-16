@@ -163,8 +163,7 @@ for (const subprocessName of RUNNERS) {
     );
   }
 
-  // REMOVE
-  if (process.platform === 'linux' && false) {
+  if (process.platform === 'linux') {
     describe(
       'eval file over server via ' +
         (subprocessName ? subprocessName.go || subprocessName.node : 'memory'),
@@ -172,7 +171,7 @@ for (const subprocessName of RUNNERS) {
         test('correct result', () => {
           const server = new ServerInfo({
             address: 'localhost',
-            type: 'ssh-agent',
+            type: 'private-key',
           });
           const hp = new HTTPPanelInfo(
             '',
