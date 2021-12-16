@@ -147,7 +147,6 @@ for (const subprocessName of RUNNERS) {
         test('correct result', () => {
           const server = new ServerInfo({
             address: 'localhost',
-            type: 'ssh-agent',
           });
           const fp = new FilePanelInfo({
             name: path.join(testPath, 'unknown'),

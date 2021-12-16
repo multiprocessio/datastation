@@ -115,7 +115,7 @@ export function Server({
                 updateServer(server);
               }}
             >
-              <option value="ssh-agent">SSH Agent</option>
+              {/*<option value="ssh-agent">SSH Agent</option>*/}
               <option value="private-key">Private Key</option>
               <option value="password">Password</option>
             </Select>
