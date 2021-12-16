@@ -58,7 +58,6 @@ export async function getSSHConfig(
 ): Promise<SSHConfig> {
   const server = getServer(project, serverId);
   decryptFields(server);
-  console.log(server);
 
   const config: SSHConfig = {
     host: server.address,

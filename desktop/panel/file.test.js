@@ -16,6 +16,9 @@ const {
   REGEXP_TESTS,
   RUNNERS,
 } = require('./testutil');
+const { ensureSigningKey } = require('../secret');
+
+ensureSigningKey();
 
 const USERDATA_FILES = ['json', 'xlsx', 'csv', 'parquet', 'jsonl'];
 

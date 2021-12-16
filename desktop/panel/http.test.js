@@ -1,5 +1,6 @@
 require('../../shared/polyfill');
 
+const { ensureSigningKey } = require('../secret');
 const { spawn } = require('child_process');
 const { CODE_ROOT } = require('../constants');
 const path = require('path');
@@ -17,6 +18,8 @@ const {
   REGEXP_TESTS,
   RUNNERS,
 } = require('./testutil');
+
+ensureSigningKey();
 
 const testPath = path.join(CODE_ROOT, 'testdata');
 const baseline = JSON.parse(
