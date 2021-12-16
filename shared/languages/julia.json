@@ -2,5 +2,5 @@
   "id": "julia",
   "name": "Julia",
   "defaultPath": "julia",
-  "preamble": "\ntry\n    import JSON\ncatch e\n    import Pkg\n    Pkg.add(\"JSON\")\n    import JSON\nend\nfunction DM_getPanel(i)\n  panelId = JSON.parse(\"$$JSON_ID_MAP_QUOTE_ESCAPED$$\")[string(i)]\n  JSON.parsefile(string(\"$$RESULTS_FILE$$\", panelId))\nend\nfunction DM_setPanel(v)\n  open(\"$$PANEL_RESULTS_FILE$$\", \"w\") do f\n    JSON.print(f, v)\n  end\nend"
+  "preamble": "\ntry\n    import JSON\ncatch e\n    import Pkg\n    Pkg.add(\"JSON\")\n    import JSON\nend\nfunction DM_getPanel(i)\n  panelId = JSON.parse(\"$$JSON_ID_MAP_QUOTE_ESCAPED$$\")[string(i)]\n  JSON.parsefile(string(\"$$RESULTS_FILE$$\", panelId))\nend\nfunction DM_setPanel(v)\n  open(\"$$PANEL_RESULTS_FILE$$\", \"w\") do f\n    JSON.print(f, v)\n  end\nend\nfunction DM_getPanelFile(i)\n  JSON.parse(\"$$JSON_ID_MAP_QUOTE_ESCAPED$$\")[string(i)]\nend"
 }
