@@ -3,10 +3,10 @@ package main
 import (
 	"encoding/base64"
 	"fmt"
-	"net"
 	"io"
 	"io/ioutil"
 	"log"
+	"net"
 	"os"
 	"path"
 	"strconv"
@@ -27,7 +27,7 @@ import (
 func getDatabaseHostPort(raw, defaultPort string) (string, string, error) {
 	beforeQuery := strings.Split(raw, "?")[0]
 	_, _, err := net.SplitHostPort(beforeQuery)
-	if strings.HasSuffix(err.Error(), "missing port in address") {
+	if err != nil && strings.HasSuffix(err.Error(), "missing port in address") {
 		beforeQuery += ":" + defaultPort
 	} else if err != nil {
 		return "", "", edsef("Could not split host-port: %s", err)
@@ -188,7 +188,7 @@ func writeRowFromDatabase(dbInfo DatabaseConnectorInfoDatabase, w *JSONArrayWrit
 	row := map[string]interface{}{}
 	err := rows.MapScan(row)
 	if err != nil {
-		return  err
+		return err
 	}
 
 	colTypes, err := rows.ColumnTypes()

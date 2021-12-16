@@ -2,15 +2,15 @@ package main
 
 import (
 	"bufio"
-	"net"
-	"sync"
 	"compress/gzip"
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
 	"io"
 	"io/ioutil"
+	"net"
 	"strings"
+	"sync"
 
 	"golang.org/x/crypto/ssh"
 )
@@ -181,7 +181,7 @@ fi`, remoteFileName, remoteFileName)
 	return nil
 }
 
-func withRemoteConnection(si *ServerInfo, host, port string, cb func (host, port string) error) error {
+func withRemoteConnection(si *ServerInfo, host, port string, cb func(host, port string) error) error {
 	if si == nil {
 		return cb(host, port)
 	}
@@ -202,7 +202,7 @@ func withRemoteConnection(si *ServerInfo, host, port string, cb func (host, port
 		return err
 	}
 
-	remoteConn, err := client.Dial("tcp", host + ":" + port)
+	remoteConn, err := client.Dial("tcp", host+":"+port)
 	if err != nil {
 		return err
 	}

@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"io"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"net/url"
-	"net"
 	"os"
 	"regexp"
 	"strings"
@@ -28,10 +28,11 @@ func fullPath(u *url.URL) string {
 }
 
 // Returns: protocol, address, port
+// Not the most beautiful code, but it is well tested.
 func getHTTPHostPort(raw string) (bool, string, string, string, error) {
 	// Handle shorthand like `curl /xyz` meaning `curl http://localhost:80/xyz`
 	if raw[0] == '/' {
-		return true, "localhost", "80", raw, nil
+		return false, "localhost", "80", raw, nil
 	}
 
 	// Handle fully formed urls that include protocol
@@ -39,6 +40,15 @@ func getHTTPHostPort(raw string) (bool, string, string, string, error) {
 		u, err := url.Parse(raw)
 		if err != nil {
 			return false, "", "", "", edsef("Could not parse HTTP address: %s", err)
+		}
+
+		_, _, err = net.SplitHostPort(u.Host)
+		if err != nil && strings.HasSuffix(err.Error(), "missing port in address") {
+			if u.Scheme == "https" {
+				u.Host += ":443"
+			} else {
+				u.Host += ":80"
+			}
 		}
 
 		host, port, err := net.SplitHostPort(u.Host)
@@ -57,12 +67,21 @@ func getHTTPHostPort(raw string) (bool, string, string, string, error) {
 	raw = "http://" + raw
 	u, err := url.Parse(raw)
 	if err != nil {
-		return false,"", "", "", edsef("Could not parse HTTP address: %s", err)
+		return false, "", "", "", edsef("Could not parse HTTP address: %s", err)
+	}
+
+	_, _, err = net.SplitHostPort(u.Host)
+	if err != nil && strings.HasSuffix(err.Error(), "missing port in address") {
+		if u.Scheme == "https" {
+			u.Host += ":443"
+		} else {
+			u.Host += ":80"
+		}
 	}
 
 	host, port, err := net.SplitHostPort(u.Host)
 	if err != nil {
-		return false, "","", "", edsef("Could not split host-port: %s", err)
+		return false, "", "", "", edsef("Could not split host-port: %s", err)
 	}
 
 	// Don't override to http above if the port is 443

@@ -7,12 +7,12 @@ import (
 )
 
 func Test_getHTTPHostPort(t *testing.T) {
-	tests := []struct{
-		url string
-		expTls bool
+	tests := []struct {
+		url     string
+		expTls  bool
 		expHost string
 		expPort string
-		expErr error
+		expErr  error
 	}{
 		{
 			"localhost",
