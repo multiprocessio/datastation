@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"testing"
@@ -31,7 +30,6 @@ func Test_transformJSONLines(t *testing.T) {
 	err = json.Unmarshal(tmp2Bs, &m)
 	assert.Nil(t, err)
 
-	fmt.Println(string(tmp2Bs))
 	assert.Equal(t, []map[string]interface{}{
 		{
 			"a": float64(1),
