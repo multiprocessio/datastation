@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"net"
+	"os"
 	"strings"
 
 	"golang.org/x/crypto/ssh"
@@ -83,7 +85,13 @@ func parsePemBlock(block *pem.Block) (interface{}, error) {
 	return nil, edsef("Unsupported private key type: %s", block.Type)
 }
 
-func getSSHSession(si ServerInfo) (*ssh.Session, error) {
+var defaultKeyFiles = []string{
+	"~/.ssh/id_rsa",
+	"~/.ssh/id_dsa",
+	"~/.ssh/id_ed25519",
+}
+
+func getSSHClient(si ServerInfo) (*ssh.Client, error) {
 	config := &ssh.ClientConfig{
 		User: si.Username,
 		// TODO: figure out if we want to validate host keys
@@ -97,15 +105,31 @@ func getSSHSession(si ServerInfo) (*ssh.Session, error) {
 		}
 		config.Auth = []ssh.AuthMethod{ssh.Password(password)}
 	case SSHPrivateKey:
-		passphrase, err := si.Passphrase.decrypt()
-		if err != nil {
-			return nil, edsef("Could not decrypt server SSH passphrase: " + err.Error())
+		if si.PrivateKeyFile != "" {
+			passphrase, err := si.Passphrase.decrypt()
+			if err != nil {
+				return nil, edsef("Could not decrypt server SSH passphrase: " + err.Error())
+			}
+			authmethod, err := getSSHPrivateKeySigner(si.PrivateKeyFile, passphrase)
+			if err != nil {
+				return nil, err
+			}
+			config.Auth = []ssh.AuthMethod{authmethod}
+		} else {
+			// Try all default path ssh files
+			for _, f := range defaultKeyFiles {
+				resolved := resolvePath(f)
+				if _, err := os.Stat(resolved); err == nil {
+					authmethod, err := getSSHPrivateKeySigner(resolved, "")
+					if err != nil {
+						return nil, err
+					}
+					config.Auth = []ssh.AuthMethod{authmethod}
+				}
+			}
 		}
-		authmethod, err := getSSHPrivateKeySigner(si.PrivateKeyFile, passphrase)
-		if err != nil {
-			return nil, err
-		}
-		config.Auth = []ssh.AuthMethod{authmethod}
+	default:
+		return nil, edsef("SSH Agent authentication is not supported yet.")
 	}
 
 	if !strings.Contains(si.Address, ":") {
@@ -117,11 +141,16 @@ func getSSHSession(si ServerInfo) (*ssh.Session, error) {
 		return nil, edsef("Could not connect to remote server: %s", err)
 	}
 
-	return conn.NewSession()
+	return conn, nil
 }
 
 func remoteFileReader(si ServerInfo, remoteFileName string, callback func(r io.Reader) error) error {
-	session, err := getSSHSession(si)
+	client, err := getSSHClient(si)
+	if err != nil {
+		return err
+	}
+
+	session, err := client.NewSession()
 	if err != nil {
 		return err
 	}
@@ -172,4 +201,66 @@ fi`, remoteFileName, remoteFileName)
 	}
 
 	return nil
+}
+
+func withRemoteConnection(si *ServerInfo, host, port string, cb func(host, port string) error) error {
+	if si == nil {
+		return cb(host, port)
+	}
+
+	// Pick any open port
+	localConn, err := net.Listen("tcp", "localhost:0")
+	if err != nil {
+		return err
+	}
+	defer localConn.Close()
+
+	client, err := getSSHClient(*si)
+	if err != nil {
+		return err
+	}
+
+	remoteConn, err := client.Dial("tcp", host+":"+port)
+	if err != nil {
+		return err
+	}
+	defer remoteConn.Close()
+
+	errC := make(chan error)
+
+	// Local server
+	go func() {
+		localConn, err := localConn.Accept()
+		if err != nil {
+			errC <- err
+			return
+		}
+
+		go func() {
+			_, err = io.Copy(remoteConn, localConn)
+			if errC != nil {
+				errC <- err
+			}
+
+		}()
+
+		// Remote server
+		go func() {
+			_, err = io.Copy(localConn, remoteConn)
+			errC <- err
+		}()
+	}()
+
+	localPort := localConn.Addr().(*net.TCPAddr).Port
+	cbErr := cb("localhost", fmt.Sprintf("%d", localPort))
+	if cbErr != nil {
+		return err
+	}
+
+	err = <-errC
+	if err == io.EOF {
+		return nil
+	}
+
+	return err
 }

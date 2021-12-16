@@ -1,11 +1,16 @@
 require('../../shared/polyfill');
 
+const { ensureSigningKey } = require('../secret');
 const { spawn } = require('child_process');
 const { CODE_ROOT } = require('../constants');
 const path = require('path');
 const fs = require('fs');
 const { getProjectResultsFile } = require('../store');
-const { HTTPPanelInfo, HTTPConnectorInfo } = require('../../shared/state');
+const {
+  HTTPPanelInfo,
+  HTTPConnectorInfo,
+  ServerInfo,
+} = require('../../shared/state');
 const {
   withSavedPanels,
   translateBaselineForType,
@@ -13,6 +18,8 @@ const {
   REGEXP_TESTS,
   RUNNERS,
 } = require('./testutil');
+
+ensureSigningKey();
 
 const testPath = path.join(CODE_ROOT, 'testdata');
 const baseline = JSON.parse(
@@ -59,7 +66,7 @@ for (const subprocessName of RUNNERS) {
           },
           { evalPanels: true, subprocessName }
         );
-      });
+      }, 10_000);
     }
   );
 
@@ -153,6 +160,46 @@ for (const subprocessName of RUNNERS) {
               expect(value).toStrictEqual(t.expected);
             },
             { evalPanels: true, subprocessName }
+          );
+        }, 10_000);
+      }
+    );
+  }
+
+  if (process.platform === 'linux') {
+    describe(
+      'eval file over server via ' +
+        (subprocessName ? subprocessName.go || subprocessName.node : 'memory'),
+      () => {
+        test('correct result', () => {
+          const server = new ServerInfo({
+            address: 'localhost',
+            type: 'private-key',
+          });
+          const hp = new HTTPPanelInfo(
+            '',
+            new HTTPConnectorInfo('', 'http://localhost:9799/testdata/unknown')
+          );
+          hp.serverId = server.id;
+
+          const servers = [server];
+          const panels = [hp];
+
+          return withSavedPanels(
+            panels,
+            (project) => {
+              // Grab result
+              const value = JSON.parse(
+                fs
+                  .readFileSync(
+                    getProjectResultsFile(project.projectName) + hp.id
+                  )
+                  .toString()
+              );
+
+              expect(value).toEqual('hey this is unknown');
+            },
+            { evalPanels: true, subprocessName, servers }
           );
         }, 10_000);
       }

@@ -6,7 +6,7 @@ gocov convert all.out | gocov report | tee report
 perc="$(tail report -n1 | cut -d ' ' -f 3 | cut -d '.' -f 1)"
 
 # Bump up as needed
-MINIMUM_COVERAGE="66"
+MINIMUM_COVERAGE="75"
 
 if (( "$perc" < "$MINIMUM_COVERAGE" )); then
     echo "Code coverage ($perc) below minimum ($MINIMUM_COVERAGE)"

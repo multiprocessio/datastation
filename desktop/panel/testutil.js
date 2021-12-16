@@ -34,7 +34,7 @@ exports.fileIsEmpty = function (fileName) {
 exports.withSavedPanels = async function (
   panels,
   cb,
-  { evalPanels, subprocessName, connectors } = {}
+  { evalPanels, subprocessName, connectors, servers } = {}
 ) {
   const tmp = await makeTmpFile({ prefix: 'saved-panel-project-' });
 
@@ -47,6 +47,7 @@ exports.withSavedPanels = async function (
         panels,
       },
     ],
+    servers: servers || [],
     connectors: connectors || [],
   };
 

@@ -1,9 +1,10 @@
 import fs from 'fs';
+import os from 'os';
 import path from 'path';
 import SSH2Promise from 'ssh2-promise';
 import SSH2Config from 'ssh2-promise/lib/sshConfig';
 import log from '../../shared/log';
-import { ProjectState } from '../../shared/state';
+import { ProjectState, ServerInfo } from '../../shared/state';
 import { HOME } from '../constants';
 import { decryptFields } from '../secret';
 
@@ -20,15 +21,42 @@ export function resolvePath(name: string) {
   return path.resolve(name);
 }
 
-export async function getSSHConfig(
-  project: ProjectState,
-  serverId: string
-): Promise<SSHConfig> {
+export function getServer(project: ProjectState, serverId: string): ServerInfo {
   const servers = (project.servers || []).filter((s) => s.id === serverId);
   if (!servers.length) {
     throw new Error('No such server.');
   }
+
   const server = servers[0];
+  if (!server.username) {
+    server.username = os.userInfo().username;
+  }
+
+  // If private key file is not set, guess the first common name that exists.
+  if (server.type === 'private-key' && !server.privateKeyFile) {
+    const defaultPaths = [
+      '~/.ssh/id_ed25519',
+      '~/.ssh/id_dsa',
+      '~/.ssh/id_rsa',
+    ];
+
+    for (const path of defaultPaths) {
+      const resolved = resolvePath(path);
+      if (fs.existsSync(resolved)) {
+        server.privateKeyFile = resolved;
+        break;
+      }
+    }
+  }
+
+  return server;
+}
+
+export async function getSSHConfig(
+  project: ProjectState,
+  serverId: string
+): Promise<SSHConfig> {
+  const server = getServer(project, serverId);
   decryptFields(server);
 
   const config: SSHConfig = {
