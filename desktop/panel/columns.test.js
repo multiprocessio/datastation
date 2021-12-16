@@ -11,8 +11,9 @@ const {
 } = require('../../shared/state');
 const { makeEvalHandler } = require('./eval');
 const { fetchResultsHandler } = require('./columns');
+const { RUNNERS } = require('./testutil');
 
-for (const runner of [undefined, { go: 'build/go_desktop_runner_test' }]) {
+for (const runner of RUNNERS) {
   test(`store and retrieve literal ${
     runner ? 'using ' + runner : ''
   }, specific columns`, async () => {

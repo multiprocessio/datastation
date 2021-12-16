@@ -1,15 +1,15 @@
 package main
 
 type PanelResult struct {
-	Exception   interface{}    `json:"exception"`
-	Value       *[]interface{} `json:"value"`
-	Preview     string         `json:"preview"`
-	Stdout      string         `json:"stdout"`
-	Shape       Shape          `json:"shape"`
-	ArrayCount  *float64       `json:"float64"`
-	Size        *float64       `json:"size"`
-	ContentType string         `json:"contentType"`
-	Elapsed     *float64       `json:"elapsed"`
+	Exception   interface{} `json:"exception" db:"exception"`
+	Value       interface{} `json:"value" db:"value"`
+	Preview     string      `json:"preview" db:"preview"`
+	Stdout      string      `json:"stdout" db:"stdout"`
+	Shape       Shape       `json:"shape" db:"shape"`
+	ArrayCount  *float64    `json:"arrayCount" db:"arrayCount"`
+	Size        *float64    `json:"size" db:"size"`
+	ContentType string      `json:"contentType" db:"contentType"`
+	Elapsed     *float64    `json:"elapsed" db:"elapsed"`
 }
 
 var defaultPanelResult = PanelResult{
@@ -24,8 +24,8 @@ var defaultPanelResult = PanelResult{
 }
 
 type Encrypt struct {
-	Value     string `json:"value"`
-	Encrypted bool   `json:"encrypted"`
+	Value     string `json:"value" db:"value"`
+	Encrypted bool   `json:"encrypted" db:"encrypted"`
 }
 
 type ServerInfoType string
@@ -37,15 +37,15 @@ const (
 )
 
 type ServerInfo struct {
-	Name           string         `json:"name"`
-	Address        string         `json:"address"`
-	Port           float64        `json:"port"`
-	Type           ServerInfoType `json:"type"`
-	Username       string         `json:"username"`
-	Password       Encrypt        `json:"password_encrypt"`
-	PrivateKeyFile string         `json:"privateKeyFile"`
-	Passphrase     Encrypt        `json:"passphrase_encrypt"`
-	Id             string         `json:"id"`
+	Name           string         `json:"name" db:"name"`
+	Address        string         `json:"address" db:"address"`
+	Port           float64        `json:"port" db:"port"`
+	Type           ServerInfoType `json:"type" db:"type"`
+	Username       string         `json:"username" db:"username"`
+	Password       Encrypt        `json:"password_encrypt" db:"password_encrypt"`
+	PrivateKeyFile string         `json:"privateKeyFile" db:"privateKeyFile"`
+	Passphrase     Encrypt        `json:"passphrase_encrypt" db:"passphrase_encrypt"`
+	Id             string         `json:"id" db:"id"`
 }
 
 var defaultServerInfo = ServerInfo{
@@ -60,8 +60,8 @@ var defaultServerInfo = ServerInfo{
 }
 
 type ContentTypeInfo struct {
-	Type             string `json:"type"`
-	CustomLineRegexp string `json:"customLineRegexp"`
+	Type             string `json:"type" db:"type"`
+	CustomLineRegexp string `json:"customLineRegexp" db:"customLineRegexp"`
 }
 
 var defaultContentTypeInfo = ContentTypeInfo{}
@@ -78,12 +78,12 @@ const (
 )
 
 type PanelInfo struct {
-	Content    string        `json:"content"`
-	Type       PanelInfoType `json:"type"`
-	Name       string        `json:"name"`
-	Id         string        `json:"id"`
-	ServerId   string        `json:"serverId"`
-	ResultMeta PanelResult   `json:"resultMeta"`
+	Content    string        `json:"content" db:"content"`
+	Type       PanelInfoType `json:"type" db:"type"`
+	Name       string        `json:"name" db:"name"`
+	Id         string        `json:"id" db:"id"`
+	ServerId   string        `json:"serverId" db:"serverId"`
+	ResultMeta PanelResult   `json:"resultMeta" db:"resultMeta"`
 	*ProgramPanelInfo
 	*FilePanelInfo
 	*LiteralPanelInfo
@@ -104,36 +104,36 @@ const (
 
 type ProgramPanelInfo struct {
 	Program struct {
-		Type SupportedLanguages `json:"type"`
-	} `json:"program"`
+		Type SupportedLanguages `json:"type" db:"type"`
+	} `json:"program" db:"program"`
 }
 
 type FilePanelInfo struct {
 	File struct {
-		ContentTypeInfo ContentTypeInfo `json:"contentTypeInfo"`
-		Name            string          `json:"name"`
-	} `json:"file"`
+		ContentTypeInfo ContentTypeInfo `json:"contentTypeInfo" db:"contentTypeInfo"`
+		Name            string          `json:"name" db:"name"`
+	} `json:"file" db:"file"`
 }
 
 type LiteralPanelInfo struct {
 	Literal struct {
-		ContentTypeInfo ContentTypeInfo `json:"contentTypeInfo"`
-	} `json:"literal"`
+		ContentTypeInfo ContentTypeInfo `json:"contentTypeInfo" db:"contentTypeInfo"`
+	} `json:"literal" db:"literal"`
 }
 
 type HttpPanelInfo struct {
-	Http HttpConnectorInfo `json:"http"`
+	Http HttpConnectorInfo `json:"http" db:"http"`
 }
 
 type DatabasePanelInfoDatabase struct {
-	ConnectorId string      `json:"connectorId"`
-	Range       interface{} `json:"range"` // TODO: support these
-	Table       string      `json:"table"`
-	Step        float64     `json:"step"`
+	ConnectorId string      `json:"connectorId" db:"connectorId"`
+	Range       interface{} `json:"range" db:"range"` // TODO: support these
+	Table       string      `json:"table" db:"table"`
+	Step        float64     `json:"step" db:"step"`
 }
 
 type DatabasePanelInfo struct {
-	Database DatabasePanelInfoDatabase `json:"database"`
+	Database DatabasePanelInfoDatabase `json:"database" db:"database"`
 }
 
 type ConnectorInfoType string
@@ -144,10 +144,10 @@ const (
 )
 
 type ConnectorInfo struct {
-	Name     string            `json:"name"`
-	Type     ConnectorInfoType `json:"type"`
-	Id       string            `json:"id"`
-	ServerId string            `json:"serverId"`
+	Name     string            `json:"name" db:"name"`
+	Type     ConnectorInfoType `json:"type" db:"type"`
+	Id       string            `json:"id" db:"id"`
+	ServerId string            `json:"serverId" db:"serverId"`
 	*DatabaseConnectorInfo
 }
 
@@ -170,43 +170,44 @@ const (
 )
 
 type DatabaseConnectorInfoDatabase struct {
-	Type     DatabaseConnectorInfoType `json:"type"`
-	Database string                    `json:"database"`
-	Username string                    `json:"username"`
-	Password Encrypt                   `json:"password_encrypt"`
-	Address  string                    `json:"address"`
-	ApiKey   Encrypt                   `json:"apiKey_encrypt"`
-	Extra    map[string]string         `json:"extra"`
+	Type     DatabaseConnectorInfoType `json:"type" db:"type"`
+	Database string                    `json:"database" db:"database"`
+	Username string                    `json:"username" db:"username"`
+	Password Encrypt                   `json:"password_encrypt" db:"password_encrypt"`
+	Address  string                    `json:"address" db:"address"`
+	ApiKey   Encrypt                   `json:"apiKey_encrypt" db:"apiKey_encrypt"`
+	Extra    map[string]string         `json:"extra" db:"extra"`
 }
 
 type DatabaseConnectorInfo struct {
-	Database DatabaseConnectorInfoDatabase `json:"database"`
+	Database DatabaseConnectorInfoDatabase `json:"database" db:"database"`
 }
 
 type HttpConnectorInfoHttp struct {
-	Method          string          `json:"method"`
-	Url             string          `json:"url"`
-	ContentTypeInfo ContentTypeInfo `json:"contentTypeInfo"`
-	Headers         [][]string      `json:"headers"`
+	Method          string          `json:"method" db:"method"`
+	Url             string          `json:"url" db:"url"`
+	ContentTypeInfo ContentTypeInfo `json:"contentTypeInfo" db:"contentTypeInfo"`
+	Headers         [][]string      `json:"headers" db:"headers"`
 }
 
 type HttpConnectorInfo struct {
-	Http HttpConnectorInfoHttp `json:"http"`
+	Http HttpConnectorInfoHttp `json:"http" db:"http"`
 }
 
 type ProjectPage struct {
-	Panels    []PanelInfo   `json:"panels"`
-	Schedules []interface{} `json:"schedules"`
-	Name      string        `json:"name"`
-	Id        string        `json:"id"`
+	Panels    []PanelInfo   `json:"panels" db:"panels"`
+	Schedules []interface{} `json:"schedules" db:"schedules"`
+	Name      string        `json:"name" db:"name"`
+	Id        string        `json:"id" db:"id"`
 }
 
 type ProjectState struct {
-	Pages      []ProjectPage   `json:"pages"`
-	Connectors []ConnectorInfo `json:"connectors"`
-	Id         string          `json:"projectName"`
+	Pages      []ProjectPage   `json:"pages" db:"pages"`
+	Connectors []ConnectorInfo `json:"connectors" db:"connectors"`
+	Servers    []ServerInfo    `json:"servers" db:"servers"`
+	Id         string          `json:"projectName" db:"projectName"`
 	// Basically never use uuid
-	Uuid            string `json:"id"`
-	OriginalVersion string `json:"originalVersion"`
-	LastVersion     string `json:"lastVersion"`
+	Uuid            string `json:"id" db:"id"`
+	OriginalVersion string `json:"originalVersion" db:"originalVersion"`
+	LastVersion     string `json:"lastVersion" db:"lastVersion"`
 }

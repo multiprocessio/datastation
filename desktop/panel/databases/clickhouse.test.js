@@ -7,13 +7,9 @@ const {
   DatabasePanelInfo,
   DatabaseConnectorInfo,
 } = require('../../../shared/state');
-const { withSavedPanels } = require('../testutil');
+const { withSavedPanels, RUNNERS } = require('../testutil');
 
-for (const subprocess of [
-  undefined,
-  { node: path.join(CODE_ROOT, 'build', 'desktop_runner.js') },
-  { go: path.join(CODE_ROOT, 'build', 'go_desktop_runner_test') },
-]) {
+for (const subprocess of RUNNERS) {
   test(
     'runs clickhouse query via ' +
       (subprocess ? subprocess.node || subprocess.go : 'memory'),

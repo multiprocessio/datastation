@@ -5,7 +5,6 @@ import log from './log';
 
 process.on('unhandledRejection', (e) => {
   log.error(e);
-  process.exit(1);
 });
 process.on('uncaughtException', (e) => {
   log.error(e);

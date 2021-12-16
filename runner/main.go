@@ -152,18 +152,20 @@ func main() {
 
 	err = ec.eval(panelId, projectId)
 	if err != nil {
-		dse := edse(err)
-		if d, ok := err.(*DSError); ok {
-			dse = d
+		logln("Failed to eval: %s", err)
+
+		if _, ok := err.(*DSError); !ok {
+			err = edse(err)
+			err.(*DSError).Stack = "Unknown"
 		}
-		err := writeJSONFile(panelMetaOut, map[string]DSError{
-			"exception": *dse,
+
+		err := writeJSONFile(panelMetaOut, map[string]interface{}{
+			"exception": err,
 		})
 		if err != nil {
 			fatalln("Could not write panel meta out: %s", err)
 		}
 
-		logln("Failed to eval: %s", dse)
 		// Explicitly don't fail here so that the parent can read the exception from disk
 	}
 }

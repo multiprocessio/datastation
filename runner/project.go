@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"os"
 	"path"
@@ -23,14 +22,14 @@ func readJSONFileInto(file string, into interface{}) error {
 	decoder := json.NewDecoder(f)
 	err = decoder.Decode(into)
 	if err == io.EOF {
-		return fmt.Errorf("File is empty")
+		return edsef("File is empty")
 	}
 
 	return err
 }
 
 func writeJSONFile(file string, value interface{}) error {
-	f, err := os.OpenFile(file, os.O_WRONLY|os.O_CREATE, os.ModePerm)
+	f, err := openTruncate(file)
 	if err != nil {
 		return err
 	}
@@ -53,7 +52,15 @@ func getProjectFile(projectId string) string {
 	return path.Join(FS_BASE, projectId)
 }
 
+func makeErrNoSuchPanel(panelId string) error {
+	return edsef("Panel not found: " + panelId)
+}
+
 func getProjectPanel(projectId, panelId string) (*ProjectState, int, *PanelInfo, error) {
+	if strings.Contains(os.Args[0], "go_server_runner") {
+		return getProjectPanelFromDatabase(projectId, panelId)
+	}
+
 	file := getProjectFile(projectId)
 
 	var project ProjectState
@@ -71,7 +78,7 @@ func getProjectPanel(projectId, panelId string) (*ProjectState, int, *PanelInfo,
 		}
 	}
 
-	return nil, 0, nil, fmt.Errorf("Panel not found")
+	return nil, 0, nil, makeErrNoSuchPanel(panelId)
 }
 
 func getProjectResultsFile(projectId string) string {

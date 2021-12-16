@@ -1,25 +1,10 @@
 package main
 
-import (
-	"bytes"
-	"fmt"
-)
+import "bytes"
 
 func evalLiteralPanel(project *ProjectState, pageIndex int, panel *PanelInfo) error {
-	t := panel.Literal.ContentTypeInfo.Type
-	if t == "" {
-		return fmt.Errorf("Unknown type")
-	}
-
+	cti := panel.Literal.ContentTypeInfo
 	out := getPanelResultsFile(project.Id, panel.Id)
-	buf := bytes.NewBuffer([]byte(panel.Content))
-
-	switch t {
-	case "application/json":
-		return transformJSON(buf, out)
-	case "text/csv":
-		return transformCSV(buf, out)
-	}
-
-	return fmt.Errorf("Unsupported type " + t)
+	buf := bytes.NewReader([]byte(panel.Content))
+	return transformReader(buf, "", cti, out)
 }

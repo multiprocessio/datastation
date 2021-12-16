@@ -113,9 +113,12 @@ func transformDM_getPanelCalls(
 			case "number":
 				nameOrIndex = matchForSubexps[i]
 			case "singlequote", "doublequote":
-				// Remove quotes
 				nameOrIndex = matchForSubexps[i]
-				nameOrIndex = nameOrIndex[1 : len(nameOrIndex)-1]
+
+				// Remove quotes
+				if nameOrIndex != "" {
+					nameOrIndex = nameOrIndex[1 : len(nameOrIndex)-1]
+				}
 			}
 
 			if nameOrIndex != "" {

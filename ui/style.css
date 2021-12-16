@@ -74,6 +74,10 @@ header iframe {
   margin-left: 15px;
 }
 
+.header-project-name {
+  padding-right: 15px;
+}
+
 .editor {
   background: #fbfbfb;
   width: 100%;
@@ -197,6 +201,7 @@ input + input[type='file'] {
 }
 
 .input-invalid {
+  padding-left: 5px;
   color: red;
   font-size: 0.75rem;
 }
@@ -352,7 +357,7 @@ input + input[type='file'] {
   background: #fbfbfb;
   padding: 15px;
   max-height: 100%;
-  overflow-y: hidden;
+  overflow-y: auto;
 }
 
 .sidebar--collapsed {
@@ -812,6 +817,11 @@ canvas {
   border-top: 1px solid #ccc;
   padding-top: 15px;
   margin-top: 15px;
+
+  .project-selector,
+  .project-timestamp {
+    margin-right: 15px;
+  }
 }
 
 th {
@@ -939,7 +949,7 @@ body.dark {
 
   .button.material-icons.button--primary,
   .button.material-icons-outlined.button--primary {
-    color: #bc4fff;
+    color: #4fffa6;
   }
 
   .page-name {
@@ -1052,5 +1062,10 @@ body.dark {
 
   .project-existing {
     border-color: black;
+  }
+
+  .input-invalid,
+  .text-failure {
+    color: #e35172;
   }
 }

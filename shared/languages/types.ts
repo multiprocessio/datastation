@@ -1,3 +1,4 @@
+import { Shape } from 'shape';
 import { PanelResult } from '../state';
 
 export const EOL = /\r?\n/;
@@ -19,6 +20,10 @@ export interface LanguageInfo {
   ) => Promise<{ stdout: string; preview: string; value: any }>;
   nodeEval?: (
     prog: string,
-    results: { idMap: Record<string | number, string>; resultsFile: string }
+    results: {
+      idMap: Record<string | number, string>;
+      idShapeMap: Record<string | number, Shape>;
+      resultsFile: string;
+    }
   ) => { stdout: string; preview: string; value: any };
 }

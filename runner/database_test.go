@@ -1,8 +1,9 @@
 package main
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_getConnectionString(t *testing.T) {
@@ -40,6 +41,18 @@ func Test_getConnectionString(t *testing.T) {
 			DatabaseConnectorInfoDatabase{Type: "oracle", Username: "jim", Password: Encrypt{Encrypted: false, Value: "pw"}, Database: "test", Address: "localhost"},
 			"oracle",
 			"oracle://jim:pw@localhost/test?",
+			nil,
+		},
+		{
+			DatabaseConnectorInfoDatabase{Type: "snowflake", Username: "jim", Password: Encrypt{Encrypted: false, Value: ""}, Database: "test", Address: "myid"},
+			"snowflake",
+			"jim@myid/test?",
+			nil,
+		},
+		{
+			DatabaseConnectorInfoDatabase{Type: "snowflake", Username: "jim", Password: Encrypt{Encrypted: false, Value: "pw"}, Database: "test", Address: "myid?x=y"},
+			"snowflake",
+			"jim:pw@myid/test?x=y",
 			nil,
 		},
 		{

@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"runtime/debug"
 )
 
@@ -15,12 +16,12 @@ type DSError struct {
 
 func (dse *DSError) Error() string {
 	s, _ := json.MarshalIndent(dse, "", "  ")
-	return "DSError" + string(s) + "\n" + dse.Stack
+	return "DSError " + string(s) + "\n" + dse.Stack
 }
 
 func makeErrNotAnArrayOfObjects(id string) *DSError {
 	return &DSError{
-		Name:          "NotAnArrayOfObjects",
+		Name:          "NotAnArrayOfObjectsError",
 		TargetPanelId: id,
 		Stack:         string(debug.Stack()),
 	}
@@ -28,7 +29,7 @@ func makeErrNotAnArrayOfObjects(id string) *DSError {
 
 func makeErrUnsupported(msg string) *DSError {
 	return &DSError{
-		Name:    "Unsupported",
+		Name:    "UnsupportedError",
 		Message: msg,
 		Stack:   string(debug.Stack()),
 	}
@@ -47,6 +48,10 @@ func makeErrException(e error) *DSError {
 		return nil
 	}
 
+	if dse, ok := e.(*DSError); ok {
+		return dse
+	}
+
 	return &DSError{
 		Name:    "Error",
 		Message: e.Error(),
@@ -55,3 +60,7 @@ func makeErrException(e error) *DSError {
 }
 
 var edse = makeErrException
+
+func edsef(msg string, args ...interface{}) *DSError {
+	return edse(fmt.Errorf(msg, args...))
+}

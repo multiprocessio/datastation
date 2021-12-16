@@ -1,9 +1,9 @@
 import fs from 'fs';
-import JSON5 from 'json5';
+import yaml from 'js-yaml';
 import { mergeDeep, validate } from '../shared/object';
 import log from './log';
 
-const CONFIG_PATH = '/etc/datastation/config.json';
+const CONFIG_PATH = '/etc/datastation/config.yaml';
 
 export class Config {
   auth: {
@@ -53,8 +53,8 @@ export class Config {
 
 export function readConfig(): Config {
   const raw = fs.readFileSync(CONFIG_PATH);
-  const rawJson = JSON5.parse(raw.toString());
-  const cfg = mergeDeep(new Config(), rawJson);
+  const rawYaml = yaml.load(raw.toString());
+  const cfg = mergeDeep(new Config(), rawYaml);
 
   const requiredFields = [
     'auth.sessionSecret',
@@ -66,7 +66,7 @@ export function readConfig(): Config {
     'database.database',
   ];
   validate(cfg, requiredFields, (badKey) => {
-    log.fatal(`'${badKey}' is a required field in config.json`);
+    log.fatal(`'${badKey}' is a required field in config.yaml`);
   });
 
   return cfg;

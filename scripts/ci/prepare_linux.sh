@@ -5,18 +5,15 @@ set -ex
 # Set up Node.js
 curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
 sudo apt-get update -y
-sudo apt-get install -y nodejs cmake jq
+sudo apt-get install -y nodejs cmake jq julia
 
 # Set up Go
-sudo curl -LO https://go.dev/dl/go1.17.4.linux-amd64.tar.gz
-sudo rm -rf /usr/local/go
-sudo tar -C /usr/local -xzf go1.17.4.linux-amd64.tar.gz
-sudo ln -s /usr/local/go/bin/go /usr/local/bin/go
-sudo ln -s /usr/local/go/bin/gofmt /usr/local/bin/gofmt
+./scripts/ci/prepare_go.sh
 
 # Set up coverage tools
 go install github.com/axw/gocov/gocov@v1.0.0
 go install github.com/wadey/gocovmerge@b5bfa59
+sudo ln -s $HOME/go/bin/* /usr/local/bin/
 
 if [[ "$1" == "--integration-tests" ]]; then
     # Install xvfb for headless gui

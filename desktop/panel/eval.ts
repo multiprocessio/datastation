@@ -18,15 +18,11 @@ import {
   ConnectorInfo,
   DatabaseConnectorInfo,
   DatabasePanelInfo,
-  FilePanelInfo,
-  HTTPPanelInfo,
-  LiteralPanelInfo,
   PanelInfo,
   PanelInfoType,
   PanelResult,
   ProjectState,
 } from '../../shared/state';
-import { getMimeType, XLSX_MIME_TYPE } from '../../shared/text';
 import {
   CODE_ROOT,
   DSPROJ_FLAG,
@@ -37,7 +33,6 @@ import { ensureFile } from '../fs';
 import { parsePartialJSONFile } from '../partial';
 import { Dispatch, RPCHandler } from '../rpc';
 import { flushUnwritten, getProjectResultsFile } from '../store';
-import { additionalParsers } from './parquet';
 import { getProjectAndPanel } from './shared';
 import { EvalHandlerExtra, EvalHandlerResponse } from './types';
 
@@ -81,10 +76,6 @@ function killAllByPanelId(panelId: string) {
 }
 
 function canUseGoRunner(panel: PanelInfo, connectors: ConnectorInfo[]) {
-  if (panel.serverId) {
-    return false;
-  }
-
   const supportedDatabases = [
     'postgres',
     'sqlite',
@@ -92,13 +83,16 @@ function canUseGoRunner(panel: PanelInfo, connectors: ConnectorInfo[]) {
     'oracle',
     'sqlserver',
     'clickhouse',
+    'snowflake',
   ];
   if (panel.type === 'database') {
     const dp = panel as DatabasePanelInfo;
     for (const c of connectors) {
       if (c.id === dp.database.connectorId) {
         const dc = c as DatabaseConnectorInfo;
-        if (c.serverId) {
+
+        // Only sqlite supports remote
+        if (c.serverId && dc.database.type !== 'sqlite') {
           return false;
         }
 
@@ -108,53 +102,16 @@ function canUseGoRunner(panel: PanelInfo, connectors: ConnectorInfo[]) {
     return false;
   }
 
-  if (panel.type === 'program') {
+  if (['program', 'file'].includes(panel.type)) {
     return true;
   }
 
-  const fileLike = ['literal', 'http', 'file'].includes(panel.type);
-  if (!fileLike) {
+  // Remote not supported in http
+  if (panel.serverId) {
     return false;
   }
 
-  const supportedTypes = [
-    'text/csv',
-    'application/json',
-    'parquet',
-    XLSX_MIME_TYPE,
-    'application/vnd.ms-excel',
-  ];
-  let mimetype = '';
-  if (panel.type === 'literal') {
-    const lp = panel as LiteralPanelInfo;
-    mimetype = getMimeType(
-      {
-        ...lp.literal.contentTypeInfo,
-        additionalParsers,
-      },
-      ''
-    );
-  } else if (panel.type === 'http') {
-    const hp = panel as HTTPPanelInfo;
-    mimetype = getMimeType(
-      {
-        ...hp.http.http.contentTypeInfo,
-        additionalParsers,
-      },
-      hp.http.http.url
-    );
-  } else {
-    const fp = panel as FilePanelInfo;
-    mimetype = getMimeType(
-      {
-        ...fp.file.contentTypeInfo,
-        additionalParsers,
-      },
-      fp.file.name
-    );
-  }
-
-  return supportedTypes.includes(mimetype);
+  return ['literal', 'http'].includes(panel.type);
 }
 
 export async function evalInSubprocess(
@@ -257,12 +214,19 @@ export async function evalInSubprocess(
     if (!parsePartial) {
       const rm = JSON.parse(resultMeta);
       if (rm.exception) {
-        const e =
-          EVAL_ERRORS.find((e) => e.name === rm.exception.name) || Error;
-        if ((e as any).fromJSON) {
+        const e = EVAL_ERRORS.find((e) => e.name === rm.exception.name);
+
+        // Just a generic exception, we already caught all info in `stderr`, so just throw that.
+        if (!e) {
+          throw new Error(stderr);
+        }
+
+        // These are specific exceptions that will be handled specially in the UI such as InvalidDependentPanelError
+        if (e && (e as any).fromJSON) {
           throw (e as any).fromJSON(rm.exception);
         }
 
+        // Unclear what case this is, probably a developer mistake.
         throw new e(rm.exception);
       }
 

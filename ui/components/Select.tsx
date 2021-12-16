@@ -98,14 +98,11 @@ export function Select({
       </div>
     </div>
   );
-  if (label) {
-    return (
-      <label className={selectClass}>
-        <span className="select-label">{label}</span>
-        {select}
-      </label>
-    );
-  }
 
-  return select;
+  return (
+    <label className={selectClass}>
+      {label && <span className="select-label">{label}</span>}
+      {select}
+    </label>
+  );
 }

@@ -38,6 +38,14 @@ async function write() {
   fs.writeFileSync(jsonname, JSON.stringify(data));
   console.log(`Wrote ${jsonname}`);
 
+  // Write as JSON lines
+  const jsonlinesnames = directory + 'userdata.jsonl';
+  fs.writeFileSync(
+    jsonlinesnames,
+    data.map((row) => JSON.stringify(row).replace(/\n/g, '')).join('\n')
+  );
+  console.log(`Wrote ${jsonlinesnames}`);
+
   // Write as Excel file
   const ws = XLSX.utils.json_to_sheet(data);
   const wb = XLSX.utils.book_new();

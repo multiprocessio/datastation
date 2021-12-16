@@ -3,8 +3,10 @@ package main
 import (
 	"encoding/base64"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
+	"os"
 	"path"
 	"strconv"
 	"strings"
@@ -18,6 +20,7 @@ import (
 	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
 	_ "github.com/sijms/go-ora/v2"
+	_ "github.com/snowflakedb/gosnowflake"
 )
 
 func debugObject(obj interface{}) {
@@ -53,7 +56,7 @@ func (e *Encrypt) decrypt() (string, error) {
 
 	decrypted, ok := secretbox.Open(nil, message, &nonce, &key)
 	if !ok {
-		return "", fmt.Errorf("NACL open failed")
+		return "", edsef("NACL open failed")
 	}
 
 	return string(decrypted), nil
@@ -95,7 +98,13 @@ func getConnectionString(dbInfo DatabaseConnectorInfoDatabase) (string, string, 
 		if err != nil {
 			return "", "", err
 		}
-		genericUserPass = fmt.Sprintf("%s:%s@", username, pass)
+
+		genericUserPass = username
+		if pass != "" {
+			genericUserPass += ":" + pass
+		}
+
+		genericUserPass += "@"
 	}
 
 	genericString := fmt.Sprintf("%s://%s%s/%s?%s", dbInfo.Type, genericUserPass, address, database, extraArgs)
@@ -126,6 +135,9 @@ func getConnectionString(dbInfo DatabaseConnectorInfoDatabase) (string, string, 
 		return "sqlserver", dsn, nil
 	case OracleDatabase:
 		return "oracle", genericString, nil
+	case SnowflakeDatabase:
+		dsn := fmt.Sprintf("%s%s/%s?%s", genericUserPass, address, database, extraArgs)
+		return "snowflake", dsn, nil
 	case ClickhouseDatabase:
 		query := ""
 		if genericUserPass != "" {
@@ -170,7 +182,7 @@ func evalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo) e
 	}
 
 	if connector == nil {
-		return fmt.Errorf("Unknown connector " + panel.Database.ConnectorId)
+		return edsef("Unknown connector " + panel.Database.ConnectorId)
 	}
 
 	dbInfo := connector.Database
@@ -209,10 +221,36 @@ func evalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo) e
 		return err
 	}
 
+	// Copy remote sqlite database to tmp file if remote
+	if dbInfo.Type == "sqlite" && panel.ServerId != "" {
+		server, err := getServer(project, panel.ServerId)
+		if err != nil {
+			return err
+		}
+
+		tmp, err := ioutil.TempFile("", "sqlite-copy")
+		if err != nil {
+			return err
+		}
+
+		defer os.Remove(tmp.Name())
+
+		err = remoteFileReader(*server, dbInfo.Database, func(r io.Reader) error {
+			_, err := io.Copy(tmp, r)
+			return err
+		})
+		if err != nil {
+			return err
+		}
+
+		dbInfo.Database = tmp.Name()
+		tmp.Close()
+	}
+
 	out := getPanelResultsFile(project.Id, panel.Id)
 
 	wroteFirstRow := false
-	return withJSONArrayOutWriterFile(out, func(w JSONArrayWriter) error {
+	return withJSONArrayOutWriterFile(out, func(w *JSONArrayWriter) error {
 		_, err := importAndRun(
 			func(createTableStmt string) error {
 				_, err := db.Exec(createTableStmt)
@@ -272,10 +310,6 @@ func evalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo) e
 									logln("Skipping unknown type: " + s.DatabaseTypeName())
 								}
 							}
-						}
-
-						if s, ok := row[col].(string); ok {
-							row[col] = UnicodeEscape(s)
 						}
 					}
 

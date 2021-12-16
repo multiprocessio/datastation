@@ -1,13 +1,16 @@
 const path = require('path');
 const { LANGUAGES } = require('../../shared/languages');
-const { InvalidDependentPanelError } = require('../../shared/errors');
+const {
+  InvalidDependentPanelError,
+  NotAnArrayOfObjectsError,
+} = require('../../shared/errors');
 const { getProjectResultsFile } = require('../store');
 const fs = require('fs');
 const { LiteralPanelInfo, ProgramPanelInfo } = require('../../shared/state');
 const { updateProjectHandler } = require('../store');
 const { CODE_ROOT } = require('../constants');
 const { makeEvalHandler } = require('./eval');
-const { inPath, withSavedPanels } = require('./testutil');
+const { inPath, withSavedPanels, RUNNERS, VERBOSE } = require('./testutil');
 
 const TESTS = [
   {
@@ -40,6 +43,12 @@ const TESTS = [
     type: 'sql',
     content: 'SELECT name, CAST(age AS INT) + 10 AS age FROM DM_getPanel(0)',
     condition: true,
+  },
+  {
+    type: 'sql',
+    content: 'SELECT name FROM DM_getPanel("Not Array Data")',
+    condition: true,
+    exception: NotAnArrayOfObjectsError,
   },
   {
     type: 'sql',
@@ -100,55 +109,62 @@ for (const t of TESTS) {
 
   describe(t.type, () => {
     // First pass runs in process, second pass runs in subprocess
-    for (const subprocessName of [
-      undefined,
-      { node: path.join(CODE_ROOT, 'build', 'desktop_runner.js') },
-      { go: path.join(CODE_ROOT, 'build', 'go_desktop_runner_test') },
-    ]) {
-      test(`runs ${t.type} programs to perform addition via ${
-        subprocessName
-          ? subprocessName.node || subprocessName.go
-          : 'same-process'
-      }`, async () => {
-        try {
-          const lp = new LiteralPanelInfo({
-            contentTypeInfo: { type: 'text/csv' },
-            content: 'age,name\n12,Kev\n18,Nyra',
-            name: 'Raw Data',
-          });
+    for (const subprocessName of RUNNERS) {
+      test(
+        `runs ${t.type} program to perform addition via ${
+          subprocessName
+            ? subprocessName.node || subprocessName.go
+            : 'same-process'
+        }` + (VERBOSE ? ', program: `' + t.content + '`' : ''),
+        async () => {
+          try {
+            const lp = new LiteralPanelInfo({
+              contentTypeInfo: { type: 'text/csv' },
+              content: 'age,name\n12,Kev\n18,Nyra',
+              name: 'Raw Data',
+            });
 
-          const pp = new ProgramPanelInfo({
-            type: t.type,
-            content: t.content,
-          });
+            // Not valid array data
+            const lp2 = new LiteralPanelInfo({
+              contentTypeInfo: {},
+              content: '',
+              name: 'Not Array Data',
+            });
 
-          let finished = false;
-          const panels = [lp, pp];
-          await withSavedPanels(
-            panels,
-            async (project) => {
-              const panelValueBuffer = fs.readFileSync(
-                getProjectResultsFile(project.projectName) + pp.id
-              );
-              expect(JSON.parse(panelValueBuffer.toString())).toStrictEqual([
-                { name: 'Kev', age: 22 },
-                { name: 'Nyra', age: 28 },
-              ]);
+            const pp = new ProgramPanelInfo({
+              type: t.type,
+              content: t.content,
+            });
 
-              finished = true;
-            },
-            { evalPanels: true, subprocessName }
-          );
+            let finished = false;
+            const panels = [lp, lp2, pp];
+            await withSavedPanels(
+              panels,
+              async (project) => {
+                const panelValueBuffer = fs.readFileSync(
+                  getProjectResultsFile(project.projectName) + pp.id
+                );
+                expect(JSON.parse(panelValueBuffer.toString())).toStrictEqual([
+                  { name: 'Kev', age: 22 },
+                  { name: 'Nyra', age: 28 },
+                ]);
 
-          if (!finished) {
-            throw new Error('Callback did not finish');
+                finished = true;
+              },
+              { evalPanels: true, subprocessName }
+            );
+
+            if (!finished) {
+              throw new Error('Callback did not finish');
+            }
+          } catch (e) {
+            if (!t.exception || !(e instanceof t.exception)) {
+              throw e;
+            }
           }
-        } catch (e) {
-          if (!t.exception || !(e instanceof t.exception)) {
-            throw e;
-          }
-        }
-      }, 300_000);
+        },
+        300_000
+      );
     }
 
     for (const n of [0, 1]) {
@@ -197,4 +213,36 @@ for (const t of TESTS) {
       }, 300_000);
     }
   });
+}
+
+for (const subprocessName of RUNNERS) {
+  for (const language of Object.keys(LANGUAGES).filter((f) => f !== 'sql')) {
+    describe(`runs ${language} program to fetch panel file name via ${
+      subprocessName ? subprocessName.node || subprocessName.go : 'same-process'
+    }`, function () {
+      test('it returns its own file name', async () => {
+        const pp = new ProgramPanelInfo({
+          type: language,
+          content: 'DM_setPanel(DM_getPanelFile(0))',
+        });
+
+        let finished = false;
+        const panels = [pp];
+        await withSavedPanels(
+          panels,
+          async (project) => {
+            const fileName = getProjectResultsFile(project.projectName) + pp.id;
+            const result = JSON.parse(fs.readFileSync(fileName).toString());
+            expect(result).toEqual(fileName.replaceAll('\\', '/'));
+            finished = true;
+          },
+          { evalPanels: true }
+        );
+
+        if (!finished) {
+          throw new Error('Callback did not finish');
+        }
+      }, 15_000);
+    });
+  }
 }
