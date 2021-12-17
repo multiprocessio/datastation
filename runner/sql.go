@@ -19,11 +19,11 @@ type quoteType struct {
 	identifier string
 }
 
-var ansiSQLQuoteType = quoteType{
+var ansiSQLQuote = quoteType{
 	identifier: `"`,
 }
 
-var mysqlQuoteType = quoteType{
+var mysqlQuote = quoteType{
 	identifier: "`",
 }
 

@@ -270,13 +270,13 @@ func evalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo) e
 	}
 
 	mangleInsert := defaultMangleInsert
-	qt := ansiSQLQuoteType
+	qt := ansiSQLQuote
 	if dbInfo.Type == "postgres" {
 		mangleInsert = postgresMangleInsert
 	}
 
 	if dbInfo.Type == "mysql" {
-		qt = mysqlQuoteType
+		qt = mysqlQuote
 	}
 
 	idMap := getIdMap(project.Pages[pageIndex])
