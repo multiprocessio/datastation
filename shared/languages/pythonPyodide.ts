@@ -120,9 +120,9 @@ function exceptionRewriter(msg: string, _: string) {
   });
 }
 
-export const PYTHON = {
-  name: python.name,
-  defaultPath: python.defaultPath,
+export const PYTHON_PYODIDE = {
+  name: 'Python (pyodide)',
+  defaultPath: 'python3-pyodide',
   defaultContent,
   preamble,
   inMemoryEval,
