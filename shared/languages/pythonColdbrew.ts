@@ -1,52 +1,42 @@
-import circularSafeStringify from 'json-stringify-safe';
 import { preview } from 'preview';
 import { InvalidDependentPanelError, NoResultError } from '../errors';
 import log from '../log';
+import { deepClone, windowOrGlobal } from '../object';
 import { PanelResult } from '../state';
-import { EOL } from './types';
 
-function defaultContent(panelIndex: number) {
-  if (panelIndex === 0) {
-    return 'DM_setPanel([])';
-  }
+import { PYTHON_PYODIDE } from './pythonPyodide';
 
-  return `previous = DM_getPanel(${panelIndex - 1});\nDM_setPanel(previous);`;
-}
+function inMemoryInit() {
+  const coldbrew = document.createElement('script');
+  coldbrew.defer = true;
+  coldbrew.src =
+    'https://cdn.jsdelivr.net/gh/plasticityai/coldbrew@0.0.74/dist/coldbrew.js';
 
-function preamble(
-  resultsFile: string,
-  panelId: string,
-  indexIdMap: Array<string>
-) {
-  return `
-def DM_getPanel(i):
-  import json
-  with open(r'${resultsFile}'+${JSON.stringify(indexIdMap)}[i]) as f:
-    return json.load(f)
-def DM_setPanel(v):
-  import json
-  with open(r'${resultsFile + panelId}', 'w') as f:
-    json.dump(v, f)`;
+  return new Promise<void>((resolve, reject) => {
+    try {
+      coldbrew.onload = async function () {
+        try {
+          (window as any).coldbrew = await (window as any).Coldbrew.load();
+          resolve();
+        } catch (e) {
+          reject(e);
+        }
+      };
+      document.body.appendChild(coldbrew);
+    } catch (e) {
+      reject(e);
+    }
+  });
 }
 
 function inMemoryEval(
   prog: string,
-  results:
-    | Array<PanelResult>
-    | { indexIdMap: Array<string>; resultsFile: string }
+  results: Record<string | number, PanelResult>
 ): Promise<{ value: any; preview: string; stdout: string }> {
-  if (!Array.isArray(results)) {
-    // This is not a valid situation. Not sure how it could happen.
-    throw new Error(
-      'Bad calling convention for in-memory panel. Expected full results object.'
-    );
-  }
-
-  const anyWindow = window as any;
+  const anyWindow = windowOrGlobal as any;
 
   const stdout: Array<string> = [];
   return new Promise((resolve, reject) => {
-    // TODO: better deep copy
     anyWindow.DM_getPanel = (panelId: number) => {
       if (!results[panelId]) {
         reject(new InvalidDependentPanelError(panelId));
@@ -54,7 +44,7 @@ function inMemoryEval(
       }
 
       try {
-        return JSON.parse(JSON.stringify((results[panelId] || {}).value));
+        return deepClone((results[panelId] || {}).value);
       } catch (e) {
         log.error(e);
         reject(new InvalidDependentPanelError(panelId));
@@ -63,11 +53,10 @@ function inMemoryEval(
 
     let returned = false;
     anyWindow.DM_setPanel = (v: any) => {
-      const value = v;
       returned = true;
       resolve({
-        value,
-        preview: preview(value),
+        v,
+        preview: preview(v),
         stdout: stdout.join('\n'),
       });
     };
@@ -86,21 +75,12 @@ function inMemoryEval(
   });
 }
 
-function exceptionRewriter(msg: string, _: string) {
-  const matcher = /, line ([1-9]*), in <module>/g;
-
-  return msg.replace(matcher, function (_: string, line: string) {
-    return `, line ${
-      +line - preamble('', '', []).split(EOL).length
-    }, in <module>`;
-  });
-}
-
 export const PYTHON_COLDBREW = {
   name: 'Python (coldbrew)',
-  defaultPath: 'python3-coldbrew',
-  defaultContent,
-  preamble,
+  defaultPath: 'python3',
+  defaultContent: PYTHON_PYODIDE.defaultContent,
+  preamble: PYTHON_PYODIDE.preamble,
   inMemoryEval,
-  exceptionRewriter,
+  inMemoryInit,
+  exceptionRewriter: PYTHON_PYODIDE.exceptionRewriter,
 };

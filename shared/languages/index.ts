@@ -9,7 +9,7 @@ import { LanguageInfo } from './types';
 
 export const LANGUAGES: Record<string, LanguageInfo> = {
   javascript: JAVASCRIPT,
-  python: PYTHON_PYODIDE,
+  pythonPyodide: PYTHON_PYODIDE,
   pythonColdbrew: PYTHON_COLDBREW,
   ruby: RUBY,
   julia: JULIA,

@@ -122,7 +122,7 @@ function exceptionRewriter(msg: string, _: string) {
 
 export const PYTHON_PYODIDE = {
   name: 'Python (pyodide)',
-  defaultPath: 'python3-pyodide',
+  defaultPath: 'python3',
   defaultContent,
   preamble,
   inMemoryEval,
