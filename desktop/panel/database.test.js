@@ -46,7 +46,7 @@ const DATABASES = [
   {
     type: 'mysql',
     query: 'SELECT name, CAST(age AS SIGNED) - 10 AS age FROM DM_getPanel(0)',
-  }
+  },
 ];
 
 ensureSigningKey();
