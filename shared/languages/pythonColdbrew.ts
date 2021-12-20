@@ -3,7 +3,6 @@ import { InvalidDependentPanelError, NoResultError } from '../errors';
 import log from '../log';
 import { deepClone, windowOrGlobal } from '../object';
 import { PanelResult } from '../state';
-
 import { PYTHON_PYODIDE } from './pythonPyodide';
 
 function inMemoryInit() {

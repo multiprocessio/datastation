@@ -1,7 +1,7 @@
 import { JAVASCRIPT } from './javascript';
 import { JULIA } from './julia';
-import { PYTHON_PYODIDE } from './pythonPyodide';
 import { PYTHON_COLDBREW } from './pythonColdbrew';
+import { PYTHON_PYODIDE } from './pythonPyodide';
 import { R } from './r';
 import { RUBY } from './ruby';
 import { SQL } from './sql';
