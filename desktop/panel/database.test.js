@@ -31,6 +31,11 @@ const DATABASES = [
       'SELECT 1 AS `1`, 2.2 AS `2`, true AS `true`, "string" AS `string`, CAST("2021-01-01" AS DATE) AS `date`',
   },
   {
+    type: 'oracle',
+    query:
+      'SELECT 1 AS `1`, 2.2 AS `2`, true AS `true`, "string" AS `string`, CAST("2021-01-01" AS DATE) AS `date`',
+  },
+  {
     type: 'postgres',
     query: 'SELECT name, CAST(age AS INT) - 10 AS age FROM DM_getPanel(0)',
   },
@@ -41,7 +46,7 @@ const DATABASES = [
   {
     type: 'mysql',
     query: 'SELECT name, CAST(age AS SIGNED) - 10 AS age FROM DM_getPanel(0)',
-  },
+  }
 ];
 
 ensureSigningKey();
@@ -49,6 +54,9 @@ ensureSigningKey();
 const vendorOverride = {
   postgres: {
     address: 'localhost?sslmode=disable',
+  },
+  oracle: {
+    database: 'XEPDB1',
   },
   sqlserver: {
     address: 'localhost',
