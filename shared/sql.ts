@@ -68,11 +68,11 @@ export function timestampsFromRange(range: TimeSeriesRange) {
   } else {
     switch (range.fixed) {
       case 'this-hour':
-        return { begin: subHours(startOfHour(now), 1), end: startOfHour(now) };
+        return { begin: startOfHour(now), end: now };
       case 'previous-hour':
         return {
-          begin: subHours(startOfHour(now), 2),
-          end: subHours(startOfHour(now), 1),
+          begin: subHours(startOfHour(now), 1),
+          end: startOfHour(now),
         };
       case 'today':
         return { begin: startOfToday(), end: now };

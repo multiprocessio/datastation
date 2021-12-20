@@ -50,7 +50,7 @@ func (ec evalContext) eval(panelId, projectId string) error {
 
 	panelId, ok := allImportedPanelResultsExist(*project, project.Pages[pageIndex], *panel)
 	if !ok {
-		return makeErrInvalidDependentPanelError(panelId)
+		return makeErrInvalidDependentPanel(panelId)
 	}
 
 	switch panel.Type {

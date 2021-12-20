@@ -17,14 +17,17 @@ var JSON_SQL_TYPE_MAP = map[string]string{
 
 type quoteType struct {
 	identifier string
+	string     string
 }
 
 var ansiSQLQuote = quoteType{
 	identifier: `"`,
+	string:     `'`,
 }
 
 var mysqlQuote = quoteType{
 	identifier: "`",
+	string:     `"`,
 }
 
 func quote(value string, quoteChar string) string {

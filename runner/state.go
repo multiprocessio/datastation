@@ -216,10 +216,10 @@ type FilaggPanelInfo struct {
 }
 
 type DatabasePanelInfoDatabase struct {
-	ConnectorId string      `json:"connectorId" db:"connectorId"`
-	Range       interface{} `json:"range" db:"range"` // TODO: support these
-	Table       string      `json:"table" db:"table"`
-	Step        float64     `json:"step" db:"step"`
+	ConnectorId string          `json:"connectorId" db:"connectorId"`
+	Range       TimeSeriesRange `json:"range" db:"range"`
+	Table       string          `json:"table" db:"table"`
+	Step        float64         `json:"step" db:"step"`
 }
 
 type DatabasePanelInfo struct {

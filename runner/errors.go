@@ -35,7 +35,7 @@ func makeErrUnsupported(msg string) *DSError {
 	}
 }
 
-func makeErrInvalidDependentPanelError(id string) *DSError {
+func makeErrInvalidDependentPanel(id string) *DSError {
 	return &DSError{
 		Name:          "InvalidDependentPanelError",
 		Stack:         string(debug.Stack()),
