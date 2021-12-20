@@ -1,5 +1,7 @@
 package main
 
+import "time"
+
 type PanelResult struct {
 	Exception   interface{} `json:"exception" db:"exception"`
 	Value       interface{} `json:"value" db:"value"`
@@ -89,6 +91,7 @@ type PanelInfo struct {
 	*LiteralPanelInfo
 	*DatabasePanelInfo
 	*HttpPanelInfo
+	*FilaggPanelInfo
 }
 
 type SupportedLanguages string
@@ -125,11 +128,98 @@ type HttpPanelInfo struct {
 	Http HttpConnectorInfo `json:"http" db:"http"`
 }
 
+type TimeSeriesRelativeTimes string
+
+const (
+	Last5Minutes  TimeSeriesRelativeTimes = "last-5-minutes"
+	Last15Minutes                         = "last-15-minutes"
+	Last30Minutes                         = "last-30-minutes"
+	LastHour                              = "last-hour"
+	Last3Hours                            = "last-3-hours"
+	Last6Hours                            = "last-6-hours"
+	Last12Hours                           = "last-12-hours"
+	LastDay                               = "last-day"
+	Last3Days                             = "last-3-days"
+	LastWeek                              = "last-week"
+	Last2Weeks                            = "last-2-weeks"
+	LastMonth                             = "last-month"
+	Last2Months                           = "last-2-months"
+	Last3Months                           = "last-3-months"
+	Last6Months                           = "last-6-months"
+	LastYear                              = "last-year"
+	Last2Years                            = "last-2-years"
+	AllTime                               = "all-time"
+)
+
+type TimeSeriesFixedTimes string
+
+const (
+	ThisHour        = "this-hour"
+	PreviousHour    = "previous-hour"
+	Today           = "today"
+	Yesterday       = "yesterday"
+	WeekToDate      = "week-todate"
+	PreviousWeek    = "previous-week"
+	MonthToDate     = "month-to-date"
+	PreviousMonth   = "previous-month"
+	QuarterToDate   = "quarter-to-date"
+	PreviousQuarter = "previous-quarter"
+	YearToDate      = "year-to-date"
+	PreviousYear    = "previous-year"
+)
+
+type TimeSeriesRangeType string
+
+const (
+	AbsoluteRange TimeSeriesRangeType = "absolute"
+	RelativeRange                     = "relative"
+	FixedRange                        = "fixed"
+)
+
+type TimeSeriesRange struct {
+	Field     string                   `json:"field"`
+	SortOn    *string                  `json:"sortOn"`
+	SortAsc   *bool                    `json:"sortAsc"`
+	Type      TimeSeriesRangeType      `json:"rangeType"`
+	BeginDate *time.Time               `json:"begin_date"`
+	EndDate   *time.Time               `json:"end_date"`
+	Relative  *TimeSeriesRelativeTimes `json:"relative"`
+	Fixed     *TimeSeriesFixedTimes    `json:"fixed"`
+}
+
+type AggregateType string
+
+const (
+	NoneAggregate    AggregateType = "none"
+	CountAggregate                 = "count"
+	SumAggregate                   = "sum"
+	AverageAggregate               = "average"
+	MinAggregate                   = "min"
+	MaxAggregate                   = "max"
+)
+
+type FilaggPanelInfoFilagg struct {
+	PanelSource    string          `json:"panelSource"`
+	Filter         string          `json:"filter"`
+	Range          TimeSeriesRange `json:"range"`
+	AggregateType  AggregateType   `json:"aggregateType"`
+	GroupBy        string          `json:"groupBy"`
+	AggregateOn    string          `json:"aggregateOn"`
+	SortOn         string          `json:"sortOn"`
+	SortAsc        bool            `json:"sortAsc"`
+	WindowInterval string          `json:"windowInterval"`
+	Limit          int             `json:"limit"`
+}
+
+type FilaggPanelInfo struct {
+	Filagg FilaggPanelInfoFilagg `json:"filagg"`
+}
+
 type DatabasePanelInfoDatabase struct {
-	ConnectorId string      `json:"connectorId" db:"connectorId"`
-	Range       interface{} `json:"range" db:"range"` // TODO: support these
-	Table       string      `json:"table" db:"table"`
-	Step        float64     `json:"step" db:"step"`
+	ConnectorId string          `json:"connectorId" db:"connectorId"`
+	Range       TimeSeriesRange `json:"range" db:"range"`
+	Table       string          `json:"table" db:"table"`
+	Step        float64         `json:"step" db:"step"`
 }
 
 type DatabasePanelInfo struct {
