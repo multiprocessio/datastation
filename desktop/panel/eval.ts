@@ -96,7 +96,7 @@ function canUseGoRunner(panel: PanelInfo, connectors: ConnectorInfo[]) {
     return false;
   }
 
-  return ['program', 'file', 'http', 'literal'].includes(panel.type);
+  return true;
 }
 
 export async function evalInSubprocess(

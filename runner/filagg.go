@@ -5,23 +5,21 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/google/uuid"
 )
 
-func getDependentPanel(page ProjectPage, panelId string) (*PanelInfo, error) {
-	for _, panel := range page.Panels {
-		if panel.Name == panelId {
+func getDependentPanel(page ProjectPage, panelId string) (*PanelInfo, int, error) {
+	for i, panel := range page.Panels {
+		if panel.Name == panelId || panel.Id == panelId {
 			cp := panel
-			return &cp, nil
+			return &cp, i, nil
 		}
 	}
 
 	if i, err := strconv.Atoi(panelId); err == nil && i < len(page.Panels) {
-		return &page.Panels[i], nil
+		return &page.Panels[i], i, nil
 	}
 
-	return nil, makeErrInvalidDependentPanel(panelId)
+	return nil, 0, makeErrInvalidDependentPanel(panelId)
 }
 
 func startOfHour(t time.Time) time.Time {
@@ -139,13 +137,13 @@ func quoteTime(t time.Time, qt quoteType) string {
 }
 
 func evalFilaggPanel(project *ProjectState, pageIndex int, panel *PanelInfo) error {
-	panel, err := getDependentPanel(project.Pages[pageIndex], panel.Id)
+	qt := ansiSQLQuote
+	fg := panel.Filagg
+
+	_, panelIndex, err := getDependentPanel(project.Pages[pageIndex], fg.PanelSource)
 	if err != nil {
 		return err
 	}
-
-	qt := ansiSQLQuote
-	fg := panel.Filagg
 
 	aggType := string(fg.AggregateType)
 
@@ -217,9 +215,9 @@ func evalFilaggPanel(project *ProjectState, pageIndex int, panel *PanelInfo) err
 		orderByClause = fmt.Sprintf("ORDER BY %s %s", sortField, ascDesc)
 	}
 
-	query := fmt.Sprintf("SELECT %s FROM DM_getPanel(%s) %s %s %s LIMIT %d",
+	query := fmt.Sprintf("SELECT %s FROM DM_getPanel(%d) %s %s %s LIMIT %d",
 		columns,
-		fg.PanelSource,
+		panelIndex,
 		whereClause,
 		groupByClause,
 		orderByClause,
@@ -228,7 +226,7 @@ func evalFilaggPanel(project *ProjectState, pageIndex int, panel *PanelInfo) err
 	fakepanel := &PanelInfo{
 		Content: query,
 		Type:    ProgramPanel,
-		Id:      uuid.New().String(),
+		Id:      panel.Id,
 	}
 
 	return evalProgramSQLPanel(project, pageIndex, fakepanel)
