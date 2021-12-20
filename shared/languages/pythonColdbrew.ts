@@ -53,10 +53,11 @@ function inMemoryEval(
 
     let returned = false;
     anyWindow.DM_setPanel = (v: any) => {
+      const value = v;
       returned = true;
       resolve({
-        v,
-        preview: preview(v),
+        value,
+        preview: preview(value),
         stdout: stdout.join('\n'),
       });
     };
