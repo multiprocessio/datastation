@@ -289,7 +289,6 @@ func EvalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo, p
 		dbInfo.Type == "mysql" || dbInfo.Type == "sqlite" || dbInfo.Type == "postgres",
 		qt,
 	)
-	fmt.Println(query, panelsToImport, "PHIL", err)
 	if err != nil {
 		return err
 	}
@@ -338,11 +337,9 @@ func EvalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo, p
 	}
 	defer w.Close()
 
-	fmt.Println("HERE?")
 	return withRemoteConnection(server, host, port, func(host, port string) error {
 		wroteFirstRow := false
 		return withJSONArrayOutWriterFile(w, func(w *JSONArrayWriter) error {
-			fmt.Println("ABOUT TO IMPORT?")
 			_, err := importAndRun(
 				func(createTableStmt string) error {
 					_, err := db.Exec(createTableStmt)

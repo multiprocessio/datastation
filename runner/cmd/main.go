@@ -10,6 +10,7 @@ const VERSION = "development"
 const APP_NAME = "DataStation Runner (Go)"
 
 func main() {
+	runner.Verbose = true
 	runner.Logln(APP_NAME + " " + VERSION)
 	projectId := ""
 	panelId := ""

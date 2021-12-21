@@ -250,14 +250,12 @@ func importAndRun(
 	panelResultLoader func(string, string, interface{}) error,
 ) ([]map[string]interface{}, error) {
 	rowsIngested := 0
-	fmt.Println("HERE? 1", panelsToImport)
 	for _, panel := range panelsToImport {
 		var ddlColumns []string
 		for _, c := range panel.columns {
 			ddlColumns = append(ddlColumns, quote(c.name, qt.identifier)+" "+c.kind)
 		}
 
-		fmt.Println("HERE? 1")
 		Logln("Creating temp table " + panel.tableName)
 		createQuery := fmt.Sprintf("CREATE TEMPORARY TABLE %s (%s);",
 			quote(panel.tableName, qt.identifier),
@@ -271,7 +269,6 @@ func importAndRun(
 		// memory and then chunks it up to be loaded into the
 		// database.
 		var res []map[string]interface{}
-		fmt.Println("CALLING RESULT LOADER?")
 		err = panelResultLoader(projectId, panel.id, &res)
 
 		for _, resChunk := range chunk(res, 1000) {

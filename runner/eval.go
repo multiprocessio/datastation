@@ -8,8 +8,13 @@ import (
 
 var iso8601Format = "2006-01-02T15:04:05.999Z"
 var logPrefixSet = false
+var Verbose = true
 
 func _logln(level, msg string, args ...interface{}) {
+	if !Verbose {
+		return
+	}
+
 	if !logPrefixSet {
 		log.SetFlags(0)
 		logPrefixSet = true
