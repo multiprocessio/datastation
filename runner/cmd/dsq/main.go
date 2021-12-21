@@ -39,7 +39,6 @@ func panelResultLoader(_, _ string, res interface{}) error {
 		}
 
 		cti := runner.ContentTypeInfo{Type: mimetype}
-		fmt.Println(cti)
 		internalErr = runner.TransformReader(os.Stdin, "", cti, out)
 	} else {
 		internalErr = runner.TransformFile(arg, runner.ContentTypeInfo{}, out)
@@ -54,7 +53,7 @@ func panelResultLoader(_, _ string, res interface{}) error {
 
 func main() {
 	if len(os.Args) < 3 {
-		log.Fatal(`Expected query. e.g. 'dsq names.csv "SELECT name FROM {}"'`)
+		log.Fatal(`Expected data source and query. e.g. 'dsq names.csv "SELECT name FROM {}"'`)
 	}
 
 	runner.Verbose = false
