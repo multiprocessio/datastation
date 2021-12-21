@@ -125,11 +125,7 @@ for (const subprocess of RUNNERS) {
                 // These database drivers are all over the place between Node and Go.
                 // Close enough is fine I guess.
                 expect(v[0]['1']).toBe(1);
-                // TODO: fix the Oracle driver reading floats as zero
-                // https://github.com/sijms/go-ora/issues/135
-                if (t.type !== 'oracle') {
-                  expect(String(v[0]['2'])).toBe('2.2');
-                }
+                expect(String(v[0]['2'])).toBe('2.2');
                 expect(v[0]['true'] == '1').toBe(true);
                 expect(v[0].string).toBe('string');
                 expect(new Date(v[0].date)).toStrictEqual(

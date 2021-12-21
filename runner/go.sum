@@ -261,8 +261,8 @@ github.com/richardlehane/msoleps v1.0.1/go.mod h1:BWev5JBpU9Ko2WAgmZEuiz4/u3ZYTK
 github.com/rogpeppe/fastuuid v1.2.0/go.mod h1:jVj6XXZzXRy/MSR5jhDC/2q6DgLz+nrA6LYCDYWNEvQ=
 github.com/rogpeppe/go-internal v1.3.0/go.mod h1:M8bDsm7K2OlrFYOpmOWEs/qY81heoFRclV5y23lUDJ4=
 github.com/ruudk/golang-pdf417 v0.0.0-20181029194003-1af4ab5afa58/go.mod h1:6lfFZQK844Gfx8o5WFuvpxWRwnSoipWe/p622j1v06w=
-github.com/sijms/go-ora/v2 v2.2.15 h1:GJfudyOHT+DUgBPvS2wP/8lgmuer3OKfha8C0xnThW8=
-github.com/sijms/go-ora/v2 v2.2.15/go.mod h1:jzfAFD+4CXHE+LjGWFl6cPrtiIpQVxakI2gvrMF2w6Y=
+github.com/sijms/go-ora/v2 v2.2.17 h1:7w1lkgxorhhx/xG5fS/hWhLqBw9BrSFxTvx9oBj0Z0E=
+github.com/sijms/go-ora/v2 v2.2.17/go.mod h1:jzfAFD+4CXHE+LjGWFl6cPrtiIpQVxakI2gvrMF2w6Y=
 github.com/sirupsen/logrus v1.8.1 h1:dJKuHgqk1NNQlqoA6BTlM1Wf9DOH3NBjQyu0h9+AZZE=
 github.com/sirupsen/logrus v1.8.1/go.mod h1:yWOB1SBYBC5VeMP7gHvWumXLIWorT60ONWic61uBYv0=
 github.com/snowflakedb/gosnowflake v1.6.5 h1:z7WfTtHly52GBX0VXVrelU285oiDKj/r3nTJ++YCK9o=
