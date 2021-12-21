@@ -199,6 +199,8 @@ func writeRowFromDatabase(dbInfo DatabaseConnectorInfoDatabase, w *JSONArrayWrit
 	if err != nil {
 		return err
 	}
+	debugObject(row)
+	debugObject(colTypes)
 
 	// The MySQL driver is not friendly about unknown data types.
 	// https://github.com/go-sql-driver/mysql/issues/441
