@@ -9,6 +9,11 @@ const { makeEvalHandler } = require('./eval');
 const { withSavedPanels, RUNNERS } = require('./testutil');
 
 for (const subprocessName of RUNNERS) {
+  // Only works with Go now
+  if (!subprocessName?.go) {
+    continue;
+  }
+
   describe(`filagg tests via ${
     subprocessName ? subprocessName.node || subprocessName.go : 'same-process'
   }`, () => {

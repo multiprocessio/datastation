@@ -17,6 +17,10 @@ const DATABASES = [
     query: `SELECT 1 AS "1", 2.2 AS "2", true AS "true", 'string' AS "string", CAST('2021-01-01' AS DATE) AS "date"`,
   },
   {
+    type: 'clickhouse',
+    query: `SELECT 1 AS "1", 2.2 AS "2", true AS "true", 'string' AS "string", parseDateTimeBestEffortOrNull('2021-01-01') AS "date"`,
+  },
+  {
     type: 'sqlserver',
     // SQL Server doesn't have true/false literals
     query: `SELECT 1 AS "1", 2.2 AS "2", 1 AS "true", 'string' AS "string", CAST('2021-01-01' AS DATE) AS "date"`,
@@ -57,6 +61,9 @@ const vendorOverride = {
   postgres: {
     address: 'localhost?sslmode=disable',
   },
+  clickhouse: {
+    database: 'default',
+  },
   oracle: {
     database: 'XEPDB1',
   },
@@ -69,12 +76,12 @@ const vendorOverride = {
 };
 
 for (const subprocess of RUNNERS) {
-  for (const t of DATABASES) {
-    // Only test Oracle with the Go runner for now
-    if (t.type === 'oracle' && !subprocess?.go) {
-      continue;
-    }
+  // Most databases now only work with the Go runner.
+  if (!subprocess?.go) {
+    continue;
+  }
 
+  for (const t of DATABASES) {
     describe(
       t.type +
         ' running via ' +
@@ -108,54 +115,39 @@ for (const subprocess of RUNNERS) {
 
           let finished = false;
           const panels = [lp, dp];
-          try {
-            await withSavedPanels(
-              panels,
-              async (project) => {
-                const panelValueBuffer = fs.readFileSync(
-                  getProjectResultsFile(project.projectName) + dp.id
+          await withSavedPanels(
+            panels,
+            async (project) => {
+              const panelValueBuffer = fs.readFileSync(
+                getProjectResultsFile(project.projectName) + dp.id
+              );
+
+              const v = JSON.parse(panelValueBuffer.toString());
+              if (t.query.startsWith('SELECT 1')) {
+                expect(v.length).toBe(1);
+                // These database drivers are all over the place between Node and Go.
+                // Close enough is fine I guess.
+                expect(v[0]['1']).toBe(1);
+                expect(String(v[0]['2'])).toBe('2.2');
+                expect(v[0]['true'] == '1').toBe(true);
+                expect(v[0].string).toBe('string');
+                expect(new Date(v[0].date)).toStrictEqual(
+                  new Date('2021-01-01')
                 );
-
-                const v = JSON.parse(panelValueBuffer.toString());
-                if (t.query.startsWith('SELECT 1')) {
-                  expect(v.length).toBe(1);
-                  // These database drivers are all over the place between Node and Go.
-                  // Close enough is fine I guess.
-                  expect(v[0]['1']).toBe(1);
-                  // TODO: fix the Oracle driver reading floats as zero
-                  // https://github.com/sijms/go-ora/issues/135
-                  if (t.type !== 'oracle') {
-                    expect(String(v[0]['2'])).toBe('2.2');
-                  }
-                  expect(v[0]['true'] == '1').toBe(true);
-                  expect(v[0].string).toBe('string');
-                  expect(new Date(v[0].date)).toStrictEqual(
-                    new Date('2021-01-01')
-                  );
-                } else {
-                  expect(v).toStrictEqual([
-                    { name: 'Kate', age: 9 },
-                    { name: 'Bake', age: 10 },
-                  ]);
-                }
-
-                finished = true;
-              },
-              { evalPanels: true, connectors, subprocessName: subprocess }
-            );
-
-            if (!finished) {
-              throw new Error('Callback did not finish');
-            }
-          } finally {
-            // Delete sqlite file
-            if (t.type === 'sqlite') {
-              try {
-                fs.unlinkSync('test');
-              } catch (e) {
-                console.error(e);
+              } else {
+                expect(v).toStrictEqual([
+                  { name: 'Kate', age: 9 },
+                  { name: 'Bake', age: 10 },
+                ]);
               }
-            }
+
+              finished = true;
+            },
+            { evalPanels: true, connectors, subprocessName: subprocess }
+          );
+
+          if (!finished) {
+            throw new Error('Callback did not finish');
           }
           // sqlserver at least can take longer than 5s to fail
         }, 30_000);
