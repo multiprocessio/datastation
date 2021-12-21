@@ -70,13 +70,6 @@ const vendorOverride = {
 
 for (const subprocess of RUNNERS) {
   for (const t of DATABASES) {
-    // NB(Phil): Oracle tests in CI only work with Go at the moment because
-    // Node.js requires an additional binary that I don't know how to
-    // download automatically.
-    if (t.type === 'oracle' && !subprocess?.go) {
-      continue;
-    }
-
     describe(
       t.type +
         ' running via ' +

@@ -19,6 +19,10 @@ ssh-keygen -q -t rsa -N '' -f ~/.ssh/id_rsa <<<y >/dev/null 2>&1
 cp ~/.ssh/id_rsa.pub ~/.ssh/known_hosts
 cp ~/.ssh/id_rsa.pub ~/.ssh/authorized_keys
 
+# Install Oracle client library, instructions here: https://www.oracle.com/database/technologies/instant-client/linux-x86-64-downloads.html#ic_x64_inst
+curl -LO https://download.oracle.com/otn_software/linux/instantclient/instantclient-basic-linuxx64.zip
+unzip instantclient-basic-linuxx64.zip
+
 # Install xvfb for headless gui
 sudo apt-get install -y xvfb
 
