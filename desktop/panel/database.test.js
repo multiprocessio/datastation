@@ -61,6 +61,9 @@ const vendorOverride = {
   postgres: {
     address: 'localhost?sslmode=disable',
   },
+  clickhouse: {
+    database: 'default',
+  },
   oracle: {
     database: 'XEPDB1',
   },
