@@ -1,4 +1,4 @@
-package main
+package runner
 
 import (
 	"encoding/base64"
@@ -200,6 +200,13 @@ func writeRowFromDatabase(dbInfo DatabaseConnectorInfoDatabase, w *JSONArrayWrit
 		return err
 	}
 
+	// Needing this whole translation layer may be a good reason
+	// not to use sqlx since it translates **into** this layer
+	// from being raw.  At this point we're just reimplementing
+	// sqlx in reverse on top of sqlx. Might be better to do
+	// reflection directly on the sql package instead. Would be
+	// worth benchmarking.
+
 	// The MySQL driver is not friendly about unknown data types.
 	// https://github.com/go-sql-driver/mysql/issues/441
 	for _, s := range colTypes {
@@ -234,7 +241,7 @@ func writeRowFromDatabase(dbInfo DatabaseConnectorInfoDatabase, w *JSONArrayWrit
 				// Default to treating everything as a string
 				row[col] = string(bs)
 				if !wroteFirstRow && !textTypes[t] {
-					logln("Skipping unknown type: " + s.DatabaseTypeName())
+					Logln("Skipping unknown type: " + s.DatabaseTypeName())
 				}
 			}
 		}
@@ -249,7 +256,7 @@ func writeRowFromDatabase(dbInfo DatabaseConnectorInfoDatabase, w *JSONArrayWrit
 
 }
 
-func evalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo) error {
+func EvalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo, panelResultLoader func(string, string, interface{}) error) error {
 	var connector *ConnectorInfo
 	for _, c := range project.Connectors {
 		cc := c
@@ -339,11 +346,23 @@ func evalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo) e
 		return err
 	}
 
-	return withRemoteConnection(server, host, port, func(host, port string) error {
-		out := getPanelResultsFile(project.Id, panel.Id)
+	if panelResultLoader == nil {
+		panelResultLoader = func(projectId, panelId string, res interface{}) error {
+			f := GetPanelResultsFile(projectId, panelId)
+			return readJSONFileInto(f, res)
+		}
+	}
 
+	out := GetPanelResultsFile(project.Id, panel.Id)
+	w, err := openTruncate(out)
+	if err != nil {
+		return err
+	}
+	defer w.Close()
+
+	return withRemoteConnection(server, host, port, func(host, port string) error {
 		wroteFirstRow := false
-		return withJSONArrayOutWriterFile(out, func(w *JSONArrayWriter) error {
+		return withJSONArrayOutWriterFile(w, func(w *JSONArrayWriter) error {
 			_, err := importAndRun(
 				func(createTableStmt string) error {
 					_, err := db.Exec(createTableStmt)
@@ -377,6 +396,7 @@ func evalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo) e
 				panelsToImport,
 				qt,
 				mangleInsert,
+				panelResultLoader,
 			)
 
 			return err

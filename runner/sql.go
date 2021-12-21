@@ -1,4 +1,4 @@
-package main
+package runner
 
 import (
 	"fmt"
@@ -105,9 +105,13 @@ func transformDM_getPanelCalls(
 	getPanelCallsAllowed bool,
 	qt quoteType,
 ) ([]panelToImport, string, error) {
+	if query == "" {
+		return nil, "", edsef("Expected query, got empty query.")
+	}
+
 	var panelsToImport []panelToImport
 
-	var err error
+	var insideErr error
 	query = dmGetPanelRe.ReplaceAllStringFunc(query, func(m string) string {
 		matchForSubexps := dmGetPanelRe.FindStringSubmatch(m)
 		nameOrIndex := ""
@@ -131,13 +135,13 @@ func transformDM_getPanelCalls(
 
 		s, ok := idShapeMap[nameOrIndex]
 		if !ok || s.Kind != ArrayKind {
-			err = makeErrNotAnArrayOfObjects(nameOrIndex)
+			insideErr = makeErrNotAnArrayOfObjects(nameOrIndex)
 			return ""
 		}
 
 		rowShape := s.ArrayShape.Children
 		if rowShape.Kind != ObjectKind {
-			err = makeErrNotAnArrayOfObjects(nameOrIndex)
+			insideErr = makeErrNotAnArrayOfObjects(nameOrIndex)
 			return ""
 		}
 
@@ -160,8 +164,8 @@ func transformDM_getPanelCalls(
 		return quote(tableName, qt.identifier)
 	})
 
-	if err != nil {
-		return nil, "", err
+	if insideErr != nil {
+		return nil, "", insideErr
 	}
 
 	if len(panelsToImport) > 0 && !getPanelCallsAllowed {
@@ -243,6 +247,7 @@ func importAndRun(
 	qt quoteType,
 	// Postgres uses $1, mysql/sqlite use ?
 	mangleInsert func(string) string,
+	panelResultLoader func(string, string, interface{}) error,
 ) ([]map[string]interface{}, error) {
 	rowsIngested := 0
 	for _, panel := range panelsToImport {
@@ -251,7 +256,7 @@ func importAndRun(
 			ddlColumns = append(ddlColumns, quote(c.name, qt.identifier)+" "+c.kind)
 		}
 
-		logln("Creating temp table " + panel.tableName)
+		Logln("Creating temp table " + panel.tableName)
 		createQuery := fmt.Sprintf("CREATE TEMPORARY TABLE %s (%s);",
 			quote(panel.tableName, qt.identifier),
 			strings.Join(ddlColumns, ", "))
@@ -260,8 +265,14 @@ func importAndRun(
 			return nil, err
 		}
 
+		// This is bad design, it loads the entire thing into
+		// memory and then chunks it up to be loaded into the
+		// database.
 		var res []map[string]interface{}
-		err = readJSONFileInto(getPanelResultsFile(projectId, panel.id), &res)
+		err = panelResultLoader(projectId, panel.id, &res)
+		if err != nil {
+			return nil, err
+		}
 
 		for _, resChunk := range chunk(res, 1000) {
 			query, values := formatImportQueryAndRows(
@@ -278,7 +289,7 @@ func importAndRun(
 	}
 
 	if len(panelsToImport) > 0 {
-		logln(
+		Logln(
 			"Ingested %d rows in %d tables.\n",
 			rowsIngested,
 			len(panelsToImport))

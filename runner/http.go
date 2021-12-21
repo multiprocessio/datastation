@@ -1,4 +1,4 @@
-package main
+package runner
 
 import (
 	"bytes"
@@ -135,14 +135,19 @@ func evalHttpPanel(project *ProjectState, pageIndex int, panel *PanelInfo) error
 		}
 		defer rsp.Body.Close()
 
-		out := getPanelResultsFile(project.Id, panel.Id)
-		return transformReader(rsp.Body, url, h.ContentTypeInfo, out)
+		out := GetPanelResultsFile(project.Id, panel.Id)
+		w, err := openTruncate(out)
+		if err != nil {
+			return err
+		}
+		defer w.Close()
+		return TransformReader(rsp.Body, url, h.ContentTypeInfo, w)
 	})
 }
 
-func transformReader(r io.Reader, fileName string, cti ContentTypeInfo, out string) error {
-	assumedType := getMimeType(fileName, cti)
-	logln("Assumed '%s' from '%s' given '%s' when loading file", assumedType, cti.Type, fileName)
+func TransformReader(r io.Reader, fileName string, cti ContentTypeInfo, out io.Writer) error {
+	assumedType := GetMimeType(fileName, cti)
+	Logln("Assumed '%s' from '%s' given '%s' when loading file", assumedType, cti.Type, fileName)
 
 	switch assumedType {
 	case "application/json":

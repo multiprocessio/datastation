@@ -1,4 +1,4 @@
-package main
+package runner
 
 import (
 	"encoding/json"
@@ -44,14 +44,13 @@ func getIdMapJson(page ProjectPage) string {
 	return string(bts)
 }
 
-func evalProgramSQLPanel(project *ProjectState, pageIndex int, panel *PanelInfo) error {
+func MakeTmpSQLiteConnector() (*ConnectorInfo, *os.File, error) {
 	tmp, err := os.CreateTemp("", "sql-program-panel-")
 	if err != nil {
-		return err
+		return nil, nil, err
 	}
-	defer os.Remove(tmp.Name())
 
-	connector := ConnectorInfo{
+	connector := &ConnectorInfo{
 		Type: DatabaseConnector,
 		Id:   uuid.New().String(),
 		DatabaseConnectorInfo: &DatabaseConnectorInfo{
@@ -61,9 +60,19 @@ func evalProgramSQLPanel(project *ProjectState, pageIndex int, panel *PanelInfo)
 			},
 		},
 	}
-	project.Connectors = append(project.Connectors, connector)
 
-	return evalDatabasePanel(project, pageIndex, &PanelInfo{
+	return connector, tmp, nil
+}
+
+func evalProgramSQLPanel(project *ProjectState, pageIndex int, panel *PanelInfo) error {
+	connector, tmp, err := MakeTmpSQLiteConnector()
+	if err != nil {
+		return err
+	}
+	defer os.Remove(tmp.Name())
+	project.Connectors = append(project.Connectors, *connector)
+
+	return EvalDatabasePanel(project, pageIndex, &PanelInfo{
 		Type:    DatabasePanel,
 		Id:      panel.Id,
 		Content: panel.Content,
@@ -72,10 +81,10 @@ func evalProgramSQLPanel(project *ProjectState, pageIndex int, panel *PanelInfo)
 				ConnectorId: connector.Id,
 			},
 		},
-	})
+	}, nil)
 }
 
-func (ec evalContext) evalProgramPanel(project *ProjectState, pageIndex int, panel *PanelInfo) error {
+func (ec EvalContext) evalProgramPanel(project *ProjectState, pageIndex int, panel *PanelInfo) error {
 	if panel.Program.Type == SQL {
 		return evalProgramSQLPanel(project, pageIndex, panel)
 	}
@@ -93,7 +102,7 @@ func (ec evalContext) evalProgramPanel(project *ProjectState, pageIndex int, pan
 	defer os.Remove(tmp.Name())
 
 	resultsFile := getProjectResultsFile(project.Id)
-	panelResultsFile := getPanelResultsFile(project.Id, panel.Id)
+	panelResultsFile := GetPanelResultsFile(project.Id, panel.Id)
 	jsonIdMap := getIdMapJson(project.Pages[pageIndex])
 	preamble := strings.ReplaceAll(p.Preamble, "$$RESULTS_FILE$$", resultsFile)
 	preamble = strings.ReplaceAll(preamble, "$$PANEL_RESULTS_FILE$$", panelResultsFile)

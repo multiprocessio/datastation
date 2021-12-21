@@ -1,4 +1,4 @@
-package main
+package runner
 
 import (
 	"path"
@@ -28,14 +28,14 @@ type Settings struct {
 
 var defaultSettingsFile = path.Join(FS_BASE, ".settings")
 
-var defaultSettings = &Settings{
+var DefaultSettings = &Settings{
 	Id:            uuid.New().String(),
 	File:          path.Join(defaultSettingsFile),
 	StdoutMaxSize: 5000,
 	Theme:         "light",
 }
 
-func loadSettings() (*Settings, error) {
+func LoadSettings() (*Settings, error) {
 	var settings Settings
 	err := readJSONFileInto(defaultSettingsFile, &settings)
 	return &settings, err
