@@ -215,11 +215,17 @@ func writeRowFromDatabase(dbInfo DatabaseConnectorInfoDatabase, w *JSONArrayWrit
 				// Do conversion for ints, floats, and bools
 			case "INT", "BIGINT", "INT1", "INT2", "INT4", "INT8":
 				if dbInfo.Type == "mysql" {
-					row[col], _ = strconv.Atoi(string(row[col].([]uint8)))
+					row[col], err = strconv.Atoi(string(row[col].([]uint8)))
+					if err != nil {
+						return edsef("Failed to convert int (%s): %s", t, err)
+					}
 				}
-			case "REAL", "BIGREAL", "NUMERIC", "DECIMAL":
+			case "REAL", "BIGREAL", "NUMERIC", "DECIMAL", "FLOAT", "NUMBER":
 				if bs, ok := row[col].([]uint8); ok {
-					row[col], _ = strconv.ParseFloat(string(bs), 64)
+					row[col], err = strconv.ParseFloat(string(bs), 64)
+					if err != nil {
+						return edsef("Failed to convert float (%s): %s", t, err)
+					}
 				}
 			case "BOOLEAN", "BOOL":
 				row[col] = string(bs) == "true" || string(bs) == "TRUE" || string(bs) == "1"
