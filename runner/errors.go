@@ -1,4 +1,4 @@
-package main
+package runner
 
 import (
 	"encoding/json"
@@ -60,6 +60,7 @@ func makeErrException(e error) *DSError {
 }
 
 var edse = makeErrException
+var Edse = edse
 
 func edsef(msg string, args ...interface{}) *DSError {
 	return edse(fmt.Errorf(msg, args...))

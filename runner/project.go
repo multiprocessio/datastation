@@ -1,4 +1,4 @@
-package main
+package runner
 
 import (
 	"encoding/json"
@@ -28,7 +28,7 @@ func readJSONFileInto(file string, into interface{}) error {
 	return err
 }
 
-func writeJSONFile(file string, value interface{}) error {
+func WriteJSONFile(file string, value interface{}) error {
 	f, err := openTruncate(file)
 	if err != nil {
 		return err

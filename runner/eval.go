@@ -1,11 +1,37 @@
-package main
+package runner
 
 import (
+	"log"
 	"os"
+	"time"
 )
 
+var iso8601Format = "2006-01-02T15:04:05.999Z"
+var logPrefixSet = false
+
+func _logln(level, msg string, args ...interface{}) {
+	if !logPrefixSet {
+		log.SetFlags(0)
+		logPrefixSet = true
+	}
+	baseMsg := "[" + level + "] " + time.Now().Format(iso8601Format) + " " + msg
+	if msg[len(msg)-1] != '\n' {
+		msg += "\n"
+	}
+	log.Printf(baseMsg, args...)
+}
+
+func Logln(msg string, args ...interface{}) {
+	_logln("INFO", msg, args...)
+}
+
+func Fatalln(msg string, args ...interface{}) {
+	_logln("FATAL", msg, args...)
+	os.Exit(2)
+}
+
 func panelResultsExist(projectId, panelId string) bool {
-	resultsFile := getPanelResultsFile(projectId, panelId)
+	resultsFile := GetPanelResultsFile(projectId, panelId)
 	_, err := os.Stat(resultsFile)
 	return err == nil
 }
@@ -38,11 +64,15 @@ func allImportedPanelResultsExist(project ProjectState, page ProjectPage, panel 
 	return "", true
 }
 
-type evalContext struct {
+type EvalContext struct {
 	settings Settings
 }
 
-func (ec evalContext) eval(projectId, panelId string) error {
+func NewEvalContext(s Settings) EvalContext {
+	return EvalContext{s}
+}
+
+func (ec EvalContext) Eval(projectId, panelId string) error {
 	project, pageIndex, panel, err := getProjectPanel(projectId, panelId)
 	if err != nil {
 		return err
@@ -55,22 +85,22 @@ func (ec evalContext) eval(projectId, panelId string) error {
 
 	switch panel.Type {
 	case FilePanel:
-		logln("Evaling file panel")
+		Logln("Evaling file panel")
 		return evalFilePanel(project, pageIndex, panel)
 	case HttpPanel:
-		logln("Evaling http panel")
+		Logln("Evaling http panel")
 		return evalHttpPanel(project, pageIndex, panel)
 	case LiteralPanel:
-		logln("Evaling literal panel")
+		Logln("Evaling literal panel")
 		return evalLiteralPanel(project, pageIndex, panel)
 	case ProgramPanel:
-		logln("Evaling program panel")
+		Logln("Evaling program panel")
 		return ec.evalProgramPanel(project, pageIndex, panel)
 	case DatabasePanel:
-		logln("Evaling database panel")
+		Logln("Evaling database panel")
 		return EvalDatabasePanel(project, pageIndex, panel, nil)
 	case FilaggPanel:
-		logln("Evaling database panel")
+		Logln("Evaling database panel")
 		return evalFilaggPanel(project, pageIndex, panel)
 	}
 

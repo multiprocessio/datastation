@@ -1,4 +1,4 @@
-package main
+package runner
 
 import (
 	"encoding/base64"
@@ -228,7 +228,7 @@ func writeRowFromDatabase(dbInfo DatabaseConnectorInfoDatabase, w *JSONArrayWrit
 				// Default to treating everything as a string
 				row[col] = string(bs)
 				if !wroteFirstRow && !textTypes[t] {
-					logln("Skipping unknown type: " + s.DatabaseTypeName())
+					Logln("Skipping unknown type: " + s.DatabaseTypeName())
 				}
 			}
 		}
@@ -289,6 +289,7 @@ func EvalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo, p
 		dbInfo.Type == "mysql" || dbInfo.Type == "sqlite" || dbInfo.Type == "postgres",
 		qt,
 	)
+	fmt.Println(query, panelsToImport, "PHIL", err)
 	if err != nil {
 		return err
 	}
@@ -326,15 +327,22 @@ func EvalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo, p
 
 	if panelResultLoader == nil {
 		panelResultLoader = func(projectId, panelId string, res interface{}) error {
-			return readJSONFileInto(GetPanelResultsFile(projectId, panel.id), res)
+			return readJSONFileInto(GetPanelResultsFile(projectId, panel.Id), res)
 		}
 	}
 
-	return withRemoteConnection(server, host, port, func(host, port string) error {
-		out := getPanelResultsFile(project.Id, panel.Id)
+	out := GetPanelResultsFile(project.Id, panel.Id)
+	w, err := openTruncate(out)
+	if err != nil {
+		return err
+	}
+	defer w.Close()
 
+	fmt.Println("HERE?")
+	return withRemoteConnection(server, host, port, func(host, port string) error {
 		wroteFirstRow := false
-		return withJSONArrayOutWriterFile(out, func(w *JSONArrayWriter) error {
+		return withJSONArrayOutWriterFile(w, func(w *JSONArrayWriter) error {
+			fmt.Println("ABOUT TO IMPORT?")
 			_, err := importAndRun(
 				func(createTableStmt string) error {
 					_, err := db.Exec(createTableStmt)

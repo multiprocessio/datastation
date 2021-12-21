@@ -1,4 +1,4 @@
-package main
+package runner
 
 import (
 	"bufio"
@@ -43,8 +43,8 @@ func (j *JSONArrayWriter) Write(row interface{}) error {
 	return nil
 }
 
-func withJSONOutWriter(w *os.File, first, last string, cb func() error) error {
-	_, err := w.WriteString(first)
+func withJSONOutWriter(w io.Writer, first, last string, cb func() error) error {
+	_, err := w.Write([]byte(first))
 	if err != nil {
 		return edsef("Failed to write JSON start marker: %s", err)
 	}
@@ -54,7 +54,7 @@ func withJSONOutWriter(w *os.File, first, last string, cb func() error) error {
 		return err
 	}
 
-	_, err = w.WriteString(last)
+	_, err = w.Write([]byte(last))
 	if err != nil {
 		return edsef("Failed to write JSON end marker: %s", err)
 	}
@@ -62,7 +62,7 @@ func withJSONOutWriter(w *os.File, first, last string, cb func() error) error {
 	return nil
 }
 
-func withJSONArrayOutWriter(w *os.File, cb func(w *JSONArrayWriter) error) error {
+func withJSONArrayOutWriter(w io.Writer, cb func(w *JSONArrayWriter) error) error {
 	return withJSONOutWriter(w, "[", "]", func() error {
 		return cb(&JSONArrayWriter{w, true})
 	})
@@ -72,17 +72,11 @@ func openTruncate(out string) (*os.File, error) {
 	return os.OpenFile(out, os.O_TRUNC|os.O_WRONLY|os.O_CREATE, os.ModePerm)
 }
 
-func withJSONArrayOutWriterFile(out string, cb func(w *JSONArrayWriter) error) error {
-	w, err := openTruncate(out)
-	if err != nil {
-		return err
-	}
-	defer w.Close()
-
-	return withJSONArrayOutWriter(w, cb)
+func withJSONArrayOutWriterFile(out io.Writer, cb func(w *JSONArrayWriter) error) error {
+	return withJSONArrayOutWriter(out, cb)
 }
 
-func transformCSV(in io.Reader, out string) error {
+func transformCSV(in io.Reader, out io.Writer) error {
 	r := csv.NewReader(in)
 
 	return withJSONArrayOutWriterFile(out, func(w *JSONArrayWriter) error {
@@ -122,7 +116,7 @@ func transformCSV(in io.Reader, out string) error {
 	})
 }
 
-func transformCSVFile(in, out string) error {
+func transformCSVFile(in string, out io.Writer) error {
 	f, err := os.Open(in)
 	if err != nil {
 		return err
@@ -132,14 +126,8 @@ func transformCSVFile(in, out string) error {
 	return transformCSV(f, out)
 }
 
-func transformJSON(in io.Reader, out string) error {
-	w, err := openTruncate(out)
-	if err != nil {
-		return err
-	}
-	defer w.Close()
-
-	_, err = w.ReadFrom(in)
+func transformJSON(in io.Reader, out io.Writer) error {
+	_, err := io.Copy(out, in)
 	if err == io.EOF {
 		err = nil
 	}
@@ -147,7 +135,7 @@ func transformJSON(in io.Reader, out string) error {
 	return err
 }
 
-func transformJSONFile(in, out string) error {
+func transformJSONFile(in string, out io.Writer) error {
 	r, err := os.Open(in)
 	if err != nil {
 		return err
@@ -157,7 +145,7 @@ func transformJSONFile(in, out string) error {
 	return transformJSON(r, out)
 }
 
-func transformParquet(in source.ParquetFile, out string) error {
+func transformParquet(in source.ParquetFile, out io.Writer) error {
 	r, err := reader.NewParquetReader(in, nil, int64(preferredParallelism))
 	if err != nil {
 		return err
@@ -194,7 +182,7 @@ func transformParquet(in source.ParquetFile, out string) error {
 	})
 }
 
-func transformParquetFile(in, out string) error {
+func transformParquetFile(in string, out io.Writer) error {
 	r, err := local.NewLocalFileReader(in)
 	if err != nil {
 		return err
@@ -229,7 +217,7 @@ func writeXLSXSheet(rows [][]string, w *JSONArrayWriter) error {
 	return nil
 }
 
-func transformXLSX(in *excelize.File, out string) error {
+func transformXLSX(in *excelize.File, out io.Writer) error {
 	sheets := in.GetSheetList()
 
 	// Single sheet files get flattened into just an array, not a dict mapping sheet name to sheet contents
@@ -244,28 +232,22 @@ func transformXLSX(in *excelize.File, out string) error {
 		})
 	}
 
-	w, err := openTruncate(out)
-	if err != nil {
-		return err
-	}
-	defer w.Close()
-
-	return withJSONOutWriter(w, "{", "}", func() error {
+	return withJSONOutWriter(out, "{", "}", func() error {
 		for i, sheet := range sheets {
 			if i == 0 {
-				_, err = w.WriteString(",\n")
+				_, err := out.Write([]byte(",\n"))
 				if err != nil {
 					return err
 				}
 			}
 
 			sheetNameKey := `"` + strings.ReplaceAll(sheet, `"`, `\\"`) + `":`
-			_, err = w.WriteString(sheetNameKey)
+			_, err := out.Write([]byte(sheetNameKey))
 			if err != nil {
 				return err
 			}
 
-			err = withJSONArrayOutWriter(w, func(w *JSONArrayWriter) error {
+			err = withJSONArrayOutWriter(out, func(w *JSONArrayWriter) error {
 				rows, err := in.GetRows(sheet)
 				if err != nil {
 					return err
@@ -281,7 +263,7 @@ func transformXLSX(in *excelize.File, out string) error {
 	})
 }
 
-func transformXLSXFile(in, out string) error {
+func transformXLSXFile(in string, out io.Writer) error {
 	f, err := excelize.OpenFile(in)
 	if err != nil {
 		return err
@@ -290,24 +272,18 @@ func transformXLSXFile(in, out string) error {
 	return transformXLSX(f, out)
 }
 
-func transformGeneric(in io.Reader, out string) error {
+func transformGeneric(in io.Reader, out io.Writer) error {
 	bs, err := ioutil.ReadAll(in)
 	if err != nil {
 		return nil
 	}
 
-	w, err := openTruncate(out)
-	if err != nil {
-		return err
-	}
-	defer w.Close()
-
-	encoder := json.NewEncoder(w)
+	encoder := json.NewEncoder(out)
 	// string(bs) otherwise it's converted to bas64
 	return encoder.Encode(string(bs))
 }
 
-func transformGenericFile(in, out string) error {
+func transformGenericFile(in string, out io.Writer) error {
 	r, err := os.Open(in)
 	if err != nil {
 		return err
@@ -317,25 +293,19 @@ func transformGenericFile(in, out string) error {
 	return transformGeneric(r, out)
 }
 
-func transformJSONLines(in io.Reader, out string) error {
-	w, err := openTruncate(out)
-	if err != nil {
-		return err
-	}
-	defer w.Close()
-
+func transformJSONLines(in io.Reader, out io.Writer) error {
 	first := true
-	return withJSONOutWriter(w, "[", "]", func() error {
+	return withJSONOutWriter(out, "[", "]", func() error {
 		scanner := bufio.NewScanner(in)
 		for scanner.Scan() {
 			if !first {
-				_, err := w.WriteString(",\n")
+				_, err := out.Write([]byte(",\n"))
 				if err != nil {
 					return edsef("Could not write delimiter: %s", err)
 				}
 			}
 
-			_, err := w.WriteString(scanner.Text())
+			_, err := out.Write([]byte(scanner.Text()))
 			if err != nil {
 				return edsef("Could not write string: %s", err)
 			}
@@ -346,7 +316,7 @@ func transformJSONLines(in io.Reader, out string) error {
 	})
 }
 
-func transformJSONLinesFile(in, out string) error {
+func transformJSONLinesFile(in string, out io.Writer) error {
 	r, err := os.Open(in)
 	if err != nil {
 		return err
@@ -362,13 +332,7 @@ var BUILTIN_REGEX = map[string]*regexp.Regexp{
 	"text/nginxaccess":   regexp.MustCompile(`^(?P<remote>[^ ]*) (?P<host>[^ ]*) (?P<user>[^ ]*) \[(?P<time>[^\]]*)\] "(?P<method>\S+)(?: +(?P<path>[^\"]*?)(?: +\S*)?)?" (?P<code>[^ ]*) (?P<size>[^ ]*)(?: "(?P<referer>[^\"]*)" "(?P<agent>[^\"]*)"(?:\s+(?P<http_x_forwarded_for>[^ ]+))?)?$`),
 }
 
-func transformRegexp(in io.Reader, out string, re *regexp.Regexp) error {
-	w, err := openTruncate(out)
-	if err != nil {
-		return err
-	}
-	defer w.Close()
-
+func transformRegexp(in io.Reader, out io.Writer, re *regexp.Regexp) error {
 	scanner := bufio.NewScanner(in)
 	return withJSONArrayOutWriterFile(out, func(w *JSONArrayWriter) error {
 		for scanner.Scan() {
@@ -394,7 +358,7 @@ func transformRegexp(in io.Reader, out string, re *regexp.Regexp) error {
 	})
 }
 
-func transformRegexpFile(in, out string, re *regexp.Regexp) error {
+func transformRegexpFile(in string, out io.Writer, re *regexp.Regexp) error {
 	r, err := os.Open(in)
 	if err != nil {
 		return err
@@ -404,7 +368,7 @@ func transformRegexpFile(in, out string, re *regexp.Regexp) error {
 	return transformRegexp(r, out, re)
 }
 
-func getMimeType(fileName string, ct ContentTypeInfo) string {
+func GetMimeType(fileName string, ct ContentTypeInfo) string {
 	if ct.Type != "" {
 		return ct.Type
 	}
@@ -414,7 +378,7 @@ func getMimeType(fileName string, ct ContentTypeInfo) string {
 		return "text/csv"
 	case ".json":
 		return "application/json"
-	case ".jsonl":
+	case ".jsonl", ".ndjson":
 		return "application/jsonlines"
 	case ".xls", ".xlsx":
 		return "application/vnd.ms-excel"
@@ -446,32 +410,10 @@ func getServer(project *ProjectState, serverId string) (*ServerInfo, error) {
 	return nil, edsef("Unknown server: %d" + serverId)
 }
 
-func evalFilePanel(project *ProjectState, pageIndex int, panel *PanelInfo) error {
-	cti := panel.File.ContentTypeInfo
-	fileName := panel.File.Name
-	server, err := getServer(project, panel.ServerId)
-	if err != nil {
-		return err
-	}
+func TransformFile(fileName string, cti ContentTypeInfo, out io.Writer) error {
+	assumedType := GetMimeType(fileName, cti)
 
-	if server != nil {
-		// Resolve ~ to foreign home path.
-		// Will break if the server is not Linux.
-		fileName = strings.ReplaceAll(fileName, "~", "/home/"+server.Username)
-
-		out := getPanelResultsFile(project.Id, panel.Id)
-		return remoteFileReader(*server, fileName, func(r io.Reader) error {
-			return transformReader(r, fileName, cti, out)
-		})
-	}
-
-	fileName = resolvePath(fileName)
-
-	assumedType := getMimeType(fileName, cti)
-	logln("Assumed '%s' from '%s' given '%s' when loading file", assumedType, cti.Type, fileName)
-
-	out := getPanelResultsFile(project.Id, panel.Id)
-
+	Logln("Assumed '%s' from '%s' given '%s' when loading file", assumedType, cti.Type, fileName)
 	switch assumedType {
 	case "application/json":
 		return transformJSONFile(fileName, out)
@@ -496,6 +438,36 @@ func evalFilePanel(project *ProjectState, pageIndex int, panel *PanelInfo) error
 	}
 
 	return transformGenericFile(fileName, out)
+}
+
+func evalFilePanel(project *ProjectState, pageIndex int, panel *PanelInfo) error {
+	cti := panel.File.ContentTypeInfo
+	fileName := panel.File.Name
+	server, err := getServer(project, panel.ServerId)
+	if err != nil {
+		return err
+	}
+
+	out := GetPanelResultsFile(project.Id, panel.Id)
+	w, err := openTruncate(out)
+	if err != nil {
+		return err
+	}
+	defer w.Close()
+
+	if server != nil {
+		// Resolve ~ to foreign home path.
+		// Will break if the server is not Linux.
+		fileName = strings.ReplaceAll(fileName, "~", "/home/"+server.Username)
+
+		return remoteFileReader(*server, fileName, func(r io.Reader) error {
+			return TransformReader(r, fileName, cti, w)
+		})
+	}
+
+	fileName = resolvePath(fileName)
+
+	return TransformFile(fileName, cti, w)
 }
 
 func resolvePath(p string) string {

@@ -1,4 +1,4 @@
-package main
+package runner
 
 import (
 	"encoding/json"
@@ -70,9 +70,9 @@ func evalProgramSQLPanel(project *ProjectState, pageIndex int, panel *PanelInfo)
 		return err
 	}
 	defer os.Remove(tmp.Name())
-	project.Connectors = append(project.Connectors, connector)
+	project.Connectors = append(project.Connectors, *connector)
 
-	return evalDatabasePanel(project, pageIndex, &PanelInfo{
+	return EvalDatabasePanel(project, pageIndex, &PanelInfo{
 		Type:    DatabasePanel,
 		Id:      panel.Id,
 		Content: panel.Content,
@@ -81,10 +81,10 @@ func evalProgramSQLPanel(project *ProjectState, pageIndex int, panel *PanelInfo)
 				ConnectorId: connector.Id,
 			},
 		},
-	})
+	}, nil)
 }
 
-func (ec evalContext) evalProgramPanel(project *ProjectState, pageIndex int, panel *PanelInfo) error {
+func (ec EvalContext) evalProgramPanel(project *ProjectState, pageIndex int, panel *PanelInfo) error {
 	if panel.Program.Type == SQL {
 		return evalProgramSQLPanel(project, pageIndex, panel)
 	}
@@ -102,7 +102,7 @@ func (ec evalContext) evalProgramPanel(project *ProjectState, pageIndex int, pan
 	defer os.Remove(tmp.Name())
 
 	resultsFile := getProjectResultsFile(project.Id)
-	panelResultsFile := getPanelResultsFile(project.Id, panel.Id)
+	panelResultsFile := GetPanelResultsFile(project.Id, panel.Id)
 	jsonIdMap := getIdMapJson(project.Pages[pageIndex])
 	preamble := strings.ReplaceAll(p.Preamble, "$$RESULTS_FILE$$", resultsFile)
 	preamble = strings.ReplaceAll(preamble, "$$PANEL_RESULTS_FILE$$", panelResultsFile)

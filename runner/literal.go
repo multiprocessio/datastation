@@ -1,10 +1,15 @@
-package main
+package runner
 
 import "bytes"
 
 func evalLiteralPanel(project *ProjectState, pageIndex int, panel *PanelInfo) error {
 	cti := panel.Literal.ContentTypeInfo
-	out := getPanelResultsFile(project.Id, panel.Id)
+	out := GetPanelResultsFile(project.Id, panel.Id)
+	w, err := openTruncate(out)
+	if err != nil {
+		return err
+	}
+	defer w.Close()
 	buf := bytes.NewReader([]byte(panel.Content))
-	return transformReader(buf, "", cti, out)
+	return TransformReader(buf, "", cti, w)
 }
