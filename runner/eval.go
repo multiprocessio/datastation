@@ -38,11 +38,11 @@ func allImportedPanelResultsExist(project ProjectState, page ProjectPage, panel 
 	return "", true
 }
 
-type evalContext struct {
+type EvalContext struct {
 	settings Settings
 }
 
-func (ec evalContext) eval(panelId, projectId string) error {
+func (ec EvalContext) Eval(panelId, projectId string) error {
 	project, pageIndex, panel, err := getProjectPanel(projectId, panelId)
 	if err != nil {
 		return err
