@@ -270,6 +270,9 @@ func importAndRun(
 		// database.
 		var res []map[string]interface{}
 		err = panelResultLoader(projectId, panel.id, &res)
+		if err != nil {
+			return nil, err
+		}
 
 		for _, resChunk := range chunk(res, 1000) {
 			query, values := formatImportQueryAndRows(

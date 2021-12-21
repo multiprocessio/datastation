@@ -200,6 +200,13 @@ func writeRowFromDatabase(dbInfo DatabaseConnectorInfoDatabase, w *JSONArrayWrit
 		return err
 	}
 
+	// Needing this whole translation layer may be a good reason
+	// not to use sqlx since it translates **into** this layer
+	// from being raw.  At this point we're just reimplementing
+	// sqlx in reverse on top of sqlx. Might be better to do
+	// reflection directly on the sql package instead. Would be
+	// worth benchmarking.
+
 	// The MySQL driver is not friendly about unknown data types.
 	// https://github.com/go-sql-driver/mysql/issues/441
 	for _, s := range colTypes {
@@ -341,7 +348,8 @@ func EvalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo, p
 
 	if panelResultLoader == nil {
 		panelResultLoader = func(projectId, panelId string, res interface{}) error {
-			return readJSONFileInto(GetPanelResultsFile(projectId, panel.Id), res)
+			f := GetPanelResultsFile(projectId, panelId)
+			return readJSONFileInto(f, res)
 		}
 	}
 
