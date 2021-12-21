@@ -86,3 +86,56 @@ type VariedShape struct {
 
 var unknownShape = Shape{Kind: UnknownKind}
 var defaultShape = unknownShape
+
+func GetArrayShape(id string, raw []map[string]interface{}, sampleSize int) (*Shape, error) {
+	if raw == nil {
+		return nil, makeErrNotAnArrayOfObjects(id)
+	}
+
+	obj := ObjectShape{
+		Children: map[string]Shape{},
+	}
+
+	for i, row := range raw {
+		if i > sampleSize {
+			break
+		}
+
+		for key, val := range row {
+			var name ScalarName  = StringScalar
+			switch t := val.(type) {
+			case int, int64, float64, float32, int32, int16, int8, uint, uint64, uint32, uint8, uint16:
+				name = NumberScalar
+			case bool:
+				name = BooleanScalar
+			case string, []byte:
+				name = StringScalar
+			default:
+				Logln("Skipping unknown type: %s", t)
+				continue
+			}
+
+			// Downgrade anything with multiple types to string
+			if shape, set := obj.Children[key]; set && shape.ScalarShape.Name != name {
+				name = StringScalar
+			}
+
+			obj.Children[key] = Shape{
+				Kind: ScalarKind,
+				ScalarShape: &ScalarShape{
+					Name: name,
+				},
+			}
+		}
+	}
+
+	return &Shape{
+		Kind: ArrayKind,
+		ArrayShape: &ArrayShape{
+			Children: Shape{
+				Kind: ObjectKind,
+				ObjectShape: &obj,
+			},
+		},
+	}, nil
+}

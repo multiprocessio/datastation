@@ -27,7 +27,7 @@ func resolveContentType(fileExtensionOrContentType string) string {
 
 var firstNonFlagArg = ""
 
-func panelResultLoader(_, _ string, res interface{}) error {
+func getResult(res interface{}) error {
 	out := bytes.NewBuffer(nil)
 	arg := firstNonFlagArg
 
@@ -81,104 +81,21 @@ func main() {
 		lastNonFlagArg = arg
 	}
 
+	var res []map[string]interface{}
+	err := getResult(&res)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	sampleSize := 50
+	shape, err := runner.GetArrayShape(firstNonFlagArg, res, sampleSize)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	p0 := runner.PanelInfo{
 		ResultMeta: runner.PanelResult{
-			Shape: runner.Shape{
-				Kind: runner.ArrayKind,
-				ArrayShape: &runner.ArrayShape{
-					Children: runner.Shape{
-						Kind: runner.ObjectKind,
-						ObjectShape: &runner.ObjectShape{
-							Children: map[string]runner.Shape{
-								" Name ": {
-									Kind: runner.ScalarKind,
-									ScalarShape: &runner.ScalarShape{
-										Name: runner.StringScalar,
-									},
-								},
-								"Phone Number ": {
-									Kind: runner.ScalarKind,
-									ScalarShape: &runner.ScalarShape{
-										Name: runner.StringScalar,
-									},
-								},
-								"Email": {
-									Kind: runner.ScalarKind,
-									ScalarShape: &runner.ScalarShape{
-										Name: runner.StringScalar,
-									},
-								},
-								"Street": {
-									Kind: runner.ScalarKind,
-									ScalarShape: &runner.ScalarShape{
-										Name: runner.StringScalar,
-									},
-								},
-								"    City ": {
-									Kind: runner.ScalarKind,
-									ScalarShape: &runner.ScalarShape{
-										Name: runner.StringScalar,
-									},
-								},
-								"State": {
-									Kind: runner.ScalarKind,
-									ScalarShape: &runner.ScalarShape{
-										Name: runner.StringScalar,
-									},
-								},
-								"Zip Code ": {
-									Kind: runner.ScalarKind,
-									ScalarShape: &runner.ScalarShape{
-										Name: runner.StringScalar,
-									},
-								},
-								"Routing Number   ": {
-									Kind: runner.ScalarKind,
-									ScalarShape: &runner.ScalarShape{
-										Name: runner.StringScalar,
-									},
-								},
-								"Department": {
-									Kind: runner.ScalarKind,
-									ScalarShape: &runner.ScalarShape{
-										Name: runner.StringScalar,
-									},
-								},
-								"Company	": {
-									Kind: runner.ScalarKind,
-									ScalarShape: &runner.ScalarShape{
-										Name: runner.StringScalar,
-									},
-								},
-								"Created At ": {
-									Kind: runner.ScalarKind,
-									ScalarShape: &runner.ScalarShape{
-										Name: runner.StringScalar,
-									},
-								},
-								"Profile Photo": {
-									Kind: runner.ScalarKind,
-									ScalarShape: &runner.ScalarShape{
-										Name: runner.StringScalar,
-									},
-								},
-								"  Description": {
-									Kind: runner.ScalarKind,
-									ScalarShape: &runner.ScalarShape{
-										Name: runner.StringScalar,
-									},
-								},
-								"Activated": {
-									Kind: runner.ScalarKind,
-									ScalarShape: &runner.ScalarShape{
-										Name: runner.StringScalar,
-									},
-								},
-							},
-						},
-					},
-				},
-			},
+			Shape: *shape,
 		},
 	}
 	project := &runner.ProjectState{
@@ -207,6 +124,11 @@ func main() {
 		},
 	}
 
+	panelResultLoader := func(_, _ string, out interface{}) error {
+		r := out.(*[]map[string]interface{})
+		*r = res
+		return nil
+	}
 	err = runner.EvalDatabasePanel(project, 0, panel, panelResultLoader)
 	if err != nil {
 		log.Fatal(err)
