@@ -102,7 +102,7 @@ func GetArrayShape(id string, raw []map[string]interface{}, sampleSize int) (*Sh
 		}
 
 		for key, val := range row {
-			var name ScalarName  = StringScalar
+			var name ScalarName = StringScalar
 			switch t := val.(type) {
 			case int, int64, float64, float32, int32, int16, int8, uint, uint64, uint32, uint8, uint16:
 				name = NumberScalar
@@ -133,7 +133,7 @@ func GetArrayShape(id string, raw []map[string]interface{}, sampleSize int) (*Sh
 		Kind: ArrayKind,
 		ArrayShape: &ArrayShape{
 			Children: Shape{
-				Kind: ObjectKind,
+				Kind:        ObjectKind,
 				ObjectShape: &obj,
 			},
 		},
