@@ -15,7 +15,7 @@ func main() {
 	}
 	defer db.Close()
 
-	rows, err := db.Query(`SELECT 1 AS "col1", 2.3 AS "col2"`)
+	rows, err := db.Query(`SELECT 1 AS "col1", 2.3 AS "col2" FROM dual`)
 	if err != nil {
 		log.Fatal(err)
 	}
