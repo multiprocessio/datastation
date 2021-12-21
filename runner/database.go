@@ -293,9 +293,13 @@ func evalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo) e
 		return err
 	}
 
+	// Require queries end with semicolon primarily for Oracle
+	// that blows up without this. This will still blow up if
+	// there's no semicolon and there are comments.
+	// e.g. `SELECT 1 -- flubber` -> `SELECT 1 -- flubber;`
 	qWithoutWs := strings.TrimSpace(query)
 	if qWithoutWs[len(qWithoutWs)-1] != ';' {
-		qWithoutWs += ";"
+		query += ";"
 	}
 
 	server, err := getServer(project, panel.ServerId)
@@ -363,7 +367,7 @@ func evalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo) e
 
 				},
 				project.Id,
-				qWithoutWs,
+				query,
 				panelsToImport,
 				qt,
 				mangleInsert,
