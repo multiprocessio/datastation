@@ -35,7 +35,7 @@ const DATABASES = [
     query:
       // Oracle does not have true/false literals
       // Oracle doesn't support no-FROM. But the dual table is a dummy table.
-      `SELECT 1 AS "1", 2.2 AS "2", 1 AS "true", 'string' AS "string", TO_DATE('2021-01-01','YYYY-MM-DD') AS "date" FROM dual`,
+      `SELECT 1 AS "1", 2.2 AS "2", 3.9 AS "testfloatagain", 1 AS "true", 'string' AS "string", TO_DATE('2021-01-01','YYYY-MM-DD') AS "date" FROM dual`,
   },
   {
     type: 'postgres',
