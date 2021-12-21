@@ -33,11 +33,4 @@ jobs:
     - run: docker run -e ORACLE_RANDOM_PASSWORD="y" -e "APP_USER=test" -e "APP_USER_PASSWORD=test" -p 1521:1521 -d gvenzl/oracle-xe:latest
 
     - run: ./scripts/ci/prepare_linux.sh --integration-tests
-    - run: yarn format
-    - run: yarn tsc
-    - run: cd runner && gofmt -w .
-    - run: ./scripts/fail_on_diff.sh
-    - run: yarn test-licenses
-    # Needed so we can have ./build/desktop_runner.js and ./build/go_desktop_runner ready for tests
-    - run: yarn build-test-runner
-    - run: yarn test --runInBand --detectOpenHandles --forceExit --verbose desktop/panel/database.test.js
+    - run: cd runner && go run ./cmd/oracle.go
