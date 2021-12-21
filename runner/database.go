@@ -243,7 +243,7 @@ func writeRowFromDatabase(dbInfo DatabaseConnectorInfoDatabase, w *JSONArrayWrit
 
 }
 
-func evalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo) error {
+func EvalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo, panelResultLoader func(string, string, interface{}) error) error {
 	var connector *ConnectorInfo
 	for _, c := range project.Connectors {
 		cc := c
@@ -324,6 +324,12 @@ func evalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo) e
 		return err
 	}
 
+	if panelResultLoader == nil {
+		panelResultLoader = func(projectId, panelId string, res interface{}) error {
+			return readJSONFileInto(GetPanelResultsFile(projectId, panel.id), res)
+		}
+	}
+
 	return withRemoteConnection(server, host, port, func(host, port string) error {
 		out := getPanelResultsFile(project.Id, panel.Id)
 
@@ -362,6 +368,7 @@ func evalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo) e
 				panelsToImport,
 				qt,
 				mangleInsert,
+				panelResultLoader,
 			)
 
 			return err

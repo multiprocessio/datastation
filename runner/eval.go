@@ -38,11 +38,11 @@ func allImportedPanelResultsExist(project ProjectState, page ProjectPage, panel 
 	return "", true
 }
 
-type EvalContext struct {
+type evalContext struct {
 	settings Settings
 }
 
-func (ec EvalContext) Eval(panelId, projectId string) error {
+func (ec evalContext) eval(projectId, panelId string) error {
 	project, pageIndex, panel, err := getProjectPanel(projectId, panelId)
 	if err != nil {
 		return err
@@ -68,7 +68,7 @@ func (ec EvalContext) Eval(panelId, projectId string) error {
 		return ec.evalProgramPanel(project, pageIndex, panel)
 	case DatabasePanel:
 		logln("Evaling database panel")
-		return evalDatabasePanel(project, pageIndex, panel)
+		return EvalDatabasePanel(project, pageIndex, panel, nil)
 	case FilaggPanel:
 		logln("Evaling database panel")
 		return evalFilaggPanel(project, pageIndex, panel)

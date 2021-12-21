@@ -90,6 +90,6 @@ func getProjectResultsFile(projectId string) string {
 	return strings.ReplaceAll(path.Join(FS_BASE, "."+project+".results"), "\\", "/")
 }
 
-func getPanelResultsFile(projectId string, panelId string) string {
+func GetPanelResultsFile(projectId string, panelId string) string {
 	return getProjectResultsFile(projectId) + panelId
 }

@@ -243,6 +243,7 @@ func importAndRun(
 	qt quoteType,
 	// Postgres uses $1, mysql/sqlite use ?
 	mangleInsert func(string) string,
+	panelResultLoader func(string, string, interface{}) error
 ) ([]map[string]interface{}, error) {
 	rowsIngested := 0
 	for _, panel := range panelsToImport {
@@ -260,8 +261,11 @@ func importAndRun(
 			return nil, err
 		}
 
+		// This is bad design, it loads the entire thing into
+		// memory and then chunks it up to be loaded into the
+		// database.
 		var res []map[string]interface{}
-		err = readJSONFileInto(getPanelResultsFile(projectId, panel.id), &res)
+		err = panelResultLoader(projectId, panel.Id, &res)
 
 		for _, resChunk := range chunk(res, 1000) {
 			query, values := formatImportQueryAndRows(

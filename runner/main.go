@@ -78,9 +78,9 @@ func main() {
 		settings = defaultSettings
 	}
 
-	ec := EvalContext{*settings}
+	ec := evalContext{*settings}
 
-	err = ec.Eval(panelId, projectId)
+	err = ec.eval(projectId, panelId)
 	if err != nil {
 		logln("Failed to eval: %s", err)
 

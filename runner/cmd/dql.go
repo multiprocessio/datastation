@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"path"
 	"strings"
 	"log"
 
@@ -16,13 +17,19 @@ func isatty() {
 	return false
 }
 
+func panelResultLoader(_, _ string, res interface{}) error {
+	if isatty() {
+		return runner.TransformGeneric(os.Stdin, res)
+	}
+}
+
 func main() {
 	filestream, contentType, err := getFileInfo()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	inputTable := "$$"
+	inputTable := "{}"
 	for i, arg := range os.Args {
 		if arg == "-i" || arg == "--input-table-name" {
 			if i > len(os.Args) - 2 {
@@ -34,23 +41,37 @@ func main() {
 	}
 
 	if len(os.Args) < 3 {
-		log.Fatal(`Expected query. Example: dql names.csv "SELECT name FROM $$"`)
+		log.Fatal(`Expected query. Example: dql names.csv "SELECT name FROM {}"`)
 	}
 
 	// Query is last argument
 	query := os.Args[len(os.Args)-1]
-
 	query = strings.Replace(query, inputTable, "DM_getPanel(0)")
+	panel := &runner.PanelInfo{
+		Type: runner.DatabasePanel,
+		DatabasePanel: &runner.DatabasePanelInfo{
 
-	panel := &runner.NewPanelInfo(runner.ProgramPanel, query)
-	panel.ProgramPanel = &runner.ProgramPanelInfo{
-		Type: runner.SQL,
+		},
 	}
 
-	err = runner.Eval(panel)
+	project := &runner.ProjectInfo{}
+	connector, tmp, err := MakeTmpSQLiteConnector()
+	if err != nil {
+		return err
+	}
+	defer os.Remove(tmp.Name())
+	project.Connectors = append(project.Connectors, connector)
+
+	err := runner.EvalDatabasePanel(project, 0, panel, panelResultLoader)
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	// Dump the result to stdout
+	fd, err := os.Open(runner.GetPanelResultsFile(project.Id, pp.Id), os.O_RDONLY)
+	if err != nil {
+		log.Fatalf("Could not open results file: %s", err)
+	}
 
+	io.Copy(fd, os.Stdout)
 }
