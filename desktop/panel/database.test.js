@@ -70,6 +70,11 @@ const vendorOverride = {
 
 for (const subprocess of RUNNERS) {
   for (const t of DATABASES) {
+    // Only test Oracle with the Go runner for now
+    if (t.type === 'oracle' && !subprocess?.go) {
+      continue;
+    }
+
     describe(
       t.type +
         ' running via ' +
