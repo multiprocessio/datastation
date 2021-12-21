@@ -297,10 +297,10 @@ func evalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo) e
 	// that blows up without this. This will still blow up if
 	// there's no semicolon and there are comments.
 	// e.g. `SELECT 1 -- flubber` -> `SELECT 1 -- flubber;`
-	qWithoutWs := strings.TrimSpace(query)
-	if qWithoutWs[len(qWithoutWs)-1] != ';' {
-		query += ";"
-	}
+	//qWithoutWs := strings.TrimSpace(query)
+	//if qWithoutWs[len(qWithoutWs)-1] != ';' {
+	//	query += ";"
+	//}
 
 	server, err := getServer(project, panel.ServerId)
 	if err != nil {
