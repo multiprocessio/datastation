@@ -123,7 +123,7 @@ for (const subprocess of RUNNERS) {
                   expect(v.length).toBe(1);
                   // These database drivers are all over the place between Node and Go.
                   // Close enough is fine I guess.
-		  console.log(v[0]);
+                  console.log(v[0]);
                   expect(v[0]['1']).toBe(1);
                   expect(String(v[0]['2'])).toBe('2.2');
                   expect(v[0]['true'] == '1').toBe(true);
