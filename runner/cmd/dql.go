@@ -19,7 +19,10 @@ func isatty() {
 
 func panelResultLoader(_, _ string, res interface{}) error {
 	if isatty() {
-		return runner.TransformGeneric(os.Stdin, res)
+		cti, err := resolveContentType(os.Args[2])
+		return runner.TransformReader(os.Stdin, res)
+	} else {
+
 	}
 }
 
