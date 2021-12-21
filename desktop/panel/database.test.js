@@ -31,6 +31,13 @@ const DATABASES = [
       'SELECT 1 AS `1`, 2.2 AS `2`, true AS `true`, "string" AS `string`, CAST("2021-01-01" AS DATE) AS `date`',
   },
   {
+    type: 'oracle',
+    query:
+      // Oracle does not have true/false literals
+      // Oracle doesn't support no-FROM. But the dual table is a dummy table.
+      `SELECT 1 AS "1", 2.2 AS "2", 1 AS "true", 'string' AS "string", TO_DATE('2021-01-01','YYYY-MM-DD') AS "date" FROM dual`,
+  },
+  {
     type: 'postgres',
     query: 'SELECT name, CAST(age AS INT) - 10 AS age FROM DM_getPanel(0)',
   },
@@ -50,6 +57,9 @@ const vendorOverride = {
   postgres: {
     address: 'localhost?sslmode=disable',
   },
+  oracle: {
+    database: 'XEPDB1',
+  },
   sqlserver: {
     address: 'localhost',
     username: 'sa',
@@ -60,6 +70,11 @@ const vendorOverride = {
 
 for (const subprocess of RUNNERS) {
   for (const t of DATABASES) {
+    // Only test Oracle with the Go runner for now
+    if (t.type === 'oracle' && !subprocess?.go) {
+      continue;
+    }
+
     describe(
       t.type +
         ' running via ' +
@@ -107,7 +122,11 @@ for (const subprocess of RUNNERS) {
                   // These database drivers are all over the place between Node and Go.
                   // Close enough is fine I guess.
                   expect(v[0]['1']).toBe(1);
-                  expect(String(v[0]['2'])).toBe('2.2');
+                  // TODO: fix the Oracle driver reading floats as zero
+                  // https://github.com/sijms/go-ora/issues/135
+                  if (t.type !== 'oracle') {
+                    expect(String(v[0]['2'])).toBe('2.2');
+                  }
                   expect(v[0]['true'] == '1').toBe(true);
                   expect(v[0].string).toBe('string');
                   expect(new Date(v[0].date)).toStrictEqual(

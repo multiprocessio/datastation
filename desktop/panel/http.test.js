@@ -66,7 +66,7 @@ for (const subprocessName of RUNNERS) {
           },
           { evalPanels: true, subprocessName }
         );
-      }, 10_000);
+      }, 30_000);
     }
   );
 
@@ -121,7 +121,7 @@ for (const subprocessName of RUNNERS) {
             },
             { evalPanels: true, subprocessName }
           );
-        }, 10_000);
+        }, 30_000);
       }
     );
   }
@@ -201,7 +201,7 @@ for (const subprocessName of RUNNERS) {
             },
             { evalPanels: true, subprocessName, servers }
           );
-        }, 10_000);
+        }, 30_000);
       }
     );
   }

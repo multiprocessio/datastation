@@ -28,6 +28,8 @@ jobs:
 
     # Start up sqlserver
     - run: docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=1StrongPwd!!" -p 1433:1433 -d mcr.microsoft.com/mssql/server:2019-latest
+    # Start up oracle database
+    - run: docker run -e ORACLE_RANDOM_PASSWORD="y" -e "APP_USER=test" -e "APP_USER_PASSWORD=test" -p 1521:1521 -d gvenzl/oracle-xe:latest
 
     - run: ./scripts/ci/prepare_linux.sh --integration-tests
     - run: yarn format
