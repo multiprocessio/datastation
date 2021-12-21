@@ -95,7 +95,7 @@ function canUseGoRunner(panel: PanelInfo, connectors: ConnectorInfo[]) {
     return false;
   }
 
-  return true;
+  return !['table', 'graph'].includes(panel.type);
 }
 
 export async function evalInSubprocess(
