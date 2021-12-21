@@ -11,7 +11,7 @@ require (
 	github.com/jmoiron/sqlx v1.2.0
 	github.com/lib/pq v1.10.4
 	github.com/mattn/go-sqlite3 v1.14.9
-	github.com/sijms/go-ora/v2 v2.2.15
+	github.com/sijms/go-ora/v2 v2.2.17
 	github.com/snowflakedb/gosnowflake v1.6.5
 	github.com/stretchr/testify v1.7.0
 	github.com/xitongsys/parquet-go v1.6.2
