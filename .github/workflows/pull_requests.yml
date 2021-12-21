@@ -39,4 +39,4 @@ jobs:
     - run: yarn test-licenses
     # Needed so we can have ./build/desktop_runner.js and ./build/go_desktop_runner ready for tests
     - run: yarn build-test-runner
-    - run: yarn test --runInBand --detectOpenHandles --forceExit --verbose desktop/panel/database.test.js -t 'oracle
+    - run: yarn test --runInBand --detectOpenHandles --forceExit --verbose desktop/panel/database.test.js -t 'oracle'
