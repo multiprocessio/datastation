@@ -28,7 +28,7 @@ function main() {
       const { handlers, project } = initialize({
         subprocess: {
           node: path.join(__dirname, 'desktop_runner.js'),
-          go: path.join(CODE_ROOT, 'build', 'go_desktop_runner'),
+          go: path.join(__dirname, 'go_desktop_runner'),
         },
         additionalHandlers: storeHandlers,
       });
