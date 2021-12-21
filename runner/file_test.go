@@ -21,7 +21,7 @@ func Test_transformJSONLines(t *testing.T) {
 	defer os.Remove(tmp2.Name())
 	assert.Nil(t, err)
 
-	err = transformJSONLinesFile(tmp.Name(), tmp2.Name())
+	err = transformJSONLinesFile(tmp.Name(), tmp2)
 	assert.Nil(t, err)
 
 	var m []map[string]interface{}

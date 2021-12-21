@@ -1,7 +1,7 @@
 //go:build testrunmain
 // +build testrunmain
 
-package runner
+package main
 
 import "testing"
 
