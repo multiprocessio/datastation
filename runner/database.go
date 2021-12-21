@@ -293,6 +293,11 @@ func evalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo) e
 		return err
 	}
 
+	qWithoutWs := strings.TrimSpace(query)
+	if qWithoutWs[len(qWithoutWs)-1] != ';' {
+		qWithoutWs += ";"
+	}
+
 	server, err := getServer(project, panel.ServerId)
 	if err != nil {
 		return err
@@ -358,7 +363,7 @@ func evalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo) e
 
 				},
 				project.Id,
-				query,
+				qWithoutWs,
 				panelsToImport,
 				qt,
 				mangleInsert,
