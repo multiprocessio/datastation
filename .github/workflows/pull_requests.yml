@@ -26,6 +26,7 @@ jobs:
         ref: ${{ github.ref }}
 
     - run: ./scripts/ci/prepare_windows.ps1
+      shell: pwsh
     - run: cd runner && go build -o ../dsq cmd/dsq/main.go
     - run: ./runner/cmd/dsq/scripts/test.sh
 
