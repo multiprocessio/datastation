@@ -9,6 +9,12 @@ import { registerRPCHandlers } from './rpc';
 import { initialize } from './runner';
 import { flushUnwritten, storeHandlers } from './store';
 
+const binaryExtension: Record<string, string> = {
+  darwin: '',
+  linux: '',
+  win32: '.exe',
+};
+
 function main() {
   configureLogger();
   log.info(APP_NAME, VERSION, DEBUG ? 'DEBUG' : '');
@@ -28,7 +34,10 @@ function main() {
       const { handlers, project } = initialize({
         subprocess: {
           node: path.join(__dirname, 'desktop_runner.js'),
-          go: path.join(__dirname, 'go_desktop_runner'),
+          go: path.join(
+            __dirname,
+            'go_desktop_runner' + binaryExtension[process.platform]
+          ),
         },
         additionalHandlers: storeHandlers,
       });

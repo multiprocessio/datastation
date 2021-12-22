@@ -140,7 +140,7 @@ func evalFilaggPanel(project *ProjectState, pageIndex int, panel *PanelInfo) err
 	qt := ansiSQLQuote
 	fg := panel.Filagg
 
-	_, panelIndex, err := getDependentPanel(project.Pages[pageIndex], fg.PanelSource)
+	_, panelIndex, err := getDependentPanel(project.Pages[pageIndex], fg.GetPanelSource())
 	if err != nil {
 		return err
 	}
@@ -153,7 +153,7 @@ func evalFilaggPanel(project *ProjectState, pageIndex int, panel *PanelInfo) err
 		groupColumn := quote(fg.GroupBy, qt.identifier)
 
 		groupExpression := quote(fg.GroupBy, qt.identifier)
-		if interval, err := strconv.Atoi(fg.WindowInterval); err == nil {
+		if interval, err := strconv.Atoi(fg.WindowInterval); err == nil && interval > 0 {
 			intervalSeconds := fmt.Sprintf("%d", interval*60)
 			groupExpression = `DATETIME(STRFTIME("%s", ` + fg.GroupBy + `) - STRFTIME("%s", ` + fg.GroupBy + `) % ` + intervalSeconds + `, "unixepoch")`
 			groupColumn = groupExpression + " " + fg.GroupBy
@@ -222,6 +222,8 @@ func evalFilaggPanel(project *ProjectState, pageIndex int, panel *PanelInfo) err
 		groupByClause,
 		orderByClause,
 		fg.Limit)
+
+	Logln("filagg query: %s", query)
 
 	fakepanel := &PanelInfo{
 		Content: query,

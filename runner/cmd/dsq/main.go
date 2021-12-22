@@ -40,9 +40,6 @@ func getResult(res interface{}) error {
 	arg := firstNonFlagArg
 
 	mimetype := resolveContentType(arg)
-	if mimetype == "" {
-		return fmt.Errorf(`First argument when used in a pipe should be file extension or content type. e.g. 'cat test.csv | dsq csv "SELECT * FROM {}"'`)
-	}
 
 	cti := runner.ContentTypeInfo{Type: mimetype}
 
@@ -57,11 +54,19 @@ func getResult(res interface{}) error {
 	}
 
 	if !runAsFile {
+		if mimetype == "" {
+			return fmt.Errorf(`First argument when used in a pipe should be file extension or content type. e.g. 'cat test.csv | dsq csv "SELECT * FROM {}"'`)
+		}
+
 		err := runner.TransformReader(os.Stdin, "", cti, out)
 		if err != nil {
 			return err
 		}
 	} else {
+		if arg == "" {
+			return fmt.Errorf(`First argument when not used in a pipe should be a file. e.g. 'dsq test.csv "SELECT COUNT(1) FROM {}"'`)
+		}
+
 		err := runner.TransformFile(arg, runner.ContentTypeInfo{}, out)
 		if err != nil {
 			return err
@@ -73,13 +78,10 @@ func getResult(res interface{}) error {
 }
 
 func main() {
-	if len(os.Args) < 3 {
-		log.Fatal(`Expected data source and query. e.g. 'dsq names.csv "SELECT name FROM {}"'`)
-	}
-
+	log.SetFlags(0)
 	runner.Verbose = false
 	inputTable := "{}"
-	lastNonFlagArg := ""
+	var nonFlagArgs []string
 	for i, arg := range os.Args[1:] {
 		if arg == "-i" || arg == "--input-table-alias" {
 			if i > len(os.Args)-2 {
@@ -95,17 +97,37 @@ func main() {
 			continue
 		}
 
-		if firstNonFlagArg == "" {
-			firstNonFlagArg = arg
+		if arg == "-h" || arg == "--help" {
+			log.Println("See the README on Github for details.\n\nhttps://github.com/multiprocessio/datastation/blob/main/runner/cmd/dsq/README.md")
+			return
 		}
 
-		lastNonFlagArg = arg
+		nonFlagArgs = append(nonFlagArgs, arg)
+	}
+
+	if len(nonFlagArgs) > 0 {
+		firstNonFlagArg = nonFlagArgs[0]
+	}
+
+	lastNonFlagArg := ""
+	if len(nonFlagArgs) > 1 {
+		lastNonFlagArg = nonFlagArgs[len(nonFlagArgs)-1]
 	}
 
 	var res []map[string]interface{}
 	err := getResult(&res)
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	if lastNonFlagArg == "" {
+		encoder := json.NewEncoder(os.Stdout)
+		err := encoder.Encode(res)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		return
 	}
 
 	sampleSize := 50
