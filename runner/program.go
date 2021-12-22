@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"path"
 	"strings"
 
 	"github.com/google/uuid"
@@ -90,7 +89,7 @@ func (ec EvalContext) evalProgramPanel(project *ProjectState, pageIndex int, pan
 	}
 
 	var p ProgramEvalInfo
-	err := readJSONFileInto(path.Join("shared", "languages", string(panel.Program.Type)+".json"), &p)
+	err := json.Unmarshal([]byte(packedProgramTypeInfo[panel.Program.Type]), &p)
 	if err != nil {
 		return err
 	}
