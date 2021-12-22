@@ -66,6 +66,7 @@ jobs:
         key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
         restore-keys: |
           ${{ runner.os }}-yarn-
+
     - run: ./scripts/ci/prepare_go.sh
     - run: yarn release-server 0.0.0-install
     - run: mv releases/datastation-server-x64-0.0.0-install.zip /tmp/
@@ -100,6 +101,7 @@ jobs:
         key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
         restore-keys: |
           ${{ runner.os }}-yarn-
+
     - run: ./scripts/ci/prepare_linux.sh
     - run: yarn release-desktop 0.0.0-e2etest
       # Set up a virtual framebuffer so Chrome will start
