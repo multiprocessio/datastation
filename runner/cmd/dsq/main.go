@@ -17,7 +17,10 @@ import (
 
 func isinpipe() bool {
 	fi, _ := os.Stdin.Stat()
-	return (fi.Mode() & os.ModeCharDevice) == 0
+	if fi == nil {
+		return false
+	}
+	return !(fi.Mode() & os.ModeNamedPipe == 0)
 }
 
 func resolveContentType(fileExtensionOrContentType string) string {
