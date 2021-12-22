@@ -62,7 +62,9 @@ arbitrary (structured) data.
 
 ## Comparisons
 
-I've only done some rough benchmarks, will do some more thorough ones eventually.
+The speed column is based on rough benchmarks based on [q's
+benchmarks](https://github.com/harelba/q/blob/master/test/BENCHMARK.md). Eventually
+I'll do a more thorough and public benchmark.
 
 | Name | Link | Speed | Supported File Types | Engine | Maturity |
 |----|-|-|-|-|------------------------------------------------------------------------|
