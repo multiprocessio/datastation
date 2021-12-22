@@ -12,7 +12,7 @@ $ go install github.com/multiprocessio/datastation/runner/cmd/dsq@latest
 
 You can either pipe data to `dsq` or you can pass a file name to it.
 
-When piping data to `dsq` you need to specify the file extension of MIME type.
+When piping data to `dsq` you need to specify the file extension or MIME type.
 
 For example:
 
