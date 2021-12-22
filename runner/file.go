@@ -70,10 +70,7 @@ func withJSONArrayOutWriter(w io.Writer, cb func(w *JSONArrayWriter) error) erro
 
 func openTruncate(out string) (*os.File, error) {
 	base := filepath.Dir(out)
-	err := os.Mkdir(base, os.ModePerm)
-	if err != nil {
-		return nil, err
-	}
+	_ := os.Mkdir(base, os.ModePerm)
 	return os.OpenFile(out, os.O_TRUNC|os.O_WRONLY|os.O_CREATE, os.ModePerm)
 }
 
