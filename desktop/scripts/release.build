@@ -10,4 +10,4 @@ cp icon.png build/icon.png
 cp icon.ico build/icon.ico
 cp icon.icns build/icon.icns
 yarn electron-packager --asar --overwrite --icon=build/icon.png --out=releases --build-version={arg0} --app-version={arg0} . "DataStation Community Edition"
-#zip -9 -r releases/datastation-{os}-{arch}-{arg0}.zip "releases/DataStation Community Edition-{os}-{arch}"
+zip -9 -r releases/datastation-{os}-{arch}-{arg0}.zip "releases/DataStation Community Edition-{os}-{arch}"
