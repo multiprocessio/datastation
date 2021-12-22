@@ -5,7 +5,7 @@ on:
     branches: [main]
 
 jobs:
-  dsq-tests:
+  dsq-tests-ubuntu:
     runs-on: ubuntu-latest
 
     steps:
@@ -14,5 +14,29 @@ jobs:
         ref: ${{ github.ref }}
 
     - run: ./scripts/ci/prepare_linux.sh --integration-tests
+    - run: cd runner && go build -o ../dsq cmd/dsq/main.go
+    - run: ./runner/cmd/dsq/scripts/test.sh
+
+  dsq-tests-windows:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@master
+      with:
+        ref: ${{ github.ref }}
+
+    - run: ./scripts/ci/prepare_windows.ps1
+    - run: cd runner && go build -o ../dsq cmd/dsq/main.go
+    - run: ./runner/cmd/dsq/scripts/test.sh
+
+  dsq-tests-macos:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@master
+      with:
+        ref: ${{ github.ref }}
+
+    - run: ./scripts/ci/prepare_macos.sh
     - run: cd runner && go build -o ../dsq cmd/dsq/main.go
     - run: ./runner/cmd/dsq/scripts/test.sh
