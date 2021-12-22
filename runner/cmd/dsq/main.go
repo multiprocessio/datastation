@@ -11,6 +11,8 @@ import (
 	"strings"
 
 	"github.com/multiprocessio/datastation/runner"
+
+	"github.com/google/uuid"
 )
 
 func isinpipe() bool {
@@ -98,6 +100,8 @@ func main() {
 		ResultMeta: runner.PanelResult{
 			Shape: *shape,
 		},
+		Id:   uuid.New().String(),
+		Name: uuid.New().String(),
 	}
 
 	projectTmp, err := ioutil.TempFile("", "dsq-project")
@@ -125,6 +129,8 @@ func main() {
 	panel := &runner.PanelInfo{
 		Type:    runner.DatabasePanel,
 		Content: query,
+		Id:      uuid.New().String(),
+		Name:    uuid.New().String(),
 		DatabasePanelInfo: &runner.DatabasePanelInfo{
 			Database: runner.DatabasePanelInfoDatabase{
 				ConnectorId: connector.Id,
