@@ -34,7 +34,10 @@ function main() {
       const { handlers, project } = initialize({
         subprocess: {
           node: path.join(__dirname, 'desktop_runner.js'),
-          go: path.join(__dirname, 'go_desktop_runner' + binaryExtension[process.platform]),
+          go: path.join(
+            __dirname,
+            'go_desktop_runner' + binaryExtension[process.platform]
+          ),
         },
         additionalHandlers: storeHandlers,
       });
