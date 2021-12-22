@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"os"
 	"strings"
@@ -98,7 +99,14 @@ func main() {
 			Shape: *shape,
 		},
 	}
+
+	projectTmp, err := ioutil.TempFile("", "dsq-project")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer os.Remove(projectTmp.Name())
 	project := &runner.ProjectState{
+		Id: projectTmp.Name(),
 		Pages: []runner.ProjectPage{
 			{
 				Panels: []runner.PanelInfo{p0},
