@@ -5,16 +5,24 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"os"
 	"strings"
 
 	"github.com/multiprocessio/datastation/runner"
+
+	"github.com/google/uuid"
 )
 
 func isinpipe() bool {
 	fi, _ := os.Stdin.Stat()
-	return (fi.Mode() & os.ModeCharDevice) == 0
+	if fi == nil {
+		return false
+	}
+
+	// This comes back incorrect in automated environments like Github Actions.
+	return !(fi.Mode()&os.ModeNamedPipe == 0)
 }
 
 func resolveContentType(fileExtensionOrContentType string) string {
@@ -31,20 +39,33 @@ func getResult(res interface{}) error {
 	out := bytes.NewBuffer(nil)
 	arg := firstNonFlagArg
 
-	var internalErr error
-	if isinpipe() {
-		mimetype := resolveContentType(arg)
-		if mimetype == "" {
-			return fmt.Errorf(`First argument when used in a pipe should be file extension or content type. e.g. 'cat test.csv | dsq csv "SELECT * FROM {}"'`)
-		}
-
-		cti := runner.ContentTypeInfo{Type: mimetype}
-		internalErr = runner.TransformReader(os.Stdin, "", cti, out)
-	} else {
-		internalErr = runner.TransformFile(arg, runner.ContentTypeInfo{}, out)
+	mimetype := resolveContentType(arg)
+	if mimetype == "" {
+		return fmt.Errorf(`First argument when used in a pipe should be file extension or content type. e.g. 'cat test.csv | dsq csv "SELECT * FROM {}"'`)
 	}
-	if internalErr != nil {
-		return internalErr
+
+	cti := runner.ContentTypeInfo{Type: mimetype}
+
+	// isinpipe() is sometimes incorrect. If the first arg
+	// is a file, fall back to acting like this isn't in a
+	// pipe.
+	runAsFile := !isinpipe()
+	if !runAsFile && cti.Type == arg {
+		if _, err := os.Stat(arg); err == nil {
+			runAsFile = true
+		}
+	}
+
+	if !runAsFile {
+		err := runner.TransformReader(os.Stdin, "", cti, out)
+		if err != nil {
+			return err
+		}
+	} else {
+		err := runner.TransformFile(arg, runner.ContentTypeInfo{}, out)
+		if err != nil {
+			return err
+		}
 	}
 
 	decoder := json.NewDecoder(out)
@@ -97,8 +118,17 @@ func main() {
 		ResultMeta: runner.PanelResult{
 			Shape: *shape,
 		},
+		Id:   uuid.New().String(),
+		Name: uuid.New().String(),
 	}
+
+	projectTmp, err := ioutil.TempFile("", "dsq-project")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer os.Remove(projectTmp.Name())
 	project := &runner.ProjectState{
+		Id: projectTmp.Name(),
 		Pages: []runner.ProjectPage{
 			{
 				Panels: []runner.PanelInfo{p0},
@@ -117,6 +147,8 @@ func main() {
 	panel := &runner.PanelInfo{
 		Type:    runner.DatabasePanel,
 		Content: query,
+		Id:      uuid.New().String(),
+		Name:    uuid.New().String(),
 		DatabasePanelInfo: &runner.DatabasePanelInfo{
 			Database: runner.DatabasePanelInfoDatabase{
 				ConnectorId: connector.Id,
