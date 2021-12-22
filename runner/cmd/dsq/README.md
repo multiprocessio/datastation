@@ -1,4 +1,4 @@
-# dsq: Run SQL queries against data files
+# dsq: Run SQL queries against JSON, CSV, Excel, Parquet, and more
 
 ## Install
 
