@@ -22,7 +22,7 @@ func isinpipe() bool {
 	}
 
 	// This comes back incorrect in automated environments like Github Actions.
-	return !(fi.Mode() & os.ModeNamedPipe == 0)
+	return !(fi.Mode()&os.ModeNamedPipe == 0)
 }
 
 func resolveContentType(fileExtensionOrContentType string) string {
