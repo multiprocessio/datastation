@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -ex
+set -e
 
 types="csv parquet json"
 
@@ -12,6 +12,8 @@ for t in $types; do
     else
 	echo "Pipe $t test successful."
     fi
+
+    cat ./testdata/userdata.$t
 
     sqlcount="$(./dsq ./testdata/userdata.$t 'SELECT COUNT(1) AS c FROM {}' | jq '.[0].c')"
     if [[ "$sqlcount" != "1000" ]]; then
