@@ -1,6 +1,9 @@
 package runner
 
-import "time"
+import (
+	"time"
+	"fmt"
+)
 
 type PanelResult struct {
 	Exception   interface{} `json:"exception" db:"exception"`
@@ -174,6 +177,7 @@ const (
 	AbsoluteRange TimeSeriesRangeType = "absolute"
 	RelativeRange                     = "relative"
 	FixedRange                        = "fixed"
+	None = "none"
 )
 
 type TimeSeriesRange struct {
@@ -199,7 +203,7 @@ const (
 )
 
 type FilaggPanelInfoFilagg struct {
-	PanelSource    string          `json:"panelSource"`
+	PanelSource    interface{}          `json:"panelSource"`
 	Filter         string          `json:"filter"`
 	Range          TimeSeriesRange `json:"range"`
 	AggregateType  AggregateType   `json:"aggregateType"`
@@ -209,6 +213,14 @@ type FilaggPanelInfoFilagg struct {
 	SortAsc        bool            `json:"sortAsc"`
 	WindowInterval string          `json:"windowInterval"`
 	Limit          int             `json:"limit"`
+}
+
+func (fpif FilaggPanelInfoFilagg) GetPanelSource() string {
+	if s, ok := fpif.PanelSource.(string); ok {
+		return s
+	}
+
+	return fmt.Sprintf("%v", fpif.PanelSource)
 }
 
 type FilaggPanelInfo struct {
