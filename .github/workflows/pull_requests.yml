@@ -29,6 +29,7 @@ jobs:
       shell: pwsh
     - run: cd runner && go build -o ../dsq cmd/dsq/main.go
     - run: ./runner/cmd/dsq/scripts/test.sh
+      shell: bash
 
   dsq-tests-macos:
     runs-on: macos-latest
