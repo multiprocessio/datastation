@@ -41,6 +41,19 @@ Or:
 $ dsq testdata.ndjson "SELECT name, AVG(time) FROM {} GROUP BY name ORDER BY AVG(time) DESC"
 ```
 
+## Transforming data to JSON without querying
+
+As a shorthand for `dsq testdata.csv "SELECT * FROM {}"` to convert
+supported file types to JSON you can skip the query and the converted
+JSON will be dumped to stdout.
+
+For example:
+
+```bash
+$ dsq testdata.csv
+[{...some csv data...},{...some csv data...},...]
+```
+
 ## Supported Data Types
 
 | Name | File Extension(s) | Notes |

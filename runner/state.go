@@ -1,8 +1,8 @@
 package runner
 
 import (
-	"time"
 	"fmt"
+	"time"
 )
 
 type PanelResult struct {
@@ -177,7 +177,7 @@ const (
 	AbsoluteRange TimeSeriesRangeType = "absolute"
 	RelativeRange                     = "relative"
 	FixedRange                        = "fixed"
-	None = "none"
+	None                              = "none"
 )
 
 type TimeSeriesRange struct {
@@ -203,7 +203,7 @@ const (
 )
 
 type FilaggPanelInfoFilagg struct {
-	PanelSource    interface{}          `json:"panelSource"`
+	PanelSource    interface{}     `json:"panelSource"`
 	Filter         string          `json:"filter"`
 	Range          TimeSeriesRange `json:"range"`
 	AggregateType  AggregateType   `json:"aggregateType"`
