@@ -44,7 +44,7 @@ dsq testdata.ndjson "SELECT name, AVG(time) FROM {} GROUP BY name ORDER BY AVG(t
 ## Supported Data Types
 
 | Name | File Extension(s) | Notes |
-|----------------------------------|
+|-----------|-|---------------------|
 | CSV | `csv` ||
 | JSON | `json` | Must be an array of objects. Nested object fields are ignored. |
 | Newline-delimited JSON | `ndjson`, `jsonl` ||
