@@ -68,10 +68,10 @@ I'll do a more thorough and public benchmark.
 
 | Name | Link | Speed | Supported File Types | Engine | Maturity |
 |----|-|-|-|-|------------------------------------------------------------------------|
-| q | http://harelba.github.io/q/ | Fast | Supports fewer file types | Uses SQLite | Mature |
-| textql | https://github.com/dinedal/textql | Ok | Supports fewer file types | Uses SQLite | Mature |
-| octoql | https://github.com/cube2222/octosql | Slow | Supports fewer file types | Custom engine missing many features from SQLite | Mature (other than SQL support) |
-| dsq (this) | Here | Ok | Supports many file types | Uses SQLite | Not mature |
+| q | http://harelba.github.io/q/ | Fast | CSV, TSV | Uses SQLite | Mature |
+| textql | https://github.com/dinedal/textql | Ok | CSV, TSV | Uses SQLite | Mature |
+| octoql | https://github.com/cube2222/octosql | Slow | JSON, CSV, Excel, Parquet | Custom engine missing many features from SQLite | Mature |
+| dsq | Here | Ok | CSV, JSON, Newline-delimited JSON, Parquet, Excel, Logs | Uses SQLite | Not mature |
 
 ## License, support, community, whatnot
 
