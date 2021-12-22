@@ -129,6 +129,7 @@ jobs:
         key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
         restore-keys: |
           ${{ runner.os }}-yarn-
+
     - run: ./scripts/ci/prepare_macos.sh
     # Needed so we can have ./build/desktop_runner.js ready for tests
     - run: yarn build-test-runner
@@ -157,6 +158,7 @@ jobs:
         key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
         restore-keys: |
           ${{ runner.os }}-yarn-
+
     - run: ./scripts/ci/prepare_windows.ps1
       shell: pwsh
     # Needed so we can have ./build/desktop_runner.js ready for tests
