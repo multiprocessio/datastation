@@ -20,6 +20,8 @@ func isinpipe() bool {
 	if fi == nil {
 		return false
 	}
+
+	// This comes back incorrect in automated environments like Github Actions.
 	return !(fi.Mode() & os.ModeNamedPipe == 0)
 }
 
@@ -37,20 +39,33 @@ func getResult(res interface{}) error {
 	out := bytes.NewBuffer(nil)
 	arg := firstNonFlagArg
 
-	var internalErr error
-	if isinpipe() {
-		mimetype := resolveContentType(arg)
-		if mimetype == "" {
-			return fmt.Errorf(`First argument when used in a pipe should be file extension or content type. e.g. 'cat test.csv | dsq csv "SELECT * FROM {}"'`)
-		}
-
-		cti := runner.ContentTypeInfo{Type: mimetype}
-		internalErr = runner.TransformReader(os.Stdin, "", cti, out)
-	} else {
-		internalErr = runner.TransformFile(arg, runner.ContentTypeInfo{}, out)
+	mimetype := resolveContentType(arg)
+	if mimetype == "" {
+		return fmt.Errorf(`First argument when used in a pipe should be file extension or content type. e.g. 'cat test.csv | dsq csv "SELECT * FROM {}"'`)
 	}
-	if internalErr != nil {
-		return internalErr
+
+	cti := runner.ContentTypeInfo{Type: mimetype}
+
+	// isinpipe() is sometimes incorrect. If the first arg
+	// is a file, fall back to acting like this isn't in a
+	// pipe.
+	runAsFile := !isinpipe()
+	if !runAsFile && cti.Type == arg {
+		if _, err := os.Stat(arg); err == nil {
+			runAsFile = true
+		}
+	}
+
+	if !runAsFile {
+		err := runner.TransformReader(os.Stdin, "", cti, out)
+		if err != nil {
+			return err
+		}
+	} else {
+		err := runner.TransformFile(arg, runner.ContentTypeInfo{}, out)
+		if err != nil {
+			return err
+		}
 	}
 
 	decoder := json.NewDecoder(out)
