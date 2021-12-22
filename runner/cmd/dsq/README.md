@@ -44,7 +44,7 @@ dsq testdata.ndjson "SELECT name, AVG(time) FROM {} GROUP BY name ORDER BY AVG(t
 ## Supported Data Types
 
 | Name | File Extension(s) | Notes |
------------------------------------|
+|----------------------------------|
 | CSV | `csv` ||
 | JSON | `json` | Must be an array of objects. Nested object fields are ignored. |
 | Newline-delimited JSON | `ndjson`, `jsonl` ||
@@ -59,6 +59,17 @@ dsq testdata.ndjson "SELECT name, AVG(time) FROM {} GROUP BY name ORDER BY AVG(t
 Under the hood dsq uses DataStation as a library and under that hood
 DataStation uses SQLite to power these kinds of SQL queries on
 arbitrary (structured) data.
+
+## Comparisons
+
+I've only done some rough benchmarks, will do some more thorough ones eventually.
+
+| Name | Link | Speed | Supported File Types | Engine | Maturity |
+|----------------------------------------------------------------------------|
+| q | http://harelba.github.io/q/ | Fast | Supports fewer file types | Uses SQLite | Mature |
+| textql | https://github.com/dinedal/textql | Ok | Supports fewer file types | Uses SQLite | Mature |
+| octoql | https://github.com/cube2222/octosql | Slow | Supports fewer file types | Custom engine missing many features from SQLite | Mature (other than SQL support) |
+| dsq (this) | Here | Ok | Supports many file types | Uses SQLite | Not mature |
 
 ## License, support, community, whatnot
 
