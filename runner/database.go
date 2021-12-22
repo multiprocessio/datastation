@@ -272,16 +272,6 @@ func EvalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo, p
 
 	dbInfo := connector.Database
 
-	vendor, connStr, err := getConnectionString(dbInfo)
-	if err != nil {
-		return err
-	}
-
-	db, err := sqlx.Open(vendor, connStr)
-	if err != nil {
-		return err
-	}
-
 	mangleInsert := defaultMangleInsert
 	qt := ansiSQLQuote
 	if dbInfo.Type == "postgres" {
@@ -338,7 +328,6 @@ func EvalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo, p
 		}
 
 		dbInfo.Database = tmp.Name()
-		tmp.Close()
 	}
 
 	host, port, err := getDatabaseHostPort(dbInfo.Address, defaultPorts[dbInfo.Type])
@@ -360,7 +349,18 @@ func EvalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo, p
 	}
 	defer w.Close()
 
-	return withRemoteConnection(server, host, port, func(host, port string) error {
+	return withRemoteConnection(server, host, port, func(proxyHost, proxyPort string) error {
+		dbInfo.Address = proxyHost + ":" + proxyPort
+		vendor, connStr, err := getConnectionString(dbInfo)
+		if err != nil {
+			return err
+		}
+
+		db, err := sqlx.Open(vendor, connStr)
+		if err != nil {
+			return err
+		}
+
 		wroteFirstRow := false
 		return withJSONArrayOutWriterFile(w, func(w *JSONArrayWriter) error {
 			_, err := importAndRun(
