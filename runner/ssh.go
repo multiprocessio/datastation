@@ -266,5 +266,5 @@ func withRemoteConnection(si *ServerInfo, host, port string, cb func(host, port 
 		return err
 	default:
 		return nil
-	}	
+	}
 }
