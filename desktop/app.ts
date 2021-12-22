@@ -9,7 +9,7 @@ import { registerRPCHandlers } from './rpc';
 import { initialize } from './runner';
 import { flushUnwritten, storeHandlers } from './store';
 
-const binaryExtension = {
+const binaryExtension: Record<string, string> = {
   darwin: '',
   linux: '',
   win32: '.exe',
