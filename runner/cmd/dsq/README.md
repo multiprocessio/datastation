@@ -16,14 +16,14 @@ When piping data to `dsq` you need to specify the file extension of MIME type.
 
 For example:
 
-```
-cat testdata.csv | dsq csv "SELECT * FROM {} LIMIT 1"
+```bash
+$ cat testdata.csv | dsq csv "SELECT * FROM {} LIMIT 1"
 ```
 
 Or:
 
-```
-cat testdata.parquet | dsq parquet "SELECT COUNT(1) FROM {}"
+```bash
+$ cat testdata.parquet | dsq parquet "SELECT COUNT(1) FROM {}"
 ```
 
 If you are passing a file, it must have the usual extension for its
@@ -31,14 +31,14 @@ content type.
 
 For example:
 
-```
-dsq testdata.json "SELECT * FROM {} WHERE x > 10"
+```bash
+$ dsq testdata.json "SELECT * FROM {} WHERE x > 10"
 ```
 
 Or:
 
-```
-dsq testdata.ndjson "SELECT name, AVG(time) FROM {} GROUP BY name ORDER BY AVG(time) DESC"
+```bash
+$ dsq testdata.ndjson "SELECT name, AVG(time) FROM {} GROUP BY name ORDER BY AVG(time) DESC"
 ```
 
 ## Supported Data Types
