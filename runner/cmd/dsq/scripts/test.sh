@@ -13,8 +13,6 @@ for t in $types; do
 	echo "Pipe $t test successful."
     fi
 
-    cat ./testdata/userdata.$t
-
     sqlcount="$(./dsq ./testdata/userdata.$t 'SELECT COUNT(1) AS c FROM {}' | jq '.[0].c')"
     if [[ "$sqlcount" != "1000" ]]; then
 	echo "Bad SQL count for $t (file). Expected 1000, got $sqlcount."
