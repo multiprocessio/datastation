@@ -35,6 +35,7 @@ jobs:
     - run: yarn format
     - run: yarn tsc
     - run: cd runner && gofmt -w .
+    - run: ./runner/scripts/generate_program_type_info.sh
     - run: ./scripts/fail_on_diff.sh
     - run: yarn test-licenses
     # Needed so we can have ./build/desktop_runner.js and ./build/go_desktop_runner ready for tests
