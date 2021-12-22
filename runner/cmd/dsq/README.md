@@ -65,7 +65,7 @@ arbitrary (structured) data.
 I've only done some rough benchmarks, will do some more thorough ones eventually.
 
 | Name | Link | Speed | Supported File Types | Engine | Maturity |
-|----------------------------------------------------------------------------|
+|----|-|-|-|-|------------------------------------------------------------------------|
 | q | http://harelba.github.io/q/ | Fast | Supports fewer file types | Uses SQLite | Mature |
 | textql | https://github.com/dinedal/textql | Ok | Supports fewer file types | Uses SQLite | Mature |
 | octoql | https://github.com/cube2222/octosql | Slow | Supports fewer file types | Custom engine missing many features from SQLite | Mature (other than SQL support) |
