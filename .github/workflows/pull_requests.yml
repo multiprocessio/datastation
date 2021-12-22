@@ -45,6 +45,18 @@ jobs:
     # Test server builds
     - run: yarn build-server
 
+  dsq-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@master
+      with:
+        ref: ${{ github.ref }}
+
+    - run: ./scripts/ci/prepare_linux.sh --integration-tests
+    - run: cd runner && go build -o ../dsq cmd/dsq/main.go
+    - run: ./runner/cmd/dsq/scripts/test.sh
+
   server-install:
     runs-on: ubuntu-latest
 
