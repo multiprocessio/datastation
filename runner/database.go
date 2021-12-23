@@ -24,16 +24,22 @@ import (
 	_ "github.com/snowflakedb/gosnowflake"
 )
 
-func getDatabaseHostPort(raw, defaultPort string) (string, string, error) {
-	beforeQuery := strings.Split(raw, "?")[0]
+func getDatabaseHostPortExtra(raw, defaultPort string) (string, string, string, error) {
+	addressAndArgs := strings.SplitN(raw, "?", 2)
+	extra := ""
+	beforeQuery := addressAndArgs[0]
+	if len(addressAndArgs) > 1 {
+		extra = addressAndArgs[1]
+	}
 	_, _, err := net.SplitHostPort(beforeQuery)
 	if err != nil && strings.HasSuffix(err.Error(), "missing port in address") {
 		beforeQuery += ":" + defaultPort
 	} else if err != nil {
-		return "", "", edsef("Could not split host-port: %s", err)
+		return "", "", "", edsef("Could not split host-port: %s", err)
 	}
 
-	return net.SplitHostPort(beforeQuery)
+	host, port, err := net.SplitHostPort(beforeQuery)
+	return host, port, extra, err
 }
 
 func debugObject(obj interface{}) {
@@ -97,7 +103,7 @@ var defaultPorts = map[DatabaseConnectorInfoType]string{
 
 func getConnectionString(dbInfo DatabaseConnectorInfoDatabase) (string, string, error) {
 	address := dbInfo.Address
-	split := strings.Split(address, "?")
+	split := strings.SplitN(address, "?", 2)
 	address = split[0]
 	extraArgs := ""
 	if len(split) > 1 {
@@ -272,16 +278,6 @@ func EvalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo, p
 
 	dbInfo := connector.Database
 
-	vendor, connStr, err := getConnectionString(dbInfo)
-	if err != nil {
-		return err
-	}
-
-	db, err := sqlx.Open(vendor, connStr)
-	if err != nil {
-		return err
-	}
-
 	mangleInsert := defaultMangleInsert
 	qt := ansiSQLQuote
 	if dbInfo.Type == "postgres" {
@@ -306,16 +302,11 @@ func EvalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo, p
 		return err
 	}
 
-	// Require queries end with semicolon primarily for Oracle
-	// that blows up without this. This will still blow up if
-	// there's no semicolon and there are comments.
-	// e.g. `SELECT 1 -- flubber` -> `SELECT 1 -- flubber;`
-	//qWithoutWs := strings.TrimSpace(query)
-	//if qWithoutWs[len(qWithoutWs)-1] != ';' {
-	//	query += ";"
-	//}
-
-	server, err := getServer(project, panel.ServerId)
+	serverId := panel.ServerId
+	if serverId == "" {
+		serverId = connector.ServerId
+	}
+	server, err := getServer(project, serverId)
 	if err != nil {
 		return err
 	}
@@ -338,10 +329,9 @@ func EvalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo, p
 		}
 
 		dbInfo.Database = tmp.Name()
-		tmp.Close()
 	}
 
-	host, port, err := getDatabaseHostPort(dbInfo.Address, defaultPorts[dbInfo.Type])
+	host, port, extra, err := getDatabaseHostPortExtra(dbInfo.Address, defaultPorts[dbInfo.Type])
 	if err != nil {
 		return err
 	}
@@ -360,7 +350,21 @@ func EvalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo, p
 	}
 	defer w.Close()
 
-	return withRemoteConnection(server, host, port, func(host, port string) error {
+	return withRemoteConnection(server, host, port, func(proxyHost, proxyPort string) error {
+		dbInfo.Address = proxyHost + ":" + proxyPort
+		if extra != "" {
+			dbInfo.Address += "?" + extra
+		}
+		vendor, connStr, err := getConnectionString(dbInfo)
+		if err != nil {
+			return err
+		}
+
+		db, err := sqlx.Open(vendor, connStr)
+		if err != nil {
+			return err
+		}
+
 		wroteFirstRow := false
 		return withJSONArrayOutWriterFile(w, func(w *JSONArrayWriter) error {
 			_, err := importAndRun(
@@ -377,6 +381,7 @@ func EvalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo, p
 					if err != nil {
 						return nil, err
 					}
+
 					defer rows.Close()
 
 					for rows.Next() {

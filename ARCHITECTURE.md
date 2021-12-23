@@ -33,6 +33,10 @@ something to install all missing dependencies.
 
 ### ./desktop/panel
 
+NOTE: This code is being migrated to Go. All panel types except for a
+few database vendors have been ported to Go. A number of Node panel
+handlers have been deleted since they are no longer used.
+
 This is where eval handlers for each panel type (program, database,
 etc.) are defined.
 
@@ -44,6 +48,10 @@ handlers are actually run. ./desktop/runner.ts is the entrypoint for
 this on desktop. ./server/runner.ts is the equivalent on the server.
 
 This allows easy resource cleanup and easy "kill" panel eval support.
+
+## ./runner
+
+This is where the Go port of the original Node.js panel eval code is.
 
 ## ./server
 

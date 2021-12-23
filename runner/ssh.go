@@ -254,13 +254,17 @@ func withRemoteConnection(si *ServerInfo, host, port string, cb func(host, port 
 	localPort := localConn.Addr().(*net.TCPAddr).Port
 	cbErr := cb("localhost", fmt.Sprintf("%d", localPort))
 	if cbErr != nil {
-		return err
+		return cbErr
 	}
 
-	err = <-errC
-	if err == io.EOF {
+	select {
+	case err = <-errC:
+		if err == io.EOF {
+			return nil
+		}
+
+		return err
+	default:
 		return nil
 	}
-
-	return err
 }

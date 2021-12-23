@@ -14,6 +14,7 @@ func Test_getConnectionString(t *testing.T) {
 		expErr     error
 		expHost    string
 		expPort    string
+		expExtra   string
 	}{
 		{
 			DatabaseConnectorInfoDatabase{Type: "postgres", Username: "jim", Password: Encrypt{Encrypted: false, Value: "pw"}, Database: "test", Address: "localhost?sslmode=disable"},
@@ -22,6 +23,7 @@ func Test_getConnectionString(t *testing.T) {
 			nil,
 			"localhost",
 			"5432",
+			"sslmode=disable",
 		},
 		{
 			DatabaseConnectorInfoDatabase{Type: "postgres", Database: "test", Address: "big.com:8888?sslmode=disable"},
@@ -30,6 +32,7 @@ func Test_getConnectionString(t *testing.T) {
 			nil,
 			"big.com",
 			"8888",
+			"sslmode=disable",
 		},
 		{
 			DatabaseConnectorInfoDatabase{Type: "mysql", Username: "jim", Password: Encrypt{Encrypted: false, Value: "pw"}, Database: "test", Address: "localhost:9090"},
@@ -38,12 +41,14 @@ func Test_getConnectionString(t *testing.T) {
 			nil,
 			"localhost",
 			"9090",
+			"",
 		},
 		{
 			DatabaseConnectorInfoDatabase{Type: "sqlite", Database: "test.sql"},
 			"sqlite3",
 			"test.sql",
 			nil,
+			"",
 			"",
 			"",
 		},
@@ -54,12 +59,14 @@ func Test_getConnectionString(t *testing.T) {
 			nil,
 			"localhost",
 			"1521",
+			"",
 		},
 		{
 			DatabaseConnectorInfoDatabase{Type: "snowflake", Username: "jim", Password: Encrypt{Encrypted: false, Value: ""}, Database: "test", Address: "myid"},
 			"snowflake",
 			"jim@myid/test?",
 			nil,
+			"",
 			"",
 			"",
 		},
@@ -70,6 +77,7 @@ func Test_getConnectionString(t *testing.T) {
 			nil,
 			"",
 			"",
+			"x=y",
 		},
 		{
 			DatabaseConnectorInfoDatabase{Type: "sqlserver", Username: "jim", Password: Encrypt{Encrypted: false, Value: "pw"}, Database: "test", Address: "localhost"},
@@ -78,6 +86,7 @@ func Test_getConnectionString(t *testing.T) {
 			nil,
 			"localhost",
 			"1433",
+			"",
 		},
 		{
 			DatabaseConnectorInfoDatabase{Type: "clickhouse", Username: "jim", Password: Encrypt{Encrypted: false, Value: "pw"}, Database: "test", Address: "localhost"},
@@ -86,6 +95,7 @@ func Test_getConnectionString(t *testing.T) {
 			nil,
 			"localhost",
 			"9000",
+			"",
 		},
 		{
 			DatabaseConnectorInfoDatabase{Type: "clickhouse", Password: Encrypt{Encrypted: false, Value: ""}, Database: "test", Address: "localhost:9001"},
@@ -94,6 +104,7 @@ func Test_getConnectionString(t *testing.T) {
 			nil,
 			"localhost",
 			"9001",
+			"",
 		},
 	}
 	for _, test := range tests {
@@ -106,9 +117,10 @@ func Test_getConnectionString(t *testing.T) {
 			continue
 		}
 
-		host, port, err := getDatabaseHostPort(test.conn.Address, defaultPorts[DatabaseConnectorInfoType(test.expVendor)])
+		host, port, extra, err := getDatabaseHostPortExtra(test.conn.Address, defaultPorts[DatabaseConnectorInfoType(test.expVendor)])
 		assert.Nil(t, err)
 		assert.Equal(t, test.expHost, host)
 		assert.Equal(t, test.expPort, port)
+		assert.Equal(t, test.expExtra, extra)
 	}
 }
