@@ -50,7 +50,7 @@ export function Header() {
                 className="stars"
               >
                 <iframe
-                  src="https://datastation.multiprocess.io/stars.html"
+                  src="https://datastation.multiprocess.io/stars/datastation.html"
                   frameBorder="0"
                   scrolling="0"
                   width="100"
