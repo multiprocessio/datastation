@@ -1,4 +1,4 @@
-export const APP_NAME = 'DataStation';
+export const APP_NAME = 'DataStation Community Edition';
 export const SITE_ROOT = 'https://datastation.multiprocess.io';
 export const CHAT_LINK = 'https://discord.gg/f2wQBc4bXX';
 
