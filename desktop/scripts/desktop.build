@@ -1,7 +1,7 @@
 setenv UI_CONFIG_OVERRIDES "window.DS_CONFIG_MODE = 'desktop';"
 yarn build-ui
 
-cd runner && go build -o -ldflags="-w -s" ../build/go_desktop_runner{required_ext} cmd/main.go
+cd runner && go build -ldflags="-s -w" -o ../build/go_desktop_runner{required_ext} cmd/main.go
 upx --best --lzma build/go_desktop_runner{required_ext}
 
 yarn esbuild desktop/preload.ts --external:electron --sourcemap --bundle --outfile=build/preload.js

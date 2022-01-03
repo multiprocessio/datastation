@@ -9,6 +9,8 @@ prepend "global.DS_CONFIG_VERSION='{arg0}';" build/desktop.js
 cp icon.png build/icon.png
 cp icon.ico build/icon.ico
 cp icon.icns build/icon.icns
+
+# Clean stuff up
 rm -rf coverage
 rm -rf node_modules/canvas
 rm -rf certs
@@ -21,5 +23,13 @@ rm -rf type-overrides
 rm -rf *.png
 rm -rf TAGS
 rm -rf e2e
-yarn electron-packager --ignore=build/go_desktop_runner --asar --overwrite --icon=build/icon.png --out=releases --build-version={arg0} --app-version={arg0} . "DataStation Community Edition"
+rm -rf Dockerfile
+rm -rf dsq
+rm -rf *.js
+rm -rf tsconfig.json
+rm -rf yarn.lock
+rm -rf runner
+
+# Build and package
+yarn electron-packager --ignore=build/go_desktop_runner --ignore=releases --asar --overwrite --icon=build/icon.png --out=releases --build-version={arg0} --app-version={arg0} . "DataStation Community Edition"
 zip -9 -r releases/datastation-{os}-{arch}-{arg0}.zip "releases/DataStation Community Edition-{os}-{arch}"
