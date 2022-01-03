@@ -47,6 +47,9 @@ rm -rf *.js
 rm -rf tsconfig.json
 rm -rf yarn.lock
 rm -rf runner
+rm -rf desktop
+rm -rf ui
+rm -rf shared
 
 # Build and package
 yarn electron-packager --ignore=build/go_desktop_runner --ignore=releases --asar --overwrite --icon=build/icon.png --out=releases --build-version={arg0} --app-version={arg0} . "DataStation Community Edition"
