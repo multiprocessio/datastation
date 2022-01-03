@@ -7,25 +7,27 @@ import {
   UpdateSettingsRequest,
   UpdateSettingsResponse,
 } from '../shared/rpc';
-import { Settings } from '../shared/settings';
+import { Settings as SettingsT } from '../shared/settings';
 import { asyncRPC } from './asyncRPC';
+import { FormGroup } from './components/FormGroup';
+import { Toggle } from './components/Toggle';
 
 export const SettingsContext = React.createContext<{
-  state: Settings;
-  setState: (a0: Partial<Settings>) => void;
+  state: SettingsT;
+  setState: (a0: Partial<SettingsT>) => void;
 }>({
-  state: new Settings(''),
+  state: new SettingsT(''),
   setState(a) {
     throw new Error('Context not initialized.');
   },
 });
 
-export function useSettings(): [Settings, (s: Settings) => Promise<void>] {
+export function useSettings(): [SettingsT, (s: SettingsT) => Promise<void>] {
   const [settings, setSettingsInternal] = React.useState(null);
 
   function loadBrowserSettings() {
     if (MODE === 'browser') {
-      let settings = new Settings('');
+      let settings = new SettingsT('');
       try {
         settings = mergeDeep(
           settings,
@@ -58,7 +60,7 @@ export function useSettings(): [Settings, (s: Settings) => Promise<void>] {
     [settings]
   );
 
-  async function setSettings(s: Settings) {
+  async function setSettings(s: SettingsT) {
     setSettingsInternal({ ...s });
 
     if (MODE === 'browser') {
@@ -73,4 +75,27 @@ export function useSettings(): [Settings, (s: Settings) => Promise<void>] {
   }
 
   return [settings, setSettings];
+}
+
+export function Settings() {
+  const [settings, setSettings] = useSettings();
+
+  return (
+    <div className="container">
+      <div className="form">
+        <FormGroup label="Visual">
+          <div className="form-row">
+            <Toggle
+              label={settings.theme !== 'dark' ? 'Light Mode' : 'Dark Mode'}
+              value={settings.theme === 'dark'}
+              onChange={function handleLightModeToggle() {
+                settings.theme = settings.theme === 'dark' ? 'light' : 'dark';
+                setSettings(settings);
+              }}
+            />
+          </div>
+        </FormGroup>
+      </div>
+    </div>
+  );
 }

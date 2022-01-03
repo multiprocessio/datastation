@@ -9,5 +9,17 @@ prepend "global.DS_CONFIG_VERSION='{arg0}';" build/desktop.js
 cp icon.png build/icon.png
 cp icon.ico build/icon.ico
 cp icon.icns build/icon.icns
-yarn electron-packager --asar --overwrite --icon=build/icon.png --out=releases --build-version={arg0} --app-version={arg0} . "DataStation Community Edition"
+rm -rf coverage
+rm -rf node_modules/canvas
+rm -rf certs
+rm -rf *.md
+rm -rf *.yml
+rm -rf server
+rm -rf scripts
+rm -rf testdata
+rm -rf type-overrides
+rm -rf *.png
+rm -rf TAGS
+rm -rf e2e
+yarn electron-packager --ignore=build/go_desktop_runner --asar --overwrite --icon=build/icon.png --out=releases --build-version={arg0} --app-version={arg0} . "DataStation Community Edition"
 zip -9 -r releases/datastation-{os}-{arch}-{arg0}.zip "releases/DataStation Community Edition-{os}-{arch}"

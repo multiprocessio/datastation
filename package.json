@@ -11,6 +11,7 @@
     "build-test-runner": "python3 ./scripts/build.py ./runner/scripts/runner_test.build",
     "build-ui": "python3 ./scripts/build.py ./ui/scripts/ui.build",
     "build-server": "python3 ./scripts/build.py ./server/scripts/server.build",
+    "build-language-definitions": "python3 ./scripts/build.py ./ui/scripts/languages.build && ./runner/scripts/generate_program_type_info.sh",
     "start-server": "yarn build-server && node ./build/server.js",
     "start-desktop": "yarn build-desktop && yarn electron --trace-warning --unhandled-rejection=strict build/desktop.js",
     "start-ui": "./ui/scripts/watch_and_serve.sh",

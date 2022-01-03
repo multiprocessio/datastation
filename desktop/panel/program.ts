@@ -43,6 +43,7 @@ export async function evalProgram(
       idMap
     );
     const fullProgramBody = [preamble, ppi.content].join(EOL);
+    console.log(ppi.content);
     fs.writeFileSync(programTmp.path, fullProgramBody);
     try {
       const child = spawn(programPathOrName, [programTmp.path]);
@@ -72,6 +73,8 @@ export async function evalProgram(
           stderr += data;
         }
       });
+
+      console.log({ out, stderr });
 
       const code = await new Promise((resolve) => child.on('close', resolve));
       if (code !== 0) {

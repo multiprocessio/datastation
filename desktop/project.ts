@@ -110,6 +110,11 @@ export async function openWindow(project: string, newProject: boolean = false) {
     },
   });
 
+  win.webContents.setWindowOpenHandler(function windowOpenHandler({ url }) {
+    shell.openExternal(url);
+    return { action: 'deny' };
+  });
+
   const menu = Menu.buildFromTemplate(
     menuTemplate as MenuItemConstructorOptions[]
   );

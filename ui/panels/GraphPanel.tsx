@@ -16,7 +16,7 @@ import { FormGroup } from '../components/FormGroup';
 import { PanelSourcePicker } from '../components/PanelSourcePicker';
 import { Radio } from '../components/Radio';
 import { Select } from '../components/Select';
-import { SettingsContext } from '../settings';
+import { SettingsContext } from '../Settings';
 import { evalColumnPanel } from './TablePanel';
 import { PanelBodyProps, PanelDetailsProps, PanelUIDetails } from './types';
 

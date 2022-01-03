@@ -18,7 +18,7 @@ import * as React from 'react';
 // Shortcuts support, TODO: support non-emacs
 // This steals Ctrl-a so this should not be a default
 //import 'ace-builds/src-min-noconflict/keybinding-emacs';
-import { SettingsContext } from '../settings';
+import { SettingsContext } from '../Settings';
 import { useDebouncedLocalState } from './Input';
 import { Tooltip } from './Tooltip';
 

@@ -68,6 +68,32 @@ const TESTS = [
     condition: process.platform === 'linux' || inPath('python3'),
   },
   {
+    type: 'php',
+    content: `
+$prev = DM_getPanel(0);
+$panel = [];
+foreach ($row as $prev) {
+  $row['age'] = intval($row['age'] + 10)
+  array_push($prev, $row);
+}
+
+DM_setPanel(panel);`,
+    condition: process.platform === 'linux' || inPath('php'),
+  },
+  {
+    type: 'php',
+    content: `
+$prev = DM_getPanel('Raw Data');
+$panel = [];
+foreach ($row as $prev) {
+  $row['age'] = intval($row['age'] + 10)
+  array_push($prev, $row);
+}
+
+DM_setPanel(panel);`,
+    condition: process.platform === 'linux' || inPath('php'),
+  },
+  {
     type: 'ruby',
     content:
       'prev = DM_getPanel(0)\npanel = prev.map { |row| { name: row["name"], age: row["age"].to_i + 10 } }\nDM_setPanel(panel)',
