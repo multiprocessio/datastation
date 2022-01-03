@@ -1,6 +1,6 @@
 {
-   "defaultPath": "julia",
-   "id": "julia",
-   "name": "Julia",
-   "preamble": "\ntry\n    import JSON\ncatch e\n    import Pkg\n    Pkg.add(\"JSON\")\n    import JSON\nend\n\nfunction DM_getPanel(i)\n  panelId = JSON.parse(\"$$JSON_ID_MAP_QUOTE_ESCAPED$$\")[string(i)]\n  JSON.parsefile(string(\"$$RESULTS_FILE$$\", panelId))\nend\n\nfunction DM_setPanel(v)\n  open(\"$$PANEL_RESULTS_FILE$$\", \"w\") do f\n    JSON.print(f, v)\n  end\nend\n\nfunction DM_getPanelFile(i)\n  string(\"$$RESULTS_FILE$$\", JSON.parse(\"$$JSON_ID_MAP_QUOTE_ESCAPED$$\")[string(i)])\nend"
+  "defaultPath": "julia",
+  "id": "julia",
+  "name": "Julia",
+  "preamble": "\ntry\n    import JSON\ncatch e\n    import Pkg\n    Pkg.add(\"JSON\")\n    import JSON\nend\n\nfunction DM_getPanel(i)\n  panelId = JSON.parse(\"$$JSON_ID_MAP_QUOTE_ESCAPED$$\")[string(i)]\n  JSON.parsefile(string(\"$$RESULTS_FILE$$\", panelId))\nend\n\nfunction DM_setPanel(v)\n  open(\"$$PANEL_RESULTS_FILE$$\", \"w\") do f\n    JSON.print(f, v)\n  end\nend\n\nfunction DM_getPanelFile(i)\n  string(\"$$RESULTS_FILE$$\", JSON.parse(\"$$JSON_ID_MAP_QUOTE_ESCAPED$$\")[string(i)])\nend"
 }
