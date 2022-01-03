@@ -136,6 +136,10 @@ for (const t of TESTS) {
   describe(t.type, () => {
     // First pass runs in process, second pass runs in subprocess
     for (const subprocessName of RUNNERS) {
+      if (!subprocessName.go) {
+        continue; // Otherwise not implemented
+      }
+
       test(
         `runs ${t.type} program to perform addition via ${
           subprocessName
@@ -242,6 +246,10 @@ for (const t of TESTS) {
 }
 
 for (const subprocessName of RUNNERS) {
+  if (!subprocessName.go) {
+    continue; // Otherwise not implemented
+  }
+
   for (const language of Object.keys(LANGUAGES).filter((f) => f !== 'sql')) {
     describe(`runs ${language} program to fetch panel file name via ${
       subprocessName ? subprocessName.node || subprocessName.go : 'same-process'
