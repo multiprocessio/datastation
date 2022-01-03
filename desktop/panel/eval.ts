@@ -44,10 +44,6 @@ type EvalHandler = (
 ) => Promise<EvalHandlerResponse>;
 
 const EVAL_HANDLERS: { [k in PanelInfoType]: () => EvalHandler } = {
-  filagg: () => require('./filagg').evalFilterAggregate,
-  file: () => require('./file').evalFile,
-  http: () => require('./http').evalHTTP,
-  program: () => require('./program').evalProgram,
   database: () => require('./database').evalDatabase,
   table: () => require('./columns').evalColumns,
   graph: () => require('./columns').evalColumns,
