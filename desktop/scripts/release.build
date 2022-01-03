@@ -12,25 +12,7 @@ cp icon.icns build/icon.icns
 
 # Clean stuff up
 rm -rf coverage
-rm -rf node_modules/canvas
-rm -rf node_modules/xlsx
-rm -rf node_modules/papaparse
-rm -rf node_modules/express
-rm -rf node_modules/express-session
-rm -rf node_modules/nodemailer
-rm -rf node_modules/openid-client
-rm -rf node_modules/@dsnp
-rm -rf node_modules/cookie-parser
-rm -rf node_modules/chart.js
-rm -rf node_modules/ace-builds
-rm -rf node_modules/js-yaml
-rm -rf node_modules/node-fetch
-rm -rf node_modules/passport
-rm -rf node_modules/pg
-rm -rf node_modules/react
-rm -rf node_modules/react-ace
-rm -rf node_modules/react-dom
-rm -rf node_modules/react-syntax-highlighter
+yarn remove canvas xlsx papaparse express express-session nodemailer openid-client cookie-parser chart.js ace-builds js-yaml node-fetch passport g react react-ace react-dom react-syntax-highlighter
 rm -rf certs
 rm -rf *.md
 rm -rf *.yml
