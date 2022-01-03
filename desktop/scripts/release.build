@@ -32,7 +32,8 @@ rm -rf runner
 rm -rf desktop
 rm -rf ui
 rm -rf shared
+rm -rf releases
 
 # Build and package
-yarn electron-packager --ignore=build/go_desktop_runner --ignore=releases --asar --overwrite --icon=build/icon.png --out=releases --build-version={arg0} --app-version={arg0} . "DataStation Community Edition"
+yarn electron-packager --asar --overwrite --icon=build/icon.png --out=releases --build-version={arg0} --app-version={arg0} . "DataStation Community Edition"
 zip -9 -r releases/datastation-{os}-{arch}-{arg0}.zip "releases/DataStation Community Edition-{os}-{arch}"
