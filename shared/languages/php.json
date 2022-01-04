@@ -1,10 +1,7 @@
 {
-   "commandArgs": [
-      "-d",
-      "display_errors=on"
-   ],
-   "defaultPath": "php",
-   "id": "php",
-   "name": "PHP",
-   "preamble": "\n<?php\n\nfunction DM_getPanel($i) {\n  return json_decode(file_get_contents('$$RESULTS_FILE$$' . json_decode('$$JSON_ID_MAP$$', true)[strval($i)]), true);\n}\n\nfunction DM_setPanel($v) {\n  file_put_contents('$$PANEL_RESULTS_FILE$$', json_encode($v));\n}\n\nfunction DM_getPanelFile($i) {\n  return '$$RESULTS_FILE$$' . json_decode('$$JSON_ID_MAP$$', true)[strval($i)];\n}"
+  "commandArgs": ["-d", "display_errors=on"],
+  "defaultPath": "php",
+  "id": "php",
+  "name": "PHP",
+  "preamble": "\n<?php\n\nfunction DM_getPanel($i) {\n  return json_decode(file_get_contents('$$RESULTS_FILE$$' . json_decode('$$JSON_ID_MAP$$', true)[strval($i)]), true);\n}\n\nfunction DM_setPanel($v) {\n  file_put_contents('$$PANEL_RESULTS_FILE$$', json_encode($v));\n}\n\nfunction DM_getPanelFile($i) {\n  return '$$RESULTS_FILE$$' . json_decode('$$JSON_ID_MAP$$', true)[strval($i)];\n}"
 }
