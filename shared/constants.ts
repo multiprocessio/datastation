@@ -39,4 +39,6 @@ export const MODE_FEATURES = {
   scheduledExports: MODE === 'server',
 };
 
-export const DOCS_ROOT = SITE_ROOT + '/docs/' + VERSION;
+// There is no /docs/development/ so replace it with /docs/latest/
+const DOCS_VERSION = VERSION === 'development' ? 'latest' : VERSION;
+export const DOCS_ROOT = SITE_ROOT + '/docs/' + DOCS_VERSION;

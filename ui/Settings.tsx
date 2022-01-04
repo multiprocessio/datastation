@@ -74,7 +74,6 @@ export function useSettings(): [SettingsT, (s: SettingsT) => Promise<void>] {
     );
   }
 
-  console.log(settings);
   return [settings, setSettings];
 }
 
@@ -88,6 +87,10 @@ export function Settings() {
   return (
     <div className="card">
       <h1>Settings</h1>
+      <p>
+        After making changes, restart DataStation for them to take effect across
+        all windows.
+      </p>
       <div className="form">
         <FormGroup label="Visual">
           <div className="form-row">

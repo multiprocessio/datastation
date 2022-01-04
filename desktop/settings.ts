@@ -56,7 +56,7 @@ export class DesktopSettings extends Settings {
     return {
       resource: 'updateSettings',
       handler: async (_: string, settings: Settings) => {
-        this.lastProject = settings.lastProject;
+        Object.assign(this, settings);
         return this.save();
       },
     };

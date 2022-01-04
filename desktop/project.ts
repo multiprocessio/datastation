@@ -142,8 +142,9 @@ export async function openWindow(
   const menu = Menu.buildFromTemplate(
     menuTemplate as MenuItemConstructorOptions[]
   );
+  Menu.setApplicationMenu(menu);
   if (!overrides.hideMenu) {
-    Menu.setApplicationMenu(menu);
+    win.removeMenu();
   }
 
   const args = {

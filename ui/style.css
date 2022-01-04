@@ -802,11 +802,11 @@ canvas {
 
 .card {
   padding: 15px;
+  height: min-content;
 }
 
 .project-name {
   width: 500px;
-  height: min-content;
 }
 
 .project-name .input,

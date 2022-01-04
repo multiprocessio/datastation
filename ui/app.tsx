@@ -102,7 +102,9 @@ export function App() {
   React.useEffect(
     function setDocumentTitle() {
       if (state && state.projectName) {
-        document.title = state.projectName;
+        if (urlState.view !== 'settings') {
+          document.title = state.projectName;
+        }
       }
     },
     [state && state.projectName]

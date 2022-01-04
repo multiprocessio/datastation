@@ -63,6 +63,9 @@ export function registerRPCHandlers(
   handlers: RPCHandler<any, any>[]
 ) {
   function dispatch(payload: RPCPayload, external = false) {
+    if (external) {
+      log.info(`Handling request: ${payload.resource}`);
+    }
     const handler = handlers.filter((h) => h.resource === payload.resource)[0];
     if (!handler) {
       throw new Error(`No RPC handler for resource: ${payload.resource}`);
