@@ -141,9 +141,8 @@ for (const t of TESTS) {
       }
 
       test(
-        `runs ${t.type} program to perform addition via ${
-          subprocessName.go
-        }` + (VERBOSE ? ', program: `' + t.content + '`' : ''),
+        `runs ${t.type} program to perform addition via ${subprocessName.go}` +
+          (VERBOSE ? ', program: `' + t.content + '`' : ''),
         async () => {
           try {
             const lp = new LiteralPanelInfo({
@@ -193,52 +192,52 @@ for (const t of TESTS) {
         },
         300_000
       );
-    }
 
-    for (const n of [0, 1]) {
-      test(`${t.type} default content ${
-        n === 0 ? 'first' : 'second'
-      } panel`, async () => {
-        const lp = new LiteralPanelInfo();
-        lp.literal.contentTypeInfo = { type: 'text/csv' };
-        lp.content = 'age,name\n12,Kev\n18,Nyra';
+      for (const n of [0, 1]) {
+        test(`${t.type} default content ${
+          n === 0 ? 'first' : 'second'
+        } panel`, async () => {
+          const lp = new LiteralPanelInfo();
+          lp.literal.contentTypeInfo = { type: 'text/csv' };
+          lp.content = 'age,name\n12,Kev\n18,Nyra';
 
-        const pp = new ProgramPanelInfo();
-        pp.program.type = t.type;
-        pp.content = LANGUAGES[t.type].defaultContent(n);
+          const pp = new ProgramPanelInfo();
+          pp.program.type = t.type;
+          pp.content = LANGUAGES[t.type].defaultContent(n);
 
-        let finished = false;
-        const panels = [lp, pp];
-        await withSavedPanels(
-          panels,
-          async (project) => {
-            const panelValueBuffer = fs.readFileSync(
-              getProjectResultsFile(project.projectName) + pp.id
-            );
-            // defaultContent(0) returns [] and defaultContent(!0) returns the previous panel
-            expect(JSON.parse(panelValueBuffer.toString())).toStrictEqual(
-              n === 0
-                ? t.type === 'r'
-                  ? null
-                  : t.type === 'sql'
-                  ? [{ NULL: null }]
-                  : []
-                : [
-                    { name: 'Kev', age: '12' },
-                    { name: 'Nyra', age: '18' },
-                  ]
-            );
+          let finished = false;
+          const panels = [lp, pp];
+          await withSavedPanels(
+            panels,
+            async (project) => {
+              const panelValueBuffer = fs.readFileSync(
+                getProjectResultsFile(project.projectName) + pp.id
+              );
+              // defaultContent(0) returns [] and defaultContent(!0) returns the previous panel
+              expect(JSON.parse(panelValueBuffer.toString())).toStrictEqual(
+                n === 0
+                  ? t.type === 'r'
+                    ? null
+                    : t.type === 'sql'
+                    ? [{ NULL: null }]
+                    : []
+                  : [
+                      { name: 'Kev', age: '12' },
+                      { name: 'Nyra', age: '18' },
+                    ]
+              );
 
-            finished = true;
-          },
-          { evalPanels: true, subprocessName }
-        );
+              finished = true;
+            },
+            { evalPanels: true, subprocessName }
+          );
 
-        if (!finished) {
-          throw new Error('Callback did not finish');
-        }
-        // Otherwise is an expected error.
-      }, 300_000);
+          if (!finished) {
+            throw new Error('Callback did not finish');
+          }
+          // Otherwise is an expected error.
+        }, 300_000);
+      }
     }
   });
 }
@@ -249,9 +248,7 @@ for (const subprocessName of RUNNERS) {
   }
 
   for (const language of Object.keys(LANGUAGES).filter((f) => f !== 'sql')) {
-    describe(`runs ${language} program to fetch panel file name via ${
-      subprocessName.go
-    }`, function () {
+    describe(`runs ${language} program to fetch panel file name via ${subprocessName.go}`, function () {
       test('it returns its own file name', async () => {
         const pp = new ProgramPanelInfo({
           type: language,
