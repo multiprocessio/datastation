@@ -1,6 +1,10 @@
 {
-  "defaultPath": "php",
-  "id": "php",
-  "name": "PHP",
-  "preamble": "\nfunction DM_getPanel($i) {\n  return json_decode(file_get_contents('$$RESULTS_FILE$$' . json_decode('$$JSON_ID_MAP$$')[strval($i)]));\n}\n\nfunction DM_setPanel($v) {\n  file_put_contents('$$PANEL_RESULTS_FILE$$', json_encode($v));\n}\n\nfunction DM_getPanelFile($i) {\n  return '$$RESULTS_FILE$$' . json_decode('$$JSON_ID_MAP$$')[strval($i)];\n}"
+   "commandArgs": [
+      "-d",
+      "display_errors=on"
+   ],
+   "defaultPath": "php",
+   "id": "php",
+   "name": "PHP",
+   "preamble": "\nfunction DM_getPanel($i) {\n  return json_decode(file_get_contents('$$RESULTS_FILE$$' . json_decode('$$JSON_ID_MAP$$')[strval($i)]));\n}\n\nfunction DM_setPanel($v) {\n  file_put_contents('$$PANEL_RESULTS_FILE$$', json_encode($v));\n}\n\nfunction DM_getPanelFile($i) {\n  return '$$RESULTS_FILE$$' . json_decode('$$JSON_ID_MAP$$')[strval($i)];\n}"
 }
