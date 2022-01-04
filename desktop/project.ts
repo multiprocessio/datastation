@@ -84,18 +84,34 @@ const menuTemplate = [
       { role: 'zoomOut' },
       { type: 'separator' },
       { role: 'togglefullscreen' },
+      { type: 'separator' },
       {
         label: 'Settings',
-        click: () => openWindow('', false, 'settings'),
+        click: () =>
+          openWindow('', false, {
+            view: 'settings',
+            width: 500,
+            height: 500,
+            hideMenu: true,
+            title: 'DataStation Settings',
+          }),
       },
     ],
   },
 ];
 
+interface OpenWindowOverrides {
+  width: number;
+  height: number;
+  view: string;
+  title: string;
+  hideMenu: boolean;
+}
+
 export async function openWindow(
   project: string,
   newProject: boolean = false,
-  view: string = 'editor'
+  overrides: Partial<OpenWindowOverrides> = {}
 ) {
   // TODO: update last open project on window exit too
   if (!newProject) {
@@ -109,9 +125,9 @@ export async function openWindow(
 
   const preload = path.join(__dirname, 'preload.js');
   const win = new BrowserWindow({
-    width: project ? 1400 : 600,
-    height: project ? 800 : 600,
-    title: APP_NAME,
+    width: overrides.width || (project ? 1400 : 600),
+    height: overrides.height || (project ? 800 : 600),
+    title: overrides.title || APP_NAME,
     webPreferences: {
       preload,
       devTools: DEBUG,
@@ -126,11 +142,13 @@ export async function openWindow(
   const menu = Menu.buildFromTemplate(
     menuTemplate as MenuItemConstructorOptions[]
   );
-  Menu.setApplicationMenu(menu);
+  if (!overrides.hideMenu) {
+    Menu.setApplicationMenu(menu);
+  }
 
   const args = {
     projectId: project,
-    view,
+    view: overrides.view || 'editor',
   };
   const params = Object.entries(args)
     .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
