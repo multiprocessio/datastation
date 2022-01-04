@@ -9,10 +9,10 @@
 
 set -ex
 
-# Set up Node.js, jq, upx
+# Set up Node.js, jq
 curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
 sudo apt-get update -y
-sudo apt-get install -y nodejs cmake upx
+sudo apt-get install -y nodejs cmake
 
 # Set up Go
 ./scripts/ci/prepare_go.sh
