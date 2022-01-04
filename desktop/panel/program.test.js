@@ -136,7 +136,7 @@ for (const t of TESTS) {
   describe(t.type, () => {
     // First pass runs in process, second pass runs in subprocess
     for (const subprocessName of RUNNERS) {
-      if (!subprocessName.go) {
+      if (!subprocessName?.go) {
         continue; // Otherwise not implemented
       }
 
@@ -246,7 +246,7 @@ for (const t of TESTS) {
 }
 
 for (const subprocessName of RUNNERS) {
-  if (!subprocessName.go) {
+  if (!subprocessName?.go) {
     continue; // Otherwise not implemented
   }
 

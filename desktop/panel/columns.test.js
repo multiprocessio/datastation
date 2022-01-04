@@ -14,7 +14,7 @@ const { fetchResultsHandler } = require('./columns');
 const { RUNNERS } = require('./testutil');
 
 for (const runner of RUNNERS) {
-  if (!subprocessName.go) {
+  if (!subprocessName?.go) {
     continue; // Otherwise not implemented
   }
 

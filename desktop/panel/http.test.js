@@ -38,7 +38,7 @@ cp.stderr.on('data', (data) => {
 });
 
 for (const subprocessName of RUNNERS) {
-  if (!subprocessName.go) {
+  if (!subprocessName?.go) {
     continue; // Otherwise not implemented
   }
 
