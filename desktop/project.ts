@@ -84,11 +84,19 @@ const menuTemplate = [
       { role: 'zoomOut' },
       { type: 'separator' },
       { role: 'togglefullscreen' },
+      {
+        label: 'Settings',
+        click: () => openWindow('', false, 'settings'),
+      },
     ],
   },
 ];
 
-export async function openWindow(project: string, newProject: boolean = false) {
+export async function openWindow(
+  project: string,
+  newProject: boolean = false,
+  view: string = 'editor'
+) {
   // TODO: update last open project on window exit too
   if (!newProject) {
     if (!project) {
@@ -120,13 +128,15 @@ export async function openWindow(project: string, newProject: boolean = false) {
   );
   Menu.setApplicationMenu(menu);
 
-  win.loadURL(
-    'file://' +
-      path.join(
-        __dirname,
-        'index.html' + (project ? '?projectId=' + project : '')
-      )
-  );
+  const args = {
+    projectId: project,
+    view,
+  };
+  const params = Object.entries(args)
+    .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+    .join('&');
+
+  win.loadURL('file://' + path.join(__dirname, 'index.html?' + params));
 }
 
 export async function openProject() {
