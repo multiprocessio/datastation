@@ -142,9 +142,7 @@ for (const t of TESTS) {
 
       test(
         `runs ${t.type} program to perform addition via ${
-          subprocessName
-            ? subprocessName.node || subprocessName.go
-            : 'same-process'
+          subprocessName.go
         }` + (VERBOSE ? ', program: `' + t.content + '`' : ''),
         async () => {
           try {
@@ -233,7 +231,7 @@ for (const t of TESTS) {
 
             finished = true;
           },
-          { evalPanels: true }
+          { evalPanels: true, subprocessName }
         );
 
         if (!finished) {
@@ -252,7 +250,7 @@ for (const subprocessName of RUNNERS) {
 
   for (const language of Object.keys(LANGUAGES).filter((f) => f !== 'sql')) {
     describe(`runs ${language} program to fetch panel file name via ${
-      subprocessName ? subprocessName.node || subprocessName.go : 'same-process'
+      subprocessName.go
     }`, function () {
       test('it returns its own file name', async () => {
         const pp = new ProgramPanelInfo({
@@ -270,7 +268,7 @@ for (const subprocessName of RUNNERS) {
             expect(result).toEqual(fileName.replaceAll('\\', '/'));
             finished = true;
           },
-          { evalPanels: true }
+          { evalPanels: true, subprocessName }
         );
 
         if (!finished) {
