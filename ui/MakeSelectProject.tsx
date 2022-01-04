@@ -64,7 +64,7 @@ export function MakeSelectProject() {
   }
 
   return (
-    <div className="project-name">
+    <div className="card project-name">
       <h1>New Project</h1>
       <p>Pick a name for this project to get started.</p>
       <div className="form-row">

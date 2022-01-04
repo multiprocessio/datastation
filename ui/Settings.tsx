@@ -74,14 +74,20 @@ export function useSettings(): [SettingsT, (s: SettingsT) => Promise<void>] {
     );
   }
 
+  console.log(settings);
   return [settings, setSettings];
 }
 
 export function Settings() {
-  const [settings, setSettings] = useSettings();
+  const { state: settings, setState: setSettings } =
+    React.useContext(SettingsContext);
+  if (!settings) {
+    return null;
+  }
 
   return (
-    <div className="container">
+    <div className="card">
+      <h1>Settings</h1>
       <div className="form">
         <FormGroup label="Visual">
           <div className="form-row">

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { APP_NAME, MODE, SITE_ROOT } from '../shared/constants';
+import { APP_NAME, MODE } from '../shared/constants';
 import '../shared/polyfill';
 import { DEFAULT_PROJECT } from '../shared/state';
 import { Button } from './components/Button';
@@ -84,7 +84,9 @@ export function Header() {
                     />
                   </div>
                   <div className="global-dropdown-item">
-                    <a href="/settings/languages">Languages</a>
+                    <Link args={{ projectId, view: 'settings', page: 0 }}>
+                      See All
+                    </Link>
                   </div>
                 </div>
               </div>
@@ -109,12 +111,10 @@ export function Header() {
                       </span>
                     </div>
                     <div className="global-dropdown-item">
-                      <a
-                        href={`${SITE_ROOT}/#online-environment`}
-                        target="_blank"
-                      >
-                        About
-                      </a>
+                      <p>
+                        This is an in-memory application. Your data does not
+                        leave your browser.
+                      </p>
                     </div>
                   </div>
                 </div>

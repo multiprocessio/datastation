@@ -350,7 +350,7 @@ export function Panel({
                 icon
                 onClick={() => setDetails(!details)}
               >
-                {details ? 'unfold_less' : 'unfold_more'}
+                {details ? 'menu_open' : 'menu'}
               </Button>
             </span>
 

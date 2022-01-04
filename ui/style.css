@@ -446,6 +446,7 @@ input + input[type='file'] {
   font-weight: bold;
 }
 
+.card,
 .panel {
   background: white;
   border: 1px solid #ccc;
@@ -799,11 +800,11 @@ canvas {
   padding: 15px;
 }
 
-.project-name {
-  background: white;
-  border: 1px solid #ccc;
+.card {
   padding: 15px;
-  margin: 15px auto;
+}
+
+.project-name {
   width: 500px;
   height: min-content;
 }
@@ -878,6 +879,7 @@ tbody tr:nth-child(odd) {
     font-size: initial;
   }
 
+  p,
   .global-dropdown-anchor a {
     font-size: 0.75rem;
   }
@@ -960,13 +962,17 @@ body.dark tbody tr:nth-child(odd) {
 /* End cssplus break */
 
 body.dark {
-  background: #29293c;
+  background: #0a0a1d;
   color: white;
 
   .app--desktop,
   .app--server {
     border: 0;
     height: 100%;
+  }
+
+  .pages {
+    background: #29293c;
   }
 
   .alert {
@@ -1087,7 +1093,7 @@ body.dark {
     color: #999;
   }
 
-  .toggle .toggle-container {
+  header .toggle .toggle-container {
     border-color: #31314e;
   }
 
@@ -1095,6 +1101,7 @@ body.dark {
     background: #999;
   }
 
+  .card,
   .sidebar,
   .project-name {
     background: #31314e;
@@ -1121,5 +1128,9 @@ body.dark {
   .input-invalid,
   .text-failure {
     color: #e35172;
+  }
+
+  .global-dropdown p {
+    color: white;
   }
 }
