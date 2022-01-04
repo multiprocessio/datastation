@@ -4,8 +4,10 @@
   defaultPath: "php",
   commandArgs: ["-d", "display_errors=on"],
   preamble: "
+<?php
+
 function DM_getPanel($i) {
-  return json_decode(file_get_contents('$$RESULTS_FILE$$' . json_decode('$$JSON_ID_MAP$$')[strval($i)]));
+  return json_decode(file_get_contents('$$RESULTS_FILE$$' . json_decode('$$JSON_ID_MAP$$', true)[strval($i)]), true);
 }
 
 function DM_setPanel($v) {
@@ -13,6 +15,6 @@ function DM_setPanel($v) {
 }
 
 function DM_getPanelFile($i) {
-  return '$$RESULTS_FILE$$' . json_decode('$$JSON_ID_MAP$$')[strval($i)];
+  return '$$RESULTS_FILE$$' . json_decode('$$JSON_ID_MAP$$', true)[strval($i)];
 }",
 }

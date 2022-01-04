@@ -19,9 +19,7 @@ function preamble(
   panelId: string,
   idMap: Record<string | number, string>
 ) {
-  const p = genericPreamble(php.preamble, resultsFile, panelId, idMap);
-  console.log(p);
-  return p;
+  return genericPreamble(php.preamble, resultsFile, panelId, idMap);
 }
 
 function exceptionRewriter(msg: string, _: string) {

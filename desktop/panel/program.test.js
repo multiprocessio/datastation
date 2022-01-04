@@ -72,12 +72,12 @@ const TESTS = [
     content: `
 $prev = DM_getPanel(0);
 $panel = [];
-foreach ($row as $prev) {
-  $row['age'] = intval($row['age'] + 10)
-  array_push($prev, $row);
+foreach ($prev as $row) {
+  $row['age'] = intval($row['age'] + 10);
+  array_push($panel, $row);
 }
 
-DM_setPanel(panel);`,
+DM_setPanel($panel);`,
     condition: process.platform === 'linux' || inPath('php'),
   },
   {
@@ -85,12 +85,12 @@ DM_setPanel(panel);`,
     content: `
 $prev = DM_getPanel('Raw Data');
 $panel = [];
-foreach ($row as $prev) {
-  $row['age'] = intval($row['age'] + 10)
-  array_push($prev, $row);
+foreach ($prev as $row) {
+  $row['age'] = intval($row['age'] + 10);
+  array_push($panel, $row);
 }
 
-DM_setPanel(panel);`,
+DM_setPanel($panel);`,
     condition: process.platform === 'linux' || inPath('php'),
   },
   {
@@ -252,7 +252,7 @@ for (const subprocessName of RUNNERS) {
       test('it returns its own file name', async () => {
         const pp = new ProgramPanelInfo({
           type: language,
-          content: 'DM_setPanel(DM_getPanelFile(0))',
+          content: 'DM_setPanel(DM_getPanelFile(0));',
         });
 
         let finished = false;
