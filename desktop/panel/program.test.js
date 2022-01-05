@@ -219,7 +219,7 @@ for (const t of TESTS) {
                   ? t.type === 'r'
                     ? null
                     : t.type === 'sql'
-                    ? [{ 'NULL': null }]
+                    ? [{ NULL: null }]
                     : []
                   : [
                       { name: 'Kev', age: '12' },
