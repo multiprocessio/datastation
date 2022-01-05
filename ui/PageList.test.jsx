@@ -19,16 +19,19 @@ const TESTS = [
     type: 'sql',
     content: 'SELECT name, age::INT + 10 AS age FROM DM_getPanel(0)',
   },
-  // TODO: figure out how to load pyodide in tests
-  /* {
-   *   type: 'python',
-   *   content:
-   *     'prev = DM_getPanel(0)\nnext = [{ **row, "age": int(row["age"]) + 10 } for row in prev]\nDM_setPanel(next)',
-   * }, */
+  {
+    type: 'python',
+    content:
+      'prev = DM_getPanel(0)\nnext = [{ **row, "age": int(row["age"]) + 10 } for row in prev]\nDM_setPanel(next)',
+  },
 ];
 
 for (const language of TESTS) {
   test(`eval ${language.type}`, async () => {
+    if (language.inMemoryInit) {
+      await language.inMemoryInit();
+    }
+
     const project = {
       ...new ProjectState(),
       pages: [
