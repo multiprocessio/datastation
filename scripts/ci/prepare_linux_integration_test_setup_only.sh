@@ -73,3 +73,4 @@ sudo service clickhouse-server start
 
 # Install jsonnet
 go install github.com/google/go-jsonnet/cmd/jsonnet@latest
+sudo ln $HOME/go/bin/jsonnet /usr/local/bin/jsonnet
