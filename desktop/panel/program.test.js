@@ -68,30 +68,6 @@ const TESTS = [
     condition: process.platform === 'linux' || inPath('python3'),
   },
   {
-    type: 'clojure',
-    content: `
-(def prev (DM_getPanel 0))
-
-(defn transform [row]
-  (update row :age (+ (get row :age) 10)))
-
-(DM_setPanel (map transform prev))
-`,
-    condition: process.platform === 'linux' || inPath('clj'),
-  },
-  {
-    type: 'clojure',
-    content: `
-(def prev (DM_getPanel "Raw Data"))
-
-(defn transform [row]
-  (update row :age (+ (get row :age) 10)))
-
-(DM_setPanel (map transform prev))
-`,
-    condition: process.platform === 'linux' || inPath('clj'),
-  },
-  {
     type: 'php',
     content: `
 $prev = DM_getPanel(0);
