@@ -15,8 +15,6 @@ export const LANGUAGES: Record<string, LanguageInfo> = {
   r: R,
   sql: SQL,
   php: PHP,
-  // TODO: get clojure working
-  // clojure: CLOJURE,
 };
 
 export type SupportedLanguages = keyof typeof LANGUAGES;
