@@ -104,6 +104,7 @@ jobs:
 
     - run: ./scripts/ci/prepare_linux.sh
     - run: yarn release-desktop 0.0.0-e2etest
+    - run: git reset --hard # release blows everything up
       # Set up a virtual framebuffer so Chrome will start
       # https://www.electronjs.org/docs/tutorial/testing-on-headless-ci
       # https://github.com/juliangruber/browser-run/issues/147
@@ -136,6 +137,7 @@ jobs:
     - run: yarn test --runInBand --detectOpenHandles --forceExit --verbose shared ui desktop
     - run: cd runner && go test -cover
     - run: yarn release-desktop 0.0.0-e2etest
+    - run: git reset --hard # release blows everything up
     - run: yarn e2e-test
 
   e2e-windows:
@@ -166,6 +168,7 @@ jobs:
     - run: yarn test --runInBand --detectOpenHandles --forceExit --verbose shared ui desktop
     - run: cd runner && go test -cover
     - run: yarn release-desktop 0.0.0-e2etest
+    - run: git reset --hard # release blows everything up
     - run: yarn e2e-test
 
   dsq-tests-ubuntu:
