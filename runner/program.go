@@ -121,6 +121,7 @@ func (ec EvalContext) evalProgramPanel(project *ProjectState, pageIndex int, pan
 	}
 
 	args := append(p.CommandArgs, tmp.Name())
+	fmt.Println(args, "PHIL!")
 	cmd := exec.Command(path, args...)
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout

@@ -15,16 +15,8 @@ export const LANGUAGES: Record<string, LanguageInfo> = {
   r: R,
   sql: SQL,
   php: PHP,
+  // TODO: get clojure working
+  // clojure: CLOJURE,
 };
-
-export const DEFAULT_LANGUAGES = [
-  'javascript',
-  'python',
-  'ruby',
-  'julia',
-  'r',
-  'php',
-  'sql',
-];
 
 export type SupportedLanguages = keyof typeof LANGUAGES;

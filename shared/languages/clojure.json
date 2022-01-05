@@ -1,0 +1,6 @@
+{
+  "defaultPath": "clojure",
+  "id": "clojure",
+  "name": "Clojure",
+  "preamble": "\n(ns main\n  (:require [clojure.data.json :as json]))\n\n(defn DM_getPanel [i]\n  (json/read (java.io.FileReader.\n    (str \"$$RESULTS_FILE$$\" (get (json/read-str \"$$JSON_ID_MAP$$\") (.toString i))))))\n\n(defn DM_setPanel [v]\n  (json/write (java.io.FileWriter. \"$$PANEL_RESULTS_FILE$$\") v))\n\n(defn DM_getPanelFile [i]\n  (str \"$$RESULTS_FILE$$\" (get (json/read-str \"$$JSON_ID_MAP$$\") (.toString i))))\n"
+}
