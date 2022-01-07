@@ -140,10 +140,6 @@ export const storeHandlers: RPCHandler<any, any>[] = [
 ];
 
 export function ensureProjectFile(projectId: string) {
-  const ext = projectId.split('.').pop();
-  if (ext !== projectId && ext && projectId.endsWith(ext)) {
-    return ensureFile(projectId);
-  }
-
-  return ensureFile(projectId + '.' + PROJECT_EXTENSION);
+  const ext = '.' + PROJECT_EXTENSION;
+  return ensureFile(projectId + (projectId.endsWith(ext) ? '' : ext));
 }
