@@ -4,6 +4,8 @@ const { ensureSigningKey } = require('../secret');
 const { spawn } = require('child_process');
 const { CODE_ROOT } = require('../constants');
 const path = require('path');
+const cp = require('child_process');
+const os = require('os');
 const fs = require('fs');
 const { getProjectResultsFile } = require('../store');
 const {
@@ -27,14 +29,45 @@ const baseline = JSON.parse(
 );
 
 const USERDATA_FILES = ['json', 'xlsx', 'csv', 'parquet', 'jsonl'];
+const PORT = '9799';
 
-const cp = spawn('python3', ['-m', 'http.server', '9799']);
-cp.stdout.on('data', (data) => {
-  console.log(data.toString());
-});
+let server;
+beforeAll(async () => {
+  // TODO: port this logic to other platforms...
+  if (process.platform === 'linux') {
+    try {
+      cp.execSync(`bash -c "ps aux | grep 'http.server ${PORT}' | grep -v grep | awk '{print \\$2}' | xargs -I {} kill {}"`);
+    } catch (e) {
+      console.error(e);
+    }
+  }
 
-cp.stderr.on('data', (data) => {
-  console.warn(data.toString());
+  server = spawn('python3', ['-m', 'http.server', PORT]);
+  let ready = false;
+  server.on('spawn', () => {
+    ready = true;
+  });
+
+  server.stdout.on('data', (data) => {
+    console.log(data.toString());
+  });
+
+  server.stderr.on('data', (data) => {
+    console.warn(data.toString());
+  });
+
+  return new Promise(async (resolve, reject) => {
+    try {
+      while (!ready) {
+   	console.log('still waiting');
+   	await new Promise((resolve) => setTimeout(resolve, 300));
+      }
+
+      resolve();
+    } catch (e) {
+      reject(e);
+    }
+  });
 });
 
 for (const subprocessName of RUNNERS) {
@@ -212,5 +245,5 @@ for (const subprocessName of RUNNERS) {
 }
 
 afterAll(() => {
-  process.kill(cp.pid);
+  process.kill(server.pid);
 });
