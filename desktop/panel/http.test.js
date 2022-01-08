@@ -36,7 +36,9 @@ beforeAll(async () => {
   // TODO: port this logic to other platforms...
   if (process.platform === 'linux') {
     try {
-      cp.execSync(`bash -c "ps aux | grep 'http.server ${PORT}' | grep -v grep | awk '{print \\$2}' | xargs -I {} kill {}"`);
+      cp.execSync(
+        `bash -c "ps aux | grep 'http.server ${PORT}' | grep -v grep | awk '{print \\$2}' | xargs -I {} kill {}"`
+      );
     } catch (e) {
       console.error(e);
     }
@@ -59,8 +61,8 @@ beforeAll(async () => {
   return new Promise(async (resolve, reject) => {
     try {
       while (!ready) {
-   	console.log('still waiting');
-   	await new Promise((resolve) => setTimeout(resolve, 300));
+        console.log('still waiting');
+        await new Promise((resolve) => setTimeout(resolve, 300));
       }
 
       resolve();
