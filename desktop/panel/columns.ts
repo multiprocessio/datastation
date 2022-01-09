@@ -2,13 +2,11 @@ import fs from 'fs';
 import { PanelBody } from '../../shared/rpc';
 import {
   GraphPanelInfo,
-  LiteralPanelInfo,
   PanelInfo,
   ProjectState,
   TablePanelInfo,
 } from '../../shared/state';
 import { columnsFromObject } from '../../shared/table';
-import { parseArrayBuffer } from '../../shared/text';
 import { Dispatch, RPCHandler } from '../rpc';
 import { getProjectResultsFile } from '../store';
 import { getPanelResult, getProjectAndPanel } from './shared';
@@ -52,16 +50,6 @@ export async function evalColumns(
     value: valueWithRequestedColumns,
     returnValue: true,
   };
-}
-
-export async function evalLiteral(
-  project: ProjectState,
-  panel: PanelInfo
-): Promise<EvalHandlerResponse> {
-  const {
-    literal: { contentTypeInfo },
-  } = guardPanel<LiteralPanelInfo>(panel, 'literal');
-  return await parseArrayBuffer(contentTypeInfo, '', panel.content);
 }
 
 export const fetchResultsHandler: RPCHandler<PanelBody, EvalHandlerResponse> = {

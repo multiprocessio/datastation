@@ -28,6 +28,10 @@ const baseline = JSON.parse(
 );
 
 for (const subprocessName of RUNNERS) {
+  if (!subprocessName?.go) {
+    continue; // Otherwise not implemented
+  }
+
   describe(
     'eval generic file via ' +
       (subprocessName ? subprocessName.go || subprocessName.node : 'memory'),

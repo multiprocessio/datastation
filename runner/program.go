@@ -15,6 +15,7 @@ type ProgramEvalInfo struct {
 	Name        string             `json:"name"`
 	Preamble    string             `json:"preamble"`
 	DefaultPath string             `json:"defaultPath"`
+	CommandArgs []string           `json:"commandArgs"`
 }
 
 func getIdMap(page ProjectPage) map[string]string {
@@ -119,7 +120,8 @@ func (ec EvalContext) evalProgramPanel(project *ProjectState, pageIndex int, pan
 		path = ec.settings.Languages[p.Id].Path
 	}
 
-	cmd := exec.Command(path, tmp.Name())
+	args := append(p.CommandArgs, tmp.Name())
+	cmd := exec.Command(path, args...)
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout
 

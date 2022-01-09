@@ -16,7 +16,6 @@ sudo apt-get install -y nodejs cmake
 
 # Set up Go
 ./scripts/ci/prepare_go.sh
-
 #
 # IMPORTANT: Only run in Github CI.
 #

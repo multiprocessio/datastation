@@ -43,15 +43,21 @@ type EvalHandler = (
   dispatch: Dispatch
 ) => Promise<EvalHandlerResponse>;
 
+function unimplementedInJavaScript(): EvalHandler {
+  return function () {
+    throw new Error('There is a bug, this condition should not be possible.');
+  };
+}
+
 const EVAL_HANDLERS: { [k in PanelInfoType]: () => EvalHandler } = {
-  filagg: () => require('./filagg').evalFilterAggregate,
-  file: () => require('./file').evalFile,
-  http: () => require('./http').evalHTTP,
-  program: () => require('./program').evalProgram,
   database: () => require('./database').evalDatabase,
   table: () => require('./columns').evalColumns,
   graph: () => require('./columns').evalColumns,
-  literal: () => require('./columns').evalLiteral,
+  literal: unimplementedInJavaScript,
+  file: unimplementedInJavaScript,
+  http: unimplementedInJavaScript,
+  program: unimplementedInJavaScript,
+  filagg: unimplementedInJavaScript,
 };
 
 const runningProcesses: Record<string, Set<number>> = {};

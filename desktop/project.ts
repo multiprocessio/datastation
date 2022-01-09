@@ -84,11 +84,35 @@ const menuTemplate = [
       { role: 'zoomOut' },
       { type: 'separator' },
       { role: 'togglefullscreen' },
+      { type: 'separator' },
+      {
+        label: 'Settings',
+        click: () =>
+          openWindow('', false, {
+            view: 'settings',
+            width: 500,
+            height: 500,
+            hideMenu: true,
+            title: 'DataStation Settings',
+          }),
+      },
     ],
   },
 ];
 
-export async function openWindow(project: string, newProject: boolean = false) {
+interface OpenWindowOverrides {
+  width: number;
+  height: number;
+  view: string;
+  title: string;
+  hideMenu: boolean;
+}
+
+export async function openWindow(
+  project: string,
+  newProject: boolean = false,
+  overrides: Partial<OpenWindowOverrides> = {}
+) {
   // TODO: update last open project on window exit too
   if (!newProject) {
     if (!project) {
@@ -101,27 +125,37 @@ export async function openWindow(project: string, newProject: boolean = false) {
 
   const preload = path.join(__dirname, 'preload.js');
   const win = new BrowserWindow({
-    width: project ? 1400 : 600,
-    height: project ? 800 : 600,
-    title: APP_NAME,
+    width: overrides.width || (project ? 1400 : 600),
+    height: overrides.height || (project ? 800 : 600),
+    title: overrides.title || APP_NAME,
     webPreferences: {
       preload,
       devTools: DEBUG,
     },
   });
 
+  win.webContents.setWindowOpenHandler(function windowOpenHandler({ url }) {
+    shell.openExternal(url);
+    return { action: 'deny' };
+  });
+
   const menu = Menu.buildFromTemplate(
     menuTemplate as MenuItemConstructorOptions[]
   );
   Menu.setApplicationMenu(menu);
+  if (!overrides.hideMenu) {
+    win.removeMenu();
+  }
 
-  win.loadURL(
-    'file://' +
-      path.join(
-        __dirname,
-        'index.html' + (project ? '?projectId=' + project : '')
-      )
-  );
+  const args = {
+    projectId: project,
+    view: overrides.view || 'editor',
+  };
+  const params = Object.entries(args)
+    .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+    .join('&');
+
+  win.loadURL('file://' + path.join(__dirname, 'index.html?' + params));
 }
 
 export async function openProject() {

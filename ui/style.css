@@ -55,15 +55,17 @@ header {
   color: black;
 }
 
+header a.logo {
+  color: black;
+}
+
 header a {
   text-decoration: none;
-  color: black !important;
 }
 
 header .button,
 header a {
   display: inline-block;
-  font-size: 0.75rem;
 }
 
 header .vertical-align-center a:not(.stars) {
@@ -444,6 +446,7 @@ input + input[type='file'] {
   font-weight: bold;
 }
 
+.card,
 .panel {
   background: white;
   border: 1px solid #ccc;
@@ -797,13 +800,13 @@ canvas {
   padding: 15px;
 }
 
-.project-name {
-  background: white;
-  border: 1px solid #ccc;
+.card {
   padding: 15px;
-  margin: 15px auto;
-  width: 500px;
   height: min-content;
+}
+
+.project-name {
+  width: 500px;
 }
 
 .project-name .input,
@@ -868,6 +871,54 @@ tbody tr:nth-child(odd) {
   right: unset;
 }
 
+.global-dropdown {
+  position: relative;
+
+  a {
+    color: blue;
+    font-size: initial;
+  }
+
+  p,
+  .global-dropdown-anchor a {
+    font-size: 0.75rem;
+  }
+}
+
+.global-dropdown-body {
+  display: none;
+  z-index: 15;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 5px);
+  padding: 16px;
+  background: #f3f3f3;
+  width: 300px;
+  box-shadow: 0 1px 3px 0 #aaa;
+}
+
+.global-dropdown-section:not(:last-of-type) {
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 10px;
+  margin-bottom: 15px;
+}
+
+.global-dropdown-sectionName {
+  text-transform: uppercase;
+  font-size: 0.9rem;
+  color: #777;
+}
+
+.global-dropdown-item {
+  padding-top: 15px;
+}
+
+.global-dropdown.global-dropdown--open .global-dropdown-body {
+  display: initial;
+}
+
+/* DARK MODE RULES */
+
 /* These rules break cssplus */
 body.dark a,
 body.dark a:visited,
@@ -911,13 +962,17 @@ body.dark tbody tr:nth-child(odd) {
 /* End cssplus break */
 
 body.dark {
-  background: #29293c;
+  background: #0a0a1d;
   color: white;
 
   .app--desktop,
   .app--server {
     border: 0;
     height: 100%;
+  }
+
+  .pages {
+    background: #29293c;
   }
 
   .alert {
@@ -930,7 +985,7 @@ body.dark {
   }
 
   header a {
-    color: white !important;
+    color: white;
   }
 
   .button {
@@ -964,6 +1019,11 @@ body.dark {
     }
   }
 
+  .global-dropdown-item a {
+    color: #61b6ff;
+  }
+
+  .global-dropdown-body,
   .section-title {
     background: #0a0a1d;
   }
@@ -1033,14 +1093,15 @@ body.dark {
     color: #999;
   }
 
-  .toggle .toggle-container {
-    border-color: black;
+  header .toggle .toggle-container {
+    border-color: #31314e;
   }
 
   .toggle .toggle-mover {
     background: #999;
   }
 
+  .card,
   .sidebar,
   .project-name {
     background: #31314e;
@@ -1067,5 +1128,9 @@ body.dark {
   .input-invalid,
   .text-failure {
     color: #e35172;
+  }
+
+  .global-dropdown p {
+    color: white;
   }
 }

@@ -1,6 +1,6 @@
 {
+  "defaultPath": "python3",
   "id": "python",
   "name": "Python",
-  "defaultPath": "python3",
-  "preamble": "def DM_getPanelFile(i):\n  return r'$$RESULTS_FILE$$'+$$JSON_ID_MAP$$[str(i)]\ndef DM_getPanel(i):\n  import json\n  with open(r'$$RESULTS_FILE$$'+$$JSON_ID_MAP$$[str(i)]) as f:\n    return json.load(f)\ndef DM_setPanel(v):\n  import json\n  with open(r'$$PANEL_RESULTS_FILE$$', 'w') as f:\n    json.dump(v, f)"
+  "preamble": "\ndef DM_getPanelFile(i):\n  return r'$$RESULTS_FILE$$'+$$JSON_ID_MAP$$[str(i)]\n\ndef DM_getPanel(i):\n  import json\n  with open(r'$$RESULTS_FILE$$'+$$JSON_ID_MAP$$[str(i)]) as f:\n    return json.load(f)\n\ndef DM_setPanel(v):\n  import json\n  with open(r'$$PANEL_RESULTS_FILE$$', 'w') as f:\n    json.dump(v, f)"
 }

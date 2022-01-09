@@ -3,5 +3,6 @@ Join-Path (Resolve-Path ~).Path "scoop\shims" >> $Env:GITHUB_PATH
 scoop install nodejs cmake python yarn zip jq curl go r julia
 yarn
 Remove-Item -Recurse -Force "node_modules/canvas"
+go install github.com/google/go-jsonnet/cmd/jsonnet@latest
 
 New-Alias zip 7z

@@ -68,6 +68,32 @@ const TESTS = [
     condition: process.platform === 'linux' || inPath('python3'),
   },
   {
+    type: 'php',
+    content: `
+$prev = DM_getPanel(0);
+$next = [];
+foreach ($prev as $row) {
+  $row['age'] = intval($row['age'] + 10);
+  array_push($next, $row);
+}
+
+DM_setPanel($next);`,
+    condition: process.platform === 'linux' || inPath('php'),
+  },
+  {
+    type: 'php',
+    content: `
+$prev = DM_getPanel('Raw Data');
+$next = [];
+foreach ($prev as $row) {
+  $row['age'] = intval($row['age'] + 10);
+  array_push($next, $row);
+}
+
+DM_setPanel($next);`,
+    condition: process.platform === 'linux' || inPath('php'),
+  },
+  {
     type: 'ruby',
     content:
       'prev = DM_getPanel(0)\npanel = prev.map { |row| { name: row["name"], age: row["age"].to_i + 10 } }\nDM_setPanel(panel)',
@@ -110,12 +136,13 @@ for (const t of TESTS) {
   describe(t.type, () => {
     // First pass runs in process, second pass runs in subprocess
     for (const subprocessName of RUNNERS) {
+      if (!subprocessName?.go) {
+        continue; // Otherwise not implemented
+      }
+
       test(
-        `runs ${t.type} program to perform addition via ${
-          subprocessName
-            ? subprocessName.node || subprocessName.go
-            : 'same-process'
-        }` + (VERBOSE ? ', program: `' + t.content + '`' : ''),
+        `runs ${t.type} program to perform addition via ${subprocessName.go}` +
+          (VERBOSE ? ', program: `' + t.content + '`' : ''),
         async () => {
           try {
             const lp = new LiteralPanelInfo({
@@ -165,65 +192,67 @@ for (const t of TESTS) {
         },
         300_000
       );
-    }
 
-    for (const n of [0, 1]) {
-      test(`${t.type} default content ${
-        n === 0 ? 'first' : 'second'
-      } panel`, async () => {
-        const lp = new LiteralPanelInfo();
-        lp.literal.contentTypeInfo = { type: 'text/csv' };
-        lp.content = 'age,name\n12,Kev\n18,Nyra';
+      for (const n of [0, 1]) {
+        test(`${t.type} default content ${
+          n === 0 ? 'first' : 'second'
+        } panel`, async () => {
+          const lp = new LiteralPanelInfo();
+          lp.literal.contentTypeInfo = { type: 'text/csv' };
+          lp.content = 'age,name\n12,Kev\n18,Nyra';
 
-        const pp = new ProgramPanelInfo();
-        pp.program.type = t.type;
-        pp.content = LANGUAGES[t.type].defaultContent(n);
+          const pp = new ProgramPanelInfo();
+          pp.program.type = t.type;
+          pp.content = LANGUAGES[t.type].defaultContent(n);
 
-        let finished = false;
-        const panels = [lp, pp];
-        await withSavedPanels(
-          panels,
-          async (project) => {
-            const panelValueBuffer = fs.readFileSync(
-              getProjectResultsFile(project.projectName) + pp.id
-            );
-            // defaultContent(0) returns [] and defaultContent(!0) returns the previous panel
-            expect(JSON.parse(panelValueBuffer.toString())).toStrictEqual(
-              n === 0
-                ? t.type === 'r'
-                  ? null
-                  : t.type === 'sql'
-                  ? [{ NULL: null }]
-                  : []
-                : [
-                    { name: 'Kev', age: '12' },
-                    { name: 'Nyra', age: '18' },
-                  ]
-            );
+          let finished = false;
+          const panels = [lp, pp];
+          await withSavedPanels(
+            panels,
+            async (project) => {
+              const panelValueBuffer = fs.readFileSync(
+                getProjectResultsFile(project.projectName) + pp.id
+              );
+              // defaultContent(0) returns [] and defaultContent(!0) returns the previous panel
+              expect(JSON.parse(panelValueBuffer.toString())).toStrictEqual(
+                n === 0
+                  ? t.type === 'r'
+                    ? null
+                    : t.type === 'sql'
+                    ? [{ NULL: null }]
+                    : []
+                  : [
+                      { name: 'Kev', age: '12' },
+                      { name: 'Nyra', age: '18' },
+                    ]
+              );
 
-            finished = true;
-          },
-          { evalPanels: true }
-        );
+              finished = true;
+            },
+            { evalPanels: true, subprocessName }
+          );
 
-        if (!finished) {
-          throw new Error('Callback did not finish');
-        }
-        // Otherwise is an expected error.
-      }, 300_000);
+          if (!finished) {
+            throw new Error('Callback did not finish');
+          }
+          // Otherwise is an expected error.
+        }, 300_000);
+      }
     }
   });
 }
 
 for (const subprocessName of RUNNERS) {
+  if (!subprocessName?.go) {
+    continue; // Otherwise not implemented
+  }
+
   for (const language of Object.keys(LANGUAGES).filter((f) => f !== 'sql')) {
-    describe(`runs ${language} program to fetch panel file name via ${
-      subprocessName ? subprocessName.node || subprocessName.go : 'same-process'
-    }`, function () {
+    describe(`runs ${language} program to fetch panel file name via ${subprocessName.go}`, function () {
       test('it returns its own file name', async () => {
         const pp = new ProgramPanelInfo({
           type: language,
-          content: 'DM_setPanel(DM_getPanelFile(0))',
+          content: 'DM_setPanel(DM_getPanelFile(0));',
         });
 
         let finished = false;
@@ -236,7 +265,7 @@ for (const subprocessName of RUNNERS) {
             expect(result).toEqual(fileName.replaceAll('\\', '/'));
             finished = true;
           },
-          { evalPanels: true }
+          { evalPanels: true, subprocessName }
         );
 
         if (!finished) {

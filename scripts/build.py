@@ -91,7 +91,15 @@ def quote_line(line, join=True, show=False):
     cp = [*line]
     for i, t in enumerate(cp):
             if " " in t or (t == "" and show):
-                cp[i] = f'"{t}"'
+                quoted =  f'"{t}"'
+                # Handle rejoining quotes like -ldflags="-w -s"
+                # vs. coming out as -ldflags= "-w -s" (with a space
+                # between)
+                if i > 0 and cp[i-1].endswith('='):
+                    cp[i-1] += quoted
+                    del cp[i]
+                else:
+                    cp[i] = quoted
     l = cp if not join else ' '.join(cp)
     if show:
         print(l)

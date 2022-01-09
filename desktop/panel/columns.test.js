@@ -14,6 +14,10 @@ const { fetchResultsHandler } = require('./columns');
 const { RUNNERS } = require('./testutil');
 
 for (const runner of RUNNERS) {
+  if (!runner?.go) {
+    continue; // Otherwise not implemented
+  }
+
   test(`store and retrieve literal ${
     runner ? 'using ' + runner : ''
   }, specific columns`, async () => {

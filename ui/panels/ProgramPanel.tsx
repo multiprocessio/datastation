@@ -112,7 +112,10 @@ export function ProgramInfo({ panel }: { panel: ProgramPanelInfo }) {
         Use <code>DM_getPanel($panel_number_or_name)</code> to reference other
         panels. Once you have called this once for one panel, use{' '}
         <code>t_$panel_number_or_name</code> to refer to it again. Read more{' '}
-        <a href={DOCS_ROOT + '/Panels/Code_Panels.html'}>here</a>.
+        <a target="_blank" href={DOCS_ROOT + '/Panels/Code_Panels.html'}>
+          here
+        </a>
+        .
       </React.Fragment>
     );
   }
@@ -122,7 +125,10 @@ export function ProgramInfo({ panel }: { panel: ProgramPanelInfo }) {
       Use builtin functions, <code>DM_setPanel($some_array_data)</code> and{' '}
       <code>DM_getPanel($panel_number_or_name)</code>, to interact with other
       panels. Read more{' '}
-      <a href={DOCS_ROOT + '/Panels/Code_Panels.html'}>here</a>.
+      <a target="_blank" href={DOCS_ROOT + '/Panels/Code_Panels.html'}>
+        here
+      </a>
+      .
     </React.Fragment>
   );
 }

@@ -1,6 +1,6 @@
 {
+  "defaultPath": "ruby",
   "id": "ruby",
   "name": "Ruby",
-  "defaultPath": "ruby",
-  "preamble": "\ndef DM_getPanel(i)\n  require 'json'\n  JSON.parse(File.read('$$RESULTS_FILE$$' + JSON.parse('$$JSON_ID_MAP$$')[i.to_s]))\nend\ndef DM_setPanel(v)\n  require 'json'\n  File.write('$$PANEL_RESULTS_FILE$$', v.to_json)\nend\ndef DM_getPanelFile(i)\n  require 'json'\n  '$$RESULTS_FILE$$' + JSON.parse('$$JSON_ID_MAP$$')[i.to_s]\nend\n"
+  "preamble": "\ndef DM_getPanel(i)\n  require 'json'\n  JSON.parse(File.read('$$RESULTS_FILE$$' + JSON.parse('$$JSON_ID_MAP$$')[i.to_s]))\nend\n\ndef DM_setPanel(v)\n  require 'json'\n  File.write('$$PANEL_RESULTS_FILE$$', v.to_json)\nend\n\ndef DM_getPanelFile(i)\n  require 'json'\n  '$$RESULTS_FILE$$' + JSON.parse('$$JSON_ID_MAP$$')[i.to_s]\nend\n"
 }

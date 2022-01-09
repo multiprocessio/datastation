@@ -19,7 +19,7 @@ import { MakeSelectProject } from './MakeSelectProject';
 import { PageList } from './PageList';
 import { makeStore, ProjectContext, ProjectStore } from './ProjectStore';
 import { ServerList } from './ServerList';
-import { SettingsContext, useSettings } from './settings';
+import { Settings, SettingsContext, useSettings } from './Settings';
 import { Sidebar } from './Sidebar';
 import { Updates } from './Updates';
 import { UrlStateContext, useUrlState } from './urlState';
@@ -102,7 +102,9 @@ export function App() {
   React.useEffect(
     function setDocumentTitle() {
       if (state && state.projectName) {
-        document.title = state.projectName;
+        if (urlState.view !== 'settings') {
+          document.title = state.projectName;
+        }
       }
     },
     [state && state.projectName]
@@ -190,6 +192,8 @@ export function App() {
     if (!MODE_FEATURES.useDefaultProject) {
       main = <MakeSelectProject />;
     }
+  } else if (urlState.view === 'settings') {
+    main = <Settings />;
   } else {
     // This allows us to render the sidebar in tests where we
     // prepopulate connectors and servers

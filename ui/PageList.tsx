@@ -159,6 +159,7 @@ export function PageList({
       editor: PanelList,
       dashboard: Dashboard,
       scheduler: Scheduler,
+      settings: null,
     }[urlState.view] || NotFound;
 
   return (

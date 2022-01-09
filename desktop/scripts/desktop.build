@@ -1,7 +1,7 @@
 setenv UI_CONFIG_OVERRIDES "window.DS_CONFIG_MODE = 'desktop';"
 yarn build-ui
 
-cd runner && go build -o ../build/go_desktop_runner{required_ext} cmd/main.go
+cd runner && go build -ldflags="-s -w" -o ../build/go_desktop_runner{required_ext} cmd/main.go
 
 yarn esbuild desktop/preload.ts --external:electron --sourcemap --bundle --outfile=build/preload.js
 yarn esbuild desktop/runner.ts --bundle --platform=node --sourcemap --external:react-native-fs --external:react-native-fetch-blob "--external:@elastic/elasticsearch" "--external:wasm-brotli" --external:prometheus-query --external:snowflake-sdk --external:ssh2 --external:ssh2-promise --external:ssh2-sftp-client --external:cpu-features --external:electron --target=node10.4 --outfile=build/desktop_runner.js

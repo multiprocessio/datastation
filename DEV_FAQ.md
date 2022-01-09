@@ -43,3 +43,16 @@ For example:
 ```bash
 yarn test desktop/panel/file.test.js --dsrunner=memory
 ```
+
+## Adding/editing language libraries
+
+Language libraries (i.e. the implementation of
+DM_getPanel/DM_setPanel) are in shared/libraries/*.jsonnet. They are
+in jsonnet so that you can have nicely formatted code. They get
+compiled to JSON and committed. They also get embedded into Go code.
+
+To re-run this process, use on Mac or Linux:
+
+```
+$ yarn build-language-definitions
+```

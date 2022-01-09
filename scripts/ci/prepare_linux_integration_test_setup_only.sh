@@ -7,7 +7,7 @@
 set -ex
 
 # Set up Julia, SSH, etc.
-sudo apt-get install -y jq julia openssh-server
+sudo apt-get install -y jq julia openssh-server php
 
 # Set up coverage tools
 go install github.com/axw/gocov/gocov@v1.0.0
@@ -70,3 +70,7 @@ echo "
 # See: https://community.atlassian.com/t5/Bitbucket-Pipelines-discussions/Broken-starting-clickhouse-in-a-docker-because-of-wrong/td-p/1689466
 setcap -r `which clickhouse` && echo "Cleaning caps success" || echo "Cleaning caps error"
 sudo service clickhouse-server start
+
+# Install jsonnet
+go install github.com/google/go-jsonnet/cmd/jsonnet@latest
+sudo ln $HOME/go/bin/jsonnet /usr/local/bin/jsonnet

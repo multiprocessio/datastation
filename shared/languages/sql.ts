@@ -1,4 +1,3 @@
-import alasql from 'alasql';
 import { preview } from 'preview';
 import { Shape } from 'shape';
 import { v4 as uuidv4 } from 'uuid';
@@ -15,7 +14,7 @@ function exceptionRewriter(msg: string, _: string) {
 
 function defaultContent(panelIndex: number) {
   if (panelIndex === 0) {
-    return 'SELECT NULL -- Your query here';
+    return "SELECT NULL AS 'NULL'";
   }
 
   return `SELECT * FROM DM_getPanel(${panelIndex - 1})`;
@@ -34,7 +33,7 @@ function runSQL(prog: string, fetchResults: (n: string | number) => any[]) {
   // sure DM_getPanel gets renamed to something unique so they don't
   // conflict if multiple run at the same time.
   const thisDM_getPanel = 'DM_getPanel_' + uuidv4().replaceAll('-', '_');
-  const fromAddons = (alasql as any).from;
+  const fromAddons = (window as any).alasql.from;
   fromAddons[thisDM_getPanel] = function (
     n: number,
     opts: any,
@@ -52,7 +51,7 @@ function runSQL(prog: string, fetchResults: (n: string | number) => any[]) {
   const patchedProgram = prog.replaceAll(/DM_getPanel/gi, thisDM_getPanel);
 
   try {
-    const value = alasql(patchedProgram);
+    const value = (window as any).alasql(patchedProgram);
     return {
       value,
       preview: preview(value),
@@ -105,12 +104,30 @@ function inMemoryEval(
   );
 }
 
+function inMemoryInit() {
+  const scriptLoader = document.createElement('script');
+  scriptLoader.src = 'https://cdn.jsdelivr.net/npm/alasql@1.7';
+
+  return new Promise<void>((resolve, reject) => {
+    try {
+      scriptLoader.onload = function () {
+        resolve();
+      };
+
+      document.head.appendChild(scriptLoader);
+    } catch (e) {
+      reject(e);
+    }
+  });
+}
+
 export const SQL = {
   name: 'SQL',
   defaultPath: '',
   defaultContent,
   preamble,
   inMemoryEval,
+  inMemoryInit,
   exceptionRewriter,
   nodeEval,
 };
