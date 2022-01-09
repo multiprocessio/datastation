@@ -1,5 +1,6 @@
 import React from 'react';
 import { MODE } from '../shared/constants';
+import { LANGUAGES } from '../shared/languages';
 import { mergeDeep } from '../shared/object';
 import {
   GetSettingsRequest,
@@ -9,7 +10,9 @@ import {
 } from '../shared/rpc';
 import { Settings as SettingsT } from '../shared/settings';
 import { asyncRPC } from './asyncRPC';
+import { Button } from './components/Button';
 import { FormGroup } from './components/FormGroup';
+import { Input } from './components/Input';
 import { Toggle } from './components/Toggle';
 
 export const SettingsContext = React.createContext<{
@@ -106,6 +109,44 @@ export function Settings() {
             />
           </div>
         </FormGroup>
+        {MODE !== 'browser' && (
+          <FormGroup label="Language Path Overrides">
+            <p>
+              DataStation defaults to looking up each program on your&nbsp;
+              <code>$PATH</code>. You can override that here with a different
+              program name or an absolute path.
+            </p>
+            {Object.keys(LANGUAGES)
+              .sort()
+              .filter((k) => k !== 'sql')
+              .map((languageId) => (
+                <div className="form-row">
+                  <Input
+                    onChange={function handleLanguagePathChange(
+                      newValue: string
+                    ) {
+                      settings.languages[languageId].path = newValue;
+                      setSettings(settings);
+                    }}
+                    label={LANGUAGES[languageId].name}
+                    value={
+                      settings.languages[languageId].path ||
+                      LANGUAGES[languageId].defaultPath
+                    }
+                  />
+                  <Button
+                    onClick={function resetLanguagePath() {
+                      settings.languages[languageId].path =
+                        LANGUAGES[languageId].defaultPath;
+                      setSettings(settings);
+                    }}
+                  >
+                    Reset
+                  </Button>
+                </div>
+              ))}
+          </FormGroup>
+        )}
       </div>
     </div>
   );
