@@ -35,9 +35,12 @@ async function write() {
 
   // Write as TSV
   const tsvname = directory + 'userdata.tsv';
-  fs.writeFileSync(tsvname, CSV.unparse(data, {
-    delimiter: "\t",
-  }));
+  fs.writeFileSync(
+    tsvname,
+    CSV.unparse(data, {
+      delimiter: '\t',
+    })
+  );
   console.log(`Wrote ${tsvname}`);
 
   // Write as JSON
