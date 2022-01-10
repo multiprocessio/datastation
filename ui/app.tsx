@@ -102,7 +102,9 @@ export function App() {
   React.useEffect(
     function setDocumentTitle() {
       if (state && state.projectName) {
-        if (urlState.view !== 'settings') {
+        if (urlState.view === 'settings') {
+          document.title = 'DataStation Settings';
+        } else {
           document.title = state.projectName;
         }
       }
