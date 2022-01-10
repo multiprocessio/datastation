@@ -28,7 +28,7 @@ In desktop mode and server mode:
 
 ## Try out the demo
 
-See [https://app.datastation.multiprocess.io/](here) for the free
+See [here](https://app.datastation.multiprocess.io/) for the free
 online demo.
 
 It uses in-memory evaluation so your data never leaves your
