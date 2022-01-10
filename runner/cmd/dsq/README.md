@@ -59,10 +59,12 @@ $ dsq testdata.csv
 | Name | File Extension(s) | Notes |
 |-----------|-|---------------------|
 | CSV | `csv` ||
+| TSV | `tsv`, `tab` ||
 | JSON | `json` | Must be an array of objects. Nested object fields are ignored. |
 | Newline-delimited JSON | `ndjson`, `jsonl` ||
 | Parquet | `parquet` ||
 | Excel | `xlsx`, `xls` | Currently only works if there is only one sheet. |
+| ODS | `ods` | Currently only works if there is only one sheet. |
 | Apache Error Logs | `text/apache2error` | Currently only works if being piped in. |
 | Apache Access Logs | `text/apache2access` | Currently only works if being piped in. |
 | Nginx Access Logs | `text/nginxaccess` | Currently only works if being piped in. |
@@ -84,7 +86,7 @@ I'll do a more thorough and public benchmark.
 | q | http://harelba.github.io/q/ | Fast | CSV, TSV | Uses SQLite | Mature |
 | textql | https://github.com/dinedal/textql | Ok | CSV, TSV | Uses SQLite | Mature |
 | octoql | https://github.com/cube2222/octosql | Slow | JSON, CSV, Excel, Parquet | Custom engine missing many features from SQLite | Mature |
-| dsq | Here | Ok | CSV, JSON, Newline-delimited JSON, Parquet, Excel, Logs | Uses SQLite | Not mature |
+| dsq | Here | Ok | CSV, TSV, JSON, Newline-delimited JSON, Parquet, Excel, ODS (OpenOffice Calc), Logs | Uses SQLite | Not mature |
 
 ## License, support, community, whatnot
 
