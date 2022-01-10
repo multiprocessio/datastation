@@ -382,7 +382,7 @@ func transformJSONLinesFile(in string, out io.Writer) error {
 var BUILTIN_REGEX = map[MimeType]*regexp.Regexp{
 	ApacheErrorMimeType:  regexp.MustCompile(`^\[[^ ]* (?P<time>[^\]]*)\] \[(?P<level>[^\]]*)\](?: \[pid (?P<pid>[^:\]]*)(:[^\]]+)*\])? \[client (?P<client>[^\]]*)\] (?P<message>.*)$`),
 	ApacheAccessMimeType: regexp.MustCompile(`^(?P<host>[^ ]*) [^ ]* (?P<user>[^ ]*) \[(?P<time>[^\]]*)\] "(?P<method>\S+)(?: +(?P<path>(?:[^\"]|\.)*?)(?: +\S*)?)?" (?P<code>[^ ]*) (?P<size>[^ ]*)(?: "(?P<referer>(?:[^\"]|\.)*)" "(?P<agent>(?:[^\"]|\.)*)")?$`),
-	NginxAccessMimeType:   regexp.MustCompile(`^(?P<remote>[^ ]*) (?P<host>[^ ]*) (?P<user>[^ ]*) \[(?P<time>[^\]]*)\] "(?P<method>\S+)(?: +(?P<path>[^\"]*?)(?: +\S*)?)?" (?P<code>[^ ]*) (?P<size>[^ ]*)(?: "(?P<referer>[^\"]*)" "(?P<agent>[^\"]*)"(?:\s+(?P<http_x_forwarded_for>[^ ]+))?)?$`),
+	NginxAccessMimeType:  regexp.MustCompile(`^(?P<remote>[^ ]*) (?P<host>[^ ]*) (?P<user>[^ ]*) \[(?P<time>[^\]]*)\] "(?P<method>\S+)(?: +(?P<path>[^\"]*?)(?: +\S*)?)?" (?P<code>[^ ]*) (?P<size>[^ ]*)(?: "(?P<referer>[^\"]*)" "(?P<agent>[^\"]*)"(?:\s+(?P<http_x_forwarded_for>[^ ]+))?)?$`),
 }
 
 func transformRegexp(in io.Reader, out io.Writer, re *regexp.Regexp) error {
@@ -422,20 +422,21 @@ func transformRegexpFile(in string, out io.Writer, re *regexp.Regexp) error {
 }
 
 type MimeType string
+
 const (
-	TSVMimeType MimeType = "text/tab-separated-values"
-	CSVMimeType = "text/csv"
-	JSONMimeType = "application/json"
-	JSONLinesMimeType = "application/jsonlines"
-	RegexpLinesMimeType = "text/regexplines"
-	ExcelMimeType = "application/vnd.ms-excel"
-	ExcelOpenXMLMimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-	OpenOfficeSheetMimeType = "application/vnd.oasis.opendocument.spreadsheet"
-	ParquetMimeType = "parquet"
-	ApacheErrorMimeType = "text/apache2error"
-	ApacheAccessMimeType = "text/apache2access"
-	NginxAccessMimeType =  "text/nginxaccess"
-	UnknownMimeType = ""
+	TSVMimeType             MimeType = "text/tab-separated-values"
+	CSVMimeType                      = "text/csv"
+	JSONMimeType                     = "application/json"
+	JSONLinesMimeType                = "application/jsonlines"
+	RegexpLinesMimeType              = "text/regexplines"
+	ExcelMimeType                    = "application/vnd.ms-excel"
+	ExcelOpenXMLMimeType             = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+	OpenOfficeSheetMimeType          = "application/vnd.oasis.opendocument.spreadsheet"
+	ParquetMimeType                  = "parquet"
+	ApacheErrorMimeType              = "text/apache2error"
+	ApacheAccessMimeType             = "text/apache2access"
+	NginxAccessMimeType              = "text/nginxaccess"
+	UnknownMimeType                  = ""
 )
 
 func GetMimeType(fileName string, ct ContentTypeInfo) MimeType {
