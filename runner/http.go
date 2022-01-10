@@ -11,6 +11,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/multiprocessio/go-openoffice"
 	"github.com/xuri/excelize/v2"
 )
 
@@ -150,17 +151,19 @@ func TransformReader(r io.Reader, fileName string, cti ContentTypeInfo, out io.W
 	Logln("Assumed '%s' from '%s' given '%s' when loading file", assumedType, cti.Type, fileName)
 
 	switch assumedType {
-	case "application/json":
+	case JSONMimeType:
 		return transformJSON(r, out)
-	case "text/csv":
-		return transformCSV(r, out)
-	case "application/vnd.ms-excel", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
+	case CSVMimeType:
+		return transformCSV(r, out, ',')
+	case TSVMimeType:
+		return transformCSV(r, out, '\t')
+	case ExcelMimeType, ExcelOpenXMLMimeType:
 		r, err := excelize.OpenReader(r)
 		if err != nil {
 			return err
 		}
 		return transformXLSX(r, out)
-	case "parquet":
+	case ParquetMimeType:
 		w, err := ioutil.TempFile("", "http-parquet-temp")
 		if err != nil {
 			return err
@@ -176,14 +179,26 @@ func TransformReader(r io.Reader, fileName string, cti ContentTypeInfo, out io.W
 		}
 
 		return transformParquetFile(w.Name(), out)
-	case "text/regexplines":
+	case RegexpLinesMimeType:
 		// There are probably weird cases this won't work but
 		// let's wait for a bug report to do more intelligent
 		// translation of JavaScript -> Go regexp.
 		goRegexp := strings.ReplaceAll(cti.CustomLineRegexp, "(?<", "(?P<")
 		return transformRegexp(r, out, regexp.MustCompile(goRegexp))
-	case "application/jsonlines":
+	case JSONLinesMimeType:
 		return transformJSONLines(r, out)
+	case OpenOfficeSheetMimeType:
+		buf := bytes.NewBuffer(nil)
+		size, err := io.Copy(buf, r)
+		if err != nil {
+			return edse(err)
+		}
+
+		oor, err := openoffice.NewODSReader(bytes.NewReader(buf.Bytes()), size)
+		if err != nil {
+			return edse(err)
+		}
+		return transformOpenOfficeSheet(oor, out)
 	}
 
 	if re, ok := BUILTIN_REGEX[assumedType]; ok {

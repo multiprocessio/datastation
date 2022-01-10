@@ -62,6 +62,7 @@
     "canvas": "^2.8.0"
   },
   "devDependencies": {
+    "@dsnp/parquetjs": "^1.1.2",
     "@multiprocess/cssplus": "^0.4.0",
     "@sucrase/jest-plugin": "^2.1.1",
     "@testing-library/react": "^12.1.2",

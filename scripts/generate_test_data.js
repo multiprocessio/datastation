@@ -33,6 +33,13 @@ async function write() {
   fs.writeFileSync(csvname, CSV.unparse(data));
   console.log(`Wrote ${csvname}`);
 
+  // Write as TSV
+  const tsvname = directory + 'userdata.tsv';
+  fs.writeFileSync(tsvname, CSV.unparse(data, {
+    delimiter: "\t",
+  }));
+  console.log(`Wrote ${tsvname}`);
+
   // Write as JSON
   const jsonname = directory + 'userdata.json';
   fs.writeFileSync(jsonname, JSON.stringify(data));
@@ -46,10 +53,15 @@ async function write() {
   );
   console.log(`Wrote ${jsonlinesnames}`);
 
-  // Write as Excel file
+  // Write as .ods file
   const ws = XLSX.utils.json_to_sheet(data);
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Sheet 1');
+  const odsname = directory + 'userdata.ods';
+  XLSX.writeFile(wb, odsname);
+  console.log(`Wrote ${odsname}`);
+
+  // Write as Excel file
   const excelname = directory + 'userdata.xlsx';
   XLSX.writeFile(wb, excelname);
   console.log(`Wrote ${excelname}`);

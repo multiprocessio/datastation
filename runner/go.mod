@@ -11,6 +11,7 @@ require (
 	github.com/jmoiron/sqlx v1.2.0
 	github.com/lib/pq v1.10.4
 	github.com/mattn/go-sqlite3 v1.14.9
+	github.com/multiprocessio/go-openoffice v0.0.0-20220110223005-5025ee21b43f
 	github.com/sijms/go-ora/v2 v2.2.17
 	github.com/snowflakedb/gosnowflake v1.6.5
 	github.com/stretchr/testify v1.7.0

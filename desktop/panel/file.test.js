@@ -20,7 +20,7 @@ const { ensureSigningKey } = require('../secret');
 
 ensureSigningKey();
 
-const USERDATA_FILES = ['json', 'xlsx', 'csv', 'parquet', 'jsonl'];
+const USERDATA_FILES = ['json', 'xlsx', 'csv', 'tsv', 'parquet', 'jsonl', 'ods'];
 
 const testPath = path.join(CODE_ROOT, 'testdata');
 const baseline = JSON.parse(
