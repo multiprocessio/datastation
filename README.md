@@ -1,12 +1,11 @@
 # DataStation Community Edition
 
-DataStation makes it easy to build cross-cutting reports on top of
-database queries, API requests, files, and custom scripts without
-requiring ETL processes or maintenance of a new large database.
-
-Developers can try it out as a desktop application on their laptop
-(data never leaves the laptop). Or the application can be installed as
-a server so the entire team can build and view dashboards.
+DataStation is an open-source data IDE for developers. It allows you
+to easily build graphs and tables with data pulled from SQL databases,
+logging databases, metrics databases, HTTP servers, and all kinds of
+text and binary files. Need to join or munge data? Write embedded
+scripts as needed in Python, JavaScript, Ruby, R, or Julia. All in one
+application.
 
 ![A screenshot of app.datastation.multiprocess.io](./screenshot.png)
 
@@ -24,8 +23,17 @@ In desktop mode and server mode:
   * Query SQL, NoSQL, metrics, and document databases
   * Query API servers
   * Load Excel, Parquet, CSV, JSON, and log files from disk
-* Script against data in Python, JavaScript, Ruby, Julia, or R
+* Script against data in Python, JavaScript, Ruby, PHP, Julia, or R
 * Cross-platform: Windows, macOS, and Linux
+
+## Try out the demo
+
+See [here](https://app.datastation.multiprocess.io/) for the free
+online demo.
+
+It uses in-memory evaluation so your data never leaves your
+machine/browser. Because it runs in browser memory it has some
+limitations that the desktop and server versions don't.
 
 ## Install
 

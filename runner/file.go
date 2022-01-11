@@ -13,6 +13,7 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/multiprocessio/go-openoffice"
 	"github.com/xitongsys/parquet-go-source/local"
 	"github.com/xitongsys/parquet-go/reader"
 	"github.com/xitongsys/parquet-go/source"
@@ -78,8 +79,9 @@ func withJSONArrayOutWriterFile(out io.Writer, cb func(w *JSONArrayWriter) error
 	return withJSONArrayOutWriter(out, cb)
 }
 
-func transformCSV(in io.Reader, out io.Writer) error {
+func transformCSV(in io.Reader, out io.Writer, delimiter rune) error {
 	r := csv.NewReader(in)
+	r.Comma = delimiter
 
 	return withJSONArrayOutWriterFile(out, func(w *JSONArrayWriter) error {
 		isHeader := true
@@ -118,14 +120,14 @@ func transformCSV(in io.Reader, out io.Writer) error {
 	})
 }
 
-func transformCSVFile(in string, out io.Writer) error {
+func transformCSVFile(in string, out io.Writer, delimiter rune) error {
 	f, err := os.Open(in)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
 
-	return transformCSV(f, out)
+	return transformCSV(f, out, delimiter)
 }
 
 func transformJSON(in io.Reader, out io.Writer) error {
@@ -194,7 +196,7 @@ func transformParquetFile(in string, out io.Writer) error {
 	return transformParquet(r, out)
 }
 
-func writeXLSXSheet(rows [][]string, w *JSONArrayWriter) error {
+func writeSheet(rows [][]string, w *JSONArrayWriter) error {
 	var header []string
 	isHeader := true
 
@@ -230,7 +232,7 @@ func transformXLSX(in *excelize.File, out io.Writer) error {
 				return err
 			}
 
-			return writeXLSXSheet(rows, w)
+			return writeSheet(rows, w)
 		})
 	}
 
@@ -254,7 +256,7 @@ func transformXLSX(in *excelize.File, out io.Writer) error {
 				if err != nil {
 					return err
 				}
-				return writeXLSXSheet(rows, w)
+				return writeSheet(rows, w)
 			})
 			if err != nil {
 				return err
@@ -272,6 +274,55 @@ func transformXLSXFile(in string, out io.Writer) error {
 	}
 
 	return transformXLSX(f, out)
+}
+
+func transformOpenOfficeSheet(in *openoffice.ODSFile, out io.Writer) error {
+	doc, err := in.ParseContent()
+	if err != nil {
+		return edse(err)
+	}
+
+	// Single sheet files get flattened into just an array, not a dict mapping sheet name to sheet contents
+	if len(doc.Sheets) == 1 {
+		return withJSONArrayOutWriterFile(out, func(w *JSONArrayWriter) error {
+			return writeSheet(doc.Sheets[0].Strings(), w)
+		})
+	}
+
+	return withJSONOutWriter(out, "{", "}", func() error {
+		for i, sheet := range doc.Sheets {
+			if i == 0 {
+				_, err := out.Write([]byte(",\n"))
+				if err != nil {
+					return err
+				}
+			}
+
+			sheetNameKey := `"` + strings.ReplaceAll(sheet.Name, `"`, `\\"`) + `":`
+			_, err := out.Write([]byte(sheetNameKey))
+			if err != nil {
+				return err
+			}
+
+			err = withJSONArrayOutWriter(out, func(w *JSONArrayWriter) error {
+				return writeSheet(doc.Sheets[0].Strings(), w)
+			})
+			if err != nil {
+				return err
+			}
+		}
+
+		return nil
+	})
+}
+
+func transformOpenOfficeSheetFile(in string, out io.Writer) error {
+	f, err := openoffice.OpenODS(in)
+	if err != nil {
+		return err
+	}
+
+	return transformOpenOfficeSheet(f, out)
 }
 
 func transformGeneric(in io.Reader, out io.Writer) error {
@@ -328,10 +379,10 @@ func transformJSONLinesFile(in string, out io.Writer) error {
 	return transformJSONLines(r, out)
 }
 
-var BUILTIN_REGEX = map[string]*regexp.Regexp{
-	"text/apache2error":  regexp.MustCompile(`^\[[^ ]* (?P<time>[^\]]*)\] \[(?P<level>[^\]]*)\](?: \[pid (?P<pid>[^:\]]*)(:[^\]]+)*\])? \[client (?P<client>[^\]]*)\] (?P<message>.*)$`),
-	"text/apache2access": regexp.MustCompile(`^(?P<host>[^ ]*) [^ ]* (?P<user>[^ ]*) \[(?P<time>[^\]]*)\] "(?P<method>\S+)(?: +(?P<path>(?:[^\"]|\.)*?)(?: +\S*)?)?" (?P<code>[^ ]*) (?P<size>[^ ]*)(?: "(?P<referer>(?:[^\"]|\.)*)" "(?P<agent>(?:[^\"]|\.)*)")?$`),
-	"text/nginxaccess":   regexp.MustCompile(`^(?P<remote>[^ ]*) (?P<host>[^ ]*) (?P<user>[^ ]*) \[(?P<time>[^\]]*)\] "(?P<method>\S+)(?: +(?P<path>[^\"]*?)(?: +\S*)?)?" (?P<code>[^ ]*) (?P<size>[^ ]*)(?: "(?P<referer>[^\"]*)" "(?P<agent>[^\"]*)"(?:\s+(?P<http_x_forwarded_for>[^ ]+))?)?$`),
+var BUILTIN_REGEX = map[MimeType]*regexp.Regexp{
+	ApacheErrorMimeType:  regexp.MustCompile(`^\[[^ ]* (?P<time>[^\]]*)\] \[(?P<level>[^\]]*)\](?: \[pid (?P<pid>[^:\]]*)(:[^\]]+)*\])? \[client (?P<client>[^\]]*)\] (?P<message>.*)$`),
+	ApacheAccessMimeType: regexp.MustCompile(`^(?P<host>[^ ]*) [^ ]* (?P<user>[^ ]*) \[(?P<time>[^\]]*)\] "(?P<method>\S+)(?: +(?P<path>(?:[^\"]|\.)*?)(?: +\S*)?)?" (?P<code>[^ ]*) (?P<size>[^ ]*)(?: "(?P<referer>(?:[^\"]|\.)*)" "(?P<agent>(?:[^\"]|\.)*)")?$`),
+	NginxAccessMimeType:  regexp.MustCompile(`^(?P<remote>[^ ]*) (?P<host>[^ ]*) (?P<user>[^ ]*) \[(?P<time>[^\]]*)\] "(?P<method>\S+)(?: +(?P<path>[^\"]*?)(?: +\S*)?)?" (?P<code>[^ ]*) (?P<size>[^ ]*)(?: "(?P<referer>[^\"]*)" "(?P<agent>[^\"]*)"(?:\s+(?P<http_x_forwarded_for>[^ ]+))?)?$`),
 }
 
 func transformRegexp(in io.Reader, out io.Writer, re *regexp.Regexp) error {
@@ -370,25 +421,47 @@ func transformRegexpFile(in string, out io.Writer, re *regexp.Regexp) error {
 	return transformRegexp(r, out, re)
 }
 
-func GetMimeType(fileName string, ct ContentTypeInfo) string {
+type MimeType string
+
+const (
+	TSVMimeType             MimeType = "text/tab-separated-values"
+	CSVMimeType                      = "text/csv"
+	JSONMimeType                     = "application/json"
+	JSONLinesMimeType                = "application/jsonlines"
+	RegexpLinesMimeType              = "text/regexplines"
+	ExcelMimeType                    = "application/vnd.ms-excel"
+	ExcelOpenXMLMimeType             = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+	OpenOfficeSheetMimeType          = "application/vnd.oasis.opendocument.spreadsheet"
+	ParquetMimeType                  = "parquet"
+	ApacheErrorMimeType              = "text/apache2error"
+	ApacheAccessMimeType             = "text/apache2access"
+	NginxAccessMimeType              = "text/nginxaccess"
+	UnknownMimeType                  = ""
+)
+
+func GetMimeType(fileName string, ct ContentTypeInfo) MimeType {
 	if ct.Type != "" {
-		return ct.Type
+		return MimeType(ct.Type)
 	}
 
 	switch filepath.Ext(fileName) {
+	case ".tsv", ".tab":
+		return TSVMimeType
 	case ".csv":
-		return "text/csv"
+		return CSVMimeType
 	case ".json":
-		return "application/json"
+		return JSONMimeType
 	case ".jsonl", ".ndjson":
-		return "application/jsonlines"
+		return JSONLinesMimeType
 	case ".xls", ".xlsx":
-		return "application/vnd.ms-excel"
+		return ExcelMimeType
+	case ".ods":
+		return OpenOfficeSheetMimeType
 	case ".parquet":
-		return "parquet"
+		return ParquetMimeType
 	}
 
-	return ""
+	return UnknownMimeType
 }
 
 func getServer(project *ProjectState, serverId string) (*ServerInfo, error) {
@@ -417,22 +490,26 @@ func TransformFile(fileName string, cti ContentTypeInfo, out io.Writer) error {
 
 	Logln("Assumed '%s' from '%s' given '%s' when loading file", assumedType, cti.Type, fileName)
 	switch assumedType {
-	case "application/json":
+	case JSONMimeType:
 		return transformJSONFile(fileName, out)
-	case "text/csv":
-		return transformCSVFile(fileName, out)
-	case "application/vnd.ms-excel", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
+	case CSVMimeType:
+		return transformCSVFile(fileName, out, ',')
+	case TSVMimeType:
+		return transformCSVFile(fileName, out, '\t')
+	case ExcelMimeType, ExcelOpenXMLMimeType:
 		return transformXLSXFile(fileName, out)
-	case "parquet":
+	case ParquetMimeType:
 		return transformParquetFile(fileName, out)
-	case "text/regexplines":
+	case RegexpLinesMimeType:
 		// There are probably weird cases this won't work but
 		// let's wait for a bug report to do more intelligent
 		// translation of JavaScript -> Go regexp.
 		goRegexp := strings.ReplaceAll(cti.CustomLineRegexp, "(?<", "(?P<")
 		return transformRegexpFile(fileName, out, regexp.MustCompile(goRegexp))
-	case "application/jsonlines":
+	case JSONLinesMimeType:
 		return transformJSONLinesFile(fileName, out)
+	case OpenOfficeSheetMimeType:
+		return transformOpenOfficeSheetFile(fileName, out)
 	}
 
 	if re, ok := BUILTIN_REGEX[assumedType]; ok {

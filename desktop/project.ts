@@ -6,7 +6,7 @@ import {
   shell,
 } from 'electron';
 import path from 'path';
-import { APP_NAME, CHAT_LINK, DEBUG, SITE_ROOT } from '../shared/constants';
+import { APP_NAME, CHAT_LINK, DEBUG, DOCS_ROOT } from '../shared/constants';
 import { OpenProjectRequest, OpenProjectResponse } from '../shared/rpc';
 import { DISK_ROOT, PROJECT_EXTENSION } from './constants';
 import { RPCHandler } from './rpc';
@@ -47,7 +47,7 @@ const menuTemplate = [
     submenu: [
       {
         label: 'Documentation',
-        click: () => shell.openExternal(`${SITE_ROOT}/docs/`),
+        click: () => shell.openExternal(DOCS_ROOT),
       },
       {
         label: 'Community Chat',
@@ -143,7 +143,7 @@ export async function openWindow(
     menuTemplate as MenuItemConstructorOptions[]
   );
   Menu.setApplicationMenu(menu);
-  if (!overrides.hideMenu) {
+  if (overrides.hideMenu) {
     win.removeMenu();
   }
 
