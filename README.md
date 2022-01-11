@@ -26,6 +26,13 @@ In desktop mode and server mode:
 * Script against data in Python, JavaScript, Ruby, PHP, Julia, or R
 * Cross-platform: Windows, macOS, and Linux
 
+## CLI
+
+[dsq](https://github.com/multiprocessio/dsq) is a CLI that uses
+DataStation internals to allow you to run SQL queries on data files
+like Excel, JSON, CSV, TSV, Parquet, etc. If you want the CLI version
+of DataStation, check out dsq.
+
 ## Try out the demo
 
 See [here](https://app.datastation.multiprocess.io/) for the free
