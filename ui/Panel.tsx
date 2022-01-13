@@ -267,7 +267,10 @@ export function Panel({
 
   let info = null;
   if (panelUIDetails.info) {
-    info = <panelUIDetails.info panel={panel} />;
+    // Although this is a render call, the `return null` within here
+    // gets transformed unintelligibly if you do
+    // <panelUIDetails.info panel={panel} />. So do a normal JavaScript function call instead.
+    info = panelUIDetails.info({ panel });
     if (info) {
       info = <Alert type="info">{info}</Alert>;
     }

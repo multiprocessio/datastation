@@ -35,7 +35,7 @@ export interface PanelUIDetails<T extends PanelInfo> {
   body: React.ElementType<PanelBodyProps<T>> | null;
   previewable: boolean;
   hasStdout: boolean;
-  info: React.ElementType<{ panel: T }> | null;
+  info: ({ panel }: { panel: T }) => React.ReactElement | null;
   factory: () => T;
   dashboard?: boolean;
 }
