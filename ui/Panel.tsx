@@ -115,7 +115,7 @@ function PreviewResults({
       },
       {
         name: 'Panel ID',
-        value: panelId,
+        value: `"${panelId}"`,
       },
     ];
     return (
