@@ -77,6 +77,7 @@ function trimExcelHeaders(ws: XLSX.WorkSheet) {
 
 export const XLSX_MIME_TYPE =
   'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+export const ODS_MIME_TYPE = 'application/vnd.oasis.opendocument.spreadsheet';
 
 export function getMimeType(
   { type, additionalParsers }: ContentTypeInfoPlusParsers,
