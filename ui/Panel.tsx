@@ -92,9 +92,11 @@ async function fetchAndDownloadResults(
 function PreviewResults({
   panelOut,
   results,
+  panelId,
 }: {
   panelOut: 'preview' | 'stdout' | 'shape' | 'metadata';
   results: PanelResultMeta & { metadata?: string };
+  panelId: string;
 }) {
   if (!results.lastRun) {
     return <React.Fragment>Panel not yet run.</React.Fragment>;
@@ -110,6 +112,10 @@ function PreviewResults({
           results.arrayCount === null
             ? 'Not an array'
             : results.arrayCount.toLocaleString(),
+      },
+      {
+        name: 'Panel ID',
+        value: panelId,
       },
     ];
     return (
@@ -514,7 +520,11 @@ export function Panel({
                     </div>
                     <div className="panel-preview">
                       <div className="panel-preview-results">
-                        <PreviewResults results={results} panelOut={panelOut} />
+                        <PreviewResults
+                          results={results}
+                          panelOut={panelOut}
+                          panelId={panel.id}
+                        />
                       </div>
                     </div>
                   </div>

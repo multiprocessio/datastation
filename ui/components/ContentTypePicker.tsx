@@ -33,7 +33,7 @@ export function ContentTypePicker({
           {!disableAutoDetect && <option value="null">Auto-detect</option>}
           <optgroup label="Data">
             <option value="text/csv">CSV</option>
-            <option value="text/tsv">TSV</option>
+            <option value="text/tab-separated-values">TSV</option>
             <option value={XLSX_MIME_TYPE}>Excel</option>
             {!inMemoryEval /* This is getting ridiculous. Really need to find a plugin architecture */ && (
               <React.Fragment>

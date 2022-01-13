@@ -148,7 +148,7 @@ func evalHttpPanel(project *ProjectState, pageIndex int, panel *PanelInfo) error
 
 func TransformReader(r io.Reader, fileName string, cti ContentTypeInfo, out io.Writer) error {
 	assumedType := GetMimeType(fileName, cti)
-	Logln("Assumed '%s' from '%s' given '%s' when loading file", assumedType, cti.Type, fileName)
+	Logln("Assumed '%s' from '%s' given '%s'", assumedType, cti.Type, fileName)
 
 	switch assumedType {
 	case JSONMimeType:
@@ -205,5 +205,6 @@ func TransformReader(r io.Reader, fileName string, cti ContentTypeInfo, out io.W
 		return transformRegexp(r, out, re)
 	}
 
+	Logln("Unknown format '%s' from '%s' given '%s', transforming as string", assumedType, cti.Type, fileName)
 	return transformGeneric(r, out)
 }
