@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { ContentTypeInfo } from '../../shared/state';
-import { XLSX_MIME_TYPE } from '../../shared/text';
+import { ODS_MIME_TYPE, XLSX_MIME_TYPE } from '../../shared/text';
 import { Input } from './Input';
 import { Select } from './Select';
 
@@ -33,11 +33,18 @@ export function ContentTypePicker({
           {!disableAutoDetect && <option value="null">Auto-detect</option>}
           <optgroup label="Data">
             <option value="text/csv">CSV</option>
+            <option value="text/tab-separated-values">TSV</option>
             <option value={XLSX_MIME_TYPE}>Excel</option>
-            {inMemoryEval /* This is getting ridiculous. Really need to find a plugin architecture */ && (
-              <option value="parquet">Parquet</option>
+            {!inMemoryEval /* This is getting ridiculous. Really need to find a plugin architecture */ && (
+              <React.Fragment>
+                <option value={ODS_MIME_TYPE}>ODS</option>
+                <option value="parquet">Parquet</option>
+              </React.Fragment>
             )}
             <option value="application/json">JSON</option>
+            <option value="application/jsonlines">
+              Newline-delimited JSON
+            </option>
           </optgroup>
           <optgroup label="Logs">
             <option value="text/apache2access">

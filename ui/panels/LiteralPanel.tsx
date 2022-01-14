@@ -19,7 +19,7 @@ export async function evalLiteralPanel(panel: LiteralPanelInfo) {
   );
 
   if (MODE !== 'browser') {
-    await panelRPC('eval', panel.id);
+    return panelRPC('eval', panel.id);
   }
 
   const s = shape(value);

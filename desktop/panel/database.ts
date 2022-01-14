@@ -99,11 +99,12 @@ export async function evalDatabase(
       +port,
       (host: string, port: number) => {
         host = host || 'localhost';
+        const hostWithProtocol = protocol + '//' + host;
         if (connector.database.type === 'elasticsearch') {
           return evalElasticsearch(
             content,
             info.database.range,
-            host,
+            hostWithProtocol,
             port,
             connector,
             info
@@ -124,7 +125,7 @@ export async function evalDatabase(
           return evalPrometheus(
             content,
             info.database.range,
-            protocol + '//' + host,
+            hostWithProtocol,
             port,
             connector,
             info
@@ -135,7 +136,7 @@ export async function evalDatabase(
           return evalInflux(
             content,
             info.database.range,
-            protocol + '//' + host,
+            hostWithProtocol,
             port,
             connector,
             info
