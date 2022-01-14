@@ -127,6 +127,16 @@ label,
   font-size: 0.75rem;
 }
 
+.panel-details {
+    .radio-label,
+    .input-label,
+    .select-label {
+	display: inline-block;
+	text-align: right;
+	width: 200px; /* 200px should be more than enough for anyone */
+    }
+}
+
 input[type='radio'] {
   margin: 0;
   margin-left: 3px;
@@ -648,6 +658,7 @@ input + input[type='file'] {
 .alert {
   padding: 15px;
   font-size: 0.75rem;
+  overflow-wrap: anywhere;
 
   pre {
     white-space: pre-wrap;
