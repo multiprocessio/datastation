@@ -343,7 +343,10 @@ export function GraphPanelDetails({
             }
           >
             {panel.graph.ys.map((y, i) => (
-              <div className="form-row vertical-align-center" key={y.field + i}>
+              <div
+                className="form-row form-row--multi vertical-align-center"
+                key={y.field + i}
+              >
                 <FieldPicker
                   used={[...panel.graph.ys.map((y) => y.field), panel.graph.x]}
                   onDelete={() => {

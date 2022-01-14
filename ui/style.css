@@ -128,12 +128,15 @@ label,
 }
 
 .panel-details {
+  overflow-x: auto;
+
   .radio-label,
   .input-label,
   .select-label {
     display: inline-block;
     text-align: right;
     width: 200px; /* 200px should be more than enough for anyone */
+    padding-right: 15px;
   }
 
   .form-row .form-row,
@@ -144,6 +147,16 @@ label,
       width: initial;
     }
   }
+
+  .radio-wrapper .input-label {
+    width: initial;
+  }
+}
+
+.panel-details .form-row--multi .input:not(:first-of-type) .input-label,
+.panel-details .form-row--multi .select:not(:first-of-type) .select-label,
+.panel-details .form-row--multi .input:not(:first-of-type) .input-label {
+  width: initial;
 }
 
 input[type='date'],
@@ -168,7 +181,7 @@ input[type='radio'] {
 }
 
 /* cssplus broken : parsing */
-.radio .radio-element:not(:last-of-type) {
+.radio--vertical .radio-element:not(:last-of-type) {
   padding-bottom: 15px;
 }
 
@@ -176,6 +189,10 @@ input[type='radio'] {
   display: block;
   padding: 5px;
   text-align: right;
+}
+
+.radio:not(.radio--vertical) .radio-element {
+  padding-right: 30px;
 }
 
 .toggle {

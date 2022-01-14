@@ -190,11 +190,6 @@ export function FieldPicker({
 
   return (
     <React.Fragment>
-      {onDelete && (
-        <Button icon onClick={onDelete} type="outline">
-          delete
-        </Button>
-      )}
       {fieldPicker}
       <Input
         label="Label"
@@ -202,6 +197,11 @@ export function FieldPicker({
         onChange={labelOnChangeWrapper}
         tooltip={tooltip}
       />
+      {onDelete && (
+        <Button icon onClick={onDelete} type="outline">
+          delete
+        </Button>
+      )}
     </React.Fragment>
   );
 }

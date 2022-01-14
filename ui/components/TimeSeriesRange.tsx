@@ -144,8 +144,8 @@ export function TimeSeriesRange({
       <div className="flex">
         <div className="form-row">
           <Radio
-            disabled={!range.field}
             vertical
+            disabled={!range.field}
             name={fieldName}
             value={range.rangeType}
             onChange={setTab}
