@@ -92,17 +92,7 @@ export function HTTPPanelDetails({
       <FormGroup label="Headers">
         {panel.http.http.headers.map(
           (header: { value: string; name: string }, headerIndex: number) => (
-            <div className="form-row form-row--collapse vertical-align-center">
-              <Button
-                icon
-                onClick={() => {
-                  panel.http.http.headers.splice(headerIndex, 1);
-                  updatePanel(panel);
-                }}
-                type="outline"
-              >
-                delete
-              </Button>
+            <div className="form-row form-row--multi vertical-align-center">
               <Input
                 label="Name"
                 value={header.name}
@@ -119,6 +109,16 @@ export function HTTPPanelDetails({
                   updatePanel(panel);
                 }}
               />
+              <Button
+                icon
+                onClick={() => {
+                  panel.http.http.headers.splice(headerIndex, 1);
+                  updatePanel(panel);
+                }}
+                type="outline"
+              >
+                delete
+              </Button>
             </div>
           )
         )}

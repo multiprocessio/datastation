@@ -251,7 +251,7 @@ export function FilterAggregatePanelDetails({
             )}
           </FormGroup>
           <FormGroup label="Sort">
-            <div className="form-row">
+            <div className="form-row form-row--multi">
               <FieldPicker
                 preferredDefaultType="number"
                 label="Field"
@@ -278,6 +278,7 @@ export function FilterAggregatePanelDetails({
           <FormGroup label="Limit">
             <div className="form-row">
               <Input
+                label="Limit"
                 onChange={(value: string) => {
                   panel.filagg.limit = +value;
                   updatePanel(panel);

@@ -58,7 +58,7 @@ export function CodeEditor({
         singleLine ? 'editor-container--singleLine vertical-align-center' : ''
       }`}
     >
-      {label && <label className="label">{label}</label>}
+      {label && <label className="label input-label">{label}</label>}
       <AceEditor
         mode={language}
         theme={theme === 'dark' ? 'dracula' : 'github'}

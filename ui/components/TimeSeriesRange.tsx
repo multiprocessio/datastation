@@ -57,66 +57,66 @@ export function TimeSeriesRange({
     label: string;
     options: Array<TimeSeriesRelativeTimes>;
   }> = [
-    {
-      label: 'Within day',
-      options: [
-        'last-5-minutes',
-        'last-15-minutes',
-        'last-30-minutes',
-        'last-hour',
-        'last-3-hours',
-        'last-6-hours',
-        'last-12-hours',
-      ],
-    },
-    {
-      label: 'Within month',
-      options: ['last-day', 'last-3-days', 'last-week', 'last-2-weeks'],
-    },
-    {
-      label: 'Within year',
-      options: [
-        'last-month',
-        'last-2-months',
-        'last-3-months',
-        'last-6-months',
-      ],
-    },
-    {
-      label: 'Rest of time',
-      options: ['last-year', 'last-2-years', 'all-time'],
-    },
-  ];
+      {
+        label: 'Within day',
+        options: [
+          'last-5-minutes',
+          'last-15-minutes',
+          'last-30-minutes',
+          'last-hour',
+          'last-3-hours',
+          'last-6-hours',
+          'last-12-hours',
+        ],
+      },
+      {
+        label: 'Within month',
+        options: ['last-day', 'last-3-days', 'last-week', 'last-2-weeks'],
+      },
+      {
+        label: 'Within year',
+        options: [
+          'last-month',
+          'last-2-months',
+          'last-3-months',
+          'last-6-months',
+        ],
+      },
+      {
+        label: 'Rest of time',
+        options: ['last-year', 'last-2-years', 'all-time'],
+      },
+    ];
 
   const fixedOptions: Array<{
     label: string;
     options: Array<TimeSeriesFixedTimes>;
   }> = [
-    {
-      label: 'Within day',
-      options: ['this-hour', 'previous-hour'],
-    },
-    {
-      label: 'Within month',
-      options: [
-        'today',
-        'yesterday',
-        'week-to-date',
-        'previous-week',
-        'month-to-date',
-      ],
-    },
-    {
-      label: 'Rest of time',
-      options: [
-        'previous-month',
-        'quarter-to-date',
-        'previous-quarter',
-        'year-to-date',
-        'previous-year',
-      ],
-    },
-  ];
+      {
+        label: 'Within day',
+        options: ['this-hour', 'previous-hour'],
+      },
+      {
+        label: 'Within month',
+        options: [
+          'today',
+          'yesterday',
+          'week-to-date',
+          'previous-week',
+          'month-to-date',
+        ],
+      },
+      {
+        label: 'Rest of time',
+        options: [
+          'previous-month',
+          'quarter-to-date',
+          'previous-quarter',
+          'year-to-date',
+          'previous-year',
+        ],
+      },
+    ];
 
   const fieldName = 'range-type-' + uuid.v4();
 
@@ -144,8 +144,8 @@ export function TimeSeriesRange({
       <div className="flex">
         <div className="form-row">
           <Radio
-            disabled={!range.field}
             vertical
+            disabled={!range.field}
             name={fieldName}
             value={range.rangeType}
             onChange={setTab}

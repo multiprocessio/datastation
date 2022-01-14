@@ -23,7 +23,7 @@ export function Radio({
     }
   });
 
-  const radioClass = 'radio';
+  const radioClass = 'radio' + (vertical ? ' radio--vertical' : '');
 
   const radio = (
     <span
@@ -53,7 +53,7 @@ export function Radio({
 
   if (label) {
     return (
-      <label className={radioClass + ' vertical-align-center'}>
+      <label className={radioClass + ' radio-wrapper vertical-align-center'}>
         <span className="radio-label">{label}</span>
         {radio}
       </label>
