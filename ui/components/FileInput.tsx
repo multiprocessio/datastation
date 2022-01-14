@@ -62,7 +62,7 @@ export function FileInput({
         const fr = new FileReader();
 
         if (onRead) {
-          fr.onload = function () {
+          fr.onload = function() {
             onRead(fr.result as ArrayBuffer);
           };
 
@@ -83,8 +83,10 @@ export function FileInput({
   return (
     <label className={inputClass}>
       {label && <span className="input-label">{label}</span>}
-      {allowManualEntry && manualInput}
-      {allowFilePicker && input}
+      <span>
+        {allowManualEntry && manualInput}
+        {allowFilePicker && input}
+      </span>
     </label>
   );
 }
