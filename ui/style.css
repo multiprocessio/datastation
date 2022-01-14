@@ -127,6 +127,30 @@ label,
   font-size: 0.75rem;
 }
 
+.panel-details {
+  .radio-label,
+  .input-label,
+  .select-label {
+    display: inline-block;
+    text-align: right;
+    width: 200px; /* 200px should be more than enough for anyone */
+  }
+
+  .form-row .form-row,
+  .form-row--collapse {
+    .radio-label,
+    .input-label,
+    .select-label {
+      width: initial;
+    }
+  }
+}
+
+input[type='date'],
+input[type='time'] {
+  font-family: sans-serif;
+}
+
 input[type='radio'] {
   margin: 0;
   margin-left: 3px;
@@ -135,9 +159,17 @@ input[type='radio'] {
 .radio {
   .input-label {
     padding-right: 5px;
-    font-size: initial;
-    color: initial;
   }
+
+  .radio-element--selected .input-label {
+    color: initial;
+    font-size: initial;
+  }
+}
+
+/* cssplus broken : parsing */
+.radio .radio-element:not(:last-of-type) {
+  padding-bottom: 15px;
 }
 
 .radio--vertical .radio-element {
@@ -410,6 +442,22 @@ input + input[type='file'] {
   overflow-x: hidden;
 }
 
+.connector {
+  overflow-x: auto;
+
+  .connector-header .input {
+    width: 100%;
+  }
+
+  .radio-label,
+  .input-label,
+  .select-label {
+    display: inline-block;
+    text-align: right;
+    width: 100px; /* 200px should be more than enough for anyone */
+  }
+}
+
 .pages {
   .page-name,
   .button.page-name {
@@ -648,6 +696,7 @@ input + input[type='file'] {
 .alert {
   padding: 15px;
   font-size: 0.75rem;
+  overflow-wrap: anywhere;
 
   pre {
     white-space: pre-wrap;
@@ -753,7 +802,7 @@ input + input[type='file'] {
 }
 
 .form-row {
-  padding: 5px 0;
+  padding: 8px 0;
   min-height: 40px;
   display: flex;
   align-items: center;

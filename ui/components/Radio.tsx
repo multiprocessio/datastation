@@ -32,17 +32,22 @@ export function Radio({
         (vertical ? '' : 'vertical-align-center')
       }
     >
-      {options.map((o) => (
-        <Input
-          className="radio-element"
-          key={o.value}
-          type="radio"
-          {...props}
-          value={o.value}
-          checked={String(o.value) === String(value)}
-          label={o.label}
-        />
-      ))}
+      {options.map((o) => {
+        const checked = String(o.value) === String(value);
+        return (
+          <Input
+            className={`radio-element ${
+              checked ? 'radio-element--selected' : ''
+            }`}
+            key={o.value}
+            type="radio"
+            {...props}
+            value={o.value}
+            checked={checked}
+            label={o.label}
+          />
+        );
+      })}
     </span>
   );
 
