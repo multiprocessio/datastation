@@ -92,7 +92,7 @@ export function HTTPPanelDetails({
       <FormGroup label="Headers">
         {panel.http.http.headers.map(
           (header: { value: string; name: string }, headerIndex: number) => (
-            <div className="form-row vertical-align-center">
+            <div className="form-row form-row--collapse vertical-align-center">
               <Button
                 icon
                 onClick={() => {

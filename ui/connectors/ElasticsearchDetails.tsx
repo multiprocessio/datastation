@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { DatabaseConnectorInfo, Encrypt, ServerInfo } from '../../shared/state';
+import { FormGroup } from '../components/FormGroup';
 import { Input } from '../components/Input';
 import { Select } from '../components/Select';
 import { ServerPicker } from '../components/ServerPicker';
@@ -37,22 +38,26 @@ export function ElasticsearchDetails(props: {
     <React.Fragment>
       <Host {...props} defaultValue="localhost:9200" />
       <Username {...props} />
-      <div className="form-row">
-        <Select
-          label="Authentication"
-          onChange={setAuthMethod}
-          value={authMethod}
-        >
-          <option value="apikey">Base64 Encoded API Key</option>
-          <option value="basic">Basic Authentication</option>
-        </Select>
+      <FormGroup label="Authentication">
+        <div className="form-row">
+          <Select
+            label="Authentication"
+            onChange={setAuthMethod}
+            value={authMethod}
+          >
+            <option value="apikey">Base64 Encoded API Key</option>
+            <option value="basic">Basic Authentication</option>
+          </Select>
+        </div>
         {authMethod === 'apikey' && (
-          <Input
-            label="Base64 Encoded API Key"
-            type="password"
-            value={apiKey}
-            onChange={(value: string) => syncApiKey(value)}
-          />
+          <div className="form-row">
+            <Input
+              label="Base64 Encoded API Key"
+              type="password"
+              value={apiKey}
+              onChange={(value: string) => syncApiKey(value)}
+            />
+          </div>
         )}
         {authMethod === 'basic' && (
           <React.Fragment>
@@ -60,7 +65,7 @@ export function ElasticsearchDetails(props: {
             <Password {...props} />
           </React.Fragment>
         )}
-      </div>
+      </FormGroup>
       <ServerPicker
         servers={servers}
         serverId={connector.serverId}

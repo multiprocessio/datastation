@@ -12,15 +12,17 @@ export function SnowflakeDetails(props: {
   const { connector, updateConnector } = props;
   return (
     <React.Fragment>
-      <Input
-        label="Account ID"
-        value={connector.database.extra.account}
-        onChange={(value: string) => {
-          connector.database.extra.account = value;
-          updateConnector(connector);
-        }}
-        placeholder="qqlavcs-aa92002"
-      />
+      <div className="form-row">
+        <Input
+          label="Account ID"
+          value={connector.database.extra.account}
+          onChange={(value: string) => {
+            connector.database.extra.account = value;
+            updateConnector(connector);
+          }}
+          placeholder="qqlavcs-aa92002"
+        />
+      </div>
       <Database {...props} placeholder="SNOWFLAKE_SAMPLE_DATA" />
       <Username {...props} />
       <Password {...props} />
