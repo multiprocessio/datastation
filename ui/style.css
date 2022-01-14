@@ -128,8 +128,8 @@ label,
 }
 
 .panel-details {
-    overflow-x: auto;
-    
+  overflow-x: auto;
+
   .radio-label,
   .input-label,
   .select-label {
