@@ -58,7 +58,7 @@ export function Connector({
         </div>
       </div>
       {expanded && (
-        <React.Fragment>
+        <div className="connector-body">
           {connector.type === 'database' && (
             <DatabaseConnector
               connector={connector as DatabaseConnectorInfo}
@@ -70,7 +70,7 @@ export function Connector({
               Close
             </Button>
           </div>
-        </React.Fragment>
+        </div>
       )}
     </div>
   );

@@ -426,11 +426,15 @@ input + input[type='file'] {
 
 .server,
 .connector {
-  overflow-x: auto;
   margin-bottom: 15px;
   padding: 10px;
   border: 1px solid transparent;
   border-bottom: 1px solid #ccc;
+
+  .connector-body,
+  .server-body {
+    overflow-x: auto;
+  }
 
   .radio-label,
   .input-label,
