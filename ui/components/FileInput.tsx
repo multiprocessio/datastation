@@ -62,7 +62,7 @@ export function FileInput({
         const fr = new FileReader();
 
         if (onRead) {
-          fr.onload = function() {
+          fr.onload = function () {
             onRead(fr.result as ArrayBuffer);
           };
 
