@@ -430,11 +430,23 @@ input + input[type='file'] {
   padding: 10px;
   border: 1px solid transparent;
   border-bottom: 1px solid #ccc;
-}
 
-.server .hover-button,
-.connector .hover-button {
-  visibility: hidden;
+  .connector-body,
+  .server-body {
+    overflow-x: auto;
+  }
+
+  .radio-label,
+  .input-label,
+  .select-label {
+    display: inline-block;
+    text-align: right;
+    width: 100px; /* 200px should be more than enough for anyone */
+  }
+
+  .hover-button {
+    visibility: hidden;
+  }
 }
 
 .server:hover .hover-button,
@@ -459,19 +471,11 @@ input + input[type='file'] {
   overflow-x: hidden;
 }
 
-.connector {
-  overflow-x: auto;
-
-  .connector-header .input {
+.server--expanded,
+.connector--expanded {
+  .connector-name,
+  .server-name {
     width: 100%;
-  }
-
-  .radio-label,
-  .input-label,
-  .select-label {
-    display: inline-block;
-    text-align: right;
-    width: 100px; /* 200px should be more than enough for anyone */
   }
 }
 
