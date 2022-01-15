@@ -54,8 +54,10 @@ func sqlColumnsAndTypesFromShape(rowShape ObjectShape) []column {
 		columnType := ""
 
 		// Look for simple type: X
-		if childShape.Kind == ScalarKind && childShape.ScalarShape.Name != NullScalar {
-			columnType = JSON_SQL_TYPE_MAP[string(childShape.ScalarShape.Name)]
+		if childShape.Kind == ScalarKind {
+			if childShape.ScalarShape.Name != NullScalar {
+				columnType = JSON_SQL_TYPE_MAP[string(childShape.ScalarShape.Name)]
+			}
 		}
 
 		// Look for type: null | X
@@ -76,15 +78,26 @@ func sqlColumnsAndTypesFromShape(rowShape ObjectShape) []column {
 			}
 		}
 
-		// Otherwise just fall back to being TEXT
-		kind := "TEXT"
-		if columnType != "" {
-			kind = columnType
+		if (childShape.Kind == ScalarKind || childShape.Kind == VariedKind) && columnType == "" {
+			// Otherwise just fall back to being TEXT
+			columnType = "TEXT"
 		}
-		columns = append(columns, column{
-			name: key,
-			kind: kind,
-		})
+
+		if childShape.Kind == ObjectKind {
+			childColumns := sqlColumnsAndTypesFromShape(*childShape.ObjectShape)
+			for _, c := range childColumns {
+				columns = append(columns, column{
+					name: strings.ReplaceAll(key, ".", "\\.") + "." + c.name,
+					kind: c.kind,
+				})
+			}
+		} else {
+			// Ignore nested arrays
+			columns = append(columns, column{
+				name: key,
+				kind: columnType,
+			})
+		}
 	}
 
 	return columns
@@ -175,6 +188,51 @@ func transformDM_getPanelCalls(
 	return panelsToImport, query, nil
 }
 
+func getObjectAtPath(obj map[string]interface{}, path string) interface{} {
+	if val, ok := obj[path]; ok {
+		return val
+	}
+
+	next := obj
+	part := []rune{}
+	for _, c := range path {
+		// Split on . not preceded by \
+		if c == '.' && len(part) > 0 {
+			if part[len(part)-1] == '\\' {
+				part[len(part)-1] = '.'
+				continue
+			}
+
+			n, ok := next[string(part)]
+			if !ok {
+				// Should not be possible
+				panic(fmt.Sprintf("Bad path (%s) at part (%s)", path, string(part)))
+			}
+			if next, ok = n.(map[string]interface{}); !ok {
+				// Should not be possible
+				panic(fmt.Sprintf("Path (%s) enters non-object at part (%s)", path, string(part)))
+			}
+
+			part = nil
+			continue
+		}
+
+		part = append(part, c)
+	}
+
+	if len(part) > 0 {
+		n, ok := next[string(part)]
+		if !ok {
+			// Should not be possible
+			panic(fmt.Sprintf("Bad path (%s) at part (%s)", path, string(part)))
+		}
+
+		return n
+	}
+
+	return next
+}
+
 func formatImportQueryAndRows(
 	tableName string,
 	columns []column,
@@ -193,7 +251,7 @@ func formatImportQueryAndRows(
 		for _, col := range columns {
 			row = append(row, "?")
 
-			values = append(values, dataRow[col.name])
+			values = append(values, getObjectAtPath(dataRow, col.name))
 		}
 
 		placeholders = append(placeholders, "("+strings.Join(row, ",")+")")

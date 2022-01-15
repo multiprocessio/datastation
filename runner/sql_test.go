@@ -104,3 +104,60 @@ func Test_postgresMangleInsert(t *testing.T) {
 		postgresMangleInsert("INSERT INTO x VALUES (?, ?, ?)"),
 		"INSERT INTO x VALUES ($1, $2, $3)")
 }
+
+func Test_getObjectAtPath(t *testing.T) {
+	tests := []struct {
+		input    map[string]interface{}
+		path     string
+		expected interface{}
+	}{
+		{
+			map[string]interface{}{
+				"x": 1,
+			},
+			"x",
+			1,
+		},
+		{
+			map[string]interface{}{
+				"x.y": 3,
+			},
+			"x.y",
+			3,
+		},
+		{
+			map[string]interface{}{
+				"x": map[string]interface{}{
+					"y": 4,
+				},
+			},
+			"x.y",
+			4,
+		},
+		{
+			map[string]interface{}{
+				"x.z": map[string]interface{}{
+					"y": 6,
+				},
+			},
+			"x\\.z.y",
+			6,
+		},
+		{
+			map[string]interface{}{
+				"x.z": map[string]interface{}{
+					"y": map[string]interface{}{
+						"z": "19",
+					},
+				},
+			},
+			"x\\.z.y.z",
+			"19",
+		},
+	}
+
+	for _, test := range tests {
+		res := getObjectAtPath(test.input, test.path)
+		assert.Equal(t, test.expected, res)
+	}
+}
