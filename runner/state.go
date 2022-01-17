@@ -285,11 +285,16 @@ type DatabaseConnectorInfo struct {
 	Database DatabaseConnectorInfoDatabase `json:"database" db:"database"`
 }
 
+type HttpConnectorInfoHeader struct {
+	Name  string `json:"name"`
+	Value string `json:"value"`
+}
+
 type HttpConnectorInfoHttp struct {
-	Method          string          `json:"method" db:"method"`
-	Url             string          `json:"url" db:"url"`
-	ContentTypeInfo ContentTypeInfo `json:"contentTypeInfo" db:"contentTypeInfo"`
-	Headers         [][]string      `json:"headers" db:"headers"`
+	Method          string                    `json:"method" db:"method"`
+	Url             string                    `json:"url" db:"url"`
+	ContentTypeInfo ContentTypeInfo           `json:"contentTypeInfo" db:"contentTypeInfo"`
+	Headers         []HttpConnectorInfoHeader `json:"headers" db:"headers"`
 }
 
 type HttpConnectorInfo struct {

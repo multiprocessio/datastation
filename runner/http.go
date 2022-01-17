@@ -126,7 +126,7 @@ func evalHttpPanel(project *ProjectState, pageIndex int, panel *PanelInfo) error
 		}
 
 		for _, header := range h.Headers {
-			req.Header.Set(header[0], header[1])
+			req.Header.Set(header.Name, header.Value)
 		}
 
 		client := &http.Client{}
