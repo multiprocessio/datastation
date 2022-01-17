@@ -32,6 +32,7 @@ const USERDATA_FILES = ['json', 'xlsx', 'csv', 'parquet', 'jsonl'];
 const PORT = '9799';
 
 let server;
+// Kill the existing server if it wasn't killed correctly already.
 beforeAll(async () => {
   // TODO: port this logic to other platforms...
   if (process.platform === 'linux') {
@@ -44,6 +45,7 @@ beforeAll(async () => {
     }
   }
 
+  // Start a new server for all tests
   server = spawn('python3', ['-m', 'http.server', PORT]);
   let ready = false;
   server.on('spawn', () => {
@@ -206,9 +208,36 @@ for (const subprocessName of RUNNERS) {
   }
 
   if (process.platform === 'linux') {
+    describe('http with headers',() => {
+      test('correct result', () => {
+        const hp = new HTTPPanelInfo(
+          '',
+          new HTTPConnectorInfo('', 'http://localhost:9799/testdata/unknown', [{name: 'X-Test', value: 'OK'}])
+        );
+
+        const panels = [hp];
+
+        return withSavedPanels(
+          panels,
+          (project) => {
+            // Grab result
+            const value = JSON.parse(
+              fs
+                .readFileSync(
+                  getProjectResultsFile(project.projectName) + hp.id
+                )
+                .toString()
+            );
+
+            expect(value).toEqual('hey this is unknown');
+          },
+          { evalPanels: true, subprocessName }
+        );
+      })
+    });
+
     describe(
-      'eval file over server via ' +
-        (subprocessName ? subprocessName.go || subprocessName.node : 'memory'),
+      'eval http over server via ' +subprocessName.go,
       () => {
         test('correct result', () => {
           const server = new ServerInfo({
