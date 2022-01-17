@@ -2,11 +2,68 @@ package runner
 
 import (
 	"io/ioutil"
+	"encoding/json"
 	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
+
+func TestGetShape(t *testing.T) {
+	tests := []struct{
+		json string
+		expShape Shape
+	}{
+		{
+			`[{"a": {"b": 1}, "c": "2"}]`,
+			Shape{
+				Kind: ObjectKind,
+				ObjectShape: &ObjectShape{
+					Children: map[string]Shape{
+						"a": Shape{
+							Kind: ObjectKind,
+							ObjectShape: &ObjectShape{
+								Children: map[string]Shape{
+									"b":    {Kind: ScalarKind, ScalarShape: &ScalarShape{Name: StringScalar}},
+								},
+							},
+						},
+						"c":    {Kind: ScalarKind, ScalarShape: &ScalarShape{Name: StringScalar}},
+					},
+				},
+			},
+		},
+		{
+			`[{"a": {"b": 1}, "d": [], "c": "2"}]`,
+			Shape{
+				Kind: ObjectKind,
+				ObjectShape: &ObjectShape{
+					Children: map[string]Shape{
+						"a": Shape{
+							Kind: ObjectKind,
+							ObjectShape: &ObjectShape{
+								Children: map[string]Shape{
+									"b":    {Kind: ScalarKind, ScalarShape: &ScalarShape{Name: StringScalar}},
+								},
+							},
+						},
+						"c":    {Kind: ScalarKind, ScalarShape: &ScalarShape{Name: StringScalar}},
+					},
+				},
+			},
+		},
+	}
+
+	for _, test := range tests {
+		var j []interface{}
+		err := json.Unmarshal([]byte(test.json), &j)
+		assert.Nil(t, err)
+		fmt.Println(j)
+		s, err := GetShape("", j, 50)
+		assert.Nil(t, err)
+		assert.Equal(t, *s, test.expShape)
+	}
+}
 
 func TestShapeFromFile(t *testing.T) {
 	tests := []struct {

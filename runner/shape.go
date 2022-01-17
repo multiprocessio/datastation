@@ -3,6 +3,7 @@ package runner
 import (
 	"encoding/json"
 	"os"
+	"reflect"
 )
 
 type ShapeKind string
@@ -87,12 +88,12 @@ type VariedShape struct {
 	Children []Shape `json:"children"`
 }
 
-var unknownShape = Shape{Kind: UnknownKind}
-var defaultShape = unknownShape
+var UnknownShape = Shape{Kind: UnknownKind}
+var defaultShape = UnknownShape
 
-func GetArrayShape(id string, raw []map[string]interface{}, sampleSize int) (*Shape, error) {
-	if raw == nil {
-		return nil, makeErrNotAnArrayOfObjects(id)
+func getArrayShape(id string, raw []interface{}, sampleSize int) (*Shape, error) {
+	if len(raw) == 0 {
+		return &Shape{Kind: ArrayKind, ArrayShape: &ArrayShape{Children: UnknownShape}}, nil
 	}
 
 	obj := ObjectShape{
@@ -105,30 +106,25 @@ func GetArrayShape(id string, raw []map[string]interface{}, sampleSize int) (*Sh
 		}
 
 		for key, val := range row {
-			var name ScalarName = StringScalar
-			switch t := val.(type) {
-			case int, int64, float64, float32, int32, int16, int8, uint, uint64, uint32, uint8, uint16:
-				name = NumberScalar
-			case bool:
-				name = BooleanScalar
-			case string, []byte:
-				name = StringScalar
-			default:
-				Logln("Skipping unknown type: %s", t)
+			childShape, err := GetShape(id, val, sampleSize)
+			if err != nil {
+				// This shouldn't be possible unless the object is actually malformed...?
+				return nil, err
+			}
+
+			// Handle varied types
+			if shape, set := obj.Children[key]; set && !reflect.DeepEqual(shape, *childShape) {
+				// TODO: merge
+				obj.Children[key] = Shape{
+					Kind: VariedKind,
+					VariedShape: &VariedShape{
+						Children: []Shape{shape, *childShape},
+					},
+				}
 				continue
 			}
 
-			// Downgrade anything with multiple types to string
-			if shape, set := obj.Children[key]; set && shape.ScalarShape.Name != name {
-				name = StringScalar
-			}
-
-			obj.Children[key] = Shape{
-				Kind: ScalarKind,
-				ScalarShape: &ScalarShape{
-					Name: name,
-				},
-			}
+			obj.Children[key] = *childShape
 		}
 	}
 
@@ -146,23 +142,38 @@ func GetArrayShape(id string, raw []map[string]interface{}, sampleSize int) (*Sh
 // TODO: support things that aren't arrays
 func GetShape(id string, value interface{}, sampleSize int) (*Shape, error) {
 	switch t := value.(type) {
-	case []interface{}:
-		var objects []map[string]interface{}
-		for _, row := range t {
-			switch tt := row.(type) {
-			case map[string]interface{}:
-				objects = append(objects, tt)
-			default:
-				return nil, makeErrNotAnArrayOfObjects(id)
-			}
-		}
+	case []interface{}, []map[string]interface{}:
+		// var objects []map[string]interface{}
+	// 	for _, row := range t {
+	// 		switch tt := row.(type) {
+	// 		case map[string]interface{}:
+	// 			objects = append(objects, tt)
+	// 		default:
+	// 			return nil, UnknownError
+	// 		}
+	// 	}
 
-		return GetArrayShape(id, objects, sampleSize)
-	case []map[string]interface{}:
-		return GetArrayShape(id, t, sampleSize)
+	// 	return getArrayShape(id, objects, sampleSize)
+	// case []map[string]interface{}:
+		return getArrayShape(id, t, sampleSize)
+	case int, int64, float64, float32, int32, int16, int8, uint, uint64, uint32, uint8, uint16:
+		return Shape{Kind: ScalarShape, Name: NumberScalar}
+	case bool:
+		return Shape{Kind: ScalarShape, Name: BooleanScalar}
+	case string, []byte:
+		return Shape{Kind: ScalarShape, Name: StringScalar}
 	default:
-		return nil, makeErrNotAnArrayOfObjects(id)
+		Logln("Skipping unknown type: %s", t)
+		return UnknownShape, nil
 	}
+}
+
+func ShapeIsObjectArray(s Shape) bool {
+	if s.Kind != ArrayKind {
+		return false
+	}
+
+	return s.ArrayShape.Children.Kind == ObjectKind
 }
 
 const DefaultShapeMaxBytesToRead = 100_000

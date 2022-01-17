@@ -147,13 +147,7 @@ func transformDM_getPanelCalls(
 		}
 
 		s, ok := idShapeMap[nameOrIndex]
-		if !ok || s.Kind != ArrayKind {
-			insideErr = makeErrNotAnArrayOfObjects(nameOrIndex)
-			return ""
-		}
-
-		rowShape := s.ArrayShape.Children
-		if rowShape.Kind != ObjectKind {
+		if !ok || !ShapeIsObjectArray(s) {
 			insideErr = makeErrNotAnArrayOfObjects(nameOrIndex)
 			return ""
 		}
@@ -167,6 +161,7 @@ func transformDM_getPanelCalls(
 			}
 		}
 
+		rowShape := s.ArrayShape.Children
 		columns := sqlColumnsAndTypesFromShape(*rowShape.ObjectShape)
 		panelsToImport = append(panelsToImport, panelToImport{
 			id:        id,
