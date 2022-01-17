@@ -208,11 +208,13 @@ for (const subprocessName of RUNNERS) {
   }
 
   if (process.platform === 'linux') {
-    describe('http with headers',() => {
+    describe('http with headers', () => {
       test('correct result', () => {
         const hp = new HTTPPanelInfo(
           '',
-          new HTTPConnectorInfo('', 'http://localhost:9799/testdata/unknown', [{name: 'X-Test', value: 'OK'}])
+          new HTTPConnectorInfo('', 'http://localhost:9799/testdata/unknown', [
+            { name: 'X-Test', value: 'OK' },
+          ])
         );
 
         const panels = [hp];
@@ -233,45 +235,42 @@ for (const subprocessName of RUNNERS) {
           },
           { evalPanels: true, subprocessName }
         );
-      })
+      });
     });
 
-    describe(
-      'eval http over server via ' +subprocessName.go,
-      () => {
-        test('correct result', () => {
-          const server = new ServerInfo({
-            address: 'localhost',
-            type: 'private-key',
-          });
-          const hp = new HTTPPanelInfo(
-            '',
-            new HTTPConnectorInfo('', 'http://localhost:9799/testdata/unknown')
-          );
-          hp.serverId = server.id;
+    describe('eval http over server via ' + subprocessName.go, () => {
+      test('correct result', () => {
+        const server = new ServerInfo({
+          address: 'localhost',
+          type: 'private-key',
+        });
+        const hp = new HTTPPanelInfo(
+          '',
+          new HTTPConnectorInfo('', 'http://localhost:9799/testdata/unknown')
+        );
+        hp.serverId = server.id;
 
-          const servers = [server];
-          const panels = [hp];
+        const servers = [server];
+        const panels = [hp];
 
-          return withSavedPanels(
-            panels,
-            (project) => {
-              // Grab result
-              const value = JSON.parse(
-                fs
-                  .readFileSync(
-                    getProjectResultsFile(project.projectName) + hp.id
-                  )
-                  .toString()
-              );
+        return withSavedPanels(
+          panels,
+          (project) => {
+            // Grab result
+            const value = JSON.parse(
+              fs
+                .readFileSync(
+                  getProjectResultsFile(project.projectName) + hp.id
+                )
+                .toString()
+            );
 
-              expect(value).toEqual('hey this is unknown');
-            },
-            { evalPanels: true, subprocessName, servers }
-          );
-        }, 30_000);
-      }
-    );
+            expect(value).toEqual('hey this is unknown');
+          },
+          { evalPanels: true, subprocessName, servers }
+        );
+      }, 30_000);
+    });
   }
 }
 
