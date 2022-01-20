@@ -18,6 +18,7 @@ rm -rf *.md
 rm -rf *.yml
 rm -rf server
 rm -rf scripts
+rm -rf screens
 rm -rf testdata
 rm -rf type-overrides
 rm -rf *.png
