@@ -51,7 +51,7 @@ export async function evalElasticsearch(
     const req = {
       size: pageSize,
       index: panel.database.table.split(','),
-      q: query,
+      q: query ? query : undefined,
       // TODO: support tiebreaker sorting as recommended: https://www.elastic.co/guide/en/elasticsearch/reference/6.8/search-request-search-after.html
       sort: range.field ? `${range.field}:desc` : undefined,
       body: {
