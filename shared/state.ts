@@ -99,7 +99,7 @@ export class ConnectorInfo {
   serverId?: string;
 
   constructor(type?: ConnectorInfoType, name?: string, serverId?: string) {
-    this.name = name || 'Untitled Connector';
+    this.name = name || 'Untitled Data Source';
     this.type = type || 'database';
     this.serverId = serverId;
     this.id = uuid.v4();

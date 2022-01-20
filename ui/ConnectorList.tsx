@@ -55,7 +55,7 @@ export function ConnectorList({
             addConnector(new DatabaseConnectorInfo());
           }}
         >
-          Add Connector
+          Add Data Source
         </Button>
       </div>
     </div>

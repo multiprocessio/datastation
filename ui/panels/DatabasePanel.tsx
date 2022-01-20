@@ -79,11 +79,11 @@ export function DatabasePanelDetails({
     <React.Fragment>
       <div className="form-row">
         {connectors.length === 0 ? (
-          <small>Create a connector on the left to get started.</small>
+          <small>Create a data source on the left to get started.</small>
         ) : (
           <React.Fragment>
             <Select
-              label="Connector"
+              label="Data Source"
               value={panel.database.connectorId}
               onChange={(connectorId: string) => {
                 panel.database.connectorId = connectorId;
