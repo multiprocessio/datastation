@@ -410,7 +410,6 @@ func EvalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo, p
 			return err
 		}
 
-		fmt.Println(vendor, connStr)
 		db, err := sqlx.Open(vendor, connStr)
 		if err != nil {
 			return err
