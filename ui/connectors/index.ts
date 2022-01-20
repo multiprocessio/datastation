@@ -2,6 +2,7 @@ import { DatabaseConnectorInfoType } from '../../shared/state';
 import { ElasticsearchDetails } from './ElasticsearchDetails';
 import { GenericDetails, GenericNoDatabaseDetails } from './GenericDetails';
 import { SnowflakeDetails } from './SnowflakeDetails';
+import { SQLiteDetails } from './SQLiteDetails';
 
 export const VENDORS: {
   [k in DatabaseConnectorInfoType]: {
@@ -33,7 +34,7 @@ export const VENDORS: {
   sqlite: {
     name: 'SQLite',
     id: 'sqlite',
-    details: GenericDetails,
+    details: SQLiteDetails,
   },
   clickhouse: {
     name: 'ClickHouse',
