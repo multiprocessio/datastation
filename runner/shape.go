@@ -2,7 +2,10 @@ package runner
 
 import (
 	"encoding/json"
+	"fmt"
+	"math/rand"
 	"os"
+	"reflect"
 )
 
 type ShapeKind string
@@ -87,82 +90,216 @@ type VariedShape struct {
 	Children []Shape `json:"children"`
 }
 
-var unknownShape = Shape{Kind: UnknownKind}
-var defaultShape = unknownShape
+var NullShape = Shape{Kind: ScalarKind, ScalarShape: &ScalarShape{Name: NullScalar}}
+var UnknownShape = Shape{Kind: UnknownKind}
+var defaultShape = UnknownShape
 
-func GetArrayShape(id string, raw []map[string]interface{}, sampleSize int) (*Shape, error) {
-	if raw == nil {
-		return nil, makeErrNotAnArrayOfObjects(id)
+func getNRandomUniqueElements(arraySize int, maxSampleSize int) []int {
+	if maxSampleSize <= 0 || arraySize <= maxSampleSize {
+		var a []int
+		for i := 0; i < arraySize; i++ {
+			a = append(a, i)
+		}
+		return a
 	}
 
-	obj := ObjectShape{
-		Children: map[string]Shape{},
-	}
-
-	for i, row := range raw {
-		if i > sampleSize {
-			break
+	var unique []int
+outer:
+	for len(unique) < maxSampleSize {
+		i := rand.Intn(arraySize)
+		for _, v := range unique {
+			if v == i {
+				continue outer
+			}
 		}
 
-		for key, val := range row {
-			var name ScalarName = StringScalar
-			switch t := val.(type) {
-			case int, int64, float64, float32, int32, int16, int8, uint, uint64, uint32, uint8, uint16:
-				name = NumberScalar
-			case bool:
-				name = BooleanScalar
-			case string, []byte:
-				name = StringScalar
-			default:
-				Logln("Skipping unknown type: %s", t)
-				continue
-			}
-
-			// Downgrade anything with multiple types to string
-			if shape, set := obj.Children[key]; set && shape.ScalarShape.Name != name {
-				name = StringScalar
-			}
-
-			obj.Children[key] = Shape{
-				Kind: ScalarKind,
-				ScalarShape: &ScalarShape{
-					Name: name,
-				},
-			}
-		}
+		unique = append(unique, i)
 	}
 
-	return &Shape{
-		Kind: ArrayKind,
-		ArrayShape: &ArrayShape{
-			Children: Shape{
-				Kind:        ObjectKind,
-				ObjectShape: &obj,
-			},
-		},
-	}, nil
+	return unique
 }
 
-// TODO: support things that aren't arrays
-func GetShape(id string, value interface{}, sampleSize int) (*Shape, error) {
-	switch t := value.(type) {
-	case []interface{}:
-		var objects []map[string]interface{}
-		for _, row := range t {
-			switch tt := row.(type) {
-			case map[string]interface{}:
-				objects = append(objects, tt)
-			default:
-				return nil, makeErrNotAnArrayOfObjects(id)
+func walkVaried(varied Shape, cb func(a0 Shape) bool) {
+	stack := []Shape{varied}
+	for len(stack) > 0 {
+		top := stack[len(stack)-1]
+		stack = stack[:len(stack)-1]
+		if top.Kind == VariedKind {
+			for _, c := range top.VariedShape.Children {
+				stack = append(stack, c)
 			}
 		}
 
-		return GetArrayShape(id, objects, sampleSize)
-	case []map[string]interface{}:
-		return GetArrayShape(id, t, sampleSize)
-	default:
-		return nil, makeErrNotAnArrayOfObjects(id)
+		if cb(top) {
+			break
+		}
 	}
+}
+
+func addUniqueVaried(maybeVaried Shape, shape Shape) Shape {
+	if maybeVaried.Kind == VariedKind {
+		varied := maybeVaried
+
+		if len(varied.VariedShape.Children) == 0 {
+			return shape
+		}
+
+		found := false
+		walkVaried(varied, func(child Shape) bool {
+			// Don't try to use variedMerge here, it doesn't recurse correctly.
+			if shape.Kind == VariedKind {
+				walkVaried(shape, func(toAddChild Shape) bool {
+					if reflect.DeepEqual(child, toAddChild) {
+						found = true
+						return true
+					}
+
+					return false
+				})
+
+				if found {
+					return true
+				}
+			}
+
+			if reflect.DeepEqual(child, shape) {
+				found = true
+				return true
+			}
+
+			return false
+		})
+
+		// Don't add the same shape twice
+		if found {
+			return varied
+		}
+	}
+
+	return Shape{
+		Kind: VariedKind,
+		VariedShape: &VariedShape{
+			Children: []Shape{maybeVaried, shape},
+		},
+	}
+}
+
+func variedMerge(a Shape, b Shape) Shape {
+	varied := Shape{Kind: VariedKind, VariedShape: &VariedShape{}}
+	walkVaried(a, func(child Shape) bool {
+		varied = addUniqueVaried(varied, child)
+		return false
+	})
+
+	walkVaried(b, func(child Shape) bool {
+		varied = addUniqueVaried(varied, child)
+		return false
+	})
+
+	return varied
+}
+
+func objectMerge(a ObjectShape, b ObjectShape) ObjectShape {
+	merged := ObjectShape{Children: map[string]Shape{}}
+
+	// First check all a keys to see if they differ in b
+	for key := range a.Children {
+		// In both? Merge them
+		if _, ok := b.Children[key]; ok {
+			merged.Children[key] = shapeMerge(a.Children[key], b.Children[key])
+			continue
+		}
+
+		// If they are new, they must sometimes be null/undefined
+		merged.Children[key] = addUniqueVaried(a.Children[key], NullShape)
+	}
+
+	// First check all b keys to see if they are new to a
+	for key := range b.Children {
+		if _, ok := a.Children[key]; !ok {
+			// If they are new, they must sometimes be null/undefined
+			merged.Children[key] = addUniqueVaried(a.Children[key], NullShape)
+		}
+
+		// Do nothing, it's already been merged.
+	}
+
+	return merged
+}
+
+func shapeMerge(a Shape, b Shape) Shape {
+	if b.Kind == ObjectKind && a.Kind == ObjectKind {
+		o := objectMerge(*a.ObjectShape, *b.ObjectShape)
+		return Shape{Kind: ObjectKind, ObjectShape: &o}
+	}
+
+	if b.Kind == ArrayKind && a.Kind == ArrayKind {
+		return shapeMerge(a.ArrayShape.Children, b.ArrayShape.Children)
+	}
+
+	// It's possible this case isn't even possible since 'varied' is
+	// something that only gets applied during post-processing here.
+	if b.Kind == VariedKind && a.Kind == VariedKind {
+		return variedMerge(b, a)
+	}
+
+	// Default/missing/non-scalar case shouldn't be possible
+	if b.Kind == a.Kind && b.Kind != ScalarKind {
+		panic(fmt.Sprintf(`Missing type equality condition for %s merge.`, b.Kind))
+	}
+
+	// Otherwise is a scalar or dissimilar kind so becomes varied
+	return addUniqueVaried(a, b)
+}
+
+func getArrayShape(id string, raw []interface{}, sampleSize int) Shape {
+	if len(raw) == 0 {
+		return Shape{Kind: ArrayKind, ArrayShape: &ArrayShape{Children: UnknownShape}}
+	}
+
+	merged := GetShape(id, raw[0], sampleSize)
+
+	for i := range getNRandomUniqueElements(len(raw), sampleSize) {
+		shape := GetShape(id, raw[i], sampleSize)
+		if reflect.DeepEqual(merged, shape) {
+			continue
+		}
+
+		merged = shapeMerge(merged, shape)
+	}
+
+	return Shape{Kind: ArrayKind, ArrayShape: &ArrayShape{Children: merged}}
+}
+
+func GetShape(id string, value interface{}, sampleSize int) Shape {
+	switch t := value.(type) {
+	case []interface{}:
+		return getArrayShape(id, t, sampleSize)
+	case map[string]interface{}:
+		o := ObjectShape{Children: map[string]Shape{}}
+		for key, val := range t {
+			o.Children[key] = GetShape(id, val, sampleSize)
+		}
+
+		return Shape{Kind: ObjectKind, ObjectShape: &o}
+	case int, int64, float64, float32, int32, int16, int8, uint, uint64, uint32, uint8, uint16:
+		return Shape{Kind: ScalarKind, ScalarShape: &ScalarShape{Name: NumberScalar}}
+	case bool:
+		return Shape{Kind: ScalarKind, ScalarShape: &ScalarShape{Name: BooleanScalar}}
+	case string, []byte:
+		return Shape{Kind: ScalarKind, ScalarShape: &ScalarShape{Name: StringScalar}}
+	default:
+		Logln("Skipping unknown type: %s", t)
+		return UnknownShape
+	}
+}
+
+func ShapeIsObjectArray(s Shape) bool {
+	if s.Kind != ArrayKind {
+		return false
+	}
+
+	return s.ArrayShape.Children.Kind == ObjectKind
 }
 
 const DefaultShapeMaxBytesToRead = 100_000
@@ -188,7 +325,8 @@ func ShapeFromFile(file, id string, maxBytesToRead int, sampleSize int) (*Shape,
 			return nil, edse(err)
 		}
 
-		return GetShape(id, value, sampleSize)
+		s := GetShape(id, value, sampleSize)
+		return &s, nil
 	}
 
 	done := false
@@ -260,5 +398,6 @@ func ShapeFromFile(file, id string, maxBytesToRead int, sampleSize int) (*Shape,
 		return nil, edse(err)
 	}
 
-	return GetShape(id, value, sampleSize)
+	s := GetShape(id, value, sampleSize)
+	return &s, nil
 }
