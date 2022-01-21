@@ -43,15 +43,18 @@ const DATABASES = [
   },
   {
     type: 'postgres',
-    query: 'SELECT name, CAST(age AS INT) - 10 AS age FROM DM_getPanel(0)',
+    query:
+      'SELECT name, CAST(age AS INT) - 10 AS age, "location.city" AS city FROM DM_getPanel(0)',
   },
   {
     type: 'sqlite',
-    query: 'SELECT name, CAST(age AS INT) - 10 AS age FROM DM_getPanel(0)',
+    query:
+      'SELECT name, CAST(age AS INT) - 10 AS age, "location.city" AS city FROM DM_getPanel(0)',
   },
   {
     type: 'mysql',
-    query: 'SELECT name, CAST(age AS SIGNED) - 10 AS age FROM DM_getPanel(0)',
+    query:
+      'SELECT name, CAST(age AS SIGNED) - 10 AS age, `location.city` AS city FROM DM_getPanel(0)',
   },
 ];
 
@@ -95,8 +98,11 @@ for (const subprocess of RUNNERS) {
           }
 
           const lp = new LiteralPanelInfo();
-          lp.literal.contentTypeInfo = { type: 'text/csv' };
-          lp.content = 'age,name\n19,Kate\n20,Bake';
+          lp.literal.contentTypeInfo = { type: 'application/json' };
+          lp.content = JSON.stringify([
+            { age: '19', name: 'Kate', location: { city: 'San Juan' } },
+            { age: '20', name: 'Bake', location: { city: 'Toronto' } },
+          ]);
 
           const connectors = [
             new DatabaseConnectorInfo({
@@ -136,8 +142,8 @@ for (const subprocess of RUNNERS) {
                 );
               } else {
                 expect(v).toStrictEqual([
-                  { name: 'Kate', age: 9 },
-                  { name: 'Bake', age: 10 },
+                  { name: 'Kate', age: 9, city: 'San Juan' },
+                  { name: 'Bake', age: 10, city: 'Toronto' },
                 ]);
               }
 
