@@ -53,6 +53,15 @@ func Test_getConnectionString(t *testing.T) {
 			"",
 		},
 		{
+			DatabaseConnectorInfoDatabase{Type: "oracle", Username: "jim", Password: Encrypt{Encrypted: false, Value: "pw"}, Database: "test", Address: ""},
+			"oracle",
+			"oracle://jim:pw@localhost/test?",
+			nil,
+			"",
+			"1521",
+			"",
+		},
+		{
 			DatabaseConnectorInfoDatabase{Type: "oracle", Username: "jim", Password: Encrypt{Encrypted: false, Value: "pw"}, Database: "test", Address: "localhost"},
 			"oracle",
 			"oracle://jim:pw@localhost/test?",

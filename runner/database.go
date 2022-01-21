@@ -101,7 +101,14 @@ var defaultPorts = map[DatabaseConnectorInfoType]string{
 	"prometheus":    "9090",
 }
 
-func getConnectionString(dbInfo DatabaseConnectorInfoDatabase) (string, string, error) {
+type urlParts struct {
+	address   string
+	database  string
+	username  string
+	extraArgs string
+}
+
+func getURLParts(dbInfo DatabaseConnectorInfoDatabase) urlParts {
 	address := dbInfo.Address
 	split := strings.SplitN(address, "?", 2)
 	address = split[0]
@@ -113,16 +120,26 @@ func getConnectionString(dbInfo DatabaseConnectorInfoDatabase) (string, string, 
 	database := dbInfo.Database
 	username := dbInfo.Username
 
+	return urlParts{
+		address:   address,
+		database:  database,
+		username:  username,
+		extraArgs: extraArgs,
+	}
+}
+
+func getGenericConnectionString(dbInfo DatabaseConnectorInfoDatabase) (string, string, error) {
+	u := getURLParts(dbInfo)
 	genericUserPass := ""
 	var pass string
-	if username != "" || dbInfo.Password.Value != "" {
+	if u.username != "" || dbInfo.Password.Value != "" {
 		var err error
 		pass, err = dbInfo.Password.decrypt()
 		if err != nil {
 			return "", "", err
 		}
 
-		genericUserPass = username
+		genericUserPass = u.username
 		if pass != "" {
 			genericUserPass += ":" + pass
 		}
@@ -130,7 +147,23 @@ func getConnectionString(dbInfo DatabaseConnectorInfoDatabase) (string, string, 
 		genericUserPass += "@"
 	}
 
-	genericString := fmt.Sprintf("%s://%s%s/%s?%s", dbInfo.Type, genericUserPass, address, database, extraArgs)
+	genericString := fmt.Sprintf(
+		"%s://%s%s/%s?%s",
+		dbInfo.Type,
+		genericUserPass,
+		u.address,
+		u.database,
+		u.extraArgs)
+
+	return genericString, genericUserPass, nil
+}
+
+func getConnectionString(dbInfo DatabaseConnectorInfoDatabase) (string, string, error) {
+	u := getURLParts(dbInfo)
+	genericString, genericUserPass, err := getGenericConnectionString(dbInfo)
+	if err != nil {
+		return "", "", err
+	}
 
 	switch dbInfo.Type {
 	case PostgresDatabase:
@@ -141,44 +174,61 @@ func getConnectionString(dbInfo DatabaseConnectorInfoDatabase) (string, string, 
 			dsn += genericUserPass
 		}
 
-		if address != "" {
-			if !strings.Contains(address, ")") {
-				if !strings.Contains(address, ":") {
-					address += ":" + defaultPorts["mysql"]
+		// MySQL driver has a pretty unique format.
+		if u.address != "" {
+			if !strings.Contains(u.address, ")") {
+				if !strings.Contains(u.address, ":") {
+					u.address += ":" + defaultPorts["mysql"]
 				}
-				address = "tcp(" + address + ")"
+				u.address = "tcp(" + u.address + ")"
 			}
-			dsn += address
+			dsn += u.address
 		}
 
-		dsn += "/" + database + "?" + extraArgs
+		dsn += "/" + u.database + "?" + u.extraArgs
 		return "mysql", dsn, nil
 	case SQLServerDatabase:
-		dsn := fmt.Sprintf("%s://%s%s?database=%s%s", dbInfo.Type, genericUserPass, address, database, extraArgs)
+		dsn := fmt.Sprintf("%s://%s%s?database=%s%s",
+			dbInfo.Type,
+			genericUserPass,
+			u.address,
+			u.database,
+			u.extraArgs)
 		return "sqlserver", dsn, nil
 	case OracleDatabase:
+		// The Oracle driver we use is not cool with blank address
+		if dbInfo.Address == "" || dbInfo.Address[0] == ':' {
+			dbInfo.Address = "localhost"
+			genericString, _, _ = getGenericConnectionString(dbInfo)
+		}
 		return "oracle", genericString, nil
 	case SnowflakeDatabase:
-		dsn := fmt.Sprintf("%s%s/%s?%s", genericUserPass, address, database, extraArgs)
+		dsn := fmt.Sprintf("%s%s/%s?%s",
+			genericUserPass,
+			u.address,
+			u.database,
+			u.extraArgs)
 		return "snowflake", dsn, nil
 	case ClickhouseDatabase:
 		query := ""
 		if genericUserPass != "" {
-			query = fmt.Sprintf("username=%s&password=%s&", username, pass)
+			// Already proven to be ok
+			pass, _ := dbInfo.Password.decrypt()
+			query = fmt.Sprintf("username=%s&password=%s&", u.username, pass)
 		}
 
-		if database != "" {
-			query += "database=" + database
+		if u.database != "" {
+			query += "database=" + u.database
 		}
 
-		if !strings.Contains(address, ":") {
-			address += ":" + defaultPorts["clickhouse"]
+		if !strings.Contains(u.address, ":") {
+			u.address += ":" + defaultPorts["clickhouse"]
 		}
 
-		query += extraArgs
-		return "clickhouse", fmt.Sprintf("tcp://%s?%s", address, query), nil
+		query += u.extraArgs
+		return "clickhouse", fmt.Sprintf("tcp://%s?%s", u.address, query), nil
 	case SQLiteDatabase:
-		return "sqlite3", database, nil
+		return "sqlite3", u.database, nil
 	}
 
 	return "", "", nil
