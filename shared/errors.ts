@@ -47,7 +47,7 @@ export class NoConnectorError extends Error {
   constructor() {
     super();
     this.name = 'NoConnectorError';
-    this.message = 'Without a connector this panel cannot be run.';
+    this.message = 'Without a data source this panel cannot be run.';
   }
 }
 

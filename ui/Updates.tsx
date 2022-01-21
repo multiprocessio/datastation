@@ -3,8 +3,10 @@ import { SITE_ROOT, VERSION } from '../shared/constants';
 import { request } from '../shared/http';
 import log from '../shared/log';
 import { ContentTypeInfo } from '../shared/state';
+import { SettingsContext } from './Settings';
 
 export function Updates() {
+  const { state: settings } = React.useContext(SettingsContext);
   const [updates, setUpdates] = React.useState(null);
   React.useEffect(function getUpdates() {
     async function run() {
@@ -12,7 +14,7 @@ export function Updates() {
         const updates = await request(
           window.fetch,
           'GET',
-          `${SITE_ROOT}/api/updates?version=${VERSION}`,
+          `${SITE_ROOT}/api/updates?version=${VERSION}&i=${settings.id}`,
           new ContentTypeInfo(),
           [],
           '',

@@ -83,7 +83,7 @@ export function Server({
         </div>
       </div>
       {expanded && (
-        <React.Fragment>
+        <div className="server-body">
           <div className="form-row">
             <Input
               label="Address"
@@ -184,7 +184,7 @@ export function Server({
               </Button>
             </div>
           )}
-        </React.Fragment>
+        </div>
       )}
     </div>
   );

@@ -7,7 +7,7 @@ text and binary files. Need to join or munge data? Write embedded
 scripts as needed in Python, JavaScript, Ruby, R, or Julia. All in one
 application.
 
-![A screenshot of app.datastation.multiprocess.io](./screenshot.png)
+![Remote file demo](./screens/datastation-0.6.0-file-demo.gif)
 
 ## Features
 
