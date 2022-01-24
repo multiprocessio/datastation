@@ -86,19 +86,25 @@ func (e *Encrypt) decrypt() (string, error) {
 }
 
 var defaultPorts = map[DatabaseConnectorInfoType]string{
-	"postgres":      "5432",
-	"mysql":         "3306",
-	"sqlite":        "0",
-	"sqlserver":     "1433",
-	"oracle":        "1521",
-	"clickhouse":    "9000",
-	"cassandra":     "9160",
-	"snowflake":     "443",
-	"presto":        "8080",
-	"elasticsearch": "9200",
-	"influx":        "8086",
-	"splunk":        "443",
-	"prometheus":    "9090",
+	PostgresDatabase:      "5432",
+	MySQLDatabase:         "3306",
+	SQLiteDatabase:        "0",
+	SQLServerDatabase:     "1433",
+	OracleDatabase:        "1521",
+	ClickHouseDatabase:    "9000",
+	CassandraDatabase:     "9160",
+	ScyllaDatabase:        "9042",
+	SnowflakeDatabase:     "443",
+	PrestoDatabse:         "8080",
+	ElasticsearchDatabase: "9200",
+	InfluxDatabase:        "8086",
+	SplunkDatabase:        "443",
+	PrometheusDatabase:    "9090",
+	CockroachDatabse:      "26257",
+	CrateDatabase:         "5432",
+	TimescaleDatabase:     "5432",
+	YugabyteDatabase:      "5433",
+	QuestDatabase: "8812",
 }
 
 type urlParts struct {
@@ -166,7 +172,7 @@ func getConnectionString(dbInfo DatabaseConnectorInfoDatabase) (string, string, 
 	}
 
 	switch dbInfo.Type {
-	case PostgresDatabase:
+	case PostgresDatabase, TimescaleDatabase, CockroachDatabase, CrateDatabase, YugabyteDatabase, QuestDatabase:
 		return "postgres", genericString, nil
 	case MySQLDatabase:
 		dsn := ""

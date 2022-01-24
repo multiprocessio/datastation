@@ -74,3 +74,21 @@ sudo service clickhouse-server start
 # Install jsonnet
 go install github.com/google/go-jsonnet/cmd/jsonnet@latest
 sudo ln $HOME/go/bin/jsonnet /usr/local/bin/jsonnet
+
+# Start up sqlserver
+docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=1StrongPwd!!" -p 1433:1433 -d mcr.microsoft.com/mssql/server:2019-latest
+
+# Start up oracle database
+docker run -e ORACLE_RANDOM_PASSWORD="y" -e "APP_USER=test" -e "APP_USER_PASSWORD=test" -p 1521:1521 -d gvenzl/oracle-xe:latest
+
+# Start up cockroach database
+curl https://binaries.cockroachdb.com/cockroach-v21.2.4.linux-amd64.tgz | tar -xz && sudo cp -i cockroach-v21.2.4.linux-amd64/cockroach /usr/local/bin/
+cockroach start-single-node --insecure
+cockroach sql --execute "CREATE DATABASE test; CREATE USER test WITH PASSWORD 'test'; GRANT ALL ON DATABASE test TO test;"
+
+# Start up cratedb
+id="$(docker run -p 5432:5434 crate -Cdiscovery.type=single-node)"
+docker exec -it "$id" crash -c "CREATE DATABASE test; CREATE USER test WITH (password = 'test'); GRANT ALL PRIVILEGES TO test;"
+
+# Start up questdb
+docker run -p 8812:8812 questdb/questdb

@@ -17,6 +17,18 @@ const DATABASES = [
     query: `SELECT 1 AS "1", 2.2 AS "2", true AS "true", 'string' AS "string", CAST('2021-01-01' AS DATE) AS "date"`,
   },
   {
+    type: 'quest',
+    query: `SELECT 1 AS "1", 2.2 AS "2", true AS "true", 'string' AS "string", CAST('2021-01-01' AS DATE) AS "date"`,
+  },
+  {
+    type: 'crate',
+    query: `SELECT 1 AS "1", 2.2 AS "2", true AS "true", 'string' AS "string", CAST('2021-01-01' AS DATE) AS "date"`,
+  },
+  {
+    type: 'cockroach',
+    query: `SELECT 1 AS "1", 2.2 AS "2", true AS "true", 'string' AS "string", CAST('2021-01-01' AS DATE) AS "date"`,
+  },
+  {
     type: 'clickhouse',
     query: `SELECT 1 AS "1", 2.2 AS "2", true AS "true", 'string' AS "string", parseDateTimeBestEffortOrNull('2021-01-01') AS "date"`,
   },
@@ -75,6 +87,14 @@ const vendorOverride = {
     username: 'sa',
     password: '1StrongPwd!!',
     database: 'master',
+  },
+  quest: {
+    database: 'qdb',
+    username: 'admin',
+    password: 'quest',
+  },
+  crate: {
+    address: 'localhost:5434',
   },
 };
 

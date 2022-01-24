@@ -16,6 +16,31 @@ export const VENDORS: {
     id: 'postgres',
     details: GenericDetails,
   },
+  cockroach: {
+    name: 'CockroachDB',
+    id: 'cockroach',
+    details: GenericDetails,
+  },
+  timescale: {
+    name: 'TimescaleDB',
+    id: 'timescale',
+    details: GenericDetails,
+  },
+  crate: {
+    name: 'CrateDB',
+    id: 'crate',
+    details: GenericDetails,
+  },
+  yugabyte: {
+    name: 'YugabyteDB',
+    id: 'yugabyte',
+    details: GenericDetails,
+  },
+  quest: {
+    name: 'QuestDB',
+    id: 'quest',
+    details: GenericDetails,
+  },
   mysql: {
     name: 'MySQL',
     id: 'mysql',
@@ -84,18 +109,25 @@ export const VENDOR_GROUPS: Array<{
 }> = [
   {
     group: 'SQL',
-    vendors: ['postgres', 'mysql', 'sqlserver', 'oracle', 'sqlite'],
+    vendors: [
+      'postgres',
+      'mysql',
+      'sqlserver',
+      'oracle',
+      'sqlite',
+      'cockroach',
+    ],
   },
   {
-    group: 'Analytics',
-    vendors: ['clickhouse', 'snowflake'],
+    group: 'Warehouse',
+    vendors: ['snowflake', 'bigquery'],
   },
   {
-    group: 'Log',
+    group: 'Document',
     vendors: ['elasticsearch'],
   },
   {
-    group: 'Metrics',
-    vendors: ['prometheus', 'influx'],
+    group: 'Time Series',
+    vendors: ['clickhouse', 'prometheus', 'influx', 'crate', 'timescale', 'yugabyte'],
   },
 ];

@@ -180,6 +180,11 @@ export type SQLConnectorType =
   | 'presto'
   | 'clickhouse'
   | 'snowflake'
+  | 'cockroach'
+  | 'timescale'
+  | 'crate'
+  | 'yugabyte'
+ | 'quest'
   | 'cassandra';
 
 export type DatabaseConnectorInfoType =
