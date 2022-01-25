@@ -2,6 +2,7 @@ package runner
 
 import (
 	"encoding/base64"
+	"math"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -14,6 +15,10 @@ import (
 
 	"golang.org/x/crypto/nacl/secretbox"
 
+	prom_api "github.com/prometheus/client_golang/api"
+	prom_v1 "github.com/prometheus/client_golang/api/prometheus/v1"
+	prom_config "github.com/prometheus/common/config"
+	"github.com/influxdata/influxdb-client-go"
 	_ "github.com/ClickHouse/clickhouse-go"
 	_ "github.com/denisenkom/go-mssqldb"
 	_ "github.com/go-sql-driver/mysql"
@@ -315,7 +320,127 @@ func writeRowFromDatabase(dbInfo DatabaseConnectorInfoDatabase, w *JSONArrayWrit
 	}
 
 	return nil
+}
 
+func evalElasticsearch(panel *PanelInfo, dbInfo *DatabaseConnectorInfoDatabase, server *ServerInfo, query string, w io.Writer) error {
+	panic("Not implemented")
+}
+
+func evalBigQuery(panel *PanelInfo, dbInfo *DatabaseConnectorInfoDatabase, server *ServerInfo, query string, w io.Writer) error {
+	panic("Not implemented")
+}
+
+func evalPrometheus(panel *PanelInfo, dbInfo *DatabaseConnectorInfoDatabase, server *ServerInfo, query string, w io.Writer) error {
+	begin, end = timestampsFromRange(panel.DatabasePanelInfo.Range)
+
+	tls, host, port, rest, err := getHTTPHostPort(dbInfo.Address)
+	if err != nil {
+		return err
+	}
+
+	password, err := dbInfo.Password.decrypt()
+	if err != nil {
+		return err
+	}
+
+	apiKey, err := dbInfo.ApiKey.decrypt()
+	if err != nil {
+		return err
+	}
+
+	return withRemoteConnection(server, host, port, func(proxyHost, proxyPort string) error {
+		step := time.Second * math.Floor(panel.DatabasePanelInfo.Step)
+		if step <= 0 * time.Second {
+			// Default to 15 minutes
+			step = 15 * time.Minute
+		}
+		if step <= 60 * time.Second {
+			// Don't allow less than 1 minute.
+			step = time.Second
+		}
+
+		url := makeHTTPUrl(tls, proxyHost, proxyPort, "")
+		cfg := prom_api.Config{Address: url}
+		if password != "" {
+			cfg.RoundTripper = prom_config.NewBasicAuthRoundTripper(
+				dbInfo.Username, password, "", prom_api.DefaultRoundTripper)
+		} else if apiKey != "" {
+			cfg.RoundTripper = prom_config.NewAuthorizationCredentialsRoundTripper(
+				"Bearer", apiKey, prom_api.DefaultRoundTripper)
+		}
+
+		client, err := prom_api.NewClient(cfg)
+		if err != nil {
+			return err
+		}
+
+		v1api := prom_v1.NewAPI(client)
+		r := v1.Range{
+			Start: begin,
+			End:   end,
+			Step:  step,
+		}
+		result, _, err := v1api.QueryRange(context.Background(), panel.Contents, r)
+		if err != nil {
+			return err
+		}
+
+		m := result.(prom_model.Matrix)
+		return withJSONArrayOutWriterFile(w, func(w *JSONArrayWriter) error {
+			for _, row := range m {
+				err := w.Write()
+				if err != nil {
+					return err
+				}
+			}
+
+			return nil
+		})
+	})
+}
+
+func evalSplunk(panel *PanelInfo, dbInfo *DatabaseConnectorInfoDatabase, server *ServerInfo, query string, w io.Writer) error {
+	panic("Not implemented")
+}
+
+func evalMongo(panel *PanelInfo, dbInfo *DatabaseConnectorInfoDatabase, server *ServerInfo, query string, w io.Writer) error {
+	panic("Not implemented")
+}
+
+func evalInflux(panel *PanelInfo, dbInfo *DatabaseConnectorInfoDatabase, server *ServerInfo, query string, w io.Writer) error {
+	tls, host, port, rest, err := getHTTPHostPort(dbInfo.Address)
+	if err != nil {
+		return err
+	}
+
+	token, err := dbInfo.Password.decrypt()
+	if err != nil {
+		return err
+	}
+
+	return withRemoteConnection(server, host, port, func(proxyHost, proxyPort string) error {
+		url := makeHTTPURL(tls, proxyHost, proxyPort, rest)
+		client := influxdb2.NewClient(url, token)
+		defer client.Close()
+
+		queryAPI := client.QueryAPI(dbInfo.Database)
+
+		result, err := queryAPI.Query(context.Background(), panel.Content)
+		if err != nil {
+			return err
+		}
+
+		return withJSONArrayOutWriterFile(w, func(w *JSONArrayWriter) error {
+			for result.Next() {
+				err := w.Write(result.Record().Values())
+				if err != nil {
+					return err
+				}
+			}
+
+			return result.Err()
+		})
+	})
 }
 
 func EvalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo, panelResultLoader func(string, string, interface{}) error) error {
@@ -334,28 +459,11 @@ func EvalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo, p
 
 	dbInfo := connector.Database
 
-	mangleInsert := defaultMangleInsert
-	qt := ansiSQLQuote
-	if dbInfo.Type == "postgres" {
-		mangleInsert = postgresMangleInsert
-	}
-
-	if dbInfo.Type == "mysql" {
-		qt = mysqlQuote
-	}
-
-	idMap := getIdMap(project.Pages[pageIndex])
-	idShapeMap := getIdShapeMap(project.Pages[pageIndex])
-
-	panelsToImport, query, err := transformDM_getPanelCalls(
-		panel.Content,
-		idShapeMap,
-		idMap,
-		dbInfo.Type == "mysql" || dbInfo.Type == "sqlite" || dbInfo.Type == "postgres",
-		qt,
-	)
-	if err != nil {
-		return err
+	if panelResultLoader == nil {
+		panelResultLoader = func(projectId, panelId string, res interface{}) error {
+			f := GetPanelResultsFile(projectId, panelId)
+			return readJSONFileInto(f, res)
+		}
 	}
 
 	serverId := panel.ServerId
@@ -367,8 +475,54 @@ func EvalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo, p
 		return err
 	}
 
+	out := GetPanelResultsFile(project.Id, panel.Id)
+	w, err := openTruncate(out)
+	if err != nil {
+		return err
+	}
+	defer w.Close()
+
+	switch dbInfo.Type {
+	case ElasticsearchDatabase:
+		return evalElasticsearch(panel, dbInfo, server, w)
+	case InfluxDatabase:
+		return evalInflux(panel, dbInfo, server, w)
+	case PrometheusDatabase:
+		return evalPrometheus(panel, dbInfo, server, w)
+	case BigQueryDatabase:
+		return evalBigQuery(panel, dbInfo, server, w)
+	case SplunkDatabase:
+		return evalSplunk(panel, dbInfo, server, w)
+	case MongoDatabase:
+		return evalMongo(panel, dbInfo, server, w)
+	}
+
+	mangleInsert := defaultMangleInsert
+	qt := ansiSQLQuote
+	if dbInfo.Type == PostgresDatabase {
+		mangleInsert = postgresMangleInsert
+	}
+
+	if dbInfo.Type == MySQLDatabase {
+		qt = mysqlQuote
+	}
+
+	idMap := getIdMap(project.Pages[pageIndex])
+	idShapeMap := getIdShapeMap(project.Pages[pageIndex])
+
+	panelsToImport, query, err := transformDM_getPanelCalls(
+		panel.Content,
+		idShapeMap,
+		idMap,
+		dbInfo.Type == MySQLDatabase || dbInfo.Type == SQLiteDatabase || dbInfo.Type == PostgresDatabase,
+		qt,
+	)
+	if err != nil {
+		return err
+	}
+
 	// Copy remote sqlite database to tmp file if remote
-	if dbInfo.Type == "sqlite" && server != nil {
+	if dbInfo.Type == SQLiteDatabase && server != nil {
 		tmp, err := ioutil.TempFile("", "sqlite-copy")
 		if err != nil {
 			return err
@@ -391,20 +545,6 @@ func EvalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo, p
 	if err != nil {
 		return err
 	}
-
-	if panelResultLoader == nil {
-		panelResultLoader = func(projectId, panelId string, res interface{}) error {
-			f := GetPanelResultsFile(projectId, panelId)
-			return readJSONFileInto(f, res)
-		}
-	}
-
-	out := GetPanelResultsFile(project.Id, panel.Id)
-	w, err := openTruncate(out)
-	if err != nil {
-		return err
-	}
-	defer w.Close()
 
 	return withRemoteConnection(server, host, port, func(proxyHost, proxyPort string) error {
 		dbInfo.Address = proxyHost + ":" + proxyPort

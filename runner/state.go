@@ -275,6 +275,8 @@ const (
 	CrateDatabase                                   = "crate"
 	YugabyteDatabase                                = "yugabyte"
 	QuestDatabase = "quest"
+	BigQueryDatabase = "bigquery"
+	MongoDatabase = "mongo"
 )
 
 type DatabaseConnectorInfoDatabase struct {

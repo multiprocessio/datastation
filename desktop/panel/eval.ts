@@ -16,8 +16,6 @@ import log from '../../shared/log';
 import { PanelBody } from '../../shared/rpc';
 import {
   ConnectorInfo,
-  DatabaseConnectorInfo,
-  DatabasePanelInfo,
   PanelInfo,
   PanelInfoType,
   PanelResult,
@@ -50,7 +48,6 @@ function unimplementedInJavaScript(): EvalHandler {
 }
 
 const EVAL_HANDLERS: { [k in PanelInfoType]: () => EvalHandler } = {
-  database: () => require('./database').evalDatabase,
   table: () => require('./columns').evalColumns,
   graph: () => require('./columns').evalColumns,
   literal: unimplementedInJavaScript,
@@ -82,25 +79,6 @@ function killAllByPanelId(panelId: string) {
 }
 
 function canUseGoRunner(panel: PanelInfo, connectors: ConnectorInfo[]) {
-  const supportedDatabases = [
-    'postgres',
-    'sqlite',
-    'mysql',
-    'oracle',
-    'sqlserver',
-    'clickhouse',
-  ];
-  if (panel.type === 'database') {
-    const dp = panel as DatabasePanelInfo;
-    for (const c of connectors) {
-      if (c.id === dp.database.connectorId) {
-        const dc = c as DatabaseConnectorInfo;
-        return supportedDatabases.includes(dc.database.type);
-      }
-    }
-    return false;
-  }
-
   return !['table', 'graph'].includes(panel.type);
 }
 

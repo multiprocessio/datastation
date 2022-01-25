@@ -99,7 +99,22 @@ export const VENDORS: {
   cassandra: {
     name: 'Cassandra',
     id: 'cassandra',
-    details: GenericDetails,
+    details: CassandraDetails,
+  },
+  scylla: {
+    name: 'ScyllaDB',
+    id: 'scylla',
+    details: CassandraDetails,
+  },
+  bigquery: {
+    name: 'BigQuery',
+    id: 'bigquery',
+    details: BigQueryDetails,
+  },
+  mongo: {
+    name: 'MongoDB',
+    id: 'mongo',
+    details: MongoDetails,
   },
 };
 
@@ -124,10 +139,19 @@ export const VENDOR_GROUPS: Array<{
   },
   {
     group: 'Document',
-    vendors: ['elasticsearch'],
+    vendors: ['elasticsearch', 'mongo'],
   },
   {
     group: 'Time Series',
-    vendors: ['clickhouse', 'prometheus', 'influx', 'crate', 'timescale', 'yugabyte'],
+    vendors: [
+      'clickhouse',
+      'cassandra',
+      'scylla',
+      'prometheus',
+      'influx',
+      'crate',
+      'timescale',
+      'yugabyte',
+    ],
   },
 ];

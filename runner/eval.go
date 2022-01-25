@@ -94,7 +94,7 @@ func (ec EvalContext) Eval(projectId, panelId string) error {
 		return evalFilePanel(project, pageIndex, panel)
 	case HttpPanel:
 		Logln("Evaling http panel")
-		return evalHttpPanel(project, pageIndex, panel)
+		return evalHTTPPanel(project, pageIndex, panel)
 	case LiteralPanel:
 		Logln("Evaling literal panel")
 		return evalLiteralPanel(project, pageIndex, panel)

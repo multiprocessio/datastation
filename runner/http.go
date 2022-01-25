@@ -93,7 +93,45 @@ func getHTTPHostPort(raw string) (bool, string, string, string, error) {
 	return u.Scheme == "https", host, port, fullPath(u), err
 }
 
-func evalHttpPanel(project *ProjectState, pageIndex int, panel *PanelInfo) error {
+func makeHTTPURL(tls bool, host, port, extra string) string {
+	url := "http://"
+	if tls {
+		url = "https://"
+	}
+	return url + host + ":" + port + rest
+}
+
+type httpRequest struct {
+	url string
+	headers []HttpConnectorInfoHeader
+	body []byte
+	sendBody bool
+	method http.Method
+}
+
+func makeHTTPRequest(hr httpRequest) (*http.Response, error) {
+	var req *http.Request
+	var err error
+	// Convoluted logic to not pass in a typed nil
+	// https://github.com/golang/go/issues/32897
+	if hr.sendBody {
+		req, err = http.NewRequest(hr.method, hr.url, hr.body)
+	} else {
+		req, err = http.NewRequest(hr.method, hr.url, nil)
+	}
+	if err != nil {
+		return err
+	}
+
+	for _, header := range hr.headers {
+		req.Header.Set(header.Name, header.Value)
+	}
+
+	c := http.Client{Timeout: time.Second * 5}
+	return c.Do(req)
+}
+
+func evalHTTPPanel(project *ProjectState, pageIndex int, panel *PanelInfo) error {
 	server, err := getServer(project, panel.ServerId)
 	if err != nil {
 		return err
@@ -104,33 +142,16 @@ func evalHttpPanel(project *ProjectState, pageIndex int, panel *PanelInfo) error
 		return err
 	}
 
-	return withRemoteConnection(server, host, port, func(host, port string) error {
+	return withRemoteConnection(server, host, port, func(proxyHost, proxyPort string) error {
 		h := panel.Http.Http
-
-		url := "http://"
-		if tls {
-			url = "https://"
-		}
-		url += host + ":" + port + rest
-		var req *http.Request
-		var err error
-		// Convoluted logic to not pass in a typed nil
-		// https://github.com/golang/go/issues/32897
-		if panel.Content != "" && h.Method != "GET" {
-			req, err = http.NewRequest(h.Method, url, bytes.NewBuffer([]byte(panel.Content)))
-		} else {
-			req, err = http.NewRequest(h.Method, url, nil)
-		}
-		if err != nil {
-			return err
-		}
-
-		for _, header := range h.Headers {
-			req.Header.Set(header.Name, header.Value)
-		}
-
-		client := &http.Client{}
-		rsp, err := client.Do(req)
+		url := makeHTTPUrl(tls, proxyHost, proxyPost, rest)
+		rsp, err := makeHTTPRequest(httpRequest{
+			url: url,
+			headers: h.Headers,
+			body: []byte(panel.Content),
+			sendBody: panel.Content != "" &&
+				(h.Method == http.PUT || h.Method == http.PATCH || h.Method == http.POST),
+		})
 		if err != nil {
 			return err
 		}

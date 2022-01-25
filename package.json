@@ -24,7 +24,6 @@
     "e2e-test": "node --unhandled-rejections=throw ./e2e/index.js"
   },
   "dependencies": {
-    "@elastic/elasticsearch": "^7.15.0",
     "ace-builds": "^1.4.13",
     "chart.js": "^3.5.1",
     "cookie-parser": "^1.4.5",
@@ -48,7 +47,6 @@
     "react-dom": "^17.0.2",
     "react-syntax-highlighter": "^15.4.4",
     "shape": "npm:@multiprocess/shape",
-    "snowflake-sdk": "^1.6.3",
     "source-map-support": "^0.5.20",
     "ssh2-promise": "^1.0.2",
     "ssh2-sftp-client": "^7.0.4",

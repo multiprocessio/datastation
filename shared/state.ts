@@ -184,11 +184,13 @@ export type SQLConnectorType =
   | 'timescale'
   | 'crate'
   | 'yugabyte'
- | 'quest'
+  | 'quest'
+  | 'bigquery'
   | 'cassandra';
 
 export type DatabaseConnectorInfoType =
   | SQLConnectorType
+  | 'mongo'
   | 'elasticsearch'
   | 'splunk'
   | 'prometheus'
