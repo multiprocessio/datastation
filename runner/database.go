@@ -175,6 +175,13 @@ func getConnectionString(dbInfo DatabaseConnectorInfoDatabase) (string, string, 
 	switch dbInfo.Type {
 	case PostgresDatabase, TimescaleDatabase, CockroachDatabase, CrateDatabase, YugabyteDatabase, QuestDatabase:
 		return "postgres", genericString, nil
+	case MongoDatabase:
+		return "mongodb", fmt.Sprintf(
+			"mongodb://%s%s/%s?%s",
+			genericUserPass,
+			u.address,
+			u.database,
+			u.extraArgs), nil
 	case MySQLDatabase:
 		dsn := ""
 		if genericUserPass != "" {
@@ -372,6 +379,8 @@ func EvalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo, p
 		return evalSplunk(panel, dbInfo, server, w)
 	case MongoDatabase:
 		return evalMongo(panel, dbInfo, server, w)
+	case CassandraDatabase, ScyllaDatabase:
+		return evalCQL(panel, dbInfo, server, w)
 	}
 
 	mangleInsert := defaultMangleInsert
