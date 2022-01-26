@@ -187,7 +187,7 @@ export type SQLConnectorType =
   | 'quest'
   | 'bigquery'
   | 'cassandra'
-| 'scylla';
+  | 'scylla';
 
 export type DatabaseConnectorInfoType =
   | SQLConnectorType
