@@ -1,22 +1,19 @@
 import * as React from 'react';
-import { DatabaseConnectorInfo, Encrypt, ServerInfo } from '../../shared/state';
+import { DatabaseConnectorInfo } from '../../shared/state';
 import { FormGroup } from '../components/FormGroup';
-import { Input } from '../components/Input';
 import { Select } from '../components/Select';
-import { ServerPicker } from '../components/ServerPicker';
-import { Host } from './Host';
+import { ApiKey } from './ApiKey';
 import { Password } from './Password';
 import { Username } from './Username';
-import { ApiKey } from './ApiKey';
 
 export function Auth(props: {
   connector: DatabaseConnectorInfo;
   updateConnector: (c: DatabaseConnectorInfo) => void;
+  apiKeyLabel?: string;
 }) {
-  const { connector, updateConnector, servers } = props;
+  const { connector, apiKeyLabel } = props;
 
-
-    const [authMethod, setAuthMethod] = React.useState(
+  const [authMethod, setAuthMethod] = React.useState(
     connector.database.apiKey_encrypt.value ||
       connector.database.apiKey_encrypt.encrypted
       ? 'apikey'
@@ -27,26 +24,24 @@ export function Auth(props: {
   );
 
   return (
-        <FormGroup label="Authentication">
-        <div className="form-row">
-          <Select
-            label="Authentication"
-            onChange={setAuthMethod}
-            value={authMethod}
-          >
-            <option value="apikey">Base64 Encoded API Key</option>
-            <option value="basic">Basic Authentication</option>
-          </Select>
-        </div>
-        {authMethod === 'apikey' && (
-          <Auth {...props} />
-        )}
-        {authMethod === 'basic' && (
-          <React.Fragment>
-            <Username {...props} />
-            <Password {...props} />
-          </React.Fragment>
-        )}
-  </FormGroup>
-);
+    <FormGroup label="Authentication">
+      <div className="form-row">
+        <Select
+          label="Authentication"
+          onChange={setAuthMethod}
+          value={authMethod}
+        >
+          <option value="apikey">Base64 Encoded API Key</option>
+          <option value="basic">Basic Authentication</option>
+        </Select>
+      </div>
+      {authMethod === 'apikey' && <ApiKey {...props} label={apiKeyLabel} />}
+      {authMethod === 'basic' && (
+        <React.Fragment>
+          <Username {...props} />
+          <Password {...props} />
+        </React.Fragment>
+      )}
+    </FormGroup>
+  );
 }

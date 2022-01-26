@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { DatabaseConnectorInfo, Encrypt } from '../../shared/state';
-import { Input } from '../components/Input';
+import { DatabaseConnectorInfo } from '../../shared/state';
+import { ApiKey } from './ApiKey';
 import { Database } from './Database';
 
 export function BigQueryDetails({
@@ -17,14 +17,11 @@ export function BigQueryDetails({
         connector={connector}
         updateConnector={updateConnector}
       />
-      <div className="form-row">
-        <Input
-          label="Service Account JSON"
-          type="password"
-          value={apiKey}
-          onChange={(value: string) => syncApiKey(value)}
-        />
-      </div>
+      <ApiKey
+        label="Service Account JSON"
+        connector={connector}
+        updateConnector={updateConnector}
+      />
     </React.Fragment>
   );
 }

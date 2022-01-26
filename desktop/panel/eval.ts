@@ -51,6 +51,7 @@ const EVAL_HANDLERS: { [k in PanelInfoType]: () => EvalHandler } = {
   table: () => require('./columns').evalColumns,
   graph: () => require('./columns').evalColumns,
   literal: unimplementedInJavaScript,
+  database: unimplementedInJavaScript,
   file: unimplementedInJavaScript,
   http: unimplementedInJavaScript,
   program: unimplementedInJavaScript,

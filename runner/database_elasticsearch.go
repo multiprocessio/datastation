@@ -19,7 +19,7 @@ type elasticsearchResponse struct {
 }
 
 func evalElasticsearch(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, server *ServerInfo, w io.Writer) error {
-	indexes := strings.Split(dbInfo.Database, ",")
+	indexes := strings.Split(panel.DatabasePanelInfo.Database.Table, ",")
 	for i := range indexes {
 		indexes[i] = strings.TrimSpace(indexes[i])
 	}

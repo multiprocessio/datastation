@@ -3,9 +3,10 @@ import { DatabaseConnectorInfo, ServerInfo } from '../../shared/state';
 import { ServerPicker } from '../components/ServerPicker';
 import { Database } from './Database';
 import { Host } from './Host';
-import { Auth } from './Auth';
+import { Password } from './Password';
+import { Username } from './Username';
 
-export function GenericDetails(props: {
+export function CassandraDetails(props: {
   connector: DatabaseConnectorInfo;
   updateConnector: (c: DatabaseConnectorInfo) => void;
   servers: Array<ServerInfo>;
@@ -15,8 +16,13 @@ export function GenericDetails(props: {
   return (
     <React.Fragment>
       <Host connector={connector} updateConnector={updateConnector} />
-      <Database label="Keyspace" connector={connector} updateConnector={updateConnector} />
-      <Auth connector={connector} updateConnector={updateConnector} />
+      <Database
+        label="Keyspace"
+        connector={connector}
+        updateConnector={updateConnector}
+      />
+      <Username {...props} />
+      <Password {...props} />
       <ServerPicker
         servers={servers}
         serverId={connector.serverId}
