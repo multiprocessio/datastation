@@ -3,13 +3,17 @@ package runner
 import (
 	"context"
 	"encoding/json"
+	"io"
+	"io/ioutil"
+	"net/http"
 	"strings"
+	"time"
 
 	"github.com/elastic/go-elasticsearch/v6"
 )
 
 type elasticsearchResponse struct {
-	Hits struct{
+	Hits struct {
 		Hits []map[string]interface{} `json:"hits"`
 	} `json:"hits"`
 }
@@ -17,7 +21,7 @@ type elasticsearchResponse struct {
 func evalElasticsearch(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, server *ServerInfo, w io.Writer) error {
 	indexes := strings.Split(dbInfo.Database, ",")
 	for i := range indexes {
-		indexes[i] = strings.TrimWhitespace(indexes[i])
+		indexes[i] = strings.TrimSpace(indexes[i])
 	}
 
 	tls, host, port, rest, err := getHTTPHostPort(dbInfo.Address)
@@ -25,7 +29,10 @@ func evalElasticsearch(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, s
 		return err
 	}
 
-	password,
+	password, err := dbInfo.Password.decrypt()
+	if err != nil {
+		return err
+	}
 
 	token, err := dbInfo.ApiKey.decrypt()
 	if err != nil {
@@ -34,29 +41,52 @@ func evalElasticsearch(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, s
 
 	return withRemoteConnection(server, host, port, func(proxyHost, proxyPort string) error {
 		url := makeHTTPUrl(tls, proxyHost, proxyPort, rest)
-		es, err := elasticsearch.NewDefaultClient()
+		cfg := elasticsearch.Config{
+			Addresses: []string{url},
+		}
+		if password != "" {
+			cfg.Username = dbInfo.Username
+			cfg.Password = password
+		} else if token != "" {
+			// TODO: Are either of these supposed to base64 encoded?
+			cfg.APIKey = token
+			cfg.Header = http.Header(map[string][]string{
+				"Authorization": {"Bearer " + token},
+			})
+		}
+
+		es, err := elasticsearch.NewClient(cfg)
 		if err != nil {
 			return err
 		}
 
-		res, err = es.Search(
+		q := panel.Content
+		_range := panel.DatabasePanelInfo.Database.Range
+		if _range.Field != "" {
+			begin, end, err := timestampsFromRange(_range)
+			if err != nil {
+				return err
+			}
+
+			if q != "" {
+				q = "(" + q + ") AND "
+			}
+
+			q += _range.Field + ":[" + begin.Format(time.RFC3339) + " TO " + end.Format(time.RFC3339) + "]"
+		}
+
+		res, err := es.Search(
 			es.Search.WithContext(context.Background()),
 			es.Search.WithIndex(indexes...),
-			es.Search.WithTrackTotalHits(true),
-		)
+			es.Search.WithQuery(q))
 		if err != nil {
 			return err
 		}
 		defer res.Body.Close()
 
 		if res.IsError() {
-			var e map[string]interface{}
-			if err := json.NewDecoder(res.Body).Decode(&e); err != nil {
-				return err
-			}
-
-			e["status"] = res.Status()
-			return e
+			rsp, _ := ioutil.ReadAll(res.Body)
+			return edsef("Error %s: %s", res.Status(), rsp)
 		}
 
 		var r elasticsearchResponse
@@ -65,14 +95,14 @@ func evalElasticsearch(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, s
 		}
 
 		return withJSONArrayOutWriterFile(w, func(w *JSONArrayWriter) error {
-			for result.Next() {
-				err := w.Write(result.Record().Values())
+			for _, hit := range r.Hits.Hits {
+				err := w.Write(hit)
 				if err != nil {
 					return err
 				}
 			}
 
-			return result.Err()
+			return nil
 		})
 	})
 }

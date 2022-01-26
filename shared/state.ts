@@ -186,7 +186,8 @@ export type SQLConnectorType =
   | 'yugabyte'
   | 'quest'
   | 'bigquery'
-  | 'cassandra';
+  | 'cassandra'
+| 'scylla';
 
 export type DatabaseConnectorInfoType =
   | SQLConnectorType
@@ -195,7 +196,7 @@ export type DatabaseConnectorInfoType =
   | 'splunk'
   | 'prometheus'
   | 'influx'
-| 'influx-flux';
+  | 'influx-flux';
 
 export class DatabaseConnectorInfo extends ConnectorInfo {
   database: {

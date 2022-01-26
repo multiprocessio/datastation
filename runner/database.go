@@ -98,7 +98,7 @@ var defaultPorts = map[DatabaseConnectorInfoType]string{
 	PrestoDatabase:        "8080",
 	ElasticsearchDatabase: "9200",
 	InfluxDatabase:        "8086",
-	InfluxFluxDatabase: "8086",
+	InfluxFluxDatabase:    "8086",
 	SplunkDatabase:        "443",
 	PrometheusDatabase:    "9090",
 	CockroachDatabase:     "26257",
@@ -361,7 +361,7 @@ func EvalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo, p
 	case ElasticsearchDatabase:
 		return evalElasticsearch(panel, dbInfo, server, w)
 	case InfluxDatabase:
-		return evalInflux(panel, dbInfo, server, w)
+		return evalInfluxQL(panel, dbInfo, server, w)
 	case InfluxFluxDatabase:
 		return evalFlux(panel, dbInfo, server, w)
 	case PrometheusDatabase:

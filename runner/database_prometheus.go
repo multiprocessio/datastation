@@ -1,12 +1,15 @@
 package runner
 
 import (
+	"context"
 	"io"
+	"math"
+	"time"
 
-	 "github.com/prometheus/client_golang/api"
-	 "github.com/prometheus/client_golang/api/prometheus/v1"
-	 "github.com/prometheus/common/config"
-	 "github.com/prometheus/common/model"
+	"github.com/prometheus/client_golang/api"
+	"github.com/prometheus/client_golang/api/prometheus/v1"
+	"github.com/prometheus/common/config"
+	"github.com/prometheus/common/model"
 )
 
 func evalPrometheus(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, server *ServerInfo, w io.Writer) error {

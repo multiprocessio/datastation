@@ -102,6 +102,11 @@ export const VENDORS: {
     id: 'presto',
     details: GenericDetails,
   },
+  bigquery: {
+    name: 'BigQuery',
+    id: 'bigquery',
+    details: BigQueryDetails,
+  },
   cassandra: {
     name: 'Cassandra',
     id: 'cassandra',
@@ -111,11 +116,6 @@ export const VENDORS: {
     name: 'ScyllaDB',
     id: 'scylla',
     details: CassandraDetails,
-  },
-  bigquery: {
-    name: 'BigQuery',
-    id: 'bigquery',
-    details: BigQueryDetails,
   },
   mongo: {
     name: 'MongoDB',

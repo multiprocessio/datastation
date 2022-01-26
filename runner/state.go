@@ -270,7 +270,7 @@ const (
 	SplunkDatabase                                  = "splunk"
 	PrometheusDatabase                              = "prometheus"
 	InfluxDatabase                                  = "influx"
-	InfluxFluxDatabase                                  = "influx-flux"
+	InfluxFluxDatabase                              = "influx-flux"
 	CockroachDatabase                               = "cockroach"
 	TimescaleDatabase                               = "timescale"
 	CrateDatabase                                   = "crate"

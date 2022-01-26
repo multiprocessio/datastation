@@ -1,13 +1,17 @@
 package runner
 
 import (
-	"encoding/base64"
 	"context"
+	"encoding/base64"
+	"encoding/json"
 	"io"
+
+	"github.com/influxdata/influxdb-client-go/v2"
 )
 
 type influxSeries struct {
-	Values  `json:"values"`
+	Values []map[string]interface{} `json:"values"`
+	Name   string                   `json:"name"`
 }
 
 type influxResult struct {
@@ -43,33 +47,44 @@ func evalInfluxQL(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, server
 		var headers []HttpConnectorInfoHeader
 		if password != "" {
 			headers = append(headers, HttpConnectorInfoHeader{
-				Name: "Authorization",
-				Value: "Basic " + base64.StdEncoding.EncodeString([]byte(username + ":" + password)),
+				Name:  "Authorization",
+				Value: "Basic " + base64.StdEncoding.EncodeToString([]byte(dbInfo.Username+":"+password)),
 			})
 		} else if token != "" {
 			headers = append(headers, HttpConnectorInfoHeader{
-				Name: "Authorization",
-				Value: "Token " + base64.StdEncoding.EncodeString([]byte(token)),
+				Name:  "Authorization",
+				Value: "Token " + base64.StdEncoding.EncodeToString([]byte(token)),
 			})
 		}
 
 		rsp, err := makeHTTPRequest(httpRequest{
-			url: url,
-			method: "GET",
+			url:     url,
+			method:  "GET",
 			headers: headers,
 		})
+		defer rsp.Body.Close()
 
-		var r influxResults
+		var r influxResponse
+		err = json.NewDecoder(rsp.Body).Decode(&r)
+		if err != nil {
+			return err
+		}
 
 		return withJSONArrayOutWriterFile(w, func(w *JSONArrayWriter) error {
-			for result.Next() {
-				err := w.Write(result.Record().Values())
-				if err != nil {
-					return err
+			for _, result := range r.Results {
+				for _, series := range result.Series {
+					for _, row := range series.Values {
+						// Hope this doesn't collide!
+						row["__series_name__"] = series.Name
+						err := w.Write(row)
+						if err != nil {
+							return err
+						}
+					}
 				}
 			}
 
-			return result.Err()
+			return nil
 		})
 	})
 }
@@ -93,12 +108,21 @@ func evalFlux(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, server *Se
 		client := influxdb2.NewClientWithOptions(url, token,
 			influxdb2.DefaultOptions().
 				SetUseGZip(true))
+		defer client.Close()
 
 		queryApi := client.QueryAPI(dbInfo.Database)
 
+		result, err := queryApi.Query(context.Background(), panel.Content)
+		if err != nil {
+			return err
+		}
+
 		return withJSONArrayOutWriterFile(w, func(w *JSONArrayWriter) error {
 			for result.Next() {
-				err := w.Write(result.Record().Values())
+				values := result.Record().Values()
+				// Let's hope this doesn't collide!
+				values["__table_name__"] = result.TableMetadata().String()
+				err := w.Write(values)
 				if err != nil {
 					return err
 				}
