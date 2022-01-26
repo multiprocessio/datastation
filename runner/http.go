@@ -10,6 +10,7 @@ import (
 	"os"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/multiprocessio/go-openoffice"
 	"github.com/xuri/excelize/v2"
@@ -93,20 +94,20 @@ func getHTTPHostPort(raw string) (bool, string, string, string, error) {
 	return u.Scheme == "https", host, port, fullPath(u), err
 }
 
-func makeHTTPURL(tls bool, host, port, extra string) string {
+func makeHTTPUrl(tls bool, host, port, extra string) string {
 	url := "http://"
 	if tls {
 		url = "https://"
 	}
-	return url + host + ":" + port + rest
+	return url + host + ":" + port + extra
 }
 
 type httpRequest struct {
-	url string
-	headers []HttpConnectorInfoHeader
-	body []byte
+	url      string
+	headers  []HttpConnectorInfoHeader
+	body     []byte
 	sendBody bool
-	method http.Method
+	method   string
 }
 
 func makeHTTPRequest(hr httpRequest) (*http.Response, error) {
@@ -115,12 +116,12 @@ func makeHTTPRequest(hr httpRequest) (*http.Response, error) {
 	// Convoluted logic to not pass in a typed nil
 	// https://github.com/golang/go/issues/32897
 	if hr.sendBody {
-		req, err = http.NewRequest(hr.method, hr.url, hr.body)
+		req, err = http.NewRequest(hr.method, hr.url, bytes.NewBuffer(hr.body))
 	} else {
 		req, err = http.NewRequest(hr.method, hr.url, nil)
 	}
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	for _, header := range hr.headers {
@@ -144,13 +145,13 @@ func evalHTTPPanel(project *ProjectState, pageIndex int, panel *PanelInfo) error
 
 	return withRemoteConnection(server, host, port, func(proxyHost, proxyPort string) error {
 		h := panel.Http.Http
-		url := makeHTTPUrl(tls, proxyHost, proxyPost, rest)
+		url := makeHTTPUrl(tls, proxyHost, proxyPort, rest)
 		rsp, err := makeHTTPRequest(httpRequest{
-			url: url,
+			url:     url,
 			headers: h.Headers,
-			body: []byte(panel.Content),
+			body:    []byte(panel.Content),
 			sendBody: panel.Content != "" &&
-				(h.Method == http.PUT || h.Method == http.PATCH || h.Method == http.POST),
+				(h.Method == http.MethodPut || h.Method == http.MethodPatch || h.Method == http.MethodPost),
 		})
 		if err != nil {
 			return err

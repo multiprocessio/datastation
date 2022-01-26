@@ -194,7 +194,8 @@ export type DatabaseConnectorInfoType =
   | 'elasticsearch'
   | 'splunk'
   | 'prometheus'
-  | 'influx';
+  | 'influx'
+| 'influx-flux';
 
 export class DatabaseConnectorInfo extends ConnectorInfo {
   database: {

@@ -92,3 +92,12 @@ docker exec -it "$id" crash -c "CREATE DATABASE test; CREATE USER test WITH (pas
 
 # Start up questdb
 docker run -p 8812:8812 questdb/questdb
+
+# Start up elasticsearch
+docker run -p 9200:9200 -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:7.16.3
+
+# Start up prometheus
+docker run -p 9090:9090 prom/prometheus
+
+# Start up influx
+docker run -p 8086:8086 -v influxdb:/var/lib/influxdb influxdb:2.0

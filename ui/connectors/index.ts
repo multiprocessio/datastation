@@ -1,4 +1,5 @@
 import { DatabaseConnectorInfoType } from '../../shared/state';
+import { BigQueryDetails } from './BigQueryDetails';
 import { ElasticsearchDetails } from './ElasticsearchDetails';
 import { GenericDetails, GenericNoDatabaseDetails } from './GenericDetails';
 import { SnowflakeDetails } from './SnowflakeDetails';
@@ -87,8 +88,13 @@ export const VENDORS: {
     details: GenericNoDatabaseDetails,
   },
   influx: {
-    name: 'Influx',
+    name: 'Influx (InfluxQL)',
     id: 'influx',
+    details: GenericDetails,
+  },
+  'influx-flux': {
+    name: 'Influx (Flux)',
+    id: 'influx-flux',
     details: GenericDetails,
   },
   presto: {

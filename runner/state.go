@@ -270,13 +270,14 @@ const (
 	SplunkDatabase                                  = "splunk"
 	PrometheusDatabase                              = "prometheus"
 	InfluxDatabase                                  = "influx"
+	InfluxFluxDatabase                                  = "influx-flux"
 	CockroachDatabase                               = "cockroach"
 	TimescaleDatabase                               = "timescale"
 	CrateDatabase                                   = "crate"
 	YugabyteDatabase                                = "yugabyte"
-	QuestDatabase = "quest"
-	BigQueryDatabase = "bigquery"
-	MongoDatabase = "mongo"
+	QuestDatabase                                   = "quest"
+	BigQueryDatabase                                = "bigquery"
+	MongoDatabase                                   = "mongo"
 )
 
 type DatabaseConnectorInfoDatabase struct {
