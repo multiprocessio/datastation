@@ -76,10 +76,10 @@ go install github.com/google/go-jsonnet/cmd/jsonnet@latest
 sudo ln $HOME/go/bin/jsonnet /usr/local/bin/jsonnet
 
 # Start up sqlserver
-docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=1StrongPwd!!" -p 1433:1433 -d mcr.microsoft.com/mssql/server:2019-latest
+docker run -d -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=1StrongPwd!!" -p 1433:1433 mcr.microsoft.com/mssql/server:2019-latest
 
 # Start up oracle database
-docker run -e ORACLE_RANDOM_PASSWORD="y" -e "APP_USER=test" -e "APP_USER_PASSWORD=test" -p 1521:1521 -d gvenzl/oracle-xe:latest
+docker run -d -e ORACLE_RANDOM_PASSWORD="y" -e "APP_USER=test" -e "APP_USER_PASSWORD=test" -p 1521:1521 gvenzl/oracle-xe:latest
 
 # Start up cockroach database
 curl https://binaries.cockroachdb.com/cockroach-v21.2.4.linux-amd64.tgz | tar -xz && sudo cp -i cockroach-v21.2.4.linux-amd64/cockroach /usr/local/bin/
@@ -87,17 +87,22 @@ cockroach start-single-node --insecure
 cockroach sql --execute "CREATE DATABASE test; CREATE USER test WITH PASSWORD 'test'; GRANT ALL ON DATABASE test TO test;"
 
 # Start up cratedb
-id="$(docker run -p 5432:5434 crate -Cdiscovery.type=single-node)"
+id="$(docker run -d -p 5432:5434 crate -Cdiscovery.type=single-node)"
 docker exec -it "$id" crash -c "CREATE DATABASE test; CREATE USER test WITH (password = 'test'); GRANT ALL PRIVILEGES TO test;"
 
 # Start up questdb
-docker run -p 8812:8812 questdb/questdb
+docker run -d -p 8812:8812 questdb/questdb
 
 # Start up elasticsearch
-docker run -p 9200:9200 -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:7.16.3
+docker run -d -p 9200:9200 -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:7.16.3
 
 # Start up prometheus
-docker run -p 9090:9090 prom/prometheus
+docker run -d -p 9090:9090 prom/prometheus
 
-# Start up influx
-docker run -p 8086:8086 -v influxdb:/var/lib/influxdb influxdb:2.0
+# Start up influx (2 for fluxql)
+docker run -d -p 8086:8086 -e "DOCKER_INFLUXDB_INIT_MODE=setup" -e "DOCKER_INFLUXDB_INIT_USERNAME=test" -e "DOCKER_INFLUXDB_INIT_PASSWORD=test" -e "DOCKER_INFLUXDB_INIT_ORG=test" -e "DOCKER_INFLUXDB_INIT_BUCKET=test" -e "DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=test" influxdb:2.0
+
+# Start up influx (1 for influxql)
+docker run -d -p 8086:8087 -e "INFLUXDB_HTTP_AUTH_ENABLED=true" -e "INFLUXDB_ADMIN_USER=test" -e "INFLUXDB_ADMIN_PASSWORD=test" influxdb:1.7
+
+# TODO: might be worth switching to docker-compose at some point...
