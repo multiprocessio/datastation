@@ -6,15 +6,17 @@ export function Database({
   connector,
   updateConnector,
   placeholder,
+  label = 'Database',
 }: {
   connector: DatabaseConnectorInfo;
   updateConnector: (c: DatabaseConnectorInfo) => void;
   placeholder?: string;
+  label?: string;
 }) {
   return (
     <div className="form-row">
       <Input
-        label="Database"
+        label={label}
         value={connector.database.database}
         onChange={(value: string) => {
           connector.database.database = value;

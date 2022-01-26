@@ -90,12 +90,12 @@ export const VENDORS: {
   influx: {
     name: 'Influx (InfluxQL)',
     id: 'influx',
-    details: GenericDetails,
+    details: InfluxDetails,
   },
   'influx-flux': {
     name: 'Influx (Flux)',
     id: 'influx-flux',
-    details: GenericDetails,
+    details: FluxDetails,
   },
   presto: {
     name: 'Presto',
@@ -155,6 +155,7 @@ export const VENDOR_GROUPS: Array<{
       'scylla',
       'prometheus',
       'influx',
+      'influx-flux'
       'crate',
       'timescale',
       'yugabyte',

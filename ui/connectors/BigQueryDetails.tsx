@@ -1,25 +1,22 @@
 import * as React from 'react';
-import { DatabaseConnectorInfo } from '../../shared/state';
+import { DatabaseConnectorInfo, Encrypt } from '../../shared/state';
+import { Input } from '../components/Input';
 import { Database } from './Database';
 
-export function GenericDetails({
-  props,
+export function BigQueryDetails({
+  connector,
+  updateConnector,
 }: {
   connector: DatabaseConnectorInfo;
   updateConnector: (c: DatabaseConnectorInfo) => void;
 }) {
-  // Don't try to show initial apiKey
-  const [apiKey, setApiKey] = React.useState('');
-  function syncApiKey(p: string) {
-    setApiKey(p);
-    // Sync typed apiKey to state on change
-    connector.database.apiKey_encrypt = new Encrypt(p);
-    updateConnector(connector);
-  }
-
   return (
     <React.Fragment>
-      <Database connector={connector} updateConnector={updateConnector} />
+      <Database
+        label="Project ID"
+        connector={connector}
+        updateConnector={updateConnector}
+      />
       <div className="form-row">
         <Input
           label="Service Account JSON"
