@@ -12,10 +12,21 @@ func evalCQL(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, server *Ser
 		return err
 	}
 
+	password, err := dbInfo.Password.decrypt()
+	if err != nil {
+		return err
+	}
+
 	return withRemoteConnection(server, host, port, func(proxyHost, proxyPort string) error {
 		cluster := gocql.NewCluster(proxyHost + ":" + proxyPort)
 		cluster.Keyspace = dbInfo.Database
 		cluster.Consistency = gocql.Quorum
+		if password != "" {
+			cluster.Authenticator = gocql.PasswordAuthenticator{
+				Username: dbInfo.Username,
+				Password: password,
+			}
+		}
 
 		sess, err := cluster.CreateSession()
 		if err != nil {

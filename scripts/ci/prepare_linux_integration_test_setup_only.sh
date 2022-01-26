@@ -105,4 +105,7 @@ docker run -d -p 8086:8086 -e "DOCKER_INFLUXDB_INIT_MODE=setup" -e "DOCKER_INFLU
 # Start up influx (1 for influxql)
 docker run -d -p 8086:8087 -e "INFLUXDB_HTTP_AUTH_ENABLED=true" -e "INFLUXDB_ADMIN_USER=test" -e "INFLUXDB_ADMIN_PASSWORD=test" influxdb:1.7
 
+# Start up scylla
+docker run -d scylladb/scylla --smp 1
+
 # TODO: might be worth switching to docker-compose at some point...
