@@ -96,6 +96,14 @@ const vendorOverride = {
   crate: {
     address: 'localhost:5434',
   },
+  scylla: {
+    username: 'cassandra',
+    password: 'cassandra',
+  },
+  cassandra: {
+    username: 'cassandra',
+    password: 'cassandra',
+  },
 };
 
 for (const subprocess of RUNNERS) {
