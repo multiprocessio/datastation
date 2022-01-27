@@ -135,6 +135,15 @@ func getURLParts(dbInfo DatabaseConnectorInfoDatabase) urlParts {
 	}
 }
 
+var dbDriverOverride = map[DatabaseConnectorInfoType]string{
+	MongoDatabase:     "mongodb",
+	CrateDatabase:     "postgres",
+	QuestDatabase:     "postgres",
+	TimescaleDatabase: "postgres",
+	YugabyteDatabase:  "postgres",
+	CockroachDatabase: "postgres",
+}
+
 func getGenericConnectionString(dbInfo DatabaseConnectorInfoDatabase) (string, string, error) {
 	u := getURLParts(dbInfo)
 	genericUserPass := ""
@@ -159,9 +168,14 @@ func getGenericConnectionString(dbInfo DatabaseConnectorInfoDatabase) (string, s
 		extra = "?" + extra
 	}
 
+	driver := string(dbInfo.Type)
+	if d, ok := dbDriverOverride[dbInfo.Type]; ok {
+		driver = d
+	}
+
 	genericString := fmt.Sprintf(
 		"%s://%s%s/%s%s",
-		dbInfo.Type,
+		driver,
 		genericUserPass,
 		u.address,
 		u.database,
@@ -181,12 +195,7 @@ func getConnectionString(dbInfo DatabaseConnectorInfoDatabase) (string, string, 
 	case PostgresDatabase, TimescaleDatabase, CockroachDatabase, CrateDatabase, YugabyteDatabase, QuestDatabase:
 		return "postgres", genericString, nil
 	case MongoDatabase:
-		return "mongodb", fmt.Sprintf(
-			"mongodb://%s%s/%s?%s",
-			genericUserPass,
-			u.address,
-			u.database,
-			u.extraArgs), nil
+		return "mongodb", genericString, nil
 	case MySQLDatabase:
 		dsn := ""
 		if genericUserPass != "" {
@@ -413,7 +422,6 @@ func EvalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo, p
 		qt,
 	)
 	if err != nil {
-		fmt.Println("PHIL!", dbInfo.Type)
 		return err
 	}
 
@@ -454,7 +462,6 @@ func EvalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo, p
 
 		db, err := sqlx.Open(vendor, connStr)
 		if err != nil {
-			fmt.Println("PHIL CONN INFO", connStr, dbInfo)
 			return err
 		}
 

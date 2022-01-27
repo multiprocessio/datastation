@@ -62,6 +62,9 @@ func evalInfluxQL(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, server
 			method:  "GET",
 			headers: headers,
 		})
+		if err != nil {
+			return err
+		}
 		defer rsp.Body.Close()
 
 		var r influxResponse
