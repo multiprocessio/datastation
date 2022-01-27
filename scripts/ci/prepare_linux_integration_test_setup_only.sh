@@ -83,6 +83,9 @@ docker run -d -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=1StrongPwd!!" -p 1433:143
 # Start up oracle database
 docker run -d -e ORACLE_RANDOM_PASSWORD="y" -e "APP_USER=test" -e "APP_USER_PASSWORD=test" -p 1521:1521 gvenzl/oracle-xe:latest
 
+# Start up scylla
+scyllacontainer="$(docker run -d scylladb/scylla --smp 1 --authenticator PasswordAuthenticator)"
+
 # Start up cockroach database
 curl https://binaries.cockroachdb.com/cockroach-v21.2.4.linux-amd64.tgz | tar -xz && sudo cp -i cockroach-v21.2.4.linux-amd64/cockroach /usr/local/bin/
 ## Set up certs (see: https://www.cockroachlabs.com/docs/stable/secure-a-cluster.html)
@@ -111,9 +114,6 @@ docker run -d -p 8086:8086 -e "DOCKER_INFLUXDB_INIT_MODE=setup" -e "DOCKER_INFLU
 # Start up influx (1 for influxql)
 docker run -d -p 8087:8086 -e "INFLUXDB_HTTP_AUTH_ENABLED=true" -e "INFLUXDB_ADMIN_USER=test" -e "INFLUXDB_ADMIN_PASSWORD=testtest" influxdb:1.7
 
-# Start up scylla
-scyllacontainer="$(docker run -d scylladb/scylla --smp 1 --authenticator PasswordAuthenticator)"
-
 ## LOAD DATA ##
 
 sleep 15 # Time for everything to load (influx in particular takes a while)
@@ -129,8 +129,8 @@ for t in $(ls testdata/documents/*.json); do
 done
 
 # Load influx1 data
-curl -XPOST 'http://localhost:8087/query?u=test&p=test' --data-urlencode "q=CREATE DATABASE test"
-curl -XPOST 'http://localhost:8087/write?db=test&u=test&p=test' --data-binary @testdata/influx/noaa-ndbc-data-sample.lp
+curl -XPOST 'http://localhost:8087/query?u=test&p=testtest' --data-urlencode "q=CREATE DATABASE test"
+curl -XPOST 'http://localhost:8087/write?db=test&u=test&p=testtest' --data-binary @testdata/influx/noaa-ndbc-data-sample.lp
 
 # Load influx2 data
 curl -XPOST 'http://localhost:8086/api/v2/write?bucket=test&precision=ns' \
