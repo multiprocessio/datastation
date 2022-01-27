@@ -22,7 +22,7 @@ const DATABASES = [
   },
   {
     type: 'crate',
-    query: `SELECT 1 AS "1", 2.2 AS "2", true AS "true", 'string' AS "string", CAST('2021-01-01' AS DATE) AS "date"`,
+    query: `SELECT 1 AS "1", 2.2 AS "2", true AS "true", 'string' AS "string", CAST('2021-01-01' AS TIMESTAMP) AS "date"`,
   },
   {
     type: 'cockroach',
@@ -313,5 +313,46 @@ for (const subprocess of RUNNERS) {
         }
       });
     }
+  });
+
+  describe('basic cassandra/scylladb tests', () => {
+    test(`runs basic cql query`, async () => {
+      if (process.platform !== 'linux') {
+        return;
+      }
+
+      const connectors = [
+        new DatabaseConnectorInfo({
+          type: 'scylla',
+          database: 'test',
+          username: 'test',
+          password: 'test',
+        }),
+      ];
+      const dp = new DatabasePanelInfo();
+      dp.database.connectorId = connectors[0].id;
+      dp.content = 'select broadcast_address from system.local;';
+
+      let finished = false;
+      const panels = [dp];
+      await withSavedPanels(
+        panels,
+        async (project) => {
+          const panelValueBuffer = fs.readFileSync(
+            getProjectResultsFile(project.projectName) + dp.id
+          );
+
+          const v = JSON.parse(panelValueBuffer.toString());
+          expect(v).toStrictEqual([{ broadcast_address: '127.0.0.1' }]);
+
+          finished = true;
+        },
+        { evalPanels: true, connectors, subprocessName: subprocess }
+      );
+
+      if (!finished) {
+        throw new Error('Callback did not finish');
+      }
+    });
   });
 }

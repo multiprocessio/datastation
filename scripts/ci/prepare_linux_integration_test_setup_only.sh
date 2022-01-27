@@ -112,9 +112,11 @@ docker run -d -p 8086:8086 -e "DOCKER_INFLUXDB_INIT_MODE=setup" -e "DOCKER_INFLU
 docker run -d -p 8087:8086 -e "INFLUXDB_HTTP_AUTH_ENABLED=true" -e "INFLUXDB_ADMIN_USER=test" -e "INFLUXDB_ADMIN_PASSWORD=testtest" influxdb:1.7
 
 # Start up scylla
-docker run -d scylladb/scylla --smp 1 --authenticator PasswordAuthenticator
+scyllacontainer="$(docker run -d scylladb/scylla --smp 1 --authenticator PasswordAuthenticator)"
 
 ## LOAD DATA ##
+
+sleep 15 # Time for everything to load (influx in particular takes a while)
 
 # Configure cratedb
 docker exec "$cratecontainer" crash -c "CREATE USER test WITH (password = 'test');"
@@ -126,14 +128,17 @@ for t in $(ls testdata/documents/*.json); do
     curl -X POST -H "Content-Type: application/json" -d @$t http://localhost:9200/test/_doc
 done
 
-sleep 15 # Time for influx to load
-
 # Load influx1 data
 curl -XPOST 'http://localhost:8087/query?u=test&p=test' --data-urlencode "q=CREATE DATABASE test"
 curl -XPOST 'http://localhost:8087/write?db=test&u=test&p=test' --data-binary @testdata/influx/noaa-ndbc-data-sample.lp
 
 # Load influx2 data
 curl -XPOST 'http://localhost:8086/api/v2/write?bucket=test&precision=ns' \
-  --header 'Authorization: Token test:testtest' --data-binary @testdata/influx/noaa-ndbc-data-sample.lp
+     --header 'Authorization: Token test:testtest' --data-binary @testdata/influx/noaa-ndbc-data-sample.lp
+
+docker exec "$scyllacontainer" cqlsh \
+       -e "CREATE KEYSPACE test WITH REPLICATION = {'class': 'SimpleStrategy', 'replication_factor': 1};"
+docker exec "$scyllacontainer" cqlsh \
+       -e "CREATE ROLE test WITH PASSWORD = 'test' AND LOGIN = true AND SUPERUSER = true;"
 
 # TODO: might be worth switching to docker-compose at some point...
