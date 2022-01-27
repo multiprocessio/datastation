@@ -264,11 +264,11 @@ for (const subprocess of RUNNERS) {
   describe('influx testdata/influx tests', () => {
     const tests = [
       {
-        query: '',
+        query: 'SELECT *',
         version: 'influx',
       },
       {
-        query: '',
+        query: 'from(bucket: "test")',
         version: 'influx-flux',
       },
     ];
@@ -284,7 +284,8 @@ for (const subprocess of RUNNERS) {
             type: testcase.version,
             database: 'test',
             username: 'test',
-            password: 'testtest',
+            password_encrypt: new Encrypt('testtest'),
+	    apiKey_encrypt: new Encrypt('testtest'),
           }),
         ];
         const dp = new DatabasePanelInfo();
@@ -326,7 +327,7 @@ for (const subprocess of RUNNERS) {
           type: 'scylla',
           database: 'test',
           username: 'test',
-          password: 'test',
+	  password_encrypt: new Encrypt('test'),
         }),
       ];
       const dp = new DatabasePanelInfo();
