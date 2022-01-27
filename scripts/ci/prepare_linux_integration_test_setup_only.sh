@@ -89,7 +89,7 @@ cockroach cert create-ca --certs-dir=certs --ca-key=cockroach-safe/ca.key
 cockroach cert create-node localhost $(hostname) --certs-dir=certs --ca-key=cockroach-safe/ca.key
 cockroach cert create-client root --certs-dir=certs --ca-key=cockroach-safe/ca.key
 cockroach start-single-node --certs-dir=certs --accept-sql-without-tls --background
-cockroach sql --insecure --certs-dir=certs --execute "CREATE DATABASE test; CREATE USER test WITH PASSWORD 'test'; GRANT ALL ON DATABASE test TO test;"
+cockroach sql --certs-dir=certs --host=localhost:26257 --execute "CREATE DATABASE test; CREATE USER test WITH PASSWORD 'test'; GRANT ALL ON DATABASE test TO test;"
 
 # Start up cratedb
 id="$(docker run -d -p 5432:5434 crate -Cdiscovery.type=single-node)"
