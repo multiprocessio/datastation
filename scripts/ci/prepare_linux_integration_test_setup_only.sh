@@ -123,8 +123,10 @@ docker exec "$cratecontainer" crash -c "GRANT ALL PRIVILEGES ON SCHEMA doc TO te
 # Load Elasticsearch data
 curl -X PUT http://localhost:9200/test
 for t in $(ls testdata/documents/*.json); do
-    curl -X POST -H "Content-Type: application/json" -d @$t http://localhost:9200/test
+    curl -X POST -H "Content-Type: application/json" -d @$t http://localhost:9200/test/_doc
 done
+
+sleep 20
 
 docker ps
 netstat -tulpn | grep "8086\|8087"
