@@ -122,12 +122,6 @@ sleep 15 # Time for everything to load (influx in particular takes a while)
 docker exec "$cratecontainer" crash -c "CREATE USER test WITH (password = 'test');"
 docker exec "$cratecontainer" crash -c "GRANT ALL PRIVILEGES ON SCHEMA doc TO test;"
 
-# Load Elasticsearch data
-curl -X PUT http://localhost:9200/test
-for t in $(ls testdata/documents/*.json); do
-    curl -X POST -H "Content-Type: application/json" -d @$t http://localhost:9200/test/_doc
-done
-
 # Load influx1 data
 curl -XPOST 'http://localhost:8087/query?u=test&p=testtest' --data-urlencode "q=CREATE DATABASE test"
 curl -XPOST 'http://localhost:8087/write?db=test&u=test&p=testtest' --data-binary @testdata/influx/noaa-ndbc-data-sample.lp
@@ -136,9 +130,16 @@ curl -XPOST 'http://localhost:8087/write?db=test&u=test&p=testtest' --data-binar
 curl -XPOST 'http://localhost:8086/api/v2/write?bucket=test&precision=ns' \
      --header 'Authorization: Token test:testtest' --data-binary @testdata/influx/noaa-ndbc-data-sample.lp
 
+# Configure scylla
 docker exec "$scyllacontainer" cqlsh \
        -e "CREATE KEYSPACE test WITH REPLICATION = {'class': 'SimpleStrategy', 'replication_factor': 1};"
 docker exec "$scyllacontainer" cqlsh \
        -e "CREATE ROLE test WITH PASSWORD = 'test' AND LOGIN = true AND SUPERUSER = true;"
+
+# Load Elasticsearch data
+curl -X PUT http://localhost:9200/test
+for t in $(ls testdata/documents/*.json); do
+    curl -X POST -H "Content-Type: application/json" -d @$t http://localhost:9200/test/_doc
+done
 
 # TODO: might be worth switching to docker-compose at some point...
