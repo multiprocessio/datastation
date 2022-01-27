@@ -93,7 +93,7 @@ cockroach sql --certs-dir=certs --host=localhost:26257 --execute "CREATE DATABAS
 
 # Start up cratedb
 id="$(docker run -d -p 5434:5432 crate -Cdiscovery.type=single-node)"
-docker exec -it "$id" crash -c "CREATE DATABASE test; CREATE USER test WITH (password = 'test'); GRANT ALL PRIVILEGES TO test;"
+docker exec "$id" crash -c "CREATE DATABASE test; CREATE USER test WITH (password = 'test'); GRANT ALL PRIVILEGES TO test;"
 
 # Start up questdb
 docker run -d -p 8812:8812 questdb/questdb
