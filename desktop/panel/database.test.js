@@ -285,7 +285,7 @@ for (const subprocess of RUNNERS) {
             database: 'test',
             username: 'test',
             password_encrypt: new Encrypt('testtest'),
-	    apiKey_encrypt: new Encrypt('testtest'),
+            apiKey_encrypt: new Encrypt('testtest'),
           }),
         ];
         const dp = new DatabasePanelInfo();
@@ -327,7 +327,7 @@ for (const subprocess of RUNNERS) {
           type: 'scylla',
           database: 'test',
           username: 'test',
-	  password_encrypt: new Encrypt('test'),
+          password_encrypt: new Encrypt('test'),
         }),
       ];
       const dp = new DatabasePanelInfo();
