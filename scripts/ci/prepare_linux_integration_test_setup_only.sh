@@ -127,8 +127,8 @@ for t in $(ls testdata/documents/*.json); do
 done
 
 # Load influx2 data
-curl -i -XPOST 'http://localhost:8086/api/v2/write?bucket=test&precision=ns' \
-  --header 'Authorization: Token test:test' --data-binary @testdata/influx/noaa-ndbc-data-sample.lp
+#curl -i -XPOST 'http://localhost:8086/api/v2/write?bucket=test&precision=ns' \
+#  --header 'Authorization: Token test:test' --data-binary @testdata/influx/noaa-ndbc-data-sample.lp
 
 # Load influx1 data
 curl -i -XPOST http://localhost:8087/query?u=test&p=test --data-urlencode "q=CREATE DATABASE test"
