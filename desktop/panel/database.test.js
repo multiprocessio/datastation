@@ -95,6 +95,7 @@ const vendorOverride = {
   },
   crate: {
     address: 'localhost:5434',
+    database: 'doc',
   },
   scylla: {
     username: 'cassandra',
@@ -188,4 +189,74 @@ for (const subprocess of RUNNERS) {
       }
     );
   }
+
+  describe('elasticsearch testdata/documents tests', () => {
+    const tests = [
+      {
+	query: '',
+	range: null,
+	results: 4,
+      },
+      {
+	query: 'pageCount:>0',
+	range: null,
+	results: 3,
+      },
+      {
+	query: 'pageCount:<0',
+	range: null,
+	results: 0,
+      },
+      {
+	query: 'pageCount:>0',
+	range: {
+	  field: 'publishedDate.date',
+	  rangeType: 'absolute',
+	  begin_date: new Date('2008-01-01'),
+	  end_date: new Date('2010-01-01'),
+	},
+	results: 2,
+      },
+    ];
+
+    for (const test of tests) {
+      test(`runs ${JSON.stringify(test)} query`, async () => {
+	if (process.platform !== 'linux') {
+	  return;
+	}
+
+	const connectors = [
+	  new DatabaseConnectorInfo({
+            type: 'elasticsearch',
+      	  }),
+	];
+	const dp = new DatabasePanelInfo();
+	dp.database.connectorId = connectors[0].id;
+	dp.database.table = 'test';
+	dp.database.range = test.range;
+	dp.content = test.query;
+
+	let finished = false;
+	const panels = [dp];
+	await withSavedPanels(
+	  panels,
+	  async (project) => {
+            const panelValueBuffer = fs.readFileSync(
+              getProjectResultsFile(project.projectName) + dp.id
+            );
+
+            const v = JSON.parse(panelValueBuffer.toString());
+	    expect(v.length).toBe(test.results);
+
+            finished = true;
+	  },
+	  { evalPanels: true, connectors, subprocessName: subprocess }
+	);
+
+	if (!finished) {
+	  throw new Error('Callback did not finish');
+	}
+      });
+    }
+  });
 }

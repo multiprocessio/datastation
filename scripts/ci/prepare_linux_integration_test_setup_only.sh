@@ -92,11 +92,7 @@ cockroach start-single-node --certs-dir=certs --accept-sql-without-tls --backgro
 cockroach sql --certs-dir=certs --host=localhost:26257 --execute "CREATE DATABASE test; CREATE USER test WITH PASSWORD 'test'; GRANT ALL ON DATABASE test TO test;"
 
 # Start up cratedb
-id="$(docker run -d -p 5434:5432 crate -Cdiscovery.type=single-node)"
-sleep 20
-docker exec "$id" crash -c "CREATE DATABASE test; CREATE USER test WITH (password = 'test'); GRANT ALL PRIVILEGES TO test;" || echo true
-docker logs "$id"
-exit 1
+cratecontainer="$(docker run -d -p 5434:5432 crate -Cdiscovery.type=single-node)"
 
 # Start up questdb
 docker run -d -p 8812:8812 questdb/questdb
@@ -104,6 +100,9 @@ docker run -d -p 8812:8812 questdb/questdb
 # Start up elasticsearch
 docker run -d -p 9200:9200 -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:7.16.3
 curl -X PUT http://localhost:9200/test
+for t in $(ls testdata/documents/*.json); do
+    curl -X POST -H "Content-Type: application/json" -d @$t http://localhost:9200/test
+done
 
 # Start up prometheus
 docker run -d -p 9090:9090 prom/prometheus
@@ -116,5 +115,8 @@ docker run -d -p 8086:8087 -e "INFLUXDB_HTTP_AUTH_ENABLED=true" -e "INFLUXDB_ADM
 
 # Start up scylla
 docker run -d scylladb/scylla --smp 1 --authenticator PasswordAuthenticator
+
+# Give cratedb time to start up before running DDL
+docker exec "$cratecontainer" crash -c "CREATE USER test WITH (password = 'test'); GRANT ALL PRIVILEGES ON SCHEMA doc TO test;"
 
 # TODO: might be worth switching to docker-compose at some point...
