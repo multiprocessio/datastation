@@ -246,7 +246,7 @@ for (const subprocess of RUNNERS) {
             );
 
             const v = JSON.parse(panelValueBuffer.toString());
-            expect(v.length).toBe(test.results);
+            expect(v.length).toBe(testcase.results);
 
             finished = true;
           },
@@ -280,7 +280,7 @@ for (const subprocess of RUNNERS) {
 
         const connectors = [
           new DatabaseConnectorInfo({
-            type: test.version,
+            type: testcase.version,
             database: 'test',
             username: 'test',
             password: 'testtest',
