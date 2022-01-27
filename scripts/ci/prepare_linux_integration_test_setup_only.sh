@@ -75,6 +75,8 @@ sudo service clickhouse-server start
 go install github.com/google/go-jsonnet/cmd/jsonnet@latest
 sudo ln $HOME/go/bin/jsonnet /usr/local/bin/jsonnet
 
+## LAUNCH CONTAINERS
+
 # Start up sqlserver
 docker run -d -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=1StrongPwd!!" -p 1433:1433 mcr.microsoft.com/mssql/server:2019-latest
 
@@ -99,28 +101,36 @@ docker run -d -p 8812:8812 questdb/questdb
 
 # Start up elasticsearch
 docker run -d -p 9200:9200 -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:7.16.3
-curl -X PUT http://localhost:9200/test
-for t in $(ls testdata/documents/*.json); do
-    curl -X POST -H "Content-Type: application/json" -d @$t http://localhost:9200/test
-done
 
 # Start up prometheus
 docker run -d -p 9090:9090 prom/prometheus
 
 # Start up influx (2 for fluxql)
 docker run -d -p 8086:8086 -e "DOCKER_INFLUXDB_INIT_MODE=setup" -e "DOCKER_INFLUXDB_INIT_USERNAME=test" -e "DOCKER_INFLUXDB_INIT_PASSWORD=test" -e "DOCKER_INFLUXDB_INIT_ORG=test" -e "DOCKER_INFLUXDB_INIT_BUCKET=test" -e "DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=test" influxdb:2.0
-curl -i -XPOST 'http://localhost:8086/api/v2/write?bucket=test&precision=ns' \
-  --header 'Authorization: Token test:test' --data-binary @testdata/influx/noaa-ndbc-data-sample.lp
 
 # Start up influx (1 for influxql)
 docker run -d -p 8087:8086 -e "INFLUXDB_HTTP_AUTH_ENABLED=true" -e "INFLUXDB_ADMIN_USER=test" -e "INFLUXDB_ADMIN_PASSWORD=test" influxdb:1.7
-curl -i -XPOST http://localhost:8087/query?u=test&p=test --data-urlencode "q=CREATE DATABASE test"
-curl -i -XPOST 'http://localhost:8087/write?db=test' --data-binary @testdata/influx/noaa-ndbc-data-sample.lp
 
 # Start up scylla
 docker run -d scylladb/scylla --smp 1 --authenticator PasswordAuthenticator
 
-# Give cratedb time to start up before running DDL
+## LOAD DATA ##
+
+# Configure cratedb
 docker exec "$cratecontainer" crash -c "CREATE USER test WITH (password = 'test'); GRANT ALL PRIVILEGES ON SCHEMA doc TO test;"
+
+# Load Elasticsearch data
+curl -X PUT http://localhost:9200/test
+for t in $(ls testdata/documents/*.json); do
+    curl -X POST -H "Content-Type: application/json" -d @$t http://localhost:9200/test
+done
+
+# Load influx2 data
+curl -i -XPOST 'http://localhost:8086/api/v2/write?bucket=test&precision=ns' \
+  --header 'Authorization: Token test:test' --data-binary @testdata/influx/noaa-ndbc-data-sample.lp
+
+# Load influx1 data
+curl -i -XPOST http://localhost:8087/query?u=test&p=test --data-urlencode "q=CREATE DATABASE test"
+curl -i -XPOST 'http://localhost:8087/write?db=test' --data-binary @testdata/influx/noaa-ndbc-data-sample.lp
 
 # TODO: might be worth switching to docker-compose at some point...
