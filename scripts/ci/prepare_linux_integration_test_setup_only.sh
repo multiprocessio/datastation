@@ -83,8 +83,8 @@ docker run -d -e ORACLE_RANDOM_PASSWORD="y" -e "APP_USER=test" -e "APP_USER_PASS
 
 # Start up cockroach database
 curl https://binaries.cockroachdb.com/cockroach-v21.2.4.linux-amd64.tgz | tar -xz && sudo cp -i cockroach-v21.2.4.linux-amd64/cockroach /usr/local/bin/
-cockroach start-single-node --insecure --background
-cockroach sql --insecure --execute "CREATE DATABASE test; CREATE USER test WITH PASSWORD 'test'; GRANT ALL ON DATABASE test TO test;"
+cockroach start-single-node --accept-sql-without-tls --background
+cockroach sql --execute "CREATE DATABASE test; CREATE USER test WITH PASSWORD 'test'; GRANT ALL ON DATABASE test TO test;"
 
 # Start up cratedb
 id="$(docker run -d -p 5432:5434 crate -Cdiscovery.type=single-node)"
