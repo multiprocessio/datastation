@@ -89,12 +89,13 @@ const vendorOverride = {
     database: 'master',
   },
   quest: {
+    address: '?sslmode=disable',
     database: 'qdb',
     username: 'admin',
     password: 'quest',
   },
   crate: {
-    address: 'localhost:5434',
+    address: 'localhost:5434?sslmode=disable',
     database: 'doc',
   },
   scylla: {

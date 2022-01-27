@@ -132,7 +132,7 @@ export const VENDOR_GROUPS: Array<{
   vendors: Array<DatabaseConnectorInfoType>;
 }> = [
   {
-    group: 'SQL',
+    group: 'Traditional',
     vendors: [
       'postgres',
       'mysql',
@@ -140,15 +140,22 @@ export const VENDOR_GROUPS: Array<{
       'oracle',
       'sqlite',
       'cockroach',
-    ],
+    ].sort() as Array<DatabaseConnectorInfoType>,
   },
   {
     group: 'Warehouse',
-    vendors: ['snowflake', 'bigquery'],
+    vendors: [
+      'snowflake',
+      'bigquery',
+    ].sort() as Array<DatabaseConnectorInfoType>,
   },
   {
     group: 'Document',
-    vendors: ['elasticsearch', 'mongo'],
+    vendors: [
+      'elasticsearch',
+      'mongo',
+      'crate',
+    ].sort() as Array<DatabaseConnectorInfoType>,
   },
   {
     group: 'Time Series',
@@ -156,12 +163,13 @@ export const VENDOR_GROUPS: Array<{
       'clickhouse',
       'cassandra',
       'scylla',
-      'prometheus',
-      'influx',
-      'influx-flux',
-      'crate',
+      'quest',
       'timescale',
       'yugabyte',
-    ],
+    ].sort() as Array<DatabaseConnectorInfoType>,
+  },
+  {
+    group: 'Metrics',
+    vendors: ['prometheus', 'influx', 'influx-flux'],
   },
 ];
