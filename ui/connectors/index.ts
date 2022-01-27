@@ -140,22 +140,15 @@ export const VENDOR_GROUPS: Array<{
       'oracle',
       'sqlite',
       'cockroach',
-    ].sort() as Array<DatabaseConnectorInfoType>,
+    ],
   },
   {
     group: 'Warehouse',
-    vendors: [
-      'snowflake',
-      'bigquery',
-    ].sort() as Array<DatabaseConnectorInfoType>,
+    vendors: ['snowflake', 'bigquery'],
   },
   {
     group: 'Document',
-    vendors: [
-      'elasticsearch',
-      'mongo',
-      'crate',
-    ].sort() as Array<DatabaseConnectorInfoType>,
+    vendors: ['elasticsearch', 'mongo', 'crate'],
   },
   {
     group: 'Time Series',
@@ -166,10 +159,14 @@ export const VENDOR_GROUPS: Array<{
       'quest',
       'timescale',
       'yugabyte',
-    ].sort() as Array<DatabaseConnectorInfoType>,
+    ],
   },
   {
     group: 'Metrics',
     vendors: ['prometheus', 'influx', 'influx-flux'],
   },
 ];
+
+VENDOR_GROUPS.forEach((g) => {
+  g.vendors.sort();
+});
