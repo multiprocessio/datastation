@@ -92,7 +92,7 @@ cockroach start-single-node --certs-dir=certs --accept-sql-without-tls --backgro
 cockroach sql --certs-dir=certs --host=localhost:26257 --execute "CREATE DATABASE test; CREATE USER test WITH PASSWORD 'test'; GRANT ALL ON DATABASE test TO test;"
 
 # Start up cratedb
-id="$(docker run -d -p 5432:5434 crate -Cdiscovery.type=single-node)"
+id="$(docker run -d -p 5434:5432 crate -Cdiscovery.type=single-node)"
 docker exec -it "$id" crash -c "CREATE DATABASE test; CREATE USER test WITH (password = 'test'); GRANT ALL PRIVILEGES TO test;"
 
 # Start up questdb
