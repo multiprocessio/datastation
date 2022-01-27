@@ -392,8 +392,6 @@ func EvalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo, p
 		return evalCQL(panel, dbInfo, server, w)
 	}
 
-	fmt.Println("PHIL!", InfluxDatabase, InfluxFluxDatabase, "the type -> ", dbInfo.Type)
-
 	mangleInsert := defaultMangleInsert
 	qt := ansiSQLQuote
 	if dbInfo.Type == PostgresDatabase {
@@ -415,6 +413,7 @@ func EvalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo, p
 		qt,
 	)
 	if err != nil {
+		fmt.Println("PHIL!", InfluxDatabase, InfluxFluxDatabase, "the type -> ", dbInfo.Type)
 		return err
 	}
 
@@ -452,6 +451,7 @@ func EvalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo, p
 		if err != nil {
 			return err
 		}
+		fmt.Println("PHIL CONN INFO", vendor, connStr, dbInfo.Type)
 
 		db, err := sqlx.Open(vendor, connStr)
 		if err != nil {
