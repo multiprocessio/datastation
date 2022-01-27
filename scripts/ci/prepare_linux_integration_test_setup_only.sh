@@ -122,13 +122,35 @@ sleep 15 # Time for everything to load (influx in particular takes a while)
 docker exec "$cratecontainer" crash -c "CREATE USER test WITH (password = 'test');"
 docker exec "$cratecontainer" crash -c "GRANT ALL PRIVILEGES ON SCHEMA doc TO test;"
 
+function retry {
+    ok="false"
+    for i in {1..$1}; do
+	if bash -c "$2" ; then
+	    ok="true"
+	    break
+	fi
+
+	echo "Retrying... $2"
+    done
+
+    if [[ "$ok" == "$false" ]]; then
+	echo "Failed after retries... $2"
+	exit 1
+    fi
+}
+
 # Load influx1 data
-curl -XPOST 'http://localhost:8087/query?u=test&p=testtest' --data-urlencode "q=CREATE DATABASE test"
-curl -XPOST 'http://localhost:8087/write?db=test&u=test&p=testtest' --data-binary @testdata/influx/noaa-ndbc-data-sample.lp
+retry 3 'curl -XPOST "http://localhost:8087/query?u=test&p=testtest" --data-urlencode "q=CREATE DATABASE test"'
+retrt 3 "curl -XPOST 'http://localhost:8087/write?db=test&u=test&p=testtest' --data-binary @testdata/influx/noaa-ndbc-data-sample.lp"
 
 # Load influx2 data
-curl -XPOST 'http://localhost:8086/api/v2/write?bucket=test&precision=ns' \
-     --header 'Authorization: Token test:testtest' --data-binary @testdata/influx/noaa-ndbc-data-sample.lp
+retry 3 "curl -XPOST 'http://localhost:8086/api/v2/write?bucket=test&precision=ns' --header 'Authorization: Token test:testtest' --data-binary @testdata/influx/noaa-ndbc-data-sample.lp"
+
+# Load Elasticsearch data
+retry 3 "curl -X PUT http://localhost:9200/test"
+for t in $(ls testdata/documents/*.json); do
+    retry 3 'curl -X POST -H "Content-Type: application/json" -d @$t http://localhost:9200/test/_doc'
+done
 
 # Configure scylla
 docker exec "$scyllacontainer" cqlsh \
@@ -136,10 +158,5 @@ docker exec "$scyllacontainer" cqlsh \
 docker exec "$scyllacontainer" cqlsh \
        -e "CREATE ROLE test WITH PASSWORD = 'test' AND LOGIN = true AND SUPERUSER = true;"
 
-# Load Elasticsearch data
-curl -X PUT http://localhost:9200/test
-for t in $(ls testdata/documents/*.json); do
-    curl -X POST -H "Content-Type: application/json" -d @$t http://localhost:9200/test/_doc
-done
 
 # TODO: might be worth switching to docker-compose at some point...
