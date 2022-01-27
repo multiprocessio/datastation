@@ -154,13 +154,18 @@ func getGenericConnectionString(dbInfo DatabaseConnectorInfoDatabase) (string, s
 		genericUserPass += "@"
 	}
 
+	extra := u.extraArgs
+	if extra == "?" {
+		extra = ""
+	}
+
 	genericString := fmt.Sprintf(
 		"%s://%s%s/%s?%s",
 		dbInfo.Type,
 		genericUserPass,
 		u.address,
 		u.database,
-		u.extraArgs)
+		extra)
 
 	return genericString, genericUserPass, nil
 }
