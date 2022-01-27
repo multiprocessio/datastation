@@ -356,4 +356,51 @@ for (const subprocess of RUNNERS) {
       }
     });
   });
+
+  describe('basic cassandra/scylladb tests', () => {
+    test(`runs basic cql query`, async () => {
+      if (process.platform !== 'linux') {
+        return;
+      }
+
+      const connectors = [
+        new DatabaseConnectorInfo({
+          type: 'bigquery',
+          database: 'idyllic-catcher-129419',
+          apiKey_encrypt: new Encrypt(process.env.BIGQUERY_TOKEN),
+        }),
+      ];
+      const dp = new DatabasePanelInfo();
+      dp.database.connectorId = connectors[0].id;
+      dp.content =
+        'SELECT * FROM `bigquery-public-data`.census_bureau_usa.population_by_zip_2010 ORDER BY population DESC LIMIT 10';
+
+      let finished = false;
+      const panels = [dp];
+      await withSavedPanels(
+        panels,
+        async (project) => {
+          const panelValueBuffer = fs.readFileSync(
+            getProjectResultsFile(project.projectName) + dp.id
+          );
+
+          const v = JSON.parse(panelValueBuffer.toString());
+          expect(v).toStrictEqual(
+            JSON.parse(
+              fs
+                .readFileSync('testdata/bigquery/population_result.json')
+                .toString()
+            )
+          );
+
+          finished = true;
+        },
+        { evalPanels: true, connectors, subprocessName: subprocess }
+      );
+
+      if (!finished) {
+        throw new Error('Callback did not finish');
+      }
+    }, 15_000);
+  });
 }

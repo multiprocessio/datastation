@@ -1,0 +1,82 @@
+[
+  {
+    "gender": null,
+    "geo_id": "8600000US60629",
+    "maximum_age": null,
+    "minimum_age": null,
+    "population": 113916,
+    "zipcode": "60629"
+  },
+  {
+    "gender": null,
+    "geo_id": "8600000US79936",
+    "maximum_age": null,
+    "minimum_age": null,
+    "population": 111086,
+    "zipcode": "79936"
+  },
+  {
+    "gender": null,
+    "geo_id": "8600000US11368",
+    "maximum_age": null,
+    "minimum_age": null,
+    "population": 109931,
+    "zipcode": "11368"
+  },
+  {
+    "gender": null,
+    "geo_id": "8600000US00926",
+    "maximum_age": null,
+    "minimum_age": null,
+    "population": 108862,
+    "zipcode": "926"
+  },
+  {
+    "gender": null,
+    "geo_id": "8600000US90650",
+    "maximum_age": null,
+    "minimum_age": null,
+    "population": 105549,
+    "zipcode": "90650"
+  },
+  {
+    "gender": null,
+    "geo_id": "8600000US90011",
+    "maximum_age": null,
+    "minimum_age": null,
+    "population": 103892,
+    "zipcode": "90011"
+  },
+  {
+    "gender": null,
+    "geo_id": "8600000US91331",
+    "maximum_age": null,
+    "minimum_age": null,
+    "population": 103689,
+    "zipcode": "91331"
+  },
+  {
+    "gender": null,
+    "geo_id": "8600000US11226",
+    "maximum_age": null,
+    "minimum_age": null,
+    "population": 101572,
+    "zipcode": "11226"
+  },
+  {
+    "gender": null,
+    "geo_id": "8600000US90201",
+    "maximum_age": null,
+    "minimum_age": null,
+    "population": 101279,
+    "zipcode": "90201"
+  },
+  {
+    "gender": null,
+    "geo_id": "8600000US11373",
+    "maximum_age": null,
+    "minimum_age": null,
+    "population": 100820,
+    "zipcode": "11373"
+  }
+]
