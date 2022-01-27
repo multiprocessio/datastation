@@ -126,6 +126,8 @@ for t in $(ls testdata/documents/*.json); do
     curl -X POST -H "Content-Type: application/json" -d @$t http://localhost:9200/test/_doc
 done
 
+sleep 15 # Time for influx to load
+
 # Load influx1 data
 curl -XPOST 'http://localhost:8087/query?u=test&p=test' --data-urlencode "q=CREATE DATABASE test"
 curl -XPOST 'http://localhost:8087/write?db=test&u=test&p=test' --data-binary @testdata/influx/noaa-ndbc-data-sample.lp
