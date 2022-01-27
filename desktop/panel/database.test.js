@@ -283,7 +283,7 @@ for (const subprocess of RUNNERS) {
             type: test.version,
 	    database: 'test',
 	    username: 'test',
-	    password: 'test',
+	    password: 'testtest',
       	  }),
 	];
 	const dp = new DatabasePanelInfo();
@@ -300,7 +300,7 @@ for (const subprocess of RUNNERS) {
             );
 
             const v = JSON.parse(panelValueBuffer.toString());
-	    expect(v.length).toBe(test.results);
+	    expect(v).toStrictEqual({});
 
             finished = true;
 	  },
