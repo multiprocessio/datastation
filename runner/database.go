@@ -413,7 +413,7 @@ func EvalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo, p
 		qt,
 	)
 	if err != nil {
-		fmt.Println("PHIL!", InfluxDatabase, InfluxFluxDatabase, "the type -> ", dbInfo.Type)
+		fmt.Println("PHIL!", dbInfo.Type)
 		return err
 	}
 
@@ -451,10 +451,10 @@ func EvalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo, p
 		if err != nil {
 			return err
 		}
-		fmt.Println("PHIL CONN INFO", vendor, connStr, dbInfo.Type)
 
 		db, err := sqlx.Open(vendor, connStr)
 		if err != nil {
+			fmt.Println("PHIL CONN INFO", connStr, dbInfo)
 			return err
 		}
 
