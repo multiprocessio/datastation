@@ -86,7 +86,7 @@ curl https://binaries.cockroachdb.com/cockroach-v21.2.4.linux-amd64.tgz | tar -x
 ## Set up certs (see: https://www.cockroachlabs.com/docs/stable/secure-a-cluster.html)
 mkdir certs cockroach-safe
 cockroach cert create-ca --certs-dir=certs --ca-key=cockroach-safe/ca.key
-cockroach cert create-node localhost $(hostname) --certs-dir=certs --ca-key=cockroach-safe/ca.ke
+cockroach cert create-node localhost $(hostname) --certs-dir=certs --ca-key=cockroach-safe/ca.key
 cockroach cert create-client root --certs-dir=certs --ca-key=cockroach-safe/ca.key
 cockroach start-single-node --certs-dir=certs --accept-sql-without-tls --background
 cockroach sql --insecure --execute "CREATE DATABASE test; CREATE USER test WITH PASSWORD 'test'; GRANT ALL ON DATABASE test TO test;"
