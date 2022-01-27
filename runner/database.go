@@ -155,12 +155,12 @@ func getGenericConnectionString(dbInfo DatabaseConnectorInfoDatabase) (string, s
 	}
 
 	extra := u.extraArgs
-	if extra == "?" {
-		extra = ""
+	if len(extra) > 0 && extra[0] != '?' {
+		extra = "?" + extra
 	}
 
 	genericString := fmt.Sprintf(
-		"%s://%s%s/%s?%s",
+		"%s://%s%s/%s%s",
 		dbInfo.Type,
 		genericUserPass,
 		u.address,
@@ -391,6 +391,8 @@ func EvalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo, p
 	case CassandraDatabase, ScyllaDatabase:
 		return evalCQL(panel, dbInfo, server, w)
 	}
+
+	fmt.Println("PHIL!", InfluxDatabase, InfluxFluxDatabase, "the type -> ", dbInfo.Type)
 
 	mangleInsert := defaultMangleInsert
 	qt := ansiSQLQuote
