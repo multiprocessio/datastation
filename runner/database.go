@@ -364,6 +364,10 @@ func EvalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo, p
 	}
 	defer w.Close()
 
+	if dbInfo.Address == "" {
+		dbInfo.Address = "localhost:" + defaultPorts[dbInfo.Type]
+	}
+
 	switch dbInfo.Type {
 	case ElasticsearchDatabase:
 		return evalElasticsearch(panel, dbInfo, server, w)
