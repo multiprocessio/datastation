@@ -117,7 +117,8 @@ docker run -d scylladb/scylla --smp 1 --authenticator PasswordAuthenticator
 ## LOAD DATA ##
 
 # Configure cratedb
-docker exec "$cratecontainer" crash -c "CREATE USER test WITH (password = 'test'); GRANT ALL PRIVILEGES ON SCHEMA doc TO test;"
+docker exec "$cratecontainer" crash -c "CREATE USER test WITH (password = 'test');"
+docker exec "$cratecontainer" crash -c "GRANT ALL PRIVILEGES ON SCHEMA doc TO test;"
 
 # Load Elasticsearch data
 curl -X PUT http://localhost:9200/test
