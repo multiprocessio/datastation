@@ -219,8 +219,8 @@ for (const subprocess of RUNNERS) {
       },
     ];
 
-    for (const test of tests) {
-      test(`runs ${JSON.stringify(test)} query`, async () => {
+    for (const testcase of tests) {
+      test(`runs ${JSON.stringify(testcase)} query`, async () => {
         if (process.platform !== 'linux') {
           return;
         }
@@ -233,8 +233,8 @@ for (const subprocess of RUNNERS) {
         const dp = new DatabasePanelInfo();
         dp.database.connectorId = connectors[0].id;
         dp.database.table = 'test';
-        dp.database.range = test.range;
-        dp.content = test.query;
+        dp.database.range = testcase.range;
+        dp.content = testcase.query;
 
         let finished = false;
         const panels = [dp];
@@ -272,8 +272,8 @@ for (const subprocess of RUNNERS) {
       },
     ];
 
-    for (const test of tests) {
-      test(`runs ${JSON.stringify(test)} query`, async () => {
+    for (const testcase of tests) {
+      test(`runs ${JSON.stringify(testcase)} query`, async () => {
         if (process.platform !== 'linux') {
           return;
         }
@@ -288,7 +288,7 @@ for (const subprocess of RUNNERS) {
         ];
         const dp = new DatabasePanelInfo();
         dp.database.connectorId = connectors[0].id;
-        dp.content = test.query;
+        dp.content = testcase.query;
 
         let finished = false;
         const panels = [dp];
