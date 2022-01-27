@@ -259,4 +259,58 @@ for (const subprocess of RUNNERS) {
       });
     }
   });
+
+  describe('influx testdata/influx tests', () => {
+    const tests = [
+      {
+	query: '',
+	version: 'influx',
+      },
+      {
+	query: '',
+	version: 'influx-flux',
+      },
+    ];
+
+    for (const test of tests) {
+      test(`runs ${JSON.stringify(test)} query`, async () => {
+	if (process.platform !== 'linux') {
+	  return;
+	}
+
+	const connectors = [
+	  new DatabaseConnectorInfo({
+            type: test.version,
+	    database: 'test',
+	    username: 'test',
+	    password: 'test',
+      	  }),
+	];
+	const dp = new DatabasePanelInfo();
+	dp.database.connectorId = connectors[0].id;
+	dp.content = test.query;
+
+	let finished = false;
+	const panels = [dp];
+	await withSavedPanels(
+	  panels,
+	  async (project) => {
+            const panelValueBuffer = fs.readFileSync(
+              getProjectResultsFile(project.projectName) + dp.id
+            );
+
+            const v = JSON.parse(panelValueBuffer.toString());
+	    expect(v.length).toBe(test.results);
+
+            finished = true;
+	  },
+	  { evalPanels: true, connectors, subprocessName: subprocess }
+	);
+
+	if (!finished) {
+	  throw new Error('Callback did not finish');
+	}
+      });
+    }
+  });
 }

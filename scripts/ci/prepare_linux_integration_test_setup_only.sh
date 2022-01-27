@@ -109,9 +109,13 @@ docker run -d -p 9090:9090 prom/prometheus
 
 # Start up influx (2 for fluxql)
 docker run -d -p 8086:8086 -e "DOCKER_INFLUXDB_INIT_MODE=setup" -e "DOCKER_INFLUXDB_INIT_USERNAME=test" -e "DOCKER_INFLUXDB_INIT_PASSWORD=test" -e "DOCKER_INFLUXDB_INIT_ORG=test" -e "DOCKER_INFLUXDB_INIT_BUCKET=test" -e "DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=test" influxdb:2.0
+curl -i -XPOST 'http://localhost:8086/api/v2/write?bucket=test&precision=ns' \
+  --header 'Authorization: Token test:test' --data-binary @testdata/influx/noaa-ndbc-data-sample.lp
 
 # Start up influx (1 for influxql)
-docker run -d -p 8086:8087 -e "INFLUXDB_HTTP_AUTH_ENABLED=true" -e "INFLUXDB_ADMIN_USER=test" -e "INFLUXDB_ADMIN_PASSWORD=test" influxdb:1.7
+docker run -d -p 8087:8086 -e "INFLUXDB_HTTP_AUTH_ENABLED=true" -e "INFLUXDB_ADMIN_USER=test" -e "INFLUXDB_ADMIN_PASSWORD=test" influxdb:1.7
+curl -i -XPOST http://localhost:8087/query?u=test&p=test --data-urlencode "q=CREATE DATABASE test"
+curl -i -XPOST 'http://localhost:8087/write?db=test' --data-binary @testdata/influx/noaa-ndbc-data-sample.lp
 
 # Start up scylla
 docker run -d scylladb/scylla --smp 1 --authenticator PasswordAuthenticator
