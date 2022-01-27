@@ -84,7 +84,7 @@ docker run -d -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=1StrongPwd!!" -p 1433:143
 docker run -d -e ORACLE_RANDOM_PASSWORD="y" -e "APP_USER=test" -e "APP_USER_PASSWORD=test" -p 1521:1521 gvenzl/oracle-xe:latest
 
 # Start up scylla
-scyllacontainer="$(docker run -d scylladb/scylla --smp 1 --authenticator PasswordAuthenticator)"
+scyllacontainer="$(docker run -d scylladb/scylla --smp 1 --authenticator PasswordAuthenticator --broadcast-address 127.0.0.1 --listen-address 0.0.0.0 --broadcast-rpc-address 127.0.0.1)"
 
 # Start up cockroach database
 curl https://binaries.cockroachdb.com/cockroach-v21.2.4.linux-amd64.tgz | tar -xz && sudo cp -i cockroach-v21.2.4.linux-amd64/cockroach /usr/local/bin/
