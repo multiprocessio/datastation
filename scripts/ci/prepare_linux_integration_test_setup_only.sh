@@ -128,15 +128,15 @@ done
 
 sleep 20
 
-docker ps
+docker ps -a
 netstat -tulpn | grep "8086\|8087"
-
-# Load influx2 data
-curl -XPOST 'http://localhost:8086/api/v2/write?bucket=test&precision=ns' \
-  --header 'Authorization: Token test:test' --data-binary @testdata/influx/noaa-ndbc-data-sample.lp
 
 # Load influx1 data
 curl -XPOST 'http://localhost:8087/query?u=test&p=test' --data-urlencode "q=CREATE DATABASE test"
 curl -XPOST 'http://localhost:8087/write?db=test' --data-binary @testdata/influx/noaa-ndbc-data-sample.lp
+
+# Load influx2 data
+curl -XPOST 'http://localhost:8086/api/v2/write?bucket=test&precision=ns' \
+  --header 'Authorization: Token test:test' --data-binary @testdata/influx/noaa-ndbc-data-sample.lp
 
 # TODO: might be worth switching to docker-compose at some point...
