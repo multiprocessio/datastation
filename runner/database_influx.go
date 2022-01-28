@@ -2,6 +2,7 @@ package runner
 
 import (
 	"context"
+	"fmt"
 	"encoding/base64"
 	"encoding/json"
 	"io"
@@ -107,6 +108,7 @@ func evalFlux(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, server *Se
 	return withRemoteConnection(server, host, port, func(proxyHost, proxyPort string) error {
 		url := makeHTTPUrl(tls, proxyHost, proxyPort, rest)
 
+		fmt.Println("With a token!", token)
 		// TODO: support custom certs
 		client := influxdb2.NewClientWithOptions(url, token,
 			influxdb2.DefaultOptions().

@@ -3,6 +3,7 @@ package runner
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -75,6 +76,7 @@ func evalElasticsearch(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, s
 			q += _range.Field + ":[" + begin.Format(time.RFC3339) + " TO " + end.Format(time.RFC3339) + "]"
 		}
 
+		fmt.Println("Running Elasticsearch query: " + q)
 		res, err := es.Search(
 			es.Search.WithContext(context.Background()),
 			es.Search.WithIndex(indexes...),
