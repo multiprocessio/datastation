@@ -2,9 +2,9 @@ package runner
 
 import (
 	"context"
-	"fmt"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"io"
 
 	"github.com/influxdata/influxdb-client-go/v2"
