@@ -203,7 +203,7 @@ for (const subprocess of RUNNERS) {
       {
         query: 'pageCount:>0',
         range: {
-          field: 'publishedDate.date',
+          field: 'publishedDate.$date',
           rangeType: 'absolute',
           begin_date: new Date('2008-01-01'),
           end_date: new Date('2010-01-01'),
