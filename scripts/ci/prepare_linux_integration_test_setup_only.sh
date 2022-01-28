@@ -131,7 +131,7 @@ function retry {
 	fi
 
 	echo "Retrying... $2"
-	sleep 5000
+	sleep 5s
     done
 
     if [[ "$ok" == "false" ]]; then
