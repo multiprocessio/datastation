@@ -124,7 +124,7 @@ docker exec "$cratecontainer" crash -c "GRANT ALL PRIVILEGES ON SCHEMA doc TO te
 
 function retry {
     ok="false"
-    for i in {1..$1}; do
+    for i in $(seq $1); do
 	if bash -c "$2" ; then
 	    ok="true"
 	    break
@@ -133,7 +133,7 @@ function retry {
 	echo "Retrying... $2"
     done
 
-    if [[ "$ok" == "$false" ]]; then
+    if [[ "$ok" == "false" ]]; then
 	echo "Failed after retries... $2"
 	exit 1
     fi
@@ -141,7 +141,7 @@ function retry {
 
 # Load influx1 data
 retry 3 'curl -XPOST "http://localhost:8087/query?u=test&p=testtest" --data-urlencode "q=CREATE DATABASE test"'
-retrt 3 "curl -XPOST 'http://localhost:8087/write?db=test&u=test&p=testtest' --data-binary @testdata/influx/noaa-ndbc-data-sample.lp"
+retry 3 "curl -XPOST 'http://localhost:8087/write?db=test&u=test&p=testtest' --data-binary @testdata/influx/noaa-ndbc-data-sample.lp"
 
 # Load influx2 data
 retry 3 "curl -XPOST 'http://localhost:8086/api/v2/write?bucket=test&precision=ns' --header 'Authorization: Token test:testtest' --data-binary @testdata/influx/noaa-ndbc-data-sample.lp"
