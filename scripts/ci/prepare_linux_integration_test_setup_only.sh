@@ -151,13 +151,13 @@ retry 3 "curl -XPOST 'http://localhost:8086/api/v2/write?bucket=test&precision=n
 # Load Elasticsearch data
 retry 3 "curl -X PUT http://localhost:9200/test"
 for t in $(ls testdata/documents/*.json); do
-    retry 3 'curl -X POST -H "Content-Type: application/json" -d @$t http://localhost:9200/test/_doc'
+    retry 3 "curl -X POST -H 'Content-Type: application/json' -d @$t http://localhost:9200/test/_doc"
 done
 
 # Configure scylla
-docker exec "$scyllacontainer" cqlsh \
+docker exec "$scyllacontainer" cqlsh -u cassandra -p cassandra \
        -e "CREATE KEYSPACE test WITH REPLICATION = {'class': 'SimpleStrategy', 'replication_factor': 1};"
-docker exec "$scyllacontainer" cqlsh \
+docker exec "$scyllacontainer" cqlsh -u cassandra -p cassandra \
        -e "CREATE ROLE test WITH PASSWORD = 'test' AND LOGIN = true AND SUPERUSER = true;"
 
 

@@ -98,14 +98,6 @@ const vendorOverride = {
     address: 'localhost:5434?sslmode=disable',
     database: 'doc',
   },
-  scylla: {
-    username: 'cassandra',
-    password: 'cassandra',
-  },
-  cassandra: {
-    username: 'cassandra',
-    password: 'cassandra',
-  },
 };
 
 for (const subprocess of RUNNERS) {
@@ -325,9 +317,9 @@ for (const subprocess of RUNNERS) {
       const connectors = [
         new DatabaseConnectorInfo({
           type: 'scylla',
-          database: 'test',
-          username: 'test',
-          password_encrypt: new Encrypt('test'),
+	  database: 'test',
+	  username: 'cassandra',
+          password_encrypt: new Encrypt('cassandra'),
         }),
       ];
       const dp = new DatabasePanelInfo();
@@ -357,8 +349,8 @@ for (const subprocess of RUNNERS) {
     });
   });
 
-  describe('basic cassandra/scylladb tests', () => {
-    test(`runs basic cql query`, async () => {
+  describe('basic bigquery tests', () => {
+    test(`runs query against public dataset`, async () => {
       if (process.platform !== 'linux') {
         return;
       }
