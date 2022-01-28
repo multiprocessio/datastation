@@ -317,8 +317,8 @@ for (const subprocess of RUNNERS) {
       const connectors = [
         new DatabaseConnectorInfo({
           type: 'scylla',
-	  database: 'test',
-	  username: 'cassandra',
+          database: 'test',
+          username: 'cassandra',
           password_encrypt: new Encrypt('cassandra'),
         }),
       ];
