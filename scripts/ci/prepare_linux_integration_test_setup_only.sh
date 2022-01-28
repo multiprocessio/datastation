@@ -147,7 +147,7 @@ retry 3 'curl -XPOST "http://localhost:8087/query?u=test&p=testtest" --data-urle
 retry 3 "curl -XPOST 'http://localhost:8087/write?db=test&u=test&p=testtest' --data-binary @testdata/influx/noaa-ndbc-data-sample.lp"
 
 # Load influx2 data
-retry 3 "curl -XPOST 'http://localhost:8086/api/v2/write?bucket=test&precision=ns' --header 'Authorization: Token test:testtest' --data-binary @testdata/influx/noaa-ndbc-data-sample.lp"
+retry 3 "curl -XPOST 'http://localhost:8086/api/v2/write?org=test&bucket=test&precision=ns' --header 'Authorization: Token test' --data-binary @testdata/influx/noaa-ndbc-data-sample.lp"
 
 # Load Elasticsearch data
 retry 3 "curl -X PUT http://localhost:9200/test"

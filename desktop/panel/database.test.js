@@ -256,11 +256,22 @@ for (const subprocess of RUNNERS) {
   describe('influx testdata/influx tests', () => {
     const tests = [
       {
-        query: 'SELECT *',
+        query: 'SELECT MEAN(ang_wave_period_sec) FROM ndbc',
         version: 'influx',
       },
       {
-        query: 'from(bucket: "test")',
+        query: `
+from(bucket: "test")
+  |> range(start: -1000000h)
+  |> filter(fn: (r) =>
+          (r._measurement == "ndbc" and r._field == "ang_wave_period_sec"))
+  |> group(columns: ["_measurement", "_start", "_stop", "_field"], mode: "by")
+  |> keep(columns: ["_measurement", "_start", "_stop", "_field", "_time", "_value"])
+  |> mean()
+  |> map(fn: (r) =>
+          ({r with _time: 1970-01-01T00:00:00Z}))
+  |> rename(columns: {_value: "mean"})
+  |> yield(name: "0")`,
         version: 'influx-flux',
       },
     ];
@@ -277,7 +288,7 @@ for (const subprocess of RUNNERS) {
             database: 'test',
             username: 'test',
             password_encrypt: new Encrypt('testtest'),
-            apiKey_encrypt: new Encrypt('testtest'),
+            apiKey_encrypt: new Encrypt('test'),
           }),
         ];
         const dp = new DatabasePanelInfo();
