@@ -407,4 +407,51 @@ from(bucket: "test")
       }
     }, 15_000);
   });
+
+  describe('basic mongodb testdata/documents tests', () => {
+    test('basic test', async () => {
+      if (process.platform !== 'linux') {
+        return;
+      }
+
+      const connectors = [
+        new DatabaseConnectorInfo({
+          type: 'mongo',
+          database: 'test',
+          username: 'test',
+          password_encrypt: new Encrypt('test'),
+        }),
+      ];
+      const dp = new DatabasePanelInfo();
+      dp.database.connectorId = connectors[0].id;
+      dp.content = 'db.test.find({ pageCount: { $gt: 0 } })';
+
+      let finished = false;
+      const panels = [dp];
+      await withSavedPanels(
+        panels,
+        async (project) => {
+          const panelValueBuffer = fs.readFileSync(
+            getProjectResultsFile(project.projectName) + dp.id
+          );
+
+          const v = JSON.parse(panelValueBuffer.toString());
+          expect(v).toStrictEqual(
+            JSON.parse(
+              fs
+                .readFileSync('testdata/bigquery/population_result.json')
+                .toString()
+            )
+          );
+
+          finished = true;
+        },
+        { evalPanels: true, connectors, subprocessName: subprocess }
+      );
+
+      if (!finished) {
+        throw new Error('Callback did not finish');
+      }
+    }, 15_000);
+  });
 }

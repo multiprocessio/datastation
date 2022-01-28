@@ -12,7 +12,14 @@ func evalMongo(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, server *S
 		return err
 	}
 
-	cmd := exec.Command("mongo", conn, "--eval", panel.Content)
+	prog := "mongo"
+	test := exec.StartProcess("sh", "-c", "command -v mongo")
+	_, err = test.Wait()
+	if err != nil {
+		prog = "mongosh"
+	}
+
+	cmd := exec.Command(prog, conn, "--eval", panel.Content)
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout
 
