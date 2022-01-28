@@ -8,10 +8,11 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
-	"time"
 
 	"github.com/elastic/go-elasticsearch/v6"
 )
+
+var iso8601Format = "2006-01-02T15:04:05"
 
 type elasticsearchResponse struct {
 	Hits struct {
@@ -73,7 +74,7 @@ func evalElasticsearch(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, s
 				q = "(" + q + ") AND "
 			}
 
-			q += _range.Field + ":[" + begin.Format(time.RFC3339) + " TO " + end.Format(time.RFC3339) + "]"
+			q += _range.Field + ":[" + begin.Format(iso8601Format) + " TO " + end.Format(iso8601Format) + "]"
 		}
 
 		fmt.Println("Running Elasticsearch query: " + q)

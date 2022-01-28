@@ -355,6 +355,7 @@ for (const subprocess of RUNNERS) {
         return;
       }
 
+      console.log('PHIL BIGQUERY TOKEN', process.env.BIGQUERY_TOKEN);
       const connectors = [
         new DatabaseConnectorInfo({
           type: 'bigquery',
