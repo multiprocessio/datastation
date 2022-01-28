@@ -116,7 +116,7 @@ docker run -d -p 8087:8086 -e "INFLUXDB_HTTP_AUTH_ENABLED=true" -e "INFLUXDB_ADM
 
 ## LOAD DATA ##
 
-sleep 15 # Time for everything to load (influx in particular takes a while)
+sleep 30 # Time for everything to load (influx in particular takes a while)
 
 # Configure cratedb
 docker exec "$cratecontainer" crash -c "CREATE USER test WITH (password = 'test');"
