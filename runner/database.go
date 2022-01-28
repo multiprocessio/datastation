@@ -361,8 +361,8 @@ func EvalDatabasePanel(
 	dbInfo := connector.Database
 
 	// Only Elasticsearch is ok with an empty query, I think.
-	if query == "" && dbInfo.Type != ElasticsearchDatabase {
-		return nil, "", edsef("Expected query, got empty query.")
+	if panel.Content == "" && dbInfo.Type != ElasticsearchDatabase {
+		return edsef("Expected query, got empty query.")
 	}
 
 	if panelResultLoader == nil {

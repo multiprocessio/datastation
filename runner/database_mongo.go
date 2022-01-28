@@ -13,8 +13,7 @@ func evalMongo(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, server *S
 	}
 
 	prog := "mongo"
-	test := exec.StartProcess("sh", "-c", "command -v mongo")
-	_, err = test.Wait()
+	_, err = exec.LookPath(prog)
 	if err != nil {
 		prog = "mongosh"
 	}
