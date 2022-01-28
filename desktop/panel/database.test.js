@@ -324,7 +324,8 @@ for (const subprocess of RUNNERS) {
       ];
       const dp = new DatabasePanelInfo();
       dp.database.connectorId = connectors[0].id;
-      dp.content = 'select broadcast_address from system.local;';
+      //dp.content = 'select broadcast_address from system.local;';
+      dp.content = 'select * from system.local;';
 
       let finished = false;
       const panels = [dp];
