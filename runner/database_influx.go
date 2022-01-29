@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
 	"io"
 	"io/ioutil"
 
@@ -69,8 +68,11 @@ func evalInfluxQL(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, server
 		}
 		defer rsp.Body.Close()
 
-		b, _ := ioutil.ReadAll(rsp.Body)
-		fmt.Println("INFLUX RESPONSE", string(b))
+		if rsp.StatusCode >= 400 {
+			b, _ := ioutil.ReadAll(rsp.Body)
+			return edsef("Failed to query Influx (status %s): %s", rsp.Status, b)
+		}
+
 		var r influxResponse
 		err = json.NewDecoder(rsp.Body).Decode(&r)
 		if err != nil {
