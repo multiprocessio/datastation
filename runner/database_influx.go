@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 
@@ -58,6 +59,7 @@ func evalInfluxQL(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, server
 			})
 		}
 
+		fmt.Println("PHIL URL", url)
 		rsp, err := makeHTTPRequest(httpRequest{
 			url:     url,
 			method:  "GET",

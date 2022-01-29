@@ -26,7 +26,6 @@ func evalMongo(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, server *S
 			return err
 		}
 
-
 		cmd := exec.Command(prog, conn, "--eval", panel.Content)
 		cmd.Stderr = os.Stderr
 		cmd.Stdout = w
