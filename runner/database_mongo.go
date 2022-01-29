@@ -1,34 +1,41 @@
 package runner
 
 import (
-	"fmt"
 	"io"
 	"os"
 	"os/exec"
 )
 
 func evalMongo(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, server *ServerInfo, w io.Writer) error {
-	_, conn, err := getConnectionString(dbInfo)
-	if err != nil {
-		return err
-	}
-
 	prog := "mongo"
-	_, err = exec.LookPath(prog)
+	_, err := exec.LookPath(prog)
 	if err != nil {
 		prog = "mongosh"
 	}
 
-	fmt.Println("%s %s --eval '%s'", prog, conn, panel.Content)
-
-	cmd := exec.Command(prog, conn, "--eval", panel.Content)
-	cmd.Stderr = os.Stderr
-	cmd.Stdout = os.Stdout
-
-	err = cmd.Start()
+	// TODO: how does TLS work?
+	_, host, port, _, err := getHTTPHostPort(dbInfo.Address)
 	if err != nil {
 		return err
 	}
 
-	return cmd.Wait()
+	return withRemoteConnection(server, host, port, func(proxyHost, proxyPort string) error {
+		dbInfo.Address = proxyHost + ":" + proxyPort
+		_, conn, err := getConnectionString(dbInfo)
+		if err != nil {
+			return err
+		}
+
+
+		cmd := exec.Command(prog, conn, "--eval", panel.Content)
+		cmd.Stderr = os.Stderr
+		cmd.Stdout = w
+
+		err = cmd.Start()
+		if err != nil {
+			return err
+		}
+
+		return cmd.Wait()
+	})
 }

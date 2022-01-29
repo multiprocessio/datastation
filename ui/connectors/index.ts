@@ -148,7 +148,7 @@ export const VENDOR_GROUPS: Array<{
   },
   {
     group: 'Document',
-    vendors: ['elasticsearch', 'mongo', 'crate'],
+    vendors: ['elasticsearch', 'crate'],
   },
   {
     group: 'Time Series',

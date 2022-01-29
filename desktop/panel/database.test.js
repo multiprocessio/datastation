@@ -417,6 +417,9 @@ from(bucket: "test")
         return;
       }
 
+      // Mongo doesn't work yet.
+      return;
+
       const connectors = [
         new DatabaseConnectorInfo({
           type: 'mongo',
