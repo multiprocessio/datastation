@@ -114,6 +114,11 @@ docker run -d -p 8086:8086 -e "DOCKER_INFLUXDB_INIT_MODE=setup" -e "DOCKER_INFLU
 # Start up influx (1 for influxql)
 docker run -d -p 8087:8086 -e "INFLUXDB_HTTP_AUTH_ENABLED=true" -e "INFLUXDB_ADMIN_USER=test" -e "INFLUXDB_ADMIN_PASSWORD=testtest" influxdb:1.7
 
+# Start up mongodb and install mongosh (shell)
+docker run -d -e "MONGO_INITDB_ROOT_USERNAME=test" -e "MONGO_INITDB_DATABASE=test" -e "MONGO_INITDB_ROOT_PASSWORD=test" -p 27017:27017 mongo:5
+curl -LO https://github.com/mongodb-js/mongosh/releases/download/v1.1.9/mongodb-mongosh_1.1.9_amd64.deb
+sudo apt-get install ./mongodb-mongosh_1.1.9_amd64.deb
+
 ## LOAD DATA ##
 
 sleep 30 # Time for everything to load (influx in particular takes a while)
@@ -147,7 +152,7 @@ retry 3 'curl -XPOST "http://localhost:8087/query?u=test&p=testtest" --data-urle
 retry 3 "curl -XPOST 'http://localhost:8087/write?db=test&u=test&p=testtest' --data-binary @testdata/influx/noaa-ndbc-data-sample.lp"
 
 # Load influx2 data
-retry 3 "curl -XPOST 'http://localhost:8086/api/v2/write?bucket=test&precision=ns' --header 'Authorization: Token test:testtest' --data-binary @testdata/influx/noaa-ndbc-data-sample.lp"
+retry 3 "curl -XPOST 'http://localhost:8086/api/v2/write?org=test&bucket=test&precision=ns' --header 'Authorization: Token test' --data-binary @testdata/influx/noaa-ndbc-data-sample.lp"
 
 # Load Elasticsearch data
 retry 3 "curl -X PUT http://localhost:9200/test"
@@ -161,5 +166,9 @@ docker exec "$scyllacontainer" cqlsh -u cassandra -p cassandra \
 docker exec "$scyllacontainer" cqlsh -u cassandra -p cassandra \
        -e "CREATE ROLE test WITH PASSWORD = 'test' AND LOGIN = true AND SUPERUSER = true;"
 
+# Load Mongodb documents
+for t in $(ls testdata/documents/*.json); do
+    mongosh "mongodb://test:test@localhost:27017" --eval "db.test.insertOne($(cat $t))"
+done
 
 # TODO: might be worth switching to docker-compose at some point...

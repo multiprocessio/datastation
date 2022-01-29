@@ -118,10 +118,6 @@ func transformDM_getPanelCalls(
 	getPanelCallsAllowed bool,
 	qt quoteType,
 ) ([]panelToImport, string, error) {
-	if query == "" {
-		return nil, "", edsef("Expected query, got empty query.")
-	}
-
 	var panelsToImport []panelToImport
 
 	var insideErr error

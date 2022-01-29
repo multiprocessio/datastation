@@ -339,7 +339,12 @@ func writeRowFromDatabase(dbInfo DatabaseConnectorInfoDatabase, w *JSONArrayWrit
 	return nil
 }
 
-func EvalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo, panelResultLoader func(string, string, interface{}) error) error {
+func EvalDatabasePanel(
+	project *ProjectState,
+	pageIndex int,
+	panel *PanelInfo,
+	panelResultLoader func(string, string, interface{}) error,
+) error {
 	var connector *ConnectorInfo
 	for _, c := range project.Connectors {
 		cc := c
@@ -354,6 +359,11 @@ func EvalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo, p
 	}
 
 	dbInfo := connector.Database
+
+	// Only Elasticsearch is ok with an empty query, I think.
+	if panel.Content == "" && dbInfo.Type != ElasticsearchDatabase {
+		return edsef("Expected query, got empty query.")
+	}
 
 	if panelResultLoader == nil {
 		panelResultLoader = func(projectId, panelId string, res interface{}) error {

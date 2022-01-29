@@ -256,11 +256,22 @@ for (const subprocess of RUNNERS) {
   describe('influx testdata/influx tests', () => {
     const tests = [
       {
-        query: 'SELECT *',
+        query: 'SELECT MEAN(ang_wave_period_sec) FROM ndbc',
         version: 'influx',
       },
       {
-        query: 'from(bucket: "test")',
+        query: `
+from(bucket: "test")
+  |> range(start: -1000000h)
+  |> filter(fn: (r) =>
+          (r._measurement == "ndbc" and r._field == "ang_wave_period_sec"))
+  |> group(columns: ["_measurement", "_start", "_stop", "_field"], mode: "by")
+  |> keep(columns: ["_measurement", "_start", "_stop", "_field", "_time", "_value"])
+  |> mean()
+  |> map(fn: (r) =>
+          ({r with _time: 1970-01-01T00:00:00Z}))
+  |> rename(columns: {_value: "mean"})
+  |> yield(name: "0")`,
         version: 'influx-flux',
       },
     ];
@@ -277,7 +288,7 @@ for (const subprocess of RUNNERS) {
             database: 'test',
             username: 'test',
             password_encrypt: new Encrypt('testtest'),
-            apiKey_encrypt: new Encrypt('testtest'),
+            apiKey_encrypt: new Encrypt('test'),
           }),
         ];
         const dp = new DatabasePanelInfo();
@@ -356,7 +367,6 @@ for (const subprocess of RUNNERS) {
         return;
       }
 
-      console.log('PHIL BIGQUERY TOKEN', process.env.BIGQUERY_TOKEN);
       const connectors = [
         new DatabaseConnectorInfo({
           type: 'bigquery',
@@ -368,6 +378,53 @@ for (const subprocess of RUNNERS) {
       dp.database.connectorId = connectors[0].id;
       dp.content =
         'SELECT * FROM `bigquery-public-data`.census_bureau_usa.population_by_zip_2010 ORDER BY population DESC LIMIT 10';
+
+      let finished = false;
+      const panels = [dp];
+      await withSavedPanels(
+        panels,
+        async (project) => {
+          const panelValueBuffer = fs.readFileSync(
+            getProjectResultsFile(project.projectName) + dp.id
+          );
+
+          const v = JSON.parse(panelValueBuffer.toString());
+          expect(v).toStrictEqual(
+            JSON.parse(
+              fs
+                .readFileSync('testdata/bigquery/population_result.json')
+                .toString()
+            )
+          );
+
+          finished = true;
+        },
+        { evalPanels: true, connectors, subprocessName: subprocess }
+      );
+
+      if (!finished) {
+        throw new Error('Callback did not finish');
+      }
+    }, 15_000);
+  });
+
+  describe('basic mongodb testdata/documents tests', () => {
+    test('basic test', async () => {
+      if (process.platform !== 'linux') {
+        return;
+      }
+
+      const connectors = [
+        new DatabaseConnectorInfo({
+          type: 'mongo',
+          database: 'test',
+          username: 'test',
+          password_encrypt: new Encrypt('test'),
+        }),
+      ];
+      const dp = new DatabasePanelInfo();
+      dp.database.connectorId = connectors[0].id;
+      dp.content = 'db.test.find({ pageCount: { $gt: 0 } })';
 
       let finished = false;
       const panels = [dp];
