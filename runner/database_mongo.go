@@ -1,6 +1,7 @@
 package runner
 
 import (
+	"fmt"
 	"io"
 	"os"
 	"os/exec"
@@ -11,6 +12,8 @@ func evalMongo(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, server *S
 	if err != nil {
 		return err
 	}
+
+	fmt.Println("mongo %s --eval '%s'", conn, panel.Content)
 
 	cmd := exec.Command("mongo", conn, "--eval", panel.Content)
 	cmd.Stderr = os.Stderr
