@@ -4,7 +4,9 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"io"
+	"io/ioutil"
 
 	"github.com/influxdata/influxdb-client-go/v2"
 )
@@ -67,6 +69,8 @@ func evalInfluxQL(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, server
 		}
 		defer rsp.Body.Close()
 
+		b, _ := ioutil.ReadAll(rsp.Body)
+		fmt.Println("INFLUX RESPONSE", string(b))
 		var r influxResponse
 		err = json.NewDecoder(rsp.Body).Decode(&r)
 		if err != nil {

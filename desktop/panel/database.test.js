@@ -305,7 +305,7 @@ from(bucket: "test")
             );
 
             const v = JSON.parse(panelValueBuffer.toString());
-            expect(v).toStrictEqual({});
+            expect(v).toStrictEqual([{time: 0, mean: '0.6'}]);
 
             finished = true;
           },
