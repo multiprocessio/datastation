@@ -256,10 +256,12 @@ for (const subprocess of RUNNERS) {
   describe('influx testdata/influx tests', () => {
     const tests = [
       {
+        address: 'localhost:8087',
         query: 'SELECT MEAN(ang_wave_period_sec) FROM ndbc',
         version: 'influx',
       },
       {
+        address: 'localhost:8086',
         query: `
 from(bucket: "test")
   |> range(start: -1000000h)
@@ -285,6 +287,7 @@ from(bucket: "test")
         const connectors = [
           new DatabaseConnectorInfo({
             type: testcase.version,
+            address: testcase.address,
             database: 'test',
             username: 'test',
             password_encrypt: new Encrypt('testtest'),
