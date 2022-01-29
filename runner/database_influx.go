@@ -43,7 +43,7 @@ func evalInfluxQL(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, server
 	}
 
 	return withRemoteConnection(server, host, port, func(proxyHost, proxyPort string) error {
-		url := makeHTTPUrl(tls, proxyHost, proxyPort, "")
+		url := makeHTTPUrl(tls, proxyHost, proxyPort, "/query")
 		url += "?q=" + panel.Content + "&db=" + dbInfo.Database
 
 		var headers []HttpConnectorInfoHeader
