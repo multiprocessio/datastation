@@ -6,7 +6,6 @@ import (
 	"time"
 )
 
-var iso8601Format = "2006-01-02T15:04:05.999Z"
 var logPrefixSet = false
 var Verbose = true
 
@@ -94,7 +93,7 @@ func (ec EvalContext) Eval(projectId, panelId string) error {
 		return evalFilePanel(project, pageIndex, panel)
 	case HttpPanel:
 		Logln("Evaling http panel")
-		return evalHttpPanel(project, pageIndex, panel)
+		return evalHTTPPanel(project, pageIndex, panel)
 	case LiteralPanel:
 		Logln("Evaling literal panel")
 		return evalLiteralPanel(project, pageIndex, panel)

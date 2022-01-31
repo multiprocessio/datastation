@@ -1,6 +1,10 @@
 import { DatabaseConnectorInfoType } from '../../shared/state';
+import { BigQueryDetails } from './BigQueryDetails';
+import { CassandraDetails } from './CassandraDetails';
 import { ElasticsearchDetails } from './ElasticsearchDetails';
+import { FluxDetails } from './FluxDetails';
 import { GenericDetails, GenericNoDatabaseDetails } from './GenericDetails';
+import { InfluxDetails } from './InfluxDetails';
 import { SnowflakeDetails } from './SnowflakeDetails';
 import { SQLiteDetails } from './SQLiteDetails';
 
@@ -14,6 +18,31 @@ export const VENDORS: {
   postgres: {
     name: 'PostgreSQL',
     id: 'postgres',
+    details: GenericDetails,
+  },
+  cockroach: {
+    name: 'CockroachDB',
+    id: 'cockroach',
+    details: GenericDetails,
+  },
+  timescale: {
+    name: 'TimescaleDB',
+    id: 'timescale',
+    details: GenericDetails,
+  },
+  crate: {
+    name: 'CrateDB',
+    id: 'crate',
+    details: GenericDetails,
+  },
+  yugabyte: {
+    name: 'YugabyteDB',
+    id: 'yugabyte',
+    details: GenericDetails,
+  },
+  quest: {
+    name: 'QuestDB',
+    id: 'quest',
     details: GenericDetails,
   },
   mysql: {
@@ -62,18 +91,38 @@ export const VENDORS: {
     details: GenericNoDatabaseDetails,
   },
   influx: {
-    name: 'Influx',
+    name: 'Influx (InfluxQL)',
     id: 'influx',
-    details: GenericDetails,
+    details: InfluxDetails,
+  },
+  'influx-flux': {
+    name: 'Influx (Flux)',
+    id: 'influx-flux',
+    details: FluxDetails,
   },
   presto: {
     name: 'Presto',
     id: 'presto',
     details: GenericDetails,
   },
+  bigquery: {
+    name: 'BigQuery',
+    id: 'bigquery',
+    details: BigQueryDetails,
+  },
   cassandra: {
     name: 'Cassandra',
     id: 'cassandra',
+    details: CassandraDetails,
+  },
+  scylla: {
+    name: 'ScyllaDB',
+    id: 'scylla',
+    details: CassandraDetails,
+  },
+  mongo: {
+    name: 'MongoDB',
+    id: 'mongo',
     details: GenericDetails,
   },
 };
@@ -83,19 +132,41 @@ export const VENDOR_GROUPS: Array<{
   vendors: Array<DatabaseConnectorInfoType>;
 }> = [
   {
-    group: 'SQL',
-    vendors: ['postgres', 'mysql', 'sqlserver', 'oracle', 'sqlite'],
+    group: 'Traditional',
+    vendors: [
+      'postgres',
+      'mysql',
+      'sqlserver',
+      'oracle',
+      'sqlite',
+      'cockroach',
+    ],
   },
   {
-    group: 'Analytics',
-    vendors: ['clickhouse', 'snowflake'],
+    group: 'Warehouse',
+    vendors: ['snowflake', 'bigquery'],
   },
   {
-    group: 'Log',
-    vendors: ['elasticsearch'],
+    group: 'Document',
+    vendors: ['elasticsearch', 'crate'],
+  },
+  {
+    group: 'Time Series',
+    vendors: [
+      'clickhouse',
+      'cassandra',
+      'scylla',
+      'quest',
+      'timescale',
+      'yugabyte',
+    ],
   },
   {
     group: 'Metrics',
     vendors: ['prometheus', 'influx'],
   },
 ];
+
+VENDOR_GROUPS.forEach((g) => {
+  g.vendors.sort();
+});

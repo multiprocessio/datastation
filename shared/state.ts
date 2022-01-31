@@ -180,14 +180,23 @@ export type SQLConnectorType =
   | 'presto'
   | 'clickhouse'
   | 'snowflake'
-  | 'cassandra';
+  | 'cockroach'
+  | 'timescale'
+  | 'crate'
+  | 'yugabyte'
+  | 'quest'
+  | 'bigquery'
+  | 'cassandra'
+  | 'scylla';
 
 export type DatabaseConnectorInfoType =
   | SQLConnectorType
+  | 'mongo'
   | 'elasticsearch'
   | 'splunk'
   | 'prometheus'
-  | 'influx';
+  | 'influx'
+  | 'influx-flux';
 
 export class DatabaseConnectorInfo extends ConnectorInfo {
   database: {

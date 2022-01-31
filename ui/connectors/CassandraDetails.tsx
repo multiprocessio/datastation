@@ -1,20 +1,28 @@
 import * as React from 'react';
 import { DatabaseConnectorInfo, ServerInfo } from '../../shared/state';
 import { ServerPicker } from '../components/ServerPicker';
-import { Auth } from './Auth';
+import { Database } from './Database';
 import { Host } from './Host';
+import { Password } from './Password';
+import { Username } from './Username';
 
-export function ElasticsearchDetails(props: {
+export function CassandraDetails(props: {
   connector: DatabaseConnectorInfo;
   updateConnector: (c: DatabaseConnectorInfo) => void;
   servers: Array<ServerInfo>;
 }) {
-  const { connector, updateConnector, servers } = props;
+  const { servers, connector, updateConnector } = props;
 
   return (
     <React.Fragment>
-      <Host {...props} />
-      <Auth {...props} apiKeyLabel="Base64 Encoded API Key" />
+      <Host connector={connector} updateConnector={updateConnector} />
+      <Database
+        label="Keyspace"
+        connector={connector}
+        updateConnector={updateConnector}
+      />
+      <Username {...props} />
+      <Password {...props} />
       <ServerPicker
         servers={servers}
         serverId={connector.serverId}

@@ -262,13 +262,22 @@ const (
 	OracleDatabase                                  = "oracle"
 	SQLServerDatabase                               = "sqlserver"
 	PrestoDatabase                                  = "presto"
-	ClickhouseDatabase                              = "clickhouse"
+	ClickHouseDatabase                              = "clickhouse"
 	SnowflakeDatabase                               = "snowflake"
 	CassandraDatabase                               = "cassandra"
+	ScyllaDatabase                                  = "scylla"
 	ElasticsearchDatabase                           = "elasticsearch"
 	SplunkDatabase                                  = "splunk"
 	PrometheusDatabase                              = "prometheus"
 	InfluxDatabase                                  = "influx"
+	InfluxFluxDatabase                              = "influx-flux"
+	CockroachDatabase                               = "cockroach"
+	TimescaleDatabase                               = "timescale"
+	CrateDatabase                                   = "crate"
+	YugabyteDatabase                                = "yugabyte"
+	QuestDatabase                                   = "quest"
+	BigQueryDatabase                                = "bigquery"
+	MongoDatabase                                   = "mongo"
 )
 
 type DatabaseConnectorInfoDatabase struct {

@@ -37,7 +37,7 @@ func Test_getConnectionString(t *testing.T) {
 		{
 			DatabaseConnectorInfoDatabase{Type: "mysql", Username: "jim", Password: Encrypt{Encrypted: false, Value: "pw"}, Database: "test", Address: "localhost:9090"},
 			"mysql",
-			"jim:pw@tcp(localhost:9090)/test?",
+			"jim:pw@tcp(localhost:9090)/test",
 			nil,
 			"localhost",
 			"9090",
@@ -55,7 +55,7 @@ func Test_getConnectionString(t *testing.T) {
 		{
 			DatabaseConnectorInfoDatabase{Type: "oracle", Username: "jim", Password: Encrypt{Encrypted: false, Value: "pw"}, Database: "test", Address: ""},
 			"oracle",
-			"oracle://jim:pw@localhost/test?",
+			"oracle://jim:pw@localhost/test",
 			nil,
 			"",
 			"1521",
@@ -64,7 +64,7 @@ func Test_getConnectionString(t *testing.T) {
 		{
 			DatabaseConnectorInfoDatabase{Type: "oracle", Username: "jim", Password: Encrypt{Encrypted: false, Value: "pw"}, Database: "test", Address: "localhost"},
 			"oracle",
-			"oracle://jim:pw@localhost/test?",
+			"oracle://jim:pw@localhost/test",
 			nil,
 			"localhost",
 			"1521",
@@ -73,7 +73,7 @@ func Test_getConnectionString(t *testing.T) {
 		{
 			DatabaseConnectorInfoDatabase{Type: "snowflake", Username: "jim", Password: Encrypt{Encrypted: false, Value: ""}, Database: "test", Address: "myid"},
 			"snowflake",
-			"jim@myid/test?",
+			"jim@myid/test",
 			nil,
 			"",
 			"",

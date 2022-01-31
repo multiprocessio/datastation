@@ -24,7 +24,6 @@
     "e2e-test": "node --unhandled-rejections=throw ./e2e/index.js"
   },
   "dependencies": {
-    "@elastic/elasticsearch": "^7.15.0",
     "ace-builds": "^1.4.13",
     "chart.js": "^3.5.1",
     "cookie-parser": "^1.4.5",
@@ -36,7 +35,6 @@
     "jsesc": "^3.0.2",
     "json-stringify-safe": "^5.0.1",
     "lodash.debounce": "^4.0.8",
-    "node-fetch": "^3.1.1",
     "nodemailer": "^6.7.0",
     "openid-client": "^4.9.0",
     "papaparse": "^5.3.1",
@@ -48,10 +46,7 @@
     "react-dom": "^17.0.2",
     "react-syntax-highlighter": "^15.4.4",
     "shape": "npm:@multiprocess/shape",
-    "snowflake-sdk": "^1.6.3",
     "source-map-support": "^0.5.20",
-    "ssh2-promise": "^1.0.2",
-    "ssh2-sftp-client": "^7.0.4",
     "tmp-promise": "^3.0.2",
     "tweetnacl": "^1.0.3",
     "tweetnacl-util": "^0.15.1",
@@ -64,8 +59,6 @@
   "devDependencies": {
     "@dsnp/parquetjs": "^1.1.2",
     "@multiprocess/cssplus": "^0.4.0",
-    "@sucrase/jest-plugin": "^2.1.1",
-    "@testing-library/react": "^12.1.2",
     "@types/cookie-parser": "^1.4.2",
     "@types/express": "^4.17.13",
     "@types/express-session": "^1.17.4",
@@ -80,7 +73,6 @@
     "@types/react": "^17.0.30",
     "@types/react-dom": "^17.0.9",
     "@types/react-syntax-highlighter": "^13.5.2",
-    "@types/ssh2-sftp-client": "^7.0.0",
     "@types/uuid": "^8.3.1",
     "@wojtekmaj/enzyme-adapter-react-17": "^0.6.5",
     "electron": "^15.1.0",

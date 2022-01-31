@@ -86,19 +86,26 @@ func (e *Encrypt) decrypt() (string, error) {
 }
 
 var defaultPorts = map[DatabaseConnectorInfoType]string{
-	"postgres":      "5432",
-	"mysql":         "3306",
-	"sqlite":        "0",
-	"sqlserver":     "1433",
-	"oracle":        "1521",
-	"clickhouse":    "9000",
-	"cassandra":     "9160",
-	"snowflake":     "443",
-	"presto":        "8080",
-	"elasticsearch": "9200",
-	"influx":        "8086",
-	"splunk":        "443",
-	"prometheus":    "9090",
+	PostgresDatabase:      "5432",
+	MySQLDatabase:         "3306",
+	SQLiteDatabase:        "0",
+	SQLServerDatabase:     "1433",
+	OracleDatabase:        "1521",
+	ClickHouseDatabase:    "9000",
+	CassandraDatabase:     "9160",
+	ScyllaDatabase:        "9042",
+	SnowflakeDatabase:     "443",
+	PrestoDatabase:        "8080",
+	ElasticsearchDatabase: "9200",
+	InfluxDatabase:        "8086",
+	InfluxFluxDatabase:    "8086",
+	SplunkDatabase:        "443",
+	PrometheusDatabase:    "9090",
+	CockroachDatabase:     "26257",
+	CrateDatabase:         "5432",
+	TimescaleDatabase:     "5432",
+	YugabyteDatabase:      "5433",
+	QuestDatabase:         "8812",
 }
 
 type urlParts struct {
@@ -128,6 +135,15 @@ func getURLParts(dbInfo DatabaseConnectorInfoDatabase) urlParts {
 	}
 }
 
+var dbDriverOverride = map[DatabaseConnectorInfoType]string{
+	MongoDatabase:     "mongodb",
+	CrateDatabase:     "postgres",
+	QuestDatabase:     "postgres",
+	TimescaleDatabase: "postgres",
+	YugabyteDatabase:  "postgres",
+	CockroachDatabase: "postgres",
+}
+
 func getGenericConnectionString(dbInfo DatabaseConnectorInfoDatabase) (string, string, error) {
 	u := getURLParts(dbInfo)
 	genericUserPass := ""
@@ -147,13 +163,23 @@ func getGenericConnectionString(dbInfo DatabaseConnectorInfoDatabase) (string, s
 		genericUserPass += "@"
 	}
 
+	extra := u.extraArgs
+	if len(extra) > 0 && extra[0] != '?' {
+		extra = "?" + extra
+	}
+
+	driver := string(dbInfo.Type)
+	if d, ok := dbDriverOverride[dbInfo.Type]; ok {
+		driver = d
+	}
+
 	genericString := fmt.Sprintf(
-		"%s://%s%s/%s?%s",
-		dbInfo.Type,
+		"%s://%s%s/%s%s",
+		driver,
 		genericUserPass,
 		u.address,
 		u.database,
-		u.extraArgs)
+		extra)
 
 	return genericString, genericUserPass, nil
 }
@@ -166,8 +192,10 @@ func getConnectionString(dbInfo DatabaseConnectorInfoDatabase) (string, string, 
 	}
 
 	switch dbInfo.Type {
-	case PostgresDatabase:
+	case PostgresDatabase, TimescaleDatabase, CockroachDatabase, CrateDatabase, YugabyteDatabase, QuestDatabase:
 		return "postgres", genericString, nil
+	case MongoDatabase:
+		return "mongodb", genericString, nil
 	case MySQLDatabase:
 		dsn := ""
 		if genericUserPass != "" {
@@ -185,7 +213,14 @@ func getConnectionString(dbInfo DatabaseConnectorInfoDatabase) (string, string, 
 			dsn += u.address
 		}
 
-		dsn += "/" + u.database + "?" + u.extraArgs
+		dsn += "/" + u.database
+		if len(u.extraArgs) > 0 {
+			if u.extraArgs[0] != '?' {
+				dsn += "?"
+			}
+
+			dsn += u.extraArgs
+		}
 		return "mysql", dsn, nil
 	case SQLServerDatabase:
 		dsn := fmt.Sprintf("%s://%s%s?database=%s%s",
@@ -203,13 +238,19 @@ func getConnectionString(dbInfo DatabaseConnectorInfoDatabase) (string, string, 
 		}
 		return "oracle", genericString, nil
 	case SnowflakeDatabase:
-		dsn := fmt.Sprintf("%s%s/%s?%s",
+		dsn := fmt.Sprintf("%s%s/%s",
 			genericUserPass,
 			u.address,
-			u.database,
-			u.extraArgs)
+			u.database)
+		if len(u.extraArgs) > 0 {
+			if u.extraArgs[0] != '?' {
+				dsn += "?"
+			}
+
+			dsn += u.extraArgs
+		}
 		return "snowflake", dsn, nil
-	case ClickhouseDatabase:
+	case ClickHouseDatabase:
 		query := ""
 		if genericUserPass != "" {
 			// Already proven to be ok
@@ -309,10 +350,14 @@ func writeRowFromDatabase(dbInfo DatabaseConnectorInfoDatabase, w *JSONArrayWrit
 	}
 
 	return nil
-
 }
 
-func EvalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo, panelResultLoader func(string, string, interface{}) error) error {
+func EvalDatabasePanel(
+	project *ProjectState,
+	pageIndex int,
+	panel *PanelInfo,
+	panelResultLoader func(string, string, interface{}) error,
+) error {
 	var connector *ConnectorInfo
 	for _, c := range project.Connectors {
 		cc := c
@@ -328,28 +373,16 @@ func EvalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo, p
 
 	dbInfo := connector.Database
 
-	mangleInsert := defaultMangleInsert
-	qt := ansiSQLQuote
-	if dbInfo.Type == "postgres" {
-		mangleInsert = postgresMangleInsert
+	// Only Elasticsearch is ok with an empty query, I think.
+	if panel.Content == "" && dbInfo.Type != ElasticsearchDatabase {
+		return edsef("Expected query, got empty query.")
 	}
 
-	if dbInfo.Type == "mysql" {
-		qt = mysqlQuote
-	}
-
-	idMap := getIdMap(project.Pages[pageIndex])
-	idShapeMap := getIdShapeMap(project.Pages[pageIndex])
-
-	panelsToImport, query, err := transformDM_getPanelCalls(
-		panel.Content,
-		idShapeMap,
-		idMap,
-		dbInfo.Type == "mysql" || dbInfo.Type == "sqlite" || dbInfo.Type == "postgres",
-		qt,
-	)
-	if err != nil {
-		return err
+	if panelResultLoader == nil {
+		panelResultLoader = func(projectId, panelId string, res interface{}) error {
+			f := GetPanelResultsFile(projectId, panelId)
+			return readJSONFileInto(f, res)
+		}
 	}
 
 	serverId := panel.ServerId
@@ -361,8 +394,62 @@ func EvalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo, p
 		return err
 	}
 
+	out := GetPanelResultsFile(project.Id, panel.Id)
+	w, err := openTruncate(out)
+	if err != nil {
+		return err
+	}
+	defer w.Close()
+
+	if dbInfo.Address == "" {
+		dbInfo.Address = "localhost:" + defaultPorts[dbInfo.Type]
+	}
+
+	switch dbInfo.Type {
+	case ElasticsearchDatabase:
+		return evalElasticsearch(panel, dbInfo, server, w)
+	case InfluxDatabase:
+		return evalInfluxQL(panel, dbInfo, server, w)
+	case InfluxFluxDatabase:
+		return evalFlux(panel, dbInfo, server, w)
+	case PrometheusDatabase:
+		return evalPrometheus(panel, dbInfo, server, w)
+	case BigQueryDatabase:
+		return evalBigQuery(panel, dbInfo, server, w)
+	case SplunkDatabase:
+		return evalSplunk(panel, dbInfo, server, w)
+	case MongoDatabase:
+		return evalMongo(panel, dbInfo, server, w)
+	case CassandraDatabase, ScyllaDatabase:
+		return evalCQL(panel, dbInfo, server, w)
+	}
+
+	mangleInsert := defaultMangleInsert
+	qt := ansiSQLQuote
+	if dbInfo.Type == PostgresDatabase {
+		mangleInsert = postgresMangleInsert
+	}
+
+	if dbInfo.Type == MySQLDatabase {
+		qt = mysqlQuote
+	}
+
+	idMap := getIdMap(project.Pages[pageIndex])
+	idShapeMap := getIdShapeMap(project.Pages[pageIndex])
+
+	panelsToImport, query, err := transformDM_getPanelCalls(
+		panel.Content,
+		idShapeMap,
+		idMap,
+		dbInfo.Type == MySQLDatabase || dbInfo.Type == SQLiteDatabase || dbInfo.Type == PostgresDatabase,
+		qt,
+	)
+	if err != nil {
+		return err
+	}
+
 	// Copy remote sqlite database to tmp file if remote
-	if dbInfo.Type == "sqlite" && server != nil {
+	if dbInfo.Type == SQLiteDatabase && server != nil {
 		tmp, err := ioutil.TempFile("", "sqlite-copy")
 		if err != nil {
 			return err
@@ -385,20 +472,6 @@ func EvalDatabasePanel(project *ProjectState, pageIndex int, panel *PanelInfo, p
 	if err != nil {
 		return err
 	}
-
-	if panelResultLoader == nil {
-		panelResultLoader = func(projectId, panelId string, res interface{}) error {
-			f := GetPanelResultsFile(projectId, panelId)
-			return readJSONFileInto(f, res)
-		}
-	}
-
-	out := GetPanelResultsFile(project.Id, panel.Id)
-	w, err := openTruncate(out)
-	if err != nil {
-		return err
-	}
-	defer w.Close()
 
 	return withRemoteConnection(server, host, port, func(proxyHost, proxyPort string) error {
 		dbInfo.Address = proxyHost + ":" + proxyPort

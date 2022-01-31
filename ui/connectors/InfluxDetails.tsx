@@ -1,10 +1,11 @@
 import * as React from 'react';
 import { DatabaseConnectorInfo, ServerInfo } from '../../shared/state';
 import { ServerPicker } from '../components/ServerPicker';
-import { Auth } from './Auth';
 import { Host } from './Host';
+import { Password } from './Password';
+import { Username } from './Username';
 
-export function ElasticsearchDetails(props: {
+export function InfluxDetails(props: {
   connector: DatabaseConnectorInfo;
   updateConnector: (c: DatabaseConnectorInfo) => void;
   servers: Array<ServerInfo>;
@@ -14,7 +15,8 @@ export function ElasticsearchDetails(props: {
   return (
     <React.Fragment>
       <Host {...props} />
-      <Auth {...props} apiKeyLabel="Base64 Encoded API Key" />
+      <Username {...props} />
+      <Password {...props} />
       <ServerPicker
         servers={servers}
         serverId={connector.serverId}
