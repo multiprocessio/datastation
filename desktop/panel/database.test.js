@@ -257,26 +257,26 @@ for (const subprocess of RUNNERS) {
     const tests = [
       {
         address: 'localhost:8087',
-        query: 'SELECT MEAN(ang_wave_period_sec) FROM ndbc',
+        query: 'SELECT MEAN(avg_wave_period_sec) FROM ndbc',
         version: 'influx',
       },
-      // TODO: support influx2
-      /* {
-       *   address: 'localhost:8086',
-       *   query: `
+      {
+        address: 'localhost:8086',
+        query: `
 	 from(bucket: "test")
 	 |> range(start: -1000000h)
 	 |> filter(fn: (r) =>
-       *     (r._measurement == "ndbc" and r._field == "ang_wave_period_sec"))
+           (r._measurement == "ndbc" and r._field == "avg_wave_period_sec"))
 	 |> group(columns: ["_measurement", "_start", "_stop", "_field"], mode: "by")
 	 |> keep(columns: ["_measurement", "_start", "_stop", "_field", "_time", "_value"])
 	 |> mean()
 	 |> map(fn: (r) =>
-       *     ({r with _time: 1970-01-01T00:00:00Z}))
-	 |> rename(columns: {_value: "mean"})
+           ({r with _time: 1970-01-01T00:00:00Z}))
+	 |> rename(columns: {_value: "mean", "_time": "time"})
+         |> drop(columns: ["result", "table"])
 	 |> yield(name: "0")`,
-       *   version: 'influx-flux',
-       * }, */
+        version: 'influx-flux',
+      },
     ];
 
     for (const testcase of tests) {
@@ -309,7 +309,9 @@ for (const subprocess of RUNNERS) {
             );
 
             const v = JSON.parse(panelValueBuffer.toString());
-            expect(v).toStrictEqual([{ time: 0, mean: '0.6' }]);
+            expect(v.length).toEqual(1);
+            expect(v[0].time).toStrictEqual('1970-01-01T00:00:00Z');
+            expect(v[0].mean).toStrictEqual(6.6);
 
             finished = true;
           },

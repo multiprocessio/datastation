@@ -12,8 +12,9 @@ import (
 )
 
 type influxSeries struct {
-	Values []map[string]interface{} `json:"values"`
-	Name   string                   `json:"name"`
+	Values  [][]interface{} `json:"values"`
+	Columns []string        `json:"columns"`
+	Name    string          `json:"name"`
 }
 
 type influxResult struct {
@@ -85,9 +86,14 @@ func evalInfluxQL(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, server
 		return withJSONArrayOutWriterFile(w, func(w *JSONArrayWriter) error {
 			for _, result := range r.Results {
 				for _, series := range result.Series {
-					for _, row := range series.Values {
-						// Hope this doesn't collide!
-						row["__series_name__"] = series.Name
+					for _, r := range series.Values {
+						row := map[string]interface{}{
+							"__series_name__": series.Name,
+						}
+						for i, cell := range r {
+							row[series.Columns[i]] = cell
+						}
+
 						err := w.Write(row)
 						if err != nil {
 							return err
@@ -132,8 +138,6 @@ func evalFlux(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, server *Se
 		return withJSONArrayOutWriterFile(w, func(w *JSONArrayWriter) error {
 			for result.Next() {
 				values := result.Record().Values()
-				// Let's hope this doesn't collide!
-				values["__table_name__"] = result.TableMetadata().String()
 				err := w.Write(values)
 				if err != nil {
 					return err
