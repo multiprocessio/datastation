@@ -213,7 +213,14 @@ func getConnectionString(dbInfo DatabaseConnectorInfoDatabase) (string, string, 
 			dsn += u.address
 		}
 
-		dsn += "/" + u.database + "?" + u.extraArgs
+		dsn += "/" + u.database
+		if len(u.extraArgs) > 0 {
+			if u.extraArgs[0] != '?' {
+				dsn += "?"
+			}
+
+			dsn += u.extraArgs
+		}
 		return "mysql", dsn, nil
 	case SQLServerDatabase:
 		dsn := fmt.Sprintf("%s://%s%s?database=%s%s",
@@ -231,11 +238,17 @@ func getConnectionString(dbInfo DatabaseConnectorInfoDatabase) (string, string, 
 		}
 		return "oracle", genericString, nil
 	case SnowflakeDatabase:
-		dsn := fmt.Sprintf("%s%s/%s?%s",
+		dsn := fmt.Sprintf("%s%s/%s",
 			genericUserPass,
 			u.address,
-			u.database,
-			u.extraArgs)
+			u.database)
+		if len(u.extraArgs) > 0 {
+			if u.extraArgs[0] != '?' {
+				dsn += "?"
+			}
+
+			dsn += u.extraArgs
+		}
 		return "snowflake", dsn, nil
 	case ClickHouseDatabase:
 		query := ""
