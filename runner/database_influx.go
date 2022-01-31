@@ -4,9 +4,9 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
 	"io"
 	"io/ioutil"
+	"net/url"
 
 	"github.com/influxdata/influxdb-client-go/v2"
 )
@@ -43,8 +43,10 @@ func evalInfluxQL(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, server
 	}
 
 	return withRemoteConnection(server, host, port, func(proxyHost, proxyPort string) error {
-		url := makeHTTPUrl(tls, proxyHost, proxyPort, "/query")
-		url += "?q=" + panel.Content + "&db=" + dbInfo.Database
+		params := url.Values{}
+		params.Add("q", panel.Content)
+		params.Add("db", dbInfo.Database)
+		u := makeHTTPUrl(tls, proxyHost, proxyPort, "/query?"+params.Encode())
 
 		var headers []HttpConnectorInfoHeader
 		if password != "" {
@@ -59,9 +61,8 @@ func evalInfluxQL(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, server
 			})
 		}
 
-		fmt.Println("PHIL URL", url)
 		rsp, err := makeHTTPRequest(httpRequest{
-			url:     url,
+			url:     u,
 			method:  "GET",
 			headers: headers,
 		})
