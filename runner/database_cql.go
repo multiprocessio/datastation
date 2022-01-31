@@ -41,6 +41,10 @@ func evalCQL(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, server *Ser
 				if !iter.MapScan(row) {
 					break
 				}
+				err := w.Write(row)
+				if err != nil {
+					return err
+				}
 			}
 
 			return iter.Close()

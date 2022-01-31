@@ -163,7 +163,7 @@ export const VENDOR_GROUPS: Array<{
   },
   {
     group: 'Metrics',
-    vendors: ['prometheus', 'influx', 'influx-flux'],
+    vendors: ['prometheus', 'influx'],
   },
 ];
 
