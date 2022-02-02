@@ -31,7 +31,8 @@ const USERDATA_FILES = [
   'ods',
 ];
 
-const testPath = path.join(CODE_ROOT, 'testdata/allformats');
+const testPathRoot = path.join(CODE_ROOT, 'testdata');
+const testPath = path.join(testPathRoot, 'allformats');
 const baseline = JSON.parse(
   fs.readFileSync(path.join(testPath, 'userdata.json').toString())
 );
@@ -121,7 +122,7 @@ for (const subprocessName of RUNNERS) {
 
   for (const t of REGEXP_TESTS) {
     const fp = new FilePanelInfo({
-      name: path.join(testPath, 'logs', t.filename),
+      name: path.join(testPathRoot, 'logs', t.filename),
       contentTypeInfo: t.contentTypeInfo,
     });
 
