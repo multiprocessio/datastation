@@ -462,4 +462,52 @@ for (const subprocess of RUNNERS) {
       }
     }, 15_000);
   });
+
+  describe('basic prometheus tests', () => {
+    test('basic test', async () => {
+      if (process.platform !== 'linux') {
+        return;
+      }
+
+      const connectors = [
+        new DatabaseConnectorInfo({
+          type: 'prometheus',
+          database: '',
+        }),
+      ];
+      const dp = new DatabasePanelInfo();
+      dp.database.connectorId = connectors[0].id;
+      dp.content = 'up';
+
+      let finished = false;
+      const panels = [dp];
+      await withSavedPanels(
+        panels,
+        async (project) => {
+          const panelValueBuffer = fs.readFileSync(
+            getProjectResultsFile(project.projectName) + dp.id
+          );
+
+          const v = JSON.parse(panelValueBuffer.toString());
+          expect(v.length).toBeGreaterThan(1);
+          expect(v[0]).toStrictEqual({
+            metric: {
+              __name__: 'up',
+              instance: 'localhost:9090',
+              job: 'prometheus',
+            },
+            time: v[0].time,
+            value: '1',
+          });
+
+          finished = true;
+        },
+        { evalPanels: true, connectors, subprocessName: subprocess }
+      );
+
+      if (!finished) {
+        throw new Error('Callback did not finish');
+      }
+    });
+  });
 }
