@@ -86,7 +86,7 @@ for (const subprocessName of RUNNERS) {
       test('correct result', () => {
         const hp = new HTTPPanelInfo(
           '',
-          new HTTPConnectorInfo('', 'http://localhost:9799/testdata/unknown')
+          new HTTPConnectorInfo('', 'http://localhost:9799/testdata/allformats/unknown')
         );
 
         const panels = [hp];
@@ -212,7 +212,7 @@ for (const subprocessName of RUNNERS) {
       test('correct result', () => {
         const hp = new HTTPPanelInfo(
           '',
-          new HTTPConnectorInfo('', 'http://localhost:9799/testdata/unknown', [
+          new HTTPConnectorInfo('', 'http://localhost:9799/testdata/allformats/unknown', [
             { name: 'X-Test', value: 'OK' },
           ])
         );
@@ -246,7 +246,7 @@ for (const subprocessName of RUNNERS) {
         });
         const hp = new HTTPPanelInfo(
           '',
-          new HTTPConnectorInfo('', 'http://localhost:9799/testdata/unknown')
+          new HTTPConnectorInfo('', 'http://localhost:9799/testdata/allformats/unknown')
         );
         hp.serverId = server.id;
 
