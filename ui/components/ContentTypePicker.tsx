@@ -45,9 +45,7 @@ export function ContentTypePicker({
             <option value="application/jsonlines">
               Newline-delimited JSON
             </option>
-            <option value="application/jsonconcat">
-              Concatenated JSON
-            </option>
+            <option value="application/jsonconcat">Concatenated JSON</option>
           </optgroup>
           <optgroup label="Logs">
             <option value="text/apache2access">
