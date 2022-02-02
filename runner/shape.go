@@ -244,7 +244,7 @@ func shapeMerge(a Shape, b Shape) Shape {
 
 	// Default/missing/non-scalar case shouldn't be possible
 	if b.Kind == a.Kind && b.Kind != ScalarKind {
-		Logln(`Missing type equality condition for %s merge.`, b.Kind)
+		Logln(`Missing type equality condition for %s merge: [%#v] and [%#v].`, b.Kind, a, b)
 	}
 
 	// Otherwise is a scalar or dissimilar kind so becomes varied
