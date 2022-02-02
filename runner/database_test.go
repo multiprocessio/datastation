@@ -71,7 +71,7 @@ func Test_getConnectionString(t *testing.T) {
 			"",
 		},
 		{
-			DatabaseConnectorInfoDatabase{Type: "snowflake", Username: "jim", Password: Encrypt{Encrypted: false, Value: ""}, Database: "test", Address: "myid"},
+			DatabaseConnectorInfoDatabase{Type: "snowflake", Username: "jim", Password: Encrypt{Encrypted: false, Value: ""}, Database: "test", Extra: map[string]string{"Account": "myid"}},
 			"snowflake",
 			"jim@myid/test",
 			nil,
@@ -80,13 +80,13 @@ func Test_getConnectionString(t *testing.T) {
 			"",
 		},
 		{
-			DatabaseConnectorInfoDatabase{Type: "snowflake", Username: "jim", Password: Encrypt{Encrypted: false, Value: "pw"}, Database: "test", Address: "myid?x=y"},
+			DatabaseConnectorInfoDatabase{Type: "snowflake", Username: "jim", Password: Encrypt{Encrypted: false, Value: "pw"}, Database: "test", Extra: map[string]string{"Account": "myid"}},
 			"snowflake",
-			"jim:pw@myid/test?x=y",
+			"jim:pw@myid/test",
 			nil,
 			"",
 			"",
-			"x=y",
+			"",
 		},
 		{
 			DatabaseConnectorInfoDatabase{Type: "sqlserver", Username: "jim", Password: Encrypt{Encrypted: false, Value: "pw"}, Database: "test", Address: "localhost"},
