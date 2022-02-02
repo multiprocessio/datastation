@@ -38,6 +38,9 @@ jobs:
     - run: yarn test --runInBand --detectOpenHandles --forceExit --verbose
       env:
         BIGQUERY_TOKEN: ${{ secrets.BIGQUERY_TOKEN }}
+        SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER }}
+        SNOWFLAKE_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}
+        SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
     - run: cd runner && go test -coverprofile ../coverage/gounit.cov
     - run: ./runner/scripts/test_coverage.sh
     # Test server builds

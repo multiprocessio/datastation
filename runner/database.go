@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net"
+	"net/url"
 	"os"
 	"path"
 	"strconv"
@@ -157,7 +158,7 @@ func getGenericConnectionString(dbInfo DatabaseConnectorInfoDatabase) (string, s
 
 		genericUserPass = u.username
 		if pass != "" {
-			genericUserPass += ":" + pass
+			genericUserPass += ":" + url.QueryEscape(pass)
 		}
 
 		genericUserPass += "@"
@@ -238,17 +239,9 @@ func getConnectionString(dbInfo DatabaseConnectorInfoDatabase) (string, string, 
 		}
 		return "oracle", genericString, nil
 	case SnowflakeDatabase:
-		dsn := fmt.Sprintf("%s%s/%s",
-			genericUserPass,
-			u.address,
-			u.database)
-		if len(u.extraArgs) > 0 {
-			if u.extraArgs[0] != '?' {
-				dsn += "?"
-			}
-
-			dsn += u.extraArgs
-		}
+		dbInfo.Address = dbInfo.Extra["account"]
+		genericString, _, _ = getGenericConnectionString(dbInfo)
+		dsn := genericString[len("snowflake://"):] // Snowflake library doesn't use this prefix
 		return "snowflake", dsn, nil
 	case ClickHouseDatabase:
 		query := ""

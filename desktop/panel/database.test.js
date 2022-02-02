@@ -510,4 +510,50 @@ for (const subprocess of RUNNERS) {
       }
     });
   });
+
+  describe('basic snowflake tests', () => {
+    test('basic test', async () => {
+      if (process.platform !== 'linux') {
+        return;
+      }
+
+      const connectors = [
+        new DatabaseConnectorInfo({
+          type: 'snowflake',
+          database: '',
+          username: process.env.SNOWFLAKE_USER,
+          password_encrypt: new Encrypt(process.env.SNOWFLAKE_PASSWORD),
+          extra: {
+            account: process.env.SNOWFLAKE_ACCOUNT,
+          },
+        }),
+      ];
+      console.log(connectors[0].database.extra);
+      const dp = new DatabasePanelInfo();
+      dp.database.connectorId = connectors[0].id;
+      dp.content =
+        'select count(*) from "SNOWFLAKE_SAMPLE_DATA".tpch_sf1.lineitem;';
+
+      let finished = false;
+      const panels = [dp];
+      await withSavedPanels(
+        panels,
+        async (project) => {
+          const panelValueBuffer = fs.readFileSync(
+            getProjectResultsFile(project.projectName) + dp.id
+          );
+
+          const v = JSON.parse(panelValueBuffer.toString());
+          expect(v).toStrictEqual([{ 'COUNT(*)': '6001215' }]);
+
+          finished = true;
+        },
+        { evalPanels: true, connectors, subprocessName: subprocess }
+      );
+
+      if (!finished) {
+        throw new Error('Callback did not finish');
+      }
+    });
+  });
 }
