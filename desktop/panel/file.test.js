@@ -27,10 +27,11 @@ const USERDATA_FILES = [
   'tsv',
   'parquet',
   'jsonl',
+  'cjson',
   'ods',
 ];
 
-const testPath = path.join(CODE_ROOT, 'testdata');
+const testPath = path.join(CODE_ROOT, 'testdata/allformats');
 const baseline = JSON.parse(
   fs.readFileSync(path.join(testPath, 'userdata.json').toString())
 );

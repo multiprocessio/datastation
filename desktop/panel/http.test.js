@@ -23,12 +23,12 @@ const {
 
 ensureSigningKey();
 
-const testPath = path.join(CODE_ROOT, 'testdata');
+const testPath = path.join(CODE_ROOT, 'testdata/allformats');
 const baseline = JSON.parse(
   fs.readFileSync(path.join(testPath, 'userdata.json').toString())
 );
 
-const USERDATA_FILES = ['json', 'xlsx', 'csv', 'parquet', 'jsonl'];
+const USERDATA_FILES = ['json', 'xlsx', 'csv', 'parquet', 'jsonl', 'cjson'];
 const PORT = '9799';
 
 let server;
