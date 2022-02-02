@@ -319,7 +319,7 @@ func transformOpenOfficeSheet(in *openoffice.ODSFile, out io.Writer) error {
 func transformOpenOfficeSheetFile(in string, out io.Writer) error {
 	f, err := openoffice.OpenODS(in)
 	if err != nil {
-		return err
+		return edse(err)
 	}
 
 	return transformOpenOfficeSheet(f, out)
@@ -339,11 +339,77 @@ func transformGeneric(in io.Reader, out io.Writer) error {
 func transformGenericFile(in string, out io.Writer) error {
 	r, err := os.Open(in)
 	if err != nil {
-		return err
+		return edse(err)
 	}
 	defer r.Close()
 
 	return transformGeneric(r, out)
+}
+
+func transformJSONConcat(in io.Reader, out io.Writer) error {
+	return withJSONOutWriter(out, "[", "]", func() error {
+		inString := false
+		var last byte = ' '
+		nFound := 0
+
+		objectStack := 0
+
+		for {
+			buf := make([]byte, 1024)
+			bytesRead, err := in.Read(buf)
+			if err == io.EOF {
+				return nil
+			}
+			if err != nil {
+				return edse(err)
+			}
+
+			for _, b := range buf[:bytesRead] {
+				if b == '"' && last != '\\' {
+					inString = !inString
+				}
+
+				if !inString {
+					if b == '{' {
+						if objectStack == 0 && nFound > 0 {
+							// Write a comma before the next { gets written
+							_, err = out.Write([]byte{','})
+							if err != nil {
+								return edsef("Could not write string: %s", err)
+							}
+						}
+
+						objectStack += 1
+					}
+
+					if b == '}' {
+						objectStack -= 1
+
+						if objectStack == 0 {
+							nFound += 1
+						}
+					}
+				}
+
+				_, err = out.Write([]byte{b})
+				if err != nil {
+					return edsef("Could not write string: %s", err)
+				}
+
+				last = b
+			}
+		}
+	})
+}
+
+func transformJSONConcatFile(in string, out io.Writer) error {
+	r, err := os.Open(in)
+	if err != nil {
+		return err
+	}
+	defer r.Close()
+
+	return transformJSONConcat(r, out)
 }
 
 func transformJSONLines(in io.Reader, out io.Writer) error {
@@ -428,6 +494,7 @@ const (
 	CSVMimeType                      = "text/csv"
 	JSONMimeType                     = "application/json"
 	JSONLinesMimeType                = "application/jsonlines"
+	JSONConcatMimeType               = "application/jsonconcat"
 	RegexpLinesMimeType              = "text/regexplines"
 	ExcelMimeType                    = "application/vnd.ms-excel"
 	ExcelOpenXMLMimeType             = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -453,6 +520,8 @@ func GetMimeType(fileName string, ct ContentTypeInfo) MimeType {
 		return JSONMimeType
 	case ".jsonl", ".ndjson":
 		return JSONLinesMimeType
+	case ".cjson":
+		return JSONConcatMimeType
 	case ".xls", ".xlsx":
 		return ExcelMimeType
 	case ".ods":
@@ -500,6 +569,8 @@ func TransformFile(fileName string, cti ContentTypeInfo, out io.Writer) error {
 		return transformXLSXFile(fileName, out)
 	case ParquetMimeType:
 		return transformParquetFile(fileName, out)
+	case JSONConcatMimeType:
+		return transformJSONConcatFile(fileName, out)
 	case RegexpLinesMimeType:
 		// There are probably weird cases this won't work but
 		// let's wait for a bug report to do more intelligent

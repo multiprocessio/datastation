@@ -377,6 +377,10 @@ func ShapeFromFile(file, id string, maxBytesToRead int, sampleSize int) (*Shape,
 		}
 
 		f = append(f, read...)
+		// It's possible this is buggy but maybe it doesn't
+		// matter if we're only ever reading this from
+		// disk. If it were over the network what if some
+		// bytes just weren't available but this weren't EOF?
 		if bytesRead < cap(buf) {
 			break
 		}
