@@ -106,7 +106,7 @@ docker run -d -p 8812:8812 questdb/questdb
 docker run -d -p 9200:9200 -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:7.16.3
 
 # Start up prometheus
-docker run -d -p 9090:9090 prom/prometheus
+docker run -d -p 9090:9090 -v $(pwd)/testdata/prometheus:/etc/prometheus prom/prometheus
 
 # Start up influx (2 for fluxql)
 docker run -d -p 8086:8086 -e "DOCKER_INFLUXDB_INIT_MODE=setup" -e "DOCKER_INFLUXDB_INIT_USERNAME=test" -e "DOCKER_INFLUXDB_INIT_PASSWORD=testtest" -e "DOCKER_INFLUXDB_INIT_ORG=test" -e "DOCKER_INFLUXDB_INIT_BUCKET=test" -e "DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=test" influxdb:2.0
