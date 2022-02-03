@@ -141,10 +141,10 @@ for (const subprocessName of RUNNERS) {
             panels,
             (project) => {
               const v = fs
-                  .readFileSync(
-                    getProjectResultsFile(project.projectName) + hp.id
-                  )
-                  .toString();
+                .readFileSync(
+                  getProjectResultsFile(project.projectName) + hp.id
+                )
+                .toString();
               // Grab result
               const value = JSON.parse(v);
 
