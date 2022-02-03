@@ -3,10 +3,10 @@ package runner
 import (
 	"encoding/json"
 	"fmt"
-	"time"
 	"io/ioutil"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -126,12 +126,11 @@ func Test_transformCSV_BENCHMARK(t *testing.T) {
 	if os.Getenv("BENCHMARK") != "true" {
 		return
 	}
-	
+
 	// curl -LO https://s3.amazonaws.com/nyc-tlc/trip+data/yellow_tripdata_2021-04.csv
 	outTmp, err := ioutil.TempFile("", "")
 	defer os.Remove(outTmp.Name())
 	assert.Nil(t, err)
-
 
 	start := time.Now()
 	err = transformCSVFile("yellow_tripdata_2021-04.csv", outTmp, ',')

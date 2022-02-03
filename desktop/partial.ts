@@ -95,7 +95,13 @@ export function parsePartialJSONFile(
       }
     }
 
-    const value = JSON.parse(f);
+    let value: any;
+    try {
+      value = JSON.parse(f);
+    } catch (e) {
+      fs.writeFileSync('/tmp/phil2', f);
+      throw e;
+      }
 
     let arrayCount = null;
     if (Array.isArray(value)) {

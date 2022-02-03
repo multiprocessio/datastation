@@ -2,8 +2,9 @@ package runner
 
 import (
 	"bufio"
-	"encoding/json"
 	"encoding/csv"
+	"encoding/json"
+	"strconv"
 	"io"
 	"io/ioutil"
 	"os"
@@ -24,11 +25,11 @@ import (
 var preferredParallelism = runtime.NumCPU() * 2
 
 type JSONArrayWriter struct {
-	w     io.Writer
-	first bool
-	columns []string
+	w              io.Writer
+	first          bool
+	columns        []string
 	columnsEscaped [][]byte
-	isMap bool
+	isMap          bool
 }
 
 func newJSONArrayWriter(w io.Writer) *JSONArrayWriter {
@@ -36,10 +37,10 @@ func newJSONArrayWriter(w io.Writer) *JSONArrayWriter {
 }
 
 var (
-	comma = []byte(",")
+	comma   = []byte(",")
 	commaNl = []byte(",\n")
-	open = []byte("{")
-	close = []byte("}")
+	open    = []byte("{")
+	close   = []byte("}")
 )
 
 func (j *JSONArrayWriter) Write(row interface{}) error {
@@ -55,11 +56,16 @@ func (j *JSONArrayWriter) Write(row interface{}) error {
 		if j.isMap {
 			for k := range r {
 				j.columns = append(j.columns, k)
-				j.columnsEscaped = append(j.columnsEscaped, []byte(`"` + strings.ReplaceAll(k, `"`, `\"`) + `":`))
+				j.columnsEscaped = append(j.columnsEscaped, []byte(strconv.QuoteToASCII(k) +`:`))
 			}
 		}
 	}
 
+	// The Go JSON encoder spends a lot of time just ordering keys
+	// so it's actually a lot faster to define the keys and order
+	// once and then generate JSON objects from that column order
+	// when the row to write is a map.  So far the only case where
+	// the row is not necessarily a map is parquet.
 	if j.isMap {
 		r := row.(map[string]interface{})
 		j.w.Write(open)
@@ -122,7 +128,7 @@ func withJSONOutWriter(w io.Writer, first, last string, cb func() error) error {
 
 func withJSONArrayOutWriter(w io.Writer, cb func(w *JSONArrayWriter) error) error {
 	return withJSONOutWriter(w, "[", "]", func() error {
-		bw := bufio.NewWriterSize(w, 10 * 1024)
+		bw := bufio.NewWriterSize(w, 10*1024)
 		defer bw.Flush()
 		return cb(newJSONArrayWriter(bw))
 	})
