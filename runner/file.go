@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"encoding/csv"
 	"encoding/json"
-	"strconv"
 	"io"
 	"io/ioutil"
 	"os"
@@ -12,6 +11,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"runtime"
+	"strconv"
 	"strings"
 
 	"github.com/multiprocessio/go-openoffice"
@@ -37,10 +37,10 @@ func newJSONArrayWriter(w io.Writer) *JSONArrayWriter {
 }
 
 var (
-	COMMA   = []byte(",")
+	COMMA    = []byte(",")
 	COMMA_NL = []byte(",\n")
-	OPEN    = []byte("{")
-	CLOSE   = []byte("}")
+	OPEN     = []byte("{")
+	CLOSE    = []byte("}")
 )
 
 func (j *JSONArrayWriter) Write(row interface{}) error {
@@ -56,7 +56,7 @@ func (j *JSONArrayWriter) Write(row interface{}) error {
 		if j.isMap {
 			for k := range r {
 				j.columns = append(j.columns, k)
-				j.columnsEscaped = append(j.columnsEscaped, []byte(strconv.QuoteToASCII(k) +`:`))
+				j.columnsEscaped = append(j.columnsEscaped, []byte(strconv.QuoteToASCII(k)+`:`))
 			}
 		}
 	}

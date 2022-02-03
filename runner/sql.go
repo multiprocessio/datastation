@@ -282,7 +282,7 @@ func chunk(c chan map[string]interface{}, size int) chan []map[string]interface{
 	outer:
 		for {
 			select {
-			case next, ok := <- c:
+			case next, ok := <-c:
 				if !ok {
 					break outer
 				}

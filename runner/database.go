@@ -420,7 +420,7 @@ func EvalDatabasePanel(
 	project *ProjectState,
 	pageIndex int,
 	panel *PanelInfo,
-	panelResultLoader func (projectId, panelId string) (chan map[string]interface{}, error),
+	panelResultLoader func(projectId, panelId string) (chan map[string]interface{}, error),
 ) error {
 	var connector *ConnectorInfo
 	for _, c := range project.Connectors {
