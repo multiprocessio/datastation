@@ -198,9 +198,9 @@ for (const subprocessName of RUNNERS) {
     {
       file: path.join('testdata', 'csv', 'missing_columns.csv'),
       expected: [
-        {a: '3', b: '4'},
-        {a: '1', b: '2'},
-        {a: '5', b: '6'},
+        { a: '3', b: '4' },
+        { a: '1', b: '2' },
+        { a: '5', b: '6' },
       ],
       name: 'missing columns in csv',
     },
