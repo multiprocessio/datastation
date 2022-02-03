@@ -57,10 +57,13 @@ func (j *JSONArrayWriter) Write(row interface{}) error {
 		if j.isMap {
 			for k := range r {
 				j.columns = append(j.columns, k)
-				j.columnsEscaped = append(j.columnsEscaped, []byte(strconv.QuoteToASCII(k)+`:`))
 			}
 
 			sort.Strings(j.columns)
+
+			for _, col := range j.columns {
+				j.columnsEscaped = append(j.columnsEscaped, []byte(strconv.QuoteToASCII(col)+`:`))
+			}
 		}
 	}
 
