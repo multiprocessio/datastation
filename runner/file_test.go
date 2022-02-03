@@ -41,3 +41,81 @@ func Test_transformJSONLines(t *testing.T) {
 		},
 	}, m)
 }
+
+func Test_transformJSONConcat(t *testing.T) {
+	tests := []struct {
+		in  string
+		out interface{}
+	}{
+		{
+			in: `{"a": 1}{"a": 2}`,
+			out: []map[string]interface{}{
+				{"a": float64(1)},
+				{"a": float64(2)},
+			},
+		},
+		{
+			in: `{"a {}": 1}{"a {}": 2}`,
+			out: []map[string]interface{}{
+				{"a {}": float64(1)},
+				{"a {}": float64(2)},
+			},
+		},
+		{
+			in: `{"a {": "}"}{"a {": "{"}`,
+			out: []map[string]interface{}{
+				{"a {": "}"},
+				{"a {": "{"},
+			},
+		},
+		{
+			in: `{"a {": "\"}}"}{"a {": "{\"{"}`,
+			out: []map[string]interface{}{
+				{"a {": `"}}`},
+				{"a {": `{"{`},
+			},
+		},
+		{
+			in: `{"a": 1}
+
+
+
+
+{"a": 2}`,
+			out: []map[string]interface{}{
+				{"a": float64(1)},
+				{"a": float64(2)},
+			},
+		},
+		{
+			in: `{"a": 1, "b": { "c": [1, {"d": 2}] }}{"a": 1, "b": { "c": [1, {"d": 2}] }}`,
+			out: []map[string]interface{}{
+				{"a": float64(1), "b": map[string]interface{}{"c": []interface{}{float64(1), map[string]interface{}{"d": float64(2)}}}},
+				{"a": float64(1), "b": map[string]interface{}{"c": []interface{}{float64(1), map[string]interface{}{"d": float64(2)}}}},
+			},
+		},
+	}
+
+	for _, test := range tests {
+		inTmp, err := ioutil.TempFile("", "")
+		defer os.Remove(inTmp.Name())
+		assert.Nil(t, err)
+
+		inTmp.WriteString(test.in)
+
+		outTmp, err := ioutil.TempFile("", "")
+		defer os.Remove(outTmp.Name())
+		assert.Nil(t, err)
+
+		err = transformJSONConcatFile(inTmp.Name(), outTmp)
+		assert.Nil(t, err)
+
+		var m []map[string]interface{}
+		outTmpBs, err := ioutil.ReadFile(outTmp.Name())
+		assert.Nil(t, err)
+		err = json.Unmarshal(outTmpBs, &m)
+		assert.Nil(t, err)
+
+		assert.Equal(t, test.out, m)
+	}
+}

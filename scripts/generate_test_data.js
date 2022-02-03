@@ -25,7 +25,7 @@ for (let i = 0; i < 1000; i++) {
 }
 console.log(`Generated ${data.length} test data rows`);
 
-const directory = 'testdata/';
+const directory = 'testdata/allformats/';
 
 async function write() {
   // Write as CSV
@@ -55,6 +55,14 @@ async function write() {
     data.map((row) => JSON.stringify(row).replace(/\n/g, '')).join('\n')
   );
   console.log(`Wrote ${jsonlinesnames}`);
+
+  // Write as JSON concat
+  const jsonconcatnames = directory + 'userdata.cjson';
+  fs.writeFileSync(
+    jsonconcatnames,
+    data.map((row) => JSON.stringify(row)).join('')
+  );
+  console.log(`Wrote ${jsonconcatnames}`);
 
   // Write as .ods file
   const ws = XLSX.utils.json_to_sheet(data);

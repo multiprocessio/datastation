@@ -209,6 +209,8 @@ func TransformReader(r io.Reader, fileName string, cti ContentTypeInfo, out io.W
 		return transformRegexp(r, out, regexp.MustCompile(goRegexp))
 	case JSONLinesMimeType:
 		return transformJSONLines(r, out)
+	case JSONConcatMimeType:
+		return transformJSONConcat(r, out)
 	case OpenOfficeSheetMimeType:
 		buf := bytes.NewBuffer(nil)
 		size, err := io.Copy(buf, r)
