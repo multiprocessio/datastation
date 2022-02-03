@@ -184,9 +184,8 @@ func Test_sqlIngest_BENCHMARK(t *testing.T) {
 		},
 	}
 
-	connector, tmp, err := MakeTmpSQLiteConnector()
+	connector, err := MakeTmpSQLiteConnector()
 	assert.Nil(t, err)
-	defer os.Remove(tmp.Name())
 	project.Connectors = append(project.Connectors, *connector)
 
 	// curl -LO https://s3.amazonaws.com/nyc-tlc/trip+data/yellow_tripdata_2021-04.csv
