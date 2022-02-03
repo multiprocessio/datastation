@@ -271,19 +271,36 @@ func defaultMangleInsert(stmt string) string {
 	return stmt
 }
 
-func chunk(a []map[string]interface{}, size int) [][]map[string]interface{} {
-	var chunks [][]map[string]interface{}
-	for i := 0; i < len(a); i += size {
-		end := i + size
+func chunk(c chan map[string]interface{}, size int) chan []map[string]interface{} {
+	var chunk []map[string]interface{}
 
-		if end > len(a) {
-			end = len(a)
+	out := make(chan []map[string]interface{}, 1)
+
+	go func() {
+		defer close(out)
+
+	outer:
+		for {
+			select {
+			case next, ok := <-c:
+				if !ok {
+					break outer
+				}
+				chunk = append(chunk, next)
+			}
+
+			if len(chunk) == size {
+				out <- chunk
+				chunk = nil
+			}
 		}
 
-		chunks = append(chunks, a[i:end])
-	}
+		if len(chunk) > 0 {
+			out <- chunk
+		}
+	}()
 
-	return chunks
+	return out
 }
 
 func importAndRun(
@@ -296,7 +313,7 @@ func importAndRun(
 	qt quoteType,
 	// Postgres uses $1, mysql/sqlite use ?
 	mangleInsert func(string) string,
-	panelResultLoader func(string, string, interface{}) error,
+	panelResultLoader func(string, string) (chan map[string]interface{}, error),
 ) ([]map[string]interface{}, error) {
 	rowsIngested := 0
 	for _, panel := range panelsToImport {
@@ -314,16 +331,12 @@ func importAndRun(
 			return nil, err
 		}
 
-		// This is bad design, it loads the entire thing into
-		// memory and then chunks it up to be loaded into the
-		// database.
-		var res []map[string]interface{}
-		err = panelResultLoader(projectId, panel.id, &res)
+		c, err := panelResultLoader(projectId, panel.id)
 		if err != nil {
 			return nil, err
 		}
 
-		for _, resChunk := range chunk(res, 1000) {
+		for resChunk := range chunk(c, 10) {
 			query, values := formatImportQueryAndRows(
 				panel.tableName,
 				panel.columns,

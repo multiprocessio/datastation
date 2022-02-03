@@ -11,9 +11,11 @@ import (
 	"path/filepath"
 	"regexp"
 	"runtime"
+	"strconv"
 	"strings"
 
 	"github.com/multiprocessio/go-openoffice"
+
 	"github.com/xitongsys/parquet-go-source/local"
 	"github.com/xitongsys/parquet-go/reader"
 	"github.com/xitongsys/parquet-go/source"
@@ -23,21 +25,82 @@ import (
 var preferredParallelism = runtime.NumCPU() * 2
 
 type JSONArrayWriter struct {
-	w     io.Writer
-	first bool
+	w              io.Writer
+	first          bool
+	columns        []string
+	columnsEscaped [][]byte
+	isMap          bool
 }
+
+func newJSONArrayWriter(w io.Writer) *JSONArrayWriter {
+	return &JSONArrayWriter{w, true, nil, nil, false}
+}
+
+var (
+	COMMA    = []byte(",")
+	COMMA_NL = []byte(",\n")
+	OPEN     = []byte("{")
+	CLOSE    = []byte("}")
+)
 
 func (j *JSONArrayWriter) Write(row interface{}) error {
 	if !j.first {
-		_, err := j.w.Write([]byte(",\n"))
+		_, err := j.w.Write(COMMA_NL)
 		if err != nil {
 			return edsef("Failed to write JSON delimiter: %s", err)
 		}
+	} else {
+		var r map[string]interface{}
+		r, j.isMap = row.(map[string]interface{})
+
+		if j.isMap {
+			for k := range r {
+				j.columns = append(j.columns, k)
+				j.columnsEscaped = append(j.columnsEscaped, []byte(strconv.QuoteToASCII(k)+`:`))
+			}
+		}
 	}
-	encoder := json.NewEncoder(j.w)
-	err := encoder.Encode(row)
-	if err != nil {
-		return edsef("Failed to encode JSON: %s", err)
+
+	// The Go JSON encoder spends a lot of time just ordering keys
+	// so it's actually a lot faster to define the keys and order
+	// once and then generate JSON objects from that column order
+	// when the row to write is a map.  So far the only case where
+	// the row is not necessarily a map is parquet.
+	if j.isMap {
+		r := row.(map[string]interface{})
+		j.w.Write(OPEN)
+		for i, col := range j.columns {
+			cellBytes, err := json.Marshal(r[col])
+			if err != nil {
+				return edse(err)
+			}
+
+			var prefix []byte
+			if i > 0 {
+				prefix = COMMA
+			}
+			_, err = j.w.Write(prefix)
+			if err != nil {
+				return edse(err)
+			}
+
+			_, err = j.w.Write(j.columnsEscaped[i])
+			if err != nil {
+				return edse(err)
+			}
+
+			_, err = j.w.Write(cellBytes)
+			if err != nil {
+				return edse(err)
+			}
+		}
+		j.w.Write(CLOSE)
+	} else {
+		encoder := json.NewEncoder(j.w)
+		err := encoder.Encode(row)
+		if err != nil {
+			return edsef("Failed to encode JSON: %s", err)
+		}
 	}
 
 	j.first = false
@@ -65,7 +128,9 @@ func withJSONOutWriter(w io.Writer, first, last string, cb func() error) error {
 
 func withJSONArrayOutWriter(w io.Writer, cb func(w *JSONArrayWriter) error) error {
 	return withJSONOutWriter(w, "[", "]", func() error {
-		return cb(&JSONArrayWriter{w, true})
+		bw := bufio.NewWriterSize(w, 10*1024)
+		defer bw.Flush()
+		return cb(newJSONArrayWriter(bw))
 	})
 }
 
@@ -88,6 +153,8 @@ func transformCSV(in io.Reader, out io.Writer, delimiter rune) error {
 	return withJSONArrayOutWriterFile(out, func(w *JSONArrayWriter) error {
 		isHeader := true
 		var fields []string
+		row := map[string]interface{}{}
+
 		for {
 			record, err := r.Read()
 			if err == io.EOF {
@@ -107,7 +174,6 @@ func transformCSV(in io.Reader, out io.Writer, delimiter rune) error {
 				continue
 			}
 
-			row := map[string]string{}
 			for i, field := range fields {
 				row[field] = record[i]
 			}
@@ -202,6 +268,7 @@ func writeSheet(rows [][]string, w *JSONArrayWriter) error {
 	var header []string
 	isHeader := true
 
+	row := map[string]interface{}{}
 	for _, r := range rows {
 		if isHeader {
 			header = r
@@ -209,7 +276,6 @@ func writeSheet(rows [][]string, w *JSONArrayWriter) error {
 			continue
 		}
 
-		row := map[string]string{}
 		for i, cell := range r {
 			row[header[i]] = cell
 		}
@@ -457,8 +523,8 @@ var BUILTIN_REGEX = map[MimeType]*regexp.Regexp{
 func transformRegexp(in io.Reader, out io.Writer, re *regexp.Regexp) error {
 	scanner := bufio.NewScanner(in)
 	return withJSONArrayOutWriterFile(out, func(w *JSONArrayWriter) error {
+		row := map[string]interface{}{}
 		for scanner.Scan() {
-			row := map[string]interface{}{}
 			match := re.FindStringSubmatch(scanner.Text())
 			for i, name := range re.SubexpNames() {
 				if name != "" {

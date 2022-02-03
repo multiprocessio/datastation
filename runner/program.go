@@ -44,32 +44,26 @@ func getIdMapJson(page ProjectPage) string {
 	return string(bts)
 }
 
-func MakeTmpSQLiteConnector() (*ConnectorInfo, *os.File, error) {
-	tmp, err := os.CreateTemp("", "sql-program-panel-")
-	if err != nil {
-		return nil, nil, err
-	}
-
+func MakeTmpSQLiteConnector() (*ConnectorInfo, error) {
 	connector := &ConnectorInfo{
 		Type: DatabaseConnector,
 		Id:   uuid.New().String(),
 		DatabaseConnectorInfo: &DatabaseConnectorInfo{
 			Database: DatabaseConnectorInfoDatabase{
 				Type:     SQLiteDatabase,
-				Database: tmp.Name(),
+				Database: ":memory:",
 			},
 		},
 	}
 
-	return connector, tmp, nil
+	return connector, nil
 }
 
 func evalProgramSQLPanel(project *ProjectState, pageIndex int, panel *PanelInfo) error {
-	connector, tmp, err := MakeTmpSQLiteConnector()
+	connector, err := MakeTmpSQLiteConnector()
 	if err != nil {
 		return err
 	}
-	defer os.Remove(tmp.Name())
 	project.Connectors = append(project.Connectors, *connector)
 
 	return EvalDatabasePanel(project, pageIndex, &PanelInfo{

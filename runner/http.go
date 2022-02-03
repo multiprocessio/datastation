@@ -128,7 +128,7 @@ func makeHTTPRequest(hr httpRequest) (*http.Response, error) {
 		req.Header.Set(header.Name, header.Value)
 	}
 
-	c := http.Client{Timeout: time.Second * 5}
+	c := http.Client{Timeout: time.Second * 15}
 	return c.Do(req)
 }
 
