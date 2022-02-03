@@ -2,6 +2,7 @@ package runner
 
 import (
 	"encoding/json"
+	"io"
 	"math/rand"
 	"os"
 	"reflect"
@@ -335,10 +336,7 @@ func ShapeFromFile(file, id string, maxBytesToRead int, sampleSize int) (*Shape,
 
 	for !done {
 		buf := make([]byte, 1024)
-		bytesRead, err := fd.Read(buf)
-		if err != nil {
-			return nil, edse(err)
-		}
+		bytesRead, readErr := fd.Read(buf)
 
 		read := buf[:bytesRead]
 	outer:
@@ -377,12 +375,12 @@ func ShapeFromFile(file, id string, maxBytesToRead int, sampleSize int) (*Shape,
 		}
 
 		f = append(f, read...)
-		// It's possible this is buggy but maybe it doesn't
-		// matter if we're only ever reading this from
-		// disk. If it were over the network what if some
-		// bytes just weren't available but this weren't EOF?
-		if bytesRead < cap(buf) {
+
+		if readErr == io.EOF {
 			break
+		}
+		if readErr != nil {
+			return nil, edse(readErr)
 		}
 	}
 

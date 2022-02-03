@@ -356,13 +356,7 @@ func transformJSONConcat(in io.Reader, out io.Writer) error {
 
 		for {
 			buf := make([]byte, 1024)
-			bytesRead, err := in.Read(buf)
-			if err == io.EOF {
-				return nil
-			}
-			if err != nil {
-				return edse(err)
-			}
+			bytesRead, readErr := in.Read(buf)
 
 			for _, b := range buf[:bytesRead] {
 				if b == '"' && last != '\\' {
@@ -373,7 +367,7 @@ func transformJSONConcat(in io.Reader, out io.Writer) error {
 					if b == '{' {
 						if objectStack == 0 && nFound > 0 {
 							// Write a comma before the next { gets written
-							_, err = out.Write([]byte{','})
+							_, err := out.Write([]byte{','})
 							if err != nil {
 								return edsef("Could not write string: %s", err)
 							}
@@ -391,12 +385,19 @@ func transformJSONConcat(in io.Reader, out io.Writer) error {
 					}
 				}
 
-				_, err = out.Write([]byte{b})
+				_, err := out.Write([]byte{b})
 				if err != nil {
 					return edsef("Could not write string: %s", err)
 				}
 
 				last = b
+			}
+
+			if readErr == io.EOF {
+				return nil
+			}
+			if readErr != nil {
+				return edse(readErr)
 			}
 		}
 	})

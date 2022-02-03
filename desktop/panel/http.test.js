@@ -140,14 +140,13 @@ for (const subprocessName of RUNNERS) {
           return withSavedPanels(
             panels,
             (project) => {
-              // Grab result
-              const value = JSON.parse(
-                fs
+              const v = fs
                   .readFileSync(
                     getProjectResultsFile(project.projectName) + hp.id
                   )
-                  .toString()
-              );
+                  .toString();
+              // Grab result
+              const value = JSON.parse(v);
 
               const typeBaseline = translateBaselineForType(
                 baseline,
