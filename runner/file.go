@@ -2,8 +2,8 @@ package runner
 
 import (
 	"bufio"
-	"encoding/csv"
 	"encoding/json"
+	"encoding/csv"
 	"io"
 	"io/ioutil"
 	"os"
@@ -14,6 +14,7 @@ import (
 	"strings"
 
 	"github.com/multiprocessio/go-openoffice"
+
 	"github.com/xitongsys/parquet-go-source/local"
 	"github.com/xitongsys/parquet-go/reader"
 	"github.com/xitongsys/parquet-go/source"
@@ -25,19 +26,75 @@ var preferredParallelism = runtime.NumCPU() * 2
 type JSONArrayWriter struct {
 	w     io.Writer
 	first bool
+	columns []string
+	columnsEscaped [][]byte
+	isMap bool
 }
+
+func newJSONArrayWriter(w io.Writer) *JSONArrayWriter {
+	return &JSONArrayWriter{w, true, nil, nil, false}
+}
+
+var (
+	comma = []byte(",")
+	commaNl = []byte(",\n")
+	open = []byte("{")
+	close = []byte("}")
+)
 
 func (j *JSONArrayWriter) Write(row interface{}) error {
 	if !j.first {
-		_, err := j.w.Write([]byte(",\n"))
+		_, err := j.w.Write(commaNl)
 		if err != nil {
 			return edsef("Failed to write JSON delimiter: %s", err)
 		}
+	} else {
+		var r map[string]interface{}
+		r, j.isMap = row.(map[string]interface{})
+
+		if j.isMap {
+			for k := range r {
+				j.columns = append(j.columns, k)
+				j.columnsEscaped = append(j.columnsEscaped, []byte(`"` + strings.ReplaceAll(k, `"`, `\"`) + `":`))
+			}
+		}
 	}
-	encoder := json.NewEncoder(j.w)
-	err := encoder.Encode(row)
-	if err != nil {
-		return edsef("Failed to encode JSON: %s", err)
+
+	if j.isMap {
+		r := row.(map[string]interface{})
+		j.w.Write(open)
+		for i, col := range j.columns {
+			cellBytes, err := json.Marshal(r[col])
+			if err != nil {
+				return edse(err)
+			}
+
+			var prefix []byte
+			if i > 0 {
+				prefix = comma
+			}
+			_, err = j.w.Write(prefix)
+			if err != nil {
+				return edse(err)
+			}
+
+			_, err = j.w.Write(j.columnsEscaped[i])
+			if err != nil {
+				return edse(err)
+			}
+
+			_, err = j.w.Write(cellBytes)
+			if err != nil {
+				return edse(err)
+			}
+		}
+		j.w.Write(close)
+	} else {
+		encoder := json.NewEncoder(j.w)
+		err := encoder.Encode(row)
+		if err != nil {
+			return edsef("Failed to encode JSON: %s", err)
+		}
 	}
 
 	j.first = false
@@ -67,7 +124,7 @@ func withJSONArrayOutWriter(w io.Writer, cb func(w *JSONArrayWriter) error) erro
 	return withJSONOutWriter(w, "[", "]", func() error {
 		bw := bufio.NewWriterSize(w, 10 * 1024)
 		defer bw.Flush()
-		return cb(&JSONArrayWriter{bw, true})
+		return cb(newJSONArrayWriter(bw))
 	})
 }
 
@@ -90,7 +147,7 @@ func transformCSV(in io.Reader, out io.Writer, delimiter rune) error {
 	return withJSONArrayOutWriterFile(out, func(w *JSONArrayWriter) error {
 		isHeader := true
 		var fields []string
-		row := map[string]string{}
+		row := map[string]interface{}{}
 
 		for {
 			record, err := r.Read()
@@ -205,7 +262,7 @@ func writeSheet(rows [][]string, w *JSONArrayWriter) error {
 	var header []string
 	isHeader := true
 
-	row := map[string]string{}
+	row := map[string]interface{}{}
 	for _, r := range rows {
 		if isHeader {
 			header = r
