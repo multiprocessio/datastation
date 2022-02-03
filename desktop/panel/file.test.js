@@ -191,4 +191,45 @@ for (const subprocessName of RUNNERS) {
       }
     );
   }
+
+  const regressions = [
+    {
+      file: path.join('testdata', 'csv', 'missing_columns.csv'),
+      expected: [
+        {a: '3', b: '4'},
+        {a: '1', b: '2'},
+        {a: '5', b: '6'},
+      ],
+      name: 'missing columns in csv',
+    },
+  ];
+
+  for (const regression of regressions) {
+    describe('regression: ' + regression.name, () => {
+      test('correctness', () => {
+        const fp = new FilePanelInfo({
+          name: regression.file,
+        });
+
+        const panels = [fp];
+
+        return withSavedPanels(
+          panels,
+          (project) => {
+            // Grab result
+            const value = JSON.parse(
+              fs
+                .readFileSync(
+                  getProjectResultsFile(project.projectName) + fp.id
+                )
+                .toString()
+            );
+
+            expect(value).toStrictEqual(regression.expected);
+          },
+          { evalPanels: true, subprocessName }
+        );
+      });
+    });
+  }
 }

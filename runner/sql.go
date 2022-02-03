@@ -323,7 +323,7 @@ func importAndRun(
 			return nil, err
 		}
 
-		for _, resChunk := range chunk(res, 10_000) {
+		for _, resChunk := range chunk(res, 1000) {
 			query, values := formatImportQueryAndRows(
 				panel.tableName,
 				panel.columns,
