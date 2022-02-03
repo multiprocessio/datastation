@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"runtime"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -58,6 +59,8 @@ func (j *JSONArrayWriter) Write(row interface{}) error {
 				j.columns = append(j.columns, k)
 				j.columnsEscaped = append(j.columnsEscaped, []byte(strconv.QuoteToASCII(k)+`:`))
 			}
+
+			sort.Strings(j.columns)
 		}
 	}
 
