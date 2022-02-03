@@ -37,15 +37,15 @@ func newJSONArrayWriter(w io.Writer) *JSONArrayWriter {
 }
 
 var (
-	comma   = []byte(",")
-	commaNl = []byte(",\n")
-	open    = []byte("{")
-	close   = []byte("}")
+	COMMA   = []byte(",")
+	COMMA_NL = []byte(",\n")
+	OPEN    = []byte("{")
+	CLOSE   = []byte("}")
 )
 
 func (j *JSONArrayWriter) Write(row interface{}) error {
 	if !j.first {
-		_, err := j.w.Write(commaNl)
+		_, err := j.w.Write(COMMA_NL)
 		if err != nil {
 			return edsef("Failed to write JSON delimiter: %s", err)
 		}
@@ -68,7 +68,7 @@ func (j *JSONArrayWriter) Write(row interface{}) error {
 	// the row is not necessarily a map is parquet.
 	if j.isMap {
 		r := row.(map[string]interface{})
-		j.w.Write(open)
+		j.w.Write(OPEN)
 		for i, col := range j.columns {
 			cellBytes, err := json.Marshal(r[col])
 			if err != nil {
@@ -77,7 +77,7 @@ func (j *JSONArrayWriter) Write(row interface{}) error {
 
 			var prefix []byte
 			if i > 0 {
-				prefix = comma
+				prefix = COMMA
 			}
 			_, err = j.w.Write(prefix)
 			if err != nil {
@@ -94,7 +94,7 @@ func (j *JSONArrayWriter) Write(row interface{}) error {
 				return edse(err)
 			}
 		}
-		j.w.Write(close)
+		j.w.Write(CLOSE)
 	} else {
 		encoder := json.NewEncoder(j.w)
 		err := encoder.Encode(row)

@@ -2,6 +2,7 @@ package runner
 
 import (
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -345,11 +346,81 @@ func writeRowFromDatabase(dbInfo DatabaseConnectorInfoDatabase, w *JSONArrayWrit
 	return nil
 }
 
+func loadJSONArrayPanel(projectId, panelId string) (chan map[string]interface{}, error) {
+	f := GetPanelResultsFile(projectId, panelId)
+	return loadJSONArrayFile(f)
+}
+
+func loadJSONArrayFile(f string) (chan map[string]interface{}, error) {
+	fd, err := os.Open(f)
+	if err != nil {
+		return nil, err
+	}
+
+	bs := make([]byte, 1)
+	for {
+		_, err := fd.Read(bs)
+		if err != nil {
+			return nil, err
+		}
+
+		if bs[0] == '[' {
+			break
+		}
+	}
+
+	out := make(chan map[string]interface{}, 1)
+	go func() {
+		defer close(out)
+
+		var r io.Reader = fd
+
+		// Stream all JSON objects
+		for {
+			// Needs to be recreated each time because of buffered data
+			dec := json.NewDecoder(r)
+
+			var obj map[string]interface{}
+			err := dec.Decode(&obj)
+			if err == io.EOF {
+				return
+			}
+			if err != nil {
+				panic(err)
+			}
+
+			out <- obj
+
+			// Copy all buffered bytes back into a new buffer
+			r = io.MultiReader(dec.Buffered(), r)
+
+			// Read comma and array end marker
+			for {
+				_, err := r.Read(bs)
+				if err != nil {
+					panic(err)
+				}
+
+				if bs[0] == ',' {
+					break
+				}
+
+				// Done processing
+				if bs[0] == ']' {
+					return
+				}
+			}
+		}
+	}()
+
+	return out, nil
+}
+
 func EvalDatabasePanel(
 	project *ProjectState,
 	pageIndex int,
 	panel *PanelInfo,
-	panelResultLoader func(string, string, interface{}) error,
+	panelResultLoader func (projectId, panelId string) (chan map[string]interface{}, error),
 ) error {
 	var connector *ConnectorInfo
 	for _, c := range project.Connectors {
@@ -372,10 +443,7 @@ func EvalDatabasePanel(
 	}
 
 	if panelResultLoader == nil {
-		panelResultLoader = func(projectId, panelId string, res interface{}) error {
-			f := GetPanelResultsFile(projectId, panelId)
-			return readJSONFileInto(f, res)
-		}
+		panelResultLoader = loadJSONArrayPanel
 	}
 
 	serverId := panel.ServerId
