@@ -82,6 +82,8 @@ func withJSONArrayOutWriterFile(out io.Writer, cb func(w *JSONArrayWriter) error
 func transformCSV(in io.Reader, out io.Writer, delimiter rune) error {
 	r := csv.NewReader(in)
 	r.Comma = delimiter
+	r.ReuseRecord = true
+	r.FieldsPerRecord = -1
 
 	return withJSONArrayOutWriterFile(out, func(w *JSONArrayWriter) error {
 		isHeader := true
