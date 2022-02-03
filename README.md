@@ -57,8 +57,6 @@ In desktop mode and server mode:
 	* Logs (Apache, Nginx)
   * HTTP servers
 
-## 
-
 ## CLI
 
 [dsq](https://github.com/multiprocessio/dsq) is a CLI that uses
