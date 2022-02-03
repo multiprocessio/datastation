@@ -42,7 +42,7 @@ export function parsePartialJSONFile(
       const bytesRead = fs.readSync(fd, b);
 
       // To be able to iterate over code points
-      let bs = Array.from(b.toString());
+      let bs = Array.from(b.slice(0, bytesRead).toString());
       outer: for (let i = 0; i < bs.length; i++) {
         const c = bs[i];
         if (c !== '"' && inString) {

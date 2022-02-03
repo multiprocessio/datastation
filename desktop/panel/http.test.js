@@ -23,12 +23,12 @@ const {
 
 ensureSigningKey();
 
-const testPath = path.join(CODE_ROOT, 'testdata');
+const testPath = path.join(CODE_ROOT, 'testdata/allformats');
 const baseline = JSON.parse(
   fs.readFileSync(path.join(testPath, 'userdata.json').toString())
 );
 
-const USERDATA_FILES = ['json', 'xlsx', 'csv', 'parquet', 'jsonl'];
+const USERDATA_FILES = ['json', 'xlsx', 'csv', 'parquet', 'jsonl', 'cjson'];
 const PORT = '9799';
 
 let server;
@@ -86,7 +86,10 @@ for (const subprocessName of RUNNERS) {
       test('correct result', () => {
         const hp = new HTTPPanelInfo(
           '',
-          new HTTPConnectorInfo('', 'http://localhost:9799/testdata/unknown')
+          new HTTPConnectorInfo(
+            '',
+            'http://localhost:9799/testdata/allformats/unknown'
+          )
         );
 
         const panels = [hp];
@@ -121,7 +124,7 @@ for (const subprocessName of RUNNERS) {
       '',
       new HTTPConnectorInfo(
         '',
-        'http://localhost:9799/testdata/userdata.' + userdataFileType
+        'http://localhost:9799/testdata/allformats/userdata.' + userdataFileType
       )
     );
 
@@ -137,14 +140,13 @@ for (const subprocessName of RUNNERS) {
           return withSavedPanels(
             panels,
             (project) => {
+              const v = fs
+                .readFileSync(
+                  getProjectResultsFile(project.projectName) + hp.id
+                )
+                .toString();
               // Grab result
-              const value = JSON.parse(
-                fs
-                  .readFileSync(
-                    getProjectResultsFile(project.projectName) + hp.id
-                  )
-                  .toString()
-              );
+              const value = JSON.parse(v);
 
               const typeBaseline = translateBaselineForType(
                 baseline,
@@ -212,9 +214,11 @@ for (const subprocessName of RUNNERS) {
       test('correct result', () => {
         const hp = new HTTPPanelInfo(
           '',
-          new HTTPConnectorInfo('', 'http://localhost:9799/testdata/unknown', [
-            { name: 'X-Test', value: 'OK' },
-          ])
+          new HTTPConnectorInfo(
+            '',
+            'http://localhost:9799/testdata/allformats/unknown',
+            [{ name: 'X-Test', value: 'OK' }]
+          )
         );
 
         const panels = [hp];
@@ -246,7 +250,10 @@ for (const subprocessName of RUNNERS) {
         });
         const hp = new HTTPPanelInfo(
           '',
-          new HTTPConnectorInfo('', 'http://localhost:9799/testdata/unknown')
+          new HTTPConnectorInfo(
+            '',
+            'http://localhost:9799/testdata/allformats/unknown'
+          )
         );
         hp.serverId = server.id;
 

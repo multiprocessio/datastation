@@ -2,7 +2,7 @@ package runner
 
 import (
 	"encoding/json"
-	"fmt"
+	"io"
 	"math/rand"
 	"os"
 	"reflect"
@@ -245,7 +245,7 @@ func shapeMerge(a Shape, b Shape) Shape {
 
 	// Default/missing/non-scalar case shouldn't be possible
 	if b.Kind == a.Kind && b.Kind != ScalarKind {
-		panic(fmt.Sprintf(`Missing type equality condition for %s merge.`, b.Kind))
+		Logln(`Missing type equality condition for %s merge: [%#v] and [%#v].`, b.Kind, a, b)
 	}
 
 	// Otherwise is a scalar or dissimilar kind so becomes varied
@@ -336,10 +336,7 @@ func ShapeFromFile(file, id string, maxBytesToRead int, sampleSize int) (*Shape,
 
 	for !done {
 		buf := make([]byte, 1024)
-		bytesRead, err := fd.Read(buf)
-		if err != nil {
-			return nil, edse(err)
-		}
+		bytesRead, readErr := fd.Read(buf)
 
 		read := buf[:bytesRead]
 	outer:
@@ -378,8 +375,12 @@ func ShapeFromFile(file, id string, maxBytesToRead int, sampleSize int) (*Shape,
 		}
 
 		f = append(f, read...)
-		if bytesRead < cap(buf) {
+
+		if readErr == io.EOF {
 			break
+		}
+		if readErr != nil {
+			return nil, edse(readErr)
 		}
 	}
 
