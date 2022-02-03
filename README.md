@@ -19,12 +19,45 @@ In server mode:
 In desktop mode and server mode:
 
 * Build reports with graphs, charts and tables
-* Easily fetch any/all of your data
-  * Query SQL, NoSQL, metrics, and document databases
-  * Query API servers
-  * Load Excel, Parquet, CSV, JSON, and log files from disk
 * Script against data in Python, JavaScript, Ruby, PHP, Julia, or R
 * Cross-platform: Windows, macOS, and Linux
+* Easily fetch your data, wherever it is
+  * Databases
+    * Traditional
+	  * [PostgreSQL](https://datastation.multiprocess.io/docs/tutorials/Query_PostgreSQL_with_DataStation.html)
+	  * SQLite
+	  * [MySQL](https://datastation.multiprocess.io/docs/tutorials/Query_MySQL_with_DataStation.html)
+	  * [SQL Server](https://datastation.multiprocess.io/docs/tutorials/Query_SQL_Server_with_DataStation.html)
+	  * [Oracle](https://datastation.multiprocess.io/docs/tutorials/Query_Oracle_with_DataStation.html)
+	  * CockroachDB
+	* Warehouse
+	  * BigQuery
+	  * Snowflake
+	* Document
+	  * [ElasticSearch](https://datastation.multiprocess.io/docs/tutorials/Query_Elasticsearch_with_DataStation.html)
+	  * CrateDB
+	* Time Series
+	  * [ClickHouse](https://datastation.multiprocess.io/docs/tutorials/Query_ClickHouse_with_DataStation.html)
+	  * QuestDB
+	  * TimescaleDB
+	  * Yugabyte
+	  * Cassandra
+	  * ScyllaDB
+	* Metrics
+	  * Prometheus
+	  * Influx
+  * Files
+    * Excel
+	* CSV
+	* JSON (array of objects)
+	* Newline-delimited JSON
+	* Concatenated JSON
+	* Parquet
+	* ODS
+	* Logs (Apache, Nginx)
+  * HTTP servers
+
+## 
 
 ## CLI
 
