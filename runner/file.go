@@ -65,7 +65,9 @@ func withJSONOutWriter(w io.Writer, first, last string, cb func() error) error {
 
 func withJSONArrayOutWriter(w io.Writer, cb func(w *JSONArrayWriter) error) error {
 	return withJSONOutWriter(w, "[", "]", func() error {
-		return cb(&JSONArrayWriter{w, true})
+		bw := bufio.NewWriterSize(w, 10 * 1024)
+		defer bw.Flush()
+		return cb(&JSONArrayWriter{bw, true})
 	})
 }
 
@@ -88,6 +90,8 @@ func transformCSV(in io.Reader, out io.Writer, delimiter rune) error {
 	return withJSONArrayOutWriterFile(out, func(w *JSONArrayWriter) error {
 		isHeader := true
 		var fields []string
+		row := map[string]string{}
+
 		for {
 			record, err := r.Read()
 			if err == io.EOF {
@@ -107,7 +111,6 @@ func transformCSV(in io.Reader, out io.Writer, delimiter rune) error {
 				continue
 			}
 
-			row := map[string]string{}
 			for i, field := range fields {
 				row[field] = record[i]
 			}
@@ -202,6 +205,7 @@ func writeSheet(rows [][]string, w *JSONArrayWriter) error {
 	var header []string
 	isHeader := true
 
+	row := map[string]string{}
 	for _, r := range rows {
 		if isHeader {
 			header = r
@@ -209,7 +213,6 @@ func writeSheet(rows [][]string, w *JSONArrayWriter) error {
 			continue
 		}
 
-		row := map[string]string{}
 		for i, cell := range r {
 			row[header[i]] = cell
 		}
@@ -457,8 +460,8 @@ var BUILTIN_REGEX = map[MimeType]*regexp.Regexp{
 func transformRegexp(in io.Reader, out io.Writer, re *regexp.Regexp) error {
 	scanner := bufio.NewScanner(in)
 	return withJSONArrayOutWriterFile(out, func(w *JSONArrayWriter) error {
+		row := map[string]interface{}{}
 		for scanner.Scan() {
-			row := map[string]interface{}{}
 			match := re.FindStringSubmatch(scanner.Text())
 			for i, name := range re.SubexpNames() {
 				if name != "" {
