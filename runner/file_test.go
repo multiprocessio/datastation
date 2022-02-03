@@ -69,6 +69,13 @@ func Test_transformJSONConcat(t *testing.T) {
 			},
 		},
 		{
+			in: `{"a {": "\"}}"}{"a {": "{\"{"}`,
+			out: []map[string]interface{}{
+				{"a {": `"}}`},
+				{"a {": `{"{`},
+			},
+		},
+		{
 			in: `{"a": 1}
 
 
