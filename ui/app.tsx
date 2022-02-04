@@ -43,7 +43,10 @@ function useProjectState(
 
   const setState = React.useCallback(
     function setState(newState: ProjectState, addToRestoreBuffer = true) {
-      store.update(projectId, newState, addToRestoreBuffer);
+      // Don't hang renderer while updating
+      setTimeout(function () {
+	store.update(projectId, newState, addToRestoreBuffer)
+      }, 0);
       const c = { ...newState };
       Object.setPrototypeOf(c, ProjectState.prototype);
       setProjectState(c);

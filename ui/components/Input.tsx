@@ -2,7 +2,7 @@ import debounce from 'lodash.debounce';
 import * as React from 'react';
 import { Tooltip } from './Tooltip';
 
-export const INPUT_SYNC_PERIOD = 125;
+export const INPUT_SYNC_PERIOD = 3000;
 
 export function useDebouncedLocalState(
   nonLocalValue: string | number | readonly string[],
