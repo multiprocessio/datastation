@@ -43,4 +43,4 @@ export const MODE_FEATURES = {
 const DOCS_VERSION = VERSION === 'development' ? 'latest' : VERSION;
 export const DOCS_ROOT = SITE_ROOT + '/docs/' + DOCS_VERSION;
 
-export const IN_TESTS = process.env.JEST_WORKER_ID !== undefined;
+export const IN_TESTS = window.process ? process.env.JEST_WORKER_ID !== undefined : false;

@@ -6,7 +6,7 @@ import {
   GraphField,
   GraphPanelInfo,
   GraphPanelInfoType,
-  GraphPanelInfoWidth,
+  PanelInfoWidth,
   PanelInfo,
   PanelResult,
 } from '../../shared/state';
@@ -311,7 +311,7 @@ export function GraphPanelDetails({
     <React.Fragment>
       <div className="flex">
         <div>
-          <FormGroup label="General">
+          <FormGroup>
             <div className="form-row">
               <PanelSourcePicker
                 currentPanel={panel.id}
@@ -323,11 +323,26 @@ export function GraphPanelDetails({
                 }}
               />
             </div>
+            <div className="form-row">
+              <Radio
+                label="Width"
+                value={panel.graph.width}
+                onChange={(value: string) => {
+                  panel.graph.width = value as PanelInfoWidth;
+                  updatePanel(panel);
+                }}
+                options={[
+                  { label: 'Default', value: 'small' },
+                  { label: '75%', value: 'medium' },
+                  { label: '100%', value: 'large' },
+                ]}
+              />
+            </div>
           </FormGroup>
-          <FormGroup label={panel.graph.type === 'pie' ? 'Slice' : 'X-Axis'}>
+          <FormGroup>
             <div className="form-row">
               <FieldPicker
-                label="Field"
+                label={panel.graph.type === 'pie' ? 'Slice' : 'X-Axis'}
                 shape={data?.shape}
                 value={panel.graph.x}
                 onChange={(value: string) => {
@@ -336,12 +351,6 @@ export function GraphPanelDetails({
                 }}
               />
             </div>
-          </FormGroup>
-          <FormGroup
-            label={
-              panel.graph.type === 'pie' ? 'Slice Size Series' : 'Y-Axis Series'
-            }
-          >
             {panel.graph.ys.map((y, i) => (
               <div
                 className="form-row form-row--multi vertical-align-center"
@@ -349,12 +358,14 @@ export function GraphPanelDetails({
               >
                 <FieldPicker
                   used={[...panel.graph.ys.map((y) => y.field), panel.graph.x]}
-                  onDelete={() => {
+                  onDelete={panel.graph.ys.length > 1 ? () => {
                     panel.graph.ys.splice(i, 1);
                     updatePanel(panel);
-                  }}
+                  } : undefined}
                   preferredDefaultType="number"
-                  label="Field"
+                  label={
+              panel.graph.type === 'pie' ? 'Slice Size Series' : 'Y-Axis Series'
+            }
                   value={y.field}
                   shape={data?.shape}
                   onChange={(value: string) => {
@@ -380,7 +391,7 @@ export function GraphPanelDetails({
           </FormGroup>
         </div>
         <div>
-          <FormGroup label="Display">
+          <FormGroup>
             <div className="form-row">
               <Select
                 label="Graph Type"
@@ -397,7 +408,7 @@ export function GraphPanelDetails({
             </div>
             <div className="form-row">
               <Radio
-                label="Unique Colors"
+                label="Unique Colors within Series"
                 value={String(panel.graph.colors.unique)}
                 onChange={(value: string) => {
                   panel.graph.colors.unique = value === 'true';
@@ -406,21 +417,6 @@ export function GraphPanelDetails({
                 options={[
                   { label: 'Yes', value: 'true' },
                   { label: 'No', value: 'false' },
-                ]}
-              />
-            </div>
-            <div className="form-row">
-              <Radio
-                label="Width"
-                value={panel.graph.width}
-                onChange={(value: string) => {
-                  panel.graph.width = value as GraphPanelInfoWidth;
-                  updatePanel(panel);
-                }}
-                options={[
-                  { label: 'Small', value: 'small' },
-                  { label: 'Medium', value: 'medium' },
-                  { label: 'Large', value: 'large' },
                 ]}
               />
             </div>

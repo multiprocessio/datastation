@@ -1,4 +1,5 @@
 import { preview } from 'preview';
+import { Radio } from '../components/Radio';
 import * as React from 'react';
 import { shape } from 'shape';
 import { MODE } from '../../shared/constants';
@@ -104,7 +105,7 @@ export function TablePanelDetails({
 
   return (
     <React.Fragment>
-      <FormGroup label="General">
+      <FormGroup>
         <div className="form-row">
           <PanelSourcePicker
             currentPanel={panel.id}
@@ -116,18 +117,33 @@ export function TablePanelDetails({
             }}
           />
         </div>
-      </FormGroup>
-      <FormGroup label="Columns">
-        {panel.table.columns.map(function mapColumnRender(c, i) {
-          return (
-            <div className="form-row vertical-align-center" key={c.field + i}>
-              <FieldPicker
-                used={panel.table.columns.map(mapColumnToField)}
-                onDelete={function handleColumnDelete() {
-                  panel.table.columns.splice(i, 1);
+        <div className="form-row">
+              <Radio
+                label="Width"
+                value={panel.table.width}
+                onChange={(value: string) => {
+                  panel.table.width = value as PanelInfoWidth;
                   updatePanel(panel);
                 }}
-                label="Field"
+                options={[
+                  { label: 'Default', value: 'small' },
+                  { label: '75%', value: 'medium' },
+                  { label: '100%', value: 'large' },
+                ]}
+              />
+            </div>
+      </FormGroup>
+      <FormGroup>
+        {panel.table.columns.map(function mapColumnRender(c, i) {
+          return (
+            <div className="form-row form-row--multi vertical-align-center" key={c.field + i}>
+              <FieldPicker
+                used={panel.table.columns.map(mapColumnToField)}
+                onDelete={panel.table.columns.length > 1 ? function handleColumnDelete() {
+                  panel.table.columns.splice(i, 1);
+                  updatePanel(panel);
+                }: undefined}
+                label="Column"
                 value={c.field}
                 shape={data?.shape}
                 onChange={function handleFieldChange(value: string) {
@@ -175,7 +191,7 @@ export function TablePanel({ panel, panels }: PanelBodyProps<TablePanelInfo>) {
   // column key is (field + i) everywhere because columns can be
   // duplicated. Maybe should assign a uuid to them instead
   return (
-    <table>
+    <table className={`table table--${panel.table.width}`}>
       <thead>
         <tr>
           {panel.table.columns.map(function mapColumnToHeader(

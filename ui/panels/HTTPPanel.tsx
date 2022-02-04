@@ -50,7 +50,7 @@ export function HTTPPanelDetails({
   const { servers } = React.useContext(ProjectContext).state;
   return (
     <React.Fragment>
-      <FormGroup label="General">
+      <FormGroup>
         <div className="form-row">
           <Select
             label="Method"
@@ -89,12 +89,12 @@ export function HTTPPanelDetails({
         />
       </FormGroup>
 
-      <FormGroup label="Headers">
+      <FormGroup>
         {panel.http.http.headers.map(
           (header: { value: string; name: string }, headerIndex: number) => (
             <div className="form-row form-row--multi vertical-align-center">
               <Input
-                label="Name"
+                label="Header"
                 value={header.name}
                 onChange={(value: string) => {
                   header.name = value;

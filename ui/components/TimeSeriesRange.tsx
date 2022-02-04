@@ -121,7 +121,7 @@ export function TimeSeriesRange({
   const fieldName = 'range-type-' + uuid.v4();
 
   return (
-    <FormGroup label="Time Range">
+    <FormGroup>
       {!hideField && (
         <div className="form-row">
           <FieldPicker

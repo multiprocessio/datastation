@@ -108,10 +108,14 @@ export function FilterAggregatePanelDetails({
     ((panels || []).find((p) => p.id === panel.filagg.panelSource) || {})
       .resultMeta || new PanelResult();
 
+  if (panels.length <= 1) {
+    return 'This panel can only build on other panels. Create another panel first.';
+  }
+
   return (
     <React.Fragment>
-      <FormGroup label="General">
-        <div className="form-row">
+        <FormGroup>
+          <div className="form-row">
           <PanelSourcePicker
             currentPanel={panel.id}
             panels={panels}
@@ -121,47 +125,41 @@ export function FilterAggregatePanelDetails({
               updatePanel(panel);
             }}
           />
-        </div>
-      </FormGroup>
-      <div className="flex">
-        <div>
-          <FormGroup label="Filter">
-            <div className="form-row">
-              <CodeEditor
-                singleLine
-                id={panel.id + 'filter'}
-                label="Expression"
-                placeholder="x LIKE '%town%' AND y IN (1, 2)"
-                value={panel.filagg.filter}
-                onChange={(value: string) => {
-                  panel.filagg.filter = value;
-                  updatePanel(panel);
-                }}
-                language="sql"
-                className="editor"
-                tooltip="Use any valid SQLite WHERE expression."
-              />
-            </div>
-            {MODE !== 'browser' && (
-              <TimeSeriesRange
-                shape={data.shape}
-                range={panel.filagg.range}
-                updateRange={(r: TimeSeriesRangeT) => {
-                  panel.filagg.range = r;
-                  updatePanel(panel);
-                }}
-                timeFieldTooltip={
-                  'Column must be a date field in ISO8601/RFC3339 format.'
-                }
-              />
-            )}
+          </div>
+          <div className="form-row">
+            <CodeEditor
+              singleLine
+              id={panel.id + 'filter'}
+              label="Filter"
+              placeholder="x LIKE '%town%' AND y IN (1, 2)"
+              value={panel.filagg.filter}
+              onChange={(value: string) => {
+                panel.filagg.filter = value;
+                updatePanel(panel);
+              }}
+              language="sql"
+              className="editor"
+              tooltip="Use any valid SQLite WHERE expression."
+            />
+          </div>
+          {MODE !== 'browser' && (
+            <TimeSeriesRange
+              shape={data.shape}
+              range={panel.filagg.range}
+              updateRange={(r: TimeSeriesRangeT) => {
+                panel.filagg.range = r;
+                updatePanel(panel);
+              }}
+              timeFieldTooltip={
+                'Column must be a date field in ISO8601/RFC3339 format.'
+              }
+            />
+          )}
           </FormGroup>
-        </div>
-        <div>
-          <FormGroup label="Aggregate">
+          <FormGroup>
             <div className="form-row">
               <Select
-                label="Function"
+                label="Aggregate"
                 value={panel.filagg.aggregateType}
                 onChange={(value: string) => {
                   panel.filagg.aggregateType = value as AggregateType;
@@ -249,12 +247,12 @@ export function FilterAggregatePanelDetails({
                 )}
               </React.Fragment>
             )}
-          </FormGroup>
-          <FormGroup label="Sort">
+            </FormGroup>
+            <FormGroup>
             <div className="form-row form-row--multi">
               <FieldPicker
                 preferredDefaultType="number"
-                label="Field"
+                label="Sort"
               data-test-id="sort-field"
                 shape={withAggregateShape(data, panel)}
                 value={panel.filagg.sortOn}
@@ -276,8 +274,6 @@ export function FilterAggregatePanelDetails({
                 <option value="asc">Ascending</option>
               </Select>
             </div>
-          </FormGroup>
-          <FormGroup label="Limit">
             <div className="form-row">
               <Input
                 label="Limit"
@@ -290,9 +286,7 @@ export function FilterAggregatePanelDetails({
                 type="number"
               />
             </div>
-          </FormGroup>
-        </div>
-      </div>
+            </FormGroup>
     </React.Fragment>
   );
 }

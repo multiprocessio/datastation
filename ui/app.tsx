@@ -30,7 +30,7 @@ if (MODE === 'browser') {
       // These can be really big, so run it out of band
       setTimeout(function () {
         l.inMemoryInit();
-      }, 0);
+      });
     }
   });
 }

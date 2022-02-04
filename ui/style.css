@@ -1,12 +1,25 @@
+:root {
+    /* Light theme settings */
+    --background-light: #fdfdff;
+    --border-light: #d3d3e5;
+    --darker-light: #f3f3f7;
+    --button-light: #fdfdff;
+
+    /* Dark theme settings */
+    --background-dark: #29293c;
+
+    --sans-serif: "San Francisco", "Gadugi", sans-serif;
+}
+
 * {
-  box-sizing: border-box;
+    box-sizing: border-box;
 }
 
 body {
-  font-family: sans-serif;
+    font-family: var(--sans-serif);
   padding: 0;
   margin: 0;
-  background: #fbfbfb;
+  background: var(--background-light);
 }
 
 a,
@@ -17,8 +30,9 @@ a:hover {
 }
 
 .button {
-  border: 1px solid #ccc;
-  background: #fbfbfb;
+    border: 1px solid var(--border-light);
+    border-radius: 3px;
+  background: var(--button-light);
 }
 
 .loading {
@@ -28,7 +42,7 @@ a:hover {
 
 .app--desktop,
 .app--server {
-  border-top: 1px solid #ccc;
+  border-top: 1px solid var(--border-light);
   height: calc(100% - 1px);
 }
 
@@ -49,7 +63,7 @@ a:hover {
 }
 
 header {
-  background: white;
+  background: var(--background-light);
   padding: 8px 15px;
   border-bottom: 2px solid #e5e5ec;
   color: black;
@@ -81,7 +95,7 @@ header iframe {
 }
 
 .editor {
-  background: #fbfbfb;
+  background: var(--background-light);
   width: 100%;
   border: 0;
   font-family: monospace;
@@ -92,7 +106,7 @@ header iframe {
 }
 
 .ace_gutter-layer {
-  background: #d5d5d5;
+    background: var(--darker-light);
 }
 
 .editor-container:not(.editor-container--singleLine) {
@@ -113,6 +127,7 @@ header iframe {
   padding: 5px;
   background: transparent;
   border: 1px solid #aaa;
+  border-radius :5px;
   min-height: 100px;
   width: 800px;
   max-width: 100%;
@@ -127,6 +142,12 @@ label,
   font-size: 0.75rem;
 }
 
+
+.panel-details :not(.form-row--multi) > .button {
+    /* Line up with everything with a label */
+    margin-left: 100px;
+}
+
 .panel-details {
   overflow-x: auto;
 
@@ -135,8 +156,9 @@ label,
   .select-label {
     display: inline-block;
     text-align: right;
-    width: 200px; /* 200px should be more than enough for anyone */
+    width: 100px;
     padding-right: 15px;
+    overflow-wrap: break-word;
   }
 
   .form-row .form-row,
@@ -159,9 +181,10 @@ label,
   width: initial;
 }
 
+input,
 input[type='date'],
 input[type='time'] {
-  font-family: sans-serif;
+  font-family: var(--sans-serif);
 }
 
 input[type='radio'] {
@@ -211,7 +234,7 @@ input[type='radio'] {
       calc(14px * 2) + 4px
     ); /* Twice the inner circle + border width */
     height: 18px;
-    border: 2px solid #ccc;
+    border: 2px solid var(--border-light);
     border-radius: 15px;
     margin-left: 8px;
     position: relative;
@@ -239,9 +262,9 @@ label.input input:not([type='radio']):not([type='file']),
 select.select,
 label.select select {
   padding: 5px;
-  background: transparent;
-  border: 1px solid #ccc;
-  background: white;
+  border: 1px solid var(--border-light);
+  border-radius: 3px;
+  background: var(--background-light);
   /* Since many inputs are within label, keep the label font size small and the input font size normal */
   font-size: initial;
   display: inline-block;
@@ -384,7 +407,7 @@ input + input[type='file'] {
   font-size: 1.5rem;
   display: flex;
   align-items: center;
-  background: #f3f3f3;
+  background: var(--darker-light);
 }
 
 .section-title .add-page {
@@ -401,11 +424,11 @@ input + input[type='file'] {
 }
 
 .sidebar {
-  border-right: 1px solid #ccc;
-  border-bottom: 1px solid #ccc;
-  background: white;
-  min-width: 350px;
-  background: #fbfbfb;
+  border-right: 1px solid var(--border-light);
+  border-bottom: 1px solid var(--border-light);
+  background: var(--background-light);
+  min-width: 400px;
+  background: #f9f9fd;
   padding: 15px;
   max-height: 100%;
   overflow-y: auto;
@@ -429,7 +452,7 @@ input + input[type='file'] {
   margin-bottom: 15px;
   padding: 10px;
   border: 1px solid transparent;
-  border-bottom: 1px solid #ccc;
+  border-bottom: 1px solid var(--border-light);
 
   .connector-body,
   .server-body {
@@ -460,8 +483,8 @@ input + input[type='file'] {
 .connector:hover,
 .server--expanded,
 .connector--expanded {
-  background: white;
-  border-color: #ccc;
+  background: var(--background-light);
+  border-color: var(--border-light);
 }
 
 .server-name,
@@ -484,7 +507,7 @@ input + input[type='file'] {
   .button.page-name {
     border-radius: 0;
     border: 0;
-    border-right: 1px solid #fbfbfb;
+    border-right: 1px solid #f9f9fd;
     padding: 15px;
     background: transparent;
   }
@@ -492,7 +515,7 @@ input + input[type='file'] {
   .page-name--current {
     font-size: 1rem;
     padding: 8px 15px;
-    background: #fbfbfb;
+    background: var(--background-light);
 
     .input {
       margin: 0 8px;
@@ -517,8 +540,8 @@ input + input[type='file'] {
 
 .card,
 .panel {
-  background: white;
-  border: 1px solid #ccc;
+  background: var(--background-light);
+  border: 1px solid var(--border-light);
   margin: 15px;
 }
 
@@ -539,7 +562,7 @@ input + input[type='file'] {
 
 @keyframes pulse {
   0% {
-    background: white;
+    background: var(--background-light);
   }
 
   50% {
@@ -548,7 +571,7 @@ input + input[type='file'] {
 }
 
 .panel--hidden {
-  border-color: #ccc;
+  border-color: var(--border-light);
 }
 
 .panel-type,
@@ -558,9 +581,9 @@ input + input[type='file'] {
 }
 
 .panel-head {
-  padding: 8px;
-  background: #eaeaf1;
-  border-bottom: 1px solid #ccc;
+    padding: 8px;
+  background: #f9f9fd;
+  border-bottom: 1px solid var(--border-light);
 }
 
 .panel--hidden .panel-head,
@@ -570,7 +593,7 @@ input + input[type='file'] {
 
 .panel-header--open {
   padding-bottom: 8px;
-  border-bottom: 1px solid #ccc;
+  border-bottom: 1px solid var(--border-light);
 }
 
 .panel-body-container {
@@ -622,7 +645,7 @@ input + input[type='file'] {
 }
 
 .panel-out-header {
-  background: #eaeaf1;
+  background: #f9f9fd;
 }
 
 .panel--empty .panel-out {
@@ -769,8 +792,8 @@ input + input[type='file'] {
   position: absolute;
   top: 30px;
   right: 1px;
-  background: white;
-  border: 1px solid #ccc;
+  background: var(--background-light);
+  border: 1px solid var(--border-light);
   padding: 15px;
   width: 400px;
   color: black;
@@ -836,20 +859,25 @@ input + input[type='file'] {
   padding: 30px 0;
 }
 
+.table,
 canvas {
-  max-height: 100%;
+    max-height: 100%;
+    padding: 0 15px;
   margin: 30px auto;
 }
 
+.table--small,
 .canvas--small {
   width: 1024px !important;
   max-width: 100%;
 }
 
+.table--medium,
 .canvas--medium {
   width: 75% !important;
 }
 
+.table--large,
 .canvas--large {
   width: 100% !important;
 }
@@ -865,8 +893,8 @@ canvas {
 }
 
 .modal-body {
-  background: white;
-  border: 1px solid #ccc;
+  background: var(--background-light);
+  border: 1px solid var(--border-light);
   padding: 15px;
 }
 
@@ -887,7 +915,7 @@ canvas {
 }
 
 .project-existing {
-  border-top: 1px solid #ccc;
+  border-top: 1px solid var(--border-light);
   padding-top: 15px;
   margin-top: 15px;
 
@@ -902,7 +930,7 @@ th {
 }
 
 tbody tr:nth-child(odd) {
-  background: #f2f2f7;
+  background: var(--darker-light);
 }
 
 .confirm-wrapper {
@@ -921,9 +949,9 @@ tbody tr:nth-child(odd) {
   z-index: 4;
   padding: 15px;
   min-width: 200px;
-  background: white;
+  background: var(--background-light);
   box-shadow: 0 1px 3px 0 #aaa;
-  border: 1px solid #ccc;
+  border: 1px solid var(--border-light);
   font-size: 1rem;
 }
 
@@ -962,13 +990,13 @@ tbody tr:nth-child(odd) {
   right: 0;
   top: calc(100% + 5px);
   padding: 16px;
-  background: #f3f3f3;
+  background: var(--background-light);
   width: 300px;
   box-shadow: 0 1px 3px 0 #aaa;
 }
 
 .global-dropdown-section:not(:last-of-type) {
-  border-bottom: 1px solid #ccc;
+  border-bottom: 1px solid var(--border-light);
   padding-bottom: 10px;
   margin-bottom: 15px;
 }
@@ -1032,7 +1060,7 @@ body.dark tbody tr:nth-child(odd) {
 /* End cssplus break */
 
 body.dark {
-  background: #0a0a1d;
+  background: var(--background-dark);
   color: white;
 
   .app--desktop,
@@ -1095,7 +1123,7 @@ body.dark {
 
   .global-dropdown-body,
   .section-title {
-    background: #0a0a1d;
+    background: var(--background-dark);
   }
 
   .section-title > .button {
@@ -1137,7 +1165,7 @@ body.dark {
 
   .pages {
     .button.page-name {
-      border-right: 1px solid #ccc;
+      border-right: 1px solid var(--border-light);
     }
   }
 

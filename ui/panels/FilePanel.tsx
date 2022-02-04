@@ -43,7 +43,7 @@ export function FilePanelDetails({
   const { servers } = React.useContext(ProjectContext).state;
   return (
     <div className="FilePanel">
-      <FormGroup label="General">
+      <FormGroup>
         <div className="form-row">
           <FileInput
             label="File"

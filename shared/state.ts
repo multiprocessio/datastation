@@ -321,7 +321,7 @@ export interface GraphField {
 
 export type GraphPanelInfoType = 'bar' | 'pie' | 'line';
 
-export type GraphPanelInfoWidth = 'small' | 'medium' | 'large';
+export type PanelInfoWidth = 'small' | 'medium' | 'large';
 
 export class GraphPanelInfo extends PanelInfo {
   graph: {
@@ -329,7 +329,7 @@ export class GraphPanelInfo extends PanelInfo {
     ys: Array<GraphField>;
     x: string;
     type: GraphPanelInfoType;
-    width: GraphPanelInfoWidth;
+    width: PanelInfoWidth;
     colors: {
       unique: boolean;
     };
@@ -455,6 +455,7 @@ export class TablePanelInfo extends PanelInfo {
   table: {
     columns: Array<TableColumn>;
     panelSource: string;
+    width: PanelInfoWidth;
   };
 
   constructor(
@@ -466,6 +467,7 @@ export class TablePanelInfo extends PanelInfo {
     this.table = {
       columns: defaults.columns || [],
       panelSource: defaults.panelSource || '',
+      width: defaults.width || 'small',
     };
   }
 }

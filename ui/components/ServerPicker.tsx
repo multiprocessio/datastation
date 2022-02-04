@@ -17,7 +17,7 @@ export function ServerPicker({
   }
 
   return (
-    <FormGroup label="Via server">
+    <FormGroup>
       <div className="form-row">
         <Select
           value={serverId}
