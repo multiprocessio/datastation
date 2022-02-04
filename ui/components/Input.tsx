@@ -1,7 +1,7 @@
 import debounce from 'lodash.debounce';
 import * as React from 'react';
-import { Tooltip } from './Tooltip';
 import { IN_TESTS } from '../../shared/constants';
+import { Tooltip } from './Tooltip';
 
 export const INPUT_SYNC_PERIOD = IN_TESTS ? 0 : 3000;
 

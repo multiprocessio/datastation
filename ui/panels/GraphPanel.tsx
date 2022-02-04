@@ -6,8 +6,8 @@ import {
   GraphField,
   GraphPanelInfo,
   GraphPanelInfoType,
-  PanelInfoWidth,
   PanelInfo,
+  PanelInfoWidth,
   PanelResult,
 } from '../../shared/state';
 import { Button } from '../components/Button';
@@ -358,14 +358,20 @@ export function GraphPanelDetails({
               >
                 <FieldPicker
                   used={[...panel.graph.ys.map((y) => y.field), panel.graph.x]}
-                  onDelete={panel.graph.ys.length > 1 ? () => {
-                    panel.graph.ys.splice(i, 1);
-                    updatePanel(panel);
-                  } : undefined}
+                  onDelete={
+                    panel.graph.ys.length > 1
+                      ? () => {
+                          panel.graph.ys.splice(i, 1);
+                          updatePanel(panel);
+                        }
+                      : undefined
+                  }
                   preferredDefaultType="number"
                   label={
-              panel.graph.type === 'pie' ? 'Slice Size Series' : 'Y-Axis Series'
-            }
+                    panel.graph.type === 'pie'
+                      ? 'Slice Size Series'
+                      : 'Y-Axis Series'
+                  }
                   value={y.field}
                   shape={data?.shape}
                   onChange={(value: string) => {

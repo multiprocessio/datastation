@@ -1,22 +1,26 @@
 :root {
-    /* Light theme settings */
-    --background-light: #fdfdff;
-    --border-light: #d3d3e5;
-    --darker-light: #f3f3f7;
-    --button-light: #fdfdff;
+  /* Light theme settings */
+  --background-light: #fdfdff;
+  --border-light: #d3d3e5;
+  --darker-light: #f3f3f7;
+  --button-light: #fdfdff;
 
-    /* Dark theme settings */
-    --background-dark: #29293c;
+  /* Dark theme settings */
+  --background-dark: #29293c;
+  --border-dark: black;
+  --color-dark: #dfdfdf;
+  --panel-background-dark: #2a2a40;
+  --panel-background-contrast-dark: #26263a;
 
-    --sans-serif: "San Francisco", "Gadugi", sans-serif;
+  --sans-serif: 'San Francisco', 'Gadugi', sans-serif;
 }
 
 * {
-    box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 body {
-    font-family: var(--sans-serif);
+  font-family: var(--sans-serif);
   padding: 0;
   margin: 0;
   background: var(--background-light);
@@ -30,8 +34,8 @@ a:hover {
 }
 
 .button {
-    border: 1px solid var(--border-light);
-    border-radius: 3px;
+  border: 1px solid var(--border-light);
+  border-radius: 3px;
   background: var(--button-light);
 }
 
@@ -106,7 +110,7 @@ header iframe {
 }
 
 .ace_gutter-layer {
-    background: var(--darker-light);
+  background: var(--darker-light);
 }
 
 .editor-container:not(.editor-container--singleLine) {
@@ -127,7 +131,7 @@ header iframe {
   padding: 5px;
   background: transparent;
   border: 1px solid #aaa;
-  border-radius :5px;
+  border-radius: 5px;
   min-height: 100px;
   width: 800px;
   max-width: 100%;
@@ -142,10 +146,9 @@ label,
   font-size: 0.75rem;
 }
 
-
 .panel-details :not(.form-row--multi) > .button {
-    /* Line up with everything with a label */
-    margin-left: 100px;
+  /* Line up with everything with a label */
+  margin-left: 100px;
 }
 
 .panel-details {
@@ -262,7 +265,8 @@ label.input input:not([type='radio']):not([type='file']),
 select.select,
 label.select select {
   padding: 5px;
-  border: 1px solid var(--border-light);
+  border: 0;
+  box-shadow: 0px 0px 3px var(--border-light);
   border-radius: 3px;
   background: var(--background-light);
   /* Since many inputs are within label, keep the label font size small and the input font size normal */
@@ -311,6 +315,7 @@ input + input[type='file'] {
   cursor: pointer;
   cursor: hand;
   border-radius: 3px;
+  box-shadow: 0px 0px 3px var(--border-light);
 }
 
 .material-icons,
@@ -335,16 +340,17 @@ input + input[type='file'] {
 
 .button.material-icons,
 .button.material-icons-outlined {
+  box-shadow: initial;
   border: 0;
   background: transparent;
-  color: #555;
+  color: #777;
   padding: 0;
 }
 
 .button:not(.material-icons):not(.material-icons-outlined):disabled,
 .button:not(.material-icons):not(.material-icons-outlined):disabled:hover {
   background: #ccc;
-  color: #777;
+  color: #999;
   cursor: not-allowed;
   pointer-events: all !important;
 }
@@ -414,6 +420,7 @@ input + input[type='file'] {
   padding: 8px 15px;
   background: transparent;
   border: 0;
+  box-shadow: initial;
   color: black;
   font-size: 1.2rem;
   font-weight: bold;
@@ -507,6 +514,7 @@ input + input[type='file'] {
   .button.page-name {
     border-radius: 0;
     border: 0;
+    box-shadow: initial;
     border-right: 1px solid #f9f9fd;
     padding: 15px;
     background: transparent;
@@ -546,38 +554,38 @@ input + input[type='file'] {
 }
 
 .panel {
-    transition: all .5s;
+  transition: all 0.5s;
 }
 
 .panel--fullscreen {
-    position: absolute;
-    left: 0;
-    top: 0;
-    z-index: 999;
-    height: 100%;
-    width: 100%;
-    margin: 0;
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 999;
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  border: 0;
+  display: flex;
+  flex-direction: column;
+
+  .panel-header {
     border: 0;
-    display: flex;
-    flex-direction: column;
+  }
 
-    .panel-header {
-	border: 0;
+  .panel-body-container {
+    flex: 1;
+
+    .flex {
+      height: 100%;
+      flex-direction: column;
     }
 
-    .panel-body-container {
-	flex: 1;
-
-	.flex {
-	    height: 100%;
-	    flex-direction: column;
-	}
-
-	.panel-out {
-	    width: initial;
-	    height: 400px;
-	}
+    .panel-out {
+      width: initial;
+      height: 400px;
     }
+  }
 }
 
 .panel--loading {
@@ -605,7 +613,7 @@ input + input[type='file'] {
 }
 
 .panel-head {
-    padding: 8px;
+  padding: 8px;
   background: #f9f9fd;
   border-bottom: 1px solid var(--border-light);
 }
@@ -679,6 +687,7 @@ input + input[type='file'] {
 
 .panel-out-header button.button {
   border: 0 !important;
+  box-shadow: initial !important;
   background: 0;
   padding: 5px 15px;
   border-radius: 0;
@@ -885,8 +894,8 @@ input + input[type='file'] {
 
 .table,
 canvas {
-    max-height: 100%;
-    padding: 0 15px;
+  max-height: 100%;
+  padding: 0 15px;
   margin: 30px auto;
 }
 
@@ -950,15 +959,16 @@ canvas {
 }
 
 .table {
-    border-collapse: collapse;
+  border-collapse: collapse;
 
-    th {
-	text-align: left;
-    }
+  th {
+    text-align: left;
+  }
 
-    th, td {
-	padding: 5px;
-    }
+  th,
+  td {
+    padding: 5px;
+  }
 }
 
 tbody tr:nth-child(odd) {
@@ -1054,7 +1064,7 @@ body.dark a,
 body.dark a:visited,
 body.dark a:focus,
 body.dark a:hover {
-  color: white;
+  color: var(--color-dark);
 }
 
 body.dark .alert a,
@@ -1069,9 +1079,11 @@ body.dark input.input:not([type='radio']):not([type='file']),
 body.dark label.input input:not([type='radio']):not([type='file']),
 body.dark select.select,
 body.dark label.select select {
-  background: #29293c;
-  border: 1px solid black;
-  color: white;
+  background: #38384c;
+  border: 1px solid var(--border-dark);
+  box-shadow: 0px 0px 3px var(--border-dark);
+  outline: var(--border-dark);
+  color: var(--color-dark);
 }
 
 body.dark .server:hover,
@@ -1079,7 +1091,7 @@ body.dark .connector:hover,
 body.dark .server--expanded,
 body.dark .connector--expanded {
   background: #484860;
-  border-color: black;
+  border-color: var(--border-dark);
 }
 
 body.dark .button:hover {
@@ -1087,13 +1099,13 @@ body.dark .button:hover {
 }
 
 body.dark tbody tr:nth-child(odd) {
-  background: #31314e;
+  background: var(--panel-background-contrast-dark);
 }
 /* End cssplus break */
 
 body.dark {
   background: var(--background-dark);
-  color: white;
+  color: var(--color-dark);
 
   .app--desktop,
   .app--server {
@@ -1111,22 +1123,24 @@ body.dark {
 
   header {
     background: #29293c;
-    border-bottom-color: black;
+    border-bottom-color: var(--border-dark);
   }
 
   header a {
-    color: white;
+    color: var(--color-dark);
   }
 
   .button {
-    border: 1px solid black;
+    border: 1px solid var(--border-dark);
     background: #4a4a6a;
     color: #ddd;
+    box-shadow: 0px 0px 3px var(--border-dark);
   }
 
   .button.material-icons,
   .button.material-icons-outlined {
     border: 0;
+    box-shadow: initial;
     background: transparent;
     color: #999;
     padding: 0;
@@ -1138,23 +1152,22 @@ body.dark {
   }
 
   .page-name {
-    border-right-color: black;
+    border-right-color: var(--border-dark);
   }
 
   .page-name--current {
     background: #29293c;
-
-    .input {
-      background: #404066 !important;
-    }
   }
 
   .global-dropdown-item a {
     color: #61b6ff;
   }
 
-  .global-dropdown-body,
   .section-title {
+    background: var(--border-dark);
+  }
+
+  .global-dropdown-body {
     background: var(--background-dark);
   }
 
@@ -1175,29 +1188,29 @@ body.dark {
 
   .panel,
   .editor {
-    background: #484860;
+    background: var(--panel-background-dark);
   }
 
   .panel {
-    border-color: black;
+    border-color: var(--border-dark);
   }
 
   .editor {
-    color: white;
+    color: var(--color-dark);
   }
 
   .panel-head {
-    border-bottom: 1px solid black;
+    border-bottom: 1px solid var(--border-dark);
     background: #31314e;
   }
 
   .panel-header--open {
-    border-bottom: 1px solid black;
+    border-bottom: 1px solid var(--border-dark);
   }
 
   .pages {
     .button.page-name {
-      border-right: 1px solid var(--border-light);
+      border-right: 1px solid var(--border-dark);
     }
   }
 
@@ -1211,7 +1224,7 @@ body.dark {
 
   .panel-out-header .button.selected {
     background: #181824;
-    color: white;
+    color: var(--color-dark);
   }
 
   label,
@@ -1235,24 +1248,24 @@ body.dark {
   .sidebar,
   .project-name {
     background: #31314e;
-    border-color: black;
+    border-color: var(--border-dark);
   }
 
   .server,
   .connector {
-    border-bottom-color: black;
-    color: white;
+    border-bottom-color: var(--border-dark);
+    color: var(--color-dark);
   }
 
   .confirm-popup {
     background: #29293c;
-    color: white;
-    border-color: black;
+    color: var(--color-dark);
+    border-color: var(--border-dark);
     box-shadow: 0 1px 3px 0 #111;
   }
 
   .project-existing {
-    border-color: black;
+    border-color: var(--border-dark);
   }
 
   .input-invalid,
@@ -1261,6 +1274,6 @@ body.dark {
   }
 
   .global-dropdown p {
-    color: white;
+    color: var(--color-dark);
   }
 }

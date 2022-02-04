@@ -1,7 +1,6 @@
 import formatDistanceStrict from 'date-fns/formatDistanceStrict';
 import formatDistanceToNow from 'date-fns/formatDistanceToNow';
 import circularSafeStringify from 'json-stringify-safe';
-import { UrlStateContext } from './urlState';
 import * as CSV from 'papaparse';
 import * as React from 'react';
 import { toString } from 'shape';
@@ -25,6 +24,7 @@ import { Input } from './components/Input';
 import { Select } from './components/Select';
 import { PanelPlayWarning } from './errors';
 import { PANEL_GROUPS, PANEL_UI_DETAILS } from './panels';
+import { UrlStateContext } from './urlState';
 
 function valueAsString(value: any) {
   try {
@@ -230,13 +230,24 @@ export function Panel({
   blank.id = panel.id;
   blank.name = panel.name;
   const isBlank = deepEquals(panel, blank);
-  const [details, setDetails] = React.useState(isBlank);
   const [hidden, setHidden] = React.useState(false);
 
   const {
-    state: { fullScreen },
+    state: { fullScreen, expanded },
     setState: setUrlState,
   } = React.useContext(UrlStateContext);
+
+  const [details, setDetailsInternal] = React.useState(
+    isBlank || expanded.includes(panel.id)
+  );
+  function setDetails(b: boolean) {
+    setDetailsInternal(b);
+    if (!b) {
+      setUrlState({ expanded: expanded.filter((i) => i !== panel.id) });
+    } else {
+      setUrlState({ expanded: Array.from(new Set([...expanded, panel.id])) });
+    }
+  }
 
   const [panelOut, setPanelOut] = React.useState<
     'preview' | 'stdout' | 'shape' | 'metadata'
@@ -285,7 +296,9 @@ export function Panel({
   return (
     <div
       id={`panel-${panel.id}`}
-      className={`panel ${fullScreen === panel.id ? 'panel--fullscreen' : ''} ${hidden ? 'panel--hidden' : ''} ${
+      className={`panel ${fullScreen === panel.id ? 'panel--fullscreen' : ''} ${
+        hidden ? 'panel--hidden' : ''
+      } ${
         panelUIDetails.body === null && !results.exception ? 'panel--empty' : ''
       } ${results.loading ? 'panel--loading' : ''}`}
       tabIndex={1001}
@@ -419,8 +432,18 @@ export function Panel({
                 </Button>
               </span>
               <span title="Full screen mode">
-                <Button icon onClick={() => setUrlState({ fullScreen: fullScreen === panel.id ? null : panel.id})} disabled={hidden}>
-                  {fullScreen === panel.id ? 'close_fullscreen' : 'open_in_full'}
+                <Button
+                  icon
+                  onClick={() =>
+                    setUrlState({
+                      fullScreen: fullScreen === panel.id ? null : panel.id,
+                    })
+                  }
+                  disabled={hidden}
+                >
+                  {fullScreen === panel.id
+                    ? 'close_fullscreen'
+                    : 'open_in_full'}
                 </Button>
               </span>
               <span

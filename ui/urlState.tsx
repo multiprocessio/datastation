@@ -18,9 +18,10 @@ function getQueryParameter(param: String) {
 export interface UrlState {
   projectId: string;
   page: number;
-  fullScreen: string;
+  fullScreen?: string;
   view: 'editor' | 'dashboard' | 'scheduler' | 'settings';
   refreshPeriod?: number;
+  expanded?: Array<string>;
 }
 
 export function getUrlState(): UrlState {
@@ -29,6 +30,7 @@ export function getUrlState(): UrlState {
     page: +getQueryParameter('page') || 0,
     fullScreen: getQueryParameter('fullScreen'),
     view: (getQueryParameter('view') || 'editor') as UrlState['view'],
+    expanded: getQueryParameter('expanded').split(','),
   };
 }
 
@@ -45,7 +47,7 @@ export function useUrlState(): [UrlState, (a0: Partial<UrlState>) => void] {
     if (!deepEquals(currentState, state)) {
       const serialized = Object.keys(state)
         .map(function mapKey(k) {
-          return `${k}=${encodeURIComponent(state[k as keyof UrlState])}`;
+          return `${k}=${encodeURIComponent(String(state[k as keyof UrlState]))}`;
         })
         .join('&');
       const newUrl = window.location.pathname + '?' + serialized;

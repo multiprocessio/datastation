@@ -1,15 +1,14 @@
 import { preview } from 'preview';
-import { Radio } from '../components/Radio';
 import * as React from 'react';
 import { shape } from 'shape';
 import { MODE } from '../../shared/constants';
 import { InvalidDependentPanelError } from '../../shared/errors';
 import {
   PanelInfo,
+  PanelInfoWidth,
   PanelResult,
   TableColumn,
   TablePanelInfo,
-  PanelInfoWidth,
 } from '../../shared/state';
 import { columnsFromObject } from '../../shared/table';
 import { panelRPC } from '../asyncRPC';
@@ -18,6 +17,7 @@ import { Button } from '../components/Button';
 import { FieldPicker, unusedFields } from '../components/FieldPicker';
 import { FormGroup } from '../components/FormGroup';
 import { PanelSourcePicker } from '../components/PanelSourcePicker';
+import { Radio } from '../components/Radio';
 import { PanelBodyProps, PanelDetailsProps, PanelUIDetails } from './types';
 
 export async function evalColumnPanel(
@@ -119,31 +119,38 @@ export function TablePanelDetails({
           />
         </div>
         <div className="form-row">
-              <Radio
-                label="Width"
-                value={panel.table.width}
-                onChange={(value: string) => {
-                  panel.table.width = value as PanelInfoWidth;
-                  updatePanel(panel);
-                }}
-                options={[
-                  { label: 'Default', value: 'small' },
-                  { label: '75%', value: 'medium' },
-                  { label: '100%', value: 'large' },
-                ]}
-              />
-            </div>
+          <Radio
+            label="Width"
+            value={panel.table.width}
+            onChange={(value: string) => {
+              panel.table.width = value as PanelInfoWidth;
+              updatePanel(panel);
+            }}
+            options={[
+              { label: 'Default', value: 'small' },
+              { label: '75%', value: 'medium' },
+              { label: '100%', value: 'large' },
+            ]}
+          />
+        </div>
       </FormGroup>
       <FormGroup>
         {panel.table.columns.map(function mapColumnRender(c, i) {
           return (
-            <div className="form-row form-row--multi vertical-align-center" key={c.field + i}>
+            <div
+              className="form-row form-row--multi vertical-align-center"
+              key={c.field + i}
+            >
               <FieldPicker
                 used={panel.table.columns.map(mapColumnToField)}
-                onDelete={panel.table.columns.length > 1 ? function handleColumnDelete() {
-                  panel.table.columns.splice(i, 1);
-                  updatePanel(panel);
-                }: undefined}
+                onDelete={
+                  panel.table.columns.length > 1
+                    ? function handleColumnDelete() {
+                        panel.table.columns.splice(i, 1);
+                        updatePanel(panel);
+                      }
+                    : undefined
+                }
                 label="Column"
                 value={c.field}
                 shape={data?.shape}
@@ -207,7 +214,7 @@ export function TablePanel({ panel, panels }: PanelBodyProps<TablePanelInfo>) {
         {valueAsArray.map(function mapRows(row: any, i: number) {
           return (
             /* probably a better way to do this... */ <tr
-              key={Object.values(row).join(',')+i}
+              key={Object.values(row).join(',') + i}
             >
               {panel.table.columns.map(function mapColumnToCell(
                 column: TableColumn,

@@ -79,11 +79,11 @@ export function CodeEditor({
     >
       {label && <label className="label input-label">{label}</label>}
       <AceEditor
-        ref={r => editor.current = r}
+        ref={(r) => (editor.current = r)}
         mode={language}
         theme={theme === 'dark' ? 'dracula' : 'github'}
         maxLines={singleLine ? 1 : undefined}
-      wrapEnabled={true}
+        wrapEnabled={true}
         onChange={setLocalValue}
         onBlur={flushLocalValue}
         name={id}

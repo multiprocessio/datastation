@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { UrlStateContext } from './urlState';
 import {
   PanelInfo,
   PanelResultMeta,
@@ -10,6 +9,7 @@ import { Button } from './components/Button';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { Panel } from './Panel';
 import { PANEL_GROUPS, PANEL_UI_DETAILS } from './panels';
+import { UrlStateContext } from './urlState';
 
 export function PanelList({
   page,
@@ -57,17 +57,17 @@ export function PanelList({
             updatePage(page);
           }}
           options={PANEL_GROUPS.map((group) => (
-                <optgroup label={group.label} key={group.label}>
-                  {group.panels.map((name) => {
-                    const panelDetails = PANEL_UI_DETAILS[name];
-                    return (
-                      <option value={panelDetails.id} key={panelDetails.id}>
-                        {panelDetails.label}
-                      </option>
-                    );
-                  })}
-                </optgroup>
-              ))}
+            <optgroup label={group.label} key={group.label}>
+              {group.panels.map((name) => {
+                const panelDetails = PANEL_UI_DETAILS[name];
+                return (
+                  <option value={panelDetails.id} key={panelDetails.id}>
+                    {panelDetails.label}
+                  </option>
+                );
+              })}
+            </optgroup>
+          ))}
         >
           Add Panel
         </Button>
@@ -75,24 +75,26 @@ export function PanelList({
     );
   }
 
-  
   const {
     state: { fullScreen },
   } = React.useContext(UrlStateContext);
-  const fullScreenIndex = fullScreen ? page.panels.findIndex(p => p.id === fullScreen) : null;
+  const fullScreenIndex = fullScreen
+    ? page.panels.findIndex((p) => p.id === fullScreen)
+    : null;
   if (typeof fullScreenIndex === 'number' && fullScreenIndex >= 0) {
     const panel = page.panels[fullScreenIndex];
-    return <Panel
-            panel={panel}
-            updatePanel={updatePanel(page, panel.id)}
-            panelResults={panelResults}
-            reevalPanel={reevalPanel}
-            panelIndex={fullScreenIndex}
-            movePanel={movePanel}
-            removePanel={removePanel}
-            panels={page.panels}
-    />
-    ;
+    return (
+      <Panel
+        panel={panel}
+        updatePanel={updatePanel(page, panel.id)}
+        panelResults={panelResults}
+        reevalPanel={reevalPanel}
+        panelIndex={fullScreenIndex}
+        movePanel={movePanel}
+        removePanel={removePanel}
+        panels={page.panels}
+      />
+    );
   }
 
   return (
