@@ -1,8 +1,9 @@
 import debounce from 'lodash.debounce';
 import * as React from 'react';
 import { Tooltip } from './Tooltip';
+import { IN_TESTS } from '../../shared/constants';
 
-export const INPUT_SYNC_PERIOD = 3000;
+export const INPUT_SYNC_PERIOD = IN_TESTS ? 0 : 3000;
 
 export function useDebouncedLocalState(
   nonLocalValue: string | number | readonly string[],

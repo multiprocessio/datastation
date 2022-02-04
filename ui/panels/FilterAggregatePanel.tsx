@@ -255,6 +255,7 @@ export function FilterAggregatePanelDetails({
               <FieldPicker
                 preferredDefaultType="number"
                 label="Field"
+              data-test-id="sort-field"
                 shape={withAggregateShape(data, panel)}
                 value={panel.filagg.sortOn}
                 onChange={(value: string) => {
@@ -263,8 +264,9 @@ export function FilterAggregatePanelDetails({
                 }}
               />
               <Select
+                data-test-id="sort-direction"
                 label="Direction"
-                value={panel.filagg.aggregateType}
+                value={panel.filagg.sortAsc ? 'asc' : 'desc'}
                 onChange={(value: string) => {
                   panel.filagg.sortAsc = value === 'asc';
                   updatePanel(panel);

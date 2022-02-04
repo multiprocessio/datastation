@@ -42,3 +42,5 @@ export const MODE_FEATURES = {
 // There is no /docs/development/ so replace it with /docs/latest/
 const DOCS_VERSION = VERSION === 'development' ? 'latest' : VERSION;
 export const DOCS_ROOT = SITE_ROOT + '/docs/' + DOCS_VERSION;
+
+export const IN_TESTS = process.env.JEST_WORKER_ID !== undefined;
