@@ -16,32 +16,40 @@ export function useDebouncedLocalState(
   }
 
   const [defaultChanged, setDefaultChanged] = React.useState(false);
+  const debounced = React.useCallback(debounce(nonLocalSet, delay), []);
 
   const [localValue, setLocalValue] = React.useState(nonLocalValue);
+  // Resync to props when props changes
   React.useEffect(() => {
+    debounced.flush();
     setDefaultChanged(true);
     setLocalValue(nonLocalValue);
   }, [nonLocalValue]);
 
-  const debounced = React.useCallback(debounce(nonLocalSet, delay), []);
   function wrapSetLocalValue(v: string) {
+    // Only important the first time
     setDefaultChanged(true);
+
+    // First update local state
     setLocalValue(v);
+
+    // Then set off debouncer to eventually update external state
     debounced(v);
   }
 
-  const flushLocalValue = React.useCallback(function flushLocalValue() {
-    debounced.cancel();
-    nonLocalSet(String(localValue));
-  }, [debounced, localValue]);
+  function flushValue() {
+    console.log('flushing', debounced.flush);
+    debounced.flush();
+  }
 
+  // Set up initial value if there is any
   React.useEffect(() => {
     if (!localValue && defaultValue && !defaultChanged) {
       wrapSetLocalValue(defaultValue);
     }
   });
 
-  return [localValue, wrapSetLocalValue, flushLocalValue];
+  return [localValue, wrapSetLocalValue, flushValue];
 }
 
 export interface InputProps
@@ -77,8 +85,10 @@ export function Input({
   );
 
   function removeOuterWhitespaceOnFinish() {
+    let v = localValue;
     if (typeof localValue === 'string') {
-      setLocalValue(localValue.trim());
+      v = localValue.trim();
+      setLocalValue(v);
     }
 
     flushLocalValue();

@@ -45,7 +45,7 @@ function useProjectState(
     function setState(newState: ProjectState, addToRestoreBuffer = true) {
       // Don't hang renderer while updating
       setTimeout(function () {
-	store.update(projectId, newState, addToRestoreBuffer)
+        store.update(projectId, newState, addToRestoreBuffer);
       }, 0);
       const c = { ...newState };
       Object.setPrototypeOf(c, ProjectState.prototype);
