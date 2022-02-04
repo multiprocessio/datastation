@@ -55,6 +55,22 @@ export function CodeEditor({
     onChange
   );
 
+  const editor = React.useRef(null);
+
+  // Make sure editor resizes if the overall panel changes size. For
+  // example this happens when the preview height changes.
+  React.useEffect(() => {
+    if (editor.current) {
+      const panel = editor.current.editor.container.closest('.panel');
+      const obs = new ResizeObserver(function handleEditorResize() {
+        editor.current.editor.resize();
+      });
+      obs.observe(panel);
+
+      return () => obs.disconnect();
+    }
+  }, [editor.current]);
+
   return (
     <div
       className={`editor-container ${
@@ -63,9 +79,11 @@ export function CodeEditor({
     >
       {label && <label className="label input-label">{label}</label>}
       <AceEditor
+        ref={r => editor.current = r}
         mode={language}
         theme={theme === 'dark' ? 'dracula' : 'github'}
         maxLines={singleLine ? 1 : undefined}
+      wrapEnabled={true}
         onChange={setLocalValue}
         onBlur={flushLocalValue}
         name={id}

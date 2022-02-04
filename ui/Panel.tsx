@@ -1,6 +1,7 @@
 import formatDistanceStrict from 'date-fns/formatDistanceStrict';
 import formatDistanceToNow from 'date-fns/formatDistanceToNow';
 import circularSafeStringify from 'json-stringify-safe';
+import { UrlStateContext } from './urlState';
 import * as CSV from 'papaparse';
 import * as React from 'react';
 import { toString } from 'shape';
@@ -232,6 +233,11 @@ export function Panel({
   const [details, setDetails] = React.useState(isBlank);
   const [hidden, setHidden] = React.useState(false);
 
+  const {
+    state: { fullScreen },
+    setState: setUrlState,
+  } = React.useContext(UrlStateContext);
+
   const [panelOut, setPanelOut] = React.useState<
     'preview' | 'stdout' | 'shape' | 'metadata'
   >('preview');
@@ -279,7 +285,7 @@ export function Panel({
   return (
     <div
       id={`panel-${panel.id}`}
-      className={`panel ${hidden ? 'panel--hidden' : ''} ${
+      className={`panel ${fullScreen === panel.id ? 'panel--fullscreen' : ''} ${hidden ? 'panel--hidden' : ''} ${
         panelUIDetails.body === null && !results.exception ? 'panel--empty' : ''
       } ${results.loading ? 'panel--loading' : ''}`}
       tabIndex={1001}
@@ -412,6 +418,11 @@ export function Panel({
                   {results.loading ? 'close' : 'play_arrow'}
                 </Button>
               </span>
+              <span title="Full screen mode">
+                <Button icon onClick={() => setUrlState({ fullScreen: fullScreen === panel.id ? null : panel.id})} disabled={hidden}>
+                  {fullScreen === panel.id ? 'close_fullscreen' : 'open_in_full'}
+                </Button>
+              </span>
               <span
                 title={
                   !results.lastRun ? 'Panel not yet run' : 'Download Results'
@@ -498,7 +509,7 @@ export function Panel({
                         className={panelOut === 'preview' ? 'selected' : ''}
                         onClick={() => setPanelOut('preview')}
                       >
-                        Preview
+                        Result
                       </Button>
                       <Button
                         className={panelOut === 'shape' ? 'selected' : ''}

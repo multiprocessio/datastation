@@ -9,6 +9,7 @@ import {
   PanelResult,
   TableColumn,
   TablePanelInfo,
+  PanelInfoWidth,
 } from '../../shared/state';
 import { columnsFromObject } from '../../shared/table';
 import { panelRPC } from '../asyncRPC';
@@ -203,10 +204,10 @@ export function TablePanel({ panel, panels }: PanelBodyProps<TablePanelInfo>) {
         </tr>
       </thead>
       <tbody>
-        {valueAsArray.map(function mapRows(row: any) {
+        {valueAsArray.map(function mapRows(row: any, i: number) {
           return (
             /* probably a better way to do this... */ <tr
-              key={Object.values(row).join(',')}
+              key={Object.values(row).join(',')+i}
             >
               {panel.table.columns.map(function mapColumnToCell(
                 column: TableColumn,

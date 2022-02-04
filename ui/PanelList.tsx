@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { UrlStateContext } from './urlState';
 import {
   PanelInfo,
   PanelResultMeta,
@@ -72,6 +73,26 @@ export function PanelList({
         </Button>
       </div>
     );
+  }
+
+  
+  const {
+    state: { fullScreen },
+  } = React.useContext(UrlStateContext);
+  const fullScreenIndex = fullScreen ? page.panels.findIndex(p => p.id === fullScreen) : null;
+  if (typeof fullScreenIndex === 'number' && fullScreenIndex >= 0) {
+    const panel = page.panels[fullScreenIndex];
+    return <Panel
+            panel={panel}
+            updatePanel={updatePanel(page, panel.id)}
+            panelResults={panelResults}
+            reevalPanel={reevalPanel}
+            panelIndex={fullScreenIndex}
+            movePanel={movePanel}
+            removePanel={removePanel}
+            panels={page.panels}
+    />
+    ;
   }
 
   return (

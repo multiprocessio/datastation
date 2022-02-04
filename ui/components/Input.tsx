@@ -39,7 +39,6 @@ export function useDebouncedLocalState(
   }
 
   function flushValue() {
-    console.log('flushing', debounced.flush);
     debounced.flush();
   }
 

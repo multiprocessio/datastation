@@ -545,16 +545,40 @@ input + input[type='file'] {
   margin: 15px;
 }
 
-/*
-.connector:focus-within,
-.connector:focus,
-.server:focus-within,
-.server:focus,
-.panel:focus-within,
-.panel:focus {
-  border-color: #9f04ff;
+.panel {
+    transition: all .5s;
 }
-*/
+
+.panel--fullscreen {
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 999;
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    border: 0;
+    display: flex;
+    flex-direction: column;
+
+    .panel-header {
+	border: 0;
+    }
+
+    .panel-body-container {
+	flex: 1;
+
+	.flex {
+	    height: 100%;
+	    flex-direction: column;
+	}
+
+	.panel-out {
+	    width: initial;
+	    height: 400px;
+	}
+    }
+}
 
 .panel--loading {
   animation: pulse 2s infinite ease-out;
@@ -925,8 +949,16 @@ canvas {
   }
 }
 
-th {
-  text-align: left;
+.table {
+    border-collapse: collapse;
+
+    th {
+	text-align: left;
+    }
+
+    th, td {
+	padding: 5px;
+    }
 }
 
 tbody tr:nth-child(odd) {
