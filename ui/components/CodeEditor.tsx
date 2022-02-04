@@ -50,7 +50,7 @@ export function CodeEditor({
   const {
     state: { theme },
   } = React.useContext(SettingsContext);
-  const [localValue, setLocalValue] = useDebouncedLocalState(value, onChange);
+  const [localValue, setLocalValue, flushLocalValue] = useDebouncedLocalState(value, onChange);
 
   return (
     <div
@@ -63,7 +63,8 @@ export function CodeEditor({
         mode={language}
         theme={theme === 'dark' ? 'dracula' : 'github'}
         maxLines={singleLine ? 1 : undefined}
-        onChange={setLocalValue}
+    onChange={setLocalValue}
+    onBlur={flushLocalValue}
         name={id}
         value={String(localValue)}
         placeholder={placeholder}
@@ -81,11 +82,13 @@ export function CodeEditor({
           {
             name: 'ctrl-enter',
             bindKey: { win: 'Ctrl-Enter', mac: 'Ctrl-Enter' },
-            exec: () =>
-              onKeyDown({
+            exec: () => {
+	      flushLocalValue();
+              return onKeyDown({
                 ctrlKey: true,
                 code: 'Enter',
-              } as React.KeyboardEvent),
+              } as React.KeyboardEvent);
+	    },
           },
           singleLine
             ? {

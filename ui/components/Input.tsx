@@ -10,9 +10,9 @@ export function useDebouncedLocalState(
   isText = true,
   delay = INPUT_SYNC_PERIOD,
   defaultValue = ''
-): [string | number | readonly string[], (v: string) => void] {
+): [string | number | readonly string[], (v: string) => void, () => void] {
   if (!isText) {
-    return [nonLocalValue, nonLocalSet];
+    return [nonLocalValue, nonLocalSet, () => {}];
   }
 
   const [defaultChanged, setDefaultChanged] = React.useState(false);
@@ -30,13 +30,18 @@ export function useDebouncedLocalState(
     debounced(v);
   }
 
+  const flushLocalValue = React.useCallback(function flushLocalValue() {
+    debounced.cancel();
+    nonLocalSet(String(localValue));
+  }, [debounced, localValue]);
+
   React.useEffect(() => {
     if (!localValue && defaultValue && !defaultChanged) {
       wrapSetLocalValue(defaultValue);
     }
   });
 
-  return [localValue, wrapSetLocalValue];
+  return [localValue, wrapSetLocalValue, flushLocalValue];
 }
 
 export interface InputProps
@@ -63,7 +68,7 @@ export function Input({
 }: InputProps) {
   let inputClass = `input ${className ? ' ' + className : ''}`;
 
-  const [localValue, setLocalValue] = useDebouncedLocalState(
+  const [localValue, setLocalValue, flushLocalValue] = useDebouncedLocalState(
     value,
     onChange,
     type !== 'checkbox' && type !== 'radio',
@@ -75,6 +80,8 @@ export function Input({
     if (typeof localValue === 'string') {
       setLocalValue(localValue.trim());
     }
+
+    flushLocalValue();
   }
 
   const input = (
