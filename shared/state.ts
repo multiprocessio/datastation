@@ -456,6 +456,7 @@ export class TablePanelInfo extends PanelInfo {
     columns: Array<TableColumn>;
     panelSource: string;
     width: PanelInfoWidth;
+    rowNumbers: boolean;
   };
 
   constructor(
@@ -468,6 +469,7 @@ export class TablePanelInfo extends PanelInfo {
       columns: defaults.columns || [],
       panelSource: defaults.panelSource || '',
       width: defaults.width || 'small',
+      rowNumbers: defaults.rowNumbers || true,
     };
   }
 }

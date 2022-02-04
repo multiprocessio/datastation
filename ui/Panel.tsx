@@ -1,3 +1,16 @@
+import {
+  IconArrowsDiagonal,
+  IconArrowsDiagonalMinimize2,
+  IconChevronDown,
+  IconChevronUp,
+  IconDotsVertical,
+  IconDownload,
+  IconEye,
+  IconEyeOff,
+  IconPlayerPause,
+  IconPlayerPlay,
+  IconTrash,
+} from '@tabler/icons';
 import formatDistanceStrict from 'date-fns/formatDistanceStrict';
 import formatDistanceToNow from 'date-fns/formatDistanceToNow';
 import circularSafeStringify from 'json-stringify-safe';
@@ -320,7 +333,7 @@ export function Panel({
                   movePanel(panelIndex, panelIndex - 1);
                 }}
               >
-                keyboard_arrow_up
+                <IconChevronUp />
               </Button>
             </span>
             <span title="Move Down">
@@ -331,7 +344,7 @@ export function Panel({
                   movePanel(panelIndex, panelIndex + 1);
                 }}
               >
-                keyboard_arrow_down
+                <IconChevronDown />
               </Button>
             </span>
             <Select
@@ -378,7 +391,7 @@ export function Panel({
                 icon
                 onClick={() => setDetails(!details)}
               >
-                {details ? 'menu_open' : 'menu'}
+                <IconDotsVertical />
               </Button>
             </span>
 
@@ -428,7 +441,7 @@ export function Panel({
                   }
                   type="primary"
                 >
-                  {results.loading ? 'close' : 'play_arrow'}
+                  {results.loading ? <IconPlayerPause /> : <IconPlayerPlay />}
                 </Button>
               </span>
               <span title="Full screen mode">
@@ -441,9 +454,11 @@ export function Panel({
                   }
                   disabled={hidden}
                 >
-                  {fullScreen === panel.id
-                    ? 'close_fullscreen'
-                    : 'open_in_full'}
+                  {fullScreen === panel.id ? (
+                    <IconArrowsDiagonalMinimize2 />
+                  ) : (
+                    <IconArrowsDiagonal />
+                  )}
                 </Button>
               </span>
               <span
@@ -458,12 +473,12 @@ export function Panel({
                     fetchAndDownloadResults(panel, panelRef, results)
                   }
                 >
-                  file_download
+                  <IconDownload />
                 </Button>
               </span>
               <span title="Hide Panel">
                 <Button icon onClick={() => setHidden(!hidden)}>
-                  {hidden ? 'visibility' : 'visibility_off'}
+                  {hidden ? <IconEye /> : <IconEyeOff />}
                 </Button>
               </span>
               <span title="Delete Panel">
@@ -473,7 +488,7 @@ export function Panel({
                   action="Delete"
                   render={(confirm: () => void) => (
                     <Button icon onClick={confirm} type="outline">
-                      delete
+                      <IconTrash />
                     </Button>
                   )}
                 />

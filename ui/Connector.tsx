@@ -1,3 +1,4 @@
+import { IconTrash } from '@tabler/icons';
 import * as React from 'react';
 import { ConnectorInfo, DatabaseConnectorInfo } from '../shared/state';
 import { Button } from './components/Button';
@@ -50,7 +51,7 @@ export function Connector({
               action="Delete"
               render={(confirm: () => void) => (
                 <Button icon onClick={confirm} type="outline">
-                  delete
+                  <IconTrash />
                 </Button>
               )}
             />

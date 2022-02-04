@@ -1,9 +1,11 @@
+import { IconChartBar, IconTable } from '@tabler/icons';
 import * as React from 'react';
 import {
   PanelInfo,
   PanelResultMeta,
   ProgramPanelInfo,
   ProjectPage,
+  TablePanelInfo,
 } from '../shared/state';
 import { Button } from './components/Button';
 import { ErrorBoundary } from './components/ErrorBoundary';
@@ -45,6 +47,25 @@ export function PanelList({
   }
 
   function newPanel(panelIndex: number) {
+    const panel = page.panels[panelIndex];
+
+    function makePanel(type: string, prefix: string) {
+      const next = new TablePanelInfo({
+        name: prefix + ' ' + panel.name,
+        panelSource: panel.id,
+      });
+      page.panels.splice(panelIndex + 1, 0, next);
+      updatePage(page);
+    }
+
+    const offerToGraph =
+      panel &&
+      !['graph', 'table'].includes(panel.type) &&
+      panel.resultMeta &&
+      panel.resultMeta.shape &&
+      panel.resultMeta.shape.kind === 'array' &&
+      panel.resultMeta.shape.children.kind === 'object';
+
     return (
       <div className="new-panel">
         <Button
@@ -71,6 +92,20 @@ export function PanelList({
         >
           Add Panel
         </Button>
+        {offerToGraph ? (
+          <React.Fragment>
+            <span title="Generate a graph for the above panel">
+              <Button onClick={() => makePanel('graph', 'Graph of ')} icon>
+                <IconChartBar />
+              </Button>
+            </span>
+            <span title="Generate a table for the above panel">
+              <Button onClick={() => makePanel('table', 'Data from')} icon>
+                <IconTable />
+              </Button>
+            </span>
+          </React.Fragment>
+        ) : null}
       </div>
     );
   }

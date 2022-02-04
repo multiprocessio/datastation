@@ -1,3 +1,4 @@
+import { IconTrash } from '@tabler/icons';
 import * as React from 'react';
 import { MODE_FEATURES } from '../shared/constants';
 import { EVAL_ERRORS } from '../shared/errors';
@@ -182,8 +183,8 @@ export function PageList({
                   action="Delete"
                   className="page-delete"
                   render={(confirm: () => void) => (
-                    <Button icon onClick={confirm} type="outline">
-                      delete
+                    <Button icon onClick={confirm}>
+                      <IconTrash />
                     </Button>
                   )}
                 />

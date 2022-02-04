@@ -14,7 +14,7 @@ export function Button({ className, type, icon, ...props }: ButtonProps) {
   }
 
   if (icon) {
-    buttonClass += ' material-icons' + (type === 'outline' ? '-outlined' : '');
+    buttonClass += ' button--icon';
   }
 
   return <button type="button" className={buttonClass} {...props} />;

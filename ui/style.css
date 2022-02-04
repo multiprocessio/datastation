@@ -284,6 +284,11 @@ input + input[type='file'] {
   font-size: 0.75rem;
 }
 
+.horizontal-align-center {
+  display: flex;
+  justifyin-content: center;
+}
+
 .vertical-align-center {
   display: flex;
   align-items: center;
@@ -318,12 +323,6 @@ input + input[type='file'] {
   box-shadow: 0px 0px 3px var(--border-light);
 }
 
-.material-icons,
-.material-icons-outlined {
-  width: 24px;
-  height: 24px;
-}
-
 .button:hover {
   background: #f0f0f0;
 }
@@ -338,32 +337,34 @@ input + input[type='file'] {
   background: #56008c;
 }
 
-.button.material-icons,
-.button.material-icons-outlined {
+.button--icon {
   box-shadow: initial;
   border: 0;
   background: transparent;
   color: #777;
   padding: 0;
+
+  svg {
+    height: 18px;
+    width: 18px;
+  }
 }
 
-.button:not(.material-icons):not(.material-icons-outlined):disabled,
-.button:not(.material-icons):not(.material-icons-outlined):disabled:hover {
+.button:not(.button--icon):disabled,
+.button:not(.button--icon):disabled:hover {
   background: #ccc;
   color: #999;
   cursor: not-allowed;
   pointer-events: all !important;
 }
 
-.button.button--primary.material-icons,
-.button.button--primary.material-icons-outlined {
+.button.button--primary.button--icon {
+  background: transparent;
   color: #9f04ff;
 }
 
-.button.material-icons:disabled,
-.button.material-icons-outlined:disabled,
-.button.material-icons:disabled:hover,
-.button.material-icons-outlined:disabled:hover {
+.button.button--icon:disabled,
+.button.button--icon:disabled:hover {
   cursor: not-allowed;
   pointer-events: all !important;
   color: #ccc;
@@ -724,7 +725,13 @@ input + input[type='file'] {
 }
 
 .new-panel {
-  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .button {
+    margin: 0 5px;
+  }
 }
 
 .new-panel:not(:last-child) {
@@ -792,7 +799,7 @@ input + input[type='file'] {
   }
 }
 
-.alert > .material-icons {
+.alert > .button--icon {
   margin-right: 15px;
   color: #555;
 }
@@ -1137,8 +1144,7 @@ body.dark {
     box-shadow: 0px 0px 3px var(--border-dark);
   }
 
-  .button.material-icons,
-  .button.material-icons-outlined {
+  .button.button--icon {
     border: 0;
     box-shadow: initial;
     background: transparent;
@@ -1146,8 +1152,7 @@ body.dark {
     padding: 0;
   }
 
-  .button.material-icons.button--primary,
-  .button.material-icons-outlined.button--primary {
+  .button.button--icon.button--primary {
     color: #4fffa6;
   }
 

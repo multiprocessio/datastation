@@ -120,6 +120,20 @@ export function TablePanelDetails({
         </div>
         <div className="form-row">
           <Radio
+            label="Row Numbers"
+            value={String(panel.table.rowNumbers)}
+            onChange={(value: string) => {
+              panel.table.rowNumbers = value === 'true';
+              updatePanel(panel);
+            }}
+            options={[
+              { label: 'Visible', value: 'true' },
+              { label: 'Hidden', value: 'false' },
+            ]}
+          />
+        </div>
+        <div className="form-row">
+          <Radio
             label="Width"
             value={panel.table.width}
             onChange={(value: string) => {
@@ -202,6 +216,7 @@ export function TablePanel({ panel, panels }: PanelBodyProps<TablePanelInfo>) {
     <table className={`table table--${panel.table.width}`}>
       <thead>
         <tr>
+          {panel.table.rowNumbers ? <th></th> : null}
           {panel.table.columns.map(function mapColumnToHeader(
             column: TableColumn,
             i: number
@@ -216,6 +231,16 @@ export function TablePanel({ panel, panels }: PanelBodyProps<TablePanelInfo>) {
             /* probably a better way to do this... */ <tr
               key={Object.values(row).join(',') + i}
             >
+              {panel.table.rowNumbers ? (
+                <td
+                  className="text-muted"
+                  style={{
+                    width: 0 /* magically uses up least amount of space needed */,
+                  }}
+                >
+                  <small>#{i + 1}</small>
+                </td>
+              ) : null}
               {panel.table.columns.map(function mapColumnToCell(
                 column: TableColumn,
                 i: number

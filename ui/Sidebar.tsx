@@ -1,3 +1,4 @@
+import { IconChevronLeft, IconChevronRight, IconSearch } from '@tabler/icons';
 import * as React from 'react';
 import { Button } from './components/Button';
 
@@ -7,7 +8,7 @@ export function Sidebar({ children }: { children: React.ReactNode }) {
   return (
     <div className={`section sidebar ${!expanded ? 'sidebar--collapsed' : ''}`}>
       <div className="title vertical-align-center">
-        <span className="material-icons-outlined">manage_search</span>
+        <IconSearch height={18} width={18} />
         <Button
           icon
           className="flex-right"
@@ -15,7 +16,7 @@ export function Sidebar({ children }: { children: React.ReactNode }) {
             return setExpanded(!expanded);
           }}
         >
-          {expanded ? 'keyboard_arrow_left' : 'keyboard_arrow_right'}
+          {expanded ? <IconChevronLeft /> : <IconChevronRight />}
         </Button>
       </div>
       {expanded && children}

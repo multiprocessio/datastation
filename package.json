@@ -25,6 +25,7 @@
     "e2e-test": "node --unhandled-rejections=throw ./e2e/index.js"
   },
   "dependencies": {
+    "@tabler/icons": "^1.53.0",
     "ace-builds": "^1.4.13",
     "chart.js": "^3.5.1",
     "cookie-parser": "^1.4.5",

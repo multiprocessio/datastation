@@ -1,3 +1,4 @@
+import { IconTrash } from '@tabler/icons';
 import * as React from 'react';
 import { MODE } from '../shared/constants';
 import { ServerInfo, ServerInfoType } from '../shared/state';
@@ -74,7 +75,7 @@ export function Server({
               render={function renderDelete(confirm: () => void) {
                 return (
                   <Button icon onClick={confirm} type="outline">
-                    delete
+                    <IconTrash />
                   </Button>
                 );
               }}
