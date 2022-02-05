@@ -41,7 +41,7 @@ jobs:
         SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER }}
         SNOWFLAKE_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}
         SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
-    - run: cd runner && go test -coverprofile ../coverage/gounit.cov
+    - run: cd runner && go test -race -coverprofile ../coverage/gounit.cov
     - run: ./runner/scripts/test_coverage.sh
     # Test server builds
     - run: yarn build-server
@@ -135,7 +135,7 @@ jobs:
     # Needed so we can have ./build/desktop_runner.js ready for tests
     - run: yarn build-test-runner
     - run: yarn test --runInBand --detectOpenHandles --forceExit --verbose shared ui desktop
-    - run: cd runner && go test -cover
+    - run: cd runner && go test -race -cover
     - run: yarn release-desktop 0.0.0-e2etest
     - run: git reset --hard # release blows everything up
     - run: yarn e2e-test
@@ -166,7 +166,7 @@ jobs:
     # Needed so we can have ./build/desktop_runner.js ready for tests
     - run: yarn build-test-runner
     - run: yarn test --runInBand --detectOpenHandles --forceExit --verbose shared ui desktop
-    - run: cd runner && go test -cover
+    - run: cd runner && go test -race -cover
     - run: yarn release-desktop 0.0.0-e2etest
     - run: git reset --hard # release blows everything up
     - run: yarn e2e-test
