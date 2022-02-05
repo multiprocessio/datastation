@@ -1,6 +1,11 @@
+## yarn test vs yarn test-local
+
+The latter just doesn't involve running test coverage which takes
+longer and isn't that useful locally.
+
 ## Jest crashes with too many workers exception
 
-Run tests again with `--runInBand`: `yarn test --runInBand`.
+Run tests again with `--runInBand`: `yarn test-local --runInBand`.
 
 ## The packaged app is not starting, giving error messages
 
@@ -23,12 +28,12 @@ general.
 
 Should move to something that is not ts-jest eventually.
 
-## Run a single JavaScript test file
+## Run a single JavaScript test-local file
 
-Pass the test file name to `yarn test`.
+Pass the test-local file name to `yarn test`.
 
 ```bash
-yarn test server/exporter.test.js
+yarn test-local server/exporter.test.js
 ```
 
 ## Run tests on only a single runner type
@@ -41,7 +46,7 @@ tests against that runner will be run.
 For example:
 
 ```bash
-yarn test desktop/panel/file.test.js --dsrunner=memory
+yarn test-local desktop/panel/file.test.js --dsrunner=memory
 ```
 
 ## Adding/editing language libraries
