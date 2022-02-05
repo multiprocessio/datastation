@@ -3,6 +3,7 @@ require('../../shared/polyfill');
 const { ensureSigningKey } = require('../secret');
 const { spawn } = require('child_process');
 const { CODE_ROOT } = require('../constants');
+const fetch = require('node-fetch');
 const path = require('path');
 const cp = require('child_process');
 const os = require('os');
@@ -47,10 +48,6 @@ beforeAll(async () => {
 
   // Start a new server for all tests
   server = spawn('python3', ['-m', 'http.server', PORT]);
-  let ready = false;
-  server.on('spawn', () => {
-    ready = true;
-  });
 
   server.stdout.on('data', (data) => {
     console.log(data.toString());
@@ -60,16 +57,18 @@ beforeAll(async () => {
     console.warn(data.toString());
   });
 
+  // Keep trying to connect to the server until it's ready
   return new Promise(async (resolve, reject) => {
-    try {
-      while (!ready) {
-        console.log('still waiting');
-        await new Promise((resolve) => setTimeout(resolve, 300));
+    while (true) {
+      try {
+        await fetch('http://localhost:' + PORT);
+        resolve();
+        return;
+      } catch (e) {
+        console.log(e);
       }
 
-      resolve();
-    } catch (e) {
-      reject(e);
+      await new Promise((resolve) => setTimeout(resolve, 1000));
     }
   });
 });

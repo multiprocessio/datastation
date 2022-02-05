@@ -1,13 +1,21 @@
+import { IconChevronLeft, IconChevronRight } from '@tabler/icons';
 import * as React from 'react';
 import { Button } from './components/Button';
+import { UrlStateContext } from './urlState';
 
 export function Sidebar({ children }: { children: React.ReactNode }) {
-  const [expanded, setExpanded] = React.useState(true);
+  const {
+    state: { sidebar: expanded },
+    setState: setUrlState,
+  } = React.useContext(UrlStateContext);
+
+  function setExpanded(v: boolean) {
+    setUrlState({ sidebar: v });
+  }
 
   return (
     <div className={`section sidebar ${!expanded ? 'sidebar--collapsed' : ''}`}>
       <div className="title vertical-align-center">
-        <span className="material-icons-outlined">manage_search</span>
         <Button
           icon
           className="flex-right"
@@ -15,7 +23,7 @@ export function Sidebar({ children }: { children: React.ReactNode }) {
             return setExpanded(!expanded);
           }}
         >
-          {expanded ? 'keyboard_arrow_left' : 'keyboard_arrow_right'}
+          {expanded ? <IconChevronLeft /> : <IconChevronRight />}
         </Button>
       </div>
       {expanded && children}

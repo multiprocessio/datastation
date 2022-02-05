@@ -24,7 +24,7 @@ export function Auth(props: {
   );
 
   return (
-    <FormGroup label="Authentication">
+    <FormGroup>
       <div className="form-row">
         <Select
           label="Authentication"

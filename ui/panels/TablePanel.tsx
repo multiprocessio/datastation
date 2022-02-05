@@ -5,6 +5,7 @@ import { MODE } from '../../shared/constants';
 import { InvalidDependentPanelError } from '../../shared/errors';
 import {
   PanelInfo,
+  PanelInfoWidth,
   PanelResult,
   TableColumn,
   TablePanelInfo,
@@ -16,6 +17,7 @@ import { Button } from '../components/Button';
 import { FieldPicker, unusedFields } from '../components/FieldPicker';
 import { FormGroup } from '../components/FormGroup';
 import { PanelSourcePicker } from '../components/PanelSourcePicker';
+import { Radio } from '../components/Radio';
 import { PanelBodyProps, PanelDetailsProps, PanelUIDetails } from './types';
 
 export async function evalColumnPanel(
@@ -104,7 +106,7 @@ export function TablePanelDetails({
 
   return (
     <React.Fragment>
-      <FormGroup label="General">
+      <FormGroup>
         <div className="form-row">
           <PanelSourcePicker
             currentPanel={panel.id}
@@ -116,18 +118,54 @@ export function TablePanelDetails({
             }}
           />
         </div>
+        <div className="form-row">
+          <Radio
+            label="Row Numbers"
+            value={String(panel.table.rowNumbers)}
+            onChange={(value: string) => {
+              panel.table.rowNumbers = value === 'true';
+              updatePanel(panel);
+            }}
+            options={[
+              { label: 'Visible', value: 'true' },
+              { label: 'Hidden', value: 'false' },
+            ]}
+          />
+        </div>
+        <div className="form-row">
+          <Radio
+            label="Width"
+            value={panel.table.width}
+            onChange={(value: string) => {
+              panel.table.width = value as PanelInfoWidth;
+              updatePanel(panel);
+            }}
+            options={[
+              { label: 'Default', value: 'small' },
+              { label: '75%', value: 'medium' },
+              { label: '100%', value: 'large' },
+            ]}
+          />
+        </div>
       </FormGroup>
-      <FormGroup label="Columns">
+      <FormGroup>
         {panel.table.columns.map(function mapColumnRender(c, i) {
           return (
-            <div className="form-row vertical-align-center" key={c.field + i}>
+            <div
+              className="form-row form-row--multi vertical-align-center"
+              key={c.field + i}
+            >
               <FieldPicker
                 used={panel.table.columns.map(mapColumnToField)}
-                onDelete={function handleColumnDelete() {
-                  panel.table.columns.splice(i, 1);
-                  updatePanel(panel);
-                }}
-                label="Field"
+                onDelete={
+                  panel.table.columns.length > 1
+                    ? function handleColumnDelete() {
+                        panel.table.columns.splice(i, 1);
+                        updatePanel(panel);
+                      }
+                    : undefined
+                }
+                label="Column"
                 value={c.field}
                 shape={data?.shape}
                 onChange={function handleFieldChange(value: string) {
@@ -175,9 +213,10 @@ export function TablePanel({ panel, panels }: PanelBodyProps<TablePanelInfo>) {
   // column key is (field + i) everywhere because columns can be
   // duplicated. Maybe should assign a uuid to them instead
   return (
-    <table>
+    <table className={`table table--${panel.table.width}`}>
       <thead>
         <tr>
+          {panel.table.rowNumbers ? <th></th> : null}
           {panel.table.columns.map(function mapColumnToHeader(
             column: TableColumn,
             i: number
@@ -187,11 +226,21 @@ export function TablePanel({ panel, panels }: PanelBodyProps<TablePanelInfo>) {
         </tr>
       </thead>
       <tbody>
-        {valueAsArray.map(function mapRows(row: any) {
+        {valueAsArray.map(function mapRows(row: any, i: number) {
           return (
             /* probably a better way to do this... */ <tr
-              key={Object.values(row).join(',')}
+              key={Object.values(row).join(',') + i}
             >
+              {panel.table.rowNumbers ? (
+                <td
+                  className="text-muted"
+                  style={{
+                    width: 0 /* magically uses up least amount of space needed */,
+                  }}
+                >
+                  <small>#{i + 1}</small>
+                </td>
+              ) : null}
               {panel.table.columns.map(function mapColumnToCell(
                 column: TableColumn,
                 i: number

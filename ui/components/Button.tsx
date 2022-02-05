@@ -4,6 +4,7 @@ export interface ButtonProps
   extends React.InputHTMLAttributes<HTMLInputElement> {
   type?: 'primary' | 'outline';
   icon?: boolean;
+  options?: React.ReactNode;
 }
 
 export function Button({ className, type, icon, ...props }: ButtonProps) {
@@ -13,7 +14,7 @@ export function Button({ className, type, icon, ...props }: ButtonProps) {
   }
 
   if (icon) {
-    buttonClass += ' material-icons' + (type === 'outline' ? '-outlined' : '');
+    buttonClass += ' button--icon';
   }
 
   return <button type="button" className={buttonClass} {...props} />;

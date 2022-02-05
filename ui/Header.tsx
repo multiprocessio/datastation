@@ -1,3 +1,4 @@
+import { IconMenu2 } from '@tabler/icons';
 import * as React from 'react';
 import { APP_NAME, MODE } from '../shared/constants';
 import '../shared/polyfill';
@@ -63,7 +64,7 @@ export function Header() {
                   toggleDropdown((open) => !open);
                 }}
               >
-                menu
+                <IconMenu2 />
               </Button>
             </div>
             <div className="global-dropdown-body">
@@ -85,7 +86,7 @@ export function Header() {
                   </div>
                   <div className="global-dropdown-item">
                     <Link args={{ projectId, view: 'settings', page: 0 }}>
-                      See All
+                      All Settings
                     </Link>
                   </div>
                 </div>

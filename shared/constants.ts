@@ -7,14 +7,8 @@ export const RPC_ASYNC_RESPONSE = 'rpcAsyncResponse';
 
 function getConfig<T>(v: string, _default: T) {
   const key = 'DS_CONFIG_' + v;
-  let wg;
-  try {
-    wg = window as any;
-  } catch (e) {
-    wg = global as any;
-  }
-  if (key in wg) {
-    return wg[key] as T;
+  if (key in globalThis) {
+    return (globalThis as any)[key] as T;
   }
 
   return _default;
@@ -42,3 +36,7 @@ export const MODE_FEATURES = {
 // There is no /docs/development/ so replace it with /docs/latest/
 const DOCS_VERSION = VERSION === 'development' ? 'latest' : VERSION;
 export const DOCS_ROOT = SITE_ROOT + '/docs/' + DOCS_VERSION;
+
+export const IN_TESTS = globalThis.process
+  ? process.env.JEST_WORKER_ID !== undefined
+  : false;

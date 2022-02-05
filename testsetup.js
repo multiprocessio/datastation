@@ -14,6 +14,14 @@ const jsdom = new JSDOM('<!doctype html><html><body></body></html>', {
 });
 const { window } = jsdom;
 
+class ResizeObserver {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+
+window.ResizeObserver = ResizeObserver;
+
 function copyProps(src, target) {
   Object.defineProperties(target, {
     ...Object.getOwnPropertyDescriptors(src),

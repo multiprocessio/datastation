@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { DatabaseConnectorInfo, ServerInfo } from '../../shared/state';
+import { FormGroup } from '../components/FormGroup';
 import { ServerPicker } from '../components/ServerPicker';
 import { ApiKey } from './ApiKey';
 import { Database } from './Database';
@@ -14,9 +15,11 @@ export function FluxDetails(props: {
 
   return (
     <React.Fragment>
-      <Host {...props} />
-      <Database label="Organization" {...props} />
-      <ApiKey {...props} />
+      <FormGroup>
+        <Host {...props} />
+        <Database label="Organization" {...props} />
+        <ApiKey {...props} />
+      </FormGroup>
       <ServerPicker
         servers={servers}
         serverId={connector.serverId}

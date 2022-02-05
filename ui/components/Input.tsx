@@ -1,8 +1,9 @@
 import debounce from 'lodash.debounce';
 import * as React from 'react';
+import { IN_TESTS } from '../../shared/constants';
 import { Tooltip } from './Tooltip';
 
-export const INPUT_SYNC_PERIOD = 125;
+export const INPUT_SYNC_PERIOD = IN_TESTS ? 0 : 3000;
 
 export function useDebouncedLocalState(
   nonLocalValue: string | number | readonly string[],
@@ -10,33 +11,45 @@ export function useDebouncedLocalState(
   isText = true,
   delay = INPUT_SYNC_PERIOD,
   defaultValue = ''
-): [string | number | readonly string[], (v: string) => void] {
+): [string | number | readonly string[], (v: string) => void, () => void] {
   if (!isText) {
-    return [nonLocalValue, nonLocalSet];
+    return [nonLocalValue, nonLocalSet, () => {}];
   }
 
   const [defaultChanged, setDefaultChanged] = React.useState(false);
+  const debounced = React.useCallback(debounce(nonLocalSet, delay), []);
 
   const [localValue, setLocalValue] = React.useState(nonLocalValue);
+  // Resync to props when props changes
   React.useEffect(() => {
+    debounced.flush();
     setDefaultChanged(true);
     setLocalValue(nonLocalValue);
   }, [nonLocalValue]);
 
-  const debounced = React.useCallback(debounce(nonLocalSet, delay), []);
   function wrapSetLocalValue(v: string) {
+    // Only important the first time
     setDefaultChanged(true);
+
+    // First update local state
     setLocalValue(v);
+
+    // Then set off debouncer to eventually update external state
     debounced(v);
   }
 
+  function flushValue() {
+    debounced.flush();
+  }
+
+  // Set up initial value if there is any
   React.useEffect(() => {
     if (!localValue && defaultValue && !defaultChanged) {
       wrapSetLocalValue(defaultValue);
     }
   });
 
-  return [localValue, wrapSetLocalValue];
+  return [localValue, wrapSetLocalValue, flushValue];
 }
 
 export interface InputProps
@@ -63,7 +76,7 @@ export function Input({
 }: InputProps) {
   let inputClass = `input ${className ? ' ' + className : ''}`;
 
-  const [localValue, setLocalValue] = useDebouncedLocalState(
+  const [localValue, setLocalValue, flushLocalValue] = useDebouncedLocalState(
     value,
     onChange,
     type !== 'checkbox' && type !== 'radio',
@@ -72,9 +85,13 @@ export function Input({
   );
 
   function removeOuterWhitespaceOnFinish() {
+    let v = localValue;
     if (typeof localValue === 'string') {
-      setLocalValue(localValue.trim());
+      v = localValue.trim();
+      setLocalValue(v);
     }
+
+    flushLocalValue();
   }
 
   const input = (
@@ -88,7 +105,7 @@ export function Input({
           setLocalValue(String(e.target.value))
         }
         {...props}
-        size={autoWidth ? Math.min(100, String(localValue).length) : undefined}
+        size={autoWidth ? Math.max(20, String(localValue).length) : undefined}
       />
       {tooltip && <Tooltip children={tooltip} />}
       {invalid && <small className="input-invalid">{invalid}</small>}

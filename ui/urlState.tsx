@@ -18,40 +18,59 @@ function getQueryParameter(param: String) {
 export interface UrlState {
   projectId: string;
   page: number;
+  fullScreen?: string;
   view: 'editor' | 'dashboard' | 'scheduler' | 'settings';
   refreshPeriod?: number;
+  expanded?: Array<string>;
+  sidebar?: boolean;
 }
 
 export function getUrlState(): UrlState {
   return {
     projectId: getQueryParameter('projectId'),
     page: +getQueryParameter('page') || 0,
+    fullScreen: getQueryParameter('fullScreen'),
     view: (getQueryParameter('view') || 'editor') as UrlState['view'],
+    expanded: getQueryParameter('expanded').split(','),
+    sidebar: getQueryParameter('sidebar') !== 'false',
   };
 }
 
+const lsPrefix = 'urlstate:';
+
+// TODO: how to clear state if this ever goes bad?
+export function getDefaultState(): UrlState {
+  const urlState = getUrlState();
+  const key = lsPrefix + urlState.projectId;
+  try {
+    const localStorageState: UrlState = JSON.parse(
+      localStorage.getItem(key) || '{}'
+    );
+    urlState.page = localStorageState.page || urlState.page;
+    urlState.expanded = localStorageState.expanded || urlState.expanded;
+    urlState.sidebar = localStorageState.sidebar || urlState.sidebar;
+  } catch (e) {
+    localStorage.setItem(key, '{}');
+  }
+
+  return urlState;
+}
+
 export function useUrlState(): [UrlState, (a0: Partial<UrlState>) => void] {
-  const defaultState = getUrlState();
-  const lastPageIndexKey = 'lastPageIndex:' + defaultState.projectId;
-  const [state, setStateInternal] = React.useState<UrlState>({
-    ...defaultState,
-    page: defaultState.page || +localStorage.getItem(lastPageIndexKey) || 0,
-  });
+  const defaultState = getDefaultState();
+  const [state, setStateInternal] = React.useState<UrlState>(defaultState);
 
   React.useEffect(function compareUrlStates() {
     const currentState = getUrlState();
     if (!deepEquals(currentState, state)) {
       const serialized = Object.keys(state)
         .map(function mapKey(k) {
-          return `${k}=${encodeURIComponent(state[k as keyof UrlState])}`;
+          return `${k}=${encodeURIComponent(String(state[k as keyof UrlState]))}`;
         })
         .join('&');
       const newUrl = window.location.pathname + '?' + serialized;
       history.pushState({}, document.title, newUrl);
-
-      if (currentState.page !== state.page) {
-        localStorage.setItem(lastPageIndexKey, String(state.page));
-      }
+      localStorage.setItem(lsPrefix + state.projectId, JSON.stringify(state));
     }
   });
 

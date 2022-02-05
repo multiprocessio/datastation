@@ -1,3 +1,16 @@
+import {
+  IconArrowsDiagonal,
+  IconArrowsDiagonalMinimize2,
+  IconChevronDown,
+  IconChevronUp,
+  IconDotsVertical,
+  IconDownload,
+  IconEye,
+  IconEyeOff,
+  IconPlayerPause,
+  IconPlayerPlay,
+  IconTrash,
+} from '@tabler/icons';
 import formatDistanceStrict from 'date-fns/formatDistanceStrict';
 import formatDistanceToNow from 'date-fns/formatDistanceToNow';
 import circularSafeStringify from 'json-stringify-safe';
@@ -24,6 +37,7 @@ import { Input } from './components/Input';
 import { Select } from './components/Select';
 import { PanelPlayWarning } from './errors';
 import { PANEL_GROUPS, PANEL_UI_DETAILS } from './panels';
+import { UrlStateContext } from './urlState';
 
 function valueAsString(value: any) {
   try {
@@ -229,8 +243,24 @@ export function Panel({
   blank.id = panel.id;
   blank.name = panel.name;
   const isBlank = deepEquals(panel, blank);
-  const [details, setDetails] = React.useState(isBlank);
   const [hidden, setHidden] = React.useState(false);
+
+  const {
+    state: { fullScreen, expanded },
+    setState: setUrlState,
+  } = React.useContext(UrlStateContext);
+
+  const [details, setDetailsInternal] = React.useState(
+    isBlank || expanded.includes(panel.id)
+  );
+  function setDetails(b: boolean) {
+    setDetailsInternal(b);
+    if (!b) {
+      setUrlState({ expanded: expanded.filter((i) => i !== panel.id) });
+    } else {
+      setUrlState({ expanded: Array.from(new Set([...expanded, panel.id])) });
+    }
+  }
 
   const [panelOut, setPanelOut] = React.useState<
     'preview' | 'stdout' | 'shape' | 'metadata'
@@ -279,7 +309,9 @@ export function Panel({
   return (
     <div
       id={`panel-${panel.id}`}
-      className={`panel ${hidden ? 'panel--hidden' : ''} ${
+      className={`panel ${fullScreen === panel.id ? 'panel--fullscreen' : ''} ${
+        hidden ? 'panel--hidden' : ''
+      } ${
         panelUIDetails.body === null && !results.exception ? 'panel--empty' : ''
       } ${results.loading ? 'panel--loading' : ''}`}
       tabIndex={1001}
@@ -301,7 +333,7 @@ export function Panel({
                   movePanel(panelIndex, panelIndex - 1);
                 }}
               >
-                keyboard_arrow_up
+                <IconChevronUp />
               </Button>
             </span>
             <span title="Move Down">
@@ -312,7 +344,7 @@ export function Panel({
                   movePanel(panelIndex, panelIndex + 1);
                 }}
               >
-                keyboard_arrow_down
+                <IconChevronDown />
               </Button>
             </span>
             <Select
@@ -343,7 +375,6 @@ export function Panel({
             <Input
               label="Name"
               className="panel-name"
-              autoWidth
               placeholder={`Untitled panel #${panels.length + 1}`}
               onChange={(value: string) => {
                 panel.name = value;
@@ -359,7 +390,7 @@ export function Panel({
                 icon
                 onClick={() => setDetails(!details)}
               >
-                {details ? 'menu_open' : 'menu'}
+                <IconDotsVertical />
               </Button>
             </span>
 
@@ -409,7 +440,24 @@ export function Panel({
                   }
                   type="primary"
                 >
-                  {results.loading ? 'close' : 'play_arrow'}
+                  {results.loading ? <IconPlayerPause /> : <IconPlayerPlay />}
+                </Button>
+              </span>
+              <span title="Full screen mode">
+                <Button
+                  icon
+                  onClick={() =>
+                    setUrlState({
+                      fullScreen: fullScreen === panel.id ? null : panel.id,
+                    })
+                  }
+                  disabled={hidden}
+                >
+                  {fullScreen === panel.id ? (
+                    <IconArrowsDiagonalMinimize2 />
+                  ) : (
+                    <IconArrowsDiagonal />
+                  )}
                 </Button>
               </span>
               <span
@@ -424,12 +472,12 @@ export function Panel({
                     fetchAndDownloadResults(panel, panelRef, results)
                   }
                 >
-                  file_download
+                  <IconDownload />
                 </Button>
               </span>
               <span title="Hide Panel">
                 <Button icon onClick={() => setHidden(!hidden)}>
-                  {hidden ? 'visibility' : 'visibility_off'}
+                  {hidden ? <IconEye /> : <IconEyeOff />}
                 </Button>
               </span>
               <span title="Delete Panel">
@@ -439,7 +487,7 @@ export function Panel({
                   action="Delete"
                   render={(confirm: () => void) => (
                     <Button icon onClick={confirm} type="outline">
-                      delete
+                      <IconTrash />
                     </Button>
                   )}
                 />
@@ -498,7 +546,7 @@ export function Panel({
                         className={panelOut === 'preview' ? 'selected' : ''}
                         onClick={() => setPanelOut('preview')}
                       >
-                        Preview
+                        Result
                       </Button>
                       <Button
                         className={panelOut === 'shape' ? 'selected' : ''}
