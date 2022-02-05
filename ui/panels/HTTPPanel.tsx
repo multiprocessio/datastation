@@ -1,3 +1,4 @@
+import { IconTrash } from '@tabler/icons';
 import { preview } from 'preview';
 import * as React from 'react';
 import { shape } from 'shape';
@@ -117,7 +118,7 @@ export function HTTPPanelDetails({
                 }}
                 type="outline"
               >
-                delete
+                <IconTrash />
               </Button>
             </div>
           )

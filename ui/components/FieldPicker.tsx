@@ -1,3 +1,4 @@
+import { IconTrash } from '@tabler/icons';
 import * as React from 'react';
 import { ArrayShape, ObjectShape, ScalarShape, Shape } from 'shape';
 import { title } from '../../shared/text';
@@ -7,11 +8,33 @@ import { Select } from './Select';
 
 export type FieldGroup = { name: string; elements: Array<[string, Shape]> };
 
+export function flattenObjectFields(o: ObjectShape): Array<[string, Shape]> {
+  let stack: [[string[], Shape]] = [[[], o]];
+  const flat: Array<[string, Shape]> = [];
+
+  while (stack.length) {
+    const [path, shape] = stack.pop();
+
+    switch (shape.kind) {
+      case 'scalar':
+        flat.push([path.join('.'), shape]);
+        break;
+      case 'object':
+        for (const [key, value] of Object.entries(shape.children)) {
+          stack.push([[...path, key.replace('.', '\\.')], value]);
+        }
+        break;
+    }
+  }
+
+  return flat.sort(([a], [b]) => (a > b ? 1 : -1));
+}
+
 export function orderedObjectFields(
   o: ObjectShape,
   preferredDefaultType: 'number' | 'string' = 'string'
 ) {
-  const fields = Object.entries(o.children);
+  const fields = flattenObjectFields(o);
   fields.sort(([aName, a], [bName, b]) => {
     if (a.kind === 'scalar' && b.kind === 'scalar') {
       const ass = a as ScalarShape;
@@ -90,7 +113,7 @@ function renderOptions(group: FieldGroup, grouped: boolean) {
   return options;
 }
 
-function wellFormedGraphInput(shape: Shape) {
+export function wellFormedGraphInput(shape?: Shape) {
   return (
     shape &&
     shape.kind === 'array' &&
@@ -104,7 +127,7 @@ export function unusedFields(shape: Shape, ...fields: Array<string>) {
   }
 
   const os = (shape as ArrayShape).children as ObjectShape;
-  return Object.keys(os.children).filter((field) => {
+  return flattenObjectFields(os).filter(([field]) => {
     return !fields.includes(field);
   }).length;
 }
@@ -199,7 +222,7 @@ export function FieldPicker({
       />
       {onDelete && (
         <Button icon onClick={onDelete} type="outline">
-          delete
+          <IconTrash />
         </Button>
       )}
     </React.Fragment>

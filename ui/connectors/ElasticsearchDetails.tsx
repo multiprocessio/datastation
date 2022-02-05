@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { DatabaseConnectorInfo, ServerInfo } from '../../shared/state';
+import { FormGroup } from '../components/FormGroup';
 import { ServerPicker } from '../components/ServerPicker';
 import { Auth } from './Auth';
 import { Host } from './Host';
@@ -13,7 +14,9 @@ export function ElasticsearchDetails(props: {
 
   return (
     <React.Fragment>
-      <Host {...props} />
+      <FormGroup>
+        <Host {...props} />
+      </FormGroup>
       <Auth {...props} apiKeyLabel="Base64 Encoded API Key" />
       <ServerPicker
         servers={servers}

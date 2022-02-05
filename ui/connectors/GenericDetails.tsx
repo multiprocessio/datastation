@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { DatabaseConnectorInfo, ServerInfo } from '../../shared/state';
+import { FormGroup } from '../components/FormGroup';
 import { ServerPicker } from '../components/ServerPicker';
 import { Database } from './Database';
 import { Host } from './Host';
@@ -18,12 +19,14 @@ export function GenericDetails(props: GenericDetailsProps) {
 
   return (
     <React.Fragment>
-      <Host connector={connector} updateConnector={updateConnector} />
-      {skipDatabase ? null : (
-        <Database connector={connector} updateConnector={updateConnector} />
-      )}
-      <Username connector={connector} updateConnector={updateConnector} />
-      <Password connector={connector} updateConnector={updateConnector} />
+      <FormGroup>
+        <Host connector={connector} updateConnector={updateConnector} />
+        {skipDatabase ? null : (
+          <Database connector={connector} updateConnector={updateConnector} />
+        )}
+        <Username connector={connector} updateConnector={updateConnector} />
+        <Password connector={connector} updateConnector={updateConnector} />
+      </FormGroup>
       <ServerPicker
         servers={servers}
         serverId={connector.serverId}

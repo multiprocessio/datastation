@@ -1,4 +1,4 @@
-import { IconTrash } from '@tabler/icons';
+import { IconPencil, IconTrash } from '@tabler/icons';
 import * as React from 'react';
 import { MODE } from '../shared/constants';
 import { ServerInfo, ServerInfoType } from '../shared/state';
@@ -64,7 +64,7 @@ export function Server({
               }}
               title="Edit"
             >
-              edit
+              <IconPencil />
             </Button>
           )}
           <span title="Delete server">

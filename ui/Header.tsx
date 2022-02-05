@@ -86,7 +86,7 @@ export function Header() {
                   </div>
                   <div className="global-dropdown-item">
                     <Link args={{ projectId, view: 'settings', page: 0 }}>
-                      See All
+                      All Settings
                     </Link>
                   </div>
                 </div>

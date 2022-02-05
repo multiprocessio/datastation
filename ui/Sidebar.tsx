@@ -1,9 +1,17 @@
 import { IconChevronLeft, IconChevronRight, IconSearch } from '@tabler/icons';
 import * as React from 'react';
 import { Button } from './components/Button';
+import { UrlStateContext } from './urlState';
 
 export function Sidebar({ children }: { children: React.ReactNode }) {
-  const [expanded, setExpanded] = React.useState(true);
+  const {
+    state: { sidebar: expanded },
+    setState: setUrlState,
+  } = React.useContext(UrlStateContext);
+
+  function setExpanded(v: boolean) {
+    setUrlState({ sidebar: v });
+  }
 
   return (
     <div className={`section sidebar ${!expanded ? 'sidebar--collapsed' : ''}`}>

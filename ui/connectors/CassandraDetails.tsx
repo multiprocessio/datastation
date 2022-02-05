@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { DatabaseConnectorInfo, ServerInfo } from '../../shared/state';
+import { FormGroup } from '../components/FormGroup';
 import { ServerPicker } from '../components/ServerPicker';
 import { Database } from './Database';
 import { Host } from './Host';
@@ -15,14 +16,16 @@ export function CassandraDetails(props: {
 
   return (
     <React.Fragment>
-      <Host connector={connector} updateConnector={updateConnector} />
-      <Database
-        label="Keyspace"
-        connector={connector}
-        updateConnector={updateConnector}
-      />
-      <Username {...props} />
-      <Password {...props} />
+      <FormGroup>
+        <Host connector={connector} updateConnector={updateConnector} />
+        <Database
+          label="Keyspace"
+          connector={connector}
+          updateConnector={updateConnector}
+        />
+        <Username {...props} />
+        <Password {...props} />
+      </FormGroup>
       <ServerPicker
         servers={servers}
         serverId={connector.serverId}

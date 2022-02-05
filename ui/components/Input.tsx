@@ -105,7 +105,7 @@ export function Input({
           setLocalValue(String(e.target.value))
         }
         {...props}
-        size={autoWidth ? Math.min(100, String(localValue).length) : undefined}
+        size={autoWidth ? Math.max(20, String(localValue).length) : undefined}
       />
       {tooltip && <Tooltip children={tooltip} />}
       {invalid && <small className="input-invalid">{invalid}</small>}

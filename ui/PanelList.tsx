@@ -1,6 +1,8 @@
 import { IconChartBar, IconTable } from '@tabler/icons';
 import * as React from 'react';
+import { ArrayShape, ObjectShape } from 'shape';
 import {
+  GraphPanelInfo,
   PanelInfo,
   PanelResultMeta,
   ProgramPanelInfo,
@@ -9,6 +11,11 @@ import {
 } from '../shared/state';
 import { Button } from './components/Button';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import {
+  flattenObjectFields,
+  orderedObjectFields,
+  wellFormedGraphInput,
+} from './components/FieldPicker';
 import { Panel } from './Panel';
 import { PANEL_GROUPS, PANEL_UI_DETAILS } from './panels';
 import { UrlStateContext } from './urlState';
@@ -49,22 +56,57 @@ export function PanelList({
   function newPanel(panelIndex: number) {
     const panel = page.panels[panelIndex];
 
-    function makePanel(type: string, prefix: string) {
-      const next = new TablePanelInfo({
-        name: prefix + ' ' + panel.name,
-        panelSource: panel.id,
-      });
-      page.panels.splice(panelIndex + 1, 0, next);
-      updatePage(page);
+    const shapeIsOk = wellFormedGraphInput(
+      panel && panel.resultMeta ? panel.resultMeta.shape : null
+    );
+
+    const orderedFields = shapeIsOk
+      ? orderedObjectFields(
+          (panel.resultMeta.shape as ArrayShape).children as ObjectShape
+        )
+      : [];
+    let firstNumber: string;
+    let firstString: string;
+    for (const groups of orderedFields) {
+      if (groups.name === 'String') {
+        firstString = groups.elements[0] ? groups.elements[0][0] : '';
+      }
+
+      if (groups.name === 'Number') {
+        firstNumber = groups.elements[0] ? groups.elements[0][0] : '';
+      }
     }
 
-    const offerToGraph =
-      panel &&
-      !['graph', 'table'].includes(panel.type) &&
-      panel.resultMeta &&
-      panel.resultMeta.shape &&
-      panel.resultMeta.shape.kind === 'array' &&
-      panel.resultMeta.shape.children.kind === 'object';
+    function makePanel(type: string, prefix: string) {
+      let next: PanelInfo;
+      const o = (panel.resultMeta.shape as ArrayShape).children as ObjectShape;
+      if (type === 'graph') {
+        next = new GraphPanelInfo({
+          name: prefix + ' ' + panel.name,
+          panelSource: panel.id,
+          x: firstString,
+          ys: [{ field: firstNumber, label: firstNumber }],
+        });
+      } else {
+        next = new TablePanelInfo({
+          name: prefix + ' ' + panel.name,
+          panelSource: panel.id,
+          columns: flattenObjectFields(o).map(([field]) => ({
+            field,
+            label: field,
+          })),
+        });
+      }
+
+      page.panels.splice(panelIndex + 1, 0, next);
+      updatePage(page);
+      reevalPanel(next.id);
+    }
+
+    const offerToTable =
+      panel && !['graph', 'table'].includes(panel.type) && shapeIsOk;
+
+    const offerToGraph = offerToTable && firstNumber && firstString;
 
     return (
       <div className="new-panel">
@@ -93,18 +135,18 @@ export function PanelList({
           Add Panel
         </Button>
         {offerToGraph ? (
-          <React.Fragment>
-            <span title="Generate a graph for the above panel">
-              <Button onClick={() => makePanel('graph', 'Graph of ')} icon>
-                <IconChartBar />
-              </Button>
-            </span>
-            <span title="Generate a table for the above panel">
-              <Button onClick={() => makePanel('table', 'Data from')} icon>
-                <IconTable />
-              </Button>
-            </span>
-          </React.Fragment>
+          <span title="Generate a graph for the above panel">
+            <Button onClick={() => makePanel('graph', 'Graph of ')} icon>
+              <IconChartBar />
+            </Button>
+          </span>
+        ) : null}
+        {offerToTable ? (
+          <span title="Generate a table for the above panel">
+            <Button onClick={() => makePanel('table', 'Data from')} icon>
+              <IconTable />
+            </Button>
+          </span>
         ) : null}
       </div>
     );

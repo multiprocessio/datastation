@@ -22,6 +22,7 @@ export interface UrlState {
   view: 'editor' | 'dashboard' | 'scheduler' | 'settings';
   refreshPeriod?: number;
   expanded?: Array<string>;
+  sidebar?: boolean;
 }
 
 export function getUrlState(): UrlState {
@@ -31,6 +32,7 @@ export function getUrlState(): UrlState {
     fullScreen: getQueryParameter('fullScreen'),
     view: (getQueryParameter('view') || 'editor') as UrlState['view'],
     expanded: getQueryParameter('expanded').split(','),
+    sidebar: getQueryParameter('sidebar') === 'true',
   };
 }
 

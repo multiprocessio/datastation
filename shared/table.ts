@@ -1,4 +1,5 @@
 import { NotAnArrayOfObjectsError } from './errors';
+import { getPath } from './object';
 
 export function columnsFromObject(
   value: any,
@@ -21,7 +22,7 @@ export function columnsFromObject(
 
     const cells: Record<string, any> = {};
     (columns || []).forEach((name) => {
-      cells[name] = row[name];
+      cells[name] = getPath(row, name);
     });
     return cells;
   });

@@ -195,7 +195,6 @@ export function PageList({
                   page.name = value;
                   updatePage(page);
                 }}
-                autoWidth
                 value={page.name}
               />
 

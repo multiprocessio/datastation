@@ -1,4 +1,4 @@
-import { IconTrash } from '@tabler/icons';
+import { IconPencil, IconTrash } from '@tabler/icons';
 import * as React from 'react';
 import { ConnectorInfo, DatabaseConnectorInfo } from '../shared/state';
 import { Button } from './components/Button';
@@ -41,7 +41,7 @@ export function Connector({
               onClick={() => setExpanded(true)}
               title="Edit"
             >
-              edit
+              <IconPencil />
             </Button>
           )}
           <span title="Delete data source">

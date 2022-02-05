@@ -375,7 +375,6 @@ export function Panel({
             <Input
               label="Name"
               className="panel-name"
-              autoWidth
               placeholder={`Untitled panel #${panels.length + 1}`}
               onChange={(value: string) => {
                 panel.name = value;

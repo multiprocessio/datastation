@@ -21,6 +21,7 @@ export function ServerPicker({
       <div className="form-row">
         <Select
           value={serverId}
+          label="Via server"
           onChange={(v) => onChange(v === 'null' ? null : v)}
         >
           <option value="null">No</option>

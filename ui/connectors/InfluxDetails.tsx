@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { DatabaseConnectorInfo, ServerInfo } from '../../shared/state';
+import { FormGroup } from '../components/FormGroup';
 import { ServerPicker } from '../components/ServerPicker';
 import { Host } from './Host';
 import { Password } from './Password';
@@ -14,9 +15,11 @@ export function InfluxDetails(props: {
 
   return (
     <React.Fragment>
-      <Host {...props} />
-      <Username {...props} />
-      <Password {...props} />
+      <FormGroup>
+        <Host {...props} />
+        <Username {...props} />
+        <Password {...props} />
+      </FormGroup>
       <ServerPicker
         servers={servers}
         serverId={connector.serverId}
