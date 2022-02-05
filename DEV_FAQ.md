@@ -61,3 +61,8 @@ To re-run this process, use on Mac or Linux:
 ```
 $ yarn build-language-definitions
 ```
+
+## Tests blow up with SIGABRT on macos when -race is on
+
+See https://github.com/golang/go/issues/49138. Set `MallocNanoZone=0`
+before running tests to get around this.
