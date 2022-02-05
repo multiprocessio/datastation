@@ -36,8 +36,6 @@ export function PanelList({
     page.panels.splice(from, 1);
     page.panels.splice(to, 0, panel);
     updatePage(page);
-    reevalPanel(page.panels[from].id, true);
-    reevalPanel(page.panels[to].id, true);
   }
 
   function removePanel(at: number) {
@@ -100,7 +98,8 @@ export function PanelList({
 
       page.panels.splice(panelIndex + 1, 0, next);
       updatePage(page);
-      reevalPanel(next.id);
+      // Give time for write before evalling
+      setTimeout(    () =>  reevalPanel(next.id), 1000);
     }
 
     const offerToTable =

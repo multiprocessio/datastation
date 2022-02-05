@@ -5,14 +5,15 @@ export const CHAT_LINK = 'https://discord.gg/f2wQBc4bXX';
 export const RPC_ASYNC_REQUEST = 'rpcAsyncRequest';
 export const RPC_ASYNC_RESPONSE = 'rpcAsyncResponse';
 
+let wg;
+try {
+  wg = window as any;
+} catch (e) {
+  wg = global as any;
+}
+
 function getConfig<T>(v: string, _default: T) {
   const key = 'DS_CONFIG_' + v;
-  let wg;
-  try {
-    wg = window as any;
-  } catch (e) {
-    wg = global as any;
-  }
   if (key in wg) {
     return wg[key] as T;
   }
@@ -43,6 +44,6 @@ export const MODE_FEATURES = {
 const DOCS_VERSION = VERSION === 'development' ? 'latest' : VERSION;
 export const DOCS_ROOT = SITE_ROOT + '/docs/' + DOCS_VERSION;
 
-export const IN_TESTS = window.process
+export const IN_TESTS = wg.process
   ? process.env.JEST_WORKER_ID !== undefined
   : false;
