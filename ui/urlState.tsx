@@ -1,12 +1,8 @@
 import React from 'react';
 import { deepEquals } from '../shared/object';
-import { MODE } from '../shared/constants';
 
 function getQueryParameter(param: String) {
-  let query = window.location.search.substring(1);
-  if (MODE === 'desktop') {
-    query = localStorage.getItem('urlstate');
-  }
+  const query = window.location.search.substring(1);
   const vars = query.split('&');
 
   for (let i = 0; i < vars.length; i++) {
@@ -29,6 +25,24 @@ export interface UrlState {
   sidebar?: boolean;
 }
 
+const DEFAULT: UrlState = {
+  page: 0,
+  fullScreen: null,
+  view: 'editor',
+  refreshPeriod: null,
+  expanded: [],
+  sidebar: true,
+}
+
+const initialLocalStorageState = JSON.parse(
+  localStorage.getItem('urlstate') || JSON.stringify({
+    page: 0,
+    fullScreen
+}));
+
+// WHAT HAPPENS WHEN THE PROJECT CHANGES? LOCALSTORAGE ISNT UPDATED
+// WHAT IF THERES A BUG IN LOCALSTORAGE, HOW DOES THE USER CLEAR IT
+
 export function getUrlState(): UrlState {
   return {
     projectId: getQueryParameter('projectId'),
@@ -36,12 +50,25 @@ export function getUrlState(): UrlState {
     fullScreen: getQueryParameter('fullScreen'),
     view: (getQueryParameter('view') || 'editor') as UrlState['view'],
     expanded: getQueryParameter('expanded').split(','),
-    sidebar: getQueryParameter('sidebar') === 'true',
+    sidebar: getQueryParameter('sidebar') !== 'false',
   };
 }
 
+export function getDefaultState(): UrlState {
+  const urlState = getUrlState();
+  for (const [key, value] of Object.entries(urlState)) {
+    if (!value || (Array.isArray(value) && !value.length)) {
+      urlState[key] = initialLocalStorageState[key];
+    }
+  }
+
+  if (!Array.isArray(urlState.expanded)) {
+    urlState.expanded = [];
+  }
+}
+
 export function useUrlState(): [UrlState, (a0: Partial<UrlState>) => void] {
-  const defaultState = getUrlState();
+  const defaultState = getDefaultState();
   const [state, setStateInternal] = React.useState<UrlState>(defaultState);
 
   React.useEffect(function compareUrlStates() {
@@ -54,7 +81,7 @@ export function useUrlState(): [UrlState, (a0: Partial<UrlState>) => void] {
         .join('&');
       const newUrl = window.location.pathname + '?' + serialized;
       history.pushState({}, document.title, newUrl);
-      localStorage.setItem('urlstate', serialized);
+      localStorage.setItem('urlstate', JSON.stringify(state));
     }
   });
 
