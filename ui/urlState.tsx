@@ -1,8 +1,12 @@
 import React from 'react';
 import { deepEquals } from '../shared/object';
+import { MODE } from '../shared/constants';
 
 function getQueryParameter(param: String) {
-  const query = window.location.search.substring(1);
+  let query = window.location.search.substring(1);
+  if (MODE === 'desktop') {
+    query = localStorage.getItem('urlstate');
+  }
   const vars = query.split('&');
 
   for (let i = 0; i < vars.length; i++) {
@@ -38,11 +42,7 @@ export function getUrlState(): UrlState {
 
 export function useUrlState(): [UrlState, (a0: Partial<UrlState>) => void] {
   const defaultState = getUrlState();
-  const lastPageIndexKey = 'lastPageIndex:' + defaultState.projectId;
-  const [state, setStateInternal] = React.useState<UrlState>({
-    ...defaultState,
-    page: defaultState.page || +localStorage.getItem(lastPageIndexKey) || 0,
-  });
+  const [state, setStateInternal] = React.useState<UrlState>(defaultState);
 
   React.useEffect(function compareUrlStates() {
     const currentState = getUrlState();
@@ -54,10 +54,7 @@ export function useUrlState(): [UrlState, (a0: Partial<UrlState>) => void] {
         .join('&');
       const newUrl = window.location.pathname + '?' + serialized;
       history.pushState({}, document.title, newUrl);
-
-      if (currentState.page !== state.page) {
-        localStorage.setItem(lastPageIndexKey, String(state.page));
-      }
+      localStorage.setItem('urlstate', serialized);
     }
   });
 
