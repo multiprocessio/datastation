@@ -33,25 +33,14 @@ something to install all missing dependencies.
 
 ### ./desktop/panel
 
-NOTE: This code is being migrated to Go. All panel types except for a
-few database vendors have been ported to Go. A number of Node panel
-handlers have been deleted since they are no longer used.
-
-This is where eval handlers for each panel type (program, database,
-etc.) are defined.
-
-All database-specific handlers are defined in
-./desktop/panel/databases/*.ts since there are so many of them.
-
-Evaluation happens by spawning a Node.js subprocess where all the eval
-handlers are actually run. ./desktop/runner.ts is the entrypoint for
-this on desktop. ./server/runner.ts is the equivalent on the server.
-
-This allows easy resource cleanup and easy "kill" panel eval support.
+Evaluation happens by spawning a runner (see ./runner below)
+subprocess where all the eval handlers are actually run. This allows
+easy resource cleanup and easy "kill" panel eval support.
 
 ## ./runner
 
-This is where the Go port of the original Node.js panel eval code is.
+./runner/eval.go is the main eval entrypoint but the command line
+entrypoint is at ./runner/cmd/main.go.
 
 ## ./server
 
@@ -99,7 +88,20 @@ This is where types for all entities in state are described. Any time
 you want to add a new panel or connector, etc. you'll need to add it
 here.
 
+If the change needs to be read by the runner you'll also need to add
+the change to ./runner/state.go. There is nothing at the moment
+keeping these two files in sync other than tests that may exist.
+
 ### ./shared/languages
 
 This is where all supported languages are defined and where their
 libraries for interacting with DataStation are defined.
+
+The reason it's shared is because Python and JavaScript run in the
+browser in browser mode but on a machine in desktop/server mode.
+
+Language wrappers are defined in Jsonnet so that they can include
+comments and newlines. That is translated to JSON and embedded in Go
+with `yarn build-language-definitions`. The CI will complain if these
+definitions ever go out of date but it may be confusing locally not to
+see your changes until you run this and recompile the Go runner.
