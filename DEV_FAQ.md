@@ -66,3 +66,5 @@ $ yarn build-language-definitions
 
 See https://github.com/golang/go/issues/49138. Set `MallocNanoZone=0`
 before running tests to get around this.
+
+Or upgrade to a more recent minor version.
