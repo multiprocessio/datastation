@@ -25,24 +25,6 @@ export interface UrlState {
   sidebar?: boolean;
 }
 
-const DEFAULT: UrlState = {
-  page: 0,
-  fullScreen: null,
-  view: 'editor',
-  refreshPeriod: null,
-  expanded: [],
-  sidebar: true,
-}
-
-const initialLocalStorageState = JSON.parse(
-  localStorage.getItem('urlstate') || JSON.stringify({
-    page: 0,
-    fullScreen
-}));
-
-// WHAT HAPPENS WHEN THE PROJECT CHANGES? LOCALSTORAGE ISNT UPDATED
-// WHAT IF THERES A BUG IN LOCALSTORAGE, HOW DOES THE USER CLEAR IT
-
 export function getUrlState(): UrlState {
   return {
     projectId: getQueryParameter('projectId'),
@@ -54,17 +36,24 @@ export function getUrlState(): UrlState {
   };
 }
 
+const lsPrefix = 'urlstate:';
+
+// TODO: how to clear state if this ever goes bad?
 export function getDefaultState(): UrlState {
   const urlState = getUrlState();
-  for (const [key, value] of Object.entries(urlState)) {
-    if (!value || (Array.isArray(value) && !value.length)) {
-      urlState[key] = initialLocalStorageState[key];
-    }
+  const key = lsPrefix + urlState.projectId;
+  try {
+    const localStorageState: UrlState = JSON.parse(
+      localStorage.getItem(key) || '{}'
+    );
+    urlState.page = localStorageState.page || urlState.page;
+    urlState.expanded = localStorageState.expanded || urlState.expanded;
+    urlState.sidebar = localStorageState.sidebar || urlState.sidebar;
+  } catch (e) {
+    localStorage.setItem(key, '{}');
   }
 
-  if (!Array.isArray(urlState.expanded)) {
-    urlState.expanded = [];
-  }
+  return urlState;
 }
 
 export function useUrlState(): [UrlState, (a0: Partial<UrlState>) => void] {
@@ -81,7 +70,7 @@ export function useUrlState(): [UrlState, (a0: Partial<UrlState>) => void] {
         .join('&');
       const newUrl = window.location.pathname + '?' + serialized;
       history.pushState({}, document.title, newUrl);
-      localStorage.setItem('urlstate', JSON.stringify(state));
+      localStorage.setItem(lsPrefix + state.projectId, JSON.stringify(state));
     }
   });
 

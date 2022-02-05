@@ -99,7 +99,7 @@ export function PanelList({
       page.panels.splice(panelIndex + 1, 0, next);
       updatePage(page);
       // Give time for write before evalling
-      setTimeout(    () =>  reevalPanel(next.id), 300);
+      setTimeout(() => reevalPanel(next.id), 300);
     }
 
     const offerToTable =

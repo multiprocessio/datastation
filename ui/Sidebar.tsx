@@ -1,4 +1,4 @@
-import { IconChevronLeft, IconChevronRight, IconSearch } from '@tabler/icons';
+import { IconChevronLeft, IconChevronRight } from '@tabler/icons';
 import * as React from 'react';
 import { Button } from './components/Button';
 import { UrlStateContext } from './urlState';
@@ -16,7 +16,6 @@ export function Sidebar({ children }: { children: React.ReactNode }) {
   return (
     <div className={`section sidebar ${!expanded ? 'sidebar--collapsed' : ''}`}>
       <div className="title vertical-align-center">
-        <IconSearch height={18} width={18} />
         <Button
           icon
           className="flex-right"
