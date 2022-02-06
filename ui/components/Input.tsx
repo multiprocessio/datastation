@@ -60,6 +60,7 @@ export interface InputProps
   defaultValue?: string;
   tooltip?: React.ReactNode;
   invalid?: React.ReactNode;
+  noDelay?: boolean;
 }
 
 export function Input({
@@ -70,6 +71,7 @@ export function Input({
   label,
   autoWidth,
   type,
+  noDelay,
   defaultValue,
   tooltip,
   ...props
@@ -79,7 +81,7 @@ export function Input({
   const [localValue, setLocalValue, flushLocalValue] = useDebouncedLocalState(
     value,
     onChange,
-    type !== 'checkbox' && type !== 'radio',
+    type !== 'checkbox' && type !== 'radio' && !noDelay,
     INPUT_SYNC_PERIOD,
     defaultValue
   );
