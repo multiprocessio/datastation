@@ -4,7 +4,6 @@ import { CassandraDetails } from './CassandraDetails';
 import { ElasticsearchDetails } from './ElasticsearchDetails';
 import { FluxDetails } from './FluxDetails';
 import { GenericDetails, GenericNoDatabaseDetails } from './GenericDetails';
-import { InfluxDetails } from './InfluxDetails';
 import { SnowflakeDetails } from './SnowflakeDetails';
 import { SQLiteDetails } from './SQLiteDetails';
 
@@ -93,7 +92,7 @@ export const VENDORS: {
   influx: {
     name: 'Influx (InfluxQL)',
     id: 'influx',
-    details: InfluxDetails,
+    details: GenericDetails,
   },
   'influx-flux': {
     name: 'Influx (Flux)',
