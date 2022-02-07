@@ -23,29 +23,27 @@ In desktop mode and server mode:
 * Cross-platform: Windows, macOS, and Linux
 * Easily fetch your data, wherever it is
   * Databases
-    * Traditional
-	  * [PostgreSQL](https://datastation.multiprocess.io/docs/tutorials/Query_PostgreSQL_with_DataStation.html)
-	  * SQLite
-	  * [MySQL](https://datastation.multiprocess.io/docs/tutorials/Query_MySQL_with_DataStation.html)
-	  * [SQL Server](https://datastation.multiprocess.io/docs/tutorials/Query_SQL_Server_with_DataStation.html)
-	  * [Oracle](https://datastation.multiprocess.io/docs/tutorials/Query_Oracle_with_DataStation.html)
-	  * CockroachDB
-	* Warehouse
-	  * BigQuery
-	  * Snowflake
-	* Document
-	  * [ElasticSearch](https://datastation.multiprocess.io/docs/tutorials/Query_Elasticsearch_with_DataStation.html)
-	  * CrateDB
-	* Time Series
-	  * [ClickHouse](https://datastation.multiprocess.io/docs/tutorials/Query_ClickHouse_with_DataStation.html)
-	  * QuestDB
-	  * TimescaleDB
-	  * Yugabyte
-	  * Cassandra
-	  * ScyllaDB
-	* Metrics
-	  * Prometheus
-	  * Influx
+    * Relational
+      * [MySQL](https://datastation.multiprocess.io/docs/tutorials/Query_MySQL_with_DataStation.html)
+        * Same applies for MariaDB, Percona; just swap vendor
+      * [PostgreSQL](https://datastation.multiprocess.io/docs/tutorials/Query_PostgreSQL_with_DataStation.html)
+        * Same applies for CockroachDB, TimescaleDB, YugaByte, CrateDB, QuestDB; just swap vendor
+      * [Oracle](https://datastation.multiprocess.io/docs/tutorials/Query_Oracle_with_DataStation.html)
+      * [SQL Server](https://datastation.multiprocess.io/docs/tutorials/Query_SQL_Server_with_DataStation.html)
+      * [SQLite](https://datastation.multiprocess.io/docs/tutorials/Query_SQLite_with_DataStation.html)
+    * Warehouse
+      * [BigQuery](https://datastation.multiprocess.io/docs/tutorials/Query_BigQuery_with_DataStation.html)
+      * Snowflake (supported; but no tutorial yet)
+    * Document
+      * [Elasticsearch](https://datastation.multiprocess.io/docs/tutorials/Query_Elasticsearch_with_DataStation.html)
+    * Time Series
+      * [Scylla](https://datastation.multiprocess.io/docs/tutorials/Query_Scylla_with_DataStation.html)
+        * Same applies for Cassandra; just swap Vendor
+      * [ClickHouse](https://datastation.multiprocess.io/docs/tutorials/Query_ClickHouse_with_DataStation.html)
+    * Metrics
+      * [Prometheus](https://datastation.multiprocess.io/docs/tutorials/Query_Prometheus_with_DataStation.html)
+      * [Influx 2.x (Flux)](https://datastation.multiprocess.io/docs/tutorials/Query_Influx_(2.x)_with_DataStation_(Flux).html)
+      * [Influx 1.x (InfluxQL)](https://datastation.multiprocess.io/docs/tutorials/Query_Influx_(1.x)_with_DataStation_(InfluxQL).html)
   * Files
     * Excel
 	* CSV
