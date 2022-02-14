@@ -21,39 +21,12 @@ In desktop mode and server mode:
 * Build reports with graphs, charts and tables
 * Script against data in Python, JavaScript, Ruby, PHP, Julia, or R
 * Cross-platform: Windows, macOS, and Linux
-* Easily fetch your data, wherever it is
-  * Databases
-    * Relational
-      * [MySQL](https://datastation.multiprocess.io/docs/tutorials/Query_MySQL_with_DataStation.html)
-        * Same applies for MariaDB, Percona; just swap vendor
-      * [PostgreSQL](https://datastation.multiprocess.io/docs/tutorials/Query_PostgreSQL_with_DataStation.html)
-        * Same applies for CockroachDB, TimescaleDB, YugaByte, CrateDB, QuestDB; just swap vendor
-      * [Oracle](https://datastation.multiprocess.io/docs/tutorials/Query_Oracle_with_DataStation.html)
-      * [SQL Server](https://datastation.multiprocess.io/docs/tutorials/Query_SQL_Server_with_DataStation.html)
-      * [SQLite](https://datastation.multiprocess.io/docs/tutorials/Query_SQLite_with_DataStation.html)
-    * Warehouse
-      * [BigQuery](https://datastation.multiprocess.io/docs/tutorials/Query_BigQuery_with_DataStation.html)
-      * Snowflake (supported; but no tutorial yet)
-    * Document
-      * [Elasticsearch](https://datastation.multiprocess.io/docs/tutorials/Query_Elasticsearch_with_DataStation.html)
-    * Time Series
-      * [Scylla](https://datastation.multiprocess.io/docs/tutorials/Query_Scylla_with_DataStation.html)
-        * Same applies for Cassandra; just swap Vendor
-      * [ClickHouse](https://datastation.multiprocess.io/docs/tutorials/Query_ClickHouse_with_DataStation.html)
-    * Metrics
-      * [Prometheus](https://datastation.multiprocess.io/docs/tutorials/Query_Prometheus_with_DataStation.html)
-      * [Influx 2.x (Flux)](https://datastation.multiprocess.io/docs/tutorials/Query_Influx_(2.x)_with_DataStation_(Flux).html)
-      * [Influx 1.x (InfluxQL)](https://datastation.multiprocess.io/docs/tutorials/Query_Influx_(1.x)_with_DataStation_(InfluxQL).html)
-  * Files
-    * Excel
-	* CSV
-	* JSON (array of objects)
-	* Newline-delimited JSON
-	* Concatenated JSON
-	* Parquet
-	* ODS
-	* Logs (Apache, Nginx)
-  * HTTP servers
+* Easily fetch your data, wherever it is: SQL and non-SQL databases, files, HTTP servers
+
+## Learn
+
+Find user guides for all different kinds of databases and scenarios
+[here](https://datastation.multiprocess.io/docs/).
 
 ## CLI
 
@@ -73,11 +46,7 @@ limitations that the desktop and server versions don't.
 
 ## Install
 
-Install instructions are available [here](https://datastation.multiprocess.io/docs/latest/Installation.html).
-
-## Documentation
-
-See [here](https://datastation.multiprocess.io/docs/) for details.
+Install instructions are available [here](https://datastation.multiprocess.io/docs/).
 
 ## Community
 
