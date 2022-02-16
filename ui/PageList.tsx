@@ -172,6 +172,14 @@ export function PageList({
               className="vertical-align-center page-name page-name--current"
               key={page.id}
             >
+              <Input
+                onChange={(value: string) => {
+                  page.name = value;
+                  updatePage(page);
+                }}
+                value={page.name}
+              />
+
               <span title="Delete Page">
                 <Confirm
                   right
@@ -189,14 +197,6 @@ export function PageList({
                   )}
                 />
               </span>
-
-              <Input
-                onChange={(value: string) => {
-                  page.name = value;
-                  updatePage(page);
-                }}
-                value={page.name}
-              />
 
               {/*
               <span title="Evaluate all panels sequentially">

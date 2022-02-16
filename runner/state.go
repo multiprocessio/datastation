@@ -7,7 +7,6 @@ import (
 
 type PanelResult struct {
 	Exception   interface{} `json:"exception" db:"exception"`
-	Value       interface{} `json:"value" db:"value"`
 	Preview     string      `json:"preview" db:"preview"`
 	Stdout      string      `json:"stdout" db:"stdout"`
 	Shape       Shape       `json:"shape" db:"shape"`
@@ -23,7 +22,6 @@ var defaultPanelResult = PanelResult{
 	Preview:     "",
 	Size:        nil,
 	ContentType: "unknown",
-	Value:       nil,
 	Exception:   nil,
 	ArrayCount:  nil,
 }

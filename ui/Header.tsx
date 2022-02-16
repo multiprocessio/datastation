@@ -91,6 +91,16 @@ export function Header() {
                   </div>
                 </div>
               </div>
+              {MODE === 'server' ? (
+                <div className="global-dropdown-section">
+                  <div className="global-dropdown-sectionName">Project</div>
+                  <div className="global-dropdown-items">
+                    <div className="global-dropdown-item">
+                      <a href="/">Switch Project</a>
+                    </div>
+                  </div>
+                </div>
+              ) : null}
               {MODE === 'browser' ? (
                 <div className="global-dropdown-section">
                   <div className="global-dropdown-sectionName">Demo Mode</div>

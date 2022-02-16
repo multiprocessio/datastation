@@ -7,7 +7,6 @@ import {
   TokenSet,
 } from 'openid-client';
 import passport from 'passport';
-import { DOCS_ROOT } from '../shared/constants';
 import { App } from './app';
 import { Config } from './config';
 import log from './log';
@@ -42,9 +41,7 @@ export class Auth {
         response_types: ['code'],
       });
     } else {
-      log.fatal(
-        `Missing auth scheme. Review ${DOCS_ROOT}/Installation.html#configuration for how to configure auth.`
-      );
+      log.error('Auth is disabled.');
     }
   }
 
@@ -53,6 +50,10 @@ export class Auth {
     rsp: express.Response,
     next: () => void
   ) => {
+    if (!this.openIdClient) {
+      return next();
+    }
+
     if (
       !req.session.tokenSet ||
       new Date(req.session.tokenSet.expires_at * 1000) < new Date()
@@ -79,8 +80,6 @@ export class Auth {
       rsp.redirect(externalRedirect);
       return;
     }
-
-    throw new Error('No auth scheme');
   };
 
   authCallback = async (req: AuthRequestSession, rsp: express.Response) => {

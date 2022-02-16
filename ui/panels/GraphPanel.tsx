@@ -170,7 +170,7 @@ export function GraphPanel({ panel, panels }: PanelBodyProps<GraphPanelInfo>) {
       const style = window.getComputedStyle(parent);
       background = style.getPropertyValue('background-color');
       // TODO: don't hardcode this
-      Chart.defaults.color = theme === 'light' ? 'black' : 'white';
+      Chart.defaults.color = theme === 'light' || !theme ? 'black' : 'white';
     }
 
     const ys = [...panel.graph.ys];

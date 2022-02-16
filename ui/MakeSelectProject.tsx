@@ -95,7 +95,7 @@ export function MakeSelectProject() {
       )}
       {MODE === 'server' && projects.length ? (
         <div className="project-existing">
-          <p>Or open an existing project.</p>
+          <h2>Existing project</h2>
           {projects.map(({ name, createdAt }) => (
             <div className="form-row">
               <h3 className="project-selector">{name}</h3>

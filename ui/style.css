@@ -14,7 +14,9 @@
   --lighter-dark: #323254;
   --gutter-dark: var(--lighter-dark);
 
+  /* Generic settings */
   --sans-serif: 'San Francisco', 'Gadugi', sans-serif;
+  --margin-base: 8px;
 }
 
 * {
@@ -58,20 +60,21 @@ a:hover {
   height: calc(100% - 1px);
 }
 
+.app {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
 .app main {
   display: flex;
   width: 100%;
-}
-
-.app--desktop main,
-.app--server main {
-  height: 100%;
+  flex: 1;
 }
 
 .main-body {
   flex: 1;
   overflow-y: auto;
-  min-width: 920px;
 }
 
 header {
@@ -152,6 +155,10 @@ label,
   padding-right: 8px;
   color: #333;
   font-size: 0.75rem;
+}
+
+.panel {
+  min-width: 920px;
 }
 
 .panel-details :not(.form-row--multi) > .button {
@@ -310,6 +317,10 @@ input + input[type='file'] {
   align-items: center;
 }
 
+.mb-2 {
+  margin-bottom: calc(2 * var(--margin-base));
+}
+
 .flex {
   max-height: 100%;
   display: flex;
@@ -449,12 +460,11 @@ input + input[type='file'] {
 
 .sidebar {
   border-right: 1px solid var(--border-light);
-  border-bottom: 1px solid var(--border-light);
   background: var(--background-light);
   min-width: 400px;
   background: #f9f9fd;
   padding: 15px;
-  max-height: 100%;
+  height: 100%;
   overflow-y: auto;
 }
 
@@ -765,19 +775,21 @@ input + input[type='file'] {
 }
 
 .tooltip {
-  position: relative;
   font-size: 0.9rem;
 }
 
 .tooltip-body {
   position: absolute;
   top: 24px;
-  right: 0;
+  left: 0;
   display: none;
   background: rgba(30, 30, 30, 0.75);
   border: 1px solid black;
   color: white;
   padding: 10px;
+  z-index: 1;
+  max-width: 400px;
+  box-shadow: 0 1px 3px 0 #aaa;
 }
 
 .tooltip-icon {
@@ -967,6 +979,11 @@ canvas {
   width: 500px;
 }
 
+.app--server .project-name {
+  margin: 0 auto;
+  margin-top: calc(2 * var(--margin-base));
+}
+
 .project-name .input,
 .project-name .input input,
 .project-name .button {
@@ -981,6 +998,7 @@ canvas {
 
   .project-selector,
   .project-timestamp {
+    margin: 0;
     margin-right: 15px;
   }
 }
@@ -1127,6 +1145,10 @@ body.dark .server--expanded,
 body.dark .connector--expanded {
   background: #484860;
   border-color: var(--border-dark);
+}
+
+body.dark .tooltip-icon:hover {
+  color: white;
 }
 
 body.dark .button:hover {
@@ -1289,6 +1311,7 @@ body.dark {
     color: var(--color-dark);
   }
 
+  .tooltip-body,
   .confirm-popup {
     background: #29293c;
     color: var(--color-dark);
@@ -1305,6 +1328,7 @@ body.dark {
     color: #e35172;
   }
 
+  .header-project-name,
   .global-dropdown-sectionName,
   .global-dropdown p {
     color: var(--color-dark);
