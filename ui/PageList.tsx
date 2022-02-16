@@ -256,6 +256,7 @@ export function PageList({
 
       <MainChild
         page={page}
+        projectId={state.id}
         updatePage={updatePage}
         reevalPanel={reevalPanel}
         panelResults={panelResults}

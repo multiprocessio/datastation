@@ -3,7 +3,7 @@ import express from 'express';
 import path from 'path';
 import { CODE_ROOT } from '../desktop/constants';
 import { RPCHandler } from '../desktop/rpc';
-import { ProjectPage, ProjectState } from '../shared/state';
+import { PanelResultMeta, ProjectPage, ProjectState } from '../shared/state';
 import { App } from './app';
 import { authenticated, AuthRequestSession } from './auth';
 import log from './log';
@@ -34,7 +34,8 @@ class Dashboard {
       return null;
     }
 
-    return (project.pages || []).find((p) => p.id === pageId);
+    const page = (project.pages || []).find((p) => p.id === pageId);
+    return page;
   };
 
   canLoadPage = async (req: AuthRequestSession) => {
@@ -60,13 +61,14 @@ class Dashboard {
     return;
   };
 
-  evalPage = async (project: ProjectState, page: ProjectPage) => {
-    const resultsMap = {};
+  evalPage = async (projectId: string, page: ProjectPage) => {
+    if (!page.panels.length) {
+      return;
+    }
+
+    const results: Record<string, PanelResultMeta> = {};
+    const dispatch = makeDispatch(this.handlers);
     for (const panel of page.panels) {
-      const evalHandler = this.handlers.find(
-        (h) => h.resource === 'eval'
-      ).handler;
-      const dispatch = makeDispatch(this.handlers);
       results[panel.id] = await dispatch({
         resource: 'eval',
         body: { panelId: panel },
@@ -77,7 +79,7 @@ class Dashboard {
     await dispatch({
       resource: 'updateResults',
       projectId,
-      results,
+      body: results,
     });
   };
 

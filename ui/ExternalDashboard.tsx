@@ -3,7 +3,7 @@ import { ProjectPage } from './../shared/state';
 import { Alert } from './components/Alert';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { Select } from './components/Select';
-import { Panel } from './Panel';
+import { Panel } from './dashboard/Panel';
 
 export function ExternalDashboard() {
   const projectId = location.pathname.split('/')[2];
@@ -90,7 +90,12 @@ export function ExternalDashboard() {
   return (
     <div className="section">
       <div className="section-subtitle vertical-align-center">
-        <Select label="Refreshes every" disabled value={String(refreshPeriod)}>
+        <Select
+          label="Refreshes every"
+          onChange={() => {}}
+          disabled
+          value={String(refreshPeriod)}
+        >
           <option value={String(60 * 60)}>6 hour</option>
           <option value={String(60 * 60)}>1 hour</option>
           <option value={String(60 * 15)}>15 minutes</option>

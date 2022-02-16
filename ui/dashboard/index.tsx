@@ -1,10 +1,6 @@
 import React from 'react';
 import { MODE_FEATURES } from '../../shared/constants';
-import {
-  ProjectPage,
-  ProjectPageVisibility,
-  ProjectState,
-} from '../../shared/state';
+import { ProjectPage, ProjectPageVisibility } from '../../shared/state';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import { Select } from '../components/Select';
 import { Panel } from './Panel';
@@ -13,11 +9,11 @@ const IS_EXPORT = Boolean((window as any).DATASTATION_IS_EXPORT);
 
 export function Dashboard({
   page,
-  project: { id: projectId },
+  projectId,
   reevalPanel,
   updatePage,
 }: {
-  project: ProjectState;
+  projectId: string;
   page: ProjectPage;
   reevalPanel: (panelId: string, reset?: boolean) => void;
   updatePage: (p: ProjectPage) => void;

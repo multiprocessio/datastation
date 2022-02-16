@@ -6,8 +6,12 @@ import {
   UpdateProjectHandler,
 } from '../desktop/rpc';
 import { encryptProjectSecrets } from '../desktop/store';
-import { GetProjectsRequest, GetProjectsResponse } from '../shared/rpc';
-import { ProjectState, ResultMeta } from '../shared/state';
+import {
+  Endpoint,
+  GetProjectsRequest,
+  GetProjectsResponse,
+} from '../shared/rpc';
+import { PanelResultMeta, ProjectState } from '../shared/state';
 
 export const getProjectHandlers = (dbpool: pg.Pool) => {
   const getProjects: RPCHandler<GetProjectsRequest, GetProjectsResponse> = {
@@ -86,10 +90,10 @@ export const getProjectHandlers = (dbpool: pg.Pool) => {
   // can get updated without messing up the actual panel contents and
   // things like that.
   const updateResults = {
-    resource: 'updateResults',
+    resource: 'updateResults' as Endpoint,
     handler: async function updateResultsHandler(
       projectId: string,
-      results: Record<string, ResultMeta>
+      results: Record<string, PanelResultMeta>
     ) {
       const client = await dbpool.connect();
 
@@ -99,10 +103,10 @@ export const getProjectHandlers = (dbpool: pg.Pool) => {
           'SELECT project_value FROM projects WHERE project_name = $1;',
           [projectId]
         );
-        const existingState = res.rows[0].project_value;
+        const project = res.rows[0].project_value;
 
         // Update the results
-        for (const page of existingState.pages) {
+        for (const page of project.pages) {
           for (const panel of page.panels) {
             if (results[panel.id]) {
               panel.resultMeta = results[panel.id];
@@ -112,7 +116,7 @@ export const getProjectHandlers = (dbpool: pg.Pool) => {
 
         await client.query(
           'INSERT INTO projects (project_name, project_value) VALUES ($1, $2) ON CONFLICT (project_name) DO UPDATE SET project_value = EXCLUDED.project_value',
-          [projectId, JSON.stringify(newState)]
+          [projectId, JSON.stringify(project)]
         );
         await client.query('COMMIT');
       } catch (e) {
