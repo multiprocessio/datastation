@@ -566,7 +566,8 @@ input + input[type='file'] {
 }
 
 .page-mode:hover,
-.page-mode:visited {
+.page-mode:visited,
+.page-mode:focus {
   color: black;
 }
 
