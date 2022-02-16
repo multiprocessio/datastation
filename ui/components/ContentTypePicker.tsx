@@ -31,6 +31,9 @@ export function ContentTypePicker({
           }}
         >
           {!disableAutoDetect && <option value="null">Auto-detect</option>}
+          <optgroup label="Raw">
+            <option value="text/plain">Plain Text</option>
+          </optgroup>
           <optgroup label="Data">
             <option value="text/csv">CSV</option>
             <option value="text/tab-separated-values">TSV</option>

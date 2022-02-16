@@ -1,25 +1,30 @@
 import React from 'react';
 import { MODE_FEATURES } from '../../shared/constants';
-import { ProjectPage } from '../../shared/state';
+import {
+  ProjectPage,
+  ProjectPageVisibility,
+  ProjectState,
+} from '../../shared/state';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import { Select } from '../components/Select';
-import { UrlStateContext } from '../urlState';
 import { Panel } from './Panel';
 
 const IS_EXPORT = Boolean((window as any).DATASTATION_IS_EXPORT);
 
 export function Dashboard({
   page,
+  project: { id: projectId },
   reevalPanel,
+  updatePage,
 }: {
+  project: ProjectState;
   page: ProjectPage;
   reevalPanel: (panelId: string, reset?: boolean) => void;
+  updatePage: (p: ProjectPage) => void;
 }) {
-  const {
-    state: { refreshPeriod },
-    setState: setUrlState,
-  } = React.useContext(UrlStateContext);
   const { panels } = page;
+  // Minimum of 60 seconds, default to 1 hour.
+  const refreshPeriod = Math.max(+page.refreshPeriod || 60 * 60, 60);
 
   async function evalAll() {
     for (let panel of panels) {
@@ -41,12 +46,26 @@ export function Dashboard({
           try {
             i = setTimeout(() => {
               try {
-                evalAll();
+                let oldestAttempt = new Date();
+                for (let panel of panels) {
+                  if (panel.resultMeta.lastRun < oldestAttempt) {
+                    oldestAttempt = panel.resultMeta.lastRun;
+                  }
+                }
+
+                // Make sure we're not competing with other views of this page.
+                oldestAttempt.setSeconds(
+                  oldestAttempt.getSeconds() + refreshPeriod
+                );
+                if (oldestAttempt < new Date()) {
+                  evalAll();
+                }
                 resolve();
               } catch (e) {
                 reject(e);
               }
-            }, (+refreshPeriod || 60) * 1000);
+              // Randomness to help avoid competition with other pages.
+            }, (refreshPeriod + Math.random() * 60) * 1000);
           } catch (e) {
             reject(e);
           }
@@ -60,7 +79,7 @@ export function Dashboard({
       done = true;
       clearInterval(i);
     };
-  }, [refreshPeriod, panels.map((p) => p.id).join(',')]);
+  }, [page.refreshPeriod, panels.map((p) => p.id).join(',')]);
 
   if (!MODE_FEATURES.dashboard) {
     return (
@@ -72,20 +91,58 @@ export function Dashboard({
     );
   }
 
+  if (!panels.length) {
+    return (
+      <div className="section">
+        <div className="text-center">
+          There are no graph or table panels on this page ({page.name}) to
+          display! Try adding a graph or table panel in the editor view.
+        </div>
+      </div>
+    );
+  }
+
+  const dashboardLink = '/dashboard/' + projectId + '/' + page.id;
+
   return (
     <div className="section">
       {!IS_EXPORT && (
-        <div className="flex-right">
+        <div className="section-subtitle vertical-align-center">
+          {page.visibility === 'no-link' ? null : (
+            <a target="_blank" href={dashboardLink}>
+              External link
+            </a>
+          )}
+          <Select
+            className="flex-right"
+            label="External link"
+            onChange={(v: string) => {
+              page.visibility = v as ProjectPageVisibility;
+              updatePage(page);
+            }}
+            value={page.visibility}
+            tooltip={
+              'Enabling an external link allows you to share a read-only view of this page. Link with login is not public. Link without login is fully public. Anyone with the link can view the page.'
+            }
+          >
+            <option value="no-link">No link</option>
+            <option value="private-link">Link with login</option>
+            <option value="public-link">Link without login</option>
+          </Select>
+
           <Select
             label="Refresh every"
-            onChange={(v: string) => setUrlState({ refreshPeriod: +v })}
-            value={String(+refreshPeriod || 60)}
+            onChange={(v: string) => {
+              page.refreshPeriod = +v;
+              updatePage(page);
+            }}
+            value={String(refreshPeriod)}
           >
-            <option value="30">30 seconds</option>
-            <option value="60">1 minute</option>
-            <option value={String(60 * 5)}>5 minutes</option>
-            <option value={String(60 * 15)}>15 minutes</option>
+            <option value={String(60 * 60)}>6 hour</option>
             <option value={String(60 * 60)}>1 hour</option>
+            <option value={String(60 * 15)}>15 minutes</option>
+            <option value={String(60 * 5)}>5 minutes</option>
+            <option value="60">1 minute</option>
           </Select>
         </div>
       )}

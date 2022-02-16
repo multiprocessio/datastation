@@ -158,6 +158,10 @@ func evalHTTPPanel(project *ProjectState, pageIndex int, panel *PanelInfo) error
 		}
 		defer rsp.Body.Close()
 
+		if h.ContentTypeInfo.Type == "" {
+			h.ContentTypeInfo.Type = rsp.Header.Get("content-type")
+		}
+
 		out := GetPanelResultsFile(project.Id, panel.Id)
 		w, err := openTruncate(out)
 		if err != nil {

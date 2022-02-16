@@ -45,6 +45,7 @@ export function PanelList({
 
   function updatePanel(page: ProjectPage, panelId: string) {
     return (panel: PanelInfo) => {
+      panel.lastEdited = new Date();
       const panelIndex = page.panels.findIndex((p) => p.id === panelId);
       page.panels[panelIndex] = panel;
       updatePage(page);

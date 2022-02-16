@@ -1,7 +1,7 @@
 import fs from 'fs';
 import React from 'react';
 import { renderToString } from 'react-dom/server';
-import { ProjectState } from '../shared/state';
+import { ProjectPage, ProjectState } from '../shared/state';
 import { Dashboard } from '../ui/dashboard';
 import { makeReevalPanel } from '../ui/PageList';
 import { UrlStateContext } from '../ui/urlState';
@@ -17,7 +17,12 @@ export function renderPage(project: ProjectState, pageId: string) {
         setState: (p) => {},
       }}
     >
-      <Dashboard page={page} reevalPanel={reevalPanel} />
+      <Dashboard
+        project={project}
+        updatePage={(p: ProjectPage) => {}}
+        page={page}
+        reevalPanel={reevalPanel}
+      />
     </UrlStateContext.Provider>
   );
 

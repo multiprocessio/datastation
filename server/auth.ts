@@ -11,13 +11,20 @@ import { App } from './app';
 import { Config } from './config';
 import log from './log';
 
-interface AuthRequestSession extends express.Request {
+export interface AuthRequestSession extends express.Request {
   session: session.Session &
     Partial<session.SessionData> & {
       tokenSet: TokenSet;
       code: string;
       redirect: string;
     };
+}
+
+export function authenticated(req: AuthRequestSession) {
+  return (
+    req.session.tokenSet &&
+    new Date(req.session.tokenSet.expires_at * 1000) >= new Date()
+  );
 }
 
 export class Auth {
@@ -54,10 +61,7 @@ export class Auth {
       return next();
     }
 
-    if (
-      !req.session.tokenSet ||
-      new Date(req.session.tokenSet.expires_at * 1000) < new Date()
-    ) {
+    if (!authenticated(req)) {
       req.session.redirect = ('/?projectId=' + req.query.projectId) as string;
       rsp.status(401).json({});
       return;

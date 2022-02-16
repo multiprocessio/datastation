@@ -242,6 +242,7 @@ export class PanelInfo {
   id: string;
   serverId: string;
   resultMeta: PanelResultMeta;
+  lastEdited: Date;
 
   constructor(type: PanelInfoType, name?: string, content?: string) {
     this.content = content || '';
@@ -249,6 +250,7 @@ export class PanelInfo {
     this.name = name || '';
     this.id = uuid.v4();
     this.resultMeta = new PanelResultMeta();
+    this.lastEdited = new Date();
   }
 
   static fromJSON(raw: any): PanelInfo {
@@ -262,6 +264,11 @@ export class PanelInfo {
     }
 
     let pit: PanelInfo = mergeDeep(new PanelInfo(raw.type || 'literal'), raw);
+
+    pit.lastEdited =
+      typeof raw.lastEdited === 'string'
+        ? new Date(raw.lastEdited)
+        : raw.lastEdited || pit.lastEdited;
 
     switch (pit.type) {
       case 'table':
@@ -591,9 +598,13 @@ export class ScheduledExport {
   }
 }
 
+export type ProjectPageVisibility = 'no-link' | 'private-link' | 'public-link';
+
 export class ProjectPage {
   panels: Array<PanelInfo>;
   schedules: Array<ScheduledExport>;
+  refreshPeriod: number;
+  visibility: ProjectPageVisibility;
   name: string;
   id: string;
 
@@ -602,6 +613,8 @@ export class ProjectPage {
     this.panels = panels || [];
     this.schedules = [];
     this.id = uuid.v4();
+    this.visibility = 'no-link';
+    this.refreshPeriod = 60 * 60;
   }
 
   static fromJSON(raw: any): ProjectPage {
@@ -611,6 +624,8 @@ export class ProjectPage {
     pp.name = raw.name;
     pp.id = raw.id || uuid.v4();
     pp.schedules = raw.schedules || [];
+    pp.visibility = raw.visibility || pp.visibility;
+    pp.refreshPeriod = raw.refreshPeriod || pp.refreshPeriod;
     return pp;
   }
 }

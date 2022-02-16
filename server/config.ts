@@ -19,8 +19,8 @@ export class Config {
     port: number;
     address: string;
     publicUrl: string;
-    tlsKey: string;
-    tlsCert: string;
+    tlsKey?: string;
+    tlsCert?: string;
   };
 
   database: {
