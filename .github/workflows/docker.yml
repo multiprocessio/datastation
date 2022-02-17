@@ -22,7 +22,7 @@ jobs:
     # Override GIT_TAG if it's just a commit to main, not a release
     - if: github.ref == 'refs/heads/main'
       steps:
-        - echo "GIT_TAG=latest"  >> $GITHUB_ENV
+        - run: echo "GIT_TAG=latest"  >> $GITHUB_ENV
 
     - run: yarn docker-build-server
     - run: docker build -t datastation:$GIT_TAG .
