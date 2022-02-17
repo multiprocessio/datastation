@@ -138,6 +138,11 @@ export class App {
       );
     });
 
+    // Must go last?
+    this.express.get('*', (req: express.Request, rsp: express.Response) => {
+      rsp.sendStatus(404);
+    });
+
     const server = this.config.server.tlsKey
       ? this.https.createServer(
           {

@@ -1339,3 +1339,9 @@ body.dark {
     color: var(--color-dark);
   }
 }
+
+@media only screen and (max-width: 600px) {
+  .panel {
+    min-width: initial;
+  }
+}

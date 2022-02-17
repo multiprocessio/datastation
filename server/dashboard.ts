@@ -16,7 +16,7 @@ class Dashboard {
   constructor(app: App, handlers: RPCHandler<any, any>[]) {
     this.app = app;
     this.handlers = handlers;
-    this.evaling = new AsyncLock();
+    this.evaling = new AsyncLock({ timeout: 500 });
   }
 
   getPage = async (req: AuthRequestSession): Promise<ProjectPage | null> => {
@@ -52,8 +52,9 @@ class Dashboard {
   };
 
   view = async (req: AuthRequestSession, rsp: express.Response) => {
-    if (!this.canLoadPage(req)) {
-      rsp.status(404);
+    const canLoad = await this.canLoadPage(req);
+    if (!canLoad) {
+      rsp.sendStatus(404);
       return;
     }
 
@@ -71,7 +72,7 @@ class Dashboard {
     for (const panel of page.panels) {
       results[panel.id] = await dispatch({
         resource: 'eval',
-        body: { panelId: panel },
+        body: { panelId: panel.id },
         projectId,
       });
     }
@@ -84,22 +85,45 @@ class Dashboard {
   };
 
   data = async (req: AuthRequestSession, rsp: express.Response) => {
-    if (!this.canLoadPage(req)) {
-      rsp.status(404);
+    const canLoad = await this.canLoadPage(req);
+    if (!canLoad) {
+      rsp.sendStatus(404);
       return;
     }
 
     const page = await this.getPage(req);
+    if (!page) {
+      rsp.sendStatus(404);
+      return;
+    }
 
-    if (!this.evaling.isBusy()) {
+    const busy = await new Promise<boolean>(async (resolve, reject) => {
+      try {
+        await this.evaling.acquire(page.id, () => {});
+        resolve(true);
+      } catch (e) {
+        if (e.message.startsWith('async-lock timed out in queue')) {
+          resolve(false);
+          return;
+        }
+
+        reject(e);
+      }
+    });
+
+    if (busy) {
       log.info('Considering eval run for ' + page.id);
       let oldestRun = new Date();
       for (const panel of page.panels) {
-        if (panel.lastEdited < oldestRun) {
+        if (panel.lastEdited && panel.lastEdited < oldestRun) {
           oldestRun = panel.lastEdited;
         }
 
-        if (panel.resultMeta && panel.resultMeta.lastRun < oldestRun) {
+        if (
+          panel.resultMeta &&
+          panel.resultMeta.lastRun &&
+          panel.resultMeta.lastRun < oldestRun
+        ) {
           oldestRun = panel.resultMeta.lastRun;
         }
       }
@@ -111,7 +135,7 @@ class Dashboard {
         // Kick off a new run
         log.info('Starting eval run for ' + page.id);
         setTimeout(() => {
-          this.evaling.acquire('eval', () =>
+          this.evaling.acquire(req.params.pageId, () =>
             this.evalPage(req.params.projectId, page)
           );
         }, 0);
@@ -120,7 +144,7 @@ class Dashboard {
 
     // Either way always return old data
     page.panels = page.panels.filter((p) =>
-      ['table', 'dashboard'].includes(p.type)
+      ['table', 'graph'].includes(p.type)
     );
     rsp.json(page);
   };

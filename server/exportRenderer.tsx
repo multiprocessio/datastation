@@ -18,7 +18,7 @@ export function renderPage(project: ProjectState, pageId: string) {
       }}
     >
       <Dashboard
-        projectId={project.id}
+        projectId={project.projectName}
         updatePage={(p: ProjectPage) => {}}
         page={page}
         reevalPanel={reevalPanel}

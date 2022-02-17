@@ -2,6 +2,7 @@ import React from 'react';
 import { ProjectPage } from './../shared/state';
 import { Alert } from './components/Alert';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { Loading } from './components/Loading';
 import { Select } from './components/Select';
 import { Panel } from './dashboard/Panel';
 
@@ -10,6 +11,7 @@ export function ExternalDashboard() {
   const pageId = location.pathname.split('/')[3];
   const [page, setPage] = React.useState<ProjectPage>(null);
   const [error, setError] = React.useState(null);
+  const [firstLoad, setFirstLoad] = React.useState(true);
 
   async function grabPage() {
     try {
@@ -22,15 +24,23 @@ export function ExternalDashboard() {
       setError(null);
     } catch (e) {
       setError(e);
+    } finally {
+      if (firstLoad) {
+        setFirstLoad(false);
+      }
     }
   }
 
+  // Load once on page load
   React.useEffect(() => {
     grabPage();
-  });
+  }, []);
 
   // Minimum of 60 seconds, default to 1 hour.
-  const refreshPeriod = Math.max(+page.refreshPeriod || 60 * 60, 60);
+  const refreshPeriod = Math.max(
+    (page ? +page.refreshPeriod : 0) || 60 * 60,
+    60
+  );
 
   React.useEffect(() => {
     let done = false;
@@ -68,6 +78,10 @@ export function ExternalDashboard() {
     page && page.panels.map((p) => p.id).join(','),
   ]);
 
+  if (firstLoad) {
+    return <Loading />;
+  }
+
   if (error) {
     return (
       <div className="section">
@@ -80,8 +94,9 @@ export function ExternalDashboard() {
     return (
       <div className="section">
         <div className="text-center">
-          There are no graph or table panels on this page ({page.name}) to
-          display! Try adding a graph or table panel in the editor view.
+          There are no graph or table panels on this page
+          {page ? ` (${page.name})` : ''} to display! Try adding a graph or
+          table panel in the editor view.
         </div>
       </div>
     );
