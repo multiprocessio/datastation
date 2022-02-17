@@ -1,6 +1,7 @@
 FROM node:17
 WORKDIR /datastation
 EXPOSE 8080
-COPY build /datastation
+COPY package.json /datastation
+COPY build /datastation/build
 COPY node_modules /datastation/node_modules
-CMD ["node", "/datastation/server.js"]
+CMD ["node", "/datastation/build/server.js"]

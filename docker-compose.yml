@@ -6,7 +6,7 @@ services:
       - "8080:8080"
     environment:
       DATASTATION_DATABASE_ADDRESS: "postgres:5432"
-      DATASTATION_SERVER_ADDRESS: "0.0.0.0:8080"
+      DATASTATION_SERVER_ADDRESS: "0.0.0.0"
     volumes:
       - /etc/datastation:/etc/datastation
     depends_on:
