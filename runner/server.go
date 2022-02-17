@@ -44,9 +44,13 @@ func mergeConfigWithEnv(sc *ServerConfig, lookup func(string) (string, bool)) {
 		"database": &sc.Database.Database,
 	}
 
+	Logln("%#v", os.Environ())
 	for name, setting := range m {
-		if override, ok := lookup("DATASTATION_SERVER_" + strings.ToUpper(name)); ok {
+		name := "DATASTATION_DATABASE_" + strings.ToUpper(name)
+		Logln("Looking up %s", name)
+		if override, ok := lookup(name); ok {
 			*setting = override
+			Logln("overriding %s with %s", name, override)
 		}
 	}
 }

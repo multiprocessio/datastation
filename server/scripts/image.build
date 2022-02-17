@@ -1,1 +1,1 @@
-docker build . -f Dockerfile.build -t datastation-builder -v $(pwd):/datastation
+docker build . -f Dockerfile.build -t datastation-builder --build-arg CACHE_BUSTER=`date +%s` -v $(pwd):/datastation
