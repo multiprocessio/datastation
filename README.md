@@ -21,19 +21,11 @@ In desktop mode and server mode:
 * Build reports with graphs, charts and tables
 * Script against data in Python, JavaScript, Ruby, PHP, Julia, or R
 * Cross-platform: Windows, macOS, and Linux
-* Easily fetch your data, wherever it is: SQL and non-SQL databases, files, HTTP servers
+* Easily fetch your data, wherever it is: 18 SQL and non-SQL databases, files, HTTP servers
 
-## Learn
+## Install
 
-Find user guides for all different kinds of databases and scenarios
-[here](https://datastation.multiprocess.io/docs/).
-
-## CLI
-
-[dsq](https://github.com/multiprocessio/dsq) is a CLI that uses
-DataStation internals to allow you to run SQL queries on data files
-like Excel, JSON, CSV, TSV, Parquet, etc. If you want the CLI version
-of DataStation, check out dsq.
+Install instructions are available [here](https://datastation.multiprocess.io/docs/).
 
 ## Try out the demo
 
@@ -44,13 +36,22 @@ It uses in-memory evaluation so your data never leaves your
 machine/browser. Because it runs in browser memory it has some
 limitations that the desktop and server versions don't.
 
-## Install
+## Learn
 
-Install instructions are available [here](https://datastation.multiprocess.io/docs/).
+Find user guides for all different kinds of databases and scenarios
+[here](https://datastation.multiprocess.io/docs/).
 
 ## Community
 
 [Join us on Discord](https://discord.gg/f2wQBc4bXX).
+
+
+## CLI
+
+[dsq](https://github.com/multiprocessio/dsq) is a CLI that uses
+DataStation internals to allow you to run SQL queries on data files
+like Excel, JSON, CSV, TSV, Parquet, etc. If you want the CLI version
+of DataStation, check out dsq.
 
 ## How can I help?
 
