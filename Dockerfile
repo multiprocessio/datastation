@@ -1,4 +1,4 @@
-FROM node:17-slim
+FROM node:17-bullseye
 WORKDIR /datastation
 EXPOSE 8080
 COPY package.json /datastation
