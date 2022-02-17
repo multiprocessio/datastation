@@ -1,6 +1,6 @@
 import fs from 'fs';
 import yaml from 'js-yaml';
-import { mergeDeep, validate } from '../shared/object';
+import { mergeDeep, validate, setPath } from '../shared/object';
 import log from './log';
 
 const CONFIG_PATH = '/etc/datastation/config.yaml';
@@ -49,11 +49,30 @@ export class Config {
   }
 }
 
+export function mergeFromEnv(cfg: Config, env: Record<string, string>) {
+  const keys: [[Array<string>, any]] = [[[], cfg]];
+  while (keys.length) {
+    const [path, top] = keys.pop();
+    if (top !== null && typeof top === 'object') {
+      for (const [key, value] of Object.entries(top)) {
+        keys.push([[...path, key], value]);
+      }
+    }
+
+    const envvar = 'DATASTATION_' + path.join('_').toUpperCase();
+    if (env[envvar]) {
+      setPath(cfg, path.join('.'), env[envvar]);
+    }
+  }
+}
+
 export function readConfig(): Config {
   const raw = fs.readFileSync(CONFIG_PATH);
   const rawYaml = yaml.load(raw.toString());
 
   const cfg = mergeDeep(new Config(), rawYaml);
+
+  mergeFromEnv(cfg, process.env);
 
   const requiredFields = [
     'auth.sessionSecret',
