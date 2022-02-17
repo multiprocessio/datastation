@@ -585,7 +585,7 @@ type MimeType string
 
 const (
 	TSVMimeType             MimeType = "text/tab-separated-values"
-	PlainTextMimeType = "text/plain"
+	PlainTextMimeType                = "text/plain"
 	CSVMimeType                      = "text/csv"
 	JSONMimeType                     = "application/json"
 	JSONLinesMimeType                = "application/jsonlines"

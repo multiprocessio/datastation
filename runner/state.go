@@ -309,11 +309,11 @@ type HttpConnectorInfo struct {
 }
 
 type ProjectPage struct {
-	Panels    []PanelInfo   `json:"panels" db:"panels"`
-	Schedules []interface{} `json:"schedules" db:"schedules"`
-	Name      string        `json:"name" db:"name"`
-	Id        string        `json:"id" db:"id"`
-	RefreshPeriod int `json:"refreshPeriod" db:"refreshPeriod"`
+	Panels        []PanelInfo   `json:"panels" db:"panels"`
+	Schedules     []interface{} `json:"schedules" db:"schedules"`
+	Name          string        `json:"name" db:"name"`
+	Id            string        `json:"id" db:"id"`
+	RefreshPeriod int           `json:"refreshPeriod" db:"refreshPeriod"`
 }
 
 type ProjectState struct {
