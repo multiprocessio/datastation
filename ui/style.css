@@ -72,6 +72,12 @@ a:hover {
   flex: 1;
 }
 
+.app--dashboard main {
+  margin: 0 auto;
+  width: initial;
+  display: block;
+}
+
 .main-body {
   flex: 1;
   overflow-y: auto;

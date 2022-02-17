@@ -16,11 +16,12 @@ export function Panel({ panel }: { panel: PanelInfo }) {
         <div className="panel-header vertical-align-center">
           <span className="panel-name">{panel.name}</span>
           <span className="flex-right">
-            {panel.resultMeta?.lastRun &&
-              formatDistanceToNow(panel.resultMeta?.lastRun, {
-                addSuffix: true,
-                includeSeconds: true,
-              })}
+            {panel.resultMeta && panel.resultMeta.lastRun
+              ? formatDistanceToNow(panel.resultMeta.lastRun, {
+                  addSuffix: true,
+                  includeSeconds: true,
+                })
+              : null}
           </span>
         </div>
       </div>

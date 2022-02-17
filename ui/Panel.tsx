@@ -407,18 +407,23 @@ export function Panel({
                     >
                       {results.exception ? 'Failed' : 'Succeeded'}
                     </span>{' '}
-                    {formatDistanceToNow(results.lastRun, {
-                      addSuffix: true,
-                    })}
-                    <div>
-                      <small>
-                        Took{' '}
-                        {formatDistanceStrict(
-                          results.lastRun.valueOf() - (results.elapsed || 0),
-                          results.lastRun.valueOf()
-                        )}
-                      </small>
-                    </div>
+                    {results.lastRun ? (
+                      <>
+                        {formatDistanceToNow(results.lastRun, {
+                          addSuffix: true,
+                        })}
+                        <div>
+                          <small>
+                            Took{' '}
+                            {formatDistanceStrict(
+                              results.lastRun.valueOf() -
+                                (results.elapsed || 0),
+                              results.lastRun.valueOf()
+                            )}
+                          </small>
+                        </div>
+                      </>
+                    ) : null}
                   </>
                 ) : (
                   'Run to apply changes'

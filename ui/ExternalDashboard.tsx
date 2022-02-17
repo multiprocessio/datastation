@@ -1,9 +1,11 @@
 import React from 'react';
+import { APP_NAME, MODE } from '../shared/constants';
 import { ProjectPage } from './../shared/state';
 import { Alert } from './components/Alert';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { Loading } from './components/Loading';
 import { Select } from './components/Select';
+import { Version } from './components/Version';
 import { Panel } from './dashboard/Panel';
 
 export function ExternalDashboard() {
@@ -20,7 +22,7 @@ export function ExternalDashboard() {
         throw await rsp.json();
       }
 
-      setPage(await rsp.json());
+      setPage(ProjectPage.fromJSON(await rsp.json()));
       setError(null);
     } catch (e) {
       setError(e);
@@ -103,26 +105,37 @@ export function ExternalDashboard() {
   }
 
   return (
-    <div className="section">
-      <div className="section-subtitle vertical-align-center">
-        <Select
-          label="Refreshes every"
-          onChange={() => {}}
-          disabled
-          value={String(refreshPeriod)}
-        >
-          <option value={String(60 * 60)}>6 hour</option>
-          <option value={String(60 * 60)}>1 hour</option>
-          <option value={String(60 * 15)}>15 minutes</option>
-          <option value={String(60 * 5)}>5 minutes</option>
-          <option value="60">1 minute</option>
-        </Select>
-      </div>
-      {page.panels.map((panel) => (
-        <ErrorBoundary key={panel.id}>
-          <Panel panel={panel} />
-        </ErrorBoundary>
-      ))}
+    <div className={`app app--${MODE} app--dashboard`}>
+      <header>
+        <div className="vertical-align-center">
+          {APP_NAME}
+          <div className="flex-right">{decodeURIComponent(projectId)}</div>
+        </div>
+      </header>
+      <main>
+        <div className="section">
+          <div className="section-subtitle vertical-align-center">
+            <Select
+              label="Refreshes every"
+              onChange={() => {}}
+              disabled
+              value={String(refreshPeriod)}
+            >
+              <option value={String(60 * 60)}>6 hour</option>
+              <option value={String(60 * 60)}>1 hour</option>
+              <option value={String(60 * 15)}>15 minutes</option>
+              <option value={String(60 * 5)}>5 minutes</option>
+              <option value="60">1 minute</option>
+            </Select>
+          </div>
+          {page.panels.map((panel) => (
+            <ErrorBoundary key={panel.id}>
+              <Panel panel={panel} />
+            </ErrorBoundary>
+          ))}
+        </div>
+      </main>
+      <Version />
     </div>
   );
 }

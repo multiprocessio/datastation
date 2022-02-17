@@ -98,7 +98,8 @@ export function Dashboard({
     );
   }
 
-  const dashboardLink = '/dashboard/' + projectId + '/' + page.id;
+  const dashboardLink =
+    '/dashboard/' + encodeURIComponent(projectId) + '/' + page.id;
 
   return (
     <div className="section">

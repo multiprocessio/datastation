@@ -19,8 +19,15 @@ class Dashboard {
     this.evaling = new AsyncLock({ timeout: 500 });
   }
 
+  getIds(req: AuthRequestSession) {
+    return {
+      projectId: decodeURIComponent(req.params.projectId),
+      pageId: decodeURIComponent(req.params.pageId),
+    };
+  }
+
   getPage = async (req: AuthRequestSession): Promise<ProjectPage | null> => {
-    const { projectId, pageId } = req.params;
+    const { projectId, pageId } = this.getIds(req);
     const getProjectHandler = this.handlers.find(
       (h) => h.resource === 'getProject'
     ).handler;
@@ -135,9 +142,8 @@ class Dashboard {
         // Kick off a new run
         log.info('Starting eval run for ' + page.id);
         setTimeout(() => {
-          this.evaling.acquire(req.params.pageId, () =>
-            this.evalPage(req.params.projectId, page)
-          );
+          const { pageId, projectId } = this.getIds(req);
+          this.evaling.acquire(pageId, () => this.evalPage(projectId, page));
         }, 0);
       }
     }
