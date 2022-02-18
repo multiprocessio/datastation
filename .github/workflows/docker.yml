@@ -16,13 +16,13 @@ jobs:
       with:
         ref: ${{ github.ref }}
 
-    # - run: ./scripts/ci/prepare_linux.sh
-    # - run: echo "GIT_TAG=`git tag --points-at HEAD`" >> $GITHUB_ENV
+    - run: ./scripts/ci/prepare_linux.sh
+    - run: echo "GIT_TAG=`git tag --points-at HEAD`" >> $GITHUB_ENV
 
-    # # Override GIT_TAG if it's just a commit to main, not a release
-    # - if: github.ref == 'refs/heads/main'
-    #   run: echo "GIT_TAG=latest" >> $GITHUB_ENV
+    # Override GIT_TAG if it's just a commit to main, not a release
+    - if: github.ref == 'refs/heads/main'
+      run: echo "GIT_TAG=latest" >> $GITHUB_ENV
 
-    # - run: yarn docker-build-server
-    # - run: docker build -t datastation:$GIT_TAG .
-    # - run: docker push ghcr.io/multiprocessio/datastation:$GIT_TAG
+    - run: yarn docker-build-server
+    - run: docker build -t datastation:$GIT_TAG .
+    - run: docker push ghcr.io/multiprocessio/datastation:$GIT_TAG
