@@ -1,6 +1,6 @@
 const { Config, mergeFromEnv } = require('./config');
 
-test('mergeFromEnv', function testMergeFromEnv () {
+test('mergeFromEnv', function testMergeFromEnv() {
   const c = new Config();
   expect(c.database.address).toBe('localhost:5432');
 

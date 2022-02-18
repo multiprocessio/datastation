@@ -1,6 +1,6 @@
 import fs from 'fs';
 import yaml from 'js-yaml';
-import { mergeDeep, validate, setPath } from '../shared/object';
+import { mergeDeep, setPath, validate } from '../shared/object';
 import log from './log';
 
 const CONFIG_PATH = '/etc/datastation/config.yaml';
