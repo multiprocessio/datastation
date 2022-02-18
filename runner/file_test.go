@@ -122,6 +122,47 @@ func Test_transformJSONConcat(t *testing.T) {
 	}
 }
 
+func Test_transformGeneric(t *testing.T) {
+	tests := []struct {
+		in  string
+		out interface{}
+	}{
+		{
+			in:  `abcdef`,
+			out: `abcdef`,
+		},
+		{
+			in:  `ab""cdef`,
+			out: `ab""cdef`,
+		},
+	}
+
+	for _, test := range tests {
+		inTmp, err := ioutil.TempFile("", "")
+		defer os.Remove(inTmp.Name())
+		assert.Nil(t, err)
+
+		inTmp.WriteString(test.in)
+
+		outTmp, err := ioutil.TempFile("", "")
+		defer os.Remove(outTmp.Name())
+		assert.Nil(t, err)
+
+		err = transformGenericFile(inTmp.Name(), outTmp)
+		assert.Nil(t, err)
+
+		var m interface{}
+		outTmpBs, err := ioutil.ReadFile(outTmp.Name())
+		assert.Nil(t, err)
+		err = json.Unmarshal(outTmpBs, &m)
+		assert.Nil(t, err)
+
+		assert.Equal(t, test.out, m)
+	}
+}
+
+// Benchmarks
+
 func Test_transformCSV_BENCHMARK(t *testing.T) {
 	if os.Getenv("BENCHMARK") != "true" {
 		return

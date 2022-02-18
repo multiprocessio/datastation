@@ -401,12 +401,18 @@ func transformOpenOfficeSheetFile(in string, out io.Writer) error {
 func transformGeneric(in io.Reader, out io.Writer) error {
 	r := bufio.NewReader(in)
 	o := bufio.NewWriter(out)
+
+	err := o.WriteByte('"')
+	if err != nil {
+		return err
+	}
+
 	var prev byte = ' '
 
 	for {
 		b, err := r.ReadByte()
 		if err == io.EOF {
-			return nil
+			break
 		}
 
 		if err != nil {
@@ -427,6 +433,13 @@ func transformGeneric(in io.Reader, out io.Writer) error {
 
 		prev = b
 	}
+
+	err = o.WriteByte('"')
+	if err != nil {
+		return err
+	}
+
+	return o.Flush()
 }
 
 func transformGenericFile(in string, out io.Writer) error {
