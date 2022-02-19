@@ -282,10 +282,11 @@ for (const subprocessName of RUNNERS) {
         content: 'age,name\n12,Kev\n18,Nyra',
         name: 'Raw Data',
       });
-      
+
       const pp = new ProgramPanelInfo({
         type: 'python',
-        content: 'DM_setPanel("{% for row in DM_getPanel("0") %}{{ row.name }}: {{ row.age }}, {% endfor %}");',
+        content:
+          'DM_setPanel("{% for row in DM_getPanel("0") %}{{ row.name }}: {{ row.age }}, {% endfor %}");',
       });
 
       let finished = false;

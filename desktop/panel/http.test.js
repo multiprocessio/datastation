@@ -194,7 +194,7 @@ for (const subprocessName of RUNNERS) {
               // Grab result
               const value = JSON.parse(
                 fs
-      g            .readFileSync(
+                  .readFileSync(
                     getProjectResultsFile(project.projectName) + hp.id
                   )
                   .toString()
@@ -228,9 +228,7 @@ for (const subprocessName of RUNNERS) {
           // Grab result
           const value = JSON.parse(
             fs
-              .readFileSync(
-                getProjectResultsFile(project.projectName) + hp.id
-              )
+              .readFileSync(getProjectResultsFile(project.projectName) + hp.id)
               .toString()
           );
 
@@ -248,13 +246,10 @@ for (const subprocessName of RUNNERS) {
         content: '/testdata/allformats/unknown',
         name: 'Raw Data',
       });
-      
+
       const hp = new HTTPPanelInfo(
         '',
-        new HTTPConnectorInfo(
-          '',
-          'http://localhost:9799{{DM_getPanel("0")}}',
-        ),
+        new HTTPConnectorInfo('', 'http://localhost:9799{{DM_getPanel("0")}}')
       );
 
       const panels = [lp, hp];
@@ -265,9 +260,7 @@ for (const subprocessName of RUNNERS) {
           // Grab result
           const value = JSON.parse(
             fs
-              .readFileSync(
-                getProjectResultsFile(project.projectName) + hp.id
-              )
+              .readFileSync(getProjectResultsFile(project.projectName) + hp.id)
               .toString()
           );
 
@@ -277,7 +270,7 @@ for (const subprocessName of RUNNERS) {
       );
     });
   });
-  
+
   if (process.platform === 'linux') {
     describe('eval http over server via ' + subprocessName.go, () => {
       test('correct result', () => {
@@ -315,8 +308,6 @@ for (const subprocessName of RUNNERS) {
         );
       }, 30_000);
     });
-
-    
   }
 }
 
