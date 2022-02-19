@@ -3,6 +3,8 @@ package runner
 import (
 	"encoding/json"
 	"io/ioutil"
+	"os"
+	"strings"
 
 	"github.com/goccy/go-yaml"
 	"github.com/jmoiron/sqlx"
@@ -34,9 +36,29 @@ func readYAMLFileInto(file string, into interface{}) error {
 	return nil
 }
 
+func mergeConfigWithEnv(sc *ServerConfig, lookup func(string) (string, bool)) {
+	m := map[string]*string{
+		"address":  &sc.Database.Address,
+		"username": &sc.Database.Username,
+		"password": &sc.Database.Password,
+		"database": &sc.Database.Database,
+	}
+
+	Logln("%#v", os.Environ())
+	for name, setting := range m {
+		name := "DATASTATION_DATABASE_" + strings.ToUpper(name)
+		Logln("Looking up %s", name)
+		if override, ok := lookup(name); ok {
+			*setting = override
+			Logln("overriding %s with %s", name, override)
+		}
+	}
+}
+
 func getProjectPanelFromDatabase(projectId, panelId string) (*ProjectState, int, *PanelInfo, error) {
 	var sc ServerConfig
 	err := readYAMLFileInto("/etc/datastation/config.yaml", &sc)
+	mergeConfigWithEnv(&sc, os.LookupEnv)
 	if err != nil {
 		return nil, 0, nil, err
 	}

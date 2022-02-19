@@ -20,7 +20,6 @@ export interface UrlState {
   page: number;
   fullScreen?: string;
   view: 'editor' | 'dashboard' | 'scheduler' | 'settings';
-  refreshPeriod?: number;
   expanded?: Array<string>;
   sidebar?: boolean;
 }

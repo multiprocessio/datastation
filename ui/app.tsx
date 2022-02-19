@@ -202,11 +202,12 @@ export function App() {
   } else {
     // This allows us to render the sidebar in tests where we
     // prepopulate connectors and servers
-    const hasSidebar = Boolean(
-      MODE_FEATURES.connectors ||
-        state.connectors?.length ||
-        state.servers?.length
-    );
+    const hasSidebar =
+      Boolean(
+        MODE_FEATURES.connectors ||
+          state.connectors?.length ||
+          state.servers?.length
+      ) && urlState.view === 'editor';
 
     main = (
       <React.Fragment>
@@ -253,12 +254,10 @@ export function App() {
           value={{ state: settings, setState: setSettings }}
         >
           <div className={`app app--${MODE} app--${settings.theme}`}>
-            <div>
-              {MODE_FEATURES.appHeader && <Header />}
-              <main className={'view-' + (urlState.view || 'editor')}>
-                {main}
-              </main>
-            </div>
+            {MODE_FEATURES.appHeader && <Header />}
+            <main className={'view-' + (urlState.view || 'editor')}>
+              {main}
+            </main>
           </div>
         </SettingsContext.Provider>
       </UrlStateContext.Provider>

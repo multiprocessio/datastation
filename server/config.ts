@@ -1,6 +1,6 @@
 import fs from 'fs';
 import yaml from 'js-yaml';
-import { mergeDeep, validate } from '../shared/object';
+import { mergeDeep, setPath, validate } from '../shared/object';
 import log from './log';
 
 const CONFIG_PATH = '/etc/datastation/config.yaml';
@@ -19,8 +19,8 @@ export class Config {
     port: number;
     address: string;
     publicUrl: string;
-    tlsKey: string;
-    tlsCert: string;
+    tlsKey?: string;
+    tlsCert?: string;
   };
 
   database: {
@@ -32,29 +32,47 @@ export class Config {
 
   constructor() {
     this.auth = {
-      sessionSecret: '',
+      sessionSecret: 'datastation',
     };
     this.server = {
       port: 8080,
       address: 'localhost',
-      publicUrl: 'https://localhost:8080',
-      tlsKey: './certs/key.pem',
-      tlsCert: './certs/cert.pem',
+      publicUrl: 'http://localhost:8080',
     };
 
     this.database = {
       address: 'localhost:5432',
       database: 'datastation',
       username: 'datastation',
-      password: '',
+      password: 'datastation',
     };
+  }
+}
+
+export function mergeFromEnv(cfg: Config, env: Record<string, string>) {
+  const keys: [[Array<string>, any]] = [[[], cfg]];
+  while (keys.length) {
+    const [path, top] = keys.pop();
+    if (top !== null && typeof top === 'object') {
+      for (const [key, value] of Object.entries(top)) {
+        keys.push([[...path, key], value]);
+      }
+    }
+
+    const envvar = 'DATASTATION_' + path.join('_').toUpperCase();
+    if (env[envvar]) {
+      setPath(cfg, path.join('.'), env[envvar]);
+    }
   }
 }
 
 export function readConfig(): Config {
   const raw = fs.readFileSync(CONFIG_PATH);
   const rawYaml = yaml.load(raw.toString());
+
   const cfg = mergeDeep(new Config(), rawYaml);
+
+  mergeFromEnv(cfg, process.env);
 
   const requiredFields = [
     'auth.sessionSecret',

@@ -8,9 +8,9 @@ describe('parsePartialJSONFile', function parsePartialJSONFileTest() {
     try {
       const whole = '[{"foo": "bar"}, {"big": "bad"}]';
       fs.writeFileSync(f.path, whole);
-      const { value, size } = parsePartialJSONFile(f.path, 3);
+      const { size, preview } = parsePartialJSONFile(f.path, 3);
       expect(size).toBe(whole.length);
-      expect(value).toStrictEqual([{ foo: 'bar' }]);
+      expect(preview).toStrictEqual(`[\n  { "foo": "bar" }\n]`);
     } finally {
       f.cleanup();
     }
@@ -22,9 +22,9 @@ describe('parsePartialJSONFile', function parsePartialJSONFileTest() {
       try {
         const whole = `[{"foo": "${c}bar"}, {"big": "bad"}]`;
         fs.writeFileSync(f.path, whole);
-        const { value, size } = parsePartialJSONFile(f.path, 3);
+        const { preview, size } = parsePartialJSONFile(f.path, 3);
         expect(size).toBe(whole.length);
-        expect(value).toStrictEqual([{ foo: `${c}bar` }]);
+        expect(preview).toStrictEqual(`[\n  { "foo": "${c}bar" }\n]`);
       } finally {
         f.cleanup();
       }
@@ -37,9 +37,9 @@ describe('parsePartialJSONFile', function parsePartialJSONFileTest() {
       const whole = `[{"foo":"bar\\" { "},{"big":"bad"}]`;
       expect(JSON.stringify(JSON.parse(whole))).toEqual(whole);
       fs.writeFileSync(f.path, whole);
-      const { value, size } = parsePartialJSONFile(f.path, 3);
+      const { preview, size } = parsePartialJSONFile(f.path, 3);
       expect(size).toBe(whole.length);
-      expect(value).toStrictEqual([{ foo: `bar" { ` }]);
+      expect(preview).toStrictEqual(`[\n  { "foo": "bar\\" { " }\n]`);
     } finally {
       f.cleanup();
     }

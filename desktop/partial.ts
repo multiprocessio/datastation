@@ -21,7 +21,6 @@ export function parsePartialJSONFile(
     const value = JSON.parse(f);
     return {
       size,
-      value,
       arrayCount: Array.isArray(value) ? value.length : null,
       shape: shape(value),
       preview: preview(value),
@@ -110,7 +109,6 @@ export function parsePartialJSONFile(
 
     return {
       size,
-      value,
       shape: shape(value),
       preview: preview(value),
       arrayCount,

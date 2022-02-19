@@ -31,6 +31,9 @@ export function ContentTypePicker({
           }}
         >
           {!disableAutoDetect && <option value="null">Auto-detect</option>}
+          <optgroup label="Raw">
+            <option value="text/plain">Plain Text</option>
+          </optgroup>
           <optgroup label="Data">
             <option value="text/csv">CSV</option>
             <option value="text/tab-separated-values">TSV</option>
@@ -64,23 +67,28 @@ export function ContentTypePicker({
         <div className="form-row">
           <Input
             autoWidth
+            label="Custom Regex"
             type="text"
             value={value.customLineRegexp}
             onChange={(clr: string) => {
               value.customLineRegexp = clr;
               onChange(value);
             }}
+            tooltip={
+              <React.Fragment>
+                <div className="mb-2">
+                  Enter a custom ECMAScript-flavor regular expression to be
+                  evaluated for each line. Only named capture groups will be
+                  returned. For example:
+                </div>
+                <code>
+                  {
+                    '^(?<remote>[^ ]*) (?<host>[^ ]*) (?<user>[^ ]*) [(?<time>[^]]*)] "(?<method>S+)(?: +(?<path>[^"]*?)(?: +S*)?)?" (?<code>[^ ]*) (?<size>[^ ]*)(?: "(?<referer>[^"]*)" "(?<agent>[^"]*)"(?:s+(?<http_x_forwarded_for>[^ ]+))?)?$'
+                  }
+                </code>
+              </React.Fragment>
+            }
           />
-          <p>
-            Enter a custom ECMAScript-flavor regular expression to be evaluated
-            for each line. Only named capture groups will be returned. For
-            example:{' '}
-            <code>
-              {
-                '^(?<remote>[^ ]*) (?<host>[^ ]*) (?<user>[^ ]*) [(?<time>[^]]*)] "(?<method>S+)(?: +(?<path>[^"]*?)(?: +S*)?)?" (?<code>[^ ]*) (?<size>[^ ]*)(?: "(?<referer>[^"]*)" "(?<agent>[^"]*)"(?:s+(?<http_x_forwarded_for>[^ ]+))?)?$'
-              }
-            </code>
-          </p>
         </div>
       )}
     </React.Fragment>

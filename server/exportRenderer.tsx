@@ -1,15 +1,13 @@
 import fs from 'fs';
 import React from 'react';
 import { renderToString } from 'react-dom/server';
-import { ProjectState } from '../shared/state';
+import { ProjectPage, ProjectState } from '../shared/state';
 import { Dashboard } from '../ui/dashboard';
-import { makeReevalPanel } from '../ui/PageList';
 import { UrlStateContext } from '../ui/urlState';
 
 export function renderPage(project: ProjectState, pageId: string) {
   const pageIndex = project.pages.findIndex((p) => p.id === pageId);
   const page = project.pages[pageIndex];
-  const reevalPanel = makeReevalPanel(page, project, (p) => {});
   const view = (
     <UrlStateContext.Provider
       value={{
@@ -17,7 +15,11 @@ export function renderPage(project: ProjectState, pageId: string) {
         setState: (p) => {},
       }}
     >
-      <Dashboard page={page} reevalPanel={reevalPanel} />
+      <Dashboard
+        projectId={project.projectName}
+        updatePage={(p: ProjectPage) => {}}
+        page={page}
+      />
     </UrlStateContext.Provider>
   );
 

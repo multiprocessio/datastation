@@ -80,7 +80,7 @@ export function Select({
   }, [value, getOptionValues(children).join(',')]);
 
   const select = (
-    <div>
+    <div className="vertical-align-center">
       <select
         className={`${label ? '' : className} select-container`}
         value={value}

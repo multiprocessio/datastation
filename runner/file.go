@@ -5,7 +5,6 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"io"
-	"io/ioutil"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -400,14 +399,47 @@ func transformOpenOfficeSheetFile(in string, out io.Writer) error {
 }
 
 func transformGeneric(in io.Reader, out io.Writer) error {
-	bs, err := ioutil.ReadAll(in)
+	r := bufio.NewReader(in)
+	o := bufio.NewWriter(out)
+
+	err := o.WriteByte('"')
 	if err != nil {
-		return nil
+		return err
 	}
 
-	encoder := json.NewEncoder(out)
-	// string(bs) otherwise it's converted to bas64
-	return encoder.Encode(string(bs))
+	var prev byte = ' '
+
+	for {
+		b, err := r.ReadByte()
+		if err == io.EOF {
+			break
+		}
+
+		if err != nil {
+			return err
+		}
+
+		if b == '"' && prev != '\\' {
+			err = o.WriteByte('\\')
+			if err != nil {
+				return err
+			}
+		}
+
+		err = o.WriteByte(b)
+		if err != nil {
+			return err
+		}
+
+		prev = b
+	}
+
+	err = o.WriteByte('"')
+	if err != nil {
+		return err
+	}
+
+	return o.Flush()
 }
 
 func transformGenericFile(in string, out io.Writer) error {
@@ -566,6 +598,7 @@ type MimeType string
 
 const (
 	TSVMimeType             MimeType = "text/tab-separated-values"
+	PlainTextMimeType                = "text/plain"
 	CSVMimeType                      = "text/csv"
 	JSONMimeType                     = "application/json"
 	JSONLinesMimeType                = "application/jsonlines"
@@ -587,6 +620,8 @@ func GetMimeType(fileName string, ct ContentTypeInfo) MimeType {
 	}
 
 	switch filepath.Ext(fileName) {
+	case ".txt":
+		return PlainTextMimeType
 	case ".tsv", ".tab":
 		return TSVMimeType
 	case ".csv":

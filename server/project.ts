@@ -6,8 +6,12 @@ import {
   UpdateProjectHandler,
 } from '../desktop/rpc';
 import { encryptProjectSecrets } from '../desktop/store';
-import { GetProjectsRequest, GetProjectsResponse } from '../shared/rpc';
-import { ProjectState } from '../shared/state';
+import {
+  Endpoint,
+  GetProjectsRequest,
+  GetProjectsResponse,
+} from '../shared/rpc';
+import { PanelResultMeta, ProjectState } from '../shared/state';
 
 export const getProjectHandlers = (dbpool: pg.Pool) => {
   const getProjects: RPCHandler<GetProjectsRequest, GetProjectsResponse> = {
@@ -82,6 +86,48 @@ export const getProjectHandlers = (dbpool: pg.Pool) => {
     },
   };
 
+  // Update project results in a transaction. This is so that results
+  // can get updated without messing up the actual panel contents and
+  // things like that.
+  const updateResults = {
+    resource: 'updateResults' as Endpoint,
+    handler: async function updateResultsHandler(
+      projectId: string,
+      results: Record<string, PanelResultMeta>
+    ) {
+      const client = await dbpool.connect();
+
+      try {
+        await client.query('BEGIN');
+        const res = await client.query(
+          'SELECT project_value FROM projects WHERE project_name = $1;',
+          [projectId]
+        );
+        const project = res.rows[0].project_value;
+
+        // Update the results
+        for (const page of project.pages) {
+          for (const panel of page.panels) {
+            if (results[panel.id]) {
+              panel.resultMeta = results[panel.id];
+            }
+          }
+        }
+
+        await client.query(
+          'INSERT INTO projects (project_name, project_value) VALUES ($1, $2) ON CONFLICT (project_name) DO UPDATE SET project_value = EXCLUDED.project_value',
+          [projectId, JSON.stringify(project)]
+        );
+        await client.query('COMMIT');
+      } catch (e) {
+        await client.query('ROLLBACK');
+        throw e;
+      } finally {
+        client.release();
+      }
+    },
+  };
+
   const makeProject: MakeProjectHandler = {
     resource: 'makeProject',
     handler: async function makeProjectHandler(
@@ -100,5 +146,5 @@ export const getProjectHandlers = (dbpool: pg.Pool) => {
     },
   };
 
-  return [getProjects, getProject, updateProject, makeProject];
+  return [getProjects, getProject, updateProject, makeProject, updateResults];
 };

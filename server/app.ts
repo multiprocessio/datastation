@@ -11,6 +11,7 @@ import { initialize } from '../desktop/runner';
 import { humanSize } from '../shared/text';
 import { registerAuth } from './auth';
 import { Config } from './config';
+import { registerDashboard } from './dashboard';
 import log from './log';
 import { getProjectHandlers } from './project';
 import { handleRPC } from './rpc';
@@ -115,6 +116,7 @@ export class App {
       next();
     });
     const auth = await registerAuth('/a/auth', this, this.config);
+    registerDashboard('/dashboard', '/a/dashboard', this, handlers);
 
     this.express.post('/a/rpc', auth.requireAuth, (req, rsp) =>
       handleRPC(req, rsp, handlers)
@@ -134,6 +136,11 @@ export class App {
       this.express.get('/' + f, (req, rsp) =>
         rsp.sendFile(path.join(CODE_ROOT, 'build', f))
       );
+    });
+
+    // Must go last?
+    this.express.get('*', (req: express.Request, rsp: express.Response) => {
+      rsp.sendStatus(404);
     });
 
     const server = this.config.server.tlsKey

@@ -14,7 +14,9 @@
   --lighter-dark: #323254;
   --gutter-dark: var(--lighter-dark);
 
+  /* Generic settings */
   --sans-serif: 'San Francisco', 'Gadugi', sans-serif;
+  --margin-base: 8px;
 }
 
 * {
@@ -58,25 +60,32 @@ a:hover {
   height: calc(100% - 1px);
 }
 
+.app {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
 .app main {
   display: flex;
   width: 100%;
+  flex: 1;
 }
 
-.app--desktop main,
-.app--server main {
-  height: 100%;
+.app--dashboard main {
+  margin: 0 auto;
+  width: initial;
+  display: block;
 }
 
 .main-body {
   flex: 1;
   overflow-y: auto;
-  min-width: 920px;
 }
 
 header {
   background: var(--background-light);
-  padding: 8px 15px;
+  padding: var(--margin-base) calc(2 * var(--margin-base));
   border-bottom: 2px solid #e5e5ec;
   color: black;
 }
@@ -95,15 +104,15 @@ header a {
 }
 
 header .vertical-align-center a:not(.stars) {
-  margin-right: 15px;
+  margin-right: calc(2 * var(--margin-base));
 }
 
 header iframe {
-  margin-left: 15px;
+  margin-left: calc(2 * var(--margin-base));
 }
 
 .header-project-name {
-  padding-right: 15px;
+  padding-right: calc(2 * var(--margin-base));
 }
 
 .editor {
@@ -128,7 +137,7 @@ header iframe {
 .editor-container--singleLine .editor.input {
   height: initial !important;
   min-height: initial !important;
-  padding: 15px;
+  padding: calc(2 * var(--margin-base));
 }
 
 .editor-container--singleLine .ace_hidden-cursors {
@@ -149,9 +158,13 @@ label,
 .radio-label,
 .input-label,
 .select-label {
-  padding-right: 8px;
+  padding-right: var(--margin-base);
   color: #333;
   font-size: 0.75rem;
+}
+
+.panel {
+  min-width: 920px;
 }
 
 .panel-details :not(.form-row--multi) > .button {
@@ -168,7 +181,7 @@ label,
     display: inline-block;
     text-align: right;
     width: 100px;
-    padding-right: 15px;
+    padding-right: calc(2 * var(--margin-base));
     overflow-wrap: break-word;
   }
 
@@ -216,7 +229,7 @@ input[type='radio'] {
 
 /* cssplus broken : parsing */
 .radio--vertical .radio-element:not(:last-of-type) {
-  padding-bottom: 15px;
+  padding-bottom: calc(2 * var(--margin-base));
 }
 
 .radio--vertical .radio-element {
@@ -246,8 +259,8 @@ input[type='radio'] {
     ); /* Twice the inner circle + border width */
     height: 18px;
     border: 2px solid var(--border-light);
-    border-radius: 15px;
-    margin-left: 8px;
+    border-radius: calc(2 * var(--margin-base));
+    margin-left: var(--margin-base);
     position: relative;
   }
 
@@ -291,7 +304,7 @@ label.select select:focus {
 }
 
 input + input[type='file'] {
-  margin-left: 8px;
+  margin-left: var(--margin-base);
 }
 
 .input-invalid {
@@ -308,6 +321,10 @@ input + input[type='file'] {
 .vertical-align-center {
   display: flex;
   align-items: center;
+}
+
+.mb-2 {
+  margin-bottom: calc(2 * var(--margin-base));
 }
 
 .flex {
@@ -411,7 +428,7 @@ input + input[type='file'] {
   text-transform: uppercase;
   font-size: 0.9rem;
   color: #777;
-  padding-bottom: 15px;
+  padding-bottom: calc(2 * var(--margin-base));
   white-space: nowrap;
 }
 
@@ -434,7 +451,7 @@ input + input[type='file'] {
 }
 
 .section-title .add-page {
-  padding: 8px 15px;
+  padding: var(--margin-base) calc(2 * var(--margin-base));
   background: transparent;
   border: 0;
   box-shadow: initial;
@@ -444,17 +461,20 @@ input + input[type='file'] {
 }
 
 .section-subtitle {
-  padding: 15px;
+  padding: calc(2 * var(--margin-base));
+
+  .select:not(:last-of-type) {
+    margin-right: calc(2 * var(--margin-base));
+  }
 }
 
 .sidebar {
   border-right: 1px solid var(--border-light);
-  border-bottom: 1px solid var(--border-light);
   background: var(--background-light);
   min-width: 400px;
   background: #f9f9fd;
-  padding: 15px;
-  max-height: 100%;
+  padding: calc(2 * var(--margin-base));
+  height: 100%;
   overflow-y: auto;
 }
 
@@ -473,7 +493,7 @@ input + input[type='file'] {
 
 .server,
 .connector {
-  margin-bottom: 15px;
+  margin-bottom: calc(2 * var(--margin-base));
   padding: 10px;
   border: 1px solid transparent;
   border-bottom: 1px solid var(--border-light);
@@ -534,29 +554,30 @@ input + input[type='file'] {
     border: 0;
     box-shadow: initial;
     border-right: 1px solid #f9f9fd;
-    padding: 15px;
+    padding: calc(2 * var(--margin-base));
     background: transparent;
   }
 
   .page-name--current {
     font-size: 1rem;
-    padding: 8px 15px;
+    padding: var(--margin-base) calc(2 * var(--margin-base));
     background: var(--background-light);
 
     .input {
-      margin: 0 8px;
+      margin: 0 var(--margin-base);
     }
   }
 }
 
 .page-mode {
-  padding-right: 15px;
+  padding-right: calc(2 * var(--margin-base));
   text-decoration: none;
   color: black;
 }
 
 .page-mode:hover,
-.page-mode:visited {
+.page-mode:visited,
+.page-mode:focus {
   color: black;
 }
 
@@ -568,7 +589,7 @@ input + input[type='file'] {
 .panel {
   background: var(--background-light);
   border: 1px solid var(--border-light);
-  margin: 15px;
+  margin: calc(2 * var(--margin-base));
 }
 
 .panel {
@@ -627,11 +648,11 @@ input + input[type='file'] {
 .panel-type,
 .connector-type {
   color: #777;
-  padding-right: 15px;
+  padding-right: calc(2 * var(--margin-base));
 }
 
 .panel-head {
-  padding: 8px;
+  padding: var(--margin-base);
   background: #f9f9fd;
   border-bottom: 1px solid var(--border-light);
 }
@@ -642,7 +663,7 @@ input + input[type='file'] {
 }
 
 .panel-header--open {
-  padding-bottom: 8px;
+  padding-bottom: var(--margin-base);
   border-bottom: 1px solid var(--border-light);
 }
 
@@ -652,11 +673,11 @@ input + input[type='file'] {
 }
 
 .panel-controls .button {
-  margin-left: 15px;
+  margin-left: calc(2 * var(--margin-base));
 }
 
 .panel-details {
-  margin: 15px auto 0 auto;
+  margin: calc(2 * var(--margin-base)) auto 0 auto;
   max-width: 1024px;
 }
 
@@ -681,7 +702,7 @@ input + input[type='file'] {
 
 .panel-order {
   width: 30px;
-  margin-right: 15px;
+  margin-right: calc(2 * var(--margin-base));
   margin-left: 5px;
 }
 
@@ -707,7 +728,7 @@ input + input[type='file'] {
   border: 0 !important;
   box-shadow: initial !important;
   background: 0;
-  padding: 5px 15px;
+  padding: 5px calc(2 * var(--margin-base));
   border-radius: 0;
 }
 
@@ -752,7 +773,7 @@ input + input[type='file'] {
 }
 
 .new-panel:not(:last-child) {
-  margin-bottom: 15px;
+  margin-bottom: calc(2 * var(--margin-base));
 }
 
 .panel p {
@@ -765,19 +786,21 @@ input + input[type='file'] {
 }
 
 .tooltip {
-  position: relative;
   font-size: 0.9rem;
 }
 
 .tooltip-body {
   position: absolute;
   top: 24px;
-  right: 0;
+  left: 0;
   display: none;
   background: rgba(30, 30, 30, 0.75);
   border: 1px solid black;
   color: white;
   padding: 10px;
+  z-index: 1;
+  max-width: 400px;
+  box-shadow: 0 1px 3px 0 #aaa;
 }
 
 .tooltip-icon {
@@ -796,7 +819,7 @@ input + input[type='file'] {
 }
 
 .alert {
-  padding: 15px;
+  padding: calc(2 * var(--margin-base));
   font-size: 0.75rem;
   overflow-wrap: anywhere;
 
@@ -820,7 +843,7 @@ input + input[type='file'] {
 .alert > svg {
   height: 30px;
   width: 30px;
-  margin-right: 15px;
+  margin-right: calc(2 * var(--margin-base));
   color: #555;
 }
 
@@ -854,7 +877,7 @@ input + input[type='file'] {
   right: 1px;
   background: var(--background-light);
   border: 1px solid var(--border-light);
-  padding: 15px;
+  padding: calc(2 * var(--margin-base));
   width: 400px;
   color: black;
 }
@@ -906,7 +929,7 @@ input + input[type='file'] {
 }
 
 .form-row {
-  padding: 8px 0;
+  padding: var(--margin-base) 0;
   min-height: 40px;
   display: flex;
   align-items: center;
@@ -922,7 +945,7 @@ input + input[type='file'] {
 .table,
 canvas {
   max-height: 100%;
-  padding: 0 15px;
+  padding: 0 calc(2 * var(--margin-base));
   margin: 30px auto;
 }
 
@@ -955,11 +978,11 @@ canvas {
 .modal-body {
   background: var(--background-light);
   border: 1px solid var(--border-light);
-  padding: 15px;
+  padding: calc(2 * var(--margin-base));
 }
 
 .card {
-  padding: 15px;
+  padding: calc(2 * var(--margin-base));
   height: min-content;
 }
 
@@ -967,21 +990,27 @@ canvas {
   width: 500px;
 }
 
+.app--server .project-name {
+  margin: 0 auto;
+  margin-top: calc(2 * var(--margin-base));
+}
+
 .project-name .input,
 .project-name .input input,
 .project-name .button {
   width: 100%;
-  padding: 15px;
+  padding: calc(2 * var(--margin-base));
 }
 
 .project-existing {
   border-top: 1px solid var(--border-light);
-  padding-top: 15px;
-  margin-top: 15px;
+  padding-top: calc(2 * var(--margin-base));
+  margin-top: calc(2 * var(--margin-base));
 
   .project-selector,
   .project-timestamp {
-    margin-right: 15px;
+    margin: 0;
+    margin-right: calc(2 * var(--margin-base));
   }
 }
 
@@ -1016,7 +1045,7 @@ tbody tr {
   top: calc(100% + 5px);
   right: 0;
   z-index: 4;
-  padding: 15px;
+  padding: calc(2 * var(--margin-base));
   min-width: 200px;
   background: var(--background-light);
   box-shadow: 0 1px 3px 0 #aaa;
@@ -1026,7 +1055,7 @@ tbody tr {
 
 .confirm-popup .button + .button {
   display: inline-block;
-  margin-left: 15px;
+  margin-left: calc(2 * var(--margin-base));
 }
 
 .confirm-popup--open {
@@ -1058,7 +1087,7 @@ tbody tr {
   position: absolute;
   right: 0;
   top: calc(100% + 5px);
-  padding: 16px;
+  padding: calc(2 * var(--margin-base));
   background: var(--background-light);
   width: 300px;
   box-shadow: 0 1px 3px 0 #aaa;
@@ -1067,7 +1096,7 @@ tbody tr {
 .global-dropdown-section:not(:last-of-type) {
   border-bottom: 1px solid var(--border-light);
   padding-bottom: 10px;
-  margin-bottom: 15px;
+  margin-bottom: calc(2 * var(--margin-base));
 }
 
 .global-dropdown-sectionName {
@@ -1077,7 +1106,7 @@ tbody tr {
 }
 
 .global-dropdown-item {
-  padding-top: 15px;
+  padding-top: calc(2 * var(--margin-base));
 }
 
 .global-dropdown.global-dropdown--open .global-dropdown-body {
@@ -1127,6 +1156,10 @@ body.dark .server--expanded,
 body.dark .connector--expanded {
   background: #484860;
   border-color: var(--border-dark);
+}
+
+body.dark .tooltip-icon:hover {
+  color: white;
 }
 
 body.dark .button:hover {
@@ -1289,6 +1322,7 @@ body.dark {
     color: var(--color-dark);
   }
 
+  .tooltip-body,
   .confirm-popup {
     background: #29293c;
     color: var(--color-dark);
@@ -1305,8 +1339,15 @@ body.dark {
     color: #e35172;
   }
 
+  .header-project-name,
   .global-dropdown-sectionName,
   .global-dropdown p {
     color: var(--color-dark);
+  }
+}
+
+@media only screen and (max-width: 600px) {
+  .panel {
+    min-width: initial;
   }
 }
