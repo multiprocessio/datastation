@@ -7,75 +7,92 @@ import { Panel } from './Panel';
 
 const IS_EXPORT = Boolean((window as any).DATASTATION_IS_EXPORT);
 
-export function Dashboard({
-  page,
-  projectId,
-  reevalPanel,
-  updatePage,
-}: {
-  projectId: string;
-  page: ProjectPage;
-  reevalPanel: (panelId: string, reset?: boolean) => void;
-  updatePage: (p: ProjectPage) => void;
-}) {
-  const { panels } = page;
-  // Minimum of 60 seconds, default to 1 hour.
-  const refreshPeriod = Math.max(+page.refreshPeriod || 60 * 60, 60);
+export async function loop(
+  callback: () => Promise<void>,
+  frequencyMs: number,
+  done: () => boolean
+) {
+  let i: ReturnType<typeof setTimeout> = null;
 
-  async function evalAll() {
-    for (let panel of panels) {
-      await reevalPanel(panel.id);
+  // Do once initially.
+  callback();
+
+  while (!done()) {
+    clearTimeout(i);
+    await new Promise<void>((resolve, reject) => {
+      try {
+        i = setTimeout(async function timeout() {
+          try {
+            await callback();
+            resolve();
+          } catch (e) {
+            reject(e);
+          }
+        }, frequencyMs);
+      } catch (e) {
+        reject(e);
+      }
+    });
+  }
+
+  clearTimeout(i);
+}
+
+export function useDashboardData(
+  projectId: string,
+  pageId: string,
+  frequencyMs: number
+): [ProjectPage, Error, boolean] {
+  const [page, setPage] = React.useState<ProjectPage>(null);
+  const [error, setError] = React.useState(null);
+  const [firstLoad, setFirstLoad] = React.useState(true);
+
+  async function grabPage() {
+    try {
+      const rsp = await fetch(`/a/dashboard/${projectId}/${pageId}`);
+      if (rsp.status !== 200) {
+        throw await rsp.json();
+      }
+
+      setPage(ProjectPage.fromJSON(await rsp.json()));
+      setError(null);
+    } catch (e) {
+      setError(e);
+    } finally {
+      if (firstLoad) {
+        setFirstLoad(false);
+      }
     }
   }
 
   React.useEffect(() => {
-    let done = false;
-    let i: ReturnType<typeof setTimeout> = null;
-    if (IS_EXPORT || !MODE_FEATURES.dashboard) {
+    if (!IS_EXPORT && MODE_FEATURES.dashboard) {
       return;
     }
 
-    async function loop() {
-      while (!done) {
-        clearTimeout(i);
-        await new Promise<void>((resolve, reject) => {
-          try {
-            i = setTimeout(() => {
-              try {
-                let oldestAttempt = new Date();
-                for (let panel of panels) {
-                  if (panel.resultMeta.lastRun < oldestAttempt) {
-                    oldestAttempt = panel.resultMeta.lastRun;
-                  }
-                }
-
-                // Make sure we're not competing with other views of this page.
-                oldestAttempt.setSeconds(
-                  oldestAttempt.getSeconds() + refreshPeriod
-                );
-                if (oldestAttempt < new Date()) {
-                  evalAll();
-                }
-                resolve();
-              } catch (e) {
-                reject(e);
-              }
-              // Randomness to help avoid competition with other pages.
-            }, (refreshPeriod + Math.random() * 60) * 1000);
-          } catch (e) {
-            reject(e);
-          }
-        });
-      }
-    }
-
-    loop();
+    let done = false;
+    loop(grabPage, frequencyMs, () => done);
 
     return () => {
       done = true;
-      clearInterval(i);
     };
-  }, [page.refreshPeriod, panels.map((p) => p.id).join(',')]);
+  }, [page && page.panels.map((p) => p.id).join(',')]);
+
+  return [page, error, firstLoad];
+}
+
+export function Dashboard({
+  page: { id: pageId },
+  projectId,
+  updatePage,
+}: {
+  projectId: string;
+  page: ProjectPage;
+  updatePage: (p: ProjectPage) => void;
+}) {
+  const randomSeconds = (5 + Math.ceil(Math.random() * 10)) * 1_000;
+  const [page] = useDashboardData(projectId, pageId, randomSeconds);
+  const { panels } = page;
 
   if (!MODE_FEATURES.dashboard) {
     return (
@@ -133,7 +150,7 @@ export function Dashboard({
               page.refreshPeriod = +v;
               updatePage(page);
             }}
-            value={String(refreshPeriod)}
+            value={String(page.refreshPeriod)}
           >
             <option value={String(60 * 60)}>6 hour</option>
             <option value={String(60 * 60)}>1 hour</option>

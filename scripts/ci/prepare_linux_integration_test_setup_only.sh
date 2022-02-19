@@ -52,21 +52,7 @@ sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv E0C56BD4
 echo "deb https://repo.clickhouse.tech/deb/stable/ main/" | sudo tee /etc/apt/sources.list.d/clickhouse.list
 sudo apt-get update -y
 sudo apt-get install -y clickhouse-server clickhouse-client
-echo "
-<yandex>
-  <users>
-    <test>
-      <!-- test:test -->
-      <password_sha256_hex>9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08</password_sha256_hex>
-      <networks>
-        <ip>127.0.0.1</ip>
-      </networks>
-      <profile>default</profile>
-      <quota>default</quota>
-      <access_management>1</access_management>
-    </test>
-  </users>
-</yandex>" | sudo tee /etc/clickhouse-server/users.d/test.xml
+echo ./scripts/ci/clickhouse_users.xml | sudo tee /etc/clickhouse-server/users.d/test.xml
 # See: https://community.atlassian.com/t5/Bitbucket-Pipelines-discussions/Broken-starting-clickhouse-in-a-docker-because-of-wrong/td-p/1689466
 setcap -r `which clickhouse` && echo "Cleaning caps success" || echo "Cleaning caps error"
 sudo service clickhouse-server start

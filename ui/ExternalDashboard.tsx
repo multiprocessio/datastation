@@ -1,84 +1,22 @@
 import React from 'react';
 import { APP_NAME, MODE } from '../shared/constants';
-import { ProjectPage } from './../shared/state';
 import { Alert } from './components/Alert';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { Loading } from './components/Loading';
 import { Select } from './components/Select';
 import { Version } from './components/Version';
+import { useDashboardData } from './dashboard';
 import { Panel } from './dashboard/Panel';
 
 export function ExternalDashboard() {
   const projectId = location.pathname.split('/')[2];
   const pageId = location.pathname.split('/')[3];
-  const [page, setPage] = React.useState<ProjectPage>(null);
-  const [error, setError] = React.useState(null);
-  const [firstLoad, setFirstLoad] = React.useState(true);
-
-  async function grabPage() {
-    try {
-      const rsp = await fetch(`/a/dashboard/${projectId}/${pageId}`);
-      if (rsp.status !== 200) {
-        throw await rsp.json();
-      }
-
-      setPage(ProjectPage.fromJSON(await rsp.json()));
-      setError(null);
-    } catch (e) {
-      setError(e);
-    } finally {
-      if (firstLoad) {
-        setFirstLoad(false);
-      }
-    }
-  }
-
-  // Load once on page load
-  React.useEffect(() => {
-    grabPage();
-  }, []);
-
-  // Minimum of 60 seconds, default to 1 hour.
-  const refreshPeriod = Math.max(
-    (page ? +page.refreshPeriod : 0) || 60 * 60,
-    60
+  const randomMinute = (60 + Math.ceil(Math.random() * 60)) * 1_000;
+  const [page, error, firstLoad] = useDashboardData(
+    projectId,
+    pageId,
+    randomMinute
   );
-
-  React.useEffect(() => {
-    let done = false;
-    let i: ReturnType<typeof setTimeout> = null;
-    async function loop() {
-      while (!done) {
-        clearTimeout(i);
-        await new Promise<void>((resolve, reject) => {
-          try {
-            i = setTimeout(() => {
-              try {
-                grabPage();
-                resolve();
-              } catch (e) {
-                reject(e);
-              }
-
-              // Randomness to help avoid competition with other pages.
-            }, (refreshPeriod + Math.random() * 60) * 1000);
-          } catch (e) {
-            reject(e);
-          }
-        });
-      }
-    }
-
-    loop();
-
-    return () => {
-      done = true;
-      clearInterval(i);
-    };
-  }, [
-    page && page.refreshPeriod,
-    page && page.panels.map((p) => p.id).join(','),
-  ]);
 
   if (firstLoad) {
     return <Loading />;
@@ -119,7 +57,7 @@ export function ExternalDashboard() {
               label="Refreshes every"
               onChange={() => {}}
               disabled
-              value={String(refreshPeriod)}
+              value={String(page.refreshPeriod)}
             >
               <option value={String(60 * 60)}>6 hour</option>
               <option value={String(60 * 60)}>1 hour</option>
