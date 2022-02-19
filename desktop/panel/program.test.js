@@ -274,4 +274,36 @@ for (const subprocessName of RUNNERS) {
       }, 15_000);
     });
   }
+
+  describe('runs python program with macros', function () {
+    test('it handles macros correctly', async () => {
+      const lp = new LiteralPanelInfo({
+        contentTypeInfo: { type: 'text/csv' },
+        content: 'age,name\n12,Kev\n18,Nyra',
+        name: 'Raw Data',
+      });
+      
+      const pp = new ProgramPanelInfo({
+        type: 'python',
+        content: 'DM_setPanel("{% for row in DM_getPanel("0") %}{{ row.name }}: {{ row.age }}, {% endfor %}");',
+      });
+
+      let finished = false;
+      const panels = [lp, pp];
+      await withSavedPanels(
+        panels,
+        async (project) => {
+          const fileName = getProjectResultsFile(project.projectName) + pp.id;
+          const result = JSON.parse(fs.readFileSync(fileName).toString());
+          expect(result).toEqual('Kev: 12, Nyra: 18, ');
+          finished = true;
+        },
+        { evalPanels: true, subprocessName }
+      );
+
+      if (!finished) {
+        throw new Error('Callback did not finish');
+      }
+    });
+  });
 }

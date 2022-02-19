@@ -138,13 +138,26 @@ func evalHTTPPanel(project *ProjectState, pageIndex int, panel *PanelInfo) error
 		return err
 	}
 
-	tls, host, port, rest, err := getHTTPHostPort(panel.HttpPanelInfo.Http.Http.Url)
+	h := panel.Http.Http
+
+	h.Url, err = evalMacros(h.Url, project, pageIndex)
+	if err != nil {
+		return err
+	}
+
+	for _, header := range h.Headers {
+		header.Value, err = evalMacros(header.Value, project, pageIndex)
+		if err != nil {
+			return err
+		}
+	}
+
+	tls, host, port, rest, err := getHTTPHostPort(h.Url)
 	if err != nil {
 		return err
 	}
 
 	return withRemoteConnection(server, host, port, func(proxyHost, proxyPort string) error {
-		h := panel.Http.Http
 		url := makeHTTPUrl(tls, proxyHost, proxyPort, rest)
 		rsp, err := makeHTTPRequest(httpRequest{
 			url:     url,

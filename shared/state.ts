@@ -442,8 +442,6 @@ export class DatabasePanelInfo extends PanelInfo {
   }
 }
 
-export type HTTPPanelInfoType = 'csv' | 'json';
-
 export class HTTPPanelInfo extends PanelInfo {
   http: HTTPConnectorInfo;
 

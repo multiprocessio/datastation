@@ -1,9 +1,12 @@
 package runner
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"time"
+
+	"github.com/flosch/pongo2"
 )
 
 var logPrefixSet = false
@@ -68,6 +71,48 @@ func allImportedPanelResultsExist(project ProjectState, page ProjectPage, panel 
 	return "", true
 }
 
+func evalMacros(content string, project *ProjectState, pageIndex int) (string, error) {
+	tpl, err := pongo2.FromString(content)
+	if err != nil {
+		return "", makeErrBadTemplate(err.Error())
+	}
+
+	errC := make(chan error)
+
+	getPanel := func(nameOrIndex string) interface{} {
+		panelId := ""
+		for panelIndex, panel := range project.Pages[pageIndex].Panels {
+			if panel.Name == nameOrIndex || fmt.Sprintf("%d", panelIndex) == nameOrIndex {
+				panelId = panel.Id
+				break
+			}
+		}
+
+		if panelId == "" {
+			errC <- makeErrInvalidDependentPanel(nameOrIndex)
+		}
+
+		resultsFile := GetPanelResultsFile(project.Id, panelId)
+		var a interface{}
+		err := readJSONFileInto(resultsFile, &a)
+		if err != nil {
+			errC <- err
+		}
+
+		return a
+
+	}
+
+	// TODO: Does this correctly handle if 0, 1 and 2 errors happen?
+	select {
+	case err := <-errC:
+		return "", err
+	default:
+		out, err := tpl.Execute(pongo2.Context{"DM_getPanel": getPanel})
+		return out, err
+	}
+}
+
 type EvalContext struct {
 	settings Settings
 }
@@ -85,6 +130,11 @@ func (ec EvalContext) Eval(projectId, panelId string) error {
 	panelId, ok := allImportedPanelResultsExist(*project, project.Pages[pageIndex], *panel)
 	if !ok {
 		return makeErrInvalidDependentPanel(panelId)
+	}
+
+	panel.Content, err = evalMacros(panel.Content, project, pageIndex)
+	if err != nil {
+		return err
 	}
 
 	switch panel.Type {

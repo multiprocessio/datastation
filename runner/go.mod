@@ -7,6 +7,7 @@ require (
 	github.com/ClickHouse/clickhouse-go v1.5.1
 	github.com/denisenkom/go-mssqldb v0.11.0
 	github.com/elastic/go-elasticsearch/v6 v6.8.10
+	github.com/flosch/pongo2 v0.0.0-20200913210552-0d938eb266f3
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/goccy/go-yaml v1.9.4
 	github.com/gocql/gocql v0.0.0-20211222173705-d73e6b1002a7
