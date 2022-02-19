@@ -165,7 +165,7 @@ func evalHTTPPanel(project *ProjectState, pageIndex int, panel *PanelInfo) error
 				headerContentType != "text/plain" {
 				h.ContentTypeInfo.Type = headerContentType
 			}
-			
+
 		}
 
 		out := GetPanelResultsFile(project.Id, panel.Id)
