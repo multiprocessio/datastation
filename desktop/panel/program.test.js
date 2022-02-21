@@ -329,10 +329,7 @@ for (const subprocessName of RUNNERS) {
         async (project) => {
           const fileName = getProjectResultsFile(project.projectName) + pp.id;
           const result = JSON.parse(fs.readFileSync(fileName).toString());
-          expect(result).toStrictEqual([
-            { age: "18" },
-            { age: "12" },
-          ]);
+          expect(result).toStrictEqual([{ age: '18' }, { age: '12' }]);
           finished = true;
         },
         { evalPanels: true, subprocessName }
@@ -346,8 +343,7 @@ for (const subprocessName of RUNNERS) {
     test('it handles regex correctly', async () => {
       const pp = new ProgramPanelInfo({
         type: 'sql',
-        content:
-          `select * from DM_getPanel(0) where name regexp 'K[a-zA-Z]*'`,
+        content: `select * from DM_getPanel(0) where name regexp 'K[a-zA-Z]*'`,
       });
 
       let finished = false;
@@ -357,9 +353,7 @@ for (const subprocessName of RUNNERS) {
         async (project) => {
           const fileName = getProjectResultsFile(project.projectName) + pp.id;
           const result = JSON.parse(fs.readFileSync(fileName).toString());
-          expect(result).toStrictEqual([
-            { name: 'Kev', age: '12' },
-          ]);
+          expect(result).toStrictEqual([{ name: 'Kev', age: '12' }]);
           finished = true;
         },
         { evalPanels: true, subprocessName }
