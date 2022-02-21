@@ -307,4 +307,67 @@ for (const subprocessName of RUNNERS) {
       }
     });
   });
+
+  describe('basic sql tests', function () {
+    const lp = new LiteralPanelInfo({
+      contentTypeInfo: { type: 'text/csv' },
+      content: 'age,name\n12,Kev\n18,Nyra',
+      name: 'Raw Data',
+    });
+
+    test('it handles table aliases correctly', async () => {
+      const pp = new ProgramPanelInfo({
+        type: 'sql',
+        content:
+          'select testt.age from DM_getPanel(0) testt order by testt.age desc',
+      });
+
+      let finished = false;
+      const panels = [lp, pp];
+      await withSavedPanels(
+        panels,
+        async (project) => {
+          const fileName = getProjectResultsFile(project.projectName) + pp.id;
+          const result = JSON.parse(fs.readFileSync(fileName).toString());
+          expect(result).toStrictEqual([
+            { age: "18" },
+            { age: "12" },
+          ]);
+          finished = true;
+        },
+        { evalPanels: true, subprocessName }
+      );
+
+      if (!finished) {
+        throw new Error('Callback did not finish');
+      }
+    });
+
+    test('it handles regex correctly', async () => {
+      const pp = new ProgramPanelInfo({
+        type: 'sql',
+        content:
+          `select * from DM_getPanel(0) where name regexp 'K[a-zA-Z]*'`,
+      });
+
+      let finished = false;
+      const panels = [lp, pp];
+      await withSavedPanels(
+        panels,
+        async (project) => {
+          const fileName = getProjectResultsFile(project.projectName) + pp.id;
+          const result = JSON.parse(fs.readFileSync(fileName).toString());
+          expect(result).toStrictEqual([
+            { name: 'Kev', age: '12' },
+          ]);
+          finished = true;
+        },
+        { evalPanels: true, subprocessName }
+      );
+
+      if (!finished) {
+        throw new Error('Callback did not finish');
+      }
+    });
+  });
 }

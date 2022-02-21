@@ -45,7 +45,7 @@ func Test_getConnectionString(t *testing.T) {
 		},
 		{
 			DatabaseConnectorInfoDatabase{Type: "sqlite", Database: "test.sql"},
-			"sqlite3",
+			"sqlite3_extended",
 			"test.sql",
 			nil,
 			"",

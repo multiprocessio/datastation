@@ -263,7 +263,8 @@ func getConnectionString(dbInfo DatabaseConnectorInfoDatabase) (string, string, 
 		query += u.extraArgs
 		return "clickhouse", fmt.Sprintf("tcp://%s?%s", u.address, query), nil
 	case SQLiteDatabase:
-		return "sqlite3", resolvePath(u.database), nil
+		// defined in database_sqlite.go, includes regexp support
+		return "sqlite3_extended", resolvePath(u.database), nil
 	}
 
 	return "", "", nil

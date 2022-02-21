@@ -86,12 +86,12 @@ func (ec EvalContext) evalProgramPanel(project *ProjectState, pageIndex int, pan
 	var p ProgramEvalInfo
 	err := json.Unmarshal([]byte(packedProgramTypeInfo[panel.Program.Type]), &p)
 	if err != nil {
-		return err
+		return edsef("Invalid program type: %s", panel.Program.Type)
 	}
 
 	tmp, err := os.CreateTemp("", "program-panel-")
 	if err != nil {
-		return err
+		return edse(err)
 	}
 	defer os.Remove(tmp.Name())
 
