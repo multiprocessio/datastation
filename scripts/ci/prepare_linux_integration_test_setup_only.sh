@@ -52,9 +52,9 @@ sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv E0C56BD4
 echo "deb https://repo.clickhouse.tech/deb/stable/ main/" | sudo tee /etc/apt/sources.list.d/clickhouse.list
 sudo apt-get update -y
 sudo apt-get install -y clickhouse-server clickhouse-client
-echo ./scripts/ci/clickhouse_users.xml | sudo tee /etc/clickhouse-server/users.d/test.xml
+sudo cp ./scripts/ci/clickhouse_users.xml /etc/clickhouse-server/users.d/test.xml
 # See: https://community.atlassian.com/t5/Bitbucket-Pipelines-discussions/Broken-starting-clickhouse-in-a-docker-because-of-wrong/td-p/1689466
-setcap -r `which clickhouse` && echo "Cleaning caps success" || echo "Cleaning caps error"
+sudo setcap -r `which clickhouse` && echo "Cleaning caps success" || echo "Cleaning caps error"
 sudo service clickhouse-server start
 
 # Install jsonnet
