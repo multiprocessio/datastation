@@ -196,7 +196,8 @@ func Test_sqlIngest_BENCHMARK(t *testing.T) {
 		},
 	}
 
-	err = EvalDatabasePanel(project, 0, panel2, func(projectId, panelId string) (chan map[string]interface{}, error) {
+	ec := EvalContext{}
+	err = ec.EvalDatabasePanel(project, 0, panel2, func(projectId, panelId string) (chan map[string]interface{}, error) {
 		return loadJSONArrayFile(readFile)
 	})
 	assert.Nil(t, err)

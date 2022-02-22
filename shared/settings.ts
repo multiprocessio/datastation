@@ -16,6 +16,7 @@ export class Settings {
   file: string;
   stdoutMaxSize: number;
   theme: 'light' | 'dark';
+  caCerts: Array<{ file: string }>;
 
   constructor(
     file: string,
@@ -37,5 +38,6 @@ export class Settings {
       );
     this.stdoutMaxSize = stdoutMaxSize || 5000;
     this.file = file;
+    this.caCerts = [];
   }
 }

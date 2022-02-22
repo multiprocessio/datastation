@@ -2,6 +2,8 @@ package runner
 
 import (
 	"bytes"
+	"crypto/tls"
+	"crypto/x509"
 	"io"
 	"io/ioutil"
 	"net"
@@ -103,11 +105,35 @@ func makeHTTPUrl(tls bool, host, port, extra string) string {
 }
 
 type httpRequest struct {
-	url      string
-	headers  []HttpConnectorInfoHeader
-	body     []byte
-	sendBody bool
-	method   string
+	url           string
+	headers       []HttpConnectorInfoHeader
+	body          []byte
+	sendBody      bool
+	method        string
+	customCaCerts []string
+}
+
+func getTransport(customCaCerts []string) (*http.Transport, error) {
+	rootCAs, err := x509.SystemCertPool()
+	if err != nil {
+		Logln("Failed to get system certs: %s", err)
+		// Continue with empty pool
+		rootCAs = x509.NewCertPool()
+	}
+
+	for _, customCaCert := range customCaCerts {
+		cert, err := ioutil.ReadFile(customCaCert)
+		if err != nil {
+			return nil, edsef("Could not add custom CA cert: %s", err)
+		}
+
+		if ok := rootCAs.AppendCertsFromPEM(cert); !ok {
+			Logln("Failed to add custom CA cert: %s", customCaCert)
+		}
+	}
+
+	config := &tls.Config{RootCAs: rootCAs}
+	return &http.Transport{TLSClientConfig: config}, nil
 }
 
 func makeHTTPRequest(hr httpRequest) (*http.Response, error) {
@@ -128,11 +154,15 @@ func makeHTTPRequest(hr httpRequest) (*http.Response, error) {
 		req.Header.Set(header.Name, header.Value)
 	}
 
-	c := http.Client{Timeout: time.Second * 15}
+	tr, err := getTransport(hr.customCaCerts)
+	if err != nil {
+		return nil, err
+	}
+	c := http.Client{Timeout: time.Second * 15, Transport: tr}
 	return c.Do(req)
 }
 
-func evalHTTPPanel(project *ProjectState, pageIndex int, panel *PanelInfo) error {
+func (ec EvalContext) evalHTTPPanel(project *ProjectState, pageIndex int, panel *PanelInfo) error {
 	server, err := getServer(project, panel.ServerId)
 	if err != nil {
 		return err
@@ -157,6 +187,11 @@ func evalHTTPPanel(project *ProjectState, pageIndex int, panel *PanelInfo) error
 		return err
 	}
 
+	var customCaCerts []string
+	for _, caCert := range ec.settings.CaCerts {
+		customCaCerts = append(customCaCerts, caCert.File)
+	}
+
 	return withRemoteConnection(server, host, port, func(proxyHost, proxyPort string) error {
 		url := makeHTTPUrl(tls, proxyHost, proxyPort, rest)
 		rsp, err := makeHTTPRequest(httpRequest{
@@ -165,6 +200,7 @@ func evalHTTPPanel(project *ProjectState, pageIndex int, panel *PanelInfo) error
 			body:    []byte(panel.Content),
 			sendBody: panel.Content != "" &&
 				(h.Method == http.MethodPut || h.Method == http.MethodPatch || h.Method == http.MethodPost),
+			customCaCerts: customCaCerts,
 		})
 		if err != nil {
 			return err

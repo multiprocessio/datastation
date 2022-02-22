@@ -24,6 +24,9 @@ type Settings struct {
 	File          string                                  `json:"file"`
 	StdoutMaxSize int                                     `json:"stdoutMaxSize"`
 	Theme         Theme                                   `json:"theme"`
+	CaCerts       []struct {
+		File string `json:"file"`
+	} `json:"caCerts"`
 }
 
 var defaultSettingsFile = path.Join(FS_BASE, ".settings")

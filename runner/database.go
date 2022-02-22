@@ -417,7 +417,7 @@ func loadJSONArrayFile(f string) (chan map[string]interface{}, error) {
 	return out, nil
 }
 
-func EvalDatabasePanel(
+func (ec EvalContext) EvalDatabasePanel(
 	project *ProjectState,
 	pageIndex int,
 	panel *PanelInfo,
@@ -471,7 +471,7 @@ func EvalDatabasePanel(
 	case ElasticsearchDatabase:
 		return evalElasticsearch(panel, dbInfo, server, w)
 	case InfluxDatabase:
-		return evalInfluxQL(panel, dbInfo, server, w)
+		return ec.evalInfluxQL(panel, dbInfo, server, w)
 	case InfluxFluxDatabase:
 		return evalFlux(panel, dbInfo, server, w)
 	case PrometheusDatabase:

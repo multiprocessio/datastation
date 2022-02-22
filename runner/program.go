@@ -59,14 +59,14 @@ func MakeTmpSQLiteConnector() (*ConnectorInfo, error) {
 	return connector, nil
 }
 
-func evalProgramSQLPanel(project *ProjectState, pageIndex int, panel *PanelInfo) error {
+func (ec EvalContext) evalProgramSQLPanel(project *ProjectState, pageIndex int, panel *PanelInfo) error {
 	connector, err := MakeTmpSQLiteConnector()
 	if err != nil {
 		return err
 	}
 	project.Connectors = append(project.Connectors, *connector)
 
-	return EvalDatabasePanel(project, pageIndex, &PanelInfo{
+	return ec.EvalDatabasePanel(project, pageIndex, &PanelInfo{
 		Type:    DatabasePanel,
 		Id:      panel.Id,
 		Content: panel.Content,
@@ -80,7 +80,7 @@ func evalProgramSQLPanel(project *ProjectState, pageIndex int, panel *PanelInfo)
 
 func (ec EvalContext) evalProgramPanel(project *ProjectState, pageIndex int, panel *PanelInfo) error {
 	if panel.Program.Type == SQL {
-		return evalProgramSQLPanel(project, pageIndex, panel)
+		return ec.evalProgramSQLPanel(project, pageIndex, panel)
 	}
 
 	var p ProgramEvalInfo

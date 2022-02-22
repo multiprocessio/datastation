@@ -500,7 +500,7 @@ export function Panel({
             </span>
           </div>
           {details && (
-            <div className="panel-details">
+            <div className="panel-details form">
               <panelUIDetails.details
                 panelIndex={panelIndex}
                 panel={panel}

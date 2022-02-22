@@ -143,7 +143,7 @@ func (ec EvalContext) Eval(projectId, panelId string) error {
 		return evalFilePanel(project, pageIndex, panel)
 	case HttpPanel:
 		Logln("Evaling http panel")
-		return evalHTTPPanel(project, pageIndex, panel)
+		return ec.evalHTTPPanel(project, pageIndex, panel)
 	case LiteralPanel:
 		Logln("Evaling literal panel")
 		return evalLiteralPanel(project, pageIndex, panel)
@@ -152,10 +152,10 @@ func (ec EvalContext) Eval(projectId, panelId string) error {
 		return ec.evalProgramPanel(project, pageIndex, panel)
 	case DatabasePanel:
 		Logln("Evaling database panel")
-		return EvalDatabasePanel(project, pageIndex, panel, nil)
+		return ec.EvalDatabasePanel(project, pageIndex, panel, nil)
 	case FilaggPanel:
 		Logln("Evaling database panel")
-		return evalFilaggPanel(project, pageIndex, panel)
+		return ec.evalFilaggPanel(project, pageIndex, panel)
 	}
 
 	return makeErrUnsupported("Unsupported panel type " + string(panel.Type) + " in Go runner")
