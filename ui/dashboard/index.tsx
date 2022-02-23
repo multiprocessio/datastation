@@ -5,8 +5,6 @@ import { ErrorBoundary } from '../components/ErrorBoundary';
 import { Select } from '../components/Select';
 import { Panel } from './Panel';
 
-const IS_EXPORT = Boolean((window as any).DATASTATION_IS_EXPORT);
-
 export async function loop(
   callback: () => Promise<void>,
   frequencyMs: number,
@@ -41,7 +39,8 @@ export async function loop(
 export function useDashboardData(
   projectId: string,
   pageId: string,
-  frequencyMs: number
+  frequencyMs: number,
+  isExport: boolean,
 ): [ProjectPage, Error, boolean] {
   const [page, setPage] = React.useState<ProjectPage>(null);
   const [error, setError] = React.useState(null);
@@ -66,7 +65,7 @@ export function useDashboardData(
   }
 
   React.useEffect(() => {
-    if (!IS_EXPORT && MODE_FEATURES.dashboard) {
+    if (!isExport && MODE_FEATURES.dashboard) {
       return;
     }
 
@@ -85,13 +84,15 @@ export function Dashboard({
   page: { id: pageId, panels },
   projectId,
   updatePage,
+  isExport,
 }: {
   projectId: string;
   page: ProjectPage;
   updatePage: (p: ProjectPage) => void;
+  isExport?: boolean,
 }) {
   const randomSeconds = (5 + Math.ceil(Math.random() * 10)) * 1_000;
-  const [page] = useDashboardData(projectId, pageId, randomSeconds);
+  const [page] = useDashboardData(projectId, pageId, randomSeconds, isExport);
 
   if (!MODE_FEATURES.dashboard) {
     return (
@@ -123,7 +124,7 @@ export function Dashboard({
 
   return (
     <div className="section">
-      {!IS_EXPORT && (
+      {!isExport && (
         <div className="section-subtitle vertical-align-center">
           {page.visibility === 'no-link' ? null : (
             <a target="_blank" href={dashboardLink}>
