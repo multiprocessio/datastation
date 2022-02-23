@@ -1,3 +1,4 @@
+import { DENO } from './deno';
 import { JAVASCRIPT } from './javascript';
 import { JULIA } from './julia';
 import { PHP } from './php';
@@ -9,6 +10,7 @@ import { LanguageInfo } from './types';
 
 export const LANGUAGES: Record<string, LanguageInfo> = {
   javascript: JAVASCRIPT,
+  deno: DENO,
   python: PYTHON,
   ruby: RUBY,
   julia: JULIA,

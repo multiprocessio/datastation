@@ -34,7 +34,7 @@ exports.fileIsEmpty = function (fileName) {
 exports.withSavedPanels = async function (
   panels,
   cb,
-  { evalPanels, subprocessName, connectors, servers } = {}
+  { evalPanels, subprocessName, settings, connectors, servers } = {}
 ) {
   const tmp = await makeTmpFile({ prefix: 'saved-panel-project-' });
 
@@ -96,6 +96,11 @@ exports.withSavedPanels = async function (
           );
         }
 
+        if (settings) {
+          const settingsTmp = await makeTmpFile({ prefix: 'settings-' });
+          fs.writeFileSync(settingsTmp.path, JSON.stringify(settings));
+          subprocessName.settingsFileOverride = settingsTmp.path;
+        }
         panel.resultMeta = await makeEvalHandler(subprocessName).handler(
           project.projectName,
           { panelId: panel.id },

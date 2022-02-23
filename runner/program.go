@@ -111,10 +111,11 @@ func (ec EvalContext) evalProgramPanel(project *ProjectState, pageIndex int, pan
 
 	path := p.DefaultPath
 	if ec.settings.Languages != nil && ec.settings.Languages[p.Id].Path != "" {
-		path = ec.settings.Languages[p.Id].Path
+		path = strings.TrimSpace(ec.settings.Languages[p.Id].Path)
 	}
 
 	args := append(p.CommandArgs, tmp.Name())
+	fmt.Println(path, args)
 	cmd := exec.Command(path, args...)
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout

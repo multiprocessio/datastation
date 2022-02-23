@@ -29,17 +29,17 @@ type Settings struct {
 	} `json:"caCerts"`
 }
 
-var defaultSettingsFile = path.Join(FS_BASE, ".settings")
+var SettingsFileDefaultLocation = path.Join(FS_BASE, ".settings")
 
 var DefaultSettings = &Settings{
 	Id:            uuid.New().String(),
-	File:          path.Join(defaultSettingsFile),
+	File:          SettingsFileDefaultLocation,
 	StdoutMaxSize: 5000,
 	Theme:         "light",
 }
 
-func LoadSettings() (*Settings, error) {
+func LoadSettings(file string) (*Settings, error) {
 	var settings Settings
-	err := readJSONFileInto(defaultSettingsFile, &settings)
+	err := readJSONFileInto(file, &settings)
 	return &settings, err
 }

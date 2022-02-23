@@ -15,6 +15,7 @@ func main() {
 	projectId := ""
 	panelId := ""
 	panelMetaOut := ""
+	settingsFile := ""
 
 	args := os.Args
 	for i := 0; i < len(args)-1; i++ {
@@ -35,6 +36,12 @@ func main() {
 			i++
 			continue
 		}
+
+		if args[i] == "--settingsFile" {
+			settingsFile = args[i+1]
+			i++
+			continue
+		}
 	}
 
 	if projectId == "" {
@@ -49,7 +56,11 @@ func main() {
 		runner.Fatalln("No panel meta out given.")
 	}
 
-	settings, err := runner.LoadSettings()
+	if settingsFile == "" {
+		settingsFile = runner.SettingsFileDefaultLocation
+	}
+
+	settings, err := runner.LoadSettings(settingsFile)
 	if err != nil {
 		runner.Logln("Could not load settings, assuming defaults.")
 		settings = runner.DefaultSettings

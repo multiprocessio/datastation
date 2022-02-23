@@ -14,6 +14,12 @@ const { inPath, withSavedPanels, RUNNERS, VERBOSE } = require('./testutil');
 
 const TESTS = [
   {
+    type: 'deno',
+    content:
+      'const prev = DM_getPanel(0); const next = prev.map((row) => ({ ...row, "age": +row.age + 10 })); DM_setPanel(next);',
+    condition: true,
+  },
+  {
     type: 'javascript',
     content:
       'const prev = DM_getPanel(0); const next = prev.map((row) => ({ ...row, "age": +row.age + 10 })); DM_setPanel(next);',
@@ -133,7 +139,7 @@ for (const t of TESTS) {
     continue;
   }
 
-  describe(t.type, () => {
+  describe(t.type + (t.describe ? ': ' + t.describe : ''), () => {
     // First pass runs in process, second pass runs in subprocess
     for (const subprocessName of RUNNERS) {
       if (!subprocessName?.go) {
@@ -178,7 +184,7 @@ for (const t of TESTS) {
 
                 finished = true;
               },
-              { evalPanels: true, subprocessName }
+              { evalPanels: true, subprocessName, settings: t.settings }
             );
 
             if (!finished) {
@@ -229,7 +235,7 @@ for (const t of TESTS) {
 
               finished = true;
             },
-            { evalPanels: true, subprocessName }
+            { evalPanels: true, subprocessName, settings: t.settings }
           );
 
           if (!finished) {
