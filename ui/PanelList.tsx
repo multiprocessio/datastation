@@ -140,7 +140,7 @@ export function PanelList({
         </Button>
         {offerToGraph ? (
           <span title="Generate a graph for the above panel">
-            <Button onClick={() => makePanel('graph', 'Graph of ')} icon>
+            <Button onClick={() => makePanel('graph', 'Graph of')} icon>
               <IconChartBar />
             </Button>
           </span>

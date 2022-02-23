@@ -193,12 +193,7 @@ function getLineDatasets(
     };
   });
 
-  // People will be used to writing ORDER BY x DESC and this will
-  // cause those values to usefully show up on the right not the
-  // left.
-  const labels = Object.values(uniques)[0]
-    .map((d) => d[panel.graph.x])
-    .reverse();
+  const labels = Object.values(uniques)[0].map((d) => d[panel.graph.x]);
   return { datasets, labels, legendLabels: undefined };
 }
 
@@ -262,6 +257,9 @@ export function GraphPanel({ panel }: PanelBodyProps<GraphPanelInfo>) {
         },
       ],
       options: {
+        animation: {
+          duration: 0,
+        },
         responsive: true,
         scales:
           ys.length === 1
