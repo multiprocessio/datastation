@@ -82,7 +82,7 @@ export function useDashboardData(
 }
 
 export function Dashboard({
-  page: { id: pageId },
+  page: { id: pageId, panels },
   projectId,
   updatePage,
 }: {
@@ -92,7 +92,6 @@ export function Dashboard({
 }) {
   const randomSeconds = (5 + Math.ceil(Math.random() * 10)) * 1_000;
   const [page] = useDashboardData(projectId, pageId, randomSeconds);
-  const { panels } = page;
 
   if (!MODE_FEATURES.dashboard) {
     return (
@@ -104,7 +103,11 @@ export function Dashboard({
     );
   }
 
-  if (!panels.length) {
+  if (page) {
+    panels = page.panels;
+  }
+
+  if (!panels) {
     return (
       <div className="section">
         <div className="text-center">
@@ -160,7 +163,7 @@ export function Dashboard({
           </Select>
         </div>
       )}
-      {panels.map((panel) => (
+      {page.panels.map((panel) => (
         <ErrorBoundary key={panel.id}>
           <Panel panel={panel} />
         </ErrorBoundary>
