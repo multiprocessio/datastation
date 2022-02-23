@@ -16,7 +16,7 @@ export function ExternalDashboard() {
     projectId,
     pageId,
     randomMinute,
-    false,
+    false
   );
 
   if (firstLoad) {

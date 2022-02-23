@@ -5,10 +5,10 @@ const {
   ProjectPage,
   GraphPanelInfo,
   PanelResultMeta,
-} = require('../shared/state');
-const { ExternalDashboard } = require('./ExternalDashboard');
+} = require('../../shared/state');
+const { Dashboard } = require('./');
 
-describe('ExternalDashboard', function ExternalDashboardTests() {
+describe('Dashboard', function DashboardTests() {
   test('loads dashboard', async function loadsDashboard() {
     const gp = new GraphPanelInfo({
       name: 'Graph of ages',
@@ -23,7 +23,8 @@ describe('ExternalDashboard', function ExternalDashboardTests() {
       shape: shape(res),
       value: res,
     });
-    global.fetch = async function () {
+    global.fetch = async function (url) {
+      expect(url).toBe('/a/dashboard/foo/blubber');
       return Promise.resolve({
         status: 200,
         json() {
@@ -35,11 +36,19 @@ describe('ExternalDashboard', function ExternalDashboardTests() {
         },
       });
     };
-    const component = enzyme.mount(<ExternalDashboard />);
+    const component = enzyme.mount(
+      <Dashboard
+        projectId="foo"
+        page={{ id: 'blubber' }}
+        modeFeatures={{ dashboard: true }}
+      />
+    );
 
-    await componentLoad(component);
+    while (component.find('.panel').length === 0) {
+      await componentLoad(component);
 
-    throwOnErrorBoundary(component);
+      throwOnErrorBoundary(component);
+    }
 
     let panels = component.find('.panel');
     expect(panels.length).toBe(1);

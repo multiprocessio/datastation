@@ -19,7 +19,6 @@ const {
 } = require('../shared/state');
 const { App } = require('./app');
 const { LocalStorageStore } = require('./ProjectStore');
-const { throwOnErrorBoundary } = require('./testutil');
 
 const store = new LocalStorageStore();
 const project = new ProjectState();

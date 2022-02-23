@@ -277,6 +277,7 @@ export function PageList({
         updatePage={updatePage}
         reevalPanel={reevalPanel}
         panelResults={panelResults}
+        modeFeatures={MODE_FEATURES}
       />
     </div>
   );

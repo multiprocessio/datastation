@@ -3,6 +3,7 @@ import { MODE_FEATURES } from '../../shared/constants';
 import { ProjectPage, ProjectPageVisibility } from '../../shared/state';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import { Select } from '../components/Select';
+import { Loading } from '../components/Loading';
 import { Panel } from './Panel';
 
 export async function loop(
@@ -40,7 +41,7 @@ export function useDashboardData(
   projectId: string,
   pageId: string,
   frequencyMs: number,
-  isExport: boolean,
+  disabled: boolean
 ): [ProjectPage, Error, boolean] {
   const [page, setPage] = React.useState<ProjectPage>(null);
   const [error, setError] = React.useState(null);
@@ -65,7 +66,7 @@ export function useDashboardData(
   }
 
   React.useEffect(() => {
-    if (!isExport && MODE_FEATURES.dashboard) {
+    if (disabled) {
       return;
     }
 
@@ -85,16 +86,19 @@ export function Dashboard({
   projectId,
   updatePage,
   isExport,
+  modeFeatures,
 }: {
   projectId: string;
   page: ProjectPage;
   updatePage: (p: ProjectPage) => void;
-  isExport?: boolean,
+  isExport?: boolean;
+  modeFeatures: typeof MODE_FEATURES;
 }) {
   const randomSeconds = (5 + Math.ceil(Math.random() * 10)) * 1_000;
-  const [page] = useDashboardData(projectId, pageId, randomSeconds, isExport);
+  const disabled = isExport || !modeFeatures.dashboard;
+  const [page] = useDashboardData(projectId, pageId, randomSeconds, disabled);
 
-  if (!MODE_FEATURES.dashboard) {
+  if (!modeFeatures.dashboard) {
     return (
       <div className="section">
         <div className="text-center">
@@ -106,6 +110,8 @@ export function Dashboard({
 
   if (page) {
     panels = page.panels;
+  } else {
+    return <Loading />;
   }
 
   if (!panels) {
