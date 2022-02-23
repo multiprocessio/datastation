@@ -14,12 +14,6 @@ const { inPath, withSavedPanels, RUNNERS, VERBOSE } = require('./testutil');
 
 const TESTS = [
   {
-    type: 'deno',
-    content:
-      'const prev = DM_getPanel(0); const next = prev.map((row) => ({ ...row, "age": +row.age + 10 })); DM_setPanel(next);',
-    condition: true,
-  },
-  {
     type: 'javascript',
     content:
       'const prev = DM_getPanel(0); const next = prev.map((row) => ({ ...row, "age": +row.age + 10 })); DM_setPanel(next);',
@@ -62,6 +56,12 @@ const TESTS = [
     condition: true,
   },
   // Rest are only mandatory-tested on Linux to make CI easier for now
+  {
+    type: 'deno',
+    content:
+      'const prev = DM_getPanel(0); const next = prev.map((row) => ({ ...row, "age": +row.age + 10 })); DM_setPanel(next);',
+    condition: process.platform === 'linux' || inPath('deno'),
+  },
   {
     type: 'python',
     content:
