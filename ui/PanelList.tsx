@@ -16,7 +16,7 @@ import {
   orderedObjectFields,
   wellFormedGraphInput,
 } from './components/FieldPicker';
-import { Panel } from './Panel';
+import { Panel, VISUAL_PANELS } from './Panel';
 import { PANEL_GROUPS, PANEL_UI_DETAILS } from './panels';
 import { UrlStateContext } from './urlState';
 
@@ -49,6 +49,10 @@ export function PanelList({
       const panelIndex = page.panels.findIndex((p) => p.id === panelId);
       page.panels[panelIndex] = panel;
       updatePage(page);
+
+      if (VISUAL_PANELS.includes(panel.type)) {
+        reevalPanel(panel.id);
+      }
     };
   }
 
@@ -104,7 +108,7 @@ export function PanelList({
     }
 
     const offerToTable =
-      panel && !['graph', 'table'].includes(panel.type) && shapeIsOk;
+      panel && !VISUAL_PANELS.includes(panel.type) && shapeIsOk;
 
     const offerToGraph = offerToTable && firstNumber && firstString;
 

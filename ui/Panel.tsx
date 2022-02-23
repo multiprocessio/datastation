@@ -39,6 +39,8 @@ import { PanelPlayWarning } from './errors';
 import { PANEL_GROUPS, PANEL_UI_DETAILS } from './panels';
 import { UrlStateContext } from './urlState';
 
+export const VISUAL_PANELS = ['graph', 'table'];
+
 function valueAsString(value: any) {
   try {
     if (
@@ -429,25 +431,27 @@ export function Panel({
                   'Run to apply changes'
                 )}
               </span>
-              <span
-                title={
-                  results.loading
-                    ? killable
-                      ? 'Cancel'
-                      : 'Running'
-                    : 'Evaluate Panel (Ctrl-Enter)'
-                }
-              >
-                <Button
-                  icon
-                  onClick={() =>
-                    killable ? killProcess() : reevalPanel(panel.id)
+              {!VISUAL_PANELS.includes(panel.type) ? (
+                <span
+                  title={
+                    results.loading
+                      ? killable
+                        ? 'Cancel'
+                        : 'Running'
+                      : 'Evaluate Panel (Ctrl-Enter)'
                   }
-                  type="primary"
                 >
-                  {results.loading ? <IconPlayerPause /> : <IconPlayerPlay />}
-                </Button>
-              </span>
+                  <Button
+                    icon
+                    onClick={() =>
+                      killable ? killProcess() : reevalPanel(panel.id)
+                    }
+                    type="primary"
+                  >
+                    {results.loading ? <IconPlayerPause /> : <IconPlayerPlay />}
+                  </Button>
+                </span>
+              ) : null}
               <span title="Full screen mode">
                 <Button
                   icon

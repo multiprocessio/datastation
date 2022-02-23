@@ -4,9 +4,11 @@ import { MODE_FEATURES } from '../shared/constants';
 import { EVAL_ERRORS } from '../shared/errors';
 import {
   DEFAULT_PROJECT,
+  GraphPanelInfo,
   PanelResultMeta,
   ProjectPage,
   ProjectState,
+  TablePanelInfo,
 } from '../shared/state';
 import { Button } from './components/Button';
 import { Confirm } from './components/Confirm';
@@ -15,6 +17,7 @@ import { Link } from './components/Link';
 import { Dashboard } from './dashboard';
 import { PanelPlayWarning } from './errors';
 import { NotFound } from './NotFound';
+import { VISUAL_PANELS } from './Panel';
 import { PanelList } from './PanelList';
 import { PANEL_UI_DETAILS } from './panels';
 import { ProjectContext } from './ProjectStore';
@@ -72,6 +75,20 @@ export function makeReevalPanel(
         loading: false,
       };
       updatePage(page);
+
+      // Re-run all dependent visual panels
+      if (!VISUAL_PANELS.includes(panel.type)) {
+        for (const dep of page.panels) {
+          if (
+            (dep.type === 'graph' &&
+              (dep as GraphPanelInfo).graph.panelSource === panel.id) ||
+            (dep.type === 'table' &&
+              (dep as TablePanelInfo).table.panelSource === panel.id)
+          ) {
+            await reevalPanel(dep.id);
+          }
+        }
+      }
     } catch (e) {
       if (EVAL_ERRORS.map((cls) => new (cls as any)().name).includes(e.name)) {
         e = new PanelPlayWarning(e.message);
