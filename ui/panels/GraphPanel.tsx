@@ -263,7 +263,10 @@ export function GraphPanel({ panel }: PanelBodyProps<GraphPanelInfo>) {
       ],
       options: {
         responsive: true,
-        scales: undefined,
+        scales:
+          ys.length === 1
+            ? { y: { title: { display: true, text: ys[0].label } } }
+            : undefined,
         plugins: {
           legend: {
             title: {
