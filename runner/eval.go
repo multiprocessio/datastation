@@ -1,6 +1,7 @@
 package runner
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -72,6 +73,16 @@ func allImportedPanelResultsExist(project ProjectState, page ProjectPage, panel 
 }
 
 func evalMacros(content string, project *ProjectState, pageIndex int) (string, error) {
+	pongoJsonify := func(in *pongo2.Value, _ *pongo2.Value) (*pongo2.Value, *pongo2.Error) {
+		bs, err := json.Marshal(in.Interface())
+		if err != nil {
+			return nil, &pongo2.Error{OrigError: err}
+		}
+
+		return pongo2.AsSafeValue(string(bs)), nil
+	}
+	pongo2.RegisterFilter("json", pongoJsonify)
+
 	tpl, err := pongo2.FromString(content)
 	if err != nil {
 		return "", makeErrBadTemplate(err.Error())
@@ -97,13 +108,12 @@ func evalMacros(content string, project *ProjectState, pageIndex int) (string, e
 		err := readJSONFileInto(resultsFile, &a)
 		if err != nil {
 			errC <- err
+			return nil
 		}
 
 		return a
-
 	}
 
-	// TODO: Does this correctly handle if 0, 1 and 2 errors happen?
 	select {
 	case err := <-errC:
 		return "", err

@@ -282,13 +282,13 @@ for (const subprocessName of RUNNERS) {
   }
 
   describe('runs python program with macros', function () {
-    test('it handles macros correctly', async () => {
-      const lp = new LiteralPanelInfo({
-        contentTypeInfo: { type: 'text/csv' },
-        content: 'age,name\n12,Kev\n18,Nyra',
-        name: 'Raw Data',
-      });
+    const lp = new LiteralPanelInfo({
+      contentTypeInfo: { type: 'text/csv' },
+      content: 'age,name\n12,Kev\n18,Nyra',
+      name: 'Raw Data',
+    });
 
+    test('it handles basic macros correctly', async () => {
       const pp = new ProgramPanelInfo({
         type: 'python',
         content:
@@ -303,6 +303,85 @@ for (const subprocessName of RUNNERS) {
           const fileName = getProjectResultsFile(project.projectName) + pp.id;
           const result = JSON.parse(fs.readFileSync(fileName).toString());
           expect(result).toEqual('Kev: 12, Nyra: 18, ');
+          finished = true;
+        },
+        { evalPanels: true, subprocessName }
+      );
+
+      if (!finished) {
+        throw new Error('Callback did not finish');
+      }
+    });
+
+    test('it handles json macros correctly', async () => {
+      const pp = new ProgramPanelInfo({
+        type: 'python',
+        content: 'DM_setPanel({{ DM_getPanel("0") | json }});',
+      });
+
+      let finished = false;
+      const panels = [lp, pp];
+      await withSavedPanels(
+        panels,
+        async (project) => {
+          const fileName = getProjectResultsFile(project.projectName) + pp.id;
+          const result = JSON.parse(fs.readFileSync(fileName).toString());
+
+          const lpFileName = getProjectResultsFile(project.projectName) + lp.id;
+          const lpResult = JSON.parse(fs.readFileSync(lpFileName).toString());
+          expect(result).toStrictEqual(lpResult);
+          finished = true;
+        },
+        { evalPanels: true, subprocessName }
+      );
+
+      if (!finished) {
+        throw new Error('Callback did not finish');
+      }
+    });
+
+    test('it handles bad DM_getPanel macros correctly', async () => {
+      const pp = new ProgramPanelInfo({
+        type: 'python',
+        content:
+          'DM_setPanel({{ DM_getPanel("2000") }}, {{ DM_getPanel("100") }});',
+      });
+
+      let finished = false;
+      const panels = [lp, pp];
+      try {
+        await withSavedPanels(panels, async (project) => {}, {
+          evalPanels: true,
+          subprocessName,
+        });
+      } catch (e) {
+        if (e instanceof InvalidDependentPanelError) {
+          finished = true;
+        } else {
+          throw e;
+        }
+      }
+
+      if (!finished) {
+        throw new Error('Callback did not finish');
+      }
+    });
+
+    test('it handles loop counter macros correctly', async () => {
+      const pp = new ProgramPanelInfo({
+        type: 'python',
+        content:
+          'DM_setPanel("{% for row in DM_getPanel("0") %}{{ row.name }}: {{ row.age }}{% if not forloop.Last %}, {% endif %}{% endfor %}");',
+      });
+
+      let finished = false;
+      const panels = [lp, pp];
+      await withSavedPanels(
+        panels,
+        async (project) => {
+          const fileName = getProjectResultsFile(project.projectName) + pp.id;
+          const result = JSON.parse(fs.readFileSync(fileName).toString());
+          expect(result).toEqual('Kev: 12, Nyra: 18');
           finished = true;
         },
         { evalPanels: true, subprocessName }
