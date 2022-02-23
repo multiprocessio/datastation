@@ -108,6 +108,7 @@ var defaultPorts = map[DatabaseConnectorInfoType]string{
 	TimescaleDatabase:     "5432",
 	YugabyteDatabase:      "5433",
 	QuestDatabase:         "8812",
+	AthenaDatabase: "",
 }
 
 type urlParts struct {
@@ -483,6 +484,8 @@ func EvalDatabasePanel(
 		return evalMongo(panel, dbInfo, server, w)
 	case CassandraDatabase, ScyllaDatabase:
 		return evalCQL(panel, dbInfo, server, w)
+	case AthenaDatabase:
+		return evalAthena(panel, dbInfo, w)
 	}
 
 	mangleInsert := defaultMangleInsert

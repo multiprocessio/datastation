@@ -276,6 +276,7 @@ const (
 	QuestDatabase                                   = "quest"
 	BigQueryDatabase                                = "bigquery"
 	MongoDatabase                                   = "mongo"
+	AthenaDatabase = "athena"
 )
 
 type DatabaseConnectorInfoDatabase struct {
