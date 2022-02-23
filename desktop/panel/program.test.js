@@ -448,5 +448,29 @@ for (const subprocessName of RUNNERS) {
         throw new Error('Callback did not finish');
       }
     });
+
+    test('it handles new json syntax correctly', async () => {
+      const pp = new ProgramPanelInfo({
+        type: 'sql',
+        content: `select '[11,22,33,44]' -> 3 AS test`,
+      });
+
+      let finished = false;
+      const panels = [pp];
+      await withSavedPanels(
+        panels,
+        async (project) => {
+          const fileName = getProjectResultsFile(project.projectName) + pp.id;
+          const result = JSON.parse(fs.readFileSync(fileName).toString());
+          expect(result).toStrictEqual([{ test: '44' }]);
+          finished = true;
+        },
+        { evalPanels: true, subprocessName }
+      );
+
+      if (!finished) {
+        throw new Error('Callback did not finish');
+      }
+    });
   });
 }
