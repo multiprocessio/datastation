@@ -22,7 +22,11 @@ export async function evalColumns(
   let panelSource: string;
   if (panel.type === 'graph') {
     const gp = panel as GraphPanelInfo;
-    columns = [gp.graph.x, ...gp.graph.ys.map((y) => y.field)];
+    columns = [
+      gp.graph.x,
+      gp.graph.uniqueBy,
+      ...gp.graph.ys.map((y) => y.field),
+    ].filter(Boolean);
     panelSource = gp.graph.panelSource;
   } else if (panel.type === 'table') {
     const tp = panel as TablePanelInfo;
