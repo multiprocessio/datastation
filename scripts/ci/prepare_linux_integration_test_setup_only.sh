@@ -26,6 +26,12 @@ unzip instantclient-basic-linuxx64.zip
 # Install xvfb for headless gui
 sudo apt-get install -y xvfb
 
+# Install deno
+curl -LO https://github.com/denoland/deno/releases/download/v1.19.0/deno-x86_64-unknown-linux-gnu.zip
+unzip deno-x86_64-unknown-linux-gnu.zip
+chmod +x deno
+sudo mv deno /usr/bin/deno
+
 # Allow R programs to install packages
 sudo mkdir -p /usr/local/lib/R/site-library
 sudo chown -R $USER /usr/local/lib/R/
