@@ -134,7 +134,7 @@ function getLineDatasets(
   ys: Array<GraphField>,
   uniqueBy?: string
 ): { labels: string[]; datasets: any[]; legendLabels: any } {
-  if (uniqueBy === NONE) {
+  if (!uniqueBy || uniqueBy === NONE) {
     const labels = value.map((d) => d[panel.graph.x]);
     let legendLabels = undefined;
 
@@ -328,7 +328,8 @@ export function GraphPanelDetails({
     }
   });
 
-  let moreThan2Fields = allFields(data?.shape).length > 2;
+  const moreThan2Fields = allFields(data?.shape).length > 2;
+  console.log(panel.graph);
 
   return (
     <React.Fragment>
@@ -431,7 +432,8 @@ export function GraphPanelDetails({
                     />
                   </div>
                 ) : null}
-                {panel.graph.type === 'bar' && panel.graph.uniqueBy === NONE ? (
+                {panel.graph.type === 'bar' &&
+                (!panel.graph.uniqueBy || panel.graph.uniqueBy === NONE) ? (
                   <div className="form-row">
                     <Radio
                       label="Unique colors"
