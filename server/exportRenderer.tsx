@@ -20,6 +20,7 @@ export function renderPage(project: ProjectState, pageId: string) {
         updatePage={(p: ProjectPage) => {}}
         page={page}
         isExport
+        modeFeatures={{ dashboard: true }}
       />
     </UrlStateContext.Provider>
   );

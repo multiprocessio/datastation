@@ -1,5 +1,4 @@
 import React from 'react';
-import { MODE_FEATURES } from '../../shared/constants';
 import { ProjectPage, ProjectPageVisibility } from '../../shared/state';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import { Loading } from '../components/Loading';
@@ -92,7 +91,7 @@ export function Dashboard({
   page: ProjectPage;
   updatePage: (p: ProjectPage) => void;
   isExport?: boolean;
-  modeFeatures: typeof MODE_FEATURES;
+  modeFeatures: { dashboard: boolean };
 }) {
   const randomSeconds = (5 + Math.ceil(Math.random() * 10)) * 1_000;
   const disabled = isExport || !modeFeatures.dashboard;
