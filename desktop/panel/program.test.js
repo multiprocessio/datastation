@@ -254,6 +254,10 @@ for (const subprocessName of RUNNERS) {
   }
 
   for (const language of Object.keys(LANGUAGES).filter((f) => f !== 'sql')) {
+    if (!inPath(language)) {
+      continue;
+    }
+
     describe(`runs ${language} program to fetch panel file name via ${subprocessName.go}`, function () {
       test('it returns its own file name', async () => {
         const pp = new ProgramPanelInfo({

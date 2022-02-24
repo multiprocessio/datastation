@@ -2,8 +2,8 @@ import React from 'react';
 import { MODE_FEATURES } from '../../shared/constants';
 import { ProjectPage, ProjectPageVisibility } from '../../shared/state';
 import { ErrorBoundary } from '../components/ErrorBoundary';
-import { Select } from '../components/Select';
 import { Loading } from '../components/Loading';
+import { Select } from '../components/Select';
 import { Panel } from './Panel';
 
 export async function loop(

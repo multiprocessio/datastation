@@ -14,7 +14,11 @@ const { makeEvalHandler } = require('./eval');
 const { fetchResultsHandler } = require('./columns');
 
 exports.inPath = function (program) {
-  const where = process.platform === 'win32' ? 'where' : 'whereis';
+  const where = {
+    linux: 'where',
+    darwin: 'where',
+    win32: 'whereis',
+  }[process.platform];
   const proc = spawnSync(where, [program]);
   return proc.status === 0;
 };
