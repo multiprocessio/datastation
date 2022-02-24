@@ -25,5 +25,5 @@ jobs:
 
     - run: yarn docker-build-server
     - run: docker build -t ghcr.io/multiprocessio/datastation:$GIT_TAG .
-    - run: echo $GCR_TOKEN | docker login ghcr.io -u eatonphil --password-stdin
+    - run: echo ${{ secrets.GCR_TOKEN }} | docker login ghcr.io -u eatonphil --password-stdin
     - run: docker push ghcr.io/multiprocessio/datastation:$GIT_TAG
