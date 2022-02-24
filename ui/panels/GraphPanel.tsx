@@ -332,7 +332,6 @@ export function GraphPanelDetails({
   });
 
   const moreThan2Fields = allFields(data?.shape).length > 2;
-  console.log(panel.graph);
 
   return (
     <React.Fragment>
