@@ -78,7 +78,10 @@ function fixedColorByLabel(valueLabels: Array<string>) {
   // Assign colors based on labels alphabetic order
   const colorsSortedByLabelAlphabeticOrder = copyOfValueLabels
     .sort()
-    .map((label, i) => ({ label, color: UNIQUE_COLORS[i] }));
+    .map((label, i) => ({
+      label,
+      color: UNIQUE_COLORS[i % UNIQUE_COLORS.length],
+    }));
   // Then resort based on label real order. This keeps colors
   // consistent for the same label even as the order of labels changes
   const colorsSortedByRealLabelOrder = colorsSortedByLabelAlphabeticOrder
