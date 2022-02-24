@@ -1,6 +1,6 @@
 # Hacking
 
-You'll need a recent Node.js, Python3, cmake, and
+You'll need a recent Node.js (v16, not v17), Python3, cmake, and
 [yarn](https://yarnpkg.com/).
 
 You'll also need a C++ compiler for some native Node.js

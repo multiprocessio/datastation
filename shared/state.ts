@@ -335,6 +335,7 @@ export class GraphPanelInfo extends PanelInfo {
     panelSource: string;
     ys: Array<GraphField>;
     x: string;
+    uniqueBy: string;
     type: GraphPanelInfoType;
     width: PanelInfoWidth;
     colors: {
@@ -351,8 +352,9 @@ export class GraphPanelInfo extends PanelInfo {
     this.graph = {
       panelSource: defaults.panelSource || '',
       x: defaults.x || '',
+      uniqueBy: defaults.uniqueBy || '',
       ys: defaults.ys || [],
-      type: defaults.type || 'bar',
+      type: defaults.type || 'line',
       width: defaults.width || 'small',
       colors: defaults.colors || {
         unique: false,
@@ -441,8 +443,6 @@ export class DatabasePanelInfo extends PanelInfo {
     };
   }
 }
-
-export type HTTPPanelInfoType = 'csv' | 'json';
 
 export class HTTPPanelInfo extends PanelInfo {
   http: HTTPConnectorInfo;

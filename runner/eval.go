@@ -1,9 +1,13 @@
 package runner
 
 import (
+	"encoding/json"
+	"fmt"
 	"log"
 	"os"
 	"time"
+
+	"github.com/flosch/pongo2"
 )
 
 var logPrefixSet = false
@@ -68,6 +72,57 @@ func allImportedPanelResultsExist(project ProjectState, page ProjectPage, panel 
 	return "", true
 }
 
+func evalMacros(content string, project *ProjectState, pageIndex int) (string, error) {
+	pongoJsonify := func(in *pongo2.Value, _ *pongo2.Value) (*pongo2.Value, *pongo2.Error) {
+		bs, err := json.Marshal(in.Interface())
+		if err != nil {
+			return nil, &pongo2.Error{OrigError: err}
+		}
+
+		return pongo2.AsSafeValue(string(bs)), nil
+	}
+	pongo2.RegisterFilter("json", pongoJsonify)
+
+	tpl, err := pongo2.FromString(content)
+	if err != nil {
+		return "", makeErrBadTemplate(err.Error())
+	}
+
+	errC := make(chan error)
+
+	getPanel := func(nameOrIndex string) interface{} {
+		panelId := ""
+		for panelIndex, panel := range project.Pages[pageIndex].Panels {
+			if panel.Name == nameOrIndex || fmt.Sprintf("%d", panelIndex) == nameOrIndex {
+				panelId = panel.Id
+				break
+			}
+		}
+
+		if panelId == "" {
+			errC <- makeErrInvalidDependentPanel(nameOrIndex)
+		}
+
+		resultsFile := GetPanelResultsFile(project.Id, panelId)
+		var a interface{}
+		err := readJSONFileInto(resultsFile, &a)
+		if err != nil {
+			errC <- err
+			return nil
+		}
+
+		return a
+	}
+
+	select {
+	case err := <-errC:
+		return "", err
+	default:
+		out, err := tpl.Execute(pongo2.Context{"DM_getPanel": getPanel})
+		return out, err
+	}
+}
+
 type EvalContext struct {
 	settings Settings
 }
@@ -87,13 +142,18 @@ func (ec EvalContext) Eval(projectId, panelId string) error {
 		return makeErrInvalidDependentPanel(panelId)
 	}
 
+	panel.Content, err = evalMacros(panel.Content, project, pageIndex)
+	if err != nil {
+		return err
+	}
+
 	switch panel.Type {
 	case FilePanel:
 		Logln("Evaling file panel")
 		return evalFilePanel(project, pageIndex, panel)
 	case HttpPanel:
 		Logln("Evaling http panel")
-		return evalHTTPPanel(project, pageIndex, panel)
+		return ec.evalHTTPPanel(project, pageIndex, panel)
 	case LiteralPanel:
 		Logln("Evaling literal panel")
 		return evalLiteralPanel(project, pageIndex, panel)
@@ -102,10 +162,10 @@ func (ec EvalContext) Eval(projectId, panelId string) error {
 		return ec.evalProgramPanel(project, pageIndex, panel)
 	case DatabasePanel:
 		Logln("Evaling database panel")
-		return EvalDatabasePanel(project, pageIndex, panel, nil)
+		return ec.EvalDatabasePanel(project, pageIndex, panel, nil)
 	case FilaggPanel:
 		Logln("Evaling database panel")
-		return evalFilaggPanel(project, pageIndex, panel)
+		return ec.evalFilaggPanel(project, pageIndex, panel)
 	}
 
 	return makeErrUnsupported("Unsupported panel type " + string(panel.Type) + " in Go runner")

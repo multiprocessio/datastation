@@ -121,13 +121,17 @@ export function wellFormedGraphInput(shape?: Shape) {
   );
 }
 
-export function unusedFields(shape: Shape, ...fields: Array<string>) {
+export function allFields(shape: Shape) {
   if (!wellFormedGraphInput(shape)) {
-    return 0;
+    return [];
   }
 
   const os = (shape as ArrayShape).children as ObjectShape;
-  return flattenObjectFields(os).filter(([field]) => {
+  return flattenObjectFields(os);
+}
+
+export function unusedFields(shape: Shape, ...fields: Array<string>) {
+  return allFields(shape).filter(([field]) => {
     return !fields.includes(field);
   }).length;
 }

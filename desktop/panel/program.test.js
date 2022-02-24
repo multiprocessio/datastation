@@ -57,6 +57,12 @@ const TESTS = [
   },
   // Rest are only mandatory-tested on Linux to make CI easier for now
   {
+    type: 'deno',
+    content:
+      'const prev = DM_getPanel(0); const next = prev.map((row) => ({ ...row, "age": +row.age + 10 })); DM_setPanel(next);',
+    condition: process.platform === 'linux' || inPath('deno'),
+  },
+  {
     type: 'python',
     content:
       'prev = DM_getPanel(0)\nnext = [{ **row, "age": int(row["age"]) + 10 } for row in prev]\nDM_setPanel(next)',
@@ -133,7 +139,7 @@ for (const t of TESTS) {
     continue;
   }
 
-  describe(t.type, () => {
+  describe(t.type + (t.describe ? ': ' + t.describe : ''), () => {
     // First pass runs in process, second pass runs in subprocess
     for (const subprocessName of RUNNERS) {
       if (!subprocessName?.go) {
@@ -178,7 +184,7 @@ for (const t of TESTS) {
 
                 finished = true;
               },
-              { evalPanels: true, subprocessName }
+              { evalPanels: true, subprocessName, settings: t.settings }
             );
 
             if (!finished) {
@@ -229,7 +235,7 @@ for (const t of TESTS) {
 
               finished = true;
             },
-            { evalPanels: true, subprocessName }
+            { evalPanels: true, subprocessName, settings: t.settings }
           );
 
           if (!finished) {
@@ -248,6 +254,10 @@ for (const subprocessName of RUNNERS) {
   }
 
   for (const language of Object.keys(LANGUAGES).filter((f) => f !== 'sql')) {
+    if (!inPath(language)) {
+      continue;
+    }
+
     describe(`runs ${language} program to fetch panel file name via ${subprocessName.go}`, function () {
       test('it returns its own file name', async () => {
         const pp = new ProgramPanelInfo({
@@ -274,4 +284,197 @@ for (const subprocessName of RUNNERS) {
       }, 15_000);
     });
   }
+
+  describe('runs python program with macros', function () {
+    const lp = new LiteralPanelInfo({
+      contentTypeInfo: { type: 'text/csv' },
+      content: 'age,name\n12,Kev\n18,Nyra',
+      name: 'Raw Data',
+    });
+
+    test('it handles basic macros correctly', async () => {
+      const pp = new ProgramPanelInfo({
+        type: 'python',
+        content:
+          'DM_setPanel("{% for row in DM_getPanel("0") %}{{ row.name }}: {{ row.age }}, {% endfor %}");',
+      });
+
+      let finished = false;
+      const panels = [lp, pp];
+      await withSavedPanels(
+        panels,
+        async (project) => {
+          const fileName = getProjectResultsFile(project.projectName) + pp.id;
+          const result = JSON.parse(fs.readFileSync(fileName).toString());
+          expect(result).toEqual('Kev: 12, Nyra: 18, ');
+          finished = true;
+        },
+        { evalPanels: true, subprocessName }
+      );
+
+      if (!finished) {
+        throw new Error('Callback did not finish');
+      }
+    });
+
+    test('it handles json macros correctly', async () => {
+      const pp = new ProgramPanelInfo({
+        type: 'python',
+        content: 'DM_setPanel({{ DM_getPanel("0") | json }});',
+      });
+
+      let finished = false;
+      const panels = [lp, pp];
+      await withSavedPanels(
+        panels,
+        async (project) => {
+          const fileName = getProjectResultsFile(project.projectName) + pp.id;
+          const result = JSON.parse(fs.readFileSync(fileName).toString());
+
+          const lpFileName = getProjectResultsFile(project.projectName) + lp.id;
+          const lpResult = JSON.parse(fs.readFileSync(lpFileName).toString());
+          expect(result).toStrictEqual(lpResult);
+          finished = true;
+        },
+        { evalPanels: true, subprocessName }
+      );
+
+      if (!finished) {
+        throw new Error('Callback did not finish');
+      }
+    });
+
+    test('it handles bad DM_getPanel macros correctly', async () => {
+      const pp = new ProgramPanelInfo({
+        type: 'python',
+        content:
+          'DM_setPanel({{ DM_getPanel("2000") }}, {{ DM_getPanel("100") }});',
+      });
+
+      let finished = false;
+      const panels = [lp, pp];
+      try {
+        await withSavedPanels(panels, async (project) => {}, {
+          evalPanels: true,
+          subprocessName,
+        });
+      } catch (e) {
+        if (e instanceof InvalidDependentPanelError) {
+          finished = true;
+        } else {
+          throw e;
+        }
+      }
+
+      if (!finished) {
+        throw new Error('Callback did not finish');
+      }
+    });
+
+    test('it handles loop counter macros correctly', async () => {
+      const pp = new ProgramPanelInfo({
+        type: 'python',
+        content:
+          'DM_setPanel("{% for row in DM_getPanel("0") %}{{ row.name }}: {{ row.age }}{% if not forloop.Last %}, {% endif %}{% endfor %}");',
+      });
+
+      let finished = false;
+      const panels = [lp, pp];
+      await withSavedPanels(
+        panels,
+        async (project) => {
+          const fileName = getProjectResultsFile(project.projectName) + pp.id;
+          const result = JSON.parse(fs.readFileSync(fileName).toString());
+          expect(result).toEqual('Kev: 12, Nyra: 18');
+          finished = true;
+        },
+        { evalPanels: true, subprocessName }
+      );
+
+      if (!finished) {
+        throw new Error('Callback did not finish');
+      }
+    });
+  });
+
+  describe('basic sql tests', function () {
+    const lp = new LiteralPanelInfo({
+      contentTypeInfo: { type: 'text/csv' },
+      content: 'age,name\n12,Kev\n18,Nyra',
+      name: 'Raw Data',
+    });
+
+    test('it handles table aliases correctly', async () => {
+      const pp = new ProgramPanelInfo({
+        type: 'sql',
+        content:
+          'select testt.age from DM_getPanel(0) testt order by testt.age desc',
+      });
+
+      let finished = false;
+      const panels = [lp, pp];
+      await withSavedPanels(
+        panels,
+        async (project) => {
+          const fileName = getProjectResultsFile(project.projectName) + pp.id;
+          const result = JSON.parse(fs.readFileSync(fileName).toString());
+          expect(result).toStrictEqual([{ age: '18' }, { age: '12' }]);
+          finished = true;
+        },
+        { evalPanels: true, subprocessName }
+      );
+
+      if (!finished) {
+        throw new Error('Callback did not finish');
+      }
+    });
+
+    test('it handles regex correctly', async () => {
+      const pp = new ProgramPanelInfo({
+        type: 'sql',
+        content: `select * from DM_getPanel(0) where name regexp 'K[a-zA-Z]*'`,
+      });
+
+      let finished = false;
+      const panels = [lp, pp];
+      await withSavedPanels(
+        panels,
+        async (project) => {
+          const fileName = getProjectResultsFile(project.projectName) + pp.id;
+          const result = JSON.parse(fs.readFileSync(fileName).toString());
+          expect(result).toStrictEqual([{ name: 'Kev', age: '12' }]);
+          finished = true;
+        },
+        { evalPanels: true, subprocessName }
+      );
+
+      if (!finished) {
+        throw new Error('Callback did not finish');
+      }
+    });
+
+    test('it handles new json syntax correctly', async () => {
+      const pp = new ProgramPanelInfo({
+        type: 'sql',
+        content: `select '[11,22,33,44]' -> 3 AS test`,
+      });
+
+      let finished = false;
+      const panels = [pp];
+      await withSavedPanels(
+        panels,
+        async (project) => {
+          const fileName = getProjectResultsFile(project.projectName) + pp.id;
+          const result = JSON.parse(fs.readFileSync(fileName).toString());
+          expect(result).toStrictEqual([{ test: '44' }]);
+          finished = true;
+        },
+        { evalPanels: true, subprocessName }
+      );
+
+      if (!finished) {
+        throw new Error('Callback did not finish');
+      }
+    });
+  });
 }

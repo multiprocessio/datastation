@@ -1,3 +1,4 @@
+import { IconTrash } from '@tabler/icons';
 import React from 'react';
 import { MODE } from '../shared/constants';
 import { LANGUAGES } from '../shared/languages';
@@ -10,7 +11,9 @@ import {
 } from '../shared/rpc';
 import { Settings as SettingsT } from '../shared/settings';
 import { asyncRPC } from './asyncRPC';
+import { Alert } from './components/Alert';
 import { Button } from './components/Button';
+import { FileInput } from './components/FileInput';
 import { FormGroup } from './components/FormGroup';
 import { Input } from './components/Input';
 import { Toggle } from './components/Toggle';
@@ -87,17 +90,15 @@ export function Settings() {
     return null;
   }
 
+  if (!settings.caCerts) {
+    settings.caCerts = [];
+  }
+
   return (
-    <div className="card">
+    <div className="card settings">
       <h1>Settings</h1>
-      {MODE === 'desktop' && (
-        <p>
-          After making changes, restart DataStation for them to take effect
-          across all windows.
-        </p>
-      )}
       <div className="form">
-        <FormGroup label="Visual">
+        <FormGroup major label="Visual">
           <div className="form-row">
             <Toggle
               label={settings.theme !== 'dark' ? 'Light Mode' : 'Dark Mode'}
@@ -108,44 +109,94 @@ export function Settings() {
               }}
             />
           </div>
+          {MODE === 'desktop' && (
+            <Alert type="warning">
+              After making changes, restart DataStation for them to take effect
+              across all windows.
+            </Alert>
+          )}
         </FormGroup>
         {MODE !== 'browser' && (
-          <FormGroup label="Language Path Overrides">
-            <p>
-              DataStation defaults to looking up each program on your&nbsp;
-              <code>$PATH</code>. You can override that here with a different
-              program name or an absolute path.
-            </p>
-            {Object.keys(LANGUAGES)
-              .sort()
-              .filter((k) => k !== 'sql')
-              .map((languageId) => (
-                <div className="form-row">
-                  <Input
-                    onChange={function handleLanguagePathChange(
-                      newValue: string
-                    ) {
-                      settings.languages[languageId].path = newValue;
-                      setSettings(settings);
+          <>
+            <FormGroup major label="Language Path Overrides">
+              {Object.keys(LANGUAGES)
+                .sort()
+                .filter((k) => k !== 'sql')
+                .map((languageId) => (
+                  <div className="form-row form-row--multi">
+                    <Input
+                      onChange={function handleLanguagePathChange(
+                        newValue: string
+                      ) {
+                        settings.languages[languageId].path = newValue;
+                        setSettings(settings);
+                      }}
+                      label={LANGUAGES[languageId].name}
+                      value={
+                        settings.languages[languageId].path ||
+                        LANGUAGES[languageId].defaultPath
+                      }
+                    />
+                    <Button
+                      onClick={function resetLanguagePath() {
+                        settings.languages[languageId].path =
+                          LANGUAGES[languageId].defaultPath;
+                        setSettings(settings);
+                      }}
+                    >
+                      Reset
+                    </Button>
+                  </div>
+                ))}
+              <Alert type="info">
+                <div>
+                  DataStation defaults to looking up each program on your&nbsp;
+                  <code>$PATH</code>. You can override that here with a
+                  different program name or an absolute path.
+                </div>
+              </Alert>
+            </FormGroup>
+
+            <FormGroup major label="Custom CA Certificates">
+              {settings.caCerts.map((cert, i) => {
+                <div className="form-row form-row--multi">
+                  <FileInput
+                    onChange={(v) => {
+                      cert.file = v;
                     }}
-                    label={LANGUAGES[languageId].name}
-                    value={
-                      settings.languages[languageId].path ||
-                      LANGUAGES[languageId].defaultPath
-                    }
+                    allowFilePicker={MODE === 'desktop'}
+                    value={cert.file}
+                    label="Location"
                   />
                   <Button
-                    onClick={function resetLanguagePath() {
-                      settings.languages[languageId].path =
-                        LANGUAGES[languageId].defaultPath;
+                    icon
+                    onClick={() => {
+                      settings.caCerts.splice(i, 1);
                       setSettings(settings);
                     }}
                   >
-                    Reset
+                    <IconTrash />
                   </Button>
+                </div>;
+              })}
+              <Button
+                onClick={() => {
+                  settings.caCerts.push({ file: '' });
+                  setSettings(settings);
+                }}
+              >
+                Add CA Cert
+              </Button>
+
+              <Alert type="info">
+                <div>
+                  DataStation defaults to looking up each program on your&nbsp;
+                  <code>$PATH</code>. You can override that here with a
+                  different program name or an absolute path.
                 </div>
-              ))}
-          </FormGroup>
+              </Alert>
+            </FormGroup>
+          </>
         )}
       </div>
     </div>

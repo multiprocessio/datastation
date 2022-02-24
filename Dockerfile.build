@@ -5,9 +5,3 @@ WORKDIR /datastation
 # Install Golang
 RUN curl -L https://go.dev/dl/go1.17.7.linux-amd64.tar.gz -o /tmp/go.tar.gz && tar -C /usr/local -xzf /tmp/go.tar.gz
 RUN ln -s /usr/local/go/bin/go /usr/bin/go
-
-# Bust volume cache
-RUN CACHE_BUSTER=${CACHE_BUSTER} ls
-
-# Build
-RUN yarn build-server

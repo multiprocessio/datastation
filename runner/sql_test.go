@@ -35,7 +35,7 @@ func Test_transformDM_getPanelCalls(t *testing.T) {
 		},
 	}
 	panels, query, err := transformDM_getPanelCalls(
-		"SELECT * FROM DM_getPanel(0), DM_getPanel('my great panel')",
+		"SELECT * FROM DM_getPanel(0) p0, DM_getPanel('my great panel')",
 		map[string]Shape{
 			"0":              shape,
 			"my great panel": shape,
@@ -51,7 +51,7 @@ func Test_transformDM_getPanelCalls(t *testing.T) {
 	)
 
 	assert.Nil(t, err)
-	assert.Equal(t, query, `SELECT * FROM "t_0", "t_my great panel"`)
+	assert.Equal(t, query, `SELECT * FROM "t_0" p0, "t_my great panel"`)
 	assert.Equal(t, len(panels), 2)
 	assert.Equal(t, panels[0], panelToImport{
 		tableName: "t_0",
@@ -82,26 +82,6 @@ func Test_transformDM_getPanelCalls(t *testing.T) {
 		id: " a great id",
 	})
 }
-
-// func Test_chunk(t *testing.T) {
-// 	a := []map[string]interface{}{
-// 		{"a": 1},
-// 		{"b": 2},
-// 		{"c": 3},
-// 		{"d": 4},
-// 		{"e": 5},
-// 		{"f": 6},
-// 		{"g": 7},
-// 	}
-// 	chunks := chunk(a, 3)
-// 	assert.Equal(t, len(chunks), 3)
-// 	assert.Equal(t, len(chunks[0]), 3)
-// 	assert.Equal(t, len(chunks[1]), 3)
-// 	assert.Equal(t, len(chunks[2]), 1)
-// 	assert.Equal(t, chunks[2][0], map[string]interface{}{
-// 		"g": 7,
-// 	})
-// }
 
 func Test_postgresMangleInsert(t *testing.T) {
 	assert.Equal(t,
@@ -216,7 +196,8 @@ func Test_sqlIngest_BENCHMARK(t *testing.T) {
 		},
 	}
 
-	err = EvalDatabasePanel(project, 0, panel2, func(projectId, panelId string) (chan map[string]interface{}, error) {
+	ec := EvalContext{}
+	err = ec.EvalDatabasePanel(project, 0, panel2, func(projectId, panelId string) (chan map[string]interface{}, error) {
 		return loadJSONArrayFile(readFile)
 	})
 	assert.Nil(t, err)

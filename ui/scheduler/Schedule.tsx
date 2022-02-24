@@ -41,7 +41,7 @@ export function Schedule({
       <div className="panel-body-container">
         <div className="panel-body">
           <div>
-            <div className="panel-details">
+            <div className="panel-details form">
               <div className="form-row">
                 <Select
                   label="Frequency"

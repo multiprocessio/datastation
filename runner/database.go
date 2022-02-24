@@ -16,12 +16,12 @@ import (
 
 	"golang.org/x/crypto/nacl/secretbox"
 
-	_ "github.com/ClickHouse/clickhouse-go"
+	_ "github.com/ClickHouse/clickhouse-go/v2"
 	_ "github.com/denisenkom/go-mssqldb"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
-	_ "github.com/mattn/go-sqlite3"
+	_ "github.com/multiprocessio/go-sqlite3"
 	_ "github.com/sijms/go-ora/v2"
 	_ "github.com/snowflakedb/gosnowflake"
 )
@@ -263,7 +263,8 @@ func getConnectionString(dbInfo DatabaseConnectorInfoDatabase) (string, string, 
 		query += u.extraArgs
 		return "clickhouse", fmt.Sprintf("tcp://%s?%s", u.address, query), nil
 	case SQLiteDatabase:
-		return "sqlite3", resolvePath(u.database), nil
+		// defined in database_sqlite.go, includes regexp support
+		return "sqlite3_extended", resolvePath(u.database), nil
 	}
 
 	return "", "", nil
@@ -416,7 +417,7 @@ func loadJSONArrayFile(f string) (chan map[string]interface{}, error) {
 	return out, nil
 }
 
-func EvalDatabasePanel(
+func (ec EvalContext) EvalDatabasePanel(
 	project *ProjectState,
 	pageIndex int,
 	panel *PanelInfo,
@@ -470,7 +471,7 @@ func EvalDatabasePanel(
 	case ElasticsearchDatabase:
 		return evalElasticsearch(panel, dbInfo, server, w)
 	case InfluxDatabase:
-		return evalInfluxQL(panel, dbInfo, server, w)
+		return ec.evalInfluxQL(panel, dbInfo, server, w)
 	case InfluxFluxDatabase:
 		return evalFlux(panel, dbInfo, server, w)
 	case PrometheusDatabase:

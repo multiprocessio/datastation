@@ -27,7 +27,7 @@ type influxResponse struct {
 
 // InfluxQL is supported in 1 and 2 but requires special setup in 2.
 // See https://docs.influxdata.com/influxdb/v2.1/query-data/influxql/#verify-buckets-have-a-mapping
-func evalInfluxQL(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, server *ServerInfo, w io.Writer) error {
+func (ec EvalContext) evalInfluxQL(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, server *ServerInfo, w io.Writer) error {
 	tls, host, port, _, err := getHTTPHostPort(dbInfo.Address)
 	if err != nil {
 		return err
@@ -62,10 +62,15 @@ func evalInfluxQL(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, server
 			})
 		}
 
+		var customCaCerts []string
+		for _, c := range ec.settings.CaCerts {
+			customCaCerts = append(customCaCerts, c.File)
+		}
 		rsp, err := makeHTTPRequest(httpRequest{
-			url:     u,
-			method:  "GET",
-			headers: headers,
+			url:           u,
+			method:        "GET",
+			headers:       headers,
+			customCaCerts: customCaCerts,
 		})
 		if err != nil {
 			return err

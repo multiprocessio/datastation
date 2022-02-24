@@ -19,6 +19,8 @@ export function renderPage(project: ProjectState, pageId: string) {
         projectId={project.projectName}
         updatePage={(p: ProjectPage) => {}}
         page={page}
+        isExport
+        modeFeatures={{ dashboard: true }}
       />
     </UrlStateContext.Provider>
   );

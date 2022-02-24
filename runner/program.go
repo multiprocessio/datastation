@@ -59,14 +59,14 @@ func MakeTmpSQLiteConnector() (*ConnectorInfo, error) {
 	return connector, nil
 }
 
-func evalProgramSQLPanel(project *ProjectState, pageIndex int, panel *PanelInfo) error {
+func (ec EvalContext) evalProgramSQLPanel(project *ProjectState, pageIndex int, panel *PanelInfo) error {
 	connector, err := MakeTmpSQLiteConnector()
 	if err != nil {
 		return err
 	}
 	project.Connectors = append(project.Connectors, *connector)
 
-	return EvalDatabasePanel(project, pageIndex, &PanelInfo{
+	return ec.EvalDatabasePanel(project, pageIndex, &PanelInfo{
 		Type:    DatabasePanel,
 		Id:      panel.Id,
 		Content: panel.Content,
@@ -80,18 +80,18 @@ func evalProgramSQLPanel(project *ProjectState, pageIndex int, panel *PanelInfo)
 
 func (ec EvalContext) evalProgramPanel(project *ProjectState, pageIndex int, panel *PanelInfo) error {
 	if panel.Program.Type == SQL {
-		return evalProgramSQLPanel(project, pageIndex, panel)
+		return ec.evalProgramSQLPanel(project, pageIndex, panel)
 	}
 
 	var p ProgramEvalInfo
 	err := json.Unmarshal([]byte(packedProgramTypeInfo[panel.Program.Type]), &p)
 	if err != nil {
-		return err
+		return edsef("Invalid program type: %s", panel.Program.Type)
 	}
 
 	tmp, err := os.CreateTemp("", "program-panel-")
 	if err != nil {
-		return err
+		return edse(err)
 	}
 	defer os.Remove(tmp.Name())
 
@@ -109,12 +109,19 @@ func (ec EvalContext) evalProgramPanel(project *ProjectState, pageIndex int, pan
 		return err
 	}
 
+	args := append(p.CommandArgs, tmp.Name())
+
 	path := p.DefaultPath
 	if ec.settings.Languages != nil && ec.settings.Languages[p.Id].Path != "" {
-		path = ec.settings.Languages[p.Id].Path
+		path = strings.TrimSpace(ec.settings.Languages[p.Id].Path)
+
+		if strings.Contains(path, " ") {
+			bits := strings.Split(path, " ")
+			path = bits[0]
+			args = bits[1:]
+		}
 	}
 
-	args := append(p.CommandArgs, tmp.Name())
 	cmd := exec.Command(path, args...)
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout

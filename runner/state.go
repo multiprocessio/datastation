@@ -100,6 +100,7 @@ type SupportedLanguages string
 const (
 	Python     SupportedLanguages = "python"
 	JavaScript                    = "javascript"
+	Deno                          = "deno"
 	Ruby                          = "ruby"
 	R                             = "r"
 	Julia                         = "julia"

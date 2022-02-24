@@ -1,11 +1,9 @@
 import React from 'react';
-import { MODE_FEATURES } from '../../shared/constants';
 import { ProjectPage, ProjectPageVisibility } from '../../shared/state';
 import { ErrorBoundary } from '../components/ErrorBoundary';
+import { Loading } from '../components/Loading';
 import { Select } from '../components/Select';
 import { Panel } from './Panel';
-
-const IS_EXPORT = Boolean((window as any).DATASTATION_IS_EXPORT);
 
 export async function loop(
   callback: () => Promise<void>,
@@ -41,7 +39,8 @@ export async function loop(
 export function useDashboardData(
   projectId: string,
   pageId: string,
-  frequencyMs: number
+  frequencyMs: number,
+  disabled: boolean
 ): [ProjectPage, Error, boolean] {
   const [page, setPage] = React.useState<ProjectPage>(null);
   const [error, setError] = React.useState(null);
@@ -66,7 +65,7 @@ export function useDashboardData(
   }
 
   React.useEffect(() => {
-    if (!IS_EXPORT && MODE_FEATURES.dashboard) {
+    if (disabled) {
       return;
     }
 
@@ -82,19 +81,23 @@ export function useDashboardData(
 }
 
 export function Dashboard({
-  page: { id: pageId },
+  page: { id: pageId, panels },
   projectId,
   updatePage,
+  isExport,
+  modeFeatures,
 }: {
   projectId: string;
   page: ProjectPage;
   updatePage: (p: ProjectPage) => void;
+  isExport?: boolean;
+  modeFeatures: { dashboard: boolean };
 }) {
   const randomSeconds = (5 + Math.ceil(Math.random() * 10)) * 1_000;
-  const [page] = useDashboardData(projectId, pageId, randomSeconds);
-  const { panels } = page;
+  const disabled = isExport || !modeFeatures.dashboard;
+  const [page] = useDashboardData(projectId, pageId, randomSeconds, disabled);
 
-  if (!MODE_FEATURES.dashboard) {
+  if (!modeFeatures.dashboard) {
     return (
       <div className="section">
         <div className="text-center">
@@ -104,7 +107,13 @@ export function Dashboard({
     );
   }
 
-  if (!panels.length) {
+  if (page) {
+    panels = page.panels;
+  } else {
+    return <Loading />;
+  }
+
+  if (!panels) {
     return (
       <div className="section">
         <div className="text-center">
@@ -120,7 +129,7 @@ export function Dashboard({
 
   return (
     <div className="section">
-      {!IS_EXPORT && (
+      {!isExport && (
         <div className="section-subtitle vertical-align-center">
           {page.visibility === 'no-link' ? null : (
             <a target="_blank" href={dashboardLink}>
@@ -160,7 +169,7 @@ export function Dashboard({
           </Select>
         </div>
       )}
-      {panels.map((panel) => (
+      {page.panels.map((panel) => (
         <ErrorBoundary key={panel.id}>
           <Panel panel={panel} />
         </ErrorBoundary>
