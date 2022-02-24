@@ -54,4 +54,21 @@ describe('Dashboard', function DashboardTests() {
     expect(panels.length).toBe(1);
     expect(panels.at(0).find('.panel-name').text()).toBe('Graph of ages');
   });
+
+  test('shows nothing if not enabled', async () => {
+    const component = enzyme.mount(
+      <Dashboard
+        projectId="foo"
+        page={{ id: 'blubber' }}
+        modeFeatures={{ dashboard: false }}
+      />
+    );
+    await componentLoad(component);
+    expect(component.find('.panel').length).toBe(0);
+    expect(
+      component
+        .debug()
+        .includes('This feature is only available in server mode.')
+    ).toBe(true);
+  });
 });

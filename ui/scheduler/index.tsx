@@ -1,5 +1,4 @@
 import React from 'react';
-import { MODE_FEATURES } from '../../shared/constants';
 import { ProjectPage, ScheduledExport } from '../../shared/state';
 import { Button } from '../components/Button';
 import { Schedule } from './Schedule';
@@ -7,9 +6,11 @@ import { Schedule } from './Schedule';
 export function Scheduler({
   page,
   updatePage,
+  modeFeatures,
 }: {
   page: ProjectPage;
   updatePage: (page: ProjectPage) => void;
+  modeFeatures: { scheduledExports: boolean };
 }) {
   const { schedules } = page;
 
@@ -30,7 +31,7 @@ export function Scheduler({
     updatePage(page);
   }
 
-  if (!MODE_FEATURES.scheduledExports) {
+  if (!modeFeatures.scheduledExports) {
     return (
       <div className="section">
         <div className="text-center">
