@@ -29,7 +29,7 @@ type Settings struct {
 	} `json:"caCerts"`
 }
 
-var SettingsFileDefaultLocation = path.Join(FS_BASE, ".settings")
+var SettingsFileDefaultLocation = path.Join(CONFIG_FS_BASE, ".settings")
 
 var DefaultSettings = &Settings{
 	Id:            uuid.New().String(),

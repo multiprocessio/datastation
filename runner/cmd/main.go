@@ -66,7 +66,7 @@ func main() {
 		settings = runner.DefaultSettings
 	}
 
-	ec := runner.NewEvalContext(*settings)
+	ec := runner.NewEvalContext(*settings, runner.DEFAULT_FS_BASE)
 
 	err = ec.Eval(projectId, panelId)
 	if err != nil {

@@ -58,7 +58,7 @@ func (e *Encrypt) decrypt() (string, error) {
 	}
 
 	v := e.Value
-	keyBytes, err := ioutil.ReadFile(path.Join(FS_BASE, ".signingKey"))
+	keyBytes, err := ioutil.ReadFile(path.Join(CONFIG_FS_BASE, ".signingKey"))
 	if err != nil {
 		return "", err
 	}
@@ -347,8 +347,8 @@ func writeRowFromDatabase(dbInfo DatabaseConnectorInfoDatabase, w *JSONArrayWrit
 	return nil
 }
 
-func loadJSONArrayPanel(projectId, panelId string) (chan map[string]interface{}, error) {
-	f := GetPanelResultsFile(projectId, panelId)
+func (ec EvalContext) loadJSONArrayPanel(projectId, panelId string) (chan map[string]interface{}, error) {
+	f := ec.GetPanelResultsFile(projectId, panelId)
 	return loadJSONArrayFile(f)
 }
 
@@ -444,7 +444,7 @@ func (ec EvalContext) EvalDatabasePanel(
 	}
 
 	if panelResultLoader == nil {
-		panelResultLoader = loadJSONArrayPanel
+		panelResultLoader = ec.loadJSONArrayPanel
 	}
 
 	serverId := panel.ServerId
@@ -456,7 +456,7 @@ func (ec EvalContext) EvalDatabasePanel(
 		return err
 	}
 
-	out := GetPanelResultsFile(project.Id, panel.Id)
+	out := ec.GetPanelResultsFile(project.Id, panel.Id)
 	w, err := openTruncate(out)
 	if err != nil {
 		return err
