@@ -95,8 +95,8 @@ func (ec EvalContext) evalProgramPanel(project *ProjectState, pageIndex int, pan
 	}
 	defer os.Remove(tmp.Name())
 
-	resultsFile := getProjectResultsFile(project.Id)
-	panelResultsFile := GetPanelResultsFile(project.Id, panel.Id)
+	resultsFile := ec.getProjectResultsFile(project.Id)
+	panelResultsFile := ec.GetPanelResultsFile(project.Id, panel.Id)
 	jsonIdMap := getIdMapJson(project.Pages[pageIndex])
 	preamble := strings.ReplaceAll(p.Preamble, "$$RESULTS_FILE$$", resultsFile)
 	preamble = strings.ReplaceAll(preamble, "$$PANEL_RESULTS_FILE$$", panelResultsFile)

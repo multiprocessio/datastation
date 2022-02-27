@@ -2,9 +2,9 @@ package runner
 
 import "bytes"
 
-func evalLiteralPanel(project *ProjectState, pageIndex int, panel *PanelInfo) error {
+func (ec EvalContext) evalLiteralPanel(project *ProjectState, pageIndex int, panel *PanelInfo) error {
 	cti := panel.Literal.ContentTypeInfo
-	out := GetPanelResultsFile(project.Id, panel.Id)
+	out := ec.GetPanelResultsFile(project.Id, panel.Id)
 	w, err := openTruncate(out)
 	if err != nil {
 		return err

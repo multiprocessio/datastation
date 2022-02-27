@@ -38,13 +38,13 @@ func Fatalln(msg string, args ...interface{}) {
 	os.Exit(2)
 }
 
-func panelResultsExist(projectId, panelId string) bool {
-	resultsFile := GetPanelResultsFile(projectId, panelId)
+func (ec EvalContext) panelResultsExist(projectId, panelId string) bool {
+	resultsFile := ec.GetPanelResultsFile(projectId, panelId)
 	_, err := os.Stat(resultsFile)
 	return err == nil
 }
 
-func allImportedPanelResultsExist(project ProjectState, page ProjectPage, panel PanelInfo) (string, bool) {
+func (ec EvalContext) allImportedPanelResultsExist(project ProjectState, page ProjectPage, panel PanelInfo) (string, bool) {
 	idMap := getIdMap(page)
 	matchesForSubexps := dmGetPanelRe.FindAllStringSubmatch(panel.Content, -1)
 	for _, match := range matchesForSubexps {
@@ -62,7 +62,7 @@ func allImportedPanelResultsExist(project ProjectState, page ProjectPage, panel 
 			}
 
 			if nameOrIndex != "" {
-				if !panelResultsExist(project.Id, idMap[nameOrIndex]) {
+				if !ec.panelResultsExist(project.Id, idMap[nameOrIndex]) {
 					return nameOrIndex, false
 				}
 			}
@@ -72,7 +72,7 @@ func allImportedPanelResultsExist(project ProjectState, page ProjectPage, panel 
 	return "", true
 }
 
-func evalMacros(content string, project *ProjectState, pageIndex int) (string, error) {
+func (ec EvalContext) evalMacros(content string, project *ProjectState, pageIndex int) (string, error) {
 	pongoJsonify := func(in *pongo2.Value, _ *pongo2.Value) (*pongo2.Value, *pongo2.Error) {
 		bs, err := json.Marshal(in.Interface())
 		if err != nil {
@@ -103,7 +103,7 @@ func evalMacros(content string, project *ProjectState, pageIndex int) (string, e
 			errC <- makeErrInvalidDependentPanel(nameOrIndex)
 		}
 
-		resultsFile := GetPanelResultsFile(project.Id, panelId)
+		resultsFile := ec.GetPanelResultsFile(project.Id, panelId)
 		var a interface{}
 		err := readJSONFileInto(resultsFile, &a)
 		if err != nil {
@@ -125,24 +125,25 @@ func evalMacros(content string, project *ProjectState, pageIndex int) (string, e
 
 type EvalContext struct {
 	settings Settings
+	fsBase   string
 }
 
-func NewEvalContext(s Settings) EvalContext {
-	return EvalContext{s}
+func NewEvalContext(s Settings, fsBase string) EvalContext {
+	return EvalContext{s, fsBase}
 }
 
 func (ec EvalContext) Eval(projectId, panelId string) error {
-	project, pageIndex, panel, err := getProjectPanel(projectId, panelId)
+	project, pageIndex, panel, err := ec.getProjectPanel(projectId, panelId)
 	if err != nil {
 		return err
 	}
 
-	panelId, ok := allImportedPanelResultsExist(*project, project.Pages[pageIndex], *panel)
+	panelId, ok := ec.allImportedPanelResultsExist(*project, project.Pages[pageIndex], *panel)
 	if !ok {
 		return makeErrInvalidDependentPanel(panelId)
 	}
 
-	panel.Content, err = evalMacros(panel.Content, project, pageIndex)
+	panel.Content, err = ec.evalMacros(panel.Content, project, pageIndex)
 	if err != nil {
 		return err
 	}
@@ -150,13 +151,13 @@ func (ec EvalContext) Eval(projectId, panelId string) error {
 	switch panel.Type {
 	case FilePanel:
 		Logln("Evaling file panel")
-		return evalFilePanel(project, pageIndex, panel)
+		return ec.evalFilePanel(project, pageIndex, panel)
 	case HttpPanel:
 		Logln("Evaling http panel")
 		return ec.evalHTTPPanel(project, pageIndex, panel)
 	case LiteralPanel:
 		Logln("Evaling literal panel")
-		return evalLiteralPanel(project, pageIndex, panel)
+		return ec.evalLiteralPanel(project, pageIndex, panel)
 	case ProgramPanel:
 		Logln("Evaling program panel")
 		return ec.evalProgramPanel(project, pageIndex, panel)

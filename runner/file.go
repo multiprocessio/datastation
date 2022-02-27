@@ -700,7 +700,7 @@ func TransformFile(fileName string, cti ContentTypeInfo, out io.Writer) error {
 	return transformGenericFile(fileName, out)
 }
 
-func evalFilePanel(project *ProjectState, pageIndex int, panel *PanelInfo) error {
+func (ec EvalContext) evalFilePanel(project *ProjectState, pageIndex int, panel *PanelInfo) error {
 	cti := panel.File.ContentTypeInfo
 	fileName := panel.File.Name
 	server, err := getServer(project, panel.ServerId)
@@ -708,7 +708,7 @@ func evalFilePanel(project *ProjectState, pageIndex int, panel *PanelInfo) error
 		return err
 	}
 
-	out := GetPanelResultsFile(project.Id, panel.Id)
+	out := ec.GetPanelResultsFile(project.Id, panel.Id)
 	w, err := openTruncate(out)
 	if err != nil {
 		return err

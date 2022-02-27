@@ -170,13 +170,13 @@ func (ec EvalContext) evalHTTPPanel(project *ProjectState, pageIndex int, panel 
 
 	h := panel.Http.Http
 
-	h.Url, err = evalMacros(h.Url, project, pageIndex)
+	h.Url, err = ec.evalMacros(h.Url, project, pageIndex)
 	if err != nil {
 		return err
 	}
 
 	for _, header := range h.Headers {
-		header.Value, err = evalMacros(header.Value, project, pageIndex)
+		header.Value, err = ec.evalMacros(header.Value, project, pageIndex)
 		if err != nil {
 			return err
 		}
@@ -217,7 +217,7 @@ func (ec EvalContext) evalHTTPPanel(project *ProjectState, pageIndex int, panel 
 
 		}
 
-		out := GetPanelResultsFile(project.Id, panel.Id)
+		out := ec.GetPanelResultsFile(project.Id, panel.Id)
 		w, err := openTruncate(out)
 		if err != nil {
 			return err
