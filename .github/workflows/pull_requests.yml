@@ -35,7 +35,7 @@ jobs:
     - run: yarn test-licenses
     # Needed so we can have ./build/desktop_runner.js and ./build/go_desktop_runner ready for tests
     - run: yarn build-test-runner
-    - run: yarn test --runInBand --detectOpenHandles --forceExit --verbose
+    - run: yarn test --detectOpenHandles --forceExit --verbose
       env:
         BIGQUERY_TOKEN: ${{ secrets.BIGQUERY_TOKEN }}
         SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER }}
@@ -135,7 +135,7 @@ jobs:
     # Needed so we can have ./build/desktop_runner.js ready for tests
     - run: yarn build-test-runner
     # https://github.com/golang/go/issues/49138 bug in macos -race detector
-    - run: MallocNanoZone=0 yarn test --runInBand --detectOpenHandles --forceExit --verbose shared ui desktop
+    - run: MallocNanoZone=0 yarn test --detectOpenHandles --forceExit --verbose shared ui desktop
     - run: cd runner && MallocNanoZone=0 go test -race -cover
     - run: yarn release-desktop 0.0.0-e2etest
     - run: git reset --hard # release blows everything up
@@ -166,7 +166,7 @@ jobs:
       shell: pwsh
     # Needed so we can have ./build/desktop_runner.js ready for tests
     - run: yarn build-test-runner
-    - run: yarn test --runInBand --detectOpenHandles --forceExit --verbose shared ui desktop
+    - run: yarn test --detectOpenHandles --forceExit --verbose shared ui desktop
     - run: cd runner && go test -race -cover
     - run: yarn release-desktop 0.0.0-e2etest
     - run: git reset --hard # release blows everything up
