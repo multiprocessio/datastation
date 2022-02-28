@@ -25,14 +25,28 @@ project.pages[0].schedules = [
 ];
 
 test('shows a basic schedule page', async () => {
-  MODE_FEATURES.scheduledExports = true;
-  try {
-    const component = enzyme.mount(
-      <Scheduler page={project.pages[0]} updatePage={() => {}} />
-    );
-    await componentLoad(component);
-    expect(component.find('.panel').length).toBe(1);
-  } finally {
-    MODE_FEATURES.scheduledExports = false;
-  }
+  const component = enzyme.mount(
+    <Scheduler
+      modeFeatures={{ scheduledExports: true }}
+      page={project.pages[0]}
+      updatePage={() => {}}
+    />
+  );
+  await componentLoad(component);
+  expect(component.find('.panel').length).toBe(1);
+});
+
+test('shows nothing if not enabled', async () => {
+  const component = enzyme.mount(
+    <Scheduler
+      modeFeatures={{ scheduledExports: false }}
+      page={project.pages[0]}
+      updatePage={() => {}}
+    />
+  );
+  await componentLoad(component);
+  expect(component.find('.panel').length).toBe(0);
+  expect(
+    component.debug().includes('This feature is only available in server mode.')
+  ).toBe(true);
 });

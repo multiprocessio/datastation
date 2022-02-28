@@ -10,7 +10,8 @@ import (
 )
 
 var HOME, _ = os.UserHomeDir()
-var FS_BASE = path.Join(HOME, "DataStationProjects")
+var DEFAULT_FS_BASE = path.Join(HOME, "DataStationProjects")
+var CONFIG_FS_BASE = DEFAULT_FS_BASE
 
 func readJSONFileInto(file string, into interface{}) error {
 	f, err := os.Open(file)
@@ -39,7 +40,7 @@ func WriteJSONFile(file string, value interface{}) error {
 	return encoder.Encode(value)
 }
 
-func getProjectFile(projectId string) string {
+func (ec EvalContext) getProjectFile(projectId string) string {
 	ext := ".dsproj"
 	if !strings.HasSuffix(projectId, ext) {
 		projectId += ext
@@ -49,19 +50,19 @@ func getProjectFile(projectId string) string {
 		return projectId
 	}
 
-	return path.Join(FS_BASE, projectId)
+	return path.Join(ec.fsBase, projectId)
 }
 
 func makeErrNoSuchPanel(panelId string) error {
 	return edsef("Panel not found: " + panelId)
 }
 
-func getProjectPanel(projectId, panelId string) (*ProjectState, int, *PanelInfo, error) {
+func (ec EvalContext) getProjectPanel(projectId, panelId string) (*ProjectState, int, *PanelInfo, error) {
 	if strings.Contains(os.Args[0], "go_server_runner") {
 		return getProjectPanelFromDatabase(projectId, panelId)
 	}
 
-	file := getProjectFile(projectId)
+	file := ec.getProjectFile(projectId)
 
 	var project ProjectState
 	err := readJSONFileInto(file, &project)
@@ -81,15 +82,15 @@ func getProjectPanel(projectId, panelId string) (*ProjectState, int, *PanelInfo,
 	return nil, 0, nil, makeErrNoSuchPanel(panelId)
 }
 
-func getProjectResultsFile(projectId string) string {
+func (ec EvalContext) getProjectResultsFile(projectId string) string {
 	project := filepath.Base(projectId)
 	// Drop .dsproj from project id
 	if strings.HasSuffix(project, ".dsproj") {
 		project = project[0 : len(project)-len(".dsproj")]
 	}
-	return strings.ReplaceAll(path.Join(FS_BASE, "."+project+".results"), "\\", "/")
+	return strings.ReplaceAll(path.Join(ec.fsBase, "."+project+".results"), "\\", "/")
 }
 
-func GetPanelResultsFile(projectId string, panelId string) string {
-	return getProjectResultsFile(projectId) + panelId
+func (ec EvalContext) GetPanelResultsFile(projectId string, panelId string) string {
+	return ec.getProjectResultsFile(projectId) + panelId
 }

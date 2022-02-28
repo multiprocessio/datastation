@@ -21,7 +21,7 @@ function getOptionValues(children: React.ReactNode): Array<string> {
     .flat();
 }
 
-export const NONE = '----none----';
+export const NONE = '-- None --';
 
 export function Select({
   value,

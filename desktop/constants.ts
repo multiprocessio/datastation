@@ -12,6 +12,7 @@ export const PROJECT_EXTENSION = 'dsproj';
 export const DSPROJ_FLAG = '--dsproj';
 export const PANEL_FLAG = '--evalPanel';
 export const PANEL_META_FLAG = '--metaFile';
+export const SETTINGS_FILE_FLAG = '--settingsFile';
 
 export const KEY_SIZE = 4096;
 

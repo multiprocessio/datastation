@@ -136,7 +136,7 @@ func quoteTime(t time.Time, qt quoteType) string {
 	return quote(t.Format("2006-01-02 15:04:05"), qt.string)
 }
 
-func evalFilaggPanel(project *ProjectState, pageIndex int, panel *PanelInfo) error {
+func (ec EvalContext) evalFilaggPanel(project *ProjectState, pageIndex int, panel *PanelInfo) error {
 	qt := ansiSQLQuote
 	fg := panel.Filagg
 
@@ -231,5 +231,5 @@ func evalFilaggPanel(project *ProjectState, pageIndex int, panel *PanelInfo) err
 		Id:      panel.Id,
 	}
 
-	return evalProgramSQLPanel(project, pageIndex, fakepanel)
+	return ec.evalProgramSQLPanel(project, pageIndex, fakepanel)
 }

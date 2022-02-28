@@ -155,6 +155,7 @@ header iframe {
 }
 
 label,
+.toggle-label,
 .radio-label,
 .input-label,
 .select-label {
@@ -167,16 +168,17 @@ label,
   min-width: 920px;
 }
 
-.panel-details :not(.form-row--multi) > .button {
+.form :not(.form-row--multi) > .button {
   /* Line up with everything with a label */
   margin-left: 100px;
 }
 
-.panel-details {
+.form {
   overflow-x: auto;
 
   .radio-label,
   .input-label,
+  .toggle-label,
   .select-label {
     display: inline-block;
     text-align: right;
@@ -189,6 +191,7 @@ label,
   .form-row--collapse {
     .radio-label,
     .input-label,
+    .toggle-label,
     .select-label {
       width: initial;
     }
@@ -199,9 +202,10 @@ label,
   }
 }
 
-.panel-details .form-row--multi .input:not(:first-of-type) .input-label,
-.panel-details .form-row--multi .select:not(:first-of-type) .select-label,
-.panel-details .form-row--multi .input:not(:first-of-type) .input-label {
+.form .form-row--multi .input:not(:first-of-type) .input-label,
+.form .form-row--multi .select:not(:first-of-type) .select-label,
+.form .form-row--multi .select:not(:first-of-type) .toggle-label,
+.form .form-row--multi .input:not(:first-of-type) .input-label {
   width: initial;
 }
 
@@ -313,6 +317,13 @@ input + input[type='file'] {
   font-size: 0.75rem;
 }
 
+.form label.select select,
+.form select.select,
+.form label.input input,
+.form input.input {
+  max-width: 100%;
+}
+
 .horizontal-align-center {
   display: flex;
   justifyin-content: center;
@@ -321,6 +332,10 @@ input + input[type='file'] {
 .vertical-align-center {
   display: flex;
   align-items: center;
+}
+
+.mt-2 {
+  margin-top: calc(2 * var(--margin-base));
 }
 
 .mb-2 {
@@ -505,6 +520,7 @@ input + input[type='file'] {
 
   .radio-label,
   .input-label,
+  .toggle-label,
   .select-label {
     display: inline-block;
     text-align: right;
@@ -681,13 +697,6 @@ input + input[type='file'] {
   max-width: 1024px;
 }
 
-.panel-details label.select select,
-.panel-details select.select,
-.panel-details label.input input,
-.panel-details input.input {
-  max-width: 100%;
-}
-
 .panel-body {
   position: relative;
   flex: 1;
@@ -776,7 +785,7 @@ input + input[type='file'] {
   margin-bottom: calc(2 * var(--margin-base));
 }
 
-.panel p {
+.card p {
   max-width: 800px;
 }
 
@@ -918,14 +927,21 @@ input + input[type='file'] {
 
 .form-group {
   padding: 10px 0;
+
+  .form-group-label {
+    font-size: initial;
+  }
+
+  .form-group-children {
+    padding: 10px;
+  }
 }
 
-.form-group-label {
-  font-size: initial;
-}
-
-.form-group-children {
-  padding: 10px;
+.form-group--major {
+  .form-group-label {
+    font-size: larger;
+    font-weight: bold;
+  }
 }
 
 .form-row {
@@ -1111,6 +1127,14 @@ tbody tr {
 
 .global-dropdown.global-dropdown--open .global-dropdown-body {
   display: initial;
+}
+
+.settings {
+  width: 100%;
+
+  .alert {
+    max-width: 600px;
+  }
 }
 
 /* DARK MODE RULES */

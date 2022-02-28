@@ -11,6 +11,7 @@ const fs = require('fs');
 const { getProjectResultsFile } = require('../store');
 const {
   HTTPPanelInfo,
+  LiteralPanelInfo,
   HTTPConnectorInfo,
   ServerInfo,
 } = require('../../shared/state');
@@ -208,39 +209,69 @@ for (const subprocessName of RUNNERS) {
     );
   }
 
-  if (process.platform === 'linux') {
-    describe('http with headers', () => {
-      test('correct result', () => {
-        const hp = new HTTPPanelInfo(
+  describe('http with headers', () => {
+    test('correct result', () => {
+      const hp = new HTTPPanelInfo(
+        '',
+        new HTTPConnectorInfo(
           '',
-          new HTTPConnectorInfo(
-            '',
-            'http://localhost:9799/testdata/allformats/unknown',
-            [{ name: 'X-Test', value: 'OK' }]
-          )
-        );
+          'http://localhost:9799/testdata/allformats/unknown',
+          [{ name: 'X-Test', value: 'OK' }]
+        )
+      );
 
-        const panels = [hp];
+      const panels = [hp];
 
-        return withSavedPanels(
-          panels,
-          (project) => {
-            // Grab result
-            const value = JSON.parse(
-              fs
-                .readFileSync(
-                  getProjectResultsFile(project.projectName) + hp.id
-                )
-                .toString()
-            );
+      return withSavedPanels(
+        panels,
+        (project) => {
+          // Grab result
+          const value = JSON.parse(
+            fs
+              .readFileSync(getProjectResultsFile(project.projectName) + hp.id)
+              .toString()
+          );
 
-            expect(value).toEqual('hey this is unknown');
-          },
-          { evalPanels: true, subprocessName }
-        );
-      });
+          expect(value).toEqual('hey this is unknown');
+        },
+        { evalPanels: true, subprocessName }
+      );
     });
+  });
 
+  describe('http with macro', () => {
+    test('correct result', () => {
+      const lp = new LiteralPanelInfo({
+        contentTypeInfo: { type: 'text/plain' },
+        content: '/testdata/allformats/unknown',
+        name: 'Raw Data',
+      });
+
+      const hp = new HTTPPanelInfo(
+        '',
+        new HTTPConnectorInfo('', 'http://localhost:9799{{DM_getPanel("0")}}')
+      );
+
+      const panels = [lp, hp];
+
+      return withSavedPanels(
+        panels,
+        (project) => {
+          // Grab result
+          const value = JSON.parse(
+            fs
+              .readFileSync(getProjectResultsFile(project.projectName) + hp.id)
+              .toString()
+          );
+
+          expect(value).toEqual('hey this is unknown');
+        },
+        { evalPanels: true, subprocessName }
+      );
+    });
+  });
+
+  if (process.platform === 'linux') {
     describe('eval http over server via ' + subprocessName.go, () => {
       test('correct result', () => {
         const server = new ServerInfo({

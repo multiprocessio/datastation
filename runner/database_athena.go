@@ -28,8 +28,7 @@ func evalAthena(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, w io.Wri
 
 	result, err := svc.StartQueryExecution(&s)
 	if err != nil {
-		fmt.Println(err)
-		return
+		return err
 	}
 	fmt.Println("StartQueryExecution result:")
 	fmt.Println(result.GoString())
@@ -41,8 +40,7 @@ func evalAthena(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, w io.Wri
 	for {
 		qrop, err = svc.GetQueryExecution(&qri)
 		if err != nil {
-			fmt.Println(err)
-			return
+			return err
 		}
 		if *qrop.QueryExecution.Status.State != "RUNNING" {
 			break

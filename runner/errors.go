@@ -43,6 +43,14 @@ func makeErrInvalidDependentPanel(id string) *DSError {
 	}
 }
 
+func makeErrBadTemplate(msg string) *DSError {
+	return &DSError{
+		Name:    "BadTemplateError",
+		Stack:   string(debug.Stack()),
+		Message: msg,
+	}
+}
+
 func makeErrException(e error) *DSError {
 	if e == nil {
 		return nil

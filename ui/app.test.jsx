@@ -20,15 +20,6 @@ const {
 const { App } = require('./app');
 const { LocalStorageStore } = require('./ProjectStore');
 
-function throwOnErrorBoundary(component) {
-  component.find('ErrorBoundary').forEach((e) => {
-    if (e.find({ type: 'fatal' }).length) {
-      // Weird ways to find the actual error message
-      throw new Error(e.find('Highlight').props().children);
-    }
-  });
-}
-
 const store = new LocalStorageStore();
 const project = new ProjectState();
 project.pages = [new ProjectPage()];

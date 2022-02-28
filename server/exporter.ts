@@ -44,7 +44,6 @@ export class Exporter {
       clearTimeout(id);
     };
     copyProps(window, global);
-    window.DATASTATION_IS_EXPORT = true;
 
     // Then do the React stuff
     const { renderPage } = require('./exportRenderer');

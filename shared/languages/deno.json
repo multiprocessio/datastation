@@ -1,0 +1,7 @@
+{
+  "commandArgs": ["run", "--allow-all"],
+  "defaultPath": "deno",
+  "id": "deno",
+  "name": "Deno",
+  "preamble": "\nfunction DM_getPanelFile(i) {\n  return '$$RESULTS_FILE$$'+$$JSON_ID_MAP$$[i];\n}\n\nfunction DM_getPanel(i) {\n  return JSON.parse(Deno.readTextFileSync('$$RESULTS_FILE$$'+$$JSON_ID_MAP$$[i]));\n}\n\nfunction DM_setPanel(v) {\n  Deno.writeTextFileSync('$$PANEL_RESULTS_FILE$$', JSON.stringify(v));\n}"
+}

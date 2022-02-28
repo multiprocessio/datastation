@@ -15,7 +15,8 @@ export function ExternalDashboard() {
   const [page, error, firstLoad] = useDashboardData(
     projectId,
     pageId,
-    randomMinute
+    randomMinute,
+    false
   );
 
   if (firstLoad) {
@@ -25,7 +26,7 @@ export function ExternalDashboard() {
   if (error) {
     return (
       <div className="section">
-        <Alert type="error">{error}</Alert>
+        <Alert type="error">{String(error)}</Alert>
       </div>
     );
   }

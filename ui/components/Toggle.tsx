@@ -13,7 +13,7 @@ export function Toggle({
 }) {
   return (
     <label className={`toggle ${className || ''}`}>
-      {label}
+      <span className="toggle-label">{label}</span>
       <input type="checkbox" checked={value} onChange={onChange} />
       <span className="toggle-container">
         <span className="toggle-mover" />

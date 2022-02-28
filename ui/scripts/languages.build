@@ -4,3 +4,4 @@ jsonnet ./shared/languages/javascript.jsonnet -o ./shared/languages/javascript.j
 jsonnet ./shared/languages/python.jsonnet -o ./shared/languages/python.json
 jsonnet ./shared/languages/julia.jsonnet -o ./shared/languages/julia.json
 jsonnet ./shared/languages/php.jsonnet -o ./shared/languages/php.json
+jsonnet ./shared/languages/deno.jsonnet -o ./shared/languages/deno.json

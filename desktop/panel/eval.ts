@@ -26,6 +26,7 @@ import {
   DSPROJ_FLAG,
   PANEL_FLAG,
   PANEL_META_FLAG,
+  SETTINGS_FILE_FLAG,
 } from '../constants';
 import { ensureFile } from '../fs';
 import { parsePartialJSONFile } from '../partial';
@@ -87,6 +88,7 @@ export async function evalInSubprocess(
   subprocess: {
     node: string;
     go?: string;
+    settingsFileOverride?: string;
   },
   projectName: string,
   panel: PanelInfo,
@@ -109,6 +111,11 @@ export async function evalInSubprocess(
       PANEL_META_FLAG,
       tmp.path,
     ];
+
+    if (subprocess.settingsFileOverride) {
+      args.push(SETTINGS_FILE_FLAG, subprocess.settingsFileOverride);
+    }
+
     if (subprocess.go && canUseGoRunner(panel, connectors)) {
       base = subprocess.go;
       args.shift();
