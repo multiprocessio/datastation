@@ -187,10 +187,13 @@ export type SQLConnectorType =
   | 'quest'
   | 'bigquery'
   | 'cassandra'
-  | 'scylla';
+  | 'scylla'
+  | 'athena';
 
 export type DatabaseConnectorInfoType =
   | SQLConnectorType
+  | 'google-sheets'
+  | 'airtable'
   | 'mongo'
   | 'elasticsearch'
   | 'splunk'

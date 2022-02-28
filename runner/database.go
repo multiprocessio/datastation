@@ -108,7 +108,7 @@ var defaultPorts = map[DatabaseConnectorInfoType]string{
 	TimescaleDatabase:     "5432",
 	YugabyteDatabase:      "5433",
 	QuestDatabase:         "8812",
-	AthenaDatabase: "",
+	AthenaDatabase:        "",
 }
 
 type urlParts struct {
@@ -478,7 +478,7 @@ func (ec EvalContext) EvalDatabasePanel(
 	case PrometheusDatabase:
 		return evalPrometheus(panel, dbInfo, server, w)
 	case BigQueryDatabase:
-		return evalBigQuery(panel, dbInfo, server, w)
+		return evalBigQuery(panel, dbInfo, w)
 	case SplunkDatabase:
 		return evalSplunk(panel, dbInfo, server, w)
 	case MongoDatabase:
@@ -487,6 +487,10 @@ func (ec EvalContext) EvalDatabasePanel(
 		return evalCQL(panel, dbInfo, server, w)
 	case AthenaDatabase:
 		return evalAthena(panel, dbInfo, w)
+	case GoogleSheetsDatabase:
+		return evalGoogleSheets(panel, dbInfo, w)
+	case AirtableDatabase:
+		return evalAirtable(panel, dbInfo, w)
 	}
 
 	mangleInsert := defaultMangleInsert

@@ -23,7 +23,7 @@ func evalAthena(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, w io.Wri
 	s.SetQueryExecutionContext(&q)
 
 	var r athena.ResultConfiguration
-	r.SetOutputLocation("s3://"+dbInfo.Address)
+	r.SetOutputLocation("s3://" + dbInfo.Address)
 	s.SetResultConfiguration(&r)
 
 	result, err := svc.StartQueryExecution(&s)

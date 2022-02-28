@@ -277,7 +277,9 @@ const (
 	QuestDatabase                                   = "quest"
 	BigQueryDatabase                                = "bigquery"
 	MongoDatabase                                   = "mongo"
-	AthenaDatabase = "athena"
+	AthenaDatabase                                  = "athena"
+	AirtableDatabase                                = "airtable"
+	GoogleSheetsDatabase                            = "google-sheets"
 )
 
 type DatabaseConnectorInfoDatabase struct {

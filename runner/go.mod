@@ -17,6 +17,7 @@ require (
 	github.com/jmoiron/sqlx v1.3.4
 	github.com/lib/pq v1.10.4
 	github.com/mattn/go-sqlite3 v1.14.12
+	github.com/mehanizm/airtable v0.2.6
 	github.com/multiprocessio/go-openoffice v0.0.0-20220110232726-064f5dda1956
 	github.com/prometheus/client_golang v1.12.1
 	github.com/prometheus/common v0.32.1

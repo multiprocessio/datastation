@@ -5,9 +5,11 @@ import { Input } from '../components/Input';
 export function Password({
   connector,
   updateConnector,
+  label,
 }: {
   connector: DatabaseConnectorInfo;
   updateConnector: (c: DatabaseConnectorInfo) => void;
+  label?: string;
 }) {
   // Don't try to show initial password
   const [password, setPassword] = React.useState('');
@@ -22,7 +24,7 @@ export function Password({
   return (
     <div className="form-row">
       <Input
-        label="Password"
+        label={label || 'Password'}
         type="password"
         value={password}
         onChange={(value: string) => syncPassword(value)}
