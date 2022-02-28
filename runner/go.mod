@@ -15,8 +15,8 @@ require (
 	github.com/influxdata/influxdb-client-go/v2 v2.8.0
 	github.com/jmoiron/sqlx v1.3.4
 	github.com/lib/pq v1.10.4
+	github.com/mattn/go-sqlite3 v1.14.12
 	github.com/multiprocessio/go-openoffice v0.0.0-20220110232726-064f5dda1956
-	github.com/multiprocessio/go-sqlite3 v1.14.12-0.20220224023250-bcb0e0dfd8a9
 	github.com/prometheus/client_golang v1.12.1
 	github.com/prometheus/common v0.32.1
 	github.com/sijms/go-ora/v2 v2.4.0
