@@ -413,6 +413,57 @@ for (const subprocess of RUNNERS) {
     }, 15_000);
   });
 
+  describe('basic athena tests', () => {
+    test(`runs query against s3://datastation-tests/basic/`, async () => {
+      if (process.platform !== 'linux') {
+        return;
+      }
+
+      const connectors = [
+        new DatabaseConnectorInfo({
+          type: 'athena',
+          database: 'testdata',
+          extra: {
+            aws_region: 'us-east-1',
+          },
+          address: 's3://datastation-test-results/',
+          username: process.env.AWS_ACCESS_KEY_ID,
+          password_encrypt: new Encrypt(process.env.AWS_SECRET_ACCESS_KEY),
+        }),
+      ];
+      const dp = new DatabasePanelInfo();
+      dp.database.connectorId = connectors[0].id;
+      dp.content = 'SELECT * FROM basic_users ORDER BY age desc';
+
+      let finished = false;
+      const panels = [dp];
+      await withSavedPanels(
+        panels,
+        async (project) => {
+          const panelValueBuffer = fs.readFileSync(
+            getProjectResultsFile(project.projectName) + dp.id
+          );
+
+          const v = JSON.parse(panelValueBuffer.toString());
+          expect(v).toStrictEqual([
+            { age: 52, name: 'Emma' },
+            { age: 50, name: 'Karl' },
+            { age: 43, name: 'Garry' },
+            { age: 41, name: 'Nile' },
+            { age: 39, name: 'Mina' },
+          ]);
+
+          finished = true;
+        },
+        { evalPanels: true, connectors, subprocessName: subprocess }
+      );
+
+      if (!finished) {
+        throw new Error('Callback did not finish');
+      }
+    }, 15_000);
+  });
+
   describe('basic mongodb testdata/documents tests', () => {
     test('basic test', async () => {
       if (process.platform !== 'linux') {

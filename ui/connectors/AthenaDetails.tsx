@@ -2,7 +2,9 @@ import * as React from 'react';
 import { DatabaseConnectorInfo, ServerInfo } from '../../shared/state';
 import { FormGroup } from '../components/FormGroup';
 import { Input } from '../components/Input';
+import { Database } from './Database';
 import { Password } from './Password';
+import { Username } from './Username';
 
 export function AthenaDetails(props: {
   connector: DatabaseConnectorInfo;
@@ -12,21 +14,37 @@ export function AthenaDetails(props: {
   const { connector, updateConnector } = props;
 
   return (
-    <FormGroup>
-      <div className="form-row">
-        <Input
-          label="AWS Access Key ID"
-          value={connector.database.username}
-          onChange={(value: string) => {
-            connector.database.username = value;
-            updateConnector(connector);
-          }}
-          {...props}
-        />
-      </div>
-      <div className="form-row">
-        <Password label="AWS Secret Access Key" {...props} />
-      </div>
-    </FormGroup>
+    <>
+      <FormGroup>
+        <Database {...props} />
+        <div className="form-row">
+          <Input
+            label="Output Bucket"
+            placeholder="s3://..."
+            value={connector.database.address}
+            onChange={(value: string) => {
+              connector.database.address = value;
+              updateConnector(connector);
+            }}
+            {...props}
+          />
+        </div>
+        <div className="form-row">
+          <Input
+            label="Region"
+            value={connector.database.extra.aws_region}
+            onChange={(value: string) => {
+              connector.database.extra.aws_region = value;
+              updateConnector(connector);
+            }}
+            {...props}
+          />
+        </div>
+        <div className="form-row">
+          <Username label="Access Key ID" {...props} />
+        </div>
+        <Password label="Secret Access Key" {...props} />
+      </FormGroup>
+    </>
   );
 }

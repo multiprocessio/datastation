@@ -27,7 +27,7 @@ func evalGoogleSheets(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, w 
 		return edsef("Unable to retrieve data from sheet: %v", err)
 	}
 
-	fmt.Println("%#v", rsp)
+	fmt.Printf("%#v\n", rsp)
 	return withJSONArrayOutWriterFile(w, func(w *JSONArrayWriter) error {
 		return nil
 	})
