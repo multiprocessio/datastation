@@ -10,7 +10,6 @@ import (
 	"path/filepath"
 	"regexp"
 	"runtime"
-	"sort"
 	"strconv"
 	"strings"
 
@@ -25,15 +24,13 @@ import (
 var preferredParallelism = runtime.NumCPU() * 2
 
 type JSONArrayWriter struct {
-	w              io.Writer
-	first          bool
-	columns        []string
-	columnsEscaped [][]byte
-	isMap          bool
+	w     io.Writer
+	first bool
+	isMap bool
 }
 
 func newJSONArrayWriter(w io.Writer) *JSONArrayWriter {
-	return &JSONArrayWriter{w, true, nil, nil, false}
+	return &JSONArrayWriter{w, true, false}
 }
 
 var (
@@ -50,20 +47,7 @@ func (j *JSONArrayWriter) Write(row interface{}) error {
 			return edsef("Failed to write JSON delimiter: %s", err)
 		}
 	} else {
-		var r map[string]interface{}
-		r, j.isMap = row.(map[string]interface{})
-
-		if j.isMap {
-			for k := range r {
-				j.columns = append(j.columns, k)
-			}
-
-			sort.Strings(j.columns)
-
-			for _, col := range j.columns {
-				j.columnsEscaped = append(j.columnsEscaped, []byte(strconv.QuoteToASCII(col)+`:`))
-			}
-		}
+		_, j.isMap = row.(map[string]interface{})
 	}
 
 	// The Go JSON encoder spends a lot of time just ordering keys
@@ -71,11 +55,22 @@ func (j *JSONArrayWriter) Write(row interface{}) error {
 	// once and then generate JSON objects from that column order
 	// when the row to write is a map.  So far the only case where
 	// the row is not necessarily a map is parquet.
+	//
+	// NOTE: you can't just check the first row though because not
+	// all systems return all keys empty/not. For example the
+	// Airtable API doesn't include keys in the map if the value
+	// is null. So we can't precalculate all possible keys looking
+	// at a single row like an earlier version of this code did. :(
+	//
+	// We can however not sort the keys for each object, which is
+	// where a lot of time is taken in the Go JSON encoder.
 	if j.isMap {
 		r := row.(map[string]interface{})
 		j.w.Write(OPEN)
-		for i, col := range j.columns {
-			cellBytes, err := json.Marshal(r[col])
+		i := -1
+		for col, val := range r {
+			i += 1
+			cellBytes, err := json.Marshal(val)
 			if err != nil {
 				return edse(err)
 			}
@@ -89,7 +84,8 @@ func (j *JSONArrayWriter) Write(row interface{}) error {
 				return edse(err)
 			}
 
-			_, err = j.w.Write(j.columnsEscaped[i])
+			// Maybe it makes sense to memoize this quoted column.
+			_, err = j.w.Write([]byte(strconv.QuoteToASCII(col) + ":"))
 			if err != nil {
 				return edse(err)
 			}

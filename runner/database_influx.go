@@ -5,7 +5,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"io"
-	"io/ioutil"
 	"net/url"
 
 	"github.com/influxdata/influxdb-client-go/v2"
@@ -78,7 +77,7 @@ func (ec EvalContext) evalInfluxQL(panel *PanelInfo, dbInfo DatabaseConnectorInf
 		defer rsp.Body.Close()
 
 		if rsp.StatusCode >= 400 {
-			b, _ := ioutil.ReadAll(rsp.Body)
+			b, _ := io.ReadAll(rsp.Body)
 			return edsef("Failed to query Influx (status %s): %s", rsp.Status, b)
 		}
 

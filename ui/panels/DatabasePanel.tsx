@@ -107,26 +107,54 @@ export function DatabasePanelDetails({
       {connector && (
         <React.Fragment>
           {connector.database.type === 'airtable' && (
-            <Input
-              label="Table"
-              placeholder=""
-              value={panel.database.table}
-              onChange={(i: string) => {
-                panel.database.table = i;
-                updatePanel(panel);
-              }}
-            />
+            <>
+              <div className="form-row">
+                <Input
+                  label="App ID"
+                  placeholder=""
+                  value={panel.database.extra.airtable_app}
+                  onChange={(i: string) => {
+                    panel.database.extra.airtable_app = i;
+                    updatePanel(panel);
+                  }}
+                />
+              </div>
+              <div className="form-row">
+                <Input
+                  label="Table ID"
+                  placeholder=""
+                  value={panel.database.table}
+                  onChange={(i: string) => {
+                    panel.database.table = i;
+                    updatePanel(panel);
+                  }}
+                />
+              </div>
+              <div className="form-row">
+                <Input
+                  label="View ID"
+                  placeholder=""
+                  value={panel.database.extra.airtable_view}
+                  onChange={(i: string) => {
+                    panel.database.extra.airtable_view = i;
+                    updatePanel(panel);
+                  }}
+                />
+              </div>
+            </>
           )}
           {connector.database.type === 'elasticsearch' && (
-            <Input
-              label="Indexes"
-              placeholder="journalbeat-*,logstash-*"
-              value={panel.database.table}
-              onChange={(i: string) => {
-                panel.database.table = i;
-                updatePanel(panel);
-              }}
-            />
+            <div className="form-row">
+              <Input
+                label="Indexes"
+                placeholder="journalbeat-*,logstash-*"
+                value={panel.database.table}
+                onChange={(i: string) => {
+                  panel.database.table = i;
+                  updatePanel(panel);
+                }}
+              />
+            </div>
           )}
           {['elasticsearch', 'prometheus'].includes(
             connector.database.type
@@ -141,15 +169,17 @@ export function DatabasePanelDetails({
             />
           )}
           {connector.database.type === 'prometheus' && (
-            <Input
-              label="Step (seconds)"
-              type="number"
-              value={panel.database.step}
-              onChange={(s: string) => {
-                panel.database.step = +s;
-                updatePanel(panel);
-              }}
-            />
+            <div className="form-row">
+              <Input
+                label="Step (seconds)"
+                type="number"
+                value={panel.database.step}
+                onChange={(s: string) => {
+                  panel.database.step = +s;
+                  updatePanel(panel);
+                }}
+              />
+            </div>
           )}
           {!connector.serverId && (
             <ServerPicker

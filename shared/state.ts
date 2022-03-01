@@ -426,6 +426,7 @@ export class DatabasePanelInfo extends PanelInfo {
     range: TimeSeriesRange;
     table: string;
     step: number;
+    extra: Record<string, string>;
   };
 
   constructor(
@@ -443,6 +444,7 @@ export class DatabasePanelInfo extends PanelInfo {
       },
       table: panel.table || '',
       step: panel.step || 60,
+      extra: panel.extra || {},
     };
   }
 }
