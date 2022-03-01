@@ -106,6 +106,17 @@ export function DatabasePanelDetails({
       </div>
       {connector && (
         <React.Fragment>
+          {connector.database.type === 'airtable' && (
+            <Input
+              label="Table"
+              placeholder=""
+              value={panel.database.table}
+              onChange={(i: string) => {
+                panel.database.table = i;
+                updatePanel(panel);
+              }}
+            />
+          )}
           {connector.database.type === 'elasticsearch' && (
             <Input
               label="Indexes"
