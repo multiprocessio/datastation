@@ -90,7 +90,6 @@ func (e *Encrypt) decrypt() (string, error) {
 var defaultPorts = map[DatabaseConnectorInfoType]string{
 	PostgresDatabase:      "5432",
 	MySQLDatabase:         "3306",
-	SQLiteDatabase:        "0",
 	SQLServerDatabase:     "1433",
 	OracleDatabase:        "1521",
 	ClickHouseDatabase:    "9000",
@@ -108,7 +107,6 @@ var defaultPorts = map[DatabaseConnectorInfoType]string{
 	TimescaleDatabase:     "5432",
 	YugabyteDatabase:      "5433",
 	QuestDatabase:         "8812",
-	AthenaDatabase:        "",
 }
 
 type urlParts struct {
