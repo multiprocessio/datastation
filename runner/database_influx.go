@@ -78,7 +78,7 @@ func (ec EvalContext) evalInfluxQL(panel *PanelInfo, dbInfo DatabaseConnectorInf
 
 		if rsp.StatusCode >= 400 {
 			b, _ := io.ReadAll(rsp.Body)
-			return edsef("Failed to query Influx (status %s): %s", rsp.Status, b)
+			return makeErrUser(string(b))
 		}
 
 		var r influxResponse

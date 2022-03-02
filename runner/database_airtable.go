@@ -41,13 +41,10 @@ func evalAirtable(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, w io.W
 	var r airtableResponse
 	return withJSONArrayOutWriterFile(w, func(w *JSONArrayWriter) error {
 		offset := ""
-		first := true
-		for offset != "" || first {
-			first = false
-
+		for {
 			offsetParam := ""
 			if offset != "" {
-				offsetParam = "&offset=" + url.QueryEscape(offsetParam)
+				offsetParam = "&offset=" + url.QueryEscape(offset)
 			}
 			rsp, err := makeHTTPRequest(httpRequest{
 				url: baseUrl + offsetParam,
@@ -66,7 +63,7 @@ func evalAirtable(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, w io.W
 
 			if rsp.StatusCode >= 400 {
 				b, _ := io.ReadAll(rsp.Body)
-				return edsef("Failed to query Airtable (status %s): %s", rsp.Status, b)
+				return makeErrUser(string(b))
 			}
 
 			err = json.NewDecoder(rsp.Body).Decode(&r)
@@ -81,8 +78,11 @@ func evalAirtable(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, w io.W
 				}
 			}
 
+			if offset == r.Offset || r.Offset == "" {
+				break
+			}
+
 			offset = r.Offset
-			first = false
 		}
 
 		return nil

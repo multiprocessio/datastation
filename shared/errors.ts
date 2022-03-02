@@ -59,6 +59,18 @@ export class Cancelled extends Error {
   }
 }
 
+export class UserError extends Error {
+  constructor(msg: string) {
+    super();
+    this.name = 'UserError';
+    this.message = msg;
+  }
+
+  static fromJSON(j: any) {
+    return new UserError(j.message);
+  }
+}
+
 export class UnsupportedError extends Error {
   constructor(msg: string) {
     super();
@@ -67,7 +79,19 @@ export class UnsupportedError extends Error {
   }
 
   static fromJSON(j: any) {
-    return new InvalidDependentPanelError(j.message);
+    return new UnsupportedError(j.message);
+  }
+}
+
+export class BadTemplateError extends Error {
+  constructor(msg: string) {
+    super();
+    this.name = 'BadTemplateError';
+    this.message = msg;
+  }
+
+  static fromJSON(j: any) {
+    return new BadTemplateError(j.message);
   }
 }
 
@@ -76,6 +100,8 @@ export const EVAL_ERRORS = [
   InvalidDependentPanelError,
   NoResultError,
   UnsupportedError,
+  UserError,
+  BadTemplateError,
   NoConnectorError,
   Cancelled,
 ];

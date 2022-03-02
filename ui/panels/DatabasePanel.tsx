@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { DOCS_ROOT } from '../../shared/constants';
 import { NoConnectorError } from '../../shared/errors';
+import log from '../../shared/log';
 import {
   ConnectorInfo,
   DatabaseConnectorInfo,
@@ -110,10 +111,26 @@ export function DatabasePanelDetails({
             <>
               <div className="form-row">
                 <Input
-                  label="App ID"
+                  label="Base ID"
                   placeholder=""
                   value={panel.database.extra.airtable_app}
                   onChange={(i: string) => {
+                    if (i.startsWith('https://')) {
+                      try {
+                        // e.g. https://airtable.com/appX/tblY/viwZ?blocks=hide
+                        const [app, table, view] = i
+                          .slice('https://airtable.com/'.length)
+                          .split('?')[0]
+                          .split('/');
+                        panel.database.extra.airtable_app = app;
+                        panel.database.table = table;
+                        panel.database.extra.airtable_view = view;
+                        updatePanel(panel);
+                        return;
+                      } catch (e) {
+                        log.error(e);
+                      }
+                    }
                     panel.database.extra.airtable_app = i;
                     updatePanel(panel);
                   }}
