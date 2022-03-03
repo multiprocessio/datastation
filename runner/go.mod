@@ -17,7 +17,7 @@ require (
 	github.com/jmoiron/sqlx v1.3.4
 	github.com/lib/pq v1.10.4
 	github.com/mattn/go-sqlite3 v1.14.12
-	github.com/mehanizm/airtable v0.2.6
+	github.com/multiprocessio/go-json v0.0.0-20220303215431-27b1985507eb
 	github.com/multiprocessio/go-openoffice v0.0.0-20220110232726-064f5dda1956
 	github.com/prometheus/client_golang v1.12.1
 	github.com/prometheus/common v0.32.1
@@ -57,6 +57,7 @@ require (
 	github.com/fatih/color v1.10.0 // indirect
 	github.com/form3tech-oss/jwt-go v3.2.5+incompatible // indirect
 	github.com/gabriel-vasile/mimetype v1.4.0 // indirect
+	github.com/goccy/go-json v0.9.4 // indirect
 	github.com/golang-sql/civil v0.0.0-20190719163853-cb61b32ac6fe // indirect
 	github.com/golang-sql/sqlexp v0.0.0-20170517235910-f1bb20e5a188 // indirect
 	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect

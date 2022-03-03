@@ -16,6 +16,8 @@ import (
 
 	"golang.org/x/crypto/nacl/secretbox"
 
+	"github.com/multiprocessio/go-json"
+
 	_ "github.com/ClickHouse/clickhouse-go/v2"
 	_ "github.com/denisenkom/go-mssqldb"
 	_ "github.com/go-sql-driver/mysql"
@@ -279,7 +281,7 @@ var textTypes = map[string]bool{
 	"DATETIME":  true,
 }
 
-func writeRowFromDatabase(dbInfo DatabaseConnectorInfoDatabase, w *JSONArrayWriter, rows *sqlx.Rows, wroteFirstRow bool) error {
+func writeRowFromDatabase(dbInfo DatabaseConnectorInfoDatabase, w *jsonutil.StreamEncoder, rows *sqlx.Rows, wroteFirstRow bool) error {
 	row := map[string]interface{}{}
 	err := rows.MapScan(row)
 	if err != nil {
@@ -338,7 +340,7 @@ func writeRowFromDatabase(dbInfo DatabaseConnectorInfoDatabase, w *JSONArrayWrit
 		}
 	}
 
-	err = w.Write(row)
+	err = w.EncodeRow(row)
 	if err != nil {
 		return err
 	}
@@ -556,7 +558,7 @@ func (ec EvalContext) EvalDatabasePanel(
 		}
 
 		wroteFirstRow := false
-		return withJSONArrayOutWriterFile(w, func(w *JSONArrayWriter) error {
+		return withJSONArrayOutWriterFile(w, func(w *jsonutil.StreamEncoder) error {
 			_, err := importAndRun(
 				func(createTableStmt string) error {
 					_, err := db.Exec(createTableStmt)

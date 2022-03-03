@@ -6,6 +6,8 @@ import (
 	"io"
 	"net/url"
 	"strings"
+
+	"github.com/multiprocessio/go-json"
 )
 
 type airtableResponse struct {
@@ -39,7 +41,7 @@ func evalAirtable(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, w io.W
 	baseUrl := fmt.Sprintf("https://api.airtable.com/v0/%s/%s?%s", app, table, v.Encode())
 
 	var r airtableResponse
-	return withJSONArrayOutWriterFile(w, func(w *JSONArrayWriter) error {
+	return withJSONArrayOutWriterFile(w, func(w *jsonutil.StreamEncoder) error {
 		offset := ""
 		for {
 			offsetParam := ""
@@ -72,7 +74,7 @@ func evalAirtable(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, w io.W
 			}
 
 			for _, record := range r.Records {
-				err = w.Write(record.Fields)
+				err = w.EncodeRow(record.Fields)
 				if err != nil {
 					return edse(err)
 				}

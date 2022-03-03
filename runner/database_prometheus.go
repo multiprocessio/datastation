@@ -6,6 +6,8 @@ import (
 	"math"
 	"time"
 
+	"github.com/multiprocessio/go-json"
+
 	"github.com/prometheus/client_golang/api"
 	"github.com/prometheus/client_golang/api/prometheus/v1"
 	"github.com/prometheus/common/config"
@@ -71,10 +73,10 @@ func evalPrometheus(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, serv
 		}
 
 		m := result.(model.Matrix)
-		return withJSONArrayOutWriterFile(w, func(w *JSONArrayWriter) error {
+		return withJSONArrayOutWriterFile(w, func(w *jsonutil.StreamEncoder) error {
 			for _, sample := range m {
 				for _, row := range sample.Values {
-					err := w.Write(map[string]interface{}{
+					err := w.EncodeRow(map[string]interface{}{
 						"metric": sample.Metric,
 						"value":  row.Value,
 						"time":   row.Timestamp,

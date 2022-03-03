@@ -4,6 +4,8 @@ import (
 	"context"
 	"io"
 
+	"github.com/multiprocessio/go-json"
+
 	"cloud.google.com/go/bigquery"
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
@@ -28,7 +30,7 @@ func evalBigQuery(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, w io.W
 		return err
 	}
 
-	return withJSONArrayOutWriterFile(w, func(w *JSONArrayWriter) error {
+	return withJSONArrayOutWriterFile(w, func(w *jsonutil.StreamEncoder) error {
 		for {
 			var values []bigquery.Value
 			err := it.Next(&values)
@@ -44,7 +46,7 @@ func evalBigQuery(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, w io.W
 				row[field.Name] = values[i]
 			}
 
-			err = w.Write(row)
+			err = w.EncodeRow(row)
 			if err != nil {
 				return err
 			}

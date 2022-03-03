@@ -3,16 +3,15 @@ package runner
 import (
 	"bufio"
 	"encoding/csv"
-	"encoding/json"
 	"io"
 	"os"
 	"os/user"
 	"path/filepath"
 	"regexp"
 	"runtime"
-	"strconv"
 	"strings"
 
+	"github.com/multiprocessio/go-json"
 	"github.com/multiprocessio/go-openoffice"
 
 	"github.com/xitongsys/parquet-go-source/local"
@@ -22,91 +21,6 @@ import (
 )
 
 var preferredParallelism = runtime.NumCPU() * 2
-
-type JSONArrayWriter struct {
-	w     io.Writer
-	first bool
-	isMap bool
-}
-
-func newJSONArrayWriter(w io.Writer) *JSONArrayWriter {
-	return &JSONArrayWriter{w, true, false}
-}
-
-var (
-	COMMA    = []byte(",")
-	COMMA_NL = []byte(",\n")
-	OPEN     = []byte("{")
-	CLOSE    = []byte("}")
-)
-
-func (j *JSONArrayWriter) Write(row interface{}) error {
-	if !j.first {
-		_, err := j.w.Write(COMMA_NL)
-		if err != nil {
-			return edsef("Failed to write JSON delimiter: %s", err)
-		}
-	} else {
-		_, j.isMap = row.(map[string]interface{})
-	}
-
-	// The Go JSON encoder spends a lot of time just ordering keys
-	// so it's actually a lot faster to define the keys and order
-	// once and then generate JSON objects from that column order
-	// when the row to write is a map.  So far the only case where
-	// the row is not necessarily a map is parquet.
-	//
-	// NOTE: you can't just check the first row though because not
-	// all systems return all keys empty/not. For example the
-	// Airtable API doesn't include keys in the map if the value
-	// is null. So we can't precalculate all possible keys looking
-	// at a single row like an earlier version of this code did. :(
-	//
-	// We can however not sort the keys for each object, which is
-	// where a lot of time is taken in the Go JSON encoder.
-	if j.isMap {
-		r := row.(map[string]interface{})
-		j.w.Write(OPEN)
-		i := -1
-		for col, val := range r {
-			i += 1
-			cellBytes, err := json.Marshal(val)
-			if err != nil {
-				return edse(err)
-			}
-
-			var prefix []byte
-			if i > 0 {
-				prefix = COMMA
-			}
-			_, err = j.w.Write(prefix)
-			if err != nil {
-				return edse(err)
-			}
-
-			// Maybe it makes sense to memoize this quoted column.
-			_, err = j.w.Write([]byte(strconv.QuoteToASCII(col) + ":"))
-			if err != nil {
-				return edse(err)
-			}
-
-			_, err = j.w.Write(cellBytes)
-			if err != nil {
-				return edse(err)
-			}
-		}
-		j.w.Write(CLOSE)
-	} else {
-		encoder := json.NewEncoder(j.w)
-		err := encoder.Encode(row)
-		if err != nil {
-			return edsef("Failed to encode JSON: %s", err)
-		}
-	}
-
-	j.first = false
-	return nil
-}
 
 func withJSONOutWriter(w io.Writer, first, last string, cb func() error) error {
 	_, err := w.Write([]byte(first))
@@ -127,12 +41,9 @@ func withJSONOutWriter(w io.Writer, first, last string, cb func() error) error {
 	return nil
 }
 
-func withJSONArrayOutWriter(w io.Writer, cb func(w *JSONArrayWriter) error) error {
-	return withJSONOutWriter(w, "[", "]", func() error {
-		bw := bufio.NewWriterSize(w, 10*1024)
-		defer bw.Flush()
-		return cb(newJSONArrayWriter(bw))
-	})
+func withJSONArrayOutWriter(w io.Writer, cb func(w *jsonutil.StreamEncoder) error) error {
+	encoder := jsonutil.NewGoccyStreamEncoder(w, true)
+	return cb(encoder)
 }
 
 func openTruncate(out string) (*os.File, error) {
@@ -141,7 +52,7 @@ func openTruncate(out string) (*os.File, error) {
 	return os.OpenFile(out, os.O_TRUNC|os.O_WRONLY|os.O_CREATE, os.ModePerm)
 }
 
-func withJSONArrayOutWriterFile(out io.Writer, cb func(w *JSONArrayWriter) error) error {
+func withJSONArrayOutWriterFile(out io.Writer, cb func(w *jsonutil.StreamEncoder) error) error {
 	return withJSONArrayOutWriter(out, cb)
 }
 
@@ -151,7 +62,7 @@ func transformCSV(in io.Reader, out io.Writer, delimiter rune) error {
 	r.ReuseRecord = true
 	r.FieldsPerRecord = -1
 
-	return withJSONArrayOutWriterFile(out, func(w *JSONArrayWriter) error {
+	return withJSONArrayOutWriterFile(out, func(w *jsonutil.StreamEncoder) error {
 		isHeader := true
 		var fields []string
 		row := map[string]interface{}{}
@@ -179,7 +90,7 @@ func transformCSV(in io.Reader, out io.Writer, delimiter rune) error {
 				row[field] = record[i]
 			}
 
-			err = w.Write(row)
+			err = w.EncodeRow(row)
 			if err != nil {
 				return err
 			}
@@ -225,7 +136,7 @@ func transformParquet(in source.ParquetFile, out io.Writer) error {
 	}
 	defer r.ReadStop()
 
-	return withJSONArrayOutWriterFile(out, func(w *JSONArrayWriter) error {
+	return withJSONArrayOutWriterFile(out, func(w *jsonutil.StreamEncoder) error {
 		size := 1000
 		var offset int64 = 0
 		for {
@@ -240,7 +151,7 @@ func transformParquet(in source.ParquetFile, out io.Writer) error {
 			}
 
 			for _, row := range rows {
-				err := w.Write(row)
+				err := w.EncodeRow(row)
 				if err != nil {
 					return err
 				}
@@ -265,7 +176,7 @@ func transformParquetFile(in string, out io.Writer) error {
 	return transformParquet(r, out)
 }
 
-func writeSheet(rows [][]string, w *JSONArrayWriter) error {
+func writeSheet(rows [][]string, w *jsonutil.StreamEncoder) error {
 	var header []string
 	isHeader := true
 
@@ -281,7 +192,7 @@ func writeSheet(rows [][]string, w *JSONArrayWriter) error {
 			row[header[i]] = cell
 		}
 
-		err := w.Write(row)
+		err := w.EncodeRow(row)
 		if err != nil {
 			return err
 		}
@@ -295,7 +206,7 @@ func transformXLSX(in *excelize.File, out io.Writer) error {
 
 	// Single sheet files get flattened into just an array, not a dict mapping sheet name to sheet contents
 	if len(sheets) == 1 {
-		return withJSONArrayOutWriterFile(out, func(w *JSONArrayWriter) error {
+		return withJSONArrayOutWriterFile(out, func(w *jsonutil.StreamEncoder) error {
 			rows, err := in.GetRows(sheets[0])
 			if err != nil {
 				return err
@@ -320,7 +231,7 @@ func transformXLSX(in *excelize.File, out io.Writer) error {
 				return err
 			}
 
-			err = withJSONArrayOutWriter(out, func(w *JSONArrayWriter) error {
+			err = withJSONArrayOutWriter(out, func(w *jsonutil.StreamEncoder) error {
 				rows, err := in.GetRows(sheet)
 				if err != nil {
 					return err
@@ -353,7 +264,7 @@ func transformOpenOfficeSheet(in *openoffice.ODSFile, out io.Writer) error {
 
 	// Single sheet files get flattened into just an array, not a dict mapping sheet name to sheet contents
 	if len(doc.Sheets) == 1 {
-		return withJSONArrayOutWriterFile(out, func(w *JSONArrayWriter) error {
+		return withJSONArrayOutWriterFile(out, func(w *jsonutil.StreamEncoder) error {
 			return writeSheet(doc.Sheets[0].Strings(), w)
 		})
 	}
@@ -373,7 +284,7 @@ func transformOpenOfficeSheet(in *openoffice.ODSFile, out io.Writer) error {
 				return err
 			}
 
-			err = withJSONArrayOutWriter(out, func(w *JSONArrayWriter) error {
+			err = withJSONArrayOutWriter(out, func(w *jsonutil.StreamEncoder) error {
 				return writeSheet(doc.Sheets[0].Strings(), w)
 			})
 			if err != nil {
@@ -556,7 +467,7 @@ var BUILTIN_REGEX = map[MimeType]*regexp.Regexp{
 
 func transformRegexp(in io.Reader, out io.Writer, re *regexp.Regexp) error {
 	scanner := bufio.NewScanner(in)
-	return withJSONArrayOutWriterFile(out, func(w *JSONArrayWriter) error {
+	return withJSONArrayOutWriterFile(out, func(w *jsonutil.StreamEncoder) error {
 		row := map[string]interface{}{}
 		for scanner.Scan() {
 			match := re.FindStringSubmatch(scanner.Text())
@@ -570,7 +481,7 @@ func transformRegexp(in io.Reader, out io.Writer, re *regexp.Regexp) error {
 				}
 			}
 
-			err := w.Write(row)
+			err := w.EncodeRow(row)
 			if err != nil {
 				return err
 			}

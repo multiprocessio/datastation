@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/multiprocessio/go-json"
+
 	"google.golang.org/api/option"
 	"google.golang.org/api/sheets/v4"
 )
@@ -28,7 +30,8 @@ func evalGoogleSheets(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, w 
 	}
 
 	fmt.Printf("%#v\n", rsp)
-	return withJSONArrayOutWriterFile(w, func(w *JSONArrayWriter) error {
+	return withJSONArrayOutWriterFile(w, func(w *jsonutil.StreamEncoder) error {
 		return nil
+		// TODO: implement! PHIL!
 	})
 }

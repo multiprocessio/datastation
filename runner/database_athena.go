@@ -5,6 +5,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/multiprocessio/go-json"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/athena"
@@ -78,7 +80,7 @@ func evalAthena(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, w io.Wri
 	ip.SetQueryExecutionId(*result.QueryExecutionId)
 
 	row := map[string]interface{}{}
-	return withJSONArrayOutWriterFile(w, func(w *JSONArrayWriter) error {
+	return withJSONArrayOutWriterFile(w, func(w *jsonutil.StreamEncoder) error {
 		first := true
 		var columns []string
 		var types []string
@@ -106,7 +108,7 @@ func evalAthena(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, w io.Wri
 						row[columns[i]] = mapAthenaType(*cell.VarCharValue, types[i])
 					}
 
-					err = w.Write(row)
+					err = w.EncodeRow(row)
 					if err != nil {
 						errC <- err
 						return false
