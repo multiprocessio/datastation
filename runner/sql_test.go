@@ -1,6 +1,7 @@
 package runner
 
 import (
+	"encoding/json"
 	"io/ioutil"
 	"os"
 	"testing"
@@ -81,6 +82,65 @@ func Test_transformDM_getPanelCalls(t *testing.T) {
 		},
 		id: " a great id",
 	})
+}
+
+func Test_transformDM_getPanel_callsWithPaths(t *testing.T) {
+	tests := []struct {
+		data       string
+		query      string
+		expColumns []column
+	}{
+
+		{
+			`{"a": [{"b": 2}, {"c": 3}]}`,
+			`SELECT * FROM DM_getPanel(0, "a")`,
+			[]column{
+				{name: "a.b", kind: "REAL"},
+				{name: "a.c", kind: "REAL"},
+			},
+		},
+		{
+			`{"a": [{"b": 2}, {"c": 3}]}`,
+			"SELECT * FROM DM_getPanel(0, 'a')",
+			[]column{
+				{name: "a.b", kind: "REAL"},
+				{name: "a.c", kind: "REAL"},
+			},
+		},
+		{
+			`[{"b": 2}, {"c": 3}]`,
+			"SELECT * FROM DM_getPanel(0)",
+			[]column{
+				{name: "b", kind: "REAL"},
+				{name: "c", kind: "REAL"},
+			},
+		},
+	}
+
+	for _, test := range tests {
+		var j interface{}
+		err := json.Unmarshal([]byte(test.data), &j)
+		assert.Nil(t, err)
+		s := GetShape("", j, len(test.data))
+		assert.Nil(t, err)
+
+		panels, query, err := transformDM_getPanelCalls(
+			test.query,
+			map[string]Shape{"0": s},
+			map[string]string{"0": " a great id 2"},
+			true,
+			quoteType{identifier: "\""},
+		)
+
+		assert.Nil(t, err)
+		assert.Equal(t, query, `SELECT * FROM "t_0"`)
+		assert.Equal(t, len(panels), 1)
+		assert.Equal(t, panels[0], panelToImport{
+			tableName: "t_0",
+			columns:   test.expColumns,
+			id:        " a great id 2",
+		})
+	}
 }
 
 func Test_postgresMangleInsert(t *testing.T) {

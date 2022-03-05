@@ -107,9 +107,10 @@ type panelToImport struct {
 	id        string
 	columns   []column
 	tableName string
+	path      string
 }
 
-var dmGetPanelRe = regexp.MustCompile(`(DM_getPanel\((?P<number>[0-9]+)\))|(DM_getPanel\((?P<singlequote>'(?:[^'\\]|\\.)*\')\))|(DM_getPanel\((?P<doublequote>"(?:[^"\\]|\\.)*\")\))`)
+var dmGetPanelRe = regexp.MustCompile(`(DM_getPanel\((?P<number>[0-9]+)(((,\s*(?P<numbersinglepath>"(?:[^"\\]|\\.)*\"))?)|(,\s*(?P<numberdoublepath>'(?:[^'\\]|\\.)*\'))?)\))|(DM_getPanel\((?P<singlequote>'(?:[^'\\]|\\.)*\'(,\s*(?P<singlepath>'(?:[^'\\]|\\.)*\'))?)\))|(DM_getPanel\((?P<doublequote>"(?:[^"\\]|\\.)*\"(,\s*(?P<doublepath>"(?:[^"\\]|\\.)*\"))?)\))`)
 
 func transformDM_getPanelCalls(
 	query string,
@@ -124,10 +125,22 @@ func transformDM_getPanelCalls(
 	query = dmGetPanelRe.ReplaceAllStringFunc(query, func(m string) string {
 		matchForSubexps := dmGetPanelRe.FindStringSubmatch(m)
 		nameOrIndex := ""
+		path := ""
 		for i, name := range dmGetPanelRe.SubexpNames() {
+			if matchForSubexps[i] == "" {
+				continue
+			}
+
 			switch name {
 			case "number":
 				nameOrIndex = matchForSubexps[i]
+			case "numberdoublepath", "numbersinglepath", "singlepath", "doublepath":
+				path = matchForSubexps[i]
+
+				// Remove quotes
+				if path != "" {
+					path = path[1 : len(path)-1]
+				}
 			case "singlequote", "doublequote":
 				nameOrIndex = matchForSubexps[i]
 
@@ -136,14 +149,27 @@ func transformDM_getPanelCalls(
 					nameOrIndex = nameOrIndex[1 : len(nameOrIndex)-1]
 				}
 			}
-
-			if nameOrIndex != "" {
-				break
-			}
 		}
 
 		s, ok := idShapeMap[nameOrIndex]
-		if !ok || !ShapeIsObjectArray(s) {
+		if !ok {
+			insideErr = makeErrNotAnArrayOfObjects(nameOrIndex)
+			return ""
+		}
+
+		sp, err := shapeAtPath(s, path)
+		if err != nil {
+			insideErr = err
+			return ""
+		}
+
+		ok = ShapeIsObjectArray(*sp)
+		if err != nil {
+			insideErr = err
+			return ""
+		}
+
+		if !ok {
 			insideErr = makeErrNotAnArrayOfObjects(nameOrIndex)
 			return ""
 		}
@@ -157,8 +183,13 @@ func transformDM_getPanelCalls(
 			}
 		}
 
-		rowShape := s.ArrayShape.Children
+		rowShape := sp.ArrayShape.Children
 		columns := sqlColumnsAndTypesFromShape(*rowShape.ObjectShape)
+		if path != "" {
+			for i := range columns {
+				columns[i].name = path + "." + columns[i].name
+			}
+		}
 		panelsToImport = append(panelsToImport, panelToImport{
 			id:        id,
 			columns:   columns,
