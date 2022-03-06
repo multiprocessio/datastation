@@ -159,8 +159,8 @@ docker exec "$scyllacontainer" cqlsh -u cassandra -p cassandra \
        -e "CREATE ROLE test WITH PASSWORD = 'test' AND LOGIN = true AND SUPERUSER = true;"
 
 # Load Mongodb documents
-for t in $(ls testdata/documents/*.json); do
-    mongosh "mongodb://test:test@localhost:27017" --eval "db.test.insertOne($(cat $t))"
-done
+#for t in $(ls testdata/documents/*.json); do
+#    mongosh "mongodb://test:test@localhost:27017" --eval "db.test.insertOne($(cat $t))"
+#done
 
 # TODO: might be worth switching to docker-compose at some point...
