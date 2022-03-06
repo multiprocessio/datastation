@@ -73,7 +73,7 @@ func evalAthena(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, w io.Wri
 	}
 
 	if *qrop.QueryExecution.Status.State != "SUCCEEDED" {
-		return edsef("Athena query unsuccessful: " + *qrop.QueryExecution.Status.State)
+		return makeErrUser(qrop.QueryExecution.Status.GoString())
 	}
 
 	var ip athena.GetQueryResultsInput

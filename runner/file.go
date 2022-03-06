@@ -43,7 +43,12 @@ func withJSONOutWriter(w io.Writer, first, last string, cb func() error) error {
 
 func withJSONArrayOutWriter(w io.Writer, cb func(w *jsonutil.StreamEncoder) error) error {
 	encoder := jsonutil.NewGoccyStreamEncoder(w, true)
-	return cb(encoder)
+	err := cb(encoder)
+	if err != nil {
+		return err
+	}
+
+	return encoder.Close()
 }
 
 func openTruncate(out string) (*os.File, error) {
