@@ -107,29 +107,29 @@ func loadJSONArrayFile(f string) (chan map[string]interface{}, error) {
 	out := make(chan map[string]interface{}, 1000)
 
 	// This doesn't seem to be faster at the moment
-	// if linuxOrMacAMD64 {
-	// 	res, err := readJSONFileSonic(fd)
-	// 	if err != nil {
-	// 		return nil, err
-	// 	}
+	if linuxOrMacAMD64 {
+		res, err := readJSONFileSonic(fd)
+		if err != nil {
+			return nil, err
+		}
 
-	// 	a, ok := res.([]interface{})
-	// 	if !ok {
-	// 		return nil, edsef("%s is not an array", f)
-	// 	}
+		a, ok := res.([]interface{})
+		if !ok {
+			return nil, edsef("%s is not an array", f)
+		}
 
-	// 	//out = make(chan map[string]interface{}, len(a))
+		//out = make(chan map[string]interface{}, len(a))
 
-	// 	go func() {
-	// 		defer close(out)
-	// 		for _, row := range a {
-	// 			rowM := row.(map[string]interface{})
-	// 			out <- rowM
-	// 		}
-	// 	}()
+		go func() {
+			defer close(out)
+			for _, row := range a {
+				rowM := row.(map[string]interface{})
+				out <- rowM
+			}
+		}()
 
-	// 	return out, nil
-	// }
+		return out, nil
+	}
 
 	bs := make([]byte, 1)
 	for {
