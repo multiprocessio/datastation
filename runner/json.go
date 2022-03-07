@@ -106,29 +106,30 @@ func loadJSONArrayFile(f string) (chan map[string]interface{}, error) {
 
 	out := make(chan map[string]interface{}, 1000)
 
-	if linuxOrMacAMD64 {
-		res, err := readJSONFileSonic(fd)
-		if err != nil {
-			return nil, err
-		}
+	// This doesn't seem to be faster at the moment
+	// if linuxOrMacAMD64 {
+	// 	res, err := readJSONFileSonic(fd)
+	// 	if err != nil {
+	// 		return nil, err
+	// 	}
 
-		a, ok := res.([]interface{})
-		if !ok {
-			return nil, edsef("%s is not an array", f)
-		}
+	// 	a, ok := res.([]interface{})
+	// 	if !ok {
+	// 		return nil, edsef("%s is not an array", f)
+	// 	}
 
-		out = make(chan map[string]interface{}, len(a))
+	// 	//out = make(chan map[string]interface{}, len(a))
 
-		go func() {
-			defer close(out)
-			for _, row := range a {
-				rowM := row.(map[string]interface{})
-				out <- rowM
-			}
-		}()
+	// 	go func() {
+	// 		defer close(out)
+	// 		for _, row := range a {
+	// 			rowM := row.(map[string]interface{})
+	// 			out <- rowM
+	// 		}
+	// 	}()
 
-		return out, nil
-	}
+	// 	return out, nil
+	// }
 
 	bs := make([]byte, 1)
 	for {
@@ -163,7 +164,7 @@ func loadJSONArrayFile(f string) (chan map[string]interface{}, error) {
 
 			out <- obj
 
-			// Copy all buffered bytes back into a new buffer
+			// Line up all buffered bytes into a new reader
 			r = io.MultiReader(dec.Buffered(), r)
 
 			// Read comma and array end marker
