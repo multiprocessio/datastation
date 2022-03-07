@@ -2,7 +2,6 @@ package runner
 
 import (
 	"encoding/base64"
-	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -353,71 +352,6 @@ func (ec EvalContext) loadJSONArrayPanel(projectId, panelId string) (chan map[st
 	return loadJSONArrayFile(f)
 }
 
-func loadJSONArrayFile(f string) (chan map[string]interface{}, error) {
-	fd, err := os.Open(f)
-	if err != nil {
-		return nil, err
-	}
-
-	bs := make([]byte, 1)
-	for {
-		_, err := fd.Read(bs)
-		if err != nil {
-			return nil, err
-		}
-
-		if bs[0] == '[' {
-			break
-		}
-	}
-
-	out := make(chan map[string]interface{}, 1)
-	go func() {
-		defer close(out)
-
-		var r io.Reader = fd
-
-		// Stream all JSON objects
-		for {
-			// Needs to be recreated each time because of buffered data
-			dec := json.NewDecoder(r)
-
-			var obj map[string]interface{}
-			err := dec.Decode(&obj)
-			if err == io.EOF {
-				return
-			}
-			if err != nil {
-				panic(err)
-			}
-
-			out <- obj
-
-			// Copy all buffered bytes back into a new buffer
-			r = io.MultiReader(dec.Buffered(), r)
-
-			// Read comma and array end marker
-			for {
-				_, err := r.Read(bs)
-				if err != nil {
-					panic(err)
-				}
-
-				if bs[0] == ',' {
-					break
-				}
-
-				// Done processing
-				if bs[0] == ']' {
-					return
-				}
-			}
-		}
-	}()
-
-	return out, nil
-}
-
 func (ec EvalContext) EvalDatabasePanel(
 	project *ProjectState,
 	pageIndex int,
@@ -557,6 +491,18 @@ func (ec EvalContext) EvalDatabasePanel(
 			return err
 		}
 
+		preparer := func(q string) (func([]interface{}) error, error) {
+			stmt, err := db.Prepare(mangleInsert(q))
+			if err != nil {
+				return nil, err
+			}
+
+			return func(values []interface{}) error {
+				_, err := stmt.Exec(values...)
+				return err
+			}, nil
+		}
+
 		wroteFirstRow := false
 		return withJSONArrayOutWriterFile(w, func(w *jsonutil.StreamEncoder) error {
 			_, err := importAndRun(
@@ -564,10 +510,7 @@ func (ec EvalContext) EvalDatabasePanel(
 					_, err := db.Exec(createTableStmt)
 					return err
 				},
-				func(insertStmt string, values []interface{}) error {
-					_, err := db.Exec(insertStmt, values...)
-					return err
-				},
+				preparer,
 				func(query string) ([]map[string]interface{}, error) {
 					rows, err := db.Queryx(query)
 					if err != nil {
@@ -592,7 +535,6 @@ func (ec EvalContext) EvalDatabasePanel(
 				query,
 				panelsToImport,
 				qt,
-				mangleInsert,
 				panelResultLoader,
 			)
 

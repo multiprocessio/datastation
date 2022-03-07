@@ -229,9 +229,8 @@ func Test_sqlIngest_BENCHMARK(t *testing.T) {
 	project.Connectors = append(project.Connectors, *connector)
 
 	// curl -LO https://s3.amazonaws.com/nyc-tlc/trip+data/yellow_tripdata_2021-04.csv
-	// dsq yellow_tripdata_2021-04.csv > yellow_tripdata_2021-04.json
-	readFile := "yellow_tripdata_2021-04.json"
-	//readFile := "../testdata/allformats/userdata.json"
+	// dsq yellow_tripdata_2021-04.csv > taxi.json
+	readFile := "taxi.json"
 
 	panelId := uuid.New().String()
 	s, err := ShapeFromFile(readFile, panelId, 10_000, 100)

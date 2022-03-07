@@ -255,40 +255,6 @@ func getObjectAtPath(obj map[string]interface{}, path string) interface{} {
 	return next
 }
 
-func formatImportQueryAndRows(
-	tableName string,
-	columns []column,
-	data []map[string]interface{},
-	qt quoteType,
-) (string, []interface{}) {
-	var columnsDDL []string
-	for _, c := range columns {
-		columnsDDL = append(columnsDDL, quote(c.name, qt.identifier))
-	}
-
-	var placeholders []string
-	var values []interface{}
-	for _, dataRow := range data {
-		var row []string
-		for _, col := range columns {
-			row = append(row, "?")
-
-			values = append(values, getObjectAtPath(dataRow, col.name))
-		}
-
-		placeholders = append(placeholders, "("+strings.Join(row, ",")+")")
-	}
-
-	t := quote(tableName, qt.identifier)
-
-	query := fmt.Sprintf("INSERT INTO %s (%s) VALUES %s;",
-		t,
-		strings.Join(columnsDDL, ", "),
-		strings.Join(placeholders, ", "))
-
-	return query, values
-}
-
 func postgresMangleInsert(stmt string) string {
 	r := regexp.MustCompile("\\?")
 	counter := 0
@@ -302,90 +268,78 @@ func defaultMangleInsert(stmt string) string {
 	return stmt
 }
 
-func chunk(c chan map[string]interface{}, size int) chan []map[string]interface{} {
-	var chunk []map[string]interface{}
+func importPanel(
+	createTable func(string) error,
+	prepare func(string) (func([]interface{}) error, error),
+	makeQuery func(string) ([]map[string]interface{}, error),
+	projectId string,
+	query string,
+	panel panelToImport,
+	qt quoteType,
+	panelResultLoader func(string, string) (chan map[string]interface{}, error),
+) error {
+	var ddlColumns []string
+	for _, c := range panel.columns {
+		ddlColumns = append(ddlColumns, quote(c.name, qt.identifier)+" "+c.kind)
+	}
 
-	out := make(chan []map[string]interface{}, 1)
+	tname := quote(panel.tableName, qt.identifier)
+	Logln("Creating temp table " + panel.tableName)
+	createQuery := fmt.Sprintf("CREATE TEMPORARY TABLE %s (%s);",
+		tname,
+		strings.Join(ddlColumns, ", "))
+	err := createTable(createQuery)
+	if err != nil {
+		return err
+	}
 
-	go func() {
-		defer close(out)
+	c, err := panelResultLoader(projectId, panel.id)
+	if err != nil {
+		return err
+	}
 
-	outer:
-		for {
-			select {
-			case next, ok := <-c:
-				if !ok {
-					break outer
-				}
-				chunk = append(chunk, next)
-			}
+	var values []string
+	for range ddlColumns {
+		values = append(values, "?")
+	}
 
-			if len(chunk) == size {
-				out <- chunk
-				chunk = nil
-			}
+	preparedStatement := fmt.Sprintf("INSERT INTO %s VALUES (%s)", tname, strings.Join(values, ","))
+
+	inserter, err := prepare(preparedStatement)
+	if err != nil {
+		return err
+	}
+	toinsert := make([]interface{}, len(panel.columns))
+
+	for row := range c {
+		for i, col := range panel.columns {
+			toinsert[i] = getObjectAtPath(row, col.name)
 		}
-
-		if len(chunk) > 0 {
-			out <- chunk
+		err = inserter(toinsert)
+		if err != nil {
+			return err
 		}
-	}()
+	}
 
-	return out
+	return nil
 }
 
 func importAndRun(
 	createTable func(string) error,
-	insert func(string, []interface{}) error,
+	prepare func(string) (func([]interface{}) error, error),
 	makeQuery func(string) ([]map[string]interface{}, error),
 	projectId string,
 	query string,
 	panelsToImport []panelToImport,
 	qt quoteType,
 	// Postgres uses $1, mysql/sqlite use ?
-	mangleInsert func(string) string,
 	panelResultLoader func(string, string) (chan map[string]interface{}, error),
 ) ([]map[string]interface{}, error) {
-	rowsIngested := 0
 	for _, panel := range panelsToImport {
-		var ddlColumns []string
-		for _, c := range panel.columns {
-			ddlColumns = append(ddlColumns, quote(c.name, qt.identifier)+" "+c.kind)
-		}
-
-		Logln("Creating temp table " + panel.tableName)
-		createQuery := fmt.Sprintf("CREATE TEMPORARY TABLE %s (%s);",
-			quote(panel.tableName, qt.identifier),
-			strings.Join(ddlColumns, ", "))
-		err := createTable(createQuery)
+		err := importPanel(createTable, prepare, makeQuery, projectId, query, panel, qt, panelResultLoader)
 		if err != nil {
 			return nil, err
 		}
-
-		c, err := panelResultLoader(projectId, panel.id)
-		if err != nil {
-			return nil, err
-		}
-
-		for resChunk := range chunk(c, 10) {
-			query, values := formatImportQueryAndRows(
-				panel.tableName,
-				panel.columns,
-				resChunk,
-				qt)
-			err = insert(mangleInsert(query), values)
-			if err != nil {
-				return nil, err
-			}
-			rowsIngested += len(resChunk)
-		}
-	}
-
-	if len(panelsToImport) > 0 {
-		Logln(
-			"Ingested %d rows in %d tables.\n",
-			rowsIngested,
-			len(panelsToImport))
 	}
 
 	return makeQuery(query)

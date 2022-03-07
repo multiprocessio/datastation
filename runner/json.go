@@ -97,3 +97,93 @@ func WriteJSONFile(file string, value interface{}) error {
 	encoder := goccy_json.NewEncoder(f)
 	return encoder.Encode(value)
 }
+
+func loadJSONArrayFile(f string) (chan map[string]interface{}, error) {
+	fd, err := os.Open(f)
+	if err != nil {
+		return nil, err
+	}
+
+	out := make(chan map[string]interface{}, 1000)
+
+	if linuxOrMacAMD64 {
+		res, err := readJSONFileSonic(fd)
+		if err != nil {
+			return nil, err
+		}
+
+		a, ok := res.([]interface{})
+		if !ok {
+			return nil, edsef("%s is not an array", f)
+		}
+
+		out = make(chan map[string]interface{}, len(a))
+
+		go func() {
+			defer close(out)
+			for _, row := range a {
+				rowM := row.(map[string]interface{})
+				out <- rowM
+			}
+		}()
+
+		return out, nil
+	}
+
+	bs := make([]byte, 1)
+	for {
+		_, err := fd.Read(bs)
+		if err != nil {
+			return nil, err
+		}
+
+		if bs[0] == '[' {
+			break
+		}
+	}
+
+	go func() {
+		defer close(out)
+
+		var r io.Reader = fd
+
+		// Stream all JSON objects
+		for {
+			// Needs to be recreated each time because of buffered data
+			dec := goccy_json.NewDecoder(r)
+
+			var obj map[string]interface{}
+			err := dec.Decode(&obj)
+			if err == io.EOF {
+				return
+			}
+			if err != nil {
+				panic(err)
+			}
+
+			out <- obj
+
+			// Copy all buffered bytes back into a new buffer
+			r = io.MultiReader(dec.Buffered(), r)
+
+			// Read comma and array end marker
+			for {
+				_, err := r.Read(bs)
+				if err != nil {
+					panic(err)
+				}
+
+				if bs[0] == ',' {
+					break
+				}
+
+				// Done processing
+				if bs[0] == ']' {
+					return
+				}
+			}
+		}
+	}()
+
+	return out, nil
+}

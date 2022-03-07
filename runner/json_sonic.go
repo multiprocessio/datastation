@@ -1,3 +1,4 @@
+//go:build (darwin && amd64) || (linux && amd64)
 // +build darwin,amd64 linux,amd64
 
 package runner
@@ -15,4 +16,15 @@ func writeJSONFileSonic(f io.Writer, value *interface{}) error {
 	}
 
 	return writeAll(f, res)
+}
+
+func readJSONFileSonic(f io.Reader) (interface{}, error) {
+	bs, err := io.ReadAll(f)
+	if err != nil {
+		return nil, err
+	}
+
+	var res interface{}
+	err = sonic.Unmarshal(bs, &res)
+	return res, err
 }
