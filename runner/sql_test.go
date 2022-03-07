@@ -206,6 +206,117 @@ func Test_getObjectAtPath(t *testing.T) {
 	}
 }
 
+func Test_sqlIngest_e2e(t *testing.T) {
+	tests := []struct {
+		json      string
+		expResult []interface{}
+	}{
+		{
+			`[{"a": 1},{"b": 2}]`,
+			[]interface{}{
+				map[string]interface{}{"a": float64(1), "b": nil},
+				map[string]interface{}{"a": nil, "b": float64(2)},
+			},
+		},
+		{
+			`[{"a": 1},{"b": 2}, {"a": 1},{"b": 2}, {"a": 1},{"b": 2}, {"a": 1},{"b": 2}, {"a": 1},{"b": 2}]`,
+			[]interface{}{
+				map[string]interface{}{"a": float64(1), "b": nil},
+				map[string]interface{}{"a": float64(1), "b": nil},
+				map[string]interface{}{"a": float64(1), "b": nil},
+				map[string]interface{}{"a": float64(1), "b": nil},
+				map[string]interface{}{"a": float64(1), "b": nil},
+				map[string]interface{}{"a": nil, "b": float64(2)},
+				map[string]interface{}{"a": nil, "b": float64(2)},
+				map[string]interface{}{"a": nil, "b": float64(2)},
+				map[string]interface{}{"a": nil, "b": float64(2)},
+				map[string]interface{}{"a": nil, "b": float64(2)},
+			},
+		},
+		{
+			`[{"a": 1},{"b": 2}, {"a": 1},{"b": 2}, {"a": 1},{"b": 2}, {"a": 1},{"b": 2}, {"a": 1},{"b": 2},{"b": 2}]`,
+			[]interface{}{
+				map[string]interface{}{"a": float64(1), "b": nil},
+				map[string]interface{}{"a": float64(1), "b": nil},
+				map[string]interface{}{"a": float64(1), "b": nil},
+				map[string]interface{}{"a": float64(1), "b": nil},
+				map[string]interface{}{"a": float64(1), "b": nil},
+				map[string]interface{}{"a": nil, "b": float64(2)},
+				map[string]interface{}{"a": nil, "b": float64(2)},
+				map[string]interface{}{"a": nil, "b": float64(2)},
+				map[string]interface{}{"a": nil, "b": float64(2)},
+				map[string]interface{}{"a": nil, "b": float64(2)},
+				map[string]interface{}{"a": nil, "b": float64(2)},
+			},
+		},
+	}
+
+	projectTmp, err := ioutil.TempFile("", "dsq-project")
+	assert.Nil(t, err)
+	defer os.Remove(projectTmp.Name())
+
+	for _, test := range tests {
+		project := &ProjectState{
+			Id: projectTmp.Name(),
+			Pages: []ProjectPage{
+				{
+					Panels: nil,
+				},
+			},
+		}
+
+		connector, err := MakeTmpSQLiteConnector()
+		assert.Nil(t, err)
+		project.Connectors = append(project.Connectors, *connector)
+
+		readFile, err := ioutil.TempFile("", "infile")
+		assert.Nil(t, err)
+		defer os.Remove(readFile.Name())
+
+		readFile.WriteString(test.json)
+
+		panelId := uuid.New().String()
+		s, err := ShapeFromFile(readFile.Name(), panelId, 10_000, 100)
+		assert.Nil(t, err)
+		project.Pages[0].Panels = append(project.Pages[0].Panels, PanelInfo{
+			ResultMeta: PanelResult{
+				Shape: *s,
+			},
+			Id:   panelId,
+			Name: uuid.New().String(),
+		})
+
+		panel2 := &PanelInfo{
+			Type:    DatabasePanel,
+			Content: "SELECT * FROM DM_getPanel(0) ORDER BY a DESC",
+			Id:      uuid.New().String(),
+			Name:    uuid.New().String(),
+			DatabasePanelInfo: &DatabasePanelInfo{
+				Database: DatabasePanelInfoDatabase{
+					ConnectorId: connector.Id,
+				},
+			},
+		}
+
+		ec := EvalContext{}
+		err = ec.EvalDatabasePanel(project, 0, panel2, func(projectId, panelId string) (chan map[string]interface{}, error) {
+			return loadJSONArrayFile(readFile.Name())
+		})
+		assert.Nil(t, err)
+
+		f := ec.GetPanelResultsFile(project.Id, panel2.Id)
+		a, err := loadJSONArrayFile(f)
+		var pieces []interface{}
+		for r := range a {
+			pieces = append(pieces, r)
+		}
+		assert.Nil(t, err)
+		assert.Equal(t, test.expResult, pieces)
+	}
+}
+
+// BENCHMARKS
+
 func Test_sqlIngest_BENCHMARK(t *testing.T) {
 	if os.Getenv("BENCHMARK") != "true" {
 		return

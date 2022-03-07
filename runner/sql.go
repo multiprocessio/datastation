@@ -225,14 +225,15 @@ func getObjectAtPath(obj map[string]interface{}, path string) interface{} {
 				continue
 			}
 
-			n, ok := next[string(part)]
-			if !ok {
-				// Should not be possible
-				panic(fmt.Sprintf("Bad path (%s) at part (%s)", path, string(part)))
+			n := next[string(part)]
+			if n == nil {
+				// Some objects may have this path, some may not
+				return nil
 			}
+			var ok bool
 			if next, ok = n.(map[string]interface{}); !ok {
-				// Should not be possible
-				panic(fmt.Sprintf("Path (%s) enters non-object at part (%s)", path, string(part)))
+				// Some objects may have this path, some may not
+				return nil
 			}
 
 			part = nil
@@ -243,13 +244,7 @@ func getObjectAtPath(obj map[string]interface{}, path string) interface{} {
 	}
 
 	if len(part) > 0 {
-		n, ok := next[string(part)]
-		if !ok {
-			// Should not be possible
-			panic(fmt.Sprintf("Bad path (%s) at part (%s)", path, string(part)))
-		}
-
-		return n
+		return next[string(part)]
 	}
 
 	return next
@@ -361,9 +356,9 @@ func importPanel(
 
 	nLeftovers := 0
 	for rows := range chunk(c, chunkSize) {
-		for _, row := range rows {
-			for i, col := range panel.columns {
-				toinsert[i] = getObjectAtPath(row, col.name)
+		for i, row := range rows {
+			for j, col := range panel.columns {
+				toinsert[i*len(ddlColumns)+j] = getObjectAtPath(row, col.name)
 			}
 		}
 

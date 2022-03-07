@@ -118,8 +118,6 @@ func loadJSONArrayFile(f string) (chan map[string]interface{}, error) {
 			return nil, edsef("%s is not an array", f)
 		}
 
-		//out = make(chan map[string]interface{}, len(a))
-
 		go func() {
 			defer close(out)
 			for _, row := range a {
