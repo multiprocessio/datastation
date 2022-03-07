@@ -353,9 +353,9 @@ func importPanel(
 		return err
 	}
 
-	toinsert := make([]interface{}, len(panel.columns) * chunkSize)
+	toinsert := make([]interface{}, len(panel.columns)*chunkSize)
 
-	for rows := range chunk(c, 10) {
+	for rows := range chunk(c, chunkSize) {
 		for _, row := range rows {
 			for i, col := range panel.columns {
 				toinsert[i] = getObjectAtPath(row, col.name)
