@@ -22,45 +22,6 @@ import (
 
 var preferredParallelism = runtime.NumCPU() * 2
 
-func withJSONOutWriter(w io.Writer, first, last string, cb func() error) error {
-	_, err := w.Write([]byte(first))
-	if err != nil {
-		return edsef("Failed to write JSON start marker: %s", err)
-	}
-
-	err = cb()
-	if err != nil {
-		return err
-	}
-
-	_, err = w.Write([]byte(last))
-	if err != nil {
-		return edsef("Failed to write JSON end marker: %s", err)
-	}
-
-	return nil
-}
-
-func withJSONArrayOutWriter(w io.Writer, cb func(w *jsonutil.StreamEncoder) error) error {
-	encoder := jsonutil.NewGoccyStreamEncoder(w, true)
-	err := cb(encoder)
-	if err != nil {
-		return err
-	}
-
-	return encoder.Close()
-}
-
-func openTruncate(out string) (*os.File, error) {
-	base := filepath.Dir(out)
-	_ = os.Mkdir(base, os.ModePerm)
-	return os.OpenFile(out, os.O_TRUNC|os.O_WRONLY|os.O_CREATE, os.ModePerm)
-}
-
-func withJSONArrayOutWriterFile(out io.Writer, cb func(w *jsonutil.StreamEncoder) error) error {
-	return withJSONArrayOutWriter(out, cb)
-}
-
 func transformCSV(in io.Reader, out io.Writer, delimiter rune) error {
 	r := csv.NewReader(in)
 	r.Comma = delimiter

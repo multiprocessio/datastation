@@ -464,6 +464,53 @@ for (const subprocess of RUNNERS) {
     }, 15_000);
   });
 
+  describe('basic google sheets tests', () => {
+    test(`returns all results`, async () => {
+      if (process.platform !== 'linux') {
+        return;
+      }
+
+      const connectors = [
+        new DatabaseConnectorInfo({
+          type: 'google-sheets',
+          apiKey_encrypt: new Encrypt(process.env.BIGQUERY_TOKEN),
+        }),
+      ];
+      const dp = new DatabasePanelInfo({
+        table: '1osiz0yumwHxfovIAIYTpf5ozDapQzIHv_2jk4P2AvZg',
+      });
+      dp.database.connectorId = connectors[0].id;
+      dp.content = '';
+
+      let finished = false;
+      const panels = [dp];
+      await withSavedPanels(
+        panels,
+        async (project) => {
+          const panelValueBuffer = fs.readFileSync(
+            getProjectResultsFile(project.projectName) + dp.id
+          );
+
+          const v = JSON.parse(panelValueBuffer.toString());
+          expect(v).toStrictEqual([
+            { age: 52, name: 'Emma' },
+            { age: 50, name: 'Karl' },
+            { age: 43, name: 'Garry' },
+            { age: 41, name: 'Nile' },
+            { age: 39, name: 'Mina' },
+          ]);
+
+          finished = true;
+        },
+        { evalPanels: true, connectors, subprocessName: subprocess }
+      );
+
+      if (!finished) {
+        throw new Error('Callback did not finish');
+      }
+    }, 15_000);
+  });
+
   describe('basic airtable tests', () => {
     const terrenceSample = {
       ' Name ': 'Dr. Terrence Metz',

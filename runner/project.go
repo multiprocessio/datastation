@@ -1,8 +1,6 @@
 package runner
 
 import (
-	"encoding/json"
-	"io"
 	"os"
 	"path"
 	"path/filepath"
@@ -12,33 +10,6 @@ import (
 var HOME, _ = os.UserHomeDir()
 var DEFAULT_FS_BASE = path.Join(HOME, "DataStationProjects")
 var CONFIG_FS_BASE = DEFAULT_FS_BASE
-
-func readJSONFileInto(file string, into interface{}) error {
-	f, err := os.Open(file)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-
-	decoder := json.NewDecoder(f)
-	err = decoder.Decode(into)
-	if err == io.EOF {
-		return edsef("File is empty")
-	}
-
-	return err
-}
-
-func WriteJSONFile(file string, value interface{}) error {
-	f, err := openTruncate(file)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-
-	encoder := json.NewEncoder(f)
-	return encoder.Encode(value)
-}
 
 func (ec EvalContext) getProjectFile(projectId string) string {
 	ext := ".dsproj"
