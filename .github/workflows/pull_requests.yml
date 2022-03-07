@@ -37,6 +37,9 @@ jobs:
     - run: yarn build-test-runner
     - run: yarn test --detectOpenHandles --forceExit --verbose
       env:
+        AIRTABLE_TOKEN: ${{ secrets.AIRTABLE_TOKEN }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         BIGQUERY_TOKEN: ${{ secrets.BIGQUERY_TOKEN }}
         SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER }}
         SNOWFLAKE_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}
