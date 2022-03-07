@@ -4,7 +4,6 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"runtime"
 
 	"github.com/multiprocessio/go-json"
 
@@ -68,8 +67,6 @@ func readJSONFileInto(file string, into interface{}) error {
 	return err
 }
 
-const linuxOrMacAMD64 = (runtime.GOOS == "darwin" || runtime.GOOS == "linux") && runtime.GOARCH == "amd64"
-
 func writeAll(w io.Writer, bs []byte) error {
 	for len(bs) > 0 {
 		n, err := w.Write(bs)
@@ -90,43 +87,16 @@ func WriteJSONFile(file string, value interface{}) error {
 	}
 	defer f.Close()
 
-	if linuxOrMacAMD64 {
-		return writeJSONFileSonic(f, &value)
-	}
-
 	encoder := goccy_json.NewEncoder(f)
 	return encoder.Encode(value)
 }
 
 func loadJSONArrayFile(f string) (chan map[string]interface{}, error) {
+	out := make(chan map[string]interface{}, 1000)
+
 	fd, err := os.Open(f)
 	if err != nil {
 		return nil, err
-	}
-
-	out := make(chan map[string]interface{}, 1000)
-
-	// This doesn't seem to be faster at the moment
-	if linuxOrMacAMD64 {
-		res, err := readJSONFileSonic(fd)
-		if err != nil {
-			return nil, err
-		}
-
-		a, ok := res.([]interface{})
-		if !ok {
-			return nil, edsef("%s is not an array", f)
-		}
-
-		go func() {
-			defer close(out)
-			for _, row := range a {
-				rowM := row.(map[string]interface{})
-				out <- rowM
-			}
-		}()
-
-		return out, nil
 	}
 
 	bs := make([]byte, 1)
@@ -142,6 +112,7 @@ func loadJSONArrayFile(f string) (chan map[string]interface{}, error) {
 	}
 
 	go func() {
+		defer fd.Close()
 		defer close(out)
 
 		var r io.Reader = fd

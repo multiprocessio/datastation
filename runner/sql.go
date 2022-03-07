@@ -344,53 +344,67 @@ func importPanel(
 		return err
 	}
 
-	chunkSize := 10
-	preparedStatement := makePreparedStatement(tname, len(ddlColumns), chunkSize)
-	inserter, closer, err := prepare(preparedStatement)
-	if err != nil {
-		return err
-	}
-
 	// Preallocated this makes a 4s difference.
+	chunkSize := 10
 	toinsert := make([]interface{}, chunkSize*len(ddlColumns))
 
-	nLeftovers := 0
-	for rows := range chunk(c, chunkSize) {
-		for i, row := range rows {
-			for j, col := range panel.columns {
-				toinsert[i*len(ddlColumns)+j] = getObjectAtPath(row, col.name)
+	chunks := chunk(c, chunkSize)
+newprepare:
+	for {
+		nWritten := 0
+		preparedStatement := makePreparedStatement(tname, len(ddlColumns), chunkSize)
+		inserter, closer, err := prepare(preparedStatement)
+		if err != nil {
+			return err
+		}
+
+		nLeftovers := 0
+		for rows := range chunks {
+			nWritten += len(rows)
+
+			for i, row := range rows {
+				for j, col := range panel.columns {
+					toinsert[i*len(ddlColumns)+j] = getObjectAtPath(row, col.name)
+				}
+			}
+
+			// This likely only happens at the end where the last chunk won't always be chunkSize.
+			if len(rows) < chunkSize {
+				nLeftovers = len(rows)
+				break
+			}
+
+			err = inserter(toinsert)
+			if err != nil {
+				return err
+			}
+
+			// Start a new prepared statement every so often
+			if nWritten > 100_000 {
+				closer()
+				continue newprepare
 			}
 		}
 
-		// This likely only happens at the end where the last chunk won't always be chunkSize.
-		if len(rows) < chunkSize {
-			nLeftovers = len(rows)
-			break
+		// Prepared statement must be closed whether or not there are leftovers
+		// Must be closed before leftovers if there are leftovers
+		closer()
+
+		// Handle leftovers that are fewer than chunkSize
+		if nLeftovers > 0 {
+			stmt := makePreparedStatement(tname, len(ddlColumns), nLeftovers)
+			inserter, closer, err = prepare(stmt)
+			if err != nil {
+				return err
+			}
+
+			defer closer()
+			// Very important to slice since toinsert is preallocated it may have garbage at the end.
+			return inserter(toinsert[:nLeftovers*len(ddlColumns)])
 		}
 
-		err = inserter(toinsert)
-		if err != nil {
-			return err
-		}
+		return nil
 	}
-
-	// Prepared statement must be closed whether or not there are leftovers
-	closer()
-
-	// Handle leftovers that are fewer than chunkSize
-	if nLeftovers > 0 {
-		stmt := makePreparedStatement(tname, len(ddlColumns), nLeftovers)
-		inserter, closer, err = prepare(stmt)
-		if err != nil {
-			return err
-		}
-
-		defer closer()
-		// Very important to slice since toinsert is preallocated it may have garbage at the end.
-		return inserter(toinsert[:nLeftovers*len(ddlColumns)])
-	}
-
-	return nil
 }
 
 func importAndRun(
