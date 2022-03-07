@@ -356,13 +356,14 @@ func importPanel(
 		return err
 	}
 
-	var toinsert []interface{}
+	// Preallocated this makes a 4s difference.
+	toinsert := make([]interface{}, chunkSize*len(ddlColumns))
 
 	nLeftovers := 0
 	for rows := range chunk(c, chunkSize) {
 		for _, row := range rows {
-			for _, col := range panel.columns {
-				toinsert = append(toinsert, getObjectAtPath(row, col.name))
+			for i, col := range panel.columns {
+				toinsert[i] = getObjectAtPath(row, col.name)
 			}
 		}
 
@@ -376,8 +377,6 @@ func importPanel(
 		if err != nil {
 			return err
 		}
-
-		toinsert = nil
 	}
 
 	// Prepared statement must be closed whether or not there are leftovers
@@ -392,7 +391,8 @@ func importPanel(
 		}
 
 		defer closer()
-		return inserter(toinsert)
+		// Very important to slice since toinsert is preallocated it may have garbage at the end.
+		return inserter(toinsert[:nLeftovers*len(ddlColumns)])
 	}
 
 	return nil
