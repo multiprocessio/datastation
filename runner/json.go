@@ -8,7 +8,6 @@ import (
 
 	"github.com/multiprocessio/go-json"
 
-	"github.com/bytedance/sonic"
 	goccy_json "github.com/goccy/go-json"
 )
 
@@ -92,12 +91,7 @@ func WriteJSONFile(file string, value interface{}) error {
 	defer f.Close()
 
 	if linuxOrMacAMD64 {
-		res, err := sonic.Marshal(&value)
-		if err != nil {
-			return err
-		}
-
-		return writeAll(f, res)
+		return writeJSONFileSonic(f, &value)
 	}
 
 	encoder := goccy_json.NewEncoder(f)
