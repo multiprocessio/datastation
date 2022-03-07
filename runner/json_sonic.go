@@ -1,5 +1,4 @@
-// +build linux darwin
-// +build amd64
+// +build darwin,amd64 linux,amd64
 
 package runner
 
