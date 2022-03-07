@@ -300,9 +300,28 @@ func chunk(c chan map[string]interface{}, size int) chan []map[string]interface{
 	return out
 }
 
+func makePreparedStatement(tname string, nColumns, chunkSize int) string {
+	var values []string
+
+	for i := 0; i < chunkSize; i++ {
+		row := "("
+		for j := 0; j < nColumns; j++ {
+			if j > 0 {
+				row += ","
+			}
+
+			row += "?"
+		}
+		row += ")"
+		values = append(values, row)
+	}
+
+	return fmt.Sprintf("INSERT INTO %s VALUES %s", tname, strings.Join(values, ", "))
+}
+
 func importPanel(
 	createTable func(string) error,
-	prepare func(string) (func([]interface{}) error, error),
+	prepare func(string) (func([]interface{}) error, func(), error),
 	makeQuery func(string) ([]map[string]interface{}, error),
 	projectId string,
 	query string,
@@ -330,41 +349,50 @@ func importPanel(
 		return err
 	}
 
-	var values []string
-
 	chunkSize := 10
-	for i := 0; i < chunkSize; i++ {
-		row := "("
-		for j := range ddlColumns {
-			if j > 0 {
-				row += ","
-			}
-
-			row += "?"
-		}
-		row += ")"
-		values = append(values, row)
-	}
-
-	preparedStatement := fmt.Sprintf("INSERT INTO %s VALUES %s", tname, strings.Join(values, ", "))
-
-	inserter, err := prepare(preparedStatement)
+	preparedStatement := makePreparedStatement(tname, len(ddlColumns), chunkSize)
+	inserter, closer, err := prepare(preparedStatement)
 	if err != nil {
 		return err
 	}
 
-	toinsert := make([]interface{}, len(panel.columns)*chunkSize)
+	var toinsert []interface{}
 
+	nLeftovers := 0
 	for rows := range chunk(c, chunkSize) {
 		for _, row := range rows {
-			for i, col := range panel.columns {
-				toinsert[i] = getObjectAtPath(row, col.name)
+			for _, col := range panel.columns {
+				toinsert = append(toinsert, getObjectAtPath(row, col.name))
 			}
 		}
+
+		// This likely only happens at the end where the last chunk won't always be chunkSize.
+		if len(rows) < chunkSize {
+			nLeftovers = len(rows)
+			break
+		}
+
 		err = inserter(toinsert)
 		if err != nil {
 			return err
 		}
+
+		toinsert = nil
+	}
+
+	// Prepared statement must be closed whether or not there are leftovers
+	closer()
+
+	// Handle leftovers that are fewer than chunkSize
+	if nLeftovers > 0 {
+		stmt := makePreparedStatement(tname, len(ddlColumns), nLeftovers)
+		inserter, closer, err = prepare(stmt)
+		if err != nil {
+			return err
+		}
+
+		defer closer()
+		return inserter(toinsert)
 	}
 
 	return nil
@@ -372,7 +400,7 @@ func importPanel(
 
 func importAndRun(
 	createTable func(string) error,
-	prepare func(string) (func([]interface{}) error, error),
+	prepare func(string) (func([]interface{}) error, func(), error),
 	makeQuery func(string) ([]map[string]interface{}, error),
 	projectId string,
 	query string,

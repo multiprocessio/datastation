@@ -491,16 +491,18 @@ func (ec EvalContext) EvalDatabasePanel(
 			return err
 		}
 
-		preparer := func(q string) (func([]interface{}) error, error) {
+		preparer := func(q string) (func([]interface{}) error, func(), error) {
 			stmt, err := db.Prepare(mangleInsert(q))
 			if err != nil {
-				return nil, err
+				return nil, nil, err
 			}
 
 			return func(values []interface{}) error {
-				_, err := stmt.Exec(values...)
-				return err
-			}, nil
+					_, err := stmt.Exec(values...)
+					return err
+				}, func() {
+					stmt.Close()
+				}, nil
 		}
 
 		wroteFirstRow := false
