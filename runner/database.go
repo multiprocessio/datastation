@@ -373,8 +373,11 @@ func (ec EvalContext) EvalDatabasePanel(
 
 	dbInfo := connector.Database
 
-	// Only Elasticsearch is ok with an empty query, I think.
-	if panel.Content == "" && dbInfo.Type != ElasticsearchDatabase && dbInfo.Type != AirtableDatabase {
+	// A few database types are cool with empty queries
+	if panel.Content == "" &&
+		dbInfo.Type != ElasticsearchDatabase &&
+		dbInfo.Type != AirtableDatabase &&
+		dbInfo.Type != GoogleSheetsDatabase {
 		return edsef("Expected query, got empty query.")
 	}
 
