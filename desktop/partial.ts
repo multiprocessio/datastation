@@ -2,6 +2,7 @@ import fs from 'fs';
 import { preview } from 'preview';
 import { shape } from 'shape';
 import { NoResultError } from '../shared/errors';
+import * as log from '../shared/log';
 
 export function parsePartialJSONFile(
   file: string,
@@ -18,7 +19,13 @@ export function parsePartialJSONFile(
 
   if (size < maxBytesToRead) {
     const f = fs.readFileSync(file).toString();
-    const value = JSON.parse(f);
+    let value: any = null;
+    try {
+      value = JSON.parse(f);
+    } catch (e) {
+      log.info(e);
+      throw new Error('Could not parse JSON: ' + f);
+    }
     return {
       size,
       arrayCount: Array.isArray(value) ? value.length : null,
