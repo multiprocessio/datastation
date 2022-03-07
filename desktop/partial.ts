@@ -2,7 +2,7 @@ import fs from 'fs';
 import { preview } from 'preview';
 import { shape } from 'shape';
 import { NoResultError } from '../shared/errors';
-import * as log from '../shared/log';
+import log from '../shared/log';
 
 export function parsePartialJSONFile(
   file: string,
