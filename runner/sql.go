@@ -268,6 +268,38 @@ func defaultMangleInsert(stmt string) string {
 	return stmt
 }
 
+func chunk(c chan map[string]interface{}, size int) chan []map[string]interface{} {
+	var chunk []map[string]interface{}
+
+	out := make(chan []map[string]interface{}, 1)
+
+	go func() {
+		defer close(out)
+
+	outer:
+		for {
+			select {
+			case next, ok := <-c:
+				if !ok {
+					break outer
+				}
+				chunk = append(chunk, next)
+			}
+
+			if len(chunk) == size {
+				out <- chunk
+				chunk = nil
+			}
+		}
+
+		if len(chunk) > 0 {
+			out <- chunk
+		}
+	}()
+
+	return out
+}
+
 func importPanel(
 	createTable func(string) error,
 	prepare func(string) (func([]interface{}) error, error),
@@ -299,21 +331,35 @@ func importPanel(
 	}
 
 	var values []string
-	for range ddlColumns {
-		values = append(values, "?")
+
+	chunkSize := 10
+	for i := 0; i < chunkSize; i++ {
+		row := "("
+		for j := range ddlColumns {
+			if j > 0 {
+				row += ","
+			}
+
+			row += "?"
+		}
+		row += ")"
+		values = append(values, row)
 	}
 
-	preparedStatement := fmt.Sprintf("INSERT INTO %s VALUES (%s)", tname, strings.Join(values, ","))
+	preparedStatement := fmt.Sprintf("INSERT INTO %s VALUES %s", tname, strings.Join(values, ", "))
 
 	inserter, err := prepare(preparedStatement)
 	if err != nil {
 		return err
 	}
-	toinsert := make([]interface{}, len(panel.columns))
 
-	for row := range c {
-		for i, col := range panel.columns {
-			toinsert[i] = getObjectAtPath(row, col.name)
+	toinsert := make([]interface{}, len(panel.columns) * chunkSize)
+
+	for rows := range chunk(c, 10) {
+		for _, row := range rows {
+			for i, col := range panel.columns {
+				toinsert[i] = getObjectAtPath(row, col.name)
+			}
 		}
 		err = inserter(toinsert)
 		if err != nil {
