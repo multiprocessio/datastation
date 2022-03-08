@@ -31,17 +31,29 @@ func (s *Shape) UnmarshalJSON(data []byte) error {
 	var m map[string]interface{}
 	err := json.Unmarshal(data, &m)
 	if err != nil {
-		return err
+		// If these every go bad just try to reset rather than
+		// crashing since there's no way to recover this.
+		Logln("Bad shape (%s): %s", err, string(data))
+		s.Kind = UnknownKind
+		return nil
 	}
 
 	k, ok := m["kind"]
 	if !ok {
-		return edsef(`Missing required key: "kind"`)
+		// If these every go bad just try to reset rather than
+		// crashing since there's no way to recover this.
+		Logln("Missing required key 'kind': %s", string(data))
+		s.Kind = UnknownKind
+		return nil
 	}
 
 	ks, ok := k.(string)
 	if !ok {
-		return edsef(`Invalid kind, expected string got: "%v"`, k)
+		// If these every go bad just try to reset rather than
+		// crashing since there's no way to recover this.
+		Logln("Invalid 'kind', expected string: %s", string(data))
+		s.Kind = UnknownKind
+		return nil
 	}
 
 	s.Kind = ShapeKind(ks)
@@ -62,7 +74,11 @@ func (s *Shape) UnmarshalJSON(data []byte) error {
 		return nil
 	}
 
-	return edsef(`Invalid kind: "%s"`, ks)
+	// If these every go bad just try to reset rather than
+	// crashing since there's no way to recover this.
+	Logln("Invalid 'kind': %s", string(data))
+	s.Kind = UnknownKind
+	return nil
 }
 
 type ScalarName string
