@@ -77,7 +77,7 @@ func evalGoogleSheets(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, w 
 	sheetNames := map[string]string{}
 	return withJSONOutWriter(w, "{", "}", func() error {
 		for i, sheet := range sheets {
-			if i == 0 {
+			if i > 0 {
 				_, err := w.Write([]byte(",\n"))
 				if err != nil {
 					return err
