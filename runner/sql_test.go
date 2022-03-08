@@ -95,16 +95,16 @@ func Test_transformDM_getPanel_callsWithPaths(t *testing.T) {
 			`{"a": [{"b": 2}, {"c": 3}]}`,
 			`SELECT * FROM DM_getPanel(0, "a")`,
 			[]column{
-				{name: "a.b", kind: "REAL"},
-				{name: "a.c", kind: "REAL"},
+				{name: "b", kind: "REAL"},
+				{name: "c", kind: "REAL"},
 			},
 		},
 		{
 			`{"a": [{"b": 2}, {"c": 3}]}`,
 			"SELECT * FROM DM_getPanel(0, 'a')",
 			[]column{
-				{name: "a.b", kind: "REAL"},
-				{name: "a.c", kind: "REAL"},
+				{name: "b", kind: "REAL"},
+				{name: "c", kind: "REAL"},
 			},
 		},
 		{
