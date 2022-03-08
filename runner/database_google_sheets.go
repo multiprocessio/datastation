@@ -59,7 +59,7 @@ func evalGoogleSheets(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, w 
 		return edsef("Unable to retrieve Sheets client: %v", err)
 	}
 
-	rsp, err := srv.Spreadsheets.Get(panel.Database.Table).IncludeGridDate(true).Do()
+	rsp, err := srv.Spreadsheets.Get(panel.Database.Table).Do()
 	if err != nil {
 		return makeErrUser(err.Error())
 	}
