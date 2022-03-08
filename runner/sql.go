@@ -185,11 +185,6 @@ func transformDM_getPanelCalls(
 
 		rowShape := sp.ArrayShape.Children
 		columns := sqlColumnsAndTypesFromShape(*rowShape.ObjectShape)
-		if path != "" {
-			for i := range columns {
-				columns[i].name = path + "." + columns[i].name
-			}
-		}
 		panelsToImport = append(panelsToImport, panelToImport{
 			id:        id,
 			columns:   columns,
