@@ -66,7 +66,13 @@ def lex_command(command):
                 line.append(token)
                 token = ''
             i += 1 # Skip first "
-            while command[i] != '"':
+            while True:
+                if command[i] == '"':
+                    if i > 0 and command[i-1] == '\\':
+                        token = token[:-1] + command[i]
+                        i += 1
+                        continue
+                    break
                 token += command[i]
                 i += 1
             i += 1 # Skip last "
@@ -108,6 +114,13 @@ def quote_line(line, join=True, show=False):
 
 
 def eval_line(line):
+    if line[0] == 'render':
+        with open(line[1]) as r:
+            _in = r.read()
+        out = _in.format(**BUILTIN_VARIABLES, **os.environ)    
+        with open(line[2], 'w') as w:
+            w.write(out)
+        return
     if line[0] == 'setenv':
         os.environ[line[1]] = line[2]
         quote_line(line, show=True)
