@@ -184,7 +184,7 @@ func transformXLSX(in *excelize.File, out io.Writer) error {
 
 	return withJSONOutWriter(out, "{", "}", func() error {
 		for i, sheet := range sheets {
-			if i == 0 {
+			if i > 0 {
 				_, err := out.Write([]byte(",\n"))
 				if err != nil {
 					return err

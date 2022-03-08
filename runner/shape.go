@@ -364,8 +364,14 @@ func shapeAtPath(s Shape, path string) (*Shape, error) {
 	return &s, nil
 }
 
-const DefaultShapeMaxBytesToRead = 100_000
+const DefaultShapeMaxBytesToRead = 1_000_000 * 10 // 10 MB
 
+// This has a real problem for data structures like:
+// {
+//   "a": [... more than 1MB of data ...],
+//   "b": [...whatever...]
+// }
+// any keys after the first one will never be seen
 func ShapeFromFile(file, id string, maxBytesToRead int, sampleSize int) (*Shape, error) {
 	fd, err := os.Open(file)
 	if err != nil {
