@@ -32,7 +32,7 @@ func withJSONOutWriter(w io.Writer, first, last string, cb func() error) error {
 }
 
 func withJSONArrayOutWriter(w io.Writer, cb func(w *jsonutil.StreamEncoder) error) error {
-	encoder := jsonutil.NewStreamEncoder(w, goccy_json.Marshal, true)
+	encoder := jsonutil.NewStreamEncoder(w, true)
 	err := cb(encoder)
 	if err != nil {
 		return err
