@@ -3,17 +3,15 @@ package runner
 import (
 	"bufio"
 	"encoding/csv"
-	"encoding/json"
 	"io"
 	"os"
 	"os/user"
 	"path/filepath"
 	"regexp"
 	"runtime"
-	"sort"
-	"strconv"
 	"strings"
 
+	"github.com/multiprocessio/go-json"
 	"github.com/multiprocessio/go-openoffice"
 
 	"github.com/xitongsys/parquet-go-source/local"
@@ -24,138 +22,13 @@ import (
 
 var preferredParallelism = runtime.NumCPU() * 2
 
-type JSONArrayWriter struct {
-	w              io.Writer
-	first          bool
-	columns        []string
-	columnsEscaped [][]byte
-	isMap          bool
-}
-
-func newJSONArrayWriter(w io.Writer) *JSONArrayWriter {
-	return &JSONArrayWriter{w, true, nil, nil, false}
-}
-
-var (
-	COMMA    = []byte(",")
-	COMMA_NL = []byte(",\n")
-	OPEN     = []byte("{")
-	CLOSE    = []byte("}")
-)
-
-func (j *JSONArrayWriter) Write(row interface{}) error {
-	if !j.first {
-		_, err := j.w.Write(COMMA_NL)
-		if err != nil {
-			return edsef("Failed to write JSON delimiter: %s", err)
-		}
-	} else {
-		var r map[string]interface{}
-		r, j.isMap = row.(map[string]interface{})
-
-		if j.isMap {
-			for k := range r {
-				j.columns = append(j.columns, k)
-			}
-
-			sort.Strings(j.columns)
-
-			for _, col := range j.columns {
-				j.columnsEscaped = append(j.columnsEscaped, []byte(strconv.QuoteToASCII(col)+`:`))
-			}
-		}
-	}
-
-	// The Go JSON encoder spends a lot of time just ordering keys
-	// so it's actually a lot faster to define the keys and order
-	// once and then generate JSON objects from that column order
-	// when the row to write is a map.  So far the only case where
-	// the row is not necessarily a map is parquet.
-	if j.isMap {
-		r := row.(map[string]interface{})
-		j.w.Write(OPEN)
-		for i, col := range j.columns {
-			cellBytes, err := json.Marshal(r[col])
-			if err != nil {
-				return edse(err)
-			}
-
-			var prefix []byte
-			if i > 0 {
-				prefix = COMMA
-			}
-			_, err = j.w.Write(prefix)
-			if err != nil {
-				return edse(err)
-			}
-
-			_, err = j.w.Write(j.columnsEscaped[i])
-			if err != nil {
-				return edse(err)
-			}
-
-			_, err = j.w.Write(cellBytes)
-			if err != nil {
-				return edse(err)
-			}
-		}
-		j.w.Write(CLOSE)
-	} else {
-		encoder := json.NewEncoder(j.w)
-		err := encoder.Encode(row)
-		if err != nil {
-			return edsef("Failed to encode JSON: %s", err)
-		}
-	}
-
-	j.first = false
-	return nil
-}
-
-func withJSONOutWriter(w io.Writer, first, last string, cb func() error) error {
-	_, err := w.Write([]byte(first))
-	if err != nil {
-		return edsef("Failed to write JSON start marker: %s", err)
-	}
-
-	err = cb()
-	if err != nil {
-		return err
-	}
-
-	_, err = w.Write([]byte(last))
-	if err != nil {
-		return edsef("Failed to write JSON end marker: %s", err)
-	}
-
-	return nil
-}
-
-func withJSONArrayOutWriter(w io.Writer, cb func(w *JSONArrayWriter) error) error {
-	return withJSONOutWriter(w, "[", "]", func() error {
-		bw := bufio.NewWriterSize(w, 10*1024)
-		defer bw.Flush()
-		return cb(newJSONArrayWriter(bw))
-	})
-}
-
-func openTruncate(out string) (*os.File, error) {
-	base := filepath.Dir(out)
-	_ = os.Mkdir(base, os.ModePerm)
-	return os.OpenFile(out, os.O_TRUNC|os.O_WRONLY|os.O_CREATE, os.ModePerm)
-}
-
-func withJSONArrayOutWriterFile(out io.Writer, cb func(w *JSONArrayWriter) error) error {
-	return withJSONArrayOutWriter(out, cb)
-}
-
 func transformCSV(in io.Reader, out io.Writer, delimiter rune) error {
 	r := csv.NewReader(in)
 	r.Comma = delimiter
 	r.ReuseRecord = true
 	r.FieldsPerRecord = -1
 
-	return withJSONArrayOutWriterFile(out, func(w *JSONArrayWriter) error {
+	return withJSONArrayOutWriterFile(out, func(w *jsonutil.StreamEncoder) error {
 		isHeader := true
 		var fields []string
 		row := map[string]interface{}{}
@@ -183,7 +56,7 @@ func transformCSV(in io.Reader, out io.Writer, delimiter rune) error {
 				row[field] = record[i]
 			}
 
-			err = w.Write(row)
+			err = w.EncodeRow(row)
 			if err != nil {
 				return err
 			}
@@ -229,7 +102,7 @@ func transformParquet(in source.ParquetFile, out io.Writer) error {
 	}
 	defer r.ReadStop()
 
-	return withJSONArrayOutWriterFile(out, func(w *JSONArrayWriter) error {
+	return withJSONArrayOutWriterFile(out, func(w *jsonutil.StreamEncoder) error {
 		size := 1000
 		var offset int64 = 0
 		for {
@@ -244,7 +117,7 @@ func transformParquet(in source.ParquetFile, out io.Writer) error {
 			}
 
 			for _, row := range rows {
-				err := w.Write(row)
+				err := w.EncodeRow(row)
 				if err != nil {
 					return err
 				}
@@ -269,7 +142,7 @@ func transformParquetFile(in string, out io.Writer) error {
 	return transformParquet(r, out)
 }
 
-func writeSheet(rows [][]string, w *JSONArrayWriter) error {
+func writeSheet(rows [][]string, w *jsonutil.StreamEncoder) error {
 	var header []string
 	isHeader := true
 
@@ -285,7 +158,7 @@ func writeSheet(rows [][]string, w *JSONArrayWriter) error {
 			row[header[i]] = cell
 		}
 
-		err := w.Write(row)
+		err := w.EncodeRow(row)
 		if err != nil {
 			return err
 		}
@@ -299,7 +172,7 @@ func transformXLSX(in *excelize.File, out io.Writer) error {
 
 	// Single sheet files get flattened into just an array, not a dict mapping sheet name to sheet contents
 	if len(sheets) == 1 {
-		return withJSONArrayOutWriterFile(out, func(w *JSONArrayWriter) error {
+		return withJSONArrayOutWriterFile(out, func(w *jsonutil.StreamEncoder) error {
 			rows, err := in.GetRows(sheets[0])
 			if err != nil {
 				return err
@@ -324,7 +197,7 @@ func transformXLSX(in *excelize.File, out io.Writer) error {
 				return err
 			}
 
-			err = withJSONArrayOutWriter(out, func(w *JSONArrayWriter) error {
+			err = withJSONArrayOutWriter(out, func(w *jsonutil.StreamEncoder) error {
 				rows, err := in.GetRows(sheet)
 				if err != nil {
 					return err
@@ -357,7 +230,7 @@ func transformOpenOfficeSheet(in *openoffice.ODSFile, out io.Writer) error {
 
 	// Single sheet files get flattened into just an array, not a dict mapping sheet name to sheet contents
 	if len(doc.Sheets) == 1 {
-		return withJSONArrayOutWriterFile(out, func(w *JSONArrayWriter) error {
+		return withJSONArrayOutWriterFile(out, func(w *jsonutil.StreamEncoder) error {
 			return writeSheet(doc.Sheets[0].Strings(), w)
 		})
 	}
@@ -377,7 +250,7 @@ func transformOpenOfficeSheet(in *openoffice.ODSFile, out io.Writer) error {
 				return err
 			}
 
-			err = withJSONArrayOutWriter(out, func(w *JSONArrayWriter) error {
+			err = withJSONArrayOutWriter(out, func(w *jsonutil.StreamEncoder) error {
 				return writeSheet(doc.Sheets[0].Strings(), w)
 			})
 			if err != nil {
@@ -560,7 +433,7 @@ var BUILTIN_REGEX = map[MimeType]*regexp.Regexp{
 
 func transformRegexp(in io.Reader, out io.Writer, re *regexp.Regexp) error {
 	scanner := bufio.NewScanner(in)
-	return withJSONArrayOutWriterFile(out, func(w *JSONArrayWriter) error {
+	return withJSONArrayOutWriterFile(out, func(w *jsonutil.StreamEncoder) error {
 		row := map[string]interface{}{}
 		for scanner.Scan() {
 			match := re.FindStringSubmatch(scanner.Text())
@@ -574,7 +447,7 @@ func transformRegexp(in io.Reader, out io.Writer, re *regexp.Regexp) error {
 				}
 			}
 
-			err := w.Write(row)
+			err := w.EncodeRow(row)
 			if err != nil {
 				return err
 			}

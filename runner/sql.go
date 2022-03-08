@@ -107,9 +107,10 @@ type panelToImport struct {
 	id        string
 	columns   []column
 	tableName string
+	path      string
 }
 
-var dmGetPanelRe = regexp.MustCompile(`(DM_getPanel\((?P<number>[0-9]+)\))|(DM_getPanel\((?P<singlequote>'(?:[^'\\]|\\.)*\')\))|(DM_getPanel\((?P<doublequote>"(?:[^"\\]|\\.)*\")\))`)
+var dmGetPanelRe = regexp.MustCompile(`(DM_getPanel\((?P<number>[0-9]+)(((,\s*(?P<numbersinglepath>"(?:[^"\\]|\\.)*\"))?)|(,\s*(?P<numberdoublepath>'(?:[^'\\]|\\.)*\'))?)\))|(DM_getPanel\((?P<singlequote>'(?:[^'\\]|\\.)*\'(,\s*(?P<singlepath>'(?:[^'\\]|\\.)*\'))?)\))|(DM_getPanel\((?P<doublequote>"(?:[^"\\]|\\.)*\"(,\s*(?P<doublepath>"(?:[^"\\]|\\.)*\"))?)\))`)
 
 func transformDM_getPanelCalls(
 	query string,
@@ -124,10 +125,22 @@ func transformDM_getPanelCalls(
 	query = dmGetPanelRe.ReplaceAllStringFunc(query, func(m string) string {
 		matchForSubexps := dmGetPanelRe.FindStringSubmatch(m)
 		nameOrIndex := ""
+		path := ""
 		for i, name := range dmGetPanelRe.SubexpNames() {
+			if matchForSubexps[i] == "" {
+				continue
+			}
+
 			switch name {
 			case "number":
 				nameOrIndex = matchForSubexps[i]
+			case "numberdoublepath", "numbersinglepath", "singlepath", "doublepath":
+				path = matchForSubexps[i]
+
+				// Remove quotes
+				if path != "" {
+					path = path[1 : len(path)-1]
+				}
 			case "singlequote", "doublequote":
 				nameOrIndex = matchForSubexps[i]
 
@@ -136,14 +149,27 @@ func transformDM_getPanelCalls(
 					nameOrIndex = nameOrIndex[1 : len(nameOrIndex)-1]
 				}
 			}
-
-			if nameOrIndex != "" {
-				break
-			}
 		}
 
 		s, ok := idShapeMap[nameOrIndex]
-		if !ok || !ShapeIsObjectArray(s) {
+		if !ok {
+			insideErr = makeErrNotAnArrayOfObjects(nameOrIndex)
+			return ""
+		}
+
+		sp, err := shapeAtPath(s, path)
+		if err != nil {
+			insideErr = err
+			return ""
+		}
+
+		ok = ShapeIsObjectArray(*sp)
+		if err != nil {
+			insideErr = err
+			return ""
+		}
+
+		if !ok {
 			insideErr = makeErrNotAnArrayOfObjects(nameOrIndex)
 			return ""
 		}
@@ -157,8 +183,13 @@ func transformDM_getPanelCalls(
 			}
 		}
 
-		rowShape := s.ArrayShape.Children
+		rowShape := sp.ArrayShape.Children
 		columns := sqlColumnsAndTypesFromShape(*rowShape.ObjectShape)
+		if path != "" {
+			for i := range columns {
+				columns[i].name = path + "." + columns[i].name
+			}
+		}
 		panelsToImport = append(panelsToImport, panelToImport{
 			id:        id,
 			columns:   columns,
@@ -194,14 +225,15 @@ func getObjectAtPath(obj map[string]interface{}, path string) interface{} {
 				continue
 			}
 
-			n, ok := next[string(part)]
-			if !ok {
-				// Should not be possible
-				panic(fmt.Sprintf("Bad path (%s) at part (%s)", path, string(part)))
+			n := next[string(part)]
+			if n == nil {
+				// Some objects may have this path, some may not
+				return nil
 			}
+			var ok bool
 			if next, ok = n.(map[string]interface{}); !ok {
-				// Should not be possible
-				panic(fmt.Sprintf("Path (%s) enters non-object at part (%s)", path, string(part)))
+				// Some objects may have this path, some may not
+				return nil
 			}
 
 			part = nil
@@ -212,50 +244,10 @@ func getObjectAtPath(obj map[string]interface{}, path string) interface{} {
 	}
 
 	if len(part) > 0 {
-		n, ok := next[string(part)]
-		if !ok {
-			// Should not be possible
-			panic(fmt.Sprintf("Bad path (%s) at part (%s)", path, string(part)))
-		}
-
-		return n
+		return next[string(part)]
 	}
 
 	return next
-}
-
-func formatImportQueryAndRows(
-	tableName string,
-	columns []column,
-	data []map[string]interface{},
-	qt quoteType,
-) (string, []interface{}) {
-	var columnsDDL []string
-	for _, c := range columns {
-		columnsDDL = append(columnsDDL, quote(c.name, qt.identifier))
-	}
-
-	var placeholders []string
-	var values []interface{}
-	for _, dataRow := range data {
-		var row []string
-		for _, col := range columns {
-			row = append(row, "?")
-
-			values = append(values, getObjectAtPath(dataRow, col.name))
-		}
-
-		placeholders = append(placeholders, "("+strings.Join(row, ",")+")")
-	}
-
-	t := quote(tableName, qt.identifier)
-
-	query := fmt.Sprintf("INSERT INTO %s (%s) VALUES %s;",
-		t,
-		strings.Join(columnsDDL, ", "),
-		strings.Join(placeholders, ", "))
-
-	return query, values
 }
 
 func postgresMangleInsert(stmt string) string {
@@ -303,58 +295,134 @@ func chunk(c chan map[string]interface{}, size int) chan []map[string]interface{
 	return out
 }
 
+func makePreparedStatement(tname string, nColumns, chunkSize int) string {
+	var values []string
+
+	for i := 0; i < chunkSize; i++ {
+		row := "("
+		for j := 0; j < nColumns; j++ {
+			if j > 0 {
+				row += ","
+			}
+
+			row += "?"
+		}
+		row += ")"
+		values = append(values, row)
+	}
+
+	return fmt.Sprintf("INSERT INTO %s VALUES %s", tname, strings.Join(values, ", "))
+}
+
+func importPanel(
+	createTable func(string) error,
+	prepare func(string) (func([]interface{}) error, func(), error),
+	makeQuery func(string) ([]map[string]interface{}, error),
+	projectId string,
+	query string,
+	panel panelToImport,
+	qt quoteType,
+	panelResultLoader func(string, string) (chan map[string]interface{}, error),
+) error {
+	var ddlColumns []string
+	for _, c := range panel.columns {
+		ddlColumns = append(ddlColumns, quote(c.name, qt.identifier)+" "+c.kind)
+	}
+
+	tname := quote(panel.tableName, qt.identifier)
+	Logln("Creating temp table " + panel.tableName)
+	createQuery := fmt.Sprintf("CREATE TEMPORARY TABLE %s (%s);",
+		tname,
+		strings.Join(ddlColumns, ", "))
+	err := createTable(createQuery)
+	if err != nil {
+		return err
+	}
+
+	c, err := panelResultLoader(projectId, panel.id)
+	if err != nil {
+		return err
+	}
+
+	// Preallocated this makes a 4s difference.
+	chunkSize := 10
+	toinsert := make([]interface{}, chunkSize*len(ddlColumns))
+
+	chunks := chunk(c, chunkSize)
+newprepare:
+	for {
+		nWritten := 0
+		preparedStatement := makePreparedStatement(tname, len(ddlColumns), chunkSize)
+		inserter, closer, err := prepare(preparedStatement)
+		if err != nil {
+			return err
+		}
+
+		nLeftovers := 0
+		for rows := range chunks {
+			nWritten += len(rows)
+
+			for i, row := range rows {
+				for j, col := range panel.columns {
+					toinsert[i*len(ddlColumns)+j] = getObjectAtPath(row, col.name)
+				}
+			}
+
+			// This likely only happens at the end where the last chunk won't always be chunkSize.
+			if len(rows) < chunkSize {
+				nLeftovers = len(rows)
+				break
+			}
+
+			err = inserter(toinsert)
+			if err != nil {
+				return err
+			}
+
+			// Start a new prepared statement every so often
+			if nWritten > 100_000 {
+				closer()
+				continue newprepare
+			}
+		}
+
+		// Prepared statement must be closed whether or not there are leftovers
+		// Must be closed before leftovers if there are leftovers
+		closer()
+
+		// Handle leftovers that are fewer than chunkSize
+		if nLeftovers > 0 {
+			stmt := makePreparedStatement(tname, len(ddlColumns), nLeftovers)
+			inserter, closer, err = prepare(stmt)
+			if err != nil {
+				return err
+			}
+
+			defer closer()
+			// Very important to slice since toinsert is preallocated it may have garbage at the end.
+			return inserter(toinsert[:nLeftovers*len(ddlColumns)])
+		}
+
+		return nil
+	}
+}
+
 func importAndRun(
 	createTable func(string) error,
-	insert func(string, []interface{}) error,
+	prepare func(string) (func([]interface{}) error, func(), error),
 	makeQuery func(string) ([]map[string]interface{}, error),
 	projectId string,
 	query string,
 	panelsToImport []panelToImport,
 	qt quoteType,
 	// Postgres uses $1, mysql/sqlite use ?
-	mangleInsert func(string) string,
 	panelResultLoader func(string, string) (chan map[string]interface{}, error),
 ) ([]map[string]interface{}, error) {
-	rowsIngested := 0
 	for _, panel := range panelsToImport {
-		var ddlColumns []string
-		for _, c := range panel.columns {
-			ddlColumns = append(ddlColumns, quote(c.name, qt.identifier)+" "+c.kind)
-		}
-
-		Logln("Creating temp table " + panel.tableName)
-		createQuery := fmt.Sprintf("CREATE TEMPORARY TABLE %s (%s);",
-			quote(panel.tableName, qt.identifier),
-			strings.Join(ddlColumns, ", "))
-		err := createTable(createQuery)
+		err := importPanel(createTable, prepare, makeQuery, projectId, query, panel, qt, panelResultLoader)
 		if err != nil {
 			return nil, err
 		}
-
-		c, err := panelResultLoader(projectId, panel.id)
-		if err != nil {
-			return nil, err
-		}
-
-		for resChunk := range chunk(c, 10) {
-			query, values := formatImportQueryAndRows(
-				panel.tableName,
-				panel.columns,
-				resChunk,
-				qt)
-			err = insert(mangleInsert(query), values)
-			if err != nil {
-				return nil, err
-			}
-			rowsIngested += len(resChunk)
-		}
-	}
-
-	if len(panelsToImport) > 0 {
-		Logln(
-			"Ingested %d rows in %d tables.\n",
-			rowsIngested,
-			len(panelsToImport))
 	}
 
 	return makeQuery(query)

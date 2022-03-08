@@ -51,6 +51,14 @@ func makeErrBadTemplate(msg string) *DSError {
 	}
 }
 
+func makeErrUser(msg string) *DSError {
+	return &DSError{
+		Name:    "UserError",
+		Stack:   string(debug.Stack()),
+		Message: msg,
+	}
+}
+
 func makeErrException(e error) *DSError {
 	if e == nil {
 		return nil

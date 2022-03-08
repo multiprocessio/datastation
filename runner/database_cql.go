@@ -3,6 +3,8 @@ package runner
 import (
 	"io"
 
+	"github.com/multiprocessio/go-json"
+
 	"github.com/gocql/gocql"
 )
 
@@ -35,13 +37,13 @@ func evalCQL(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, server *Ser
 		defer sess.Close()
 
 		iter := sess.Query(panel.Content).Iter()
-		return withJSONArrayOutWriterFile(w, func(w *JSONArrayWriter) error {
+		return withJSONArrayOutWriterFile(w, func(w *jsonutil.StreamEncoder) error {
 			for {
 				row := map[string]interface{}{}
 				if !iter.MapScan(row) {
 					break
 				}
-				err := w.Write(row)
+				err := w.EncodeRow(row)
 				if err != nil {
 					return err
 				}

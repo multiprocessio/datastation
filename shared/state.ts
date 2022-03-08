@@ -187,10 +187,13 @@ export type SQLConnectorType =
   | 'quest'
   | 'bigquery'
   | 'cassandra'
-  | 'scylla';
+  | 'scylla'
+  | 'athena';
 
 export type DatabaseConnectorInfoType =
   | SQLConnectorType
+  | 'google-sheets'
+  | 'airtable'
   | 'mongo'
   | 'elasticsearch'
   | 'splunk'
@@ -423,6 +426,7 @@ export class DatabasePanelInfo extends PanelInfo {
     range: TimeSeriesRange;
     table: string;
     step: number;
+    extra: Record<string, string>;
   };
 
   constructor(
@@ -440,6 +444,7 @@ export class DatabasePanelInfo extends PanelInfo {
       },
       table: panel.table || '',
       step: panel.step || 60,
+      extra: panel.extra || {},
     };
   }
 }

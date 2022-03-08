@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -41,6 +42,39 @@ func TestGetShape(t *testing.T) {
 										Children: []Shape{
 											{Kind: ScalarKind, ScalarShape: &ScalarShape{Name: NumberScalar}},
 											{Kind: ScalarKind, ScalarShape: &ScalarShape{Name: StringScalar}},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			`[{"a": 1}, {"b": 3}]`,
+			Shape{
+				Kind: ArrayKind,
+				ArrayShape: &ArrayShape{
+					Children: Shape{
+						Kind: ObjectKind,
+						ObjectShape: &ObjectShape{
+							Children: map[string]Shape{
+								"a": {
+									Kind: VariedKind,
+									VariedShape: &VariedShape{
+										Children: []Shape{
+											{Kind: ScalarKind, ScalarShape: &ScalarShape{Name: NumberScalar}},
+											NullShape,
+										},
+									},
+								},
+								"b": {
+									Kind: VariedKind,
+									VariedShape: &VariedShape{
+										Children: []Shape{
+											{Kind: ScalarKind, ScalarShape: &ScalarShape{Name: NumberScalar}},
+											NullShape,
 										},
 									},
 								},
@@ -255,4 +289,90 @@ func TestShapeFromFile(t *testing.T) {
 		}()
 	}
 
+}
+
+func TestShapePathIsObjectArray(t *testing.T) {
+	makeString := func(s string) *string {
+		return &s
+	}
+	tests := []struct {
+		json             string
+		path             string
+		expErrContains   *string
+		expIsObjectArray bool
+	}{
+		{
+			`{"a": 1}`,
+			"b",
+			makeString("Path does not exist"),
+			false,
+		},
+		{
+			`{"a": 1}`,
+			"a",
+			nil,
+			false,
+		},
+		{
+			`1`,
+			"b",
+			makeString("Path enters non-object"),
+			false,
+		},
+		{
+			`{"a": []}`,
+			"a",
+			nil,
+			false,
+		},
+		{
+			`{"a": [1, 2]}`,
+			"a",
+			nil,
+			false,
+		},
+		{
+			`{"a": [{"b": 1}, {"c": 2}]}`,
+			"a",
+			nil,
+			true,
+		},
+		{
+			`{"d": {"a": [{"b": 1}, {"c": 2}]}}`,
+			"d.a",
+			nil,
+			true,
+		},
+		{
+			`{".d": {"a": [{"b": 1}, {"c": 2}]}}`,
+			"\\.d.a",
+			nil,
+			true,
+		},
+		{
+			`[{"a": 2}, {"b": 3}]`,
+			"",
+			nil,
+			true,
+		},
+	}
+
+	for _, test := range tests {
+		var j interface{}
+		err := json.Unmarshal([]byte(test.json), &j)
+		assert.Nil(t, err)
+		s := GetShape("", j, len(test.json))
+		assert.Nil(t, err)
+
+		sp, err := shapeAtPath(s, test.path)
+		if test.expErrContains == nil {
+			assert.Nil(t, err)
+		} else {
+			assert.True(t, strings.Contains(err.Error(), *test.expErrContains))
+		}
+		if test.expIsObjectArray {
+			ok := ShapeIsObjectArray(*sp)
+			assert.True(t, ok)
+		}
+	}
 }

@@ -5,8 +5,9 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"io"
-	"io/ioutil"
 	"net/url"
+
+	"github.com/multiprocessio/go-json"
 
 	"github.com/influxdata/influxdb-client-go/v2"
 )
@@ -78,8 +79,8 @@ func (ec EvalContext) evalInfluxQL(panel *PanelInfo, dbInfo DatabaseConnectorInf
 		defer rsp.Body.Close()
 
 		if rsp.StatusCode >= 400 {
-			b, _ := ioutil.ReadAll(rsp.Body)
-			return edsef("Failed to query Influx (status %s): %s", rsp.Status, b)
+			b, _ := io.ReadAll(rsp.Body)
+			return makeErrUser(string(b))
 		}
 
 		var r influxResponse
@@ -88,7 +89,7 @@ func (ec EvalContext) evalInfluxQL(panel *PanelInfo, dbInfo DatabaseConnectorInf
 			return err
 		}
 
-		return withJSONArrayOutWriterFile(w, func(w *JSONArrayWriter) error {
+		return withJSONArrayOutWriterFile(w, func(w *jsonutil.StreamEncoder) error {
 			for _, result := range r.Results {
 				for _, series := range result.Series {
 					for _, r := range series.Values {
@@ -99,7 +100,7 @@ func (ec EvalContext) evalInfluxQL(panel *PanelInfo, dbInfo DatabaseConnectorInf
 							row[series.Columns[i]] = cell
 						}
 
-						err := w.Write(row)
+						err := w.EncodeRow(row)
 						if err != nil {
 							return err
 						}
@@ -140,10 +141,10 @@ func evalFlux(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, server *Se
 			return err
 		}
 
-		return withJSONArrayOutWriterFile(w, func(w *JSONArrayWriter) error {
+		return withJSONArrayOutWriterFile(w, func(w *jsonutil.StreamEncoder) error {
 			for result.Next() {
 				values := result.Record().Values()
-				err := w.Write(values)
+				err := w.EncodeRow(values)
 				if err != nil {
 					return err
 				}

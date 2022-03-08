@@ -1,4 +1,6 @@
 import { DatabaseConnectorInfoType } from '../../shared/state';
+import { AirtableDetails } from './AirtableDetails';
+import { AthenaDetails } from './AthenaDetails';
 import { BigQueryDetails } from './BigQueryDetails';
 import { CassandraDetails } from './CassandraDetails';
 import { ElasticsearchDetails } from './ElasticsearchDetails';
@@ -124,6 +126,21 @@ export const VENDORS: {
     id: 'mongo',
     details: GenericDetails,
   },
+  athena: {
+    name: 'AWS Athena',
+    id: 'athena',
+    details: AthenaDetails,
+  },
+  airtable: {
+    name: 'Airtable',
+    id: 'airtable',
+    details: AirtableDetails,
+  },
+  'google-sheets': {
+    name: 'Google Sheets',
+    id: 'google-sheets',
+    details: BigQueryDetails,
+  },
 };
 
 export const VENDOR_GROUPS: Array<{
@@ -143,7 +160,11 @@ export const VENDOR_GROUPS: Array<{
   },
   {
     group: 'Warehouse',
-    vendors: ['snowflake', 'bigquery'],
+    vendors: ['snowflake', 'bigquery', 'athena'],
+  },
+  {
+    group: 'Spreadsheets',
+    vendors: ['airtable'],
   },
   {
     group: 'Document',

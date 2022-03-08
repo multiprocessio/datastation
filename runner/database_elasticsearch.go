@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/multiprocessio/go-json"
+
 	"github.com/elastic/go-elasticsearch/v6"
 )
 
@@ -95,9 +97,9 @@ func evalElasticsearch(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, s
 			return err
 		}
 
-		return withJSONArrayOutWriterFile(w, func(w *JSONArrayWriter) error {
+		return withJSONArrayOutWriterFile(w, func(w *jsonutil.StreamEncoder) error {
 			for _, hit := range r.Hits.Hits {
-				err := w.Write(hit)
+				err := w.EncodeRow(hit)
 				if err != nil {
 					return err
 				}

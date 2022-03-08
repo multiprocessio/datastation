@@ -227,10 +227,11 @@ type FilaggPanelInfo struct {
 }
 
 type DatabasePanelInfoDatabase struct {
-	ConnectorId string          `json:"connectorId" db:"connectorId"`
-	Range       TimeSeriesRange `json:"range" db:"range"`
-	Table       string          `json:"table" db:"table"`
-	Step        float64         `json:"step" db:"step"`
+	ConnectorId string            `json:"connectorId" db:"connectorId"`
+	Range       TimeSeriesRange   `json:"range" db:"range"`
+	Table       string            `json:"table" db:"table"`
+	Step        float64           `json:"step" db:"step"`
+	Extra       map[string]string `json:"extra" db:"extra"`
 }
 
 type DatabasePanelInfo struct {
@@ -277,6 +278,9 @@ const (
 	QuestDatabase                                   = "quest"
 	BigQueryDatabase                                = "bigquery"
 	MongoDatabase                                   = "mongo"
+	AthenaDatabase                                  = "athena"
+	AirtableDatabase                                = "airtable"
+	GoogleSheetsDatabase                            = "google-sheets"
 )
 
 type DatabaseConnectorInfoDatabase struct {

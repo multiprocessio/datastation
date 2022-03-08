@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { DOCS_ROOT } from '../../shared/constants';
 import { NoConnectorError } from '../../shared/errors';
+import log from '../../shared/log';
 import {
   ConnectorInfo,
   DatabaseConnectorInfo,
@@ -106,16 +107,71 @@ export function DatabasePanelDetails({
       </div>
       {connector && (
         <React.Fragment>
+          {connector.database.type === 'airtable' && (
+            <>
+              <div className="form-row">
+                <Input
+                  label="Base ID"
+                  placeholder=""
+                  value={panel.database.extra.airtable_app}
+                  onChange={(i: string) => {
+                    if (i.startsWith('https://')) {
+                      try {
+                        // e.g. https://airtable.com/appX/tblY/viwZ?blocks=hide
+                        const [app, table, view] = i
+                          .slice('https://airtable.com/'.length)
+                          .split('?')[0]
+                          .split('/');
+                        panel.database.extra.airtable_app = app;
+                        panel.database.table = table;
+                        panel.database.extra.airtable_view = view;
+                        updatePanel(panel);
+                        return;
+                      } catch (e) {
+                        log.error(e);
+                      }
+                    }
+                    panel.database.extra.airtable_app = i;
+                    updatePanel(panel);
+                  }}
+                />
+              </div>
+              <div className="form-row">
+                <Input
+                  label="Table ID"
+                  placeholder=""
+                  value={panel.database.table}
+                  onChange={(i: string) => {
+                    panel.database.table = i;
+                    updatePanel(panel);
+                  }}
+                />
+              </div>
+              <div className="form-row">
+                <Input
+                  label="View ID"
+                  placeholder=""
+                  value={panel.database.extra.airtable_view}
+                  onChange={(i: string) => {
+                    panel.database.extra.airtable_view = i;
+                    updatePanel(panel);
+                  }}
+                />
+              </div>
+            </>
+          )}
           {connector.database.type === 'elasticsearch' && (
-            <Input
-              label="Indexes"
-              placeholder="journalbeat-*,logstash-*"
-              value={panel.database.table}
-              onChange={(i: string) => {
-                panel.database.table = i;
-                updatePanel(panel);
-              }}
-            />
+            <div className="form-row">
+              <Input
+                label="Indexes"
+                placeholder="journalbeat-*,logstash-*"
+                value={panel.database.table}
+                onChange={(i: string) => {
+                  panel.database.table = i;
+                  updatePanel(panel);
+                }}
+              />
+            </div>
           )}
           {['elasticsearch', 'prometheus'].includes(
             connector.database.type
@@ -130,15 +186,17 @@ export function DatabasePanelDetails({
             />
           )}
           {connector.database.type === 'prometheus' && (
-            <Input
-              label="Step (seconds)"
-              type="number"
-              value={panel.database.step}
-              onChange={(s: string) => {
-                panel.database.step = +s;
-                updatePanel(panel);
-              }}
-            />
+            <div className="form-row">
+              <Input
+                label="Step (seconds)"
+                type="number"
+                value={panel.database.step}
+                onChange={(s: string) => {
+                  panel.database.step = +s;
+                  updatePanel(panel);
+                }}
+              />
+            </div>
           )}
           {!connector.serverId && (
             <ServerPicker

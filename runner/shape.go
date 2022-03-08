@@ -2,6 +2,7 @@ package runner
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"math/rand"
 	"os"
@@ -219,7 +220,8 @@ func objectMerge(a ObjectShape, b ObjectShape) ObjectShape {
 	for key := range b.Children {
 		if _, ok := a.Children[key]; !ok {
 			// If they are new, they must sometimes be null/undefined
-			merged.Children[key] = addUniqueVaried(a.Children[key], NullShape)
+			merged.Children[key] = addUniqueVaried(b.Children[key], NullShape)
+			continue
 		}
 
 		// Do nothing, it's already been merged.
@@ -301,6 +303,49 @@ func ShapeIsObjectArray(s Shape) bool {
 	}
 
 	return s.ArrayShape.Children.Kind == ObjectKind
+}
+
+func shapeAtPath(s Shape, path string) (*Shape, error) {
+	pathRunes := []rune(path)
+
+	for len(pathRunes) > 0 {
+		if s.Kind != ObjectKind {
+			return nil, makeErrUser(fmt.Sprintf("Path enters non-object: %s", path))
+		}
+		obj := s.ObjectShape.Children
+
+		var pathPart []rune
+		i := 0
+		for i < len(pathRunes) {
+			c := pathRunes[i]
+			if c == '.' {
+				// Unescape an escaped period and keep going
+				if i > 0 && path[i-1] == '\\' {
+					pathPart[i-1] = '.'
+					i++
+					continue
+				}
+
+				// Otherwise found a real period
+				i++
+				break
+			}
+
+			pathPart = append(pathPart, c)
+			i++
+		}
+
+		pathPartS := string(pathPart)
+
+		pathRunes = pathRunes[i:]
+		var ok bool
+		s, ok = obj[pathPartS]
+		if !ok {
+			return nil, makeErrUser(fmt.Sprintf("Path does not exist: %s", pathPartS))
+		}
+	}
+
+	return &s, nil
 }
 
 const DefaultShapeMaxBytesToRead = 100_000

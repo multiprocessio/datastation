@@ -2,7 +2,6 @@ package runner
 
 import (
 	"encoding/base64"
-	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -15,6 +14,8 @@ import (
 	"strings"
 
 	"golang.org/x/crypto/nacl/secretbox"
+
+	"github.com/multiprocessio/go-json"
 
 	_ "github.com/ClickHouse/clickhouse-go/v2"
 	_ "github.com/denisenkom/go-mssqldb"
@@ -90,7 +91,6 @@ func (e *Encrypt) decrypt() (string, error) {
 var defaultPorts = map[DatabaseConnectorInfoType]string{
 	PostgresDatabase:      "5432",
 	MySQLDatabase:         "3306",
-	SQLiteDatabase:        "0",
 	SQLServerDatabase:     "1433",
 	OracleDatabase:        "1521",
 	ClickHouseDatabase:    "9000",
@@ -280,7 +280,7 @@ var textTypes = map[string]bool{
 	"DATETIME":  true,
 }
 
-func writeRowFromDatabase(dbInfo DatabaseConnectorInfoDatabase, w *JSONArrayWriter, rows *sqlx.Rows, wroteFirstRow bool) error {
+func writeRowFromDatabase(dbInfo DatabaseConnectorInfoDatabase, w *jsonutil.StreamEncoder, rows *sqlx.Rows, wroteFirstRow bool) error {
 	row := map[string]interface{}{}
 	err := rows.MapScan(row)
 	if err != nil {
@@ -339,7 +339,7 @@ func writeRowFromDatabase(dbInfo DatabaseConnectorInfoDatabase, w *JSONArrayWrit
 		}
 	}
 
-	err = w.Write(row)
+	err = w.EncodeRow(row)
 	if err != nil {
 		return err
 	}
@@ -350,71 +350,6 @@ func writeRowFromDatabase(dbInfo DatabaseConnectorInfoDatabase, w *JSONArrayWrit
 func (ec EvalContext) loadJSONArrayPanel(projectId, panelId string) (chan map[string]interface{}, error) {
 	f := ec.GetPanelResultsFile(projectId, panelId)
 	return loadJSONArrayFile(f)
-}
-
-func loadJSONArrayFile(f string) (chan map[string]interface{}, error) {
-	fd, err := os.Open(f)
-	if err != nil {
-		return nil, err
-	}
-
-	bs := make([]byte, 1)
-	for {
-		_, err := fd.Read(bs)
-		if err != nil {
-			return nil, err
-		}
-
-		if bs[0] == '[' {
-			break
-		}
-	}
-
-	out := make(chan map[string]interface{}, 1)
-	go func() {
-		defer close(out)
-
-		var r io.Reader = fd
-
-		// Stream all JSON objects
-		for {
-			// Needs to be recreated each time because of buffered data
-			dec := json.NewDecoder(r)
-
-			var obj map[string]interface{}
-			err := dec.Decode(&obj)
-			if err == io.EOF {
-				return
-			}
-			if err != nil {
-				panic(err)
-			}
-
-			out <- obj
-
-			// Copy all buffered bytes back into a new buffer
-			r = io.MultiReader(dec.Buffered(), r)
-
-			// Read comma and array end marker
-			for {
-				_, err := r.Read(bs)
-				if err != nil {
-					panic(err)
-				}
-
-				if bs[0] == ',' {
-					break
-				}
-
-				// Done processing
-				if bs[0] == ']' {
-					return
-				}
-			}
-		}
-	}()
-
-	return out, nil
 }
 
 func (ec EvalContext) EvalDatabasePanel(
@@ -438,8 +373,11 @@ func (ec EvalContext) EvalDatabasePanel(
 
 	dbInfo := connector.Database
 
-	// Only Elasticsearch is ok with an empty query, I think.
-	if panel.Content == "" && dbInfo.Type != ElasticsearchDatabase {
+	// A few database types are cool with empty queries
+	if panel.Content == "" &&
+		dbInfo.Type != ElasticsearchDatabase &&
+		dbInfo.Type != AirtableDatabase &&
+		dbInfo.Type != GoogleSheetsDatabase {
 		return edsef("Expected query, got empty query.")
 	}
 
@@ -477,13 +415,19 @@ func (ec EvalContext) EvalDatabasePanel(
 	case PrometheusDatabase:
 		return evalPrometheus(panel, dbInfo, server, w)
 	case BigQueryDatabase:
-		return evalBigQuery(panel, dbInfo, server, w)
+		return evalBigQuery(panel, dbInfo, w)
 	case SplunkDatabase:
 		return evalSplunk(panel, dbInfo, server, w)
 	case MongoDatabase:
 		return evalMongo(panel, dbInfo, server, w)
 	case CassandraDatabase, ScyllaDatabase:
 		return evalCQL(panel, dbInfo, server, w)
+	case AthenaDatabase:
+		return evalAthena(panel, dbInfo, w)
+	case GoogleSheetsDatabase:
+		return evalGoogleSheets(panel, dbInfo, w)
+	case AirtableDatabase:
+		return evalAirtable(panel, dbInfo, w)
 	}
 
 	mangleInsert := defaultMangleInsert
@@ -550,17 +494,28 @@ func (ec EvalContext) EvalDatabasePanel(
 			return err
 		}
 
+		preparer := func(q string) (func([]interface{}) error, func(), error) {
+			stmt, err := db.Prepare(mangleInsert(q))
+			if err != nil {
+				return nil, nil, err
+			}
+
+			return func(values []interface{}) error {
+					_, err := stmt.Exec(values...)
+					return err
+				}, func() {
+					stmt.Close()
+				}, nil
+		}
+
 		wroteFirstRow := false
-		return withJSONArrayOutWriterFile(w, func(w *JSONArrayWriter) error {
+		return withJSONArrayOutWriterFile(w, func(w *jsonutil.StreamEncoder) error {
 			_, err := importAndRun(
 				func(createTableStmt string) error {
 					_, err := db.Exec(createTableStmt)
 					return err
 				},
-				func(insertStmt string, values []interface{}) error {
-					_, err := db.Exec(insertStmt, values...)
-					return err
-				},
+				preparer,
 				func(query string) ([]map[string]interface{}, error) {
 					rows, err := db.Queryx(query)
 					if err != nil {
@@ -585,7 +540,6 @@ func (ec EvalContext) EvalDatabasePanel(
 				query,
 				panelsToImport,
 				qt,
-				mangleInsert,
 				panelResultLoader,
 			)
 

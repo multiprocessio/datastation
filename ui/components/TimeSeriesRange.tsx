@@ -19,12 +19,10 @@ export function TimeSeriesRange({
   shape,
   hideField,
   updateRange,
-  showSort,
   timeFieldTooltip,
 }: {
   range: TimeSeriesRangeT;
   hideField?: boolean;
-  showSort?: boolean;
   shape?: Shape;
   updateRange: (r: TimeSeriesRangeT) => void;
   timeFieldTooltip?: React.ReactNode;
