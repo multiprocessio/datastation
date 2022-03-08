@@ -164,7 +164,7 @@ export const VENDOR_GROUPS: Array<{
   },
   {
     group: 'Spreadsheets',
-    vendors: ['google-sheets', 'airtable'],
+    vendors: ['airtable'],
   },
   {
     group: 'Document',

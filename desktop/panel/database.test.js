@@ -375,7 +375,7 @@ for (const subprocess of RUNNERS) {
       const connectors = [
         new DatabaseConnectorInfo({
           type: 'bigquery',
-          database: 'idyllic-catcher-129419',
+          database: 'multiprocess-325723',
           apiKey_encrypt: new Encrypt(process.env.BIGQUERY_TOKEN),
         }),
       ];
@@ -469,6 +469,9 @@ for (const subprocess of RUNNERS) {
       if (process.platform !== 'linux') {
         return;
       }
+
+      // Mongo doesn't work yet.
+      return;
 
       const connectors = [
         new DatabaseConnectorInfo({

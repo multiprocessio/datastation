@@ -15,6 +15,7 @@ import (
 func writeGoogleSheet(sheet *sheets.Sheet, w *jsonutil.StreamEncoder, row *map[string]interface{}) error {
 	var header []string
 	if len(sheet.Data) != 1 {
+		fmt.Printf("%#v\n", sheet)
 		return edsef("Too few or too many data grids (%d), should not be possible.", len(sheet.Data))
 	}
 
@@ -53,14 +54,14 @@ func evalGoogleSheets(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, w 
 		return err
 	}
 
-	srv, err := sheets.NewService(ctx, option.WithScopes(sheets.SpreadsheetsReadonlyScope), option.WithAPIKey(token))
+	srv, err := sheets.NewService(ctx, option.WithScopes(sheets.SpreadsheetsReadonlyScope), option.WithCredentialsJSON([]byte(token)))
 	if err != nil {
 		return edsef("Unable to retrieve Sheets client: %v", err)
 	}
 
-	rsp, err := srv.Spreadsheets.Get(panel.Database.Table).Do()
+	rsp, err := srv.Spreadsheets.Get(panel.Database.Table).IncludeGridDate(true).Do()
 	if err != nil {
-		return edsef("Unable to retrieve data from sheet: %v", err)
+		return makeErrUser(err.Error())
 	}
 
 	sheets := rsp.Sheets
