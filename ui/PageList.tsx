@@ -1,6 +1,6 @@
 import { IconTrash } from '@tabler/icons';
 import * as React from 'react';
-import { MODE_FEATURES } from '../shared/constants';
+import { LIMITS, MODE_FEATURES } from '../shared/constants';
 import { EVAL_ERRORS } from '../shared/errors';
 import {
   DEFAULT_PROJECT,
@@ -16,6 +16,7 @@ import { Input } from './components/Input';
 import { Link } from './components/Link';
 import { Dashboard } from './dashboard';
 import { PanelPlayWarning } from './errors';
+import { limitPopup } from './limit';
 import { NotFound } from './NotFound';
 import { VISUAL_PANELS } from './Panel';
 import { PanelList } from './PanelList';
@@ -236,6 +237,11 @@ export function PageList({
         <Button
           className="add-page"
           onClick={() => {
+            if (state.pages.length >= LIMITS.pages) {
+              limitPopup();
+              return;
+            }
+
             addPage(new ProjectPage('Untitled Page'));
             setPageIndex(state.pages.length - 1);
           }}

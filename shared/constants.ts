@@ -18,6 +18,37 @@ export const DEBUG = getConfig<boolean>('DEBUG', true);
 export const VERSION = getConfig<string>('VERSION', 'development');
 export const MODE = getConfig<string>('MODE', 'browser');
 
+export const LIMITS: {
+  ssh: number | 'any';
+  dbs: number | 'any';
+  pages: number | 'any';
+} = (() => {
+  const defaults = getConfig<string>('LIMITS', '');
+  function guard(v: any) {
+    v = parseInt(v);
+    if (isNaN(v)) {
+      return 'any';
+    }
+
+    return v;
+  }
+
+  let defaultsParsed: any = {};
+  if (defaults) {
+    try {
+      defaultsParsed = JSON.parse(defaults);
+    } catch (e) {
+      // nothing
+    }
+  }
+
+  return {
+    ssh: guard(defaultsParsed.ssh),
+    dbs: guard(defaultsParsed.dbs),
+    pages: guard(defaultsParsed.pages),
+  };
+})();
+
 export const MODE_FEATURES = {
   appHeader: MODE !== 'desktop',
   connectors: MODE !== 'browser',

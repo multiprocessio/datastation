@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { LIMITS } from '../shared/constants';
 import {
   ConnectorInfo,
   DatabaseConnectorInfo,
@@ -7,6 +8,7 @@ import {
 import { Button } from './components/Button';
 import { Connector } from './Connector';
 import { VENDORS } from './connectors';
+import { limitPopup } from './limit';
 
 export function ConnectorList({
   state,
@@ -52,6 +54,10 @@ export function ConnectorList({
       <div className="text-center">
         <Button
           onClick={() => {
+            if (state.connectors.length >= LIMITS.dbs) {
+              limitPopup();
+              return;
+            }
             addConnector(new DatabaseConnectorInfo());
           }}
         >

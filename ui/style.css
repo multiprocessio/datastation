@@ -54,6 +54,25 @@ a:hover {
   margin: 100px auto;
 }
 
+.modal {
+  background: rgba(0, 0, 0, 0.4);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 4;
+
+  .modal-body {
+    max-width: 400px;
+    margin: 0 auto;
+    margin-top: 10%;
+    box-shadow: 0px 0px 3px var(--border-light);
+    background: var(--background-light);
+    padding: calc(2 * var(--margin-base));
+  }
+}
+
 .app--desktop,
 .app--server {
   border-top: 1px solid var(--border-light);
@@ -979,22 +998,6 @@ canvas {
 .table--large,
 .canvas--large {
   width: 100% !important;
-}
-
-.modal {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 2;
-  background: rgba(0, 0, 0, 0.5);
-}
-
-.modal-body {
-  background: var(--background-light);
-  border: 1px solid var(--border-light);
-  padding: calc(2 * var(--margin-base));
 }
 
 .card {

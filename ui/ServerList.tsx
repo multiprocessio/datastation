@@ -1,6 +1,8 @@
 import * as React from 'react';
+import { LIMITS } from '../shared/constants';
 import { ProjectState, ServerInfo } from '../shared/state';
 import { Button } from './components/Button';
+import { limitPopup } from './limit';
 import { Server } from './Server';
 
 export function ServerList({
@@ -28,6 +30,10 @@ export function ServerList({
       <div className="text-center">
         <Button
           onClick={() => {
+            if (state.servers?.length >= LIMITS.ssh) {
+              limitPopup();
+              return;
+            }
             addServer(new ServerInfo());
           }}
         >
