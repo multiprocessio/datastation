@@ -4,10 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"math/rand"
 	"os"
 	"testing"
 	"time"
 
+	"github.com/scritchley/orc"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -120,6 +122,67 @@ func Test_transformJSONConcat(t *testing.T) {
 
 		assert.Equal(t, test.out, m)
 	}
+}
+
+func Test_transformORCFile(t *testing.T) {
+	inTmp, err := ioutil.TempFile("", "")
+	assert.Nil(t, err)
+	defer os.Remove(inTmp.Name())
+	defer inTmp.Close()
+
+	// define column types for ORC file
+	schema, err := orc.ParseSchema("struct<string1:string,timestamp1:timestamp,int1:int,boolean1:boolean,double1:double,nested:struct<double2:double,nested:struct<int2:int>>>")
+	assert.Nil(t, err)
+
+	w, err := orc.NewWriter(inTmp, orc.SetSchema(schema))
+	assert.Nil(t, err)
+
+	now := time.Unix(1478123411, 99).UTC()
+	timeIncrease := 5*time.Second + 10001*time.Nanosecond
+	length := 2 // number of rows to create
+
+	// will hold output data for test
+	out := make([][]interface{}, length)
+
+	// generate test data
+	for i := 0; i < length; i++ {
+		out[i] = make([]interface{}, 6)
+
+		out[i][0] = fmt.Sprintf("%x", rand.Int63n(1000))
+		out[i][1] = now.Add(time.Duration(i) * timeIncrease)
+		out[i][2] = rand.Int63n(10000)
+		out[i][3] = rand.Int63n(10000) > 4444
+		out[i][4] = rand.Float64()
+		out[i][5] = []interface{}{
+			rand.Float64(),
+			[]interface{}{
+				rand.Int63n(10000),
+			},
+		}
+
+		err = w.Write(out[i]...)
+		assert.Nil(t, err)
+	}
+
+	err = w.Close()
+	assert.Nil(t, err)
+
+	outTmp, err := ioutil.TempFile("", "")
+	defer os.Remove(outTmp.Name())
+	assert.Nil(t, err)
+
+	err = transformORCFile(inTmp.Name(), outTmp)
+	assert.Nil(t, err)
+
+	var m interface{}
+	outTmpBs, err := ioutil.ReadFile(outTmp.Name())
+	assert.Nil(t, err)
+
+	err = json.Unmarshal(outTmpBs, &m)
+	assert.Nil(t, err)
+
+	assert.Equal(t, out, m)
+
 }
 
 func Test_transformGeneric(t *testing.T) {
