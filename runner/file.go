@@ -11,8 +11,9 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/multiprocessio/go-json"
+	jsonutil "github.com/multiprocessio/go-json"
 	"github.com/multiprocessio/go-openoffice"
+	"github.com/scritchley/orc"
 
 	"github.com/xitongsys/parquet-go-source/local"
 	"github.com/xitongsys/parquet-go/reader"
@@ -140,6 +141,37 @@ func transformParquetFile(in string, out io.Writer) error {
 	defer r.Close()
 
 	return transformParquet(r, out)
+}
+
+func transformORC(in *orc.Reader, out io.Writer) error {
+	cols := in.Schema().Columns()
+	c := in.Select(cols...)
+
+	return withJSONArrayOutWriterFile(out, func(w *jsonutil.StreamEncoder) error {
+		for c.Stripes() {
+
+			for c.Next() {
+				row := c.Row()
+				err := w.EncodeRow(row)
+				if err != nil {
+					return err
+				}
+			}
+		}
+		
+		return c.Err()
+		
+	})
+}
+
+func transformORCFile(in string, out io.Writer) error {
+	r, err := orc.Open(in)
+	if err != nil {
+		return err
+	}
+	defer r.Close()
+
+	return transformORC(r, out)
 }
 
 func writeSheet(rows [][]string, w *jsonutil.StreamEncoder) error {
