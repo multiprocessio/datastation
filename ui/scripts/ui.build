@@ -6,5 +6,7 @@ yarn esbuild --target=es2020,chrome90,firefox90,safari13,edge90 ui/index.tsx --l
 setenv_default UI_CONFIG_OVERRIDES ""
 prepend {UI_CONFIG_OVERRIDES} build/ui.js
 
-cp ui/index.html build
+setenv_default UI_CSP ""
+setenv_default UI_ROOT "/"
+render ui/index.html build/index.html
 node ./ui/scripts/css.js ./ui/style.css ./build/style.css
