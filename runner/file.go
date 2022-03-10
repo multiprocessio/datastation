@@ -151,7 +151,12 @@ func transformORC(in *orc.Reader, out io.Writer) error {
 		for c.Stripes() {
 
 			for c.Next() {
-				row := c.Row()
+				row := map[string]interface{}{}
+				r := c.Row()
+				for i, col := range cols {
+					row[col] = r[i]
+				}
+
 				err := w.EncodeRow(row)
 				if err != nil {
 					return err
