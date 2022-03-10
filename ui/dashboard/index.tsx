@@ -81,7 +81,7 @@ export function useDashboardData(
 }
 
 export function Dashboard({
-  page: { id: pageId, panels },
+  page,
   projectId,
   updatePage,
   isExport,
@@ -95,7 +95,12 @@ export function Dashboard({
 }) {
   const randomSeconds = (5 + Math.ceil(Math.random() * 10)) * 1_000;
   const disabled = isExport || !modeFeatures.dashboard;
-  const [page] = useDashboardData(projectId, pageId, randomSeconds, disabled);
+  const [pageWithOnlyVisualPanels] = useDashboardData(
+    projectId,
+    page.id,
+    randomSeconds,
+    disabled
+  );
 
   if (!modeFeatures.dashboard) {
     return (
@@ -107,18 +112,19 @@ export function Dashboard({
     );
   }
 
-  if (page) {
-    panels = page.panels;
-  } else {
+  if (!pageWithOnlyVisualPanels) {
     return <Loading />;
   }
+
+  const panels = pageWithOnlyVisualPanels?.panels;
 
   if (!panels) {
     return (
       <div className="section">
         <div className="text-center">
-          There are no graph or table panels on this page ({page.name}) to
-          display! Try adding a graph or table panel in the editor view.
+          There are no graph or table panels on this page (
+          {pageWithOnlyVisualPanels.name}) to display! Try adding a graph or
+          table panel in the editor view.
         </div>
       </div>
     );
@@ -169,7 +175,7 @@ export function Dashboard({
           </Select>
         </div>
       )}
-      {page.panels.map((panel) => (
+      {pageWithOnlyVisualPanels.panels.map((panel) => (
         <ErrorBoundary key={panel.id}>
           <Panel panel={panel} />
         </ErrorBoundary>
