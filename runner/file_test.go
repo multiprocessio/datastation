@@ -131,36 +131,42 @@ func Test_transformORCFile(t *testing.T) {
 	defer inTmp.Close()
 
 	// define column types for ORC file
-	schema, err := orc.ParseSchema("struct<string1:string,timestamp1:timestamp,int1:int,boolean1:boolean,double1:double,nested:struct<double2:double,nested:struct<int2:int>>>")
+	schema, err := orc.ParseSchema("struct<username:string,administrator:boolean,score:double,nested:struct<randomnumber:double,correct:boolean>>")
 	assert.Nil(t, err)
 
 	w, err := orc.NewWriter(inTmp, orc.SetSchema(schema))
 	assert.Nil(t, err)
 
-	now := time.Unix(1478123411, 99).UTC()
-	timeIncrease := 5*time.Second + 10001*time.Nanosecond
-	length := 2 // number of rows to create
+	length := 1 // number of rows to create
 
 	// will hold output data for test
-	out := make([][]interface{}, length)
+	var expJson []map[string]interface{}
 
 	// generate test data
 	for i := 0; i < length; i++ {
-		out[i] = make([]interface{}, 6)
-
-		out[i][0] = fmt.Sprintf("%x", rand.Int63n(1000))
-		out[i][1] = now.Add(time.Duration(i) * timeIncrease)
-		out[i][2] = rand.Int63n(10000)
-		out[i][3] = rand.Int63n(10000) > 4444
-		out[i][4] = rand.Float64()
-		out[i][5] = []interface{}{
+		nestedValues := []interface{}{
 			rand.Float64(),
-			[]interface{}{
-				rand.Int63n(10000),
-			},
+			rand.Int63n(10000) > 5000,
 		}
 
-		err = w.Write(out[i]...)
+		values := []interface{}{
+			fmt.Sprintf("%x", rand.Int63n(1000)),
+			rand.Int63n(10000) > 4444,
+			rand.Float64(),
+			nestedValues,
+		}
+
+		expJson = append(expJson, map[string]interface{}{
+			"username": values[0],
+			"administrator": values[1],
+			"score": values[2],
+			"nested": map[string]interface{}{
+				"randomnumber": nestedValues[0],
+				"correct": nestedValues[1],
+			},
+		})
+
+		err = w.Write(values...)
 		assert.Nil(t, err)
 	}
 
@@ -181,7 +187,7 @@ func Test_transformORCFile(t *testing.T) {
 	err = json.Unmarshal(outTmpBs, &m)
 	assert.Nil(t, err)
 
-	assert.Equal(t, out, m)
+	assert.Equal(t, expJson, m)
 
 }
 
