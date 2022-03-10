@@ -32,7 +32,11 @@ export function evalGraphPanel(
   return evalColumnPanel(
     panel.id,
     panel.graph.panelSource,
-    [panel.graph.x, ...panel.graph.ys.map((y) => y.field)],
+    [
+      panel.graph.x,
+      panel.graph.uniqueBy,
+      ...panel.graph.ys.map((y) => y.field),
+    ].filter(Boolean),
     idMap,
     panels
   );
@@ -183,10 +187,20 @@ function getLineDatasets(
     uniques[row[uniqueBy]].push(row);
   }
 
+  const labels: Array<any> = [];
+  for (const row of value) {
+    const label = row[panel.graph.x];
+    if (!labels.includes(label)) {
+      labels.push(label);
+    }
+  }
+
   const datasets = Object.entries(uniques).map(([unique, values], i) => {
     return {
       label: unique,
-      data: values.map((d) => +d[ys[0].field]),
+      data: values.map((d) =>
+        isNaN(+d[ys[0].field]) ? undefined : +d[ys[0].field]
+      ),
       backgroundColor: transparentize(
         UNIQUE_COLORS[i % UNIQUE_COLORS.length],
         0.75
@@ -196,7 +210,6 @@ function getLineDatasets(
     };
   });
 
-  const labels = Object.values(uniques)[0].map((d) => d[panel.graph.x]);
   return { datasets, labels, legendLabels: undefined };
 }
 
