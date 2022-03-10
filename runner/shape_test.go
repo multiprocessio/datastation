@@ -2,7 +2,6 @@ package runner
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -163,7 +162,6 @@ func TestGetShape(t *testing.T) {
 		var j interface{}
 		err := json.Unmarshal([]byte(test.json), &j)
 		assert.Nil(t, err)
-		fmt.Println(j)
 		s := GetShape("", j, 50)
 		assert.Nil(t, err)
 		assert.Equal(t, s, test.expShape)
