@@ -14,37 +14,6 @@ import {
 } from './rpc';
 import { encrypt } from './secret';
 
-const buffers: Record<
-  string,
-  {
-    contents: string;
-    timeout: ReturnType<typeof setTimeout>;
-  }
-> = {};
-export function writeFileBuffered(name: string, contents: string) {
-  if (buffers[name]) {
-    clearTimeout(buffers[name].timeout);
-  }
-  buffers[name] = {
-    contents,
-    timeout: null,
-  };
-  buffers[name].timeout = setTimeout(() => {
-    fs.writeFileSync(name, contents);
-    delete buffers[name];
-  }, SYNC_PERIOD);
-}
-
-export function flushUnwritten() {
-  Object.keys(buffers).map((fileName: string) => {
-    clearTimeout(buffers[fileName].timeout);
-    // Must be a synchronous write in this 'exit' context
-    // https://nodejs.org/api/process.html#process_event_exit
-    fs.writeFileSync(fileName, buffers[fileName].contents);
-    delete buffers[fileName];
-  });
-}
-
 export function getProjectResultsFile(projectId: string) {
   const fileName = path
     .basename(projectId)
@@ -104,20 +73,6 @@ export const updateProjectHandler: UpdateProjectHandler = {
   resource: 'updateProject',
   handler: async (projectId: string, newState: ProjectState) => {
     const fileName = ensureProjectFile(projectId);
-    let existingState = new ProjectState();
-    try {
-      // This is a race condition but not sure if it matters because
-      // it is only used to preserve the current project secret.
-      // Maybe secrets should be stored somewhere else
-      const f = fs.readFileSync(fileName);
-      existingState = JSON.parse(f.toString());
-    } catch (e) {
-      // Fine to default to blank project when reading for update
-      if (e.code !== 'ENOENT') {
-        throw e;
-      }
-    }
-    encryptProjectSecrets(newState, existingState);
     writeFileBuffered(fileName, JSON.stringify(newState));
   },
 };
@@ -128,11 +83,51 @@ const makeProjectHandler: MakeProjectHandler = {
     const fileName = ensureProjectFile(projectId);
     const newProject = new ProjectState();
     newProject.projectName = fileName;
+    const files = fs.readdirSync(path.join(__dirname, 'migrations'));
+    files.sort();
+    const db = sqlite.open(fileName)
+    for (const file of files) {
+      log.info('Running migration: ' + file);
+      const contents = fs.readFileSync(file).toString();
+      await db.exec(contents);
+      log.info('Done migration: ' + file);
+    }
+
+    await 
+
     return fs.writeFileSync(fileName, JSON.stringify(newProject));
   },
 };
 
-// Break handlers out so they can be individually typed without `any`
+const getPagesHandler: GetPagesHandler = {
+  resource: 'getPages',
+  handler: async (
+    _0: string,
+    { projectId }: GetPagesRequest,
+    _1: unknown,
+    external: boolean
+  ) => {
+    const fileName = ensureProjectFile(projectId);
+    try {
+      const f = fs.readFileSync(fileName);
+      const ps = JSON.parse(f.toString()) as ProjectState;
+      return ProjectState.fromJSON(ps, external);
+    } catch (e) {
+      log.error(e);
+      return null;
+    }
+  },
+};
+
+export const updateProjectHandler: UpdateProjectHandler = {
+  resource: 'updateProject',
+  handler: async (projectId: string, newState: ProjectState) => {
+    const fileName = ensureProjectFile(projectId);
+    writeFileBuffered(fileName, JSON.stringify(newState));
+  },
+};
+
+// Break handlers out so they can be individually typed without `any` <-- huh. is this supposed to be a TODO?
 export const storeHandlers: RPCHandler<any, any>[] = [
   getProjectHandler,
   updateProjectHandler,
