@@ -137,7 +137,7 @@ func Test_transformORCFile(t *testing.T) {
 	w, err := orc.NewWriter(inTmp, orc.SetSchema(schema))
 	assert.Nil(t, err)
 
-	length := 1 // number of rows to create
+	length := 2 // number of rows to create
 
 	// will hold output data for test
 	var expJson []map[string]interface{}
@@ -180,7 +180,7 @@ func Test_transformORCFile(t *testing.T) {
 	err = transformORCFile(inTmp.Name(), outTmp)
 	assert.Nil(t, err)
 
-	var m interface{}
+	var m []map[string]interface{}
 	outTmpBs, err := ioutil.ReadFile(outTmp.Name())
 	assert.Nil(t, err)
 
