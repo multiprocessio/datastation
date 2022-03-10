@@ -159,25 +159,28 @@ export function Settings() {
 
             <FormGroup major label="Custom CA Certificates">
               {settings.caCerts.map((cert, i) => {
-                <div className="form-row form-row--multi">
-                  <FileInput
-                    onChange={(v) => {
-                      cert.file = v;
-                    }}
-                    allowFilePicker={MODE === 'desktop'}
-                    value={cert.file}
-                    label="Location"
-                  />
-                  <Button
-                    icon
-                    onClick={() => {
-                      settings.caCerts.splice(i, 1);
-                      setSettings(settings);
-                    }}
-                  >
-                    <IconTrash />
-                  </Button>
-                </div>;
+                return (
+                  <div className="form-row form-row--multi">
+                    <FileInput
+                      onChange={(v) => {
+                        cert.file = v;
+                      }}
+                      allowManualEntry={MODE !== 'desktop'}
+                      allowFilePicker={MODE === 'desktop'}
+                      value={cert.file}
+                      label="Location"
+                    />
+                    <Button
+                      icon
+                      onClick={() => {
+                        settings.caCerts.splice(i, 1);
+                        setSettings(settings);
+                      }}
+                    >
+                      <IconTrash />
+                    </Button>
+                  </div>
+                );
               })}
               <Button
                 onClick={() => {
