@@ -164,8 +164,9 @@ export function Settings() {
                     <FileInput
                       onChange={(v) => {
                         cert.file = v;
+                        setSettings(settings);
                       }}
-                      allowManualEntry={MODE !== 'desktop'}
+                      allowManualEntry
                       allowFilePicker={MODE === 'desktop'}
                       value={cert.file}
                       label="Location"
