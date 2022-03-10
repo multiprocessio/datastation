@@ -148,10 +148,10 @@ func transformORC(in *orc.Reader, out io.Writer) error {
 	c := in.Select(cols...)
 
 	return withJSONArrayOutWriterFile(out, func(w *jsonutil.StreamEncoder) error {
+		row := map[string]interface{}{}
+		
 		for c.Stripes() {
-
 			for c.Next() {
-				row := map[string]interface{}{}
 				r := c.Row()
 				for i, col := range cols {
 					row[col] = r[i]
@@ -518,6 +518,7 @@ const (
 	ExcelOpenXMLMimeType             = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 	OpenOfficeSheetMimeType          = "application/vnd.oasis.opendocument.spreadsheet"
 	ParquetMimeType                  = "parquet"
+	ORCMimeType                      = "orc"
 	ApacheErrorMimeType              = "text/apache2error"
 	ApacheAccessMimeType             = "text/apache2access"
 	NginxAccessMimeType              = "text/nginxaccess"
@@ -548,6 +549,8 @@ func GetMimeType(fileName string, ct ContentTypeInfo) MimeType {
 		return OpenOfficeSheetMimeType
 	case ".parquet":
 		return ParquetMimeType
+	case ".orc":
+		return ORCMimeType
 	}
 
 	return UnknownMimeType
@@ -589,6 +592,8 @@ func TransformFile(fileName string, cti ContentTypeInfo, out io.Writer) error {
 		return transformXLSXFile(fileName, out)
 	case ParquetMimeType:
 		return transformParquetFile(fileName, out)
+	case ORCMimeType:
+		return transformORCFile(fileName, out)
 	case JSONConcatMimeType:
 		return transformJSONConcatFile(fileName, out)
 	case RegexpLinesMimeType:

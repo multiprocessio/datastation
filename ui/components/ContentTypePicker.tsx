@@ -42,6 +42,7 @@ export function ContentTypePicker({
               <React.Fragment>
                 <option value={ODS_MIME_TYPE}>ODS</option>
                 <option value="parquet">Parquet</option>
+                <option value="orc">ORC</option>
               </React.Fragment>
             )}
             <option value="application/json">JSON</option>
