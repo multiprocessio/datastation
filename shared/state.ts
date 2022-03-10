@@ -57,6 +57,12 @@ export class Encrypt {
     this.value = value;
     this.encrypted = false;
   }
+
+  static Encrypted(value: string = '') {
+    const e = new Encrypt(value);
+    e.encrypted = true;
+    return e;
+  }
 }
 
 export type ServerInfoType = 'ssh-agent' | 'password' | 'private-key';
