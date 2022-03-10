@@ -25,3 +25,8 @@ CREATE TABLE ds_page_panels(
   FOREIGN KEY (page_id) REFERENCES ds_page(id),
   FOREIGN KEY (panel_id) REFERENCES ds_panel(id)
 ) STRICT;
+
+CREATE TABLE ds_metadata(
+  key TEXT PRIMARY KEY,
+  value TEXT NOT NULL
+);

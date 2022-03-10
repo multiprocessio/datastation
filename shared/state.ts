@@ -76,9 +76,11 @@ export class ServerInfo {
   password_encrypt: Encrypt;
   privateKeyFile: string;
   passphrase_encrypt: Encrypt;
+  order: number;
   id: string;
 
   constructor(panel: Partial<ServerInfo> = {}) {
+    this.order = panel.order || 0;
     this.type = panel.type || 'private-key';
     this.name = panel.name || 'Untitled Server';
     this.address = panel.address || '';
@@ -102,12 +104,14 @@ export class ConnectorInfo {
   name: string;
   type: ConnectorInfoType;
   id: string;
+  order: number;
   serverId?: string;
 
   constructor(type?: ConnectorInfoType, name?: string, serverId?: string) {
     this.name = name || 'Untitled Data Source';
     this.type = type || 'database';
     this.serverId = serverId;
+    this.order = 0;
     this.id = uuid.v4();
   }
 
@@ -252,9 +256,12 @@ export class PanelInfo {
   serverId: string;
   resultMeta: PanelResultMeta;
   lastEdited: Date;
+  order: number;
+  pageId: string;
 
   constructor(type: PanelInfoType, name?: string, content?: string) {
     this.content = content || '';
+    this.order = 0;
     this.type = type;
     this.name = name || '';
     this.id = uuid.v4();
