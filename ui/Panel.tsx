@@ -184,7 +184,7 @@ export function PanelPlayWarningWithLinks({
   panels: Array<PanelInfo>;
   msg: string;
 }) {
-  const parts = msg.split(/(\[(?:[^\]\\]|\\.)*\])|(DM_setPanel\([$a-zA-Z]*\))/);
+  const parts = msg.split(/(panel \[(?:[^\]\\]|\\.)*\])|(DM_setPanel\([$a-zA-Z]*\))/);
 
   let children = [];
   for (const c of parts) {
@@ -196,7 +196,7 @@ export function PanelPlayWarningWithLinks({
       children.push(<code>{c}</code>);
     }
 
-    if (!(c[0] === '[' && c[c.length - 1] === ']')) {
+    if (!(c.startsWith('panel [') && c[c.length - 1] === ']')) {
       children.push(c);
       continue;
     }
@@ -205,7 +205,7 @@ export function PanelPlayWarningWithLinks({
     const id = c.substring(1, c.length - 1);
     const panel = getNameOrIdFromNameOrIdOrIndex(panels, id);
     if (!panel) {
-      log.info('Failed to resolve panel ' + c);
+      log.info('Failed to resolve ' + c);
       return (
         <Alert type="warning">
           Unable to resolve panel <strong>{c}</strong>. Did you enter a valid
@@ -311,11 +311,9 @@ export function Panel({
   return (
     <div
       id={`panel-${panel.id}`}
-      className={`panel ${fullScreen === panel.id ? 'panel--fullscreen' : ''} ${
-        hidden ? 'panel--hidden' : ''
-      } ${
-        panelUIDetails.body === null && !results.exception ? 'panel--empty' : ''
-      } ${results.loading ? 'panel--loading' : ''}`}
+      className={`panel ${fullScreen === panel.id ? 'panel--fullscreen' : ''} ${hidden ? 'panel--hidden' : ''
+        } ${panelUIDetails.body === null && !results.exception ? 'panel--empty' : ''
+        } ${results.loading ? 'panel--loading' : ''}`}
       tabIndex={1001}
       ref={panelRef}
       onKeyDown={keyboardShortcuts}
@@ -323,9 +321,8 @@ export function Panel({
       <ErrorBoundary>
         <div className="panel-head">
           <div
-            className={`panel-header ${
-              details ? 'panel-header--open' : ''
-            } vertical-align-center`}
+            className={`panel-header ${details ? 'panel-header--open' : ''
+              } vertical-align-center`}
           >
             <span title="Move Up">
               <Button
@@ -419,7 +416,7 @@ export function Panel({
                             Took{' '}
                             {formatDistanceStrict(
                               results.lastRun.valueOf() -
-                                (results.elapsed || 0),
+                              (results.elapsed || 0),
                               results.lastRun.valueOf()
                             )}
                           </small>

@@ -122,13 +122,19 @@ func getTransport(customCaCerts []string) (*http.Transport, error) {
 	}
 
 	for _, customCaCert := range customCaCerts {
+		if customCaCert == "" {
+			continue
+		}
+
 		cert, err := ioutil.ReadFile(customCaCert)
 		if err != nil {
-			return nil, edsef("Could not add custom CA cert: %s", err)
+			Logln("Could not add custom CA cert: %s", err)
+			continue
 		}
 
 		if ok := rootCAs.AppendCertsFromPEM(cert); !ok {
 			Logln("Failed to add custom CA cert: %s", customCaCert)
+			continue
 		}
 	}
 
@@ -159,7 +165,12 @@ func makeHTTPRequest(hr httpRequest) (*http.Response, error) {
 		return nil, err
 	}
 	c := http.Client{Timeout: time.Second * 15, Transport: tr}
-	return c.Do(req)
+	rsp, err := c.Do(req)
+	if err != nil {
+		return nil, makeErrUser(err.Error())
+	}
+
+	return rsp, nil
 }
 
 func (ec EvalContext) evalHTTPPanel(project *ProjectState, pageIndex int, panel *PanelInfo) error {
