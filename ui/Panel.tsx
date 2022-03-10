@@ -313,11 +313,9 @@ export function Panel({
   return (
     <div
       id={`panel-${panel.id}`}
-      className={`panel ${fullScreen === panel.id ? 'panel--fullscreen' : ''} ${
-        hidden ? 'panel--hidden' : ''
-      } ${
-        panelUIDetails.body === null && !results.exception ? 'panel--empty' : ''
-      } ${results.loading ? 'panel--loading' : ''}`}
+      className={`panel ${fullScreen === panel.id ? 'panel--fullscreen' : ''} ${hidden ? 'panel--hidden' : ''
+        } ${panelUIDetails.body === null && !results.exception ? 'panel--empty' : ''
+        } ${results.loading ? 'panel--loading' : ''}`}
       tabIndex={1001}
       ref={panelRef}
       onKeyDown={keyboardShortcuts}
@@ -325,9 +323,8 @@ export function Panel({
       <ErrorBoundary>
         <div className="panel-head">
           <div
-            className={`panel-header ${
-              details ? 'panel-header--open' : ''
-            } vertical-align-center`}
+            className={`panel-header ${details ? 'panel-header--open' : ''
+              } vertical-align-center`}
           >
             <span title="Move Up">
               <Button
@@ -421,7 +418,7 @@ export function Panel({
                             Took{' '}
                             {formatDistanceStrict(
                               results.lastRun.valueOf() -
-                                (results.elapsed || 0),
+                              (results.elapsed || 0),
                               results.lastRun.valueOf()
                             )}
                           </small>
@@ -433,27 +430,25 @@ export function Panel({
                   'Run to apply changes'
                 )}
               </span>
-              {!VISUAL_PANELS.includes(panel.type) ? (
-                <span
-                  title={
-                    results.loading
-                      ? killable
-                        ? 'Cancel'
-                        : 'Running'
-                      : 'Evaluate Panel (Ctrl-Enter)'
+              <span
+                title={
+                  results.loading
+                    ? killable
+                      ? 'Cancel'
+                      : 'Running'
+                    : 'Evaluate Panel (Ctrl-Enter)'
+                }
+              >
+                <Button
+                  icon
+                  onClick={() =>
+                    killable ? killProcess() : reevalPanel(panel.id)
                   }
+                  type="primary"
                 >
-                  <Button
-                    icon
-                    onClick={() =>
-                      killable ? killProcess() : reevalPanel(panel.id)
-                    }
-                    type="primary"
-                  >
-                    {results.loading ? <IconPlayerPause /> : <IconPlayerPlay />}
-                  </Button>
-                </span>
-              ) : null}
+                  {results.loading ? <IconPlayerPause /> : <IconPlayerPlay />}
+                </Button>
+              </span>
               <span title="Full screen mode">
                 <Button
                   icon

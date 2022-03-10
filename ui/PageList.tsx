@@ -1,6 +1,6 @@
 import { IconTrash } from '@tabler/icons';
 import * as React from 'react';
-import { LIMITS, MODE_FEATURES } from '../shared/constants';
+import { MODE, LIMITS, MODE_FEATURES } from '../shared/constants';
 import { EVAL_ERRORS } from '../shared/errors';
 import {
   DEFAULT_PROJECT,
@@ -10,6 +10,7 @@ import {
   ProjectState,
   TablePanelInfo,
 } from '../shared/state';
+import { UpdatePage } from './state';
 import { Button } from './components/Button';
 import { Confirm } from './components/Confirm';
 import { Input } from './components/Input';
@@ -28,7 +29,7 @@ import { UrlStateContext } from './urlState';
 export function makeReevalPanel(
   page: ProjectPage,
   state: ProjectState,
-  updatePage: (page: ProjectPage) => void
+  updatePage: UpdatePage,
 ) {
   return async function reevalPanel(panelId: string, reset?: boolean) {
     const { connectors, servers } = state;
@@ -42,7 +43,8 @@ export function makeReevalPanel(
     resultMeta.loading = !reset;
 
     panel.resultMeta = resultMeta;
-    updatePage(page);
+    const localOnly = MODE !== 'browser';
+    updatePage(page, { localOnly });
     if (reset) {
       resultMeta.lastRun = null;
       return;
@@ -55,7 +57,7 @@ export function makeReevalPanel(
         idMap[p.name] = p.id;
       });
       const panelUIDetails = PANEL_UI_DETAILS[panel.type];
-      const { value, size, contentType, preview, stdout, shape, arrayCount } =
+      panel.resultMeta =
         await panelUIDetails.eval(
           panel,
           page.panels,
@@ -63,19 +65,16 @@ export function makeReevalPanel(
           connectors,
           servers
         );
-      panel.resultMeta = {
-        lastRun: new Date(),
-        elapsed: new Date().valueOf() - start.valueOf(),
-        value,
-        preview,
-        stdout,
-        shape,
-        arrayCount,
-        contentType,
-        size,
-        loading: false,
-      };
-      updatePage(page);
+      // This gets updated by the runner itself
+      /* if (MODE === 'browser') {
+       *   panel.resultMeta.lastRun = new Date();
+       *   panel.resultMeta.elapsed = new Date().valueOf() - start.valueOf();
+       *   panel.resultMeta.loading = false;
+       * } */
+
+      updatePage(page, {
+        localOnly,
+      });
 
       // Re-run all dependent visual panels
       if (!VISUAL_PANELS.includes(panel.type)) {
@@ -252,25 +251,22 @@ export function PageList({
 
       <div className="vertical-align-center section-subtitle">
         <Link
-          className={`page-mode ${
-            urlState.view === 'editor' ? 'page-mode--on' : ''
-          }`}
+          className={`page-mode ${urlState.view === 'editor' ? 'page-mode--on' : ''
+            }`}
           args={{ view: 'editor' }}
         >
           Editor
         </Link>
         <Link
-          className={`page-mode ${
-            urlState.view === 'scheduler' ? 'page-mode--on' : ''
-          }`}
+          className={`page-mode ${urlState.view === 'scheduler' ? 'page-mode--on' : ''
+            }`}
           args={{ view: 'scheduler' }}
         >
           Schedule Exports
         </Link>
         <Link
-          className={`page-mode ${
-            urlState.view === 'dashboard' ? 'page-mode--on' : ''
-          }`}
+          className={`page-mode ${urlState.view === 'dashboard' ? 'page-mode--on' : ''
+            }`}
           args={{ view: 'dashboard' }}
         >
           Dashboard

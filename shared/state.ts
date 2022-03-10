@@ -6,7 +6,7 @@ import { mergeDeep, setPath } from './object';
 
 export class PanelResult {
   exception?: Error;
-  value?: Array<any>;
+  value?: any;
   preview: string;
   stdout: string;
   shape: Shape;
@@ -606,14 +606,14 @@ export class ScheduledExport {
 export type ProjectPageVisibility = 'no-link' | 'private-link' | 'public-link';
 
 export class ProjectPage {
-  panels: Array<PanelInfo>;
-  schedules: Array<ScheduledExport>;
+  panels: Array<string>;
+  schedules: Array<string>;
   refreshPeriod: number;
   visibility: ProjectPageVisibility;
   name: string;
   id: string;
 
-  constructor(name?: string, panels?: Array<PanelInfo>) {
+  constructor(name?: string, panels?: Array<string>) {
     this.name = name || '';
     this.panels = panels || [];
     this.schedules = [];
@@ -625,7 +625,7 @@ export class ProjectPage {
   static fromJSON(raw: any): ProjectPage {
     raw = raw || {};
     const pp = new ProjectPage();
-    pp.panels = (raw.panels || []).map(PanelInfo.fromJSON);
+    pp.panels = raw.panels || [];
     pp.name = raw.name;
     pp.id = raw.id || uuid.v4();
     pp.schedules = raw.schedules || [];
@@ -666,19 +666,19 @@ export function doOnEncryptFields(
 }
 
 export class ProjectState {
-  pages: Array<ProjectPage>;
+  pages: Array<string>;
   projectName: string;
-  connectors: Array<ConnectorInfo>;
-  servers: Array<ServerInfo>;
+  connectors: Array<string>;
+  servers: Array<string>;
   id: string;
   originalVersion: string;
   lastVersion: string;
 
   constructor(
     projectName?: string,
-    pages?: Array<ProjectPage>,
-    connectors?: Array<ConnectorInfo>,
-    servers?: Array<ServerInfo>,
+    pages?: Array<string>,
+    connectors?: Array<string>,
+    servers?: Array<string>,
     originalVersion?: string,
     lastVersion?: string
   ) {
@@ -691,35 +691,16 @@ export class ProjectState {
     this.id = uuid.v4();
   }
 
-  static fromJSON(raw: any, external = true): ProjectState {
+  static fromJSON(raw: any): ProjectState {
     raw = raw || {};
     const ps = new ProjectState();
     ps.projectName = raw.projectName || '';
-    ps.pages = (raw.pages || []).map(ProjectPage.fromJSON);
-    ps.connectors = (raw.connectors || []).map(ConnectorInfo.fromJSON);
-    ps.servers = (raw.servers || []).map(ServerInfo.fromJSON);
+    ps.pages = raw.pages || [];
+    ps.connectors = raw.connectors || [];
+    ps.servers = raw.servers || [];
     ps.id = raw.id || uuid.v4();
     ps.originalVersion = raw.originalVersion || VERSION;
     ps.lastVersion = raw.lastVersion || VERSION;
-    if (external) {
-      doOnEncryptFields(ps, (f, p) => {
-        const new_ = new Encrypt(null);
-        new_.encrypted = true;
-        return new_;
-      });
-    }
-    doOnMatchingFields<Date>(
-      ps,
-      (path) => path.endsWith('_date'),
-      (d) => {
-        const nd = new Date(d);
-        if (String(nd) === 'Invalid Date') {
-          return new Date();
-        }
-
-        return nd;
-      }
-    );
     return ps;
   }
 }
