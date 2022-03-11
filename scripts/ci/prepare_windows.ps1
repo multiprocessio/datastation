@@ -1,4 +1,5 @@
-iwr -useb https://raw.githubusercontent.com/ScoopInstaller/Install/master/install.ps1 | iex
+Set-ExecutionPolicy RemoteSigned -scope CurrentUser
+iwr -useb get.scoop.sh | iex
 Join-Path (Resolve-Path ~).Path "scoop\shims" >> $Env:GITHUB_PATH
 scoop install nodejs@16 cmake python yarn zip jq curl go r julia
 yarn
