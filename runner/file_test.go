@@ -157,12 +157,12 @@ func Test_transformORCFile(t *testing.T) {
 		}
 
 		expJson = append(expJson, map[string]interface{}{
-			"username": values[0],
+			"username":      values[0],
 			"administrator": values[1],
-			"score": values[2],
+			"score":         values[2],
 			"nested": map[string]interface{}{
 				"randomnumber": nestedValues[0],
-				"correct": nestedValues[1],
+				"correct":      nestedValues[1],
 			},
 		})
 

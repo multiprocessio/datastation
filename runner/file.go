@@ -149,7 +149,7 @@ func transformORC(in *orc.Reader, out io.Writer) error {
 
 	return withJSONArrayOutWriterFile(out, func(w *jsonutil.StreamEncoder) error {
 		row := map[string]interface{}{}
-		
+
 		for c.Stripes() {
 			for c.Next() {
 				r := c.Row()
@@ -163,9 +163,9 @@ func transformORC(in *orc.Reader, out io.Writer) error {
 				}
 			}
 		}
-		
+
 		return c.Err()
-		
+
 	})
 }
 
