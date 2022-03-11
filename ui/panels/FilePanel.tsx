@@ -41,6 +41,7 @@ export function FilePanelDetails({
   updatePanel,
 }: PanelDetailsProps<FilePanelInfo>) {
   const { servers } = React.useContext(ProjectContext).state;
+  console.log(MODE, MODE === 'browser');
   return (
     <div className="FilePanel">
       <FormGroup>
@@ -53,9 +54,9 @@ export function FilePanelDetails({
             onRead={
               MODE !== 'desktop'
                 ? (value: ArrayBuffer) => {
-                    panel.file.content = value;
-                    updatePanel(panel);
-                  }
+                  panel.file.content = value;
+                  updatePanel(panel);
+                }
                 : null
             }
             onChange={(fileName: string) => {
@@ -65,7 +66,7 @@ export function FilePanelDetails({
           />
         </div>
         <ContentTypePicker
-          inMemoryEval={MODE !== 'browser'}
+          inMemoryEval={MODE === 'browser'}
           value={panel.file.contentTypeInfo}
           onChange={(cti: { type: string; customLineRegexp: string }) => {
             panel.file.contentTypeInfo = cti;
