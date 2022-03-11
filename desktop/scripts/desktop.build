@@ -1,5 +1,4 @@
 setenv UI_CONFIG_OVERRIDES "window.DS_CONFIG_MODE = 'desktop';"
-setenv UI_ROOT ""
 yarn build-ui
 
 cd runner && go build -ldflags="-s -w" -o ../build/go_desktop_runner{required_ext} cmd/main.go

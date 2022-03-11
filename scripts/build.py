@@ -120,6 +120,7 @@ def eval_line(line):
         out = _in.format(**BUILTIN_VARIABLES, **os.environ)    
         with open(line[2], 'w') as w:
             w.write(out)
+        quote_line(line, show=True)
         return
     if line[0] == 'setenv':
         os.environ[line[1]] = line[2]

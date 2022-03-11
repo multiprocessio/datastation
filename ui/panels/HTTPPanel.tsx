@@ -81,7 +81,7 @@ export function HTTPPanelDetails({
           />
         </div>
         <ContentTypePicker
-          inMemoryEval={MODE !== 'browser'}
+          inMemoryEval={MODE === 'browser'}
           value={panel.http.http.contentTypeInfo}
           onChange={(type: ContentTypeInfo) => {
             panel.http.http.contentTypeInfo = type;
