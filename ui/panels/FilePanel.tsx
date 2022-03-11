@@ -41,7 +41,6 @@ export function FilePanelDetails({
   updatePanel,
 }: PanelDetailsProps<FilePanelInfo>) {
   const { servers } = React.useContext(ProjectContext).state;
-  console.log(MODE, MODE === 'browser');
   return (
     <div className="FilePanel">
       <FormGroup>
