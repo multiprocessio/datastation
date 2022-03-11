@@ -38,12 +38,15 @@ export function ContentTypePicker({
             <option value="text/csv">CSV</option>
             <option value="text/tab-separated-values">TSV</option>
             <option value={XLSX_MIME_TYPE}>Excel</option>
-            {!inMemoryEval /* This is getting ridiculous. Really need to find a plugin architecture */ && (
-              <React.Fragment>
-                <option value={ODS_MIME_TYPE}>ODS</option>
-                <option value="parquet">Parquet</option>
-              </React.Fragment>
-            )}
+            <option disabled={inMemoryEval} value={ODS_MIME_TYPE}>
+              ODS
+            </option>
+            <option disabled={inMemoryEval} value="parquet">
+              Parquet
+            </option>
+            <option disabled={inMemoryEval} value="orc">
+              ORC
+            </option>
             <option value="application/json">JSON</option>
             <option value="application/jsonlines">
               Newline-delimited JSON
