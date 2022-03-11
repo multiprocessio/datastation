@@ -53,9 +53,9 @@ export function FilePanelDetails({
             onRead={
               MODE !== 'desktop'
                 ? (value: ArrayBuffer) => {
-                  panel.file.content = value;
-                  updatePanel(panel);
-                }
+                    panel.file.content = value;
+                    updatePanel(panel);
+                  }
                 : null
             }
             onChange={(fileName: string) => {
