@@ -65,7 +65,7 @@ export function FilePanelDetails({
           />
         </div>
         <ContentTypePicker
-          inMemoryEval={MODE === 'browser'}
+          inMemoryEval={MODE !== 'browser'}
           value={panel.file.contentTypeInfo}
           onChange={(cti: { type: string; customLineRegexp: string }) => {
             panel.file.contentTypeInfo = cti;
