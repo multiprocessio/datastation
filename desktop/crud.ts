@@ -1,15 +1,12 @@
 import sqlite from 'sqlite';
 import { ServerInfo, ProjectPage, PanelInfo, ConnectorInfo } from '../shared/state';
 
-function makeGenericCrud<T extends { id: string, order: number }>(
-  entitity: string,
-  fromJSON: (raw: any) => T,
-) {
+function makeGenericCrud<T extends { id: string, order: number }>(entity: string) {
   async function get(db: sqlite.Database) {
     const rows = await db.all('SELECT * FROM ' + entity);
-    const mapped = rows.map(function mapServer(({ data_json }: { string }) {
-        return JSON.parse(data_json);
-    }));
+    const mapped = rows.map(function mapObject({ data_json }: { data_json: string }) {
+      return JSON.parse(data_json) as T;
+    });
     mapped.sort((a, b) => a.order - b.order);
     return mapped;  
   }
@@ -19,19 +16,20 @@ function makeGenericCrud<T extends { id: string, order: number }>(
     return JSON.parse(row);
   }
 
-  async function delete(db: sqlite.Database, id: string) {
+  async function del(db: sqlite.Database, id: string) {
     await db.exec('DELETE FROM ${entity} WHERE id=?', [id]);
   }
 
   async function update(db: sqlite.Database, obj: T) {
     const j = JSON.stringify(obj);
-    await db.exec(`INSERT OR REPLACE ${entitiy}(id, json_data) VALUES (?, ?)`, [obj.id, j]);
+    await db.exec(`INSERT OR REPLACE ${entity}(id, json_data) VALUES (?, ?)`, [obj.id, j]);
   }
 
   return {
     get,
+    getOne,
     update,
-    delete,
+    del,
   };
 }
 
@@ -41,7 +39,7 @@ export const connectorCrud = makeGenericCrud<ConnectorInfo>('ds_connector');
 export const panelCrud = makeGenericCrud<PanelInfo>('ds_panel');
 
 export const metadataCrud = {
-  async get() {
+  async get(db: sqlite.Database) {
     const rows = await db.all('SELECT * FROM ds_metadata');
     const metadata: Record<string, string> = {};
     for (const row of rows) {
@@ -49,14 +47,14 @@ export const metadataCrud = {
     }
 
     return metadata;
-  }
+  },
 
-  async function update(metadata: Record<string, string>) {
+  async update(db: sqlite.Database, metadata: Record<string, string>) {
     const stmt = await db.prepare('INSERT OR REPLACE ds_metadata (key, value) VALUES (?, ?)');
     for (const kv of Object.entries(metadata)) {
       await stmt.bind(kv);
     }
 
-    await stmt.exec();
+    await stmt.run();
   }
 }

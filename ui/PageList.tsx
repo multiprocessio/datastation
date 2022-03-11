@@ -139,8 +139,7 @@ export function PageList({
           <Button
             type="primary"
             onClick={() => {
-              addPage(new ProjectPage('Untitled Page'));
-              setPageIndex(state.pages.length - 1);
+              addPage(state.pages.length - 1, new ProjectPage('Untitled Page'));
             }}
           >
             Add a page

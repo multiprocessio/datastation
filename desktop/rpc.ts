@@ -8,8 +8,14 @@ import {
   IPCRendererResponse,
   MakeProjectRequest,
   MakeProjectResponse,
-  UpdateProjectRequest,
-  UpdateProjectResponse,
+  UpdatePanelRequest,
+  UpdatePanelResponse,
+  UpdateConnectorRequest,
+  UpdateConnectorResponse,
+  UpdateServerRequest,
+  UpdateServerResponse,
+  UpdatePageRequest,
+  UpdatePageResponse,
 } from '../shared/rpc';
 
 export interface RPCPayload {
@@ -40,13 +46,25 @@ export type GetProjectHandler = RPCHandler<
   GetProjectRequest,
   GetProjectResponse
 >;
-export type UpdateProjectHandler = RPCHandler<
-  UpdateProjectRequest,
-  UpdateProjectResponse
->;
 export type MakeProjectHandler = RPCHandler<
   MakeProjectRequest,
   MakeProjectResponse
+>;
+export type UpdateServerHandler = RPCHandler<
+  UpdateServerRequest,
+  UpdateServerResponse
+>;
+export type UpdateConnectorHandler = RPCHandler<
+  UpdateConnectorRequest,
+  UpdateConnectorResponse
+>;
+export type UpdatePageHandler = RPCHandler<
+  UpdatePageRequest,
+  UpdatePageResponse
+>;
+export type UpdatePanelHandler = RPCHandler<
+  UpdatePanelRequest,
+  UpdatePanelResponse
 >;
 
 // Stub to ensure msg is always typed

@@ -7,7 +7,7 @@ import { configureLogger } from './log';
 import { openWindow } from './project';
 import { registerRPCHandlers } from './rpc';
 import { initialize } from './runner';
-import { flushUnwritten, storeHandlers } from './store';
+import { Store } from './store';
 
 const binaryExtension: Record<string, string> = {
   darwin: '',
@@ -23,14 +23,10 @@ function main() {
     process.on(sig, log.error)
   );
 
-  // There doesn't seem to be a catchall signal
-  ['exit', 'SIGUSR1', 'SIGUSR2', 'SIGINT'].map((sig) =>
-    process.on(sig, flushUnwritten)
-  );
-
   // Just for basic unit tests
   if (app) {
     app.whenReady().then(async () => {
+      const store = new Store();
       const { handlers, project } = initialize({
         subprocess: {
           node: path.join(__dirname, 'desktop_runner.js'),
@@ -39,7 +35,7 @@ function main() {
             'go_desktop_runner' + binaryExtension[process.platform]
           ),
         },
-        additionalHandlers: storeHandlers,
+        additionalHandlers: store.getHandlers(),
       });
 
       await openWindow(project);

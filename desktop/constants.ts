@@ -16,8 +16,6 @@ export const SETTINGS_FILE_FLAG = '--settingsFile';
 
 export const KEY_SIZE = 4096;
 
-export const SYNC_PERIOD = 1000; // seconds
-
 export const LOG_FILE = path.join(DISK_ROOT, 'log');
 
 // Finds where package.json is in this repo, the repo root.

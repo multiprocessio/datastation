@@ -1,16 +1,21 @@
 import fs from 'fs';
 import path from 'path';
+import sqlite from 'sqlite';
+import sqlite3 from 'sqlite3';
 import log from '../shared/log';
 import { getPath } from '../shared/object';
 import { GetProjectRequest, MakeProjectRequest } from '../shared/rpc';
 import { doOnEncryptFields, Encrypt, ProjectState } from '../shared/state';
-import { DISK_ROOT, PROJECT_EXTENSION, SYNC_PERIOD } from './constants';
+import { DISK_ROOT, PROJECT_EXTENSION } from './constants';
 import { ensureFile } from './fs';
 import {
   GetProjectHandler,
   MakeProjectHandler,
   RPCHandler,
-  UpdateProjectHandler,
+  UpdatePanelHandler,
+  UpdateServerHandler,
+  UpdatePageHandler,
+  UpdateConnectorHandler,
 } from './rpc';
 import { serverCrud, pageCrud, panelCrud, connectorCrud, metadataCrud } from './crud';
 import { encrypt } from './secret';
@@ -49,16 +54,20 @@ export function encryptProjectSecrets(
     return checkAndEncrypt(field, getPath(existingState, path));
   });
 }
-export class Store() {
+
+export class Store {
   connections: Record<string, sqlite.Database> = {};
 
-  async getConnection(projectId: string) Promise<sqlite.Database> {
+  async getConnection(projectId: string): Promise<sqlite.Database> {
     if (this.connections[projectId]) {
       return this.connections[projectId];
     }
 
-    const fileName = ensureProjectFile(projectId);
-    return this.connections[projectId] = await db.open(fileName);
+    const filename = ensureProjectFile(projectId);
+    return this.connections[projectId] = await sqlite.open({
+      filename,
+      driver: sqlite3.Database,
+    });
   }
   
   getProjectHandler: GetProjectHandler = {
@@ -70,17 +79,19 @@ export class Store() {
       external: boolean
     ) => {
       const db = await this.getConnection(projectId);
-      const [rawProject, servers, pages, panels, connectors] = await Promise.all([
+      const [metadata, servers, pages, panels, connectors] = await Promise.all([
         metadataCrud.get(db),
         serverCrud.get(db),
         pageCrud.get(db),
         panelCrud.get(db),
         connectorCrud.get(db),
       ]);
+      const rawProject: any = metadata;
+      rawProject.connectors = connectors;
       rawProject.servers = servers;
 
-      page.panels = [];
       for (const page of pages) {
+        page.panels = [];
         for (const panel of panels) {
           if (page.id === panel.pageId) {
             page.panels.push(panel);
@@ -110,7 +121,7 @@ export class Store() {
         log.info('Done migration: ' + file);
       }
 
-      await metadataCrud.update(newProject);
+      await metadataCrud.update(db, newProject);
     },
   };
 
@@ -127,7 +138,7 @@ export class Store() {
         }
 
         encryptProjectSecrets(p, existing);
-        await panelCrud.update(p);
+        await panelCrud.update(db, p);
 
         await db.run('COMMIT');
       } catch (e) {
@@ -149,7 +160,7 @@ export class Store() {
         }
 
         encryptProjectSecrets(p, existing);
-        await connectorCrud.update(p);
+        await connectorCrud.update(db, p);
 
         await db.run('COMMIT');
       } catch (e) {
@@ -171,7 +182,29 @@ export class Store() {
         }
 
         encryptProjectSecrets(p, existing);
-        await serverCrud.update(p);
+        await serverCrud.update(db, p);
+
+        await db.run('COMMIT');
+      } catch (e) {
+        await db.run('ROLLBACK');
+      }
+    },
+  };
+
+  updatePageHandler: UpdatePageHandler = {
+    resource: 'updatePage',
+    handler: async (projectId: string, p: ProjectPage) => {
+      const db = await this.getConnection(projectId);
+      await db.run('BEGIN');
+      try {
+        try {
+          const existing = await pageCrud.getOne(p.id);
+        } catch (e) {
+          console.log(e);
+        }
+
+        encryptProjectSecrets(p, existing);
+        await pageCrud.update(db, p);
 
         await db.run('COMMIT');
       } catch (e) {
@@ -182,11 +215,14 @@ export class Store() {
 
   // Break handlers out so they can be individually typed without `any`,
   // only brought here and masked as `any`.
-  getStoreHandlers(): RPCHandler<any, any>[] {
+  getHandlers(): RPCHandler<any, any>[] {
     return [
-      getProjectHandler,
-      updateProjectHandler,
-      makeProjectHandler,
+      this.getProjectHandler,
+      this.updatePanelHandler,
+      this.updateConnectorHandler,
+      this.updatePageHandler,
+      this.updateServerHandler,
+      this.makeProjectHandler,
     ];
   }
 }

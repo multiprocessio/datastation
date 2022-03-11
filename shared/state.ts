@@ -107,11 +107,11 @@ export class ConnectorInfo {
   order: number;
   serverId?: string;
 
-  constructor(type?: ConnectorInfoType, name?: string, serverId?: string) {
+  constructor(order: number, type?: ConnectorInfoType, name?: string, serverId?: string) {
     this.name = name || 'Untitled Data Source';
     this.type = type || 'database';
     this.serverId = serverId;
-    this.order = 0;
+    this.order = order;
     this.id = uuid.v4();
   }
 
@@ -259,9 +259,9 @@ export class PanelInfo {
   order: number;
   pageId: string;
 
-  constructor(type: PanelInfoType, name?: string, content?: string) {
+  constructor(order: number, type: PanelInfoType, name?: string, content?: string) {
     this.content = content || '';
-    this.order = 0;
+    this.order = order;
     this.type = type;
     this.name = name || '';
     this.id = uuid.v4();
@@ -625,9 +625,11 @@ export class ProjectPage {
   visibility: ProjectPageVisibility;
   name: string;
   id: string;
+  order: number;
 
-  constructor(name?: string, panels?: Array<PanelInfo>) {
+  constructor(order: number, name?: string, panels?: Array<PanelInfo>) {
     this.name = name || '';
+    this.order = order;
     this.panels = panels || [];
     this.schedules = [];
     this.id = uuid.v4();

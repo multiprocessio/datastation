@@ -31,7 +31,7 @@ import {
 import { ensureFile } from '../fs';
 import { parsePartialJSONFile } from '../partial';
 import { Dispatch, RPCHandler } from '../rpc';
-import { flushUnwritten, getProjectResultsFile } from '../store';
+import { getProjectResultsFile } from '../store';
 import { getProjectAndPanel } from './shared';
 import { EvalHandlerExtra, EvalHandlerResponse } from './types';
 
@@ -260,9 +260,6 @@ export const makeEvalHandler = (subprocessEval?: {
     body: PanelBody,
     dispatch: Dispatch
   ): Promise<PanelResult> {
-    // Flushes desktop panel writes to disk. Not relevant in server context.
-    flushUnwritten();
-
     const { project, panel, panelPage } = await getProjectAndPanel(
       dispatch,
       projectId,

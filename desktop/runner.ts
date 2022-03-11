@@ -15,7 +15,7 @@ import { openProjectHandler } from './project';
 import { RPCHandler, RPCPayload } from './rpc';
 import { ensureSigningKey } from './secret';
 import { loadSettings } from './settings';
-import { storeHandlers } from './store';
+import { Store } from './store';
 
 export function initialize({
   subprocess,
@@ -132,5 +132,6 @@ if (IS_DESKTOP_RUNNER) {
   configureLogger();
   log.info(APP_NAME + ' Panel Runner', VERSION, DEBUG ? 'DEBUG' : '');
 
-  main(storeHandlers);
+  const store = new Store();
+  main(store.getHandlers());
 }

@@ -1,11 +1,20 @@
 import { Settings } from './settings';
-import { ProjectState } from './state';
+import { ProjectState, PanelInfo, ConnectorInfo, ProjectPage, ServerInfo } from './state';
 
 export type GetProjectRequest = { projectId: string };
 export type GetProjectResponse = ProjectState | null;
 
-export type UpdateProjectRequest = ProjectState;
-export type UpdateProjectResponse = void;
+export type UpdatePanelRequest = PanelInfo;
+export type UpdatePanelResponse = void;
+
+export type UpdateConnectorRequest = ConnectorInfo;
+export type UpdateConnectorResponse = void;
+
+export type UpdateServerRequest = ServerInfo;
+export type UpdateServerResponse = void;
+
+export type UpdatePageRequest = ProjectPage;
+export type UpdatePageResponse = void;
 
 export type MakeProjectRequest = { projectId: string };
 export type MakeProjectResponse = void;
