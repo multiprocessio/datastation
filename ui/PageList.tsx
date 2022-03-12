@@ -139,7 +139,7 @@ export function PageList({
           <Button
             type="primary"
             onClick={() => {
-              addPage(state.pages.length - 1, new ProjectPage('Untitled Page'));
+              addPage(new ProjectPage('Untitled Page'));
             }}
           >
             Add a page

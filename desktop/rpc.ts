@@ -8,14 +8,14 @@ import {
   IPCRendererResponse,
   MakeProjectRequest,
   MakeProjectResponse,
-  UpdatePanelRequest,
-  UpdatePanelResponse,
   UpdateConnectorRequest,
   UpdateConnectorResponse,
-  UpdateServerRequest,
-  UpdateServerResponse,
   UpdatePageRequest,
   UpdatePageResponse,
+  UpdatePanelRequest,
+  UpdatePanelResponse,
+  UpdateServerRequest,
+  UpdateServerResponse,
 } from '../shared/rpc';
 
 export interface RPCPayload {

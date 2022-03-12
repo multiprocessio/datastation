@@ -1,5 +1,11 @@
 import { Settings } from './settings';
-import { ProjectState, PanelInfo, ConnectorInfo, ProjectPage, ServerInfo } from './state';
+import {
+  ConnectorInfo,
+  PanelInfo,
+  ProjectPage,
+  ProjectState,
+  ServerInfo,
+} from './state';
 
 export type GetProjectRequest = { projectId: string };
 export type GetProjectResponse = ProjectState | null;
@@ -36,7 +42,11 @@ export type PanelBody = { panelId: string };
 export type StoreEndpoint =
   | 'getProjects'
   | 'makeProject'
+  | 'updatePanel'
+  | 'updatePage'
   | 'updateProject'
+  | 'updateConnector'
+  | 'updateServer'
   | 'getProject'
   | 'openProject'
   | 'getSettings'

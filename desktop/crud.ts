@@ -1,42 +1,85 @@
 import sqlite from 'sqlite';
-import { ServerInfo, ProjectPage, PanelInfo, ConnectorInfo } from '../shared/state';
+import {
+  ConnectorInfo,
+  PanelInfo,
+  ProjectPage,
+  ServerInfo,
+} from '../shared/state';
 
-function makeGenericCrud<T extends { id: string, order: number }>(entity: string) {
-  async function get(db: sqlite.Database) {
-    const rows = await db.all('SELECT * FROM ' + entity);
-    const mapped = rows.map(function mapObject({ data_json }: { data_json: string }) {
-      return JSON.parse(data_json) as T;
-    });
-    mapped.sort((a, b) => a.order - b.order);
-    return mapped;  
+export class GenericCrud<T extends { id: string }> {
+  entity: string;
+  stubMaker: () => () => string;
+  constructor(entity: string, stubMaker = () => () => '?') {
+    this.entity = entity;
+    this.stubMaker = stubMaker;
   }
 
-  async function getOne(db: sqlite.Database, id: string) {
-    const row = await db.get(`SELECT * FROM ${entity} WHERE id = ?`, [id]);
+  async get(
+    db: sqlite.Database,
+    extraFilter?: {
+      q: string;
+      args: Array<any>;
+    }
+  ) {
+    const values = [];
+    const extra = extraFilter ? ' ' + extraFilter.q : '';
+    if (extra) {
+      values.push(...extraFilter.args);
+    }
+    const rows = await db.all(
+      'SELECT * FROM ' + this.entity + extra + ' ORDER BY position ASC',
+      values
+    );
+    const mapped: Array<T> = rows.map(function mapObject({
+      json_data,
+    }: {
+      json_data: string;
+    }) {
+      return JSON.parse(json_data) as T;
+    });
+    return mapped;
+  }
+
+  async getOne(db: sqlite.Database, id: string) {
+    const stubMaker = this.stubMaker();
+    const row = await db.get(
+      `SELECT * FROM ${this.entity} WHERE id = ${stubMaker()}`,
+      [id]
+    );
     return JSON.parse(row);
   }
 
-  async function del(db: sqlite.Database, id: string) {
-    await db.exec('DELETE FROM ${entity} WHERE id=?', [id]);
+  async del(db: sqlite.Database, id: string) {
+    const stubMaker = this.stubMaker();
+    await db.exec(`DELETE FROM ${this.entity} WHERE id = ${stubMaker()}`, [id]);
   }
 
-  async function update(db: sqlite.Database, obj: T) {
+  async insert(db: sqlite.Database, obj: T, position: number) {
     const j = JSON.stringify(obj);
-    await db.exec(`INSERT OR REPLACE ${entity}(id, json_data) VALUES (?, ?)`, [obj.id, j]);
+    const stubMaker = this.stubMaker();
+    const stubs = [stubMaker(), stubMaker(), stubMaker()].join(', ');
+    await db.exec(
+      `INSERT INTO ${this.entity} (id, position, json_data) VALUES (${stubs})`,
+      [obj.id, position, j]
+    );
   }
 
-  return {
-    get,
-    getOne,
-    update,
-    del,
-  };
+  async update(db: sqlite.Database, obj: T) {
+    const j = JSON.stringify(obj);
+    const stubMaker = this.stubMaker();
+    await db.exec(
+      `UPDATE ${
+        this.entity
+      } SET json_data = ${stubMaker()} WHERE id = ${stubMaker()}`,
+      [j, obj.id]
+    );
+  }
 }
 
-export const serverCrud = makeGenericCrud<ServerInfo>('ds_server');
-export const pageCrud = makeGenericCrud<ProjectPage>('ds_page');
-export const connectorCrud = makeGenericCrud<ConnectorInfo>('ds_connector');
-export const panelCrud = makeGenericCrud<PanelInfo>('ds_panel');
+export const serverCrud = new GenericCrud<ServerInfo>('ds_server');
+export const pageCrud = new GenericCrud<ProjectPage>('ds_page');
+export const connectorCrud = new GenericCrud<ConnectorInfo>('ds_connector');
+export const panelCrud = new GenericCrud<PanelInfo>('ds_panel');
 
 export const metadataCrud = {
   async get(db: sqlite.Database) {
@@ -50,11 +93,13 @@ export const metadataCrud = {
   },
 
   async update(db: sqlite.Database, metadata: Record<string, string>) {
-    const stmt = await db.prepare('INSERT OR REPLACE ds_metadata (key, value) VALUES (?, ?)');
+    const stmt = await db.prepare(
+      'INSERT OR REPLACE INTO ds_metadata (key, value) VALUES (?, ?)'
+    );
     for (const kv of Object.entries(metadata)) {
       await stmt.bind(kv);
     }
 
     await stmt.run();
-  }
-}
+  },
+};
