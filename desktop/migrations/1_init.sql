@@ -5,7 +5,7 @@ CREATE TABLE ds_server(
 ) STRICT;
 
 CREATE TABLE ds_connector(
-  id TEXT NOT NULL PRIMARY KEY,
+  id TEXT PRIMARY KEY,
   position INTEGER NOT NULL,
   data_json TEXT NOT NULL
 ) STRICT;

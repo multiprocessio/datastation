@@ -27,7 +27,7 @@ export class GenericCrud<T extends { id: string }> {
       values.push(...extraFilter.args);
     }
     const rows = await db.all(
-      'SELECT * FROM ' + this.entity + extra + ' ORDER BY position ASC',
+      `SELECT * FROM "${this.entity}"${extra} ORDER BY position ASC`,
       values
     );
     const mapped: Array<T> = rows.map(function mapObject({
@@ -43,9 +43,9 @@ export class GenericCrud<T extends { id: string }> {
   async getOne(db: sqlite.Database, id: string): Promise<[T, number]> {
     const stubMaker = this.stubMaker();
     const row = await db.get(
-      `SELECT data_json, position FROM ${
+      `SELECT data_json, position FROM "${
         this.entity
-      } WHERE id = ${stubMaker()}`,
+      }" WHERE id = ${stubMaker()}`,
       [id]
     );
     if (!row) {
@@ -57,16 +57,15 @@ export class GenericCrud<T extends { id: string }> {
 
   async del(db: sqlite.Database, id: string) {
     const stubMaker = this.stubMaker();
-    await db.exec(`DELETE FROM ${this.entity} WHERE id = ${stubMaker()}`, [id]);
+    await db.exec(`DELETE FROM "${this.entity}" WHERE id = ${stubMaker()}`, [id]);
   }
 
   async insert(db: sqlite.Database, obj: T, position: number) {
     const j = JSON.stringify(obj);
     const stubMaker = this.stubMaker();
     const stubs = [stubMaker(), stubMaker(), stubMaker()].join(', ');
-    console.trace(obj, [obj.id, position, j]);
     await db.exec(
-      `INSERT INTO ${this.entity} (id, position, data_json) VALUES (${stubs})`,
+      `INSERT INTO "${this.entity}" (id, position, data_json) VALUES (${stubs})`,
       [obj.id, position, j]
     );
   }
@@ -105,8 +104,7 @@ export const metadataCrud = {
     );
     for (const kv of Object.entries(metadata)) {
       await stmt.bind(kv);
+      await stmt.run();
     }
-
-    await stmt.run();
   },
 };

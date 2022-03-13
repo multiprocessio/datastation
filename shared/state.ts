@@ -280,7 +280,7 @@ export class PanelInfo {
     }
 
     let pit: PanelInfo = mergeDeep(
-      new PanelInfo(raw.type || 'literal', pit.pageId),
+      new PanelInfo(raw.type || 'literal', raw.pageId),
       raw
     );
 

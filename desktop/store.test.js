@@ -27,6 +27,9 @@ const updateServer = storeHandlers.filter(
 const updatePanel = storeHandlers.filter(
   (r) => r.resource === 'updatePanel'
 )[0];
+const updatePage = storeHandlers.filter(
+  (r) => r.resource === 'updatePage'
+)[0];
 const getProject = storeHandlers.filter((r) => r.resource === 'getProject')[0];
 
 test('write project with encrypted secrets, read with nulled secrets', async () => {
@@ -73,15 +76,18 @@ test('write project with encrypted secrets, read with nulled secrets', async () 
 
   try {
     await makeProject.handler(null, { projectId });
-    await updateConnector.handler(projectId, {
-      data: testDatabase,
-      position: 0,
-    });
     await updateServer.handler(projectId, {
       data: testServer,
       position: 0,
     });
-    await update;
+    await updateConnector.handler(projectId, {
+      data: testDatabase,
+      position: 0,
+    });
+    await updatePage.handler(projectId, {
+      data: testPage,
+      position: 0,
+    });
     await updatePanel.handler(projectId, {
       data: testPanel,
       position: 0,
@@ -139,7 +145,8 @@ test('newly created project is saved correctly', async () => {
       projectId: testProject.projectName,
     });
     read.id = testProject.id; // id is generated newly on every instantiation which is ok
-    expect(read).toStrictEqual(testProject);
+    // Super weird but it fails saying "serializes to the same string" even when you use spread operator.
+    expect(JSON.stringify(read)).toEqual(JSON.stringify(testProject));
   } finally {
     const projectPath = ensureProjectFile(testProject.projectName);
     try {
