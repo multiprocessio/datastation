@@ -1,15 +1,7 @@
 import * as React from 'react';
-import { MODE, MODE_FEATURES, VERSION } from '../shared/constants';
+import { MODE, MODE_FEATURES } from '../shared/constants';
 import { LANGUAGES } from '../shared/languages';
-import log from '../shared/log';
 import '../shared/polyfill';
-import {
-  ConnectorInfo,
-  DEFAULT_PROJECT,
-  ProjectPage,
-  ProjectState,
-  ServerInfo,
-} from '../shared/state';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { Loading } from './components/Loading';
 import { Version } from './components/Version';
@@ -17,10 +9,10 @@ import { ConnectorList } from './ConnectorList';
 import { Header } from './Header';
 import { MakeSelectProject } from './MakeSelectProject';
 import { PageList } from './PageList';
-import { makeStore, ProjectContext, ProjectStore } from './ProjectStore';
 import { ServerList } from './ServerList';
 import { Settings, SettingsContext, useSettings } from './Settings';
 import { Sidebar } from './Sidebar';
+import { ProjectContext, useProjectState } from './state';
 import { Updates } from './Updates';
 import { UrlStateContext, useUrlState } from './urlState';
 
@@ -35,73 +27,26 @@ if (MODE === 'browser') {
   });
 }
 
-function useProjectState(
-  projectId: string,
-  store: ProjectStore | null
-): [ProjectState, (d: ProjectState) => void] {
-  const [state, setProjectState] = React.useState<ProjectState>(null);
-
-  const setState = React.useCallback(
-    function setState(newState: ProjectState, addToRestoreBuffer = true) {
-      // Don't hang renderer while updating
-      setTimeout(function () {
-        store.update(projectId, newState, addToRestoreBuffer);
-      }, 0);
-      const c = { ...newState };
-      Object.setPrototypeOf(c, ProjectState.prototype);
-      setProjectState(c);
-    },
-    [projectId, store, setProjectState]
-  );
-
-  React.useEffect(
-    function reReadStateWhenProjectIdChanges() {
-      async function fetch() {
-        let state;
-        try {
-          let rawState = await store.get(projectId);
-          state = await ProjectState.fromJSON(rawState);
-        } catch (e) {
-          log.error(e);
-          window.location.href = '/';
-        }
-
-        state.projectName = projectId;
-        state.lastVersion = VERSION;
-        setProjectState(state);
-      }
-
-      if (projectId) {
-        fetch();
-      }
-    },
-    [projectId]
-  );
-
-  return [state, setState];
-}
-
-const store = makeStore(MODE);
-
 export function App() {
   const [urlState, setUrlState] = useUrlState();
-  const [state, setProjectState] = useProjectState(urlState.projectId, store);
-  const [loadedDefault, setLoadedDefault] = React.useState(false);
-  React.useEffect(
-    function loadDefaultProject() {
-      if (
-        !urlState.projectId &&
-        MODE_FEATURES.useDefaultProject &&
-        !loadedDefault
-      ) {
-        setLoadedDefault(true);
-        setUrlState({ projectId: DEFAULT_PROJECT.projectName });
-        setProjectState(DEFAULT_PROJECT);
-      }
-    },
-    [urlState.projectId, loadedDefault]
-  );
-
+  const [state, crud] = useProjectState(urlState.projectId, urlState.page);
+  // TODO: figure out how to do
+  /* const [loadedDefault, setLoadedDefault] = React.useState(false);
+   * React.useEffect(
+   *   function loadDefaultProject() {
+   *     if (
+   *       !urlState.projectId &&
+   *       MODE_FEATURES.useDefaultProject &&
+   *       !loadedDefault
+   *     ) {
+   *       setLoadedDefault(true);
+   *       setUrlState({ projectId: DEFAULT_PROJECT.projectName });
+   *       setProjectState(DEFAULT_PROJECT);
+   *     }
+   *   },
+   *   [urlState.projectId, loadedDefault]
+   * );
+   */
   React.useEffect(
     function setDocumentTitle() {
       if (state && state.projectName) {
@@ -124,69 +69,6 @@ export function App() {
     },
     [settings && settings.theme]
   );
-
-  function updatePage(page: ProjectPage) {
-    state.pages[urlState.page] = page;
-    setProjectState(state);
-  }
-
-  function addPage(page: ProjectPage) {
-    state.pages.push(page);
-    setProjectState(state);
-  }
-
-  function deletePage(at: number) {
-    state.pages.splice(at, 1);
-    setProjectState(state);
-  }
-
-  function updateConnector(id: string, dc: ConnectorInfo) {
-    const index = (state.connectors || []).findIndex((c) => c.id === id);
-    if (index === -1) {
-      state.connectors.push(dc);
-      return;
-    }
-    state.connectors[index] = dc;
-    setProjectState(state);
-  }
-
-  function addConnector(dc: ConnectorInfo) {
-    state.connectors.push(dc);
-    setProjectState(state);
-  }
-
-  function deleteConnector(id: string) {
-    const at = (state.connectors || []).findIndex((c) => c.id === id);
-    if (at === -1) {
-      return;
-    }
-    state.connectors.splice(at, 1);
-    setProjectState(state);
-  }
-
-  function updateServer(id: string, dc: ServerInfo) {
-    const index = (state.servers || []).findIndex((c) => c.id === id);
-    if (index === -1) {
-      state.servers.push(dc);
-      return;
-    }
-    state.servers[index] = dc;
-    setProjectState(state);
-  }
-
-  function addServer(dc: ServerInfo) {
-    state.servers.push(dc);
-    setProjectState(state);
-  }
-
-  function deleteServer(id: string) {
-    const at = (state.servers || []).findIndex((c) => c.id === id);
-    if (at === -1) {
-      return;
-    }
-    state.servers.splice(at, 1);
-    setProjectState(state);
-  }
 
   let main = <Loading />;
   if (!state || !settings) {
@@ -215,15 +97,13 @@ export function App() {
           <Sidebar>
             <ConnectorList
               state={state}
-              updateConnector={updateConnector}
-              addConnector={addConnector}
-              deleteConnector={deleteConnector}
+              updateConnector={crud.updateConnector}
+              deleteConnector={crud.deleteConnector}
             />
             <ServerList
               state={state}
-              updateServer={updateServer}
-              addServer={addServer}
-              deleteServer={deleteServer}
+              updateServer={crud.updateServer}
+              deleteServer={crud.deleteServer}
             />
             <ErrorBoundary>
               <Updates />
@@ -233,9 +113,8 @@ export function App() {
         <div className="main-body">
           <PageList
             state={state}
-            updatePage={updatePage}
-            addPage={addPage}
-            deletePage={deletePage}
+            updatePage={crud.updatePage}
+            deletePage={crud.deletePage}
             pageIndex={urlState.page}
             setPageIndex={(i) => setUrlState({ page: i, view: 'editor' })}
           />
@@ -246,7 +125,7 @@ export function App() {
   }
 
   return (
-    <ProjectContext.Provider value={{ state, setState: setProjectState }}>
+    <ProjectContext.Provider value={{ state, crud }}>
       <UrlStateContext.Provider
         value={{ state: urlState, setState: setUrlState }}
       >

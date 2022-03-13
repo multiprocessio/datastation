@@ -5,13 +5,11 @@ import { Server } from './Server';
 
 export function ServerList({
   state,
-  addServer,
   updateServer,
   deleteServer,
 }: {
   state: ProjectState;
-  addServer: (dc: ServerInfo) => void;
-  updateServer: (id: string, dc: ServerInfo) => void;
+  updateServer: (dc: ServerInfo, position: number) => void;
   deleteServer: (id: string) => void;
 }) {
   return (
@@ -21,14 +19,14 @@ export function ServerList({
         <Server
           key={dc.id}
           server={dc}
-          updateServer={(dc: ServerInfo) => updateServer(dc.id, dc)}
+          updateServer={(dc: ServerInfo) => updateServer(dc, i)}
           deleteServer={() => deleteServer(dc.id)}
         />
       ))}
       <div className="text-center">
         <Button
           onClick={() => {
-            addServer(new ServerInfo());
+            updateServer(new ServerInfo(), -1);
           }}
         >
           Add Server

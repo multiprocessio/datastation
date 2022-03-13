@@ -9,7 +9,7 @@ import { ContentTypePicker } from '../components/ContentTypePicker';
 import { FileInput } from '../components/FileInput';
 import { FormGroup } from '../components/FormGroup';
 import { ServerPicker } from '../components/ServerPicker';
-import { ProjectContext } from '../ProjectStore';
+import { ProjectContext } from '../state';
 import { PanelDetailsProps, PanelUIDetails } from './types';
 
 export async function evalFilePanel(

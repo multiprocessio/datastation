@@ -20,7 +20,6 @@ import { NotFound } from './NotFound';
 import { VISUAL_PANELS } from './Panel';
 import { PanelList } from './PanelList';
 import { PANEL_UI_DETAILS } from './panels';
-import { ProjectContext } from './ProjectStore';
 import { Scheduler } from './scheduler';
 import { UrlStateContext } from './urlState';
 
@@ -129,7 +128,6 @@ export function PageList({
   const page: ProjectPage | null = state.pages[pageIndex] || null;
   const { state: urlState, setState: setUrlState } =
     React.useContext(UrlStateContext);
-  const { setState: setProjectState } = React.useContext(ProjectContext);
 
   if (!page) {
     return (
@@ -151,7 +149,7 @@ export function PageList({
             Or,{' '}
             <Button
               onClick={() => {
-                setProjectState(DEFAULT_PROJECT);
+                // TODO: figure out how to set project state
                 setUrlState({
                   projectId: DEFAULT_PROJECT.projectName,
                   page: 0,
@@ -273,7 +271,6 @@ export function PageList({
       <MainChild
         page={page}
         projectId={state.projectName}
-        updatePage={updatePage}
         reevalPanel={reevalPanel}
         panelResults={panelResults}
         modeFeatures={MODE_FEATURES}

@@ -6,10 +6,12 @@ import {
   ServerInfo,
 } from '../shared/state';
 
+export type EntityType = 'ds_server' | 'ds_connector' | 'ds_page' | 'ds_panel';
+
 export class GenericCrud<T extends { id: string }> {
   entity: string;
   stubMaker: () => () => string;
-  constructor(entity: string, stubMaker = () => () => '?') {
+  constructor(entity: EntityType, stubMaker = () => () => '?') {
     this.entity = entity;
     this.stubMaker = stubMaker;
   }
@@ -22,7 +24,7 @@ export class GenericCrud<T extends { id: string }> {
     }
   ) {
     const values = [];
-    const extra = extraFilter ? ' ' + extraFilter.q : '';
+    const extra = extraFilter ? ' WHERE ' + extraFilter.q : '';
     if (extra) {
       values.push(...extraFilter.args);
     }

@@ -15,7 +15,7 @@ import { Select } from '../components/Select';
 import { ServerPicker } from '../components/ServerPicker';
 import { TimeSeriesRange } from '../components/TimeSeriesRange';
 import { VENDORS } from '../connectors';
-import { ProjectContext } from '../ProjectStore';
+import { ProjectContext } from '../state';
 import { PanelBodyProps, PanelDetailsProps, PanelUIDetails } from './types';
 
 export async function evalDatabasePanel(

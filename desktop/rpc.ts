@@ -2,6 +2,14 @@ import { IpcMain, IpcMainEvent } from 'electron';
 import { RPC_ASYNC_REQUEST, RPC_ASYNC_RESPONSE } from '../shared/constants';
 import log from '../shared/log';
 import {
+  DeleteConnectorRequest,
+  DeleteConnectorResponse,
+  DeletePageRequest,
+  DeletePageResponse,
+  DeletePanelRequest,
+  DeletePanelResponse,
+  DeleteServerRequest,
+  DeleteServerResponse,
   Endpoint,
   GetProjectRequest,
   GetProjectResponse,
@@ -65,6 +73,22 @@ export type UpdatePageHandler = RPCHandler<
 export type UpdatePanelHandler = RPCHandler<
   UpdatePanelRequest,
   UpdatePanelResponse
+>;
+export type DeleteServerHandler = RPCHandler<
+  DeleteServerRequest,
+  DeleteServerResponse
+>;
+export type DeleteConnectorHandler = RPCHandler<
+  DeleteConnectorRequest,
+  DeleteConnectorResponse
+>;
+export type DeletePageHandler = RPCHandler<
+  DeletePageRequest,
+  DeletePageResponse
+>;
+export type DeletePanelHandler = RPCHandler<
+  DeletePanelRequest,
+  DeletePanelResponse
 >;
 
 // Stub to ensure msg is always typed

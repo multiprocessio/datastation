@@ -34,6 +34,18 @@ export type UpdatePageRequest = {
 };
 export type UpdatePageResponse = void;
 
+export type DeletePageRequest = { id: string };
+export type DeletePageResponse = void;
+
+export type DeletePanelRequest = { id: string };
+export type DeletePanelResponse = void;
+
+export type DeleteServerRequest = { id: string };
+export type DeleteServerResponse = void;
+
+export type DeleteConnectorRequest = { id: string };
+export type DeleteConnectorResponse = void;
+
 export type MakeProjectRequest = { projectId: string };
 export type MakeProjectResponse = void;
 
@@ -59,6 +71,10 @@ export type StoreEndpoint =
   | 'updateProject'
   | 'updateConnector'
   | 'updateServer'
+  | 'deletePanel'
+  | 'deletePage'
+  | 'deleteConnector'
+  | 'deleteServer'
   | 'getProject'
   | 'openProject'
   | 'getSettings'

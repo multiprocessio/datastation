@@ -34,6 +34,10 @@ import {
 } from './crud';
 import { ensureFile } from './fs';
 import {
+  DeleteConnectorHandler,
+  DeletePageHandler,
+  DeletePanelHandler,
+  DeleteServerHandler,
   GetProjectHandler,
   MakeProjectHandler,
   RPCHandler,
@@ -202,6 +206,7 @@ export class Store {
         position: number;
       }
     ) => {
+      data.lastEdited = new Date();
       return this.updateGeneric(
         panelCrud,
         projectId,
@@ -234,11 +239,12 @@ export class Store {
           // This is all the UI needs at the moment anyway
           const allExisting = await panelCrud.get(db, {
             q: `data_json->>'pageId' = ?`,
-            args: [],
+            args: [data.pageId],
           });
 
           allExisting.splice(existingPosition, 1);
           allExisting.splice(position, 0, data);
+          console.trace(allExisting);
           const stmt = await db.prepare(
             `UPDATE ${panelCrud.entity} SET position = ? WHERE id = ?`
           );
@@ -315,6 +321,64 @@ export class Store {
       ),
   };
 
+  async deleteGeneric<T extends { id: string }>(
+    crud: GenericCrud<T>,
+    projectId: string,
+    id: string
+  ) {
+    const db = await this.getConnection(projectId);
+
+    await crud.del(db, id);
+  }
+
+  deleteServerHandler: DeleteServerHandler = {
+    resource: 'deleteServer',
+    handler: (
+      projectId: string,
+      {
+        id,
+      }: {
+        id: string;
+      }
+    ) => this.deleteGeneric(serverCrud, projectId, id),
+  };
+
+  deleteConnectorHandler: DeleteConnectorHandler = {
+    resource: 'deleteConnector',
+    handler: (
+      projectId: string,
+      {
+        id,
+      }: {
+        id: string;
+      }
+    ) => this.deleteGeneric(connectorCrud, projectId, id),
+  };
+
+  deletePageHandler: DeletePageHandler = {
+    resource: 'deletePage',
+    handler: (
+      projectId: string,
+      {
+        id,
+      }: {
+        id: string;
+      }
+    ) => this.deleteGeneric(pageCrud, projectId, id),
+  };
+
+  deletePanelHandler: DeletePanelHandler = {
+    resource: 'deletePanel',
+    handler: (
+      projectId: string,
+      {
+        id,
+      }: {
+        id: string;
+      }
+    ) => this.deleteGeneric(panelCrud, projectId, id),
+  };
+
   // Break handlers out so they can be individually typed without `any`,
   // only brought here and masked as `any`.
   getHandlers(): RPCHandler<any, any>[] {
@@ -324,6 +388,10 @@ export class Store {
       this.updateConnectorHandler,
       this.updatePageHandler,
       this.updateServerHandler,
+      this.deletePanelHandler,
+      this.deleteConnectorHandler,
+      this.deletePageHandler,
+      this.deleteServerHandler,
       this.makeProjectHandler,
     ];
   }

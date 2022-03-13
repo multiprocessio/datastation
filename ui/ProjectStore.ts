@@ -1,64 +1,57 @@
-import * as React from 'react';
 import {
   GetProjectRequest,
   GetProjectResponse,
-  UpdateProjectRequest,
-  UpdateProjectResponse,
+  UpdateConnectorRequest,
+  UpdateConnectorResponse,
+  UpdatePageRequest,
+  UpdatePageResponse,
+  UpdatePanelRequest,
+  UpdatePanelResponse,
+  UpdateServerRequest,
+  UpdateServerResponse,
+  DeleteConnectorRequest,
+  DeleteConnectorResponse,
+  DeletePageRequest,
+  DeletePageResponse,
+  DeletePanelRequest,
+  DeletePanelResponse,
+  DeleteServerRequest,
+  DeleteServerResponse,
 } from '../shared/rpc';
 import { ProjectState } from '../shared/state';
 import { asyncRPC } from './asyncRPC';
 
-// This will store X copies of the entire state. Project state
-// isn't that large though. So this may not be a big deal. In the future
-// we could store only a diff.
-// https://github.com/kpdecker/jsdiff could be interesting
-class RestoreBuffer {
-  size: number;
-  buffers: Record<string, Array<string>>;
-  constructor(size: number) {
-    this.size = size;
-    this.buffers = {};
-  }
-
-  push(projectId: string, state: ProjectState) {
-    if (!this.buffers[projectId]) {
-      this.buffers[projectId] = [];
-    }
-
-    if (this.buffers[projectId].length === this.size) {
-      this.buffers[projectId].unshift();
-    }
-
-    this.buffers[projectId].push(JSON.stringify(state));
-  }
-
-  pop(projectId: string) {
-    if (!this.buffers[projectId] || this.buffers[projectId].length < 2) {
-      return null;
-    }
-
-    const states = this.buffers[projectId];
-    states.pop();
-    return JSON.parse(states[states.length - 1]) as ProjectState;
-  }
-}
-
 export class ProjectStore {
-  restoreBuffer: RestoreBuffer;
-  constructor(restoreBufferSize: number) {
-    this.restoreBuffer = new RestoreBuffer(restoreBufferSize);
+  updatePanel(projectId: string, p: PanelInfo, position: number): Promise<void> {
+    throw new Error('Not implemented');
   }
 
-  update(projectId: string, state: ProjectState, addToRestoreBuffer = true) {
-    if (addToRestoreBuffer) {
-      this.restoreBuffer.push(projectId, state);
-    }
-
-    return Promise.resolve();
+  updatePage(projectId: string, p: ProjectPage, position: number): Promise<void> {
+    throw new Error('Not implemented');
   }
 
-  undo(projectId: string) {
-    return this.restoreBuffer.pop(projectId);
+  updateServer(projectId: string, p: ServerInfo, position: number): Promise<void> {
+    throw new Error('Not implemented');
+  }
+
+  updateConnector(projectId: string, p: ConnectorInfo, position: number): Promise<void> {
+    throw new Error('Not implemented');
+  }
+
+  deletePanel(projectId: string, id: string): Promise<void> {
+    throw new Error('Not implemented');
+  }
+
+  deletePage(projectId: string, id: string): Promise<void> {
+    throw new Error('Not implemented');
+  }
+
+  deleteServer(projectId: string, id: string): Promise<void> {
+    throw new Error('Not implemented');
+  }
+
+  deleteConnector(projectId: string, id: string): Promise<void> {
+    throw new Error('Not implemented');
   }
 
   get(projectId: string): Promise<ProjectState> {
@@ -71,26 +64,64 @@ export class LocalStorageStore extends ProjectStore {
     return `projectState:${projectId}`;
   }
 
-  update(projectId: string, newState: ProjectState, addToRestoreBuffer = true) {
-    super.update(projectId, newState, addToRestoreBuffer);
-    window.localStorage.setItem(
-      this.makeKey(projectId),
-      JSON.stringify(newState)
-    );
-    return Promise.resolve();
-  }
+  // TODO: implement updaters/deleters
 
   get(projectId: string) {
     return JSON.parse(window.localStorage.getItem(this.makeKey(projectId)));
   }
 }
 
-class RPCStore extends ProjectStore {
-  update(projectId: string, newState: ProjectState, addToRestoreBuffer = true) {
-    super.update(projectId, newState, addToRestoreBuffer);
-    return asyncRPC<UpdateProjectRequest, UpdateProjectResponse>(
-      'updateProject',
-      newState
+class RemoteStore extends ProjectStore {
+  updatePanel(projectId: string, data: PanelInfo, position: number) {
+    return asyncRPC<UpdatePanelRequest, UpdatePanelResponse>('updatePanel', {
+      data,
+      position,
+    });
+  }
+
+  updatePage(projectId: string, data: ProjectPage, position: number) {
+    return asyncRPC<UpdatePageRequest, UpdatePageResponse>('updatePage', {
+      data,
+      position,
+    });
+  }
+
+  updateServer(projectId: string, data: ServerInfo, position: number) {
+    return asyncRPC<UpdateServerRequest, UpdateServerResponse>('updateServer', {
+      data,
+      position,
+    });
+  }
+
+  updateConnector(projectId: string, data: ConnectorInfo, position: number) {
+    return asyncRPC<UpdateConnectorRequest, UpdateConnectorResponse>(
+      'updateConnector',
+      { data, position }
+    );
+  }
+
+  deletePanel(projectId: string, id: string) {
+    return asyncRPC<DeletePanelRequest, DeletePanelResponse>('deletePanel', {
+      id
+    });
+  }
+
+  deletePage(projectId: string, id: string) {
+    return asyncRPC<DeletePageRequest, DeletePageResponse>('deletePage', {
+      id
+    });
+  }
+
+  deleteServer(projectId: string, id: string) {
+    return asyncRPC<DeleteServerRequest, DeleteServerResponse>('deleteServer', {
+      id,
+    });
+  }
+
+  deleteConnector(projectId: string, id: string) {
+    return asyncRPC<DeleteConnectorRequest, DeleteConnectorResponse>(
+      'deleteConnector',
+      { id }
     );
   }
 
@@ -101,21 +132,11 @@ class RPCStore extends ProjectStore {
   }
 }
 
-export function makeStore(mode: string, restoreBufferSize = 50) {
+export function makeStore(mode: string) {
   const storeClass = {
-    desktop: RPCStore,
+    desktop: RemoteStore,
     browser: LocalStorageStore,
-    server: RPCStore,
+    server: RemoteStore,
   }[mode];
-  return new storeClass(restoreBufferSize);
+  return new storeClass();
 }
-
-export const ProjectContext = React.createContext<{
-  state: ProjectState;
-  setState: (a0: Partial<ProjectState>) => void;
-}>({
-  state: new ProjectState(),
-  setState(a) {
-    throw new Error('Context not initialized.');
-  },
-});

@@ -6,7 +6,7 @@ import {
 import { FormGroup } from './components/FormGroup';
 import { Select } from './components/Select';
 import { VENDORS, VENDOR_GROUPS } from './connectors';
-import { ProjectContext } from './ProjectStore';
+import { ProjectContext } from './state';
 
 export function DatabaseConnector({
   connector,

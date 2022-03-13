@@ -6,7 +6,7 @@ import { DEFAULT_PROJECT } from '../shared/state';
 import { Button } from './components/Button';
 import { Link } from './components/Link';
 import { Toggle } from './components/Toggle';
-import { ProjectContext } from './ProjectStore';
+import { ProjectContext } from './state';
 import { SettingsContext } from './Settings';
 import { UrlStateContext } from './urlState';
 

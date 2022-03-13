@@ -41,9 +41,7 @@ test('write project with encrypted secrets, read with nulled secrets', async () 
 
   const testPage = new ProjectPage('My test page');
   testProject.pages = [testPage];
-  const testPanel = new ProgramPanelInfo('python');
-  // TODO: make pageId a required parameter;
-  testPanel.pageId = testPage.id;
+  const testPanel = new ProgramPanelInfo(testPage.id, { type: 'python' });
   testPage.panels = [testPanel];
 
   const testServer = new ServerInfo();
@@ -116,6 +114,7 @@ test('write project with encrypted secrets, read with nulled secrets', async () 
     // Passwords come back as null
     const readProject = await getProject.handler(null, { projectId });
     readProject.id = testProject.id; // id is generated newly on every instantiation which is ok
+    console.trace(readProject);
     // Time objects don't compare well
     readProject.pages[0].panels[0].lastEdited =
       testProject.pages[0].panels[0].lastEdited = null;
@@ -162,4 +161,165 @@ test('newly created project is saved correctly', async () => {
   }
 });
 
-// TODO: test for updates and panel reorder
+test('updates works correctly', async () => {
+  const testProject = new ProjectState();
+  testProject.projectName = ensureProjectFile(testProject.id);
+
+  // Delete and recreate it to be safe
+  try {
+    fs.unlinkSync(testProject.projectName);
+  } catch (e) {
+    /* nothing */
+  }
+  ensureProjectFile(testProject.projectName);
+
+  const testPage = new ProjectPage('My test page');
+  testProject.pages = [testPage];
+  const testPanel = new ProgramPanelInfo(testPage.id, { type: 'python' });
+  testPage.panels = [testPanel];
+  const projectId = testProject.projectName;
+
+  const testServer = new ServerInfo();
+  const testServerPassword = 'taffy';
+  testServer.password_encrypt = new Encrypt(testServerPassword);
+  const testServerPassphrase = 'kewl';
+  testServer.passphrase_encrypt = new Encrypt(testServerPassphrase);
+  testProject.servers.push(testServer);
+
+  const testDatabase = new DatabaseConnectorInfo();
+  const testDatabasePassword = 'kevin';
+  testDatabase.database.password_encrypt = new Encrypt(testDatabasePassword);
+  testProject.connectors.push(testDatabase);
+
+  try {
+    await makeProject.handler(null, { projectId });
+    // Add the server
+    await updateServer.handler(projectId, {
+      data: testServer,
+      position: 0,
+    });
+    // Add the database
+    await updateConnector.handler(projectId, {
+      data: testDatabase,
+      position: 0,
+    });
+    // Add the page
+    await updatePage.handler(projectId, {
+      data: testPage,
+      position: 0,
+    });
+    // Add the panel
+    await updatePanel.handler(projectId, {
+      data: testPanel,
+      position: 0,
+    });
+
+    // Update the panel
+    testPanel.content = 'DM_getPanel(1)';
+    await updatePanel.handler(projectId, {
+      data: testPanel,
+      position: 0,
+    });
+
+    // Update the page
+    testPage.name = 'A better name';
+    await updatePage.handler(projectId, {
+      data: testPage,
+      position: 0,
+    });
+
+    // Update the server
+    testServer.name = 'A great server';
+    await updateServer.handler(projectId, {
+      data: testServer,
+      position: 0,
+    });
+
+    // Update the database
+    testDatabase.name = 'A great database';
+    await updateConnector.handler(projectId, {
+      data: testDatabase,
+      position: 0,
+    });
+
+    const read = await getProject.handler(null, {
+      projectId: testProject.projectName,
+    });
+    expect(read.pages[0].name).toBe('A better name');
+    expect(read.servers[0].name).toBe('A great server');
+    expect(read.connectors[0].name).toBe('A great database');
+    expect(read.pages[0].panels[0].lastEdited > testPanel.lastEdited);
+    read.pages[0].panels[0].lastEdited = testPanel.lastEdited = null;
+    expect(read.pages[0].panels[0]).toStrictEqual(testPanel);
+  } finally {
+    const projectPath = ensureProjectFile(testProject.projectName);
+    try {
+      fs.unlinkSync(projectPath);
+    } catch (e) {
+      console.error(e);
+    }
+  }
+});
+
+test('panel reordering works correctly', async () => {
+  const testProject = new ProjectState();
+  testProject.projectName = ensureProjectFile(testProject.id);
+
+  // Delete and recreate it to be safe
+  try {
+    fs.unlinkSync(testProject.projectName);
+  } catch (e) {
+    /* nothing */
+  }
+  ensureProjectFile(testProject.projectName);
+
+  const testPage = new ProjectPage('My test page');
+  testProject.pages = [testPage];
+  const testPanel1 = new ProgramPanelInfo(testPage.id, { type: 'python' });
+  const testPanel2 = new ProgramPanelInfo(testPage.id, { type: 'javascript' });
+  testPage.panels = [testPanel1, testPanel2];
+
+  const projectId = testProject.projectName;
+
+  try {
+    await makeProject.handler(null, { projectId });
+
+    // Add the page
+    await updatePage.handler(projectId, {
+      data: testPage,
+      position: 0,
+    });
+    // Add the panels
+    await updatePanel.handler(projectId, {
+      data: testPanel1,
+      position: 0,
+    });
+    await updatePanel.handler(projectId, {
+      data: testPanel2,
+      position: 1,
+    });
+
+    // Move 2 to 1
+    await updatePanel.handler(projectId, {
+      data: testPanel2,
+      position: 0,
+    });
+
+    const read = await getProject.handler(null, {
+      projectId,
+    });
+    // Don't try to compare lastEdited
+    [...read.pages[0].panels, testPanel2, testPanel1].forEach((p) => {
+      p.lastEdited = null;
+    });
+    // Reversed
+    expect(read.pages[0].panels).toStrictEqual([testPanel2, testPanel1]);
+  } finally {
+    const projectPath = ensureProjectFile(testProject.projectName);
+    try {
+      fs.unlinkSync(projectPath);
+    } catch (e) {
+      console.error(e);
+    }
+  }
+});
