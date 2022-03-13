@@ -82,6 +82,7 @@ export function useDashboardData(
 
 export function Dashboard({
   page: { id: pageId, panels },
+  pageIndex,
   projectId,
   updatePage,
   isExport,
@@ -89,7 +90,8 @@ export function Dashboard({
 }: {
   projectId: string;
   page: ProjectPage;
-  updatePage: (p: ProjectPage) => void;
+  pageIndex: number;
+  updatePage: (p: ProjectPage, position: number) => void;
   isExport?: boolean;
   modeFeatures: { dashboard: boolean };
 }) {
@@ -141,7 +143,7 @@ export function Dashboard({
             label="External link"
             onChange={(v: string) => {
               page.visibility = v as ProjectPageVisibility;
-              updatePage(page);
+              updatePage(page, pageIndex);
             }}
             value={page.visibility}
             tooltip={
@@ -157,7 +159,7 @@ export function Dashboard({
             label="Refresh every"
             onChange={(v: string) => {
               page.refreshPeriod = +v;
-              updatePage(page);
+              updatePage(page, pageIndex);
             }}
             value={String(page.refreshPeriod)}
           >

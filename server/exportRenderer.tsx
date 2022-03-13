@@ -17,7 +17,8 @@ export function renderPage(project: ProjectState, pageId: string) {
     >
       <Dashboard
         projectId={project.projectName}
-        updatePage={(p: ProjectPage) => {}}
+        updatePage={(p: ProjectPage, i: number) => {}}
+        pageIndex={0}
         page={page}
         isExport
         modeFeatures={{ dashboard: true }}

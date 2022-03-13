@@ -1,5 +1,6 @@
 import React from 'react';
 import { MODE } from '../shared/constants';
+import log from '../shared/log';
 import {
   ConnectorInfo,
   PanelInfo,
@@ -52,8 +53,6 @@ export function useProjectState(
           window.location.href = '/';
         }
 
-        // Why are we doing this here?
-        state.projectName = projectId;
         setProjectState(state);
       }
 
@@ -64,26 +63,26 @@ export function useProjectState(
     [projectId]
   );
 
-  function makeUpdater<T>(
+  function makeUpdater<T extends { id: string }>(
     list: Array<T>,
     storeUpdate: (projectId: string, obj: T, position: number) => Promise<void>
   ): (obj: T, index: number) => Promise<void> {
-    return function update(id: string, obj: T, index: number) {
+    return function update(obj: T, index: number) {
       // Actually an insert
       if (index === -1) {
         list.push(obj);
         storeUpdate(state.projectName, obj, list.length - 1);
-        setProjectState(state);
+        setState(state);
         return;
       }
 
       list[index] = obj;
-      setProjectState(state);
+      setState(state);
       return storeUpdate(state.projectName, obj, index);
     };
   }
 
-  function makeDeleter<T>(
+  function makeDeleter<T extends { id: string }>(
     list: Array<T>,
     storeDelete: (projectId: string, id: string) => Promise<void>
   ): (id: string) => Promise<void> {
@@ -94,7 +93,7 @@ export function useProjectState(
       }
 
       list.splice(index, 1);
-      setProjectState(state);
+      setState(state);
       return storeDelete(state.projectName, list[index].id);
     };
   }
@@ -103,8 +102,19 @@ export function useProjectState(
     updatePage: makeUpdater(state.pages, store.updatePage),
     deletePage: makeDeleter(state.pages, store.deletePage),
 
-    updatePanel: makeUpdater(state.panels, store.updatePanel),
-    deletePanel: makeDeleter(state.panels, store.deletePanel),
+    updatePanel(obj: PanelInfo, index: number) {
+      const page = state.pages.find((p) => obj.pageId);
+      return makeUpdater(page.panels, store.updatePanel)(obj, index);
+    },
+    deletePanel(id: string) {
+      const page = state.pages.find(
+        (p) => p.panels.filter((pan) => pan.id === id).length > 0
+      );
+      if (!page) {
+        return;
+      }
+      return makeDeleter(page.panels, store.deletePanel)(id);
+    },
 
     updateConnector: makeUpdater(state.connectors, store.updateConnector),
     deleteConnector: makeDeleter(state.connectors, store.deleteConnector),

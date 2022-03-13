@@ -39,9 +39,7 @@ export function ConnectorList({
             <Connector
               key={dc.id}
               connector={dc}
-              updateConnector={(dc: ConnectorInfo) =>
-                updateConnector(dc, i)
-              }
+              updateConnector={(dc: ConnectorInfo) => updateConnector(dc, i)}
               deleteConnector={() => deleteConnector(dc.id)}
             />
           ))}

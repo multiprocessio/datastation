@@ -1,11 +1,9 @@
 import { IconTrash } from '@tabler/icons';
 import * as React from 'react';
 import { MODE_FEATURES } from '../shared/constants';
-import { EVAL_ERRORS } from '../shared/errors';
 import {
   DEFAULT_PROJECT,
   GraphPanelInfo,
-  PanelResultMeta,
   ProjectPage,
   ProjectState,
   TablePanelInfo,
@@ -15,7 +13,6 @@ import { Confirm } from './components/Confirm';
 import { Input } from './components/Input';
 import { Link } from './components/Link';
 import { Dashboard } from './dashboard';
-import { PanelPlayWarning } from './errors';
 import { NotFound } from './NotFound';
 import { VISUAL_PANELS } from './Panel';
 import { PanelList } from './PanelList';
@@ -23,26 +20,12 @@ import { PANEL_UI_DETAILS } from './panels';
 import { Scheduler } from './scheduler';
 import { UrlStateContext } from './urlState';
 
-export function makeReevalPanel(
-  page: ProjectPage,
-  state: ProjectState,
-  updatePage: (page: ProjectPage) => void
-) {
-  return async function reevalPanel(panelId: string, reset?: boolean) {
+export function makeReevalPanel(page: ProjectPage, state: ProjectState) {
+  return async function reevalPanel(panelId: string) {
     const { connectors, servers } = state;
-    const start = new Date();
 
     const panel = page.panels.find((p) => p.id === panelId);
     if (!panel) {
-      return;
-    }
-    let resultMeta = panel.resultMeta || new PanelResultMeta();
-    resultMeta.loading = !reset;
-
-    panel.resultMeta = resultMeta;
-    updatePage(page);
-    if (reset) {
-      resultMeta.lastRun = null;
       return;
     }
 
@@ -53,27 +36,7 @@ export function makeReevalPanel(
         idMap[p.name] = p.id;
       });
       const panelUIDetails = PANEL_UI_DETAILS[panel.type];
-      const { value, size, contentType, preview, stdout, shape, arrayCount } =
-        await panelUIDetails.eval(
-          panel,
-          page.panels,
-          idMap,
-          connectors,
-          servers
-        );
-      panel.resultMeta = {
-        lastRun: new Date(),
-        elapsed: new Date().valueOf() - start.valueOf(),
-        value,
-        preview,
-        stdout,
-        shape,
-        arrayCount,
-        contentType,
-        size,
-        loading: false,
-      };
-      updatePage(page);
+      await panelUIDetails.eval(panel, page.panels, idMap, connectors, servers);
 
       // Re-run all dependent visual panels
       if (!VISUAL_PANELS.includes(panel.type)) {
@@ -88,40 +51,20 @@ export function makeReevalPanel(
           }
         }
       }
-    } catch (e) {
-      if (EVAL_ERRORS.map((cls) => new (cls as any)().name).includes(e.name)) {
-        e = new PanelPlayWarning(e.message);
-      }
-
-      panel.resultMeta = {
-        loading: false,
-        elapsed: new Date().valueOf() - start.valueOf(),
-        lastRun: new Date(),
-        exception: e,
-        stdout: e.stdout,
-        preview: '',
-        contentType: 'unknown',
-        size: 0,
-        arrayCount: null,
-        shape: { kind: 'unknown' },
-      };
-      updatePage(page);
-    }
+    } catch (e) {}
   };
 }
 
 export function PageList({
   state,
-  addPage,
   deletePage,
   updatePage,
   setPageIndex,
   pageIndex,
 }: {
   state: ProjectState;
-  addPage: (page: ProjectPage) => void;
-  deletePage: (i: number) => void;
-  updatePage: (page: ProjectPage) => void;
+  deletePage: (id: string) => void;
+  updatePage: (page: ProjectPage, position: number) => void;
   setPageIndex: (i: number) => void;
   pageIndex: number;
 }) {
@@ -137,7 +80,7 @@ export function PageList({
           <Button
             type="primary"
             onClick={() => {
-              addPage(new ProjectPage('Untitled Page'));
+              updatePage(new ProjectPage('Untitled Page'), -1);
             }}
           >
             Add a page
@@ -167,7 +110,7 @@ export function PageList({
   }
 
   const panelResults = page.panels.map((p) => p.resultMeta);
-  const reevalPanel = makeReevalPanel(page, state, updatePage);
+  const reevalPanel = makeReevalPanel(page, state);
 
   const MainChild =
     {
@@ -189,7 +132,7 @@ export function PageList({
               <Input
                 onChange={(value: string) => {
                   page.name = value;
-                  updatePage(page);
+                  updatePage(page, i);
                 }}
                 value={page.name}
               />
@@ -198,7 +141,7 @@ export function PageList({
                 <Confirm
                   right
                   onConfirm={() => {
-                    deletePage(pageIndex);
+                    deletePage(page.id);
                     setPageIndex(Math.min(state.pages.length - 1, 0));
                   }}
                   message="delete this page"
@@ -233,7 +176,7 @@ export function PageList({
         <Button
           className="add-page"
           onClick={() => {
-            addPage(new ProjectPage('Untitled Page'));
+            updatePage(new ProjectPage('Untitled Page'), -1);
             setPageIndex(state.pages.length - 1);
           }}
         >
@@ -270,6 +213,8 @@ export function PageList({
 
       <MainChild
         page={page}
+        pageIndex={pageIndex}
+        updatePage={updatePage}
         projectId={state.projectName}
         reevalPanel={reevalPanel}
         panelResults={panelResults}

@@ -1,4 +1,12 @@
 import {
+  DeleteConnectorRequest,
+  DeleteConnectorResponse,
+  DeletePageRequest,
+  DeletePageResponse,
+  DeletePanelRequest,
+  DeletePanelResponse,
+  DeleteServerRequest,
+  DeleteServerResponse,
   GetProjectRequest,
   GetProjectResponse,
   UpdateConnectorRequest,
@@ -9,32 +17,46 @@ import {
   UpdatePanelResponse,
   UpdateServerRequest,
   UpdateServerResponse,
-  DeleteConnectorRequest,
-  DeleteConnectorResponse,
-  DeletePageRequest,
-  DeletePageResponse,
-  DeletePanelRequest,
-  DeletePanelResponse,
-  DeleteServerRequest,
-  DeleteServerResponse,
 } from '../shared/rpc';
-import { ProjectState } from '../shared/state';
+import {
+  ConnectorInfo,
+  PanelInfo,
+  ProjectPage,
+  ProjectState,
+  ServerInfo,
+} from '../shared/state';
 import { asyncRPC } from './asyncRPC';
 
 export class ProjectStore {
-  updatePanel(projectId: string, p: PanelInfo, position: number): Promise<void> {
+  updatePanel(
+    projectId: string,
+    p: PanelInfo,
+    position: number
+  ): Promise<void> {
     throw new Error('Not implemented');
   }
 
-  updatePage(projectId: string, p: ProjectPage, position: number): Promise<void> {
+  updatePage(
+    projectId: string,
+    p: ProjectPage,
+    position: number
+  ): Promise<void> {
     throw new Error('Not implemented');
   }
 
-  updateServer(projectId: string, p: ServerInfo, position: number): Promise<void> {
+  updateServer(
+    projectId: string,
+    p: ServerInfo,
+    position: number
+  ): Promise<void> {
     throw new Error('Not implemented');
   }
 
-  updateConnector(projectId: string, p: ConnectorInfo, position: number): Promise<void> {
+  updateConnector(
+    projectId: string,
+    p: ConnectorInfo,
+    position: number
+  ): Promise<void> {
     throw new Error('Not implemented');
   }
 
@@ -102,13 +124,13 @@ class RemoteStore extends ProjectStore {
 
   deletePanel(projectId: string, id: string) {
     return asyncRPC<DeletePanelRequest, DeletePanelResponse>('deletePanel', {
-      id
+      id,
     });
   }
 
   deletePage(projectId: string, id: string) {
     return asyncRPC<DeletePageRequest, DeletePageResponse>('deletePage', {
-      id
+      id,
     });
   }
 

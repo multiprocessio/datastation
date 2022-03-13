@@ -7,28 +7,31 @@ export function Scheduler({
   page,
   updatePage,
   modeFeatures,
+  pageIndex,
 }: {
   page: ProjectPage;
-  updatePage: (page: ProjectPage) => void;
+  pageIndex: number;
+  updatePage: (page: ProjectPage, index: number) => void;
   modeFeatures: { scheduledExports: boolean };
 }) {
   const { schedules } = page;
 
+  /* TODO: none of these are right. Need to update schedule directly. */
   function addSchedule() {
     schedules.push(new ScheduledExport());
-    updatePage(page);
+    updatePage(page, pageIndex);
   }
 
   function removeSchedule(id: string) {
     const at = schedules.findIndex((ps) => ps.id === id);
     schedules.splice(at, 1);
-    updatePage(page);
+    updatePage(page, pageIndex);
   }
 
   function setSchedule(s: ScheduledExport) {
     const i = schedules.findIndex((ps) => ps.id === s.id);
     schedules[i] = s;
-    updatePage(page);
+    updatePage(page, pageIndex);
   }
 
   if (!modeFeatures.scheduledExports) {

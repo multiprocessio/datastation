@@ -18,6 +18,7 @@ import * as CSV from 'papaparse';
 import * as React from 'react';
 import { toString } from 'shape';
 import { MODE, MODE_FEATURES } from '../shared/constants';
+import { EVAL_ERRORS } from '../shared/errors';
 import log from '../shared/log';
 import { deepEquals } from '../shared/object';
 import {
@@ -220,22 +221,43 @@ export function PanelPlayWarningWithLinks({
   return <Alert type="warning" children={children} />;
 }
 
+function PanelError({ panels, e }: { panels: Array<PanelInfo>; e: Error }) {
+  if (!e) {
+    return null;
+  }
+
+  if (EVAL_ERRORS.map((cls) => new (cls as any)().name).includes(e.name)) {
+    e = new PanelPlayWarning(e.message);
+  }
+
+  if (e instanceof PanelPlayWarning) {
+    return <PanelPlayWarningWithLinks panels={panels} msg={e.message} />;
+  }
+
+  return (
+    <Alert type="error">
+      <div>Error evaluating panel:</div>
+      <pre>
+        <code>{e.stack || e.message || String(e)}</code>
+      </pre>
+    </Alert>
+  );
+}
+
 export function Panel({
   panel,
   updatePanel,
   reevalPanel,
   panelIndex,
   removePanel,
-  movePanel,
   panels,
 }: {
   panel: PanelInfo;
-  updatePanel: (d: PanelInfo) => void;
+  updatePanel: (d: PanelInfo, position?: number) => void;
   panelResults: Array<PanelResultMeta>;
   reevalPanel: (id: string) => void;
   panelIndex: number;
-  removePanel: (i: number) => void;
-  movePanel: (from: number, to: number) => void;
+  removePanel: (id: string) => void;
   panels: Array<PanelInfo>;
 }) {
   // Fall back to empty dict in case panel.type names ever change
@@ -331,9 +353,7 @@ export function Panel({
               <Button
                 icon
                 disabled={panelIndex === 0}
-                onClick={() => {
-                  movePanel(panelIndex, panelIndex - 1);
-                }}
+                onClick={() => updatePanel(panel, panelIndex - 1)}
               >
                 <IconChevronUp />
               </Button>
@@ -342,9 +362,7 @@ export function Panel({
               <Button
                 icon
                 disabled={panelIndex === panels.length - 1}
-                onClick={() => {
-                  movePanel(panelIndex, panelIndex + 1);
-                }}
+                onClick={() => updatePanel(panel, panelIndex + 1)}
               >
                 <IconChevronDown />
               </Button>
@@ -493,7 +511,7 @@ export function Panel({
               </span>
               <span title="Delete Panel">
                 <Confirm
-                  onConfirm={() => removePanel(panelIndex)}
+                  onConfirm={() => removePanel(panel.id)}
                   message="delete this panel"
                   action="Delete"
                   render={(confirm: () => void) => (
@@ -529,25 +547,7 @@ export function Panel({
                       updatePanel={updatePanel}
                     />
                   )}
-                  {results.exception instanceof PanelPlayWarning ? (
-                    <PanelPlayWarningWithLinks
-                      panels={panels}
-                      msg={results.exception.message}
-                    />
-                  ) : (
-                    results.exception && (
-                      <Alert type="error">
-                        <div>Error evaluating panel:</div>
-                        <pre>
-                          <code>
-                            {results.exception.stack ||
-                              results.exception.message ||
-                              String(results.exception)}
-                          </code>
-                        </pre>
-                      </Alert>
-                    )
-                  )}
+                  <PanelError panels={panels} e={results.exception} />
                   {info}
                 </div>
                 {panelUIDetails.previewable && (

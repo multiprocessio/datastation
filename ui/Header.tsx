@@ -2,20 +2,16 @@ import { IconMenu2 } from '@tabler/icons';
 import * as React from 'react';
 import { APP_NAME, MODE } from '../shared/constants';
 import '../shared/polyfill';
-import { DEFAULT_PROJECT } from '../shared/state';
 import { Button } from './components/Button';
 import { Link } from './components/Link';
 import { Toggle } from './components/Toggle';
-import { ProjectContext } from './state';
 import { SettingsContext } from './Settings';
 import { UrlStateContext } from './urlState';
 
 export function Header() {
   const {
     state: { projectId },
-    setState: setUrlState,
   } = React.useContext(UrlStateContext);
-  const { setState: setProjectState } = React.useContext(ProjectContext);
   const { state: settings, setState: setSettings } =
     React.useContext(SettingsContext);
 
@@ -109,12 +105,15 @@ export function Header() {
                       <span title="Drop all state and load a sample project.">
                         <Button
                           onClick={() => {
-                            setProjectState(DEFAULT_PROJECT);
-                            setUrlState({
-                              projectId: DEFAULT_PROJECT.projectName,
-                              page: 0,
-                              view: 'editor',
-                            });
+                            // TODO: figure out how to set default state
+                            {
+                              /* setProjectState(DEFAULT_PROJECT);
+                                setUrlState({
+                                projectId: DEFAULT_PROJECT.projectName,
+                                page: 0,
+                                view: 'editor',
+                                }); */
+                            }
                           }}
                         >
                           Load Default Project
