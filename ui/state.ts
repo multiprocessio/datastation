@@ -26,6 +26,33 @@ export type ProjectCrud = {
   deleteServer: (serverId: string) => Promise<void>;
 };
 
+const defaultCrud = {
+  updateServer(server: ServerInfo, position: number) {
+    throw new Error('Context not initialized.');
+  },
+  deleteServer(serverId: string) {
+    throw new Error('Context not initialized.');
+  },
+  updateConnector(connector: ConnectorInfo, position: number) {
+    throw new Error('Context not initialized.');
+  },
+  deleteConnector(connectorId: string) {
+    throw new Error('Context not initialized.');
+  },
+  updatePanel(panel: PanelInfo, position: number) {
+    throw new Error('Context not initialized.');
+  },
+  deletePanel(panelId: string) {
+    throw new Error('Context not initialized.');
+  },
+  updatePage(page: ProjectPage, position: number) {
+    throw new Error('Context not initialized.');
+  },
+  deletePage(pageId: string) {
+    throw new Error('Context not initialized.');
+  },
+};
+
 export function useProjectState(
   projectId: string,
   currentPage: number
@@ -58,6 +85,8 @@ export function useProjectState(
 
       if (projectId) {
         fetch();
+      } else {
+        setProjectState(new ProjectState());
       }
     },
     [projectId]
@@ -98,30 +127,32 @@ export function useProjectState(
     };
   }
 
-  const crud = {
-    updatePage: makeUpdater(state.pages, store.updatePage),
-    deletePage: makeDeleter(state.pages, store.deletePage),
+  const crud = !state
+    ? defaultCrud
+    : {
+        updatePage: makeUpdater(state.pages, store.updatePage),
+        deletePage: makeDeleter(state.pages, store.deletePage),
 
-    updatePanel(obj: PanelInfo, index: number) {
-      const page = state.pages.find((p) => obj.pageId);
-      return makeUpdater(page.panels, store.updatePanel)(obj, index);
-    },
-    deletePanel(id: string) {
-      const page = state.pages.find(
-        (p) => p.panels.filter((pan) => pan.id === id).length > 0
-      );
-      if (!page) {
-        return;
-      }
-      return makeDeleter(page.panels, store.deletePanel)(id);
-    },
+        updatePanel(obj: PanelInfo, index: number) {
+          const page = state.pages.find((p) => obj.pageId);
+          return makeUpdater(page.panels, store.updatePanel)(obj, index);
+        },
+        deletePanel(id: string) {
+          const page = state.pages.find(
+            (p) => p.panels.filter((pan) => pan.id === id).length > 0
+          );
+          if (!page) {
+            return;
+          }
+          return makeDeleter(page.panels, store.deletePanel)(id);
+        },
 
-    updateConnector: makeUpdater(state.connectors, store.updateConnector),
-    deleteConnector: makeDeleter(state.connectors, store.deleteConnector),
+        updateConnector: makeUpdater(state.connectors, store.updateConnector),
+        deleteConnector: makeDeleter(state.connectors, store.deleteConnector),
 
-    updateServer: makeUpdater(state.servers, store.updateServer),
-    deleteServer: makeDeleter(state.servers, store.deleteServer),
-  };
+        updateServer: makeUpdater(state.servers, store.updateServer),
+        deleteServer: makeDeleter(state.servers, store.deleteServer),
+      };
 
   return [state, crud];
 }
@@ -131,30 +162,5 @@ export const ProjectContext = React.createContext<{
   crud: ProjectCrud;
 }>({
   state: new ProjectState(),
-  crud: {
-    updateServer(server: ServerInfo, position: number) {
-      throw new Error('Context not initialized.');
-    },
-    deleteServer(serverId: string) {
-      throw new Error('Context not initialized.');
-    },
-    updateConnector(connector: ConnectorInfo, position: number) {
-      throw new Error('Context not initialized.');
-    },
-    deleteConnector(connectorId: string) {
-      throw new Error('Context not initialized.');
-    },
-    updatePanel(panel: PanelInfo, position: number) {
-      throw new Error('Context not initialized.');
-    },
-    deletePanel(panelId: string) {
-      throw new Error('Context not initialized.');
-    },
-    updatePage(page: ProjectPage, position: number) {
-      throw new Error('Context not initialized.');
-    },
-    deletePage(pageId: string) {
-      throw new Error('Context not initialized.');
-    },
-  },
+  crud: defaultCrud,
 });
