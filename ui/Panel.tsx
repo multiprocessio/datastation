@@ -241,7 +241,7 @@ export function Panel({
   // Fall back to empty dict in case panel.type names ever change
   const panelUIDetails =
     PANEL_UI_DETAILS[panel.type] || PANEL_UI_DETAILS.literal;
-  const blank = panelUIDetails.factory();
+  const blank = panelUIDetails.factory(panel.pageId);
   blank.id = panel.id;
   blank.name = panel.name;
   const isBlank = deepEquals(panel, blank);
@@ -354,7 +354,9 @@ export function Panel({
               value={panel.type}
               onChange={(value: string) => {
                 const panelType = value as PanelInfoType;
-                const newPanel = PANEL_UI_DETAILS[panelType].factory();
+                const newPanel = PANEL_UI_DETAILS[panelType].factory(
+                  panel.pageId
+                );
                 (panel as any)[panelType] = newPanel[panelType];
                 panel.type = panelType;
                 updatePanel(panel);

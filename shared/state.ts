@@ -254,13 +254,19 @@ export class PanelInfo {
   lastEdited: Date;
   pageId: string;
 
-  constructor(type: PanelInfoType, name?: string, content?: string) {
+  constructor(
+    type: PanelInfoType,
+    pageId: string,
+    name?: string,
+    content?: string
+  ) {
     this.content = content || '';
     this.type = type;
     this.name = name || '';
     this.id = uuid.v4();
     this.resultMeta = new PanelResultMeta();
     this.lastEdited = new Date();
+    this.pageId = pageId;
   }
 
   static fromJSON(raw: any): PanelInfo {
@@ -273,7 +279,10 @@ export class PanelInfo {
       delete raw.sql;
     }
 
-    let pit: PanelInfo = mergeDeep(new PanelInfo(raw.type || 'literal'), raw);
+    let pit: PanelInfo = mergeDeep(
+      new PanelInfo(raw.type || 'literal', pit.pageId),
+      raw
+    );
 
     pit.lastEdited =
       typeof raw.lastEdited === 'string'
@@ -282,28 +291,28 @@ export class PanelInfo {
 
     switch (pit.type) {
       case 'table':
-        pit = mergeDeep(new TablePanelInfo(), pit);
+        pit = mergeDeep(new TablePanelInfo(pit.pageId), pit);
         break;
       case 'http':
-        pit = mergeDeep(new HTTPPanelInfo(), pit);
+        pit = mergeDeep(new HTTPPanelInfo(pit.pageId), pit);
         break;
       case 'graph':
-        pit = mergeDeep(new GraphPanelInfo(), pit);
+        pit = mergeDeep(new GraphPanelInfo(pit.pageId), pit);
         break;
       case 'program':
-        pit = mergeDeep(new ProgramPanelInfo(), pit);
+        pit = mergeDeep(new ProgramPanelInfo(pit.pageId), pit);
         break;
       case 'literal':
-        pit = mergeDeep(new LiteralPanelInfo(), pit);
+        pit = mergeDeep(new LiteralPanelInfo(pit.pageId), pit);
         break;
       case 'database':
-        pit = mergeDeep(new DatabasePanelInfo(), pit);
+        pit = mergeDeep(new DatabasePanelInfo(pit.pageId), pit);
         break;
       case 'file':
-        pit = mergeDeep(new FilePanelInfo(), pit);
+        pit = mergeDeep(new FilePanelInfo(pit.pageId), pit);
         break;
       case 'filagg':
-        pit = mergeDeep(new FilterAggregatePanelInfo(), pit);
+        pit = mergeDeep(new FilterAggregatePanelInfo(pit.pageId), pit);
         break;
     }
 
@@ -317,14 +326,17 @@ export class ProgramPanelInfo extends PanelInfo {
     type: SupportedLanguages;
   };
 
-  constructor({
-    name,
-    type,
-    content,
-  }: Partial<
-    ProgramPanelInfo['program'] & { content: string; name: string }
-  > = {}) {
-    super('program', name || '', content || '');
+  constructor(
+    pageId: string,
+    {
+      name,
+      type,
+      content,
+    }: Partial<
+      ProgramPanelInfo['program'] & { content: string; name: string }
+    > = {}
+  ) {
+    super('program', pageId, name || '', content || '');
     this.program = {
       type: type || 'python',
     };
@@ -354,11 +366,12 @@ export class GraphPanelInfo extends PanelInfo {
   };
 
   constructor(
+    pageId: string,
     defaults: Partial<
       GraphPanelInfo['graph'] & { content: string; name: string }
     > = {}
   ) {
-    super('graph', defaults.name, defaults.content);
+    super('graph', pageId, defaults.name, defaults.content);
     this.graph = {
       panelSource: defaults.panelSource || '',
       x: defaults.x || '',
@@ -437,11 +450,12 @@ export class DatabasePanelInfo extends PanelInfo {
   };
 
   constructor(
+    pageId: string,
     panel: Partial<
       DatabasePanelInfo['database'] & { content: string; name: string }
     > = {}
   ) {
-    super('database', panel.name || '', panel.content || '');
+    super('database', pageId, panel.name || '', panel.content || '');
     this.database = {
       connectorId: panel.connectorId || '',
       range: panel.range || {
@@ -459,8 +473,13 @@ export class DatabasePanelInfo extends PanelInfo {
 export class HTTPPanelInfo extends PanelInfo {
   http: HTTPConnectorInfo;
 
-  constructor(name?: string, http?: HTTPConnectorInfo, content?: string) {
-    super('http', name, content);
+  constructor(
+    pageId: string,
+    name?: string,
+    http?: HTTPConnectorInfo,
+    content?: string
+  ) {
+    super('http', pageId, name, content);
     this.http = http || new HTTPConnectorInfo();
   }
 }
@@ -479,11 +498,12 @@ export class TablePanelInfo extends PanelInfo {
   };
 
   constructor(
+    pageId: string,
     defaults: Partial<
       TablePanelInfo['table'] & { content: string; name: string }
     > = {}
   ) {
-    super('table', defaults.name, defaults.content);
+    super('table', pageId, defaults.name, defaults.content);
     this.table = {
       columns: defaults.columns || [],
       panelSource: defaults.panelSource || '',
@@ -516,9 +536,10 @@ export class FilterAggregatePanelInfo extends PanelInfo {
   };
 
   constructor(
+    pageId: string,
     panel: Partial<FilterAggregatePanelInfo['filagg'] & { name: string }> = {}
   ) {
-    super('filagg', panel.name || '', '');
+    super('filagg', pageId, panel.name || '', '');
     this.filagg = {
       panelSource: panel.panelSource || '',
       filter: panel.filter || '',
@@ -546,9 +567,10 @@ export class FilePanelInfo extends PanelInfo {
   };
 
   constructor(
+    pageId: string,
     panel: Partial<FilePanelInfo['file'] & { panelName: string }> = {}
   ) {
-    super('file', panel.panelName, '');
+    super('file', pageId, panel.panelName, '');
     this.file = {
       name: panel.name || '',
       content: panel.content || new ArrayBuffer(0),
@@ -562,14 +584,17 @@ export class LiteralPanelInfo extends PanelInfo {
     contentTypeInfo: ContentTypeInfo;
   };
 
-  constructor({
-    name,
-    content,
-    contentTypeInfo,
-  }: Partial<
-    LiteralPanelInfo['literal'] & { content: string; name: string }
-  > = {}) {
-    super('literal', name || '', content || '');
+  constructor(
+    pageId: string,
+    {
+      name,
+      content,
+      contentTypeInfo,
+    }: Partial<
+      LiteralPanelInfo['literal'] & { content: string; name: string }
+    > = {}
+  ) {
+    super('literal', pageId, name || '', content || '');
     this.literal = {
       contentTypeInfo: contentTypeInfo || new ContentTypeInfo(),
     };
@@ -732,26 +757,28 @@ export class ProjectState {
 }
 
 export const DEFAULT_PROJECT: ProjectState = (() => {
-  const ppi = new ProgramPanelInfo({
+  const page = new ProjectPage('CSV Discovery Example');
+
+  const ppi = new ProgramPanelInfo(page.id, {
     name: 'Transform with SQL',
     type: 'sql',
     content: `SELECT name, age+5 AS age FROM DM_getPanel('Raw CSV Text');`,
   });
 
-  const gpi = new GraphPanelInfo({ name: 'Display' });
+  const gpi = new GraphPanelInfo(page.id, { name: 'Display' });
   gpi.graph.ys = [{ field: 'age', label: 'Age' }];
   gpi.graph.x = 'name';
   gpi.graph.panelSource = ppi.id;
 
-  return new ProjectState('Example project', [
-    new ProjectPage('CSV Discovery Example', [
-      new LiteralPanelInfo({
-        name: 'Raw CSV Text',
-        content: 'name,age\nMorgan,12\nJames,17',
-        contentTypeInfo: new ContentTypeInfo('text/csv'),
-      }),
-      ppi,
-      gpi,
-    ]),
-  ]);
+  page.panels = [
+    new LiteralPanelInfo(page.id, {
+      name: 'Raw CSV Text',
+      content: 'name,age\nMorgan,12\nJames,17',
+      contentTypeInfo: new ContentTypeInfo('text/csv'),
+    }),
+    ppi,
+    gpi,
+  ];
+
+  return new ProjectState('Example project', [page]);
 })();

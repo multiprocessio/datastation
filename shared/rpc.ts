@@ -10,16 +10,28 @@ import {
 export type GetProjectRequest = { projectId: string };
 export type GetProjectResponse = ProjectState | null;
 
-export type UpdatePanelRequest = PanelInfo;
+export type UpdatePanelRequest = {
+  position: number;
+  data: PanelInfo;
+};
 export type UpdatePanelResponse = void;
 
-export type UpdateConnectorRequest = ConnectorInfo;
+export type UpdateConnectorRequest = {
+  position: number;
+  data: ConnectorInfo;
+};
 export type UpdateConnectorResponse = void;
 
-export type UpdateServerRequest = ServerInfo;
+export type UpdateServerRequest = {
+  position: number;
+  data: ServerInfo;
+};
 export type UpdateServerResponse = void;
 
-export type UpdatePageRequest = ProjectPage;
+export type UpdatePageRequest = {
+  position: number;
+  data: ProjectPage;
+};
 export type UpdatePageResponse = void;
 
 export type MakeProjectRequest = { projectId: string };

@@ -36,6 +36,6 @@ export interface PanelUIDetails<T extends PanelInfo> {
   previewable: boolean;
   hasStdout: boolean;
   info: ({ panel }: { panel: T }) => React.ReactElement | null;
-  factory: () => T;
+  factory: (pageId: string) => T;
   dashboard?: boolean;
 }

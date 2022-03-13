@@ -31,22 +31,28 @@ export class GenericCrud<T extends { id: string }> {
       values
     );
     const mapped: Array<T> = rows.map(function mapObject({
-      json_data,
+      data_json,
     }: {
-      json_data: string;
+      data_json: string;
     }) {
-      return JSON.parse(json_data) as T;
+      return JSON.parse(data_json) as T;
     });
     return mapped;
   }
 
-  async getOne(db: sqlite.Database, id: string) {
+  async getOne(db: sqlite.Database, id: string): Promise<[T, number]> {
     const stubMaker = this.stubMaker();
     const row = await db.get(
-      `SELECT * FROM ${this.entity} WHERE id = ${stubMaker()}`,
+      `SELECT data_json, position FROM ${
+        this.entity
+      } WHERE id = ${stubMaker()}`,
       [id]
     );
-    return JSON.parse(row);
+    if (!row) {
+      return [null, -1];
+    }
+
+    return [JSON.parse(row.data_json), row.position];
   }
 
   async del(db: sqlite.Database, id: string) {
@@ -58,8 +64,9 @@ export class GenericCrud<T extends { id: string }> {
     const j = JSON.stringify(obj);
     const stubMaker = this.stubMaker();
     const stubs = [stubMaker(), stubMaker(), stubMaker()].join(', ');
+    console.trace(obj, [obj.id, position, j]);
     await db.exec(
-      `INSERT INTO ${this.entity} (id, position, json_data) VALUES (${stubs})`,
+      `INSERT INTO ${this.entity} (id, position, data_json) VALUES (${stubs})`,
       [obj.id, position, j]
     );
   }
@@ -70,7 +77,7 @@ export class GenericCrud<T extends { id: string }> {
     await db.exec(
       `UPDATE ${
         this.entity
-      } SET json_data = ${stubMaker()} WHERE id = ${stubMaker()}`,
+      } SET data_json = ${stubMaker()} WHERE id = ${stubMaker()}`,
       [j, obj.id]
     );
   }

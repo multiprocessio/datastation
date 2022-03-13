@@ -266,7 +266,7 @@ export const databasePanel: PanelUIDetails<DatabasePanelInfo> = {
   details: DatabasePanelDetails,
   body: DatabasePanelBody,
   previewable: true,
-  factory: () => new DatabasePanelInfo(),
+  factory: (pageId: string) => new DatabasePanelInfo(pageId),
   hasStdout: false,
   info: DatabaseInfo,
 };

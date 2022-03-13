@@ -84,14 +84,14 @@ export function PanelList({
       let next: PanelInfo;
       const o = (panel.resultMeta.shape as ArrayShape).children as ObjectShape;
       if (type === 'graph') {
-        next = new GraphPanelInfo({
+        next = new GraphPanelInfo(page.id, {
           name: prefix + ' ' + panel.name,
           panelSource: panel.id,
           x: firstString,
           ys: [{ field: firstNumber, label: firstNumber }],
         });
       } else {
-        next = new TablePanelInfo({
+        next = new TablePanelInfo(page.id, {
           name: prefix + ' ' + panel.name,
           panelSource: panel.id,
           columns: flattenObjectFields(o).map(([field]) => ({
@@ -116,7 +116,7 @@ export function PanelList({
       <div className="new-panel">
         <Button
           onClick={() => {
-            const panel = new ProgramPanelInfo({
+            const panel = new ProgramPanelInfo(page.id, {
               name: `Untitled panel #${page.panels.length + 1}`,
               type: 'python',
             });

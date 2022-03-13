@@ -93,7 +93,7 @@ export const filePanel: PanelUIDetails<FilePanelInfo> = {
   details: FilePanelDetails,
   body: null,
   previewable: true,
-  factory: () => new FilePanelInfo(),
+  factory: (pageId: string) => new FilePanelInfo(pageId),
   hasStdout: false,
   info: null,
 };

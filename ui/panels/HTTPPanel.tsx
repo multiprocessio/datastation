@@ -170,7 +170,7 @@ export const httpPanel: PanelUIDetails<HTTPPanelInfo> = {
   details: HTTPPanelDetails,
   body: null,
   previewable: true,
-  factory: () => new HTTPPanelInfo(),
+  factory: (pageId: string) => new HTTPPanelInfo(pageId),
   info: HTTPInfo,
   hasStdout: false,
 };

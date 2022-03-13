@@ -1,17 +1,27 @@
 import fs from 'fs';
 import path from 'path';
-import sqlite from 'sqlite';
+import * as sqlite from 'sqlite';
 import sqlite3 from 'sqlite3';
 import log from '../shared/log';
 import { getPath } from '../shared/object';
 import { GetProjectRequest, MakeProjectRequest } from '../shared/rpc';
 import {
   ConnectorInfo,
+  DatabasePanelInfo,
   doOnEncryptFields,
   Encrypt,
+  FilePanelInfo,
+  FilterAggregatePanelInfo,
+  GraphPanelInfo,
+  HTTPPanelInfo,
+  LiteralPanelInfo,
   PanelInfo,
+  PanelInfoType,
+  ProgramPanelInfo,
+  ProjectPage,
   ProjectState,
   ServerInfo,
+  TablePanelInfo,
 } from '../shared/state';
 import { DISK_ROOT, PROJECT_EXTENSION } from './constants';
 import {
@@ -66,6 +76,7 @@ export function encryptProjectSecrets(s: any, existingState: any) {
   });
 }
 
+sqlite3.verbose();
 export class Store {
   connections: Record<string, sqlite.Database> = {};
 
@@ -121,12 +132,15 @@ export class Store {
     handler: async (_: string, { projectId }: MakeProjectRequest) => {
       const db = await this.getConnection(projectId);
       const newProject = new ProjectState();
-      newProject.projectName = projectId;
-      const files = fs.readdirSync(path.join(__dirname, 'migrations'));
+      newProject.projectName = ensureProjectFile(projectId);
+      const migrationsBase = path.join(__dirname, 'migrations');
+      const files = fs.readdirSync(migrationsBase);
       files.sort();
       for (const file of files) {
         log.info('Running migration: ' + file);
-        const contents = fs.readFileSync(file).toString();
+        const contents = fs
+          .readFileSync(path.join(migrationsBase, file))
+          .toString();
         await db.exec(contents);
         log.info('Done migration: ' + file);
       }
@@ -145,49 +159,81 @@ export class Store {
     },
   };
 
-  async updateGeneric<T extends { id: string; position: number }>(
+  async updateGeneric<T extends { id: string }>(
     crud: GenericCrud<T>,
     projectId: string,
-    p: T,
+    data: T,
+    position: number,
     factory: () => T,
-    shortcircuit?: (db: sqlite.Database, existingObj: T) => Promise<boolean>
+    shortcircuit?: (
+      db: sqlite.Database,
+      existingObj: T,
+      existingPosition: number
+    ) => Promise<boolean>
   ) {
     const db = await this.getConnection(projectId);
     await db.run('BEGIN EXCLUSIVE');
     try {
-      const existing = await crud.getOne(db, p.id);
+      const [existing, existingPosition] = await crud.getOne(db, data.id);
       if (!existing) {
-        encryptProjectSecrets(p, factory());
-        await crud.insert(db, p, p.position);
+        encryptProjectSecrets(data, factory());
+        await crud.insert(db, data, position);
         return;
       }
 
       if (shortcircuit) {
-        const stop = await shortcircuit(db, existing);
+        const stop = await shortcircuit(db, existing, existingPosition);
         if (stop) {
           return;
         }
       }
 
-      encryptProjectSecrets(p, existing);
-      await crud.update(db, p);
+      encryptProjectSecrets(data, existing);
+      await crud.update(db, data);
 
       await db.run('COMMIT');
     } catch (e) {
       await db.run('ROLLBACK');
+      throw e;
     }
   }
 
   updatePanelHandler: UpdatePanelHandler = {
     resource: 'updatePanel',
-    handler: async (projectId: string, p: PanelInfo & { position: number }) => {
-      return this.updateGeneric<PanelInfo & { position: number }>(
+    handler: async (
+      projectId: string,
+      {
+        data,
+        position,
+      }: {
+        data: PanelInfo;
+        position: number;
+      }
+    ) => {
+      return this.updateGeneric(
         panelCrud,
         projectId,
-        p,
-        () => new PanelInfo(p.type),
-        async (db, existing) => {
-          if (p.position === existing.position) {
+        data,
+        position,
+        () => {
+          const factories: Record<PanelInfoType, () => PanelInfo> = {
+            table: () => new TablePanelInfo(data.pageId),
+            http: () => new HTTPPanelInfo(data.pageId),
+            graph: () => new GraphPanelInfo(data.pageId),
+            program: () => new ProgramPanelInfo(data.pageId),
+            literal: () => new LiteralPanelInfo(data.pageId),
+            database: () => new DatabasePanelInfo(data.pageId),
+            file: () => new FilePanelInfo(data.pageId),
+            filagg: () => new FilterAggregatePanelInfo(data.pageId),
+          };
+          return factories[data.type]();
+        },
+        async (
+          db: sqlite.Database,
+          existing: PanelInfo,
+          existingPosition: number
+        ) => {
+          if (position === existingPosition) {
             return false;
           }
 
@@ -195,12 +241,12 @@ export class Store {
           // Nothing else can be updated with it.
           // This is all the UI needs at the moment anyway
           const allExisting = await panelCrud.get(db, {
-            q: `json_data->>'pageId' = ?`,
+            q: `data_json->>'pageId' = ?`,
             args: [],
           });
 
-          allExisting.splice(existing.position, 1);
-          allExisting.splice(p.position, 0, p);
+          allExisting.splice(existingPosition, 1);
+          allExisting.splice(position, 0, data);
           const stmt = await db.prepare(
             `UPDATE ${panelCrud.entity} SET position = ? WHERE id = ?`
           );
@@ -216,12 +262,22 @@ export class Store {
 
   updatePageHandler: UpdatePageHandler = {
     resource: 'updatePage',
-    handler: async (projectId: string, p: PageInfo & { position: number }) =>
-      this.updateGeneric<PageInfo & { position: number }>(
-        projectCrud,
+    handler: async (
+      projectId: string,
+      {
+        data,
+        position,
+      }: {
+        data: ProjectPage;
+        position: number;
+      }
+    ) =>
+      this.updateGeneric(
+        pageCrud,
         projectId,
-        p,
-        () => new PageInfo()
+        data,
+        position,
+        () => new ProjectPage()
       ),
   };
 
@@ -229,23 +285,40 @@ export class Store {
     resource: 'updateConnector',
     handler: async (
       projectId: string,
-      p: ConnectorInfo & { position: number }
+      {
+        data,
+        position,
+      }: {
+        data: ConnectorInfo;
+        position: number;
+      }
     ) =>
-      this.updateGeneric<ConnectorInfo & { position: number }>(
+      this.updateGeneric(
         connectorCrud,
         projectId,
-        p,
+        data,
+        position,
         () => new ConnectorInfo()
       ),
   };
 
   updateServerHandler: UpdateServerHandler = {
     resource: 'updateServer',
-    handler: async (projectId: string, p: ServerInfo & { position: number }) =>
-      this.updateGeneric<ServerInfo>(
+    handler: async (
+      projectId: string,
+      {
+        data,
+        position,
+      }: {
+        data: ServerInfo;
+        position: number;
+      }
+    ) =>
+      this.updateGeneric(
         serverCrud,
         projectId,
-        p,
+        data,
+        position,
         () => new ServerInfo()
       ),
   };

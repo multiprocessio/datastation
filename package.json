@@ -54,7 +54,7 @@
     "shape": "npm:@multiprocess/shape",
     "source-map-support": "^0.5.20",
     "sqlite": "^4.0.25",
-    "sqlite3": "^5.0.2",
+    "sqlite3": "multiprocessio/node-sqlite3#f7313ac",
     "tar": "^6.1.11",
     "tmp-promise": "^3.0.2",
     "tweetnacl": "^1.0.3",
