@@ -85,8 +85,6 @@ export function useProjectState(
 
       if (projectId) {
         fetch();
-      } else {
-        setProjectState(new ProjectState());
       }
     },
     [projectId]
@@ -100,14 +98,14 @@ export function useProjectState(
       // Actually an insert
       if (index === -1) {
         list.push(obj);
-        storeUpdate(state.projectName, obj, list.length - 1);
+        storeUpdate(projectId, obj, list.length - 1);
         setState(state);
         return;
       }
 
       list[index] = obj;
       setState(state);
-      return storeUpdate(state.projectName, obj, index);
+      return storeUpdate(projectId, obj, index);
     };
   }
 
@@ -123,7 +121,7 @@ export function useProjectState(
 
       list.splice(index, 1);
       setState(state);
-      return storeDelete(state.projectName, list[index].id);
+      return storeDelete(projectId, list[index].id);
     };
   }
 

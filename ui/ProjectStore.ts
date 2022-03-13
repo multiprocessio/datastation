@@ -86,6 +86,23 @@ export class LocalStorageStore extends ProjectStore {
     return `projectState:${projectId}`;
   }
 
+  get(projectId: string): Promise<ProjectState> {
+    const p = JSON.parse(window.localStorage.getItem(this.makeKey(projectId)));
+    return Promise.resolve(p);
+  }
+
+  async getOrCreate(projectId: string) {
+    const proj = await this.get(projectId);
+    if (proj) {
+      return proj;
+    }
+
+    const n = new ProjectState;
+    n.projectName = projectId;
+    this.update(projectId, n);
+    return n;
+  }
+
   update(projectId: string, state: ProjectState) {
     window.localStorage.setItem(this.makeKey(projectId), JSON.stringify(state));
   }
@@ -95,7 +112,7 @@ export class LocalStorageStore extends ProjectStore {
     p: PanelInfo,
     position: number
   ): Promise<void> => {
-    const state = await this.get(projectId);
+    const state = await this.getOrCreate(projectId);
     if (!state.pages) {
       state.pages = [];
     }
@@ -128,7 +145,7 @@ export class LocalStorageStore extends ProjectStore {
     p: ProjectPage,
     position: number
   ): Promise<void> => {
-    const state = await this.get(projectId);
+    const state = await this.getOrCreate(projectId);
     if (!state.pages) {
       state.pages = [];
     }
@@ -147,7 +164,7 @@ export class LocalStorageStore extends ProjectStore {
     p: ServerInfo,
     position: number
   ): Promise<void> => {
-    const state = await this.get(projectId);
+    const state = await this.getOrCreate(projectId);
     if (!state.servers) {
       state.servers = [];
     }
@@ -166,7 +183,7 @@ export class LocalStorageStore extends ProjectStore {
     p: ConnectorInfo,
     position: number
   ): Promise<void> => {
-    const state = await this.get(projectId);
+    const state = await this.getOrCreate(projectId);
     if (!state.connectors) {
       state.connectors = [];
     }
@@ -181,7 +198,7 @@ export class LocalStorageStore extends ProjectStore {
   };
 
   deletePanel = async (projectId: string, id: string): Promise<void> => {
-    const state = await this.get(projectId);
+    const state = await this.getOrCreate(projectId);
     if (!state.pages) {
       state.pages = [];
     }
@@ -205,7 +222,7 @@ export class LocalStorageStore extends ProjectStore {
   };
 
   deletePage = async (projectId: string, id: string): Promise<void> => {
-    const state = await this.get(projectId);
+    const state = await this.getOrCreate(projectId);
     if (!state.pages) {
       state.pages = [];
     }
@@ -220,7 +237,7 @@ export class LocalStorageStore extends ProjectStore {
   };
 
   deleteServer = async (projectId: string, id: string): Promise<void> => {
-    const state = await this.get(projectId);
+    const state = await this.getOrCreate(projectId);
     if (!state.servers) {
       state.servers = [];
     }
@@ -235,7 +252,7 @@ export class LocalStorageStore extends ProjectStore {
   };
 
   deleteConnector = async (projectId: string, id: string): Promise<void> => {
-    const state = await this.get(projectId);
+    const state = await this.getOrCreate(projectId);
     if (!state.connectors) {
       state.connectors = [];
     }
@@ -248,11 +265,6 @@ export class LocalStorageStore extends ProjectStore {
     this.update(projectId, state);
     return;
   };
-
-  get(projectId: string): Promise<ProjectState> {
-    const p = JSON.parse(window.localStorage.getItem(this.makeKey(projectId)));
-    return Promise.resolve(p);
-  }
 }
 
 class RemoteStore extends ProjectStore {
