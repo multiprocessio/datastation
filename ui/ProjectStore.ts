@@ -86,10 +86,172 @@ export class LocalStorageStore extends ProjectStore {
     return `projectState:${projectId}`;
   }
 
-  // TODO: implement updaters/deleters
+  update(projectId: string, state: ProjectState) {
+    window.localStorage.setItem(this.makeKey(projectId), JSON.stringify(state));
+  }
 
-  get(projectId: string) {
-    return JSON.parse(window.localStorage.getItem(this.makeKey(projectId)));
+  async updatePanel(
+    projectId: string,
+    p: PanelInfo,
+    position: number
+  ): Promise<void> {
+    const state = await this.get(projectId);
+    if (!state.pages) {
+      state.pages = [];
+    }
+
+    for (const page of state.pages) {
+      if (page.id === p.pageId) {
+        if (!page.panels) {
+          page.panels = [];
+        }
+
+        const existingPosition = page.panels.findIndex(
+          (panel) => panel.id === p.id
+        );
+        if (existingPosition === -1) {
+          page.panels.push(p);
+        } else if (existingPosition === position) {
+          page.panels[existingPosition] = p;
+        } else {
+          page.panels.splice(existingPosition, 1);
+          page.panels.splice(position, 0, p);
+        }
+
+        this.update(projectId, state);
+      }
+    }
+  }
+
+  async updatePage(
+    projectId: string,
+    p: ProjectPage,
+    position: number
+  ): Promise<void> {
+    const state = await this.get(projectId);
+    if (!state.pages) {
+      state.pages = [];
+    }
+    if (position === -1) {
+      // New page
+      state.pages.push(p);
+    } else {
+      state.pages[position] = p;
+    }
+
+    this.update(projectId, state);
+  }
+
+  async updateServer(
+    projectId: string,
+    p: ServerInfo,
+    position: number
+  ): Promise<void> {
+    const state = await this.get(projectId);
+    if (!state.servers) {
+      state.servers = [];
+    }
+    if (position === -1) {
+      // New server
+      state.servers.push(p);
+    } else {
+      state.servers[position] = p;
+    }
+
+    this.update(projectId, state);
+  }
+
+  async updateConnector(
+    projectId: string,
+    p: ConnectorInfo,
+    position: number
+  ): Promise<void> {
+    const state = await this.get(projectId);
+    if (!state.connectors) {
+      state.connectors = [];
+    }
+    if (position === -1) {
+      // New connector
+      state.connectors.push(p);
+    } else {
+      state.connectors[position] = p;
+    }
+
+    this.update(projectId, state);
+  }
+
+  async deletePanel(projectId: string, id: string): Promise<void> {
+    const state = await this.get(projectId);
+    if (!state.pages) {
+      state.pages = [];
+    }
+
+    for (const page of state.pages) {
+      if (page.id === id) {
+        if (!page.panels) {
+          page.panels = [];
+        }
+
+        const index = page.panels.findIndex((p) => p.id === id);
+        if (index === -1) {
+          return;
+        }
+
+        page.panels.splice(index, 1);
+        this.update(projectId, state);
+        return;
+      }
+    }
+  }
+
+  async deletePage(projectId: string, id: string): Promise<void> {
+    const state = await this.get(projectId);
+    if (!state.pages) {
+      state.pages = [];
+    }
+    const index = state.pages.findIndex((p) => p.id === id);
+    if (index === -1) {
+      return;
+    }
+
+    state.pages.splice(index, 1);
+    this.update(projectId, state);
+    return;
+  }
+
+  async deleteServer(projectId: string, id: string): Promise<void> {
+    const state = await this.get(projectId);
+    if (!state.servers) {
+      state.servers = [];
+    }
+    const index = state.servers.findIndex((p) => p.id === id);
+    if (index === -1) {
+      return;
+    }
+
+    state.servers.splice(index, 1);
+    this.update(projectId, state);
+    return;
+  }
+
+  async deleteConnector(projectId: string, id: string): Promise<void> {
+    const state = await this.get(projectId);
+    if (!state.connectors) {
+      state.connectors = [];
+    }
+    const index = state.connectors.findIndex((p) => p.id === id);
+    if (index === -1) {
+      return;
+    }
+
+    state.connectors.splice(index, 1);
+    this.update(projectId, state);
+    return;
+  }
+
+  get(projectId: string): Promise<ProjectState> {
+    const p = JSON.parse(window.localStorage.getItem(this.makeKey(projectId)));
+    return Promise.resolve(p);
   }
 }
 

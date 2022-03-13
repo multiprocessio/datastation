@@ -244,7 +244,6 @@ export class Store {
 
           allExisting.splice(existingPosition, 1);
           allExisting.splice(position, 0, data);
-          console.trace(allExisting);
           const stmt = await db.prepare(
             `UPDATE ${panelCrud.entity} SET position = ? WHERE id = ?`
           );
