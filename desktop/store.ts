@@ -78,18 +78,14 @@ export function encryptProjectSecrets(s: any, existingState: any) {
 
 sqlite3.verbose();
 export class Store {
-  connections: Record<string, sqlite.Database> = {};
-
   async getConnection(projectId: string): Promise<sqlite.Database> {
-    if (this.connections[projectId]) {
-      return this.connections[projectId];
-    }
-
     const filename = ensureProjectFile(projectId);
-    return (this.connections[projectId] = await sqlite.open({
+    // Connections must not be pooled, so that they are properly isolated.
+    // https://github.com/mapbox/node-sqlite3/issues/304
+    return await sqlite.open({
       filename,
       driver: sqlite3.Database,
-    }));
+    });
   }
 
   getProjectHandler: GetProjectHandler = {
@@ -128,6 +124,9 @@ export class Store {
 
   makeProjectHandler: MakeProjectHandler = {
     resource: 'makeProject',
+
+    // TODO: also need to handle migration from old dsproj format
+
     // NOTE: unlike elsewhere projectId is actually the file name not a uuid.
     handler: async (_: string, { projectId }: MakeProjectRequest) => {
       const db = await this.getConnection(projectId);
@@ -172,30 +171,23 @@ export class Store {
     ) => Promise<boolean>
   ) {
     const db = await this.getConnection(projectId);
-    await db.run('BEGIN EXCLUSIVE');
-    try {
-      const [existing, existingPosition] = await crud.getOne(db, data.id);
-      if (!existing) {
-        encryptProjectSecrets(data, factory());
-        await crud.insert(db, data, position);
+
+    const [existing, existingPosition] = await crud.getOne(db, data.id);
+    if (!existing) {
+      encryptProjectSecrets(data, factory());
+      await crud.insert(db, data, position);
+      return;
+    }
+
+    if (shortcircuit) {
+      const stop = await shortcircuit(db, existing, existingPosition);
+      if (stop) {
         return;
       }
-
-      if (shortcircuit) {
-        const stop = await shortcircuit(db, existing, existingPosition);
-        if (stop) {
-          return;
-        }
-      }
-
-      encryptProjectSecrets(data, existing);
-      await crud.update(db, data);
-
-      await db.run('COMMIT');
-    } catch (e) {
-      await db.run('ROLLBACK');
-      throw e;
     }
+
+    encryptProjectSecrets(data, existing);
+    await crud.update(db, data);
   }
 
   updatePanelHandler: UpdatePanelHandler = {
@@ -252,8 +244,8 @@ export class Store {
           );
           for (const i of allExisting.map((_, i) => i)) {
             await stmt.bind([i, allExisting[i].id]);
+            await stmt.run();
           }
-          await stmt.run();
           return true;
         }
       );

@@ -285,9 +285,9 @@ export class PanelInfo {
     );
 
     pit.lastEdited =
-      typeof raw.lastEdited === 'string'
+      (typeof raw.lastEdited === 'string'
         ? new Date(raw.lastEdited)
-        : raw.lastEdited || pit.lastEdited;
+        : raw.lastEdited) || pit.lastEdited;
 
     switch (pit.type) {
       case 'table':

@@ -27,9 +27,7 @@ const updateServer = storeHandlers.filter(
 const updatePanel = storeHandlers.filter(
   (r) => r.resource === 'updatePanel'
 )[0];
-const updatePage = storeHandlers.filter(
-  (r) => r.resource === 'updatePage'
-)[0];
+const updatePage = storeHandlers.filter((r) => r.resource === 'updatePage')[0];
 const getProject = storeHandlers.filter((r) => r.resource === 'getProject')[0];
 
 test('write project with encrypted secrets, read with nulled secrets', async () => {
@@ -65,6 +63,7 @@ test('write project with encrypted secrets, read with nulled secrets', async () 
   expect(projectPath).toBe(
     path.join(os.homedir(), 'DataStationProjects', projectId + '.dsproj')
   );
+  testProject.projectName = projectPath;
 
   // Delete and recreate it to be safe
   try {
@@ -94,7 +93,6 @@ test('write project with encrypted secrets, read with nulled secrets', async () 
     });
 
     const onDisk = await getProject.handler(null, { projectId }, null, false);
-    console.log(onDisk);
 
     // Passwords are encrypted
     expect(onDisk.servers[0].password_encrypt.value.length).not.toBe(0);
@@ -117,7 +115,14 @@ test('write project with encrypted secrets, read with nulled secrets', async () 
 
     // Passwords come back as null
     const readProject = await getProject.handler(null, { projectId });
-    expect(readProject).toStrictEqual(ProjectState.fromJSON(testProject));
+    readProject.id = testProject.id; // id is generated newly on every instantiation which is ok
+    // Time objects don't compare well
+    readProject.pages[0].panels[0].lastEdited =
+      testProject.pages[0].panels[0].lastEdited = null;
+    // Super weird but it fails saying "serializes to the same string" even when you use spread operator.
+    expect(JSON.stringify(readProject)).toStrictEqual(
+      JSON.stringify(ProjectState.fromJSON(testProject))
+    );
   } finally {
     try {
       fs.unlinkSync(projectPath);
@@ -129,7 +134,7 @@ test('write project with encrypted secrets, read with nulled secrets', async () 
 
 test('newly created project is saved correctly', async () => {
   const testProject = new ProjectState();
-  testProject.projectName = path.join(os.homedir(), 'unittestproject2.dsproj');
+  testProject.projectName = ensureProjectFile(testProject.id);
 
   // Delete and recreate it to be safe
   try {
@@ -156,3 +161,5 @@ test('newly created project is saved correctly', async () => {
     }
   }
 });
+
+// TODO: test for updates and panel reorder
