@@ -97,7 +97,7 @@ export class LocalStorageStore extends ProjectStore {
       return proj;
     }
 
-    const n = new ProjectState;
+    const n = new ProjectState();
     n.projectName = projectId;
     this.update(projectId, n);
     return n;
