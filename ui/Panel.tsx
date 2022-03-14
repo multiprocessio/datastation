@@ -431,27 +431,25 @@ export function Panel({
                   'Run to apply changes'
                 )}
               </span>
-              {!VISUAL_PANELS.includes(panel.type) ? (
-                <span
-                  title={
-                    results.loading
-                      ? killable
-                        ? 'Cancel'
-                        : 'Running'
-                      : 'Evaluate Panel (Ctrl-Enter)'
+              <span
+                title={
+                  results.loading
+                    ? killable
+                      ? 'Cancel'
+                      : 'Running'
+                    : 'Evaluate Panel (Ctrl-Enter)'
+                }
+              >
+                <Button
+                  icon
+                  onClick={() =>
+                    killable ? killProcess() : reevalPanel(panel.id)
                   }
+                  type="primary"
                 >
-                  <Button
-                    icon
-                    onClick={() =>
-                      killable ? killProcess() : reevalPanel(panel.id)
-                    }
-                    type="primary"
-                  >
-                    {results.loading ? <IconPlayerPause /> : <IconPlayerPlay />}
-                  </Button>
-                </span>
-              ) : null}
+                  {results.loading ? <IconPlayerPause /> : <IconPlayerPlay />}
+                </Button>
+              </span>
               <span title="Full screen mode">
                 <Button
                   icon
