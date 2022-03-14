@@ -137,7 +137,7 @@ export class Store {
       const newProject = new ProjectState();
       newProject.projectName = ensureProjectFile(projectId);
       const migrationsBase = path.join(__dirname, 'migrations');
-      const files = fs.readdirSync(migrationsBase);
+      const files = fs.readdirSync(migrationsBase).filter(f => f.endsWith('.sql'));
       files.sort();
       for (const file of files) {
         log.info('Running migration: ' + file);
@@ -158,7 +158,7 @@ export class Store {
           metadata[key] = String(value);
         }
       }
-      await metadataCrud.update(db, metadata);
+      await metadataCrud.insert(db, metadata);
     },
   };
 

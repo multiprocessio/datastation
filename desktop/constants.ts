@@ -5,7 +5,7 @@ import path from 'path';
 // process.env.HOME is not set on Windows
 export const HOME = os.homedir();
 
-export const DISK_ROOT = path.join(HOME, 'DataStationProjects');
+export const DISK_ROOT = path.join(HOME, 'DataStationProjects2');
 
 export const PROJECT_EXTENSION = 'dsproj';
 

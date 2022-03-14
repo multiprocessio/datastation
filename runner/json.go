@@ -10,6 +10,11 @@ import (
 	goccy_json "github.com/goccy/go-json"
 )
 
+var jsonMarshal = goccy_json.Marshal
+var jsonUnmarshal = goccy_json.Unmarshal
+var jsonNewEncoder = goccy_json.NewEncoder
+var jsonNewDecoder = goccy_json.NewDecoder
+
 type JSONStreamEncoder jsonutil.StreamEncoder
 
 func withJSONOutWriter(w io.Writer, first, last string, cb func() error) error {
@@ -87,7 +92,7 @@ func WriteJSONFile(file string, value interface{}) error {
 	}
 	defer f.Close()
 
-	encoder := goccy_json.NewEncoder(f)
+	encoder := jsonNewEncoder(f)
 	return encoder.Encode(value)
 }
 
@@ -120,7 +125,7 @@ func loadJSONArrayFile(f string) (chan map[string]interface{}, error) {
 		// Stream all JSON objects
 		for {
 			// Needs to be recreated each time because of buffered data
-			dec := goccy_json.NewDecoder(r)
+			dec := jsonNewDecoder(r)
 
 			var obj map[string]interface{}
 			err := dec.Decode(&obj)

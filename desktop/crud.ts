@@ -103,9 +103,9 @@ export const metadataCrud = {
     return metadata;
   },
 
-  async update(db: sqlite.Database, metadata: Record<string, string>) {
+  async insert(db: sqlite.Database, metadata: Record<string, string>) {
     const stmt = await db.prepare(
-      'INSERT OR REPLACE INTO ds_metadata (key, value) VALUES (?, ?)'
+      'INSERT INTO ds_metadata (key, value) VALUES (?, ?)'
     );
     for (const kv of Object.entries(metadata)) {
       await stmt.bind(kv);
