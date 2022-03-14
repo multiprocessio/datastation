@@ -1,4 +1,4 @@
-import sqlite from 'sqlite';
+import SQLiteDatabase from 'better-sqlite3';
 import {
   ConnectorInfo,
   PanelInfo,
@@ -16,8 +16,8 @@ export class GenericCrud<T extends { id: string }> {
     this.stubMaker = stubMaker;
   }
 
-  async get(
-    db: sqlite.Database,
+   get(
+    db: SQLiteDatabase,
     extraFilter?: {
       q: string;
       args: Array<any>;
@@ -28,7 +28,7 @@ export class GenericCrud<T extends { id: string }> {
     if (extra) {
       values.push(...extraFilter.args);
     }
-    const rows = await db.all(
+    const rows =  db.all(
       `SELECT * FROM "${this.entity}"${extra} ORDER BY position ASC`,
       ...values
     );
@@ -42,9 +42,9 @@ export class GenericCrud<T extends { id: string }> {
     return mapped;
   }
 
-  async getOne(db: sqlite.Database, id: string): Promise<[T, number]> {
+   getOne(db: SQLiteDatabase, id: string): [T, number] {
     const stubMaker = this.stubMaker();
-    const row = await db.get(
+    const row =  db.get(
       `SELECT data_json, position FROM "${
         this.entity
       }" WHERE id = ${stubMaker()}`,
@@ -57,16 +57,16 @@ export class GenericCrud<T extends { id: string }> {
     return [JSON.parse(row.data_json), row.position];
   }
 
-  async del(db: sqlite.Database, id: string) {
+   del(db: SQLiteDatabase, id: string) {
     const stubMaker = this.stubMaker();
-    await db.run(`DELETE FROM "${this.entity}" WHERE id = ${stubMaker()}`, id);
+     db.run(`DELETE FROM "${this.entity}" WHERE id = ${stubMaker()}`, id);
   }
 
-  async insert(db: sqlite.Database, obj: T, position: number) {
+   insert(db: SQLiteDatabase, obj: T, position: number) {
     const j = JSON.stringify(obj);
     const stubMaker = this.stubMaker();
     const stubs = [stubMaker(), stubMaker(), stubMaker()].join(', ');
-    await db.run(
+     db.run(
       `INSERT INTO "${this.entity}" (id, position, data_json) VALUES (${stubs})`,
       obj.id,
       position,
@@ -74,10 +74,10 @@ export class GenericCrud<T extends { id: string }> {
     );
   }
 
-  async update(db: sqlite.Database, obj: T) {
+   update(db: SQLiteDatabase, obj: T) {
     const j = JSON.stringify(obj);
     const stubMaker = this.stubMaker();
-    await db.run(
+     db.run(
       `UPDATE ${
         this.entity
       } SET data_json = ${stubMaker()} WHERE id = ${stubMaker()}`,
@@ -93,8 +93,8 @@ export const connectorCrud = new GenericCrud<ConnectorInfo>('ds_connector');
 export const panelCrud = new GenericCrud<PanelInfo>('ds_panel');
 
 export const metadataCrud = {
-  async get(db: sqlite.Database) {
-    const rows = await db.all('SELECT * FROM ds_metadata');
+   get(db: SQLiteDatabase) {
+    const rows =  db.all('SELECT * FROM ds_metadata');
     const metadata: Record<string, string> = {};
     for (const row of rows) {
       metadata[row.key] = row.value;
@@ -103,13 +103,13 @@ export const metadataCrud = {
     return metadata;
   },
 
-  async insert(db: sqlite.Database, metadata: Record<string, string>) {
-    const stmt = await db.prepare(
+   insert(db: SQLiteDatabase, metadata: Record<string, string>) {
+    const stmt =  db.prepare(
       'INSERT INTO ds_metadata (key, value) VALUES (?, ?)'
     );
     for (const kv of Object.entries(metadata)) {
-      await stmt.bind(kv);
-      await stmt.run();
+       stmt.bind(kv);
+       stmt.run();
     }
   },
 };

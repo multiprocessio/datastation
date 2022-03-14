@@ -1,7 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import * as sqlite from 'sqlite';
-import sqlite3 from 'sqlite3';
+import SQLiteDatabase from 'better-sqlite3';
 import log from '../shared/log';
 import { getPath } from '../shared/object';
 import { GetProjectRequest, MakeProjectRequest } from '../shared/rpc';
@@ -82,32 +81,27 @@ export function encryptProjectSecrets(s: any, existingState: any) {
 
 sqlite3.verbose();
 export class Store {
-  async getConnection(projectId: string): Promise<sqlite.Database> {
+  getConnection(projectId: string) {
     const filename = ensureProjectFile(projectId);
-    // Connections must not be pooled, so that they are properly isolated.
-    // https://github.com/mapbox/node-sqlite3/issues/304
-    return await sqlite.open({
-      filename,
-      driver: sqlite3.Database,
-    });
+    return new SQLiteDatabase(filename);
   }
 
   getProjectHandler: GetProjectHandler = {
     resource: 'getProject',
-    handler: async (
+    handler: (
       _0: string,
       { projectId }: GetProjectRequest,
       _1: unknown,
       external: boolean
     ) => {
-      const db = await this.getConnection(projectId);
-      const [metadata, servers, pages, panels, connectors] = await Promise.all([
+      const db = this.getConnection(projectId);
+      const [metadata, servers, pages, panels, connectors] = [
         metadataCrud.get(db),
         serverCrud.get(db),
         pageCrud.get(db),
         panelCrud.get(db),
         connectorCrud.get(db),
-      ]);
+      ];
       const rawProject: any = metadata;
       rawProject.connectors = connectors;
       rawProject.servers = servers;
@@ -132,8 +126,8 @@ export class Store {
     // TODO: also need to handle migration from old dsproj format
 
     // NOTE: unlike elsewhere projectId is actually the file name not a uuid.
-    handler: async (_: string, { projectId }: MakeProjectRequest) => {
-      const db = await this.getConnection(projectId);
+    handler:  (_: string, { projectId }: MakeProjectRequest) => {
+      const db = this.getConnection(projectId);
       const newProject = new ProjectState();
       newProject.projectName = ensureProjectFile(projectId);
       const migrationsBase = path.join(__dirname, 'migrations');
@@ -144,7 +138,7 @@ export class Store {
         const contents = fs
           .readFileSync(path.join(migrationsBase, file))
           .toString();
-        await db.exec(contents);
+        db.exec(contents);
         log.info('Done migration: ' + file);
       }
 
@@ -158,45 +152,46 @@ export class Store {
           metadata[key] = String(value);
         }
       }
-      await metadataCrud.insert(db, metadata);
+      metadataCrud.insert(db, metadata);
     },
   };
 
-  async updateGeneric<T extends { id: string }>(
+   updateGeneric<T extends { id: string }>(
     crud: GenericCrud<T>,
     projectId: string,
     data: T,
     position: number,
     factory: () => T,
     shortcircuit?: (
-      db: sqlite.Database,
+      db: SQLiteDatabase,
       existingObj: T,
       existingPosition: number
-    ) => Promise<boolean>
+    ) => boolean
   ) {
-    const db = await this.getConnection(projectId);
+    const db = this.getConnection(projectId);
+    db.transaction()
 
-    const [existing, existingPosition] = await crud.getOne(db, data.id);
+    const [existing, existingPosition] = crud.getOne(db, data.id);
     if (!existing) {
       encryptProjectSecrets(data, factory());
-      await crud.insert(db, data, position);
+      crud.insert(db, data, position);
       return;
     }
 
     if (shortcircuit) {
-      const stop = await shortcircuit(db, existing, existingPosition);
+      const stop = shortcircuit(db, existing, existingPosition);
       if (stop) {
         return;
       }
     }
 
     encryptProjectSecrets(data, existing);
-    await crud.update(db, data);
+    crud.update(db, data);
   }
 
   updatePanelHandler: UpdatePanelHandler = {
     resource: 'updatePanel',
-    handler: async (
+    handler:  (
       projectId: string,
       {
         data,
@@ -225,8 +220,8 @@ export class Store {
           };
           return factories[data.type]();
         },
-        async (
-          db: sqlite.Database,
+         (
+          db: SQLiteDatabase,
           existing: PanelInfo,
           existingPosition: number
         ) => {
@@ -237,19 +232,19 @@ export class Store {
           // If updating position, do that in one dedicated step.
           // Nothing else can be updated with it.
           // This is all the UI needs at the moment anyway
-          const allExisting = await panelCrud.get(db, {
+          const allExisting = panelCrud.get(db, {
             q: `data_json->>'pageId' = ?`,
             args: [data.pageId],
           });
 
           allExisting.splice(existingPosition, 1);
           allExisting.splice(position, 0, data);
-          const stmt = await db.prepare(
+          const stmt = db.prepare(
             `UPDATE ${panelCrud.entity} SET position = ? WHERE id = ?`
           );
           for (const i of allExisting.map((_, i) => i)) {
-            await stmt.bind([i, allExisting[i].id]);
-            await stmt.run();
+            stmt.bind([i, allExisting[i].id]);
+            stmt.run();
           }
           return true;
         }
@@ -259,7 +254,7 @@ export class Store {
 
   updatePageHandler: UpdatePageHandler = {
     resource: 'updatePage',
-    handler: async (
+    handler:  (
       projectId: string,
       {
         data,
@@ -280,7 +275,7 @@ export class Store {
 
   updateConnectorHandler: UpdateConnectorHandler = {
     resource: 'updateConnector',
-    handler: async (
+    handler:  (
       projectId: string,
       {
         data,
@@ -301,7 +296,7 @@ export class Store {
 
   updateServerHandler: UpdateServerHandler = {
     resource: 'updateServer',
-    handler: async (
+    handler:  (
       projectId: string,
       {
         data,
@@ -320,14 +315,14 @@ export class Store {
       ),
   };
 
-  async deleteGeneric<T extends { id: string }>(
+   deleteGeneric<T extends { id: string }>(
     crud: GenericCrud<T>,
     projectId: string,
     id: string
   ) {
-    const db = await this.getConnection(projectId);
+    const db = this.getConnection(projectId);
 
-    await crud.del(db, id);
+    crud.del(db, id);
   }
 
   deleteServerHandler: DeleteServerHandler = {
