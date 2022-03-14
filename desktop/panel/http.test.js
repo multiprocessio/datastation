@@ -299,9 +299,7 @@ for (const subprocessName of RUNNERS) {
           // Grab result
           const value = JSON.parse(
             fs
-              .readFileSync(
-                getProjectResultsFile(project.projectName) + hp.id
-              )
+              .readFileSync(getProjectResultsFile(project.projectName) + hp.id)
               .toString()
           );
           expect([{ name: 'jim', age: 12 }]).toStrictEqual(
