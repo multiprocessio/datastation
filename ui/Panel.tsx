@@ -314,7 +314,11 @@ export function Panel({
       className={`panel ${fullScreen === panel.id ? 'panel--fullscreen' : ''} ${
         hidden ? 'panel--hidden' : ''
       } ${
-        panelUIDetails.body === null && !results.exception ? 'panel--empty' : ''
+        (panelUIDetails.body === null ||
+          (panelUIDetails.hideBody && panelUIDetails.hideBody(panel))) &&
+        !results.exception
+          ? 'panel--empty'
+          : ''
       } ${results.loading ? 'panel--loading' : ''}`}
       tabIndex={1001}
       ref={panelRef}
@@ -431,27 +435,25 @@ export function Panel({
                   'Run to apply changes'
                 )}
               </span>
-              {!VISUAL_PANELS.includes(panel.type) ? (
-                <span
-                  title={
-                    results.loading
-                      ? killable
-                        ? 'Cancel'
-                        : 'Running'
-                      : 'Evaluate Panel (Ctrl-Enter)'
+              <span
+                title={
+                  results.loading
+                    ? killable
+                      ? 'Cancel'
+                      : 'Running'
+                    : 'Evaluate Panel (Ctrl-Enter)'
+                }
+              >
+                <Button
+                  icon
+                  onClick={() =>
+                    killable ? killProcess() : reevalPanel(panel.id)
                   }
+                  type="primary"
                 >
-                  <Button
-                    icon
-                    onClick={() =>
-                      killable ? killProcess() : reevalPanel(panel.id)
-                    }
-                    type="primary"
-                  >
-                    {results.loading ? <IconPlayerPause /> : <IconPlayerPlay />}
-                  </Button>
-                </span>
-              ) : null}
+                  {results.loading ? <IconPlayerPause /> : <IconPlayerPlay />}
+                </Button>
+              </span>
               <span title="Full screen mode">
                 <Button
                   icon
@@ -519,14 +521,17 @@ export function Panel({
             <ErrorBoundary className="panel-body">
               <div className="flex">
                 <div className="panel-body">
-                  {panelUIDetails.body && (
-                    <panelUIDetails.body
-                      panel={panel}
-                      keyboardShortcuts={keyboardShortcuts}
-                      panels={panels}
-                      updatePanel={updatePanel}
-                    />
-                  )}
+                  {panelUIDetails.body &&
+                    (panelUIDetails.hideBody
+                      ? !panelUIDetails.hideBody(panel)
+                      : true) && (
+                      <panelUIDetails.body
+                        panel={panel}
+                        keyboardShortcuts={keyboardShortcuts}
+                        panels={panels}
+                        updatePanel={updatePanel}
+                      />
+                    )}
                   {results.exception instanceof PanelPlayWarning ? (
                     <PanelPlayWarningWithLinks
                       panels={panels}

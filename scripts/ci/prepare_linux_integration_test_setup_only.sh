@@ -9,6 +9,9 @@ set -ex
 # Set up Julia, SSH, etc.
 sudo apt-get install -y jq julia openssh-server php
 
+# Set up http helper
+go install github.com/multiprocessio/httpmirror@latest
+
 # Set up coverage tools
 go install github.com/axw/gocov/gocov@v1.0.0
 go install github.com/wadey/gocovmerge@b5bfa59

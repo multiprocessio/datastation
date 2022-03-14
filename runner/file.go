@@ -317,8 +317,6 @@ func transformGeneric(in io.Reader, out io.Writer) error {
 		return err
 	}
 
-	var prev byte = ' '
-
 	for {
 		b, err := r.ReadByte()
 		if err == io.EOF {
@@ -329,19 +327,29 @@ func transformGeneric(in io.Reader, out io.Writer) error {
 			return err
 		}
 
-		if b == '"' && prev != '\\' {
-			err = o.WriteByte('\\')
-			if err != nil {
-				return err
-			}
+		// Escape necessary characters
+		switch b {
+		case '\b':
+			_, err = o.WriteString(`\b`)
+		case '\f':
+			_, err = o.WriteString(`\f`)
+		case '\n':
+			_, err = o.WriteString(`\n`)
+		case '\r':
+			_, err = o.WriteString(`\r`)
+		case '\t':
+			_, err = o.WriteString(`\t`)
+		case '"':
+			_, err = o.WriteString(`\"`)
+		case '\\':
+			_, err = o.WriteString(`\\`)
+		default:
+			err = o.WriteByte(b)
 		}
 
-		err = o.WriteByte(b)
 		if err != nil {
 			return err
 		}
-
-		prev = b
 	}
 
 	err = o.WriteByte('"')

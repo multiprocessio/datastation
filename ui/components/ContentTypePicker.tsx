@@ -9,17 +9,19 @@ export function ContentTypePicker({
   onChange,
   disableAutoDetect,
   inMemoryEval,
+  label,
 }: {
   value: ContentTypeInfo;
   onChange: (v: ContentTypeInfo) => void;
   disableAutoDetect?: boolean;
   inMemoryEval: boolean;
+  label?: string;
 }) {
   return (
     <React.Fragment>
       <div className="form-row">
         <Select
-          label="Content Type"
+          label={label || 'Content Type'}
           value={value.type}
           onChange={(type: string) => {
             if (type === 'null') {
