@@ -192,18 +192,11 @@ func Test_transformORCFile(t *testing.T) {
 }
 
 func Test_transformGeneric(t *testing.T) {
-	tests := []struct {
-		in  string
-		out interface{}
-	}{
-		{
-			in:  `abcdef`,
-			out: `abcdef`,
-		},
-		{
-			in:  `ab""cdef`,
-			out: `ab""cdef`,
-		},
+	tests := []string{
+		`abcdef`,
+		`ab""cdef`,
+		`ab
+cdef`,
 	}
 
 	for _, test := range tests {
@@ -211,7 +204,7 @@ func Test_transformGeneric(t *testing.T) {
 		defer os.Remove(inTmp.Name())
 		assert.Nil(t, err)
 
-		inTmp.WriteString(test.in)
+		inTmp.WriteString(test)
 
 		outTmp, err := ioutil.TempFile("", "")
 		defer os.Remove(outTmp.Name())
@@ -226,7 +219,7 @@ func Test_transformGeneric(t *testing.T) {
 		err = json.Unmarshal(outTmpBs, &m)
 		assert.Nil(t, err)
 
-		assert.Equal(t, test.out, m)
+		assert.Equal(t, test, m)
 	}
 }
 

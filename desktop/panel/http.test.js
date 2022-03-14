@@ -32,30 +32,36 @@ const baseline = JSON.parse(
 
 const USERDATA_FILES = ['json', 'xlsx', 'csv', 'parquet', 'jsonl', 'cjson'];
 const PORT = '9799';
+const PORT2 = '9798';
 
-let server;
+let server, server2;
 // Kill the existing server if it wasn't killed correctly already.
 beforeAll(async () => {
   // TODO: port this logic to other platforms...
-  if (process.platform === 'linux') {
-    try {
-      cp.execSync(
-        `bash -c "ps aux | grep 'http.server ${PORT}' | grep -v grep | awk '{print \\$2}' | xargs -I {} kill {}"`
-      );
-    } catch (e) {
-      console.error(e);
+  for (const port of [PORT, PORT2]) {
+    if (process.platform === 'linux') {
+      try {
+        cp.execSync(
+          `bash -c "ps aux | grep 'http.server ${port}' | grep -v grep | awk '{print \\$2}' | xargs -I {} kill {}"`
+        );
+      } catch (e) {
+        console.error(e);
+      }
     }
   }
 
   // Start a new server for all tests
   server = spawn('python3', ['-m', 'http.server', PORT]);
+  server2 = spawn('httpmirror', [PORT2]);
 
-  server.stdout.on('data', (data) => {
-    console.log(data.toString());
-  });
+  [server, server2].forEach((server) => {
+    server.stdout.on('data', (data) => {
+      console.log(data.toString());
+    });
 
-  server.stderr.on('data', (data) => {
-    console.warn(data.toString());
+    server.stderr.on('data', (data) => {
+      console.warn(data.toString());
+    });
   });
 
   // Keep trying to connect to the server until it's ready
@@ -308,9 +314,48 @@ for (const subprocessName of RUNNERS) {
         );
       }, 30_000);
     });
+
+    describe('http with complex macro', () => {
+      test('correct result', () => {
+        const lp = new LiteralPanelInfo({
+          contentTypeInfo: { type: 'application/json' },
+          content: '[{"name": "jim", "age": 12}]',
+          name: 'Raw Data',
+        });
+
+        const hp = new HTTPPanelInfo(
+          '',
+          new HTTPConnectorInfo('', 'http://localhost:9798')
+        );
+        hp.http.http.method = 'POST';
+        hp.content = '{{ DM_getPanel("0") | json }}';
+        hp.http.http.contentTypeInfo.type = 'text/plain';
+
+        const panels = [lp, hp];
+
+        return withSavedPanels(
+          panels,
+          (project) => {
+            // Grab result
+            const value = JSON.parse(
+              fs
+                .readFileSync(
+                  getProjectResultsFile(project.projectName) + hp.id
+                )
+                .toString()
+            );
+            expect([{ name: 'jim', age: 12 }]).toStrictEqual(
+              JSON.parse(value.split('\r\n\r\n')[1])
+            );
+          },
+          { evalPanels: true, subprocessName }
+        );
+      });
+    });
   }
 }
 
 afterAll(() => {
   process.kill(server.pid);
+  process.kill(server2.pid);
 });

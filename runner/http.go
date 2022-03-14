@@ -201,6 +201,7 @@ func (ec EvalContext) evalHTTPPanel(project *ProjectState, pageIndex int, panel 
 			sendBody: panel.Content != "" &&
 				(h.Method == http.MethodPut || h.Method == http.MethodPatch || h.Method == http.MethodPost),
 			customCaCerts: customCaCerts,
+			method:        h.Method,
 		})
 		if err != nil {
 			return err

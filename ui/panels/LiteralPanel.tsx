@@ -7,6 +7,7 @@ import { parseArrayBuffer } from '../../shared/text';
 import { panelRPC } from '../asyncRPC';
 import { CodeEditor } from '../components/CodeEditor';
 import { ContentTypePicker } from '../components/ContentTypePicker';
+import { FormGroup } from '../components/FormGroup';
 import { PanelBodyProps, PanelDetailsProps, PanelUIDetails } from './types';
 
 export async function evalLiteralPanel(panel: LiteralPanelInfo) {
@@ -39,7 +40,7 @@ export function LiteralPanelDetails({
   updatePanel,
 }: PanelDetailsProps<LiteralPanelInfo>) {
   return (
-    <React.Fragment>
+    <FormGroup>
       <div className="form-row">
         <ContentTypePicker
           disableAutoDetect
@@ -51,7 +52,7 @@ export function LiteralPanelDetails({
           }}
         />
       </div>
-    </React.Fragment>
+    </FormGroup>
   );
 }
 
