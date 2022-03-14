@@ -246,7 +246,7 @@ for (const subprocessName of RUNNERS) {
   });
 
   describe('http with macro', () => {
-    test('correct result', () => {
+    test('macro as url', () => {
       const lp = new LiteralPanelInfo({
         contentTypeInfo: { type: 'text/plain' },
         content: '/testdata/allformats/unknown',
@@ -271,6 +271,42 @@ for (const subprocessName of RUNNERS) {
           );
 
           expect(value).toEqual('hey this is unknown');
+        },
+        { evalPanels: true, subprocessName }
+      );
+    });
+
+    test('macro as body', () => {
+      const lp = new LiteralPanelInfo({
+        contentTypeInfo: { type: 'application/json' },
+        content: '[{"name": "jim", "age": 12}]',
+        name: 'Raw Data',
+      });
+
+      const hp = new HTTPPanelInfo(
+        '',
+        new HTTPConnectorInfo('', 'http://localhost:9798')
+      );
+      hp.http.http.method = 'POST';
+      hp.content = '{{ DM_getPanel("0") | json }}';
+      hp.http.http.contentTypeInfo.type = 'text/plain';
+
+      const panels = [lp, hp];
+
+      return withSavedPanels(
+        panels,
+        (project) => {
+          // Grab result
+          const value = JSON.parse(
+            fs
+              .readFileSync(
+                getProjectResultsFile(project.projectName) + hp.id
+              )
+              .toString()
+          );
+          expect([{ name: 'jim', age: 12 }]).toStrictEqual(
+            JSON.parse(value.split('\r\n\r\n')[1])
+          );
         },
         { evalPanels: true, subprocessName }
       );
@@ -313,44 +349,6 @@ for (const subprocessName of RUNNERS) {
           { evalPanels: true, subprocessName, servers }
         );
       }, 30_000);
-    });
-
-    describe('http with complex macro', () => {
-      test('correct result', () => {
-        const lp = new LiteralPanelInfo({
-          contentTypeInfo: { type: 'application/json' },
-          content: '[{"name": "jim", "age": 12}]',
-          name: 'Raw Data',
-        });
-
-        const hp = new HTTPPanelInfo(
-          '',
-          new HTTPConnectorInfo('', 'http://localhost:9798')
-        );
-        hp.http.http.method = 'POST';
-        hp.content = '{{ DM_getPanel("0") | json }}';
-        hp.http.http.contentTypeInfo.type = 'text/plain';
-
-        const panels = [lp, hp];
-
-        return withSavedPanels(
-          panels,
-          (project) => {
-            // Grab result
-            const value = JSON.parse(
-              fs
-                .readFileSync(
-                  getProjectResultsFile(project.projectName) + hp.id
-                )
-                .toString()
-            );
-            expect([{ name: 'jim', age: 12 }]).toStrictEqual(
-              JSON.parse(value.split('\r\n\r\n')[1])
-            );
-          },
-          { evalPanels: true, subprocessName }
-        );
-      });
     });
   }
 }
