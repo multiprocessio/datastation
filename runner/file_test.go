@@ -4,10 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"math/rand"
 	"os"
 	"testing"
 	"time"
 
+	"github.com/scritchley/orc"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -122,19 +124,79 @@ func Test_transformJSONConcat(t *testing.T) {
 	}
 }
 
+func Test_transformORCFile(t *testing.T) {
+	inTmp, err := ioutil.TempFile("", "")
+	assert.Nil(t, err)
+	defer os.Remove(inTmp.Name())
+	defer inTmp.Close()
+
+	// define column types for ORC file
+	schema, err := orc.ParseSchema("struct<username:string,administrator:boolean,score:double,nested:struct<randomnumber:double,correct:boolean>>")
+	assert.Nil(t, err)
+
+	w, err := orc.NewWriter(inTmp, orc.SetSchema(schema))
+	assert.Nil(t, err)
+
+	length := 2 // number of rows to create
+
+	// will hold output data for test
+	var expJson []map[string]interface{}
+
+	// generate test data
+	for i := 0; i < length; i++ {
+		nestedValues := []interface{}{
+			rand.Float64(),
+			rand.Int63n(10000) > 5000,
+		}
+
+		values := []interface{}{
+			fmt.Sprintf("%x", rand.Int63n(1000)),
+			rand.Int63n(10000) > 4444,
+			rand.Float64(),
+			nestedValues,
+		}
+
+		expJson = append(expJson, map[string]interface{}{
+			"username":      values[0],
+			"administrator": values[1],
+			"score":         values[2],
+			"nested": map[string]interface{}{
+				"randomnumber": nestedValues[0],
+				"correct":      nestedValues[1],
+			},
+		})
+
+		err = w.Write(values...)
+		assert.Nil(t, err)
+	}
+
+	err = w.Close()
+	assert.Nil(t, err)
+
+	outTmp, err := ioutil.TempFile("", "")
+	defer os.Remove(outTmp.Name())
+	assert.Nil(t, err)
+
+	err = transformORCFile(inTmp.Name(), outTmp)
+	assert.Nil(t, err)
+
+	var m []map[string]interface{}
+	outTmpBs, err := ioutil.ReadFile(outTmp.Name())
+	assert.Nil(t, err)
+
+	err = json.Unmarshal(outTmpBs, &m)
+	assert.Nil(t, err)
+
+	assert.Equal(t, expJson, m)
+
+}
+
 func Test_transformGeneric(t *testing.T) {
-	tests := []struct {
-		in  string
-		out interface{}
-	}{
-		{
-			in:  `abcdef`,
-			out: `abcdef`,
-		},
-		{
-			in:  `ab""cdef`,
-			out: `ab""cdef`,
-		},
+	tests := []string{
+		`abcdef`,
+		`ab""cdef`,
+		`ab
+cdef`,
 	}
 
 	for _, test := range tests {
@@ -142,7 +204,7 @@ func Test_transformGeneric(t *testing.T) {
 		defer os.Remove(inTmp.Name())
 		assert.Nil(t, err)
 
-		inTmp.WriteString(test.in)
+		inTmp.WriteString(test)
 
 		outTmp, err := ioutil.TempFile("", "")
 		defer os.Remove(outTmp.Name())
@@ -157,7 +219,7 @@ func Test_transformGeneric(t *testing.T) {
 		err = json.Unmarshal(outTmpBs, &m)
 		assert.Nil(t, err)
 
-		assert.Equal(t, test.out, m)
+		assert.Equal(t, test, m)
 	}
 }
 

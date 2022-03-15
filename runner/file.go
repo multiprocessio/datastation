@@ -11,8 +11,9 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/multiprocessio/go-json"
+	jsonutil "github.com/multiprocessio/go-json"
 	"github.com/multiprocessio/go-openoffice"
+	"github.com/scritchley/orc"
 
 	"github.com/xitongsys/parquet-go-source/local"
 	"github.com/xitongsys/parquet-go/reader"
@@ -140,6 +141,42 @@ func transformParquetFile(in string, out io.Writer) error {
 	defer r.Close()
 
 	return transformParquet(r, out)
+}
+
+func transformORC(in *orc.Reader, out io.Writer) error {
+	cols := in.Schema().Columns()
+	c := in.Select(cols...)
+
+	return withJSONArrayOutWriterFile(out, func(w *jsonutil.StreamEncoder) error {
+		row := map[string]interface{}{}
+
+		for c.Stripes() {
+			for c.Next() {
+				r := c.Row()
+				for i, col := range cols {
+					row[col] = r[i]
+				}
+
+				err := w.EncodeRow(row)
+				if err != nil {
+					return err
+				}
+			}
+		}
+
+		return c.Err()
+
+	})
+}
+
+func transformORCFile(in string, out io.Writer) error {
+	r, err := orc.Open(in)
+	if err != nil {
+		return err
+	}
+	defer r.Close()
+
+	return transformORC(r, out)
 }
 
 func writeSheet(rows [][]string, w *jsonutil.StreamEncoder) error {
@@ -280,8 +317,6 @@ func transformGeneric(in io.Reader, out io.Writer) error {
 		return err
 	}
 
-	var prev byte = ' '
-
 	for {
 		b, err := r.ReadByte()
 		if err == io.EOF {
@@ -292,19 +327,29 @@ func transformGeneric(in io.Reader, out io.Writer) error {
 			return err
 		}
 
-		if b == '"' && prev != '\\' {
-			err = o.WriteByte('\\')
-			if err != nil {
-				return err
-			}
+		// Escape necessary characters
+		switch b {
+		case '\b':
+			_, err = o.WriteString(`\b`)
+		case '\f':
+			_, err = o.WriteString(`\f`)
+		case '\n':
+			_, err = o.WriteString(`\n`)
+		case '\r':
+			_, err = o.WriteString(`\r`)
+		case '\t':
+			_, err = o.WriteString(`\t`)
+		case '"':
+			_, err = o.WriteString(`\"`)
+		case '\\':
+			_, err = o.WriteString(`\\`)
+		default:
+			err = o.WriteByte(b)
 		}
 
-		err = o.WriteByte(b)
 		if err != nil {
 			return err
 		}
-
-		prev = b
 	}
 
 	err = o.WriteByte('"')
@@ -481,6 +526,7 @@ const (
 	ExcelOpenXMLMimeType             = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 	OpenOfficeSheetMimeType          = "application/vnd.oasis.opendocument.spreadsheet"
 	ParquetMimeType                  = "parquet"
+	ORCMimeType                      = "orc"
 	ApacheErrorMimeType              = "text/apache2error"
 	ApacheAccessMimeType             = "text/apache2access"
 	NginxAccessMimeType              = "text/nginxaccess"
@@ -511,6 +557,8 @@ func GetMimeType(fileName string, ct ContentTypeInfo) MimeType {
 		return OpenOfficeSheetMimeType
 	case ".parquet":
 		return ParquetMimeType
+	case ".orc":
+		return ORCMimeType
 	}
 
 	return UnknownMimeType
@@ -552,6 +600,8 @@ func TransformFile(fileName string, cti ContentTypeInfo, out io.Writer) error {
 		return transformXLSXFile(fileName, out)
 	case ParquetMimeType:
 		return transformParquetFile(fileName, out)
+	case ORCMimeType:
+		return transformORCFile(fileName, out)
 	case JSONConcatMimeType:
 		return transformJSONConcatFile(fileName, out)
 	case RegexpLinesMimeType:

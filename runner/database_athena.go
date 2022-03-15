@@ -8,6 +8,7 @@ import (
 	"github.com/multiprocessio/go-json"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/athena"
 )
@@ -35,7 +36,14 @@ func mapAthenaType(value, t string) interface{} {
 }
 
 func evalAthena(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, w io.Writer) error {
+	secret, err := dbInfo.Password.decrypt()
+	if err != nil {
+		return err
+	}
+
 	cfg := aws.NewConfig().WithRegion(dbInfo.Extra["aws_region"])
+	cfg.Credentials = credentials.NewStaticCredentials(dbInfo.Username, secret, "")
+
 	sess := session.Must(session.NewSession(cfg))
 
 	svc := athena.New(sess, cfg)

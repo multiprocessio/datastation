@@ -11,13 +11,14 @@ import {
 } from '../../shared/state';
 import { panelRPC } from '../asyncRPC';
 import { Button } from '../components/Button';
+import { CodeEditor } from '../components/CodeEditor';
 import { ContentTypePicker } from '../components/ContentTypePicker';
 import { FormGroup } from '../components/FormGroup';
 import { Input } from '../components/Input';
 import { Select } from '../components/Select';
 import { ServerPicker } from '../components/ServerPicker';
 import { ProjectContext } from '../state';
-import { PanelDetailsProps, PanelUIDetails } from './types';
+import { PanelBodyProps, PanelDetailsProps, PanelUIDetails } from './types';
 
 export async function evalHTTPPanel(panel: HTTPPanelInfo) {
   if (MODE === 'browser') {
@@ -81,7 +82,8 @@ export function HTTPPanelDetails({
           />
         </div>
         <ContentTypePicker
-          inMemoryEval={MODE !== 'browser'}
+          label="Response Content Type"
+          inMemoryEval={MODE === 'browser'}
           value={panel.http.http.contentTypeInfo}
           onChange={(type: ContentTypeInfo) => {
             panel.http.http.contentTypeInfo = type;
@@ -156,9 +158,28 @@ export function HTTPInfo() {
           <br />
         </React.Fragment>
       )}
-      Use the textarea to supply a HTTP request body. This will be ignored for{' '}
-      <code>GET</code> and <code>HEAD</code> requests.
+      Use the textarea to supply a HTTP request body.
     </React.Fragment>
+  );
+}
+
+export function HTTPPanelBody({
+  updatePanel,
+  panel,
+  keyboardShortcuts,
+}: PanelBodyProps<HTTPPanelInfo>) {
+  return (
+    <CodeEditor
+      id={panel.id}
+      onKeyDown={keyboardShortcuts}
+      value={panel.content}
+      onChange={(value: string) => {
+        panel.content = value;
+        updatePanel(panel);
+      }}
+      language="javascript"
+      className="editor"
+    />
   );
 }
 
@@ -168,7 +189,9 @@ export const httpPanel: PanelUIDetails<HTTPPanelInfo> = {
   id: 'http',
   label: 'HTTP',
   details: HTTPPanelDetails,
-  body: null,
+  hideBody: (panel: HTTPPanelInfo) =>
+    !['PUT', 'POST', 'PATCH'].includes(panel.http.http.method.toUpperCase()),
+  body: HTTPPanelBody,
   previewable: true,
   factory: (pageId: string) => new HTTPPanelInfo(pageId),
   info: HTTPInfo,

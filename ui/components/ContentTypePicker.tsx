@@ -9,17 +9,19 @@ export function ContentTypePicker({
   onChange,
   disableAutoDetect,
   inMemoryEval,
+  label,
 }: {
   value: ContentTypeInfo;
   onChange: (v: ContentTypeInfo) => void;
   disableAutoDetect?: boolean;
   inMemoryEval: boolean;
+  label?: string;
 }) {
   return (
     <React.Fragment>
       <div className="form-row">
         <Select
-          label="Content Type"
+          label={label || 'Content Type'}
           value={value.type}
           onChange={(type: string) => {
             if (type === 'null') {
@@ -38,12 +40,15 @@ export function ContentTypePicker({
             <option value="text/csv">CSV</option>
             <option value="text/tab-separated-values">TSV</option>
             <option value={XLSX_MIME_TYPE}>Excel</option>
-            {!inMemoryEval /* This is getting ridiculous. Really need to find a plugin architecture */ && (
-              <React.Fragment>
-                <option value={ODS_MIME_TYPE}>ODS</option>
-                <option value="parquet">Parquet</option>
-              </React.Fragment>
-            )}
+            <option disabled={inMemoryEval} value={ODS_MIME_TYPE}>
+              ODS
+            </option>
+            <option disabled={inMemoryEval} value="parquet">
+              Parquet
+            </option>
+            <option disabled={inMemoryEval} value="orc">
+              ORC
+            </option>
             <option value="application/json">JSON</option>
             <option value="application/jsonlines">
               Newline-delimited JSON

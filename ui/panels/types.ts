@@ -33,6 +33,7 @@ export interface PanelUIDetails<T extends PanelInfo> {
   label: string;
   details: React.ElementType<PanelDetailsProps<T>>;
   body: React.ElementType<PanelBodyProps<T>> | null;
+  hideBody?: (p: T) => boolean;
   previewable: boolean;
   hasStdout: boolean;
   info: ({ panel }: { panel: T }) => React.ReactElement | null;

@@ -7,6 +7,6 @@ setenv_default UI_CONFIG_OVERRIDES ""
 prepend {UI_CONFIG_OVERRIDES} build/ui.js
 
 setenv_default UI_CSP ""
-setenv_default UI_ROOT "/"
+setenv_default UI_ROOT ""
 render ui/index.html build/index.html
 node ./ui/scripts/css.js ./ui/style.css ./build/style.css

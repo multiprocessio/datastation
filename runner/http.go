@@ -201,6 +201,7 @@ func (ec EvalContext) evalHTTPPanel(project *ProjectState, pageIndex int, panel 
 			sendBody: panel.Content != "" &&
 				(h.Method == http.MethodPut || h.Method == http.MethodPatch || h.Method == http.MethodPost),
 			customCaCerts: customCaCerts,
+			method:        h.Method,
 		})
 		if err != nil {
 			return err
@@ -260,6 +261,22 @@ func TransformReader(r io.Reader, fileName string, cti ContentTypeInfo, out io.W
 		}
 
 		return transformParquetFile(w.Name(), out)
+	case ORCMimeType:
+		w, err := ioutil.TempFile("", "http-orc-temp")
+		if err != nil {
+			return err
+		}
+		defer os.Remove(w.Name())
+
+		_, err = w.ReadFrom(r)
+		if err == io.EOF {
+			err = nil
+		}
+		if err != nil {
+			return err
+		}
+
+		return transformORCFile(w.Name(), out)
 	case RegexpLinesMimeType:
 		// There are probably weird cases this won't work but
 		// let's wait for a bug report to do more intelligent

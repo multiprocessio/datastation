@@ -1,4 +1,5 @@
 setenv UI_CONFIG_OVERRIDES "window.DS_CONFIG_MODE = 'server';"
+setenv UI_ROOT "/"
 yarn build-ui
 
 cd runner && go build -o ../build/go_server_runner{required_ext} ./cmd/main.go
