@@ -250,7 +250,7 @@ GROUP BY panel_id
     db.transaction(() => {
       const [existing, existingPosition] = crud.getOne(db, data.id);
       if (!existing) {
-        log.info(`Updating ${crud.entity}: ${data}`);
+        log.info(`Updating ${crud.entity}`);
         encryptProjectSecrets(data, factory());
         crud.insert(db, data, position);
         return;
@@ -264,7 +264,7 @@ GROUP BY panel_id
       }
 
       encryptProjectSecrets(data, existing);
-      log.info(`Inserting ${crud.entity}: ${data}`);
+      log.info(`Inserting ${crud.entity}`);
       crud.update(db, data);
     })();
   }
@@ -371,7 +371,6 @@ GROUP BY panel_id
     ) => {
       delete data.panels;
       delete data.schedules;
-      log.info('START UPDATE PAGE');
       this.updateGeneric(
         pageCrud,
         projectId,
@@ -379,7 +378,6 @@ GROUP BY panel_id
         position,
         () => new ProjectPage()
       );
-      log.info('DONE UPDATE PAGE');
     },
   };
 

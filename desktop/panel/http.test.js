@@ -247,7 +247,7 @@ for (const subprocessName of RUNNERS) {
 
   describe('http with macro', () => {
     test('macro as url', () => {
-      const lp = new LiteralPanelInfo({
+      const lp = new LiteralPanelInfo(null, {
         contentTypeInfo: { type: 'text/plain' },
         content: '/testdata/allformats/unknown',
         name: 'Raw Data',
@@ -277,7 +277,7 @@ for (const subprocessName of RUNNERS) {
     });
 
     test('macro as body', () => {
-      const lp = new LiteralPanelInfo({
+      const lp = new LiteralPanelInfo(null, {
         contentTypeInfo: { type: 'application/json' },
         content: '[{"name": "jim", "age": 12}]',
         name: 'Raw Data',

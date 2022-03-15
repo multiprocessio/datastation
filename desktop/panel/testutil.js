@@ -163,14 +163,11 @@ exports.withSavedPanels = async function (
           fs.writeFileSync(settingsTmp.path, JSON.stringify(settings));
           subprocessName.settingsFileOverride = settingsTmp.path;
         }
-        panel.resultMeta = await makeEvalHandler(subprocessName).handler(
+        await makeEvalHandler(subprocessName).handler(
           project.projectName,
           { panelId: panel.id },
           dispatch
         );
-
-        // Write results back to disk
-        await exports.updateProject(project);
 
         // Make panel results are saved to disk
         expect(
