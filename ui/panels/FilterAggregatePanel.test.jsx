@@ -5,7 +5,7 @@ const { INPUT_SYNC_PERIOD } = require('../components/Input');
 const enzyme = require('enzyme');
 const {
   ProjectState,
-  PanelResultMeta,
+  PanelResult,
   ProjectPage,
   LiteralPanelInfo,
   FilterAggregatePanelInfo,

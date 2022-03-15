@@ -21,12 +21,7 @@ import { MODE, MODE_FEATURES } from '../shared/constants';
 import { EVAL_ERRORS } from '../shared/errors';
 import log from '../shared/log';
 import { deepEquals } from '../shared/object';
-import {
-  PanelInfo,
-  PanelInfoType,
-  PanelResult,
-  PanelResultMeta,
-} from '../shared/state';
+import { PanelInfo, PanelInfoType, PanelResult } from '../shared/state';
 import { humanSize } from '../shared/text';
 import { panelRPC } from './asyncRPC';
 import { Alert } from './components/Alert';
@@ -112,7 +107,7 @@ function PreviewResults({
   panelId,
 }: {
   panelOut: 'preview' | 'stdout' | 'shape' | 'metadata';
-  results: PanelResultMeta & { metadata?: string };
+  results: PanelResult & { metadata?: string };
   panelId: string;
 }) {
   if (!results.lastRun) {
@@ -254,7 +249,7 @@ export function Panel({
 }: {
   panel: PanelInfo;
   updatePanel: (d: PanelInfo, position?: number) => void;
-  panelResults: Array<PanelResultMeta>;
+  panelResults: Array<PanelResult>;
   reevalPanel: (id: string) => void;
   panelIndex: number;
   removePanel: (id: string) => void;
@@ -289,7 +284,7 @@ export function Panel({
   const [panelOut, setPanelOut] = React.useState<
     'preview' | 'stdout' | 'shape' | 'metadata'
   >('preview');
-  const results = panel.resultMeta || new PanelResultMeta();
+  const results = panel.resultMeta || new PanelResult();
 
   const panelRef = React.useRef(null);
   function keyboardShortcuts(e: React.KeyboardEvent) {
@@ -466,9 +461,13 @@ export function Panel({
               >
                 <Button
                   icon
-                  onClick={() =>
-                    killable ? killProcess() : reevalPanel(panel.id)
-                  }
+                  onClick={async () => {
+                    if (killable) {
+                      killProcess();
+                    }
+
+                    reevalPanel(panel.id);
+                  }}
                   type="primary"
                 >
                   {results.loading ? <IconPlayerPause /> : <IconPlayerPlay />}

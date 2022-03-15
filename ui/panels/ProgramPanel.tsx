@@ -37,6 +37,7 @@ export async function evalProgramPanel(
     shape: s,
     arrayCount: s.kind === 'array' ? (res.value || []).length : null,
     contentType: 'application/json',
+    loading: false,
   };
 }
 

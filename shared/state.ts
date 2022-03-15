@@ -14,8 +14,12 @@ export class PanelResult {
   size: number;
   contentType: string;
   elapsed?: number;
+  lastRun?: Date;
+  loading: boolean;
 
   constructor(defaults: Partial<PanelResult> = {}) {
+    this.lastRun = defaults.lastRun || null;
+    this.loading = defaults.loading || false;
     this.stdout = defaults.stdout || '';
     this.shape = defaults.shape || { kind: 'unknown' };
     this.preview = defaults.preview || '';
@@ -25,22 +29,11 @@ export class PanelResult {
     this.value = defaults.value || undefined;
     this.exception = defaults.exception || undefined;
   }
-}
 
-export class PanelResultMeta extends PanelResult {
-  lastRun: Date;
-  loading: boolean;
-
-  constructor(defaults: Partial<PanelResultMeta> = {}) {
-    super(defaults as PanelResult);
-    this.lastRun = defaults.lastRun || null;
-    this.loading = defaults.loading || false;
-  }
-
-  static fromJSON(raw: any): PanelResultMeta {
+  static fromJSON(raw: any): PanelResult {
     raw = raw || {};
     raw.loading = false;
-    const prm = mergeDeep(new PanelResultMeta(), raw);
+    const prm = mergeDeep(new PanelResult(), raw);
     prm.lastRun =
       typeof raw.lastRun === 'string'
         ? new Date(raw.lastRun)
@@ -250,7 +243,7 @@ export class PanelInfo {
   name: string;
   id: string;
   serverId: string;
-  resultMeta: PanelResultMeta;
+  resultMeta: PanelResult;
   lastEdited: Date;
   pageId: string;
 
@@ -264,7 +257,7 @@ export class PanelInfo {
     this.type = type;
     this.name = name || '';
     this.id = uuid.v4();
-    this.resultMeta = new PanelResultMeta();
+    this.resultMeta = new PanelResult();
     this.lastEdited = new Date();
     this.pageId = pageId;
   }
@@ -316,7 +309,7 @@ export class PanelInfo {
         break;
     }
 
-    pit.resultMeta = PanelResultMeta.fromJSON(raw.resultMeta);
+    pit.resultMeta = PanelResult.fromJSON(raw.resultMeta);
     return pit;
   }
 }

@@ -3,7 +3,6 @@ const { act } = require('react-dom/test-utils');
 const enzyme = require('enzyme');
 const {
   ProjectState,
-  PanelResultMeta,
   ProjectPage,
   ScheduledExport,
   TablePanelInfo,

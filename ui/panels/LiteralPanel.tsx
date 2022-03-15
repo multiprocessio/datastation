@@ -29,6 +29,7 @@ export async function evalLiteralPanel(panel: LiteralPanelInfo) {
     preview: preview(value),
     shape: s,
     stdout: '',
+    loading: false,
     contentType,
     arrayCount: s.kind === 'array' ? (value || []).length : null,
     size: panel.content.length,

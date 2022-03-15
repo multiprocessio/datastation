@@ -3,7 +3,7 @@ const { act } = require('react-dom/test-utils');
 const enzyme = require('enzyme');
 const {
   ProjectState,
-  PanelResultMeta,
+  PanelResult,
   ProjectPage,
   LiteralPanelInfo,
   TablePanelInfo,
@@ -34,7 +34,7 @@ test('shows table panel details', async () => {
 });
 
 test('shows filled table panel', async () => {
-  tp.resultMeta = new PanelResultMeta({
+  tp.resultMeta = new PanelResult({
     value: [
       { name: 'Nora', age: 33 },
       { name: 'Kay', age: 20 },

@@ -93,6 +93,7 @@ export async function evalFilterAggregatePanel(
       arrayCount: s.kind === 'array' ? (res.value || []).length : null,
       contentType: 'application/json',
       shape: s,
+      loading: false,
     };
   }
 

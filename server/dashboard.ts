@@ -3,7 +3,7 @@ import express from 'express';
 import path from 'path';
 import { CODE_ROOT } from '../desktop/constants';
 import { RPCHandler } from '../desktop/rpc';
-import { PanelResultMeta, ProjectPage, ProjectState } from '../shared/state';
+import { PanelResult, ProjectPage, ProjectState } from '../shared/state';
 import { App } from './app';
 import { authenticated, AuthRequestSession } from './auth';
 import log from './log';
@@ -74,7 +74,7 @@ class Dashboard {
       return;
     }
 
-    const results: Record<string, PanelResultMeta> = {};
+    const results: Record<string, PanelResult> = {};
     const dispatch = makeDispatch(this.handlers);
     for (const panel of page.panels) {
       results[panel.id] = await dispatch({

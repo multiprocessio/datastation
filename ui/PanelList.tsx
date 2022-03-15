@@ -4,7 +4,7 @@ import { ArrayShape, ObjectShape } from 'shape';
 import {
   GraphPanelInfo,
   PanelInfo,
-  PanelResultMeta,
+  PanelResult,
   ProgramPanelInfo,
   ProjectPage,
   TablePanelInfo,
@@ -28,7 +28,7 @@ export function PanelList({
 }: {
   page: ProjectPage;
   pageIndex: number;
-  panelResults: Array<PanelResultMeta>;
+  panelResults: Array<PanelResult>;
   reevalPanel: (panelId: string, reset?: boolean) => void;
 }) {
   const { crud } = React.useContext(ProjectContext);

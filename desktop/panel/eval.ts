@@ -136,6 +136,7 @@ export async function evalInSubprocess(
       );
     }
 
+    const lastRun = new Date();
     log.info(`Launching "${base} ${args.join(' ')}"`);
     const child = execFile(base, args, {
       windowsHide: true,
@@ -192,7 +193,7 @@ export async function evalInSubprocess(
     const resultMeta = fs.readFileSync(tmp.path).toString();
     let parsePartial = !resultMeta;
     if (!parsePartial) {
-      const rm = JSON.parse(resultMeta);
+      const rm: Partial<PanelResult> = JSON.parse(resultMeta);
       if (rm.exception) {
         const e = EVAL_ERRORS.find((e) => e.name === rm.exception.name);
 
@@ -207,16 +208,25 @@ export async function evalInSubprocess(
         }
 
         // Unclear what case this is, probably a developer mistake.
-        throw new e(rm.exception);
+        throw new e(rm.exception as any);
       }
 
       // Case of existing Node.js runner
+      rm.lastRun = lastRun;
+      rm.loading = false;
+      rm.elapsed = new Date().valueOf() - lastRun.valueOf();
       return rm;
     }
 
     // Case of new Go runner
     const projectResultsFile = getProjectResultsFile(projectName);
-    return parsePartialJSONFile(projectResultsFile + panel.id);
+    const rm: Partial<PanelResult> = parsePartialJSONFile(
+      projectResultsFile + panel.id
+    );
+    rm.lastRun = lastRun;
+    rm.loading = false;
+    rm.elapsed = new Date().valueOf() - lastRun.valueOf();
+    return rm;
   } finally {
     try {
       if (pid) {
@@ -270,13 +280,20 @@ export const makeEvalHandler = (subprocessEval?: {
       body.panelId
     );
 
+    // Reset the result
+    await dispatch({
+      resource: 'updatePanelResult',
+      projectId,
+      body: { resultMeta: new PanelResult(), panelId: panel.id },
+    });
+
     if (subprocessEval) {
-      const resultMeta = await evalInSubprocess(
+      const resultMeta = (await evalInSubprocess(
         subprocessEval,
         project.projectName,
         panel,
         project.connectors
-      );
+      )) as PanelResult;
 
       await dispatch({
         resource: 'updatePanelResult',
@@ -298,6 +315,7 @@ export const makeEvalHandler = (subprocessEval?: {
     assertValidDependentPanels(projectId, panel.content, idMap);
 
     const evalHandler = EVAL_HANDLERS[panel.type]();
+    const lastRun = new Date();
     const res = await evalHandler(
       project,
       panel,
@@ -326,6 +344,9 @@ export const makeEvalHandler = (subprocessEval?: {
       shape: s,
       value: res.returnValue ? res.value : null,
       size: res.size === undefined ? json.length : res.size,
+      lastRun,
+      loading: false,
+      elapsed: new Date().valueOf() - lastRun.valueOf(),
       arrayCount:
         res.arrayCount === undefined
           ? s.kind === 'array'

@@ -4,6 +4,7 @@ import { MODE_FEATURES } from '../shared/constants';
 import {
   DEFAULT_PROJECT,
   GraphPanelInfo,
+  PanelInfo,
   ProjectPage,
   ProjectState,
   TablePanelInfo,
@@ -20,7 +21,11 @@ import { PANEL_UI_DETAILS } from './panels';
 import { Scheduler } from './scheduler';
 import { UrlStateContext } from './urlState';
 
-export function makeReevalPanel(page: ProjectPage, state: ProjectState) {
+export function makeReevalPanel(
+  page: ProjectPage,
+  state: ProjectState,
+  updatePanelInternal: (p: PanelInfo) => void
+) {
   return async function reevalPanel(panelId: string) {
     const { connectors, servers } = state;
 
@@ -29,6 +34,9 @@ export function makeReevalPanel(page: ProjectPage, state: ProjectState) {
       return;
     }
 
+    panel.resultMeta.loading = true;
+    updatePanelInternal(panel);
+
     try {
       const idMap: Record<string | number, string> = {};
       page.panels.forEach((p, index) => {
@@ -36,7 +44,14 @@ export function makeReevalPanel(page: ProjectPage, state: ProjectState) {
         idMap[p.name] = p.id;
       });
       const panelUIDetails = PANEL_UI_DETAILS[panel.type];
-      await panelUIDetails.eval(panel, page.panels, idMap, connectors, servers);
+      panel.resultMeta = await panelUIDetails.eval(
+        panel,
+        page.panels,
+        idMap,
+        connectors,
+        servers
+      );
+      updatePanelInternal(panel);
 
       // Re-run all dependent visual panels
       if (!VISUAL_PANELS.includes(panel.type)) {
@@ -59,12 +74,18 @@ export function PageList({
   state,
   deletePage,
   updatePage,
+  updatePanel,
   setPageIndex,
   pageIndex,
 }: {
   state: ProjectState;
   deletePage: (id: string) => void;
   updatePage: (page: ProjectPage, position: number) => void;
+  updatePanel: (
+    panel: PanelInfo,
+    position: number,
+    opts?: { internalOnly: boolean }
+  ) => void;
   setPageIndex: (i: number) => void;
   pageIndex: number;
 }) {
@@ -110,7 +131,14 @@ export function PageList({
   }
 
   const panelResults = page.panels.map((p) => p.resultMeta);
-  const reevalPanel = makeReevalPanel(page, state);
+  const reevalPanel = makeReevalPanel(page, state, (panel: PanelInfo) => {
+    const index = page.panels.findIndex((p) => p.id === panel.id);
+    if (index === -1) {
+      return;
+    }
+
+    updatePanel(panel, index, { internalOnly: true });
+  });
 
   const MainChild =
     {

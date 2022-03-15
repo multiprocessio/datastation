@@ -115,6 +115,7 @@ export function App() {
             state={state}
             updatePage={crud.updatePage}
             deletePage={crud.deletePage}
+            updatePanel={crud.updatePanel}
             pageIndex={urlState.page}
             setPageIndex={(i) => setUrlState({ page: i, view: 'editor' })}
           />

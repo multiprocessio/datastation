@@ -1,11 +1,7 @@
 const React = require('react');
 const enzyme = require('enzyme');
 const { shape } = require('shape');
-const {
-  ProjectPage,
-  GraphPanelInfo,
-  PanelResultMeta,
-} = require('../shared/state');
+const { ProjectPage, GraphPanelInfo, PanelResult } = require('../shared/state');
 const { ExternalDashboard } = require('./ExternalDashboard');
 
 describe('ExternalDashboard', function ExternalDashboardTests() {
@@ -19,7 +15,7 @@ describe('ExternalDashboard', function ExternalDashboardTests() {
       { age: 42, name: 'Maggie' },
       { age: 50, name: 'Terrence' },
     ];
-    gp.resultMeta = PanelResultMeta.fromJSON({
+    gp.resultMeta = PanelResult.fromJSON({
       shape: shape(res),
       value: res,
     });

@@ -24,7 +24,7 @@ CREATE TABLE ds_panel(
 
 CREATE TABLE ds_result(
   panel_id TEXT NOT NULL,
-  created_at BIGINT NOT NULL, -- UNIX timestamp
+  created_at INTEGER NOT NULL, -- UNIX timestamp
   data_json TEXT NOT NULL,
   FOREIGN KEY (panel_id) REFERENCES ds_panel(id)
 ) STRICT;

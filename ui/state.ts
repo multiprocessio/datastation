@@ -92,20 +92,26 @@ export function useProjectState(
 
   function makeUpdater<T extends { id: string }>(
     list: Array<T>,
-    storeUpdate: (projectId: string, obj: T, position: number) => Promise<void>
-  ): (obj: T, index: number) => Promise<void> {
-    return function update(obj: T, index: number) {
+    storeUpdate: (projectId: string, obj: T, position: number) => Promise<void>,
+    opts?: { internalOnly: boolean }
+  ): (obj: T, index: number, opts?: { internalOnly: boolean }) => Promise<void> {
+    return async function update(obj: T, index: number, opts?: { internalOnly: boolean }) {
       // Actually an insert
       if (index === -1) {
         list.push(obj);
-        storeUpdate(projectId, obj, list.length - 1);
+        if (!opts.internalOnly) {
+          storeUpdate(projectId, obj, list.length - 1);
+        }
+
         setState(state);
         return;
       }
 
       list[index] = obj;
       setState(state);
-      return storeUpdate(projectId, obj, index);
+      if (!opts.internalOnly) {
+        storeUpdate(projectId, obj, index);
+      }
     };
   }
 

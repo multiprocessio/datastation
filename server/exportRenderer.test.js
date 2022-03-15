@@ -1,6 +1,6 @@
 const {
   ProjectState,
-  PanelResultMeta,
+  PanelResult,
   ProjectPage,
   TablePanelInfo,
 } = require('../shared/state');
@@ -11,7 +11,7 @@ project.pages = [new ProjectPage()];
 const tpi = new TablePanelInfo({
   columns: ['name', 'age'],
 });
-tpi.resultMeta = new PanelResultMeta({
+tpi.resultMeta = new PanelResult({
   value: [
     { name: 'Kerry', age: 44 },
     { name: 'Monroe', age: 59 },

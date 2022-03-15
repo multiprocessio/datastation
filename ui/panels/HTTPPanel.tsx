@@ -39,6 +39,7 @@ export async function evalHTTPPanel(panel: HTTPPanelInfo) {
       preview: preview(value),
       shape: s,
       stdout: '',
+      loading: false,
     };
   }
 

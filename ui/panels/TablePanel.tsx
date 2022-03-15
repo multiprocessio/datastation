@@ -47,6 +47,7 @@ export async function evalColumnPanel(
         value: valueWithRequestedColumns,
         preview: preview(valueWithRequestedColumns),
         shape: s,
+        loading: false,
         stdout: '',
         size: value ? JSON.stringify(value).length : 0,
         arrayCount: s.kind === 'array' ? (value || []).length : null,

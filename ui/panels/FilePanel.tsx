@@ -16,6 +16,7 @@ export async function evalFilePanel(
   panel: FilePanelInfo
 ): Promise<PanelResult> {
   if (MODE === 'browser') {
+    const lastRun = new Date();
     const { value, contentType } = await parseArrayBuffer(
       panel.file.contentTypeInfo,
       panel.file.name,
@@ -23,7 +24,9 @@ export async function evalFilePanel(
     );
     const s = shape(value);
     return {
+      lastRun,
       value,
+      loading: false,
       preview: preview(value),
       shape: s,
       stdout: '',

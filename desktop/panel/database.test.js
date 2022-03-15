@@ -742,7 +742,6 @@ for (const subprocess of RUNNERS) {
           },
         }),
       ];
-      console.log(connectors[0].database.extra);
       const dp = new DatabasePanelInfo();
       dp.database.connectorId = connectors[0].id;
       dp.content =

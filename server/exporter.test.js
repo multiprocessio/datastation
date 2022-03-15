@@ -3,7 +3,7 @@ const {
   ProjectPage,
   ScheduledExport,
   TablePanelInfo,
-  PanelResultMeta,
+  PanelResult,
 } = require('../shared/state');
 const { main, fetchAndRunAllExports, Exporter } = require('./exporter');
 
@@ -12,7 +12,7 @@ project.pages = [new ProjectPage()];
 const tpi = new TablePanelInfo({
   columns: ['name', 'age'],
 });
-tpi.resultMeta = new PanelResultMeta({
+tpi.resultMeta = new PanelResult({
   value: [
     { name: 'Kerry', age: 44 },
     { name: 'Monroe', age: 59 },

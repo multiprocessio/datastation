@@ -16,7 +16,7 @@ import {
   LiteralPanelInfo,
   PanelInfo,
   PanelInfoType,
-  PanelResultMeta,
+  PanelResult,
   ProgramPanelInfo,
   ProjectPage,
   ProjectState,
@@ -159,19 +159,21 @@ export class Store {
       const stmt = db.prepare(`
 SELECT
   panel_id,
-  (SELECT
-     data_json
-   FROM ds_result inner
-   WHERE inner.panel_id = outer.panel_id
-   ORDER BY created_at DESC
-   LIMIT 1) data_json
-FROM ds_result outer
-GROUP BY panel_id`);
+  (
+    SELECT data_json
+    FROM ds_result i
+    WHERE i.panel_id = o.panel_id
+    ORDER BY created_at DESC
+    LIMIT 1
+  ) data_json
+FROM ds_result o
+GROUP BY panel_id
+`);
       const results = stmt.all();
 
-      const resultPanelMap: Record<string, PanelResultMeta> = {};
+      const resultPanelMap: Record<string, PanelResult> = {};
       for (const result of results) {
-        resultPanelMap[result.panel_id] = JSON.parse(result);
+        resultPanelMap[result.panel_id] = JSON.parse(result.data_json);
       }
 
       const panelPageMap: Record<string, Array<PanelInfo>> = {};
@@ -274,12 +276,12 @@ GROUP BY panel_id`);
       projectId: string,
       body: {
         panelId: string;
-        resultMeta: PanelResultMeta;
+        resultMeta: PanelResult;
       }
     ) => {
       const db = this.getConnection(projectId);
       const stmt = db.prepare(
-        `UPDATE OR REPLACE "ds_result" (panel_id, created_at, data_json) VALUES (?, STRFTIME('%s', 'now'), ?)`
+        `REPLACE INTO "ds_result" (panel_id, created_at, data_json) VALUES (?, STRFTIME('%s', 'now'), ?)`
       );
       stmt.run(body.panelId, JSON.stringify(body.resultMeta));
     },

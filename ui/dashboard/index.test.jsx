@@ -4,7 +4,7 @@ const { shape } = require('shape');
 const {
   ProjectPage,
   GraphPanelInfo,
-  PanelResultMeta,
+  PanelResult,
 } = require('../../shared/state');
 const { Dashboard } = require('./');
 
@@ -19,7 +19,7 @@ describe('Dashboard', function DashboardTests() {
       { age: 42, name: 'Maggie' },
       { age: 50, name: 'Terrence' },
     ];
-    gp.resultMeta = PanelResultMeta.fromJSON({
+    gp.resultMeta = PanelResult.fromJSON({
       shape: shape(res),
       value: res,
     });
