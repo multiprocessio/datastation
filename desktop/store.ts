@@ -264,14 +264,17 @@ export class Store {
         data: ProjectPage;
         position: number;
       }
-    ) =>
+    ) => {
+      delete data.panels;
+      delete data.schedules;
       this.updateGeneric(
         pageCrud,
         projectId,
         data,
         position,
         () => new ProjectPage()
-      ),
+      );
+    },
   };
 
   updateConnectorHandler: UpdateConnectorHandler = {
@@ -359,7 +362,17 @@ export class Store {
       }: {
         id: string;
       }
-    ) => this.deleteGeneric(pageCrud, projectId, id),
+    ) => {
+      const db = this.getConnection(projectId);
+      db.transaction(() => {
+        pageCrud.del(db, id);
+        // Page and all panels must be deleted
+        const stmt = db.prepare(
+          `DELETE FROM "${panelCrud.entity}" WHERE data_json->>'pageId' = ?`
+        );
+        stmt.run(id);
+      });
+    },
   };
 
   deletePanelHandler: DeletePanelHandler = {
