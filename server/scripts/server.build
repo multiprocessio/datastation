@@ -8,6 +8,7 @@ yarn esbuild server/runner.ts --sourcemap --platform=node --bundle --target=node
 yarn esbuild server/exporter.ts --sourcemap --platform=node --bundle --target=node10.4 --external:sqlite3 --external:react-native-fs --external:react-native-fetch-blob --external:oracledb "--external:@elastic/elasticsearch" "--external:wasm-brotli" --external:prometheus-query --external:snowflake-sdk --external:ssh2 --external:ssh2-promise --external:ssh2-sftp-client --external:cpu-features --external:electron --external:pg-native --external:canvas --external:jsdom --outfile=build/exporter.js
 yarn esbuild server/index.ts --sourcemap --platform=node --bundle --external:sqlite3 --external:react-native-fs --external:react-native-fetch-blob --external:oracledb "--external:@elastic/elasticsearch" "--external:wasm-brotli" --external:prometheus-query --external:snowflake-sdk --external:ssh2 --external:ssh2-promise --external:ssh2-sftp-client --external:cpu-features --external:electron --external:pg-native --outfile=build/server.js
 
+rm -rf build/migrations
 cp -r server/migrations build/
 
 setenv_default SERVER_CONFIG_OVERRIDES ""

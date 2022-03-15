@@ -25,20 +25,6 @@ jobs:
           -H "Content-Type: application/zip" \
           --data-binary @./releases/datastation-server-x64-$GIT_TAG.zip \
           "https://uploads.github.com/repos/multiprocessio/datastation/releases/$RELEASE_ID/assets?name=datastation-server-x64-$GIT_TAG.zip"
-
-  build-image:
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@master
-      with:
-        ref: ${{ github.ref }}
-
-    - run: ./scripts/ci/prepare_linux.sh
-    - run: echo "GIT_TAG=`git tag --points-at HEAD`" >> $GITHUB_ENV
-    - run: yarn docker-build-server
-    - run: docker build -t datastation:$GIT_TAG .
-    - run: docker push ghcr.io/multiprocessio/datastation:$GIT_TAG
           
   build-linux-desktop:
     runs-on: ubuntu-latest
