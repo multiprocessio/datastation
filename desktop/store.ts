@@ -1,6 +1,6 @@
+import * as sqlite3 from 'better-sqlite3';
 import fs from 'fs';
 import path from 'path';
-import SQLiteDatabase from 'better-sqlite3';
 import log from '../shared/log';
 import { getPath } from '../shared/object';
 import { GetProjectRequest, MakeProjectRequest } from '../shared/rpc';
@@ -79,16 +79,15 @@ export function encryptProjectSecrets(s: any, existingState: any) {
   });
 }
 
-sqlite3.verbose();
 export class Store {
   getConnection(projectId: string) {
     const filename = ensureProjectFile(projectId);
-    return new SQLiteDatabase(filename);
+    return new sqlite3.default(filename);
   }
 
   getProjectHandler: GetProjectHandler = {
     resource: 'getProject',
-    handler: (
+    handler: async (
       _0: string,
       { projectId }: GetProjectRequest,
       _1: unknown,
@@ -126,12 +125,14 @@ export class Store {
     // TODO: also need to handle migration from old dsproj format
 
     // NOTE: unlike elsewhere projectId is actually the file name not a uuid.
-    handler:  (_: string, { projectId }: MakeProjectRequest) => {
+    handler: async (_: string, { projectId }: MakeProjectRequest) => {
       const db = this.getConnection(projectId);
       const newProject = new ProjectState();
       newProject.projectName = ensureProjectFile(projectId);
       const migrationsBase = path.join(__dirname, 'migrations');
-      const files = fs.readdirSync(migrationsBase).filter(f => f.endsWith('.sql'));
+      const files = fs
+        .readdirSync(migrationsBase)
+        .filter((f) => f.endsWith('.sql'));
       files.sort();
       for (const file of files) {
         log.info('Running migration: ' + file);
@@ -156,42 +157,42 @@ export class Store {
     },
   };
 
-   updateGeneric<T extends { id: string }>(
+  updateGeneric<T extends { id: string }>(
     crud: GenericCrud<T>,
     projectId: string,
     data: T,
     position: number,
     factory: () => T,
     shortcircuit?: (
-      db: SQLiteDatabase,
+      db: sqlite3.Database,
       existingObj: T,
       existingPosition: number
     ) => boolean
   ) {
     const db = this.getConnection(projectId);
-    db.transaction()
-
-    const [existing, existingPosition] = crud.getOne(db, data.id);
-    if (!existing) {
-      encryptProjectSecrets(data, factory());
-      crud.insert(db, data, position);
-      return;
-    }
-
-    if (shortcircuit) {
-      const stop = shortcircuit(db, existing, existingPosition);
-      if (stop) {
+    db.transaction(() => {
+      const [existing, existingPosition] = crud.getOne(db, data.id);
+      if (!existing) {
+        encryptProjectSecrets(data, factory());
+        crud.insert(db, data, position);
         return;
       }
-    }
 
-    encryptProjectSecrets(data, existing);
-    crud.update(db, data);
+      if (shortcircuit) {
+        const stop = shortcircuit(db, existing, existingPosition);
+        if (stop) {
+          return;
+        }
+      }
+
+      encryptProjectSecrets(data, existing);
+      crud.update(db, data);
+    });
   }
 
   updatePanelHandler: UpdatePanelHandler = {
     resource: 'updatePanel',
-    handler:  (
+    handler: async (
       projectId: string,
       {
         data,
@@ -220,8 +221,8 @@ export class Store {
           };
           return factories[data.type]();
         },
-         (
-          db: SQLiteDatabase,
+        (
+          db: sqlite3.Database,
           existing: PanelInfo,
           existingPosition: number
         ) => {
@@ -254,7 +255,7 @@ export class Store {
 
   updatePageHandler: UpdatePageHandler = {
     resource: 'updatePage',
-    handler:  (
+    handler: async (
       projectId: string,
       {
         data,
@@ -275,7 +276,7 @@ export class Store {
 
   updateConnectorHandler: UpdateConnectorHandler = {
     resource: 'updateConnector',
-    handler:  (
+    handler: async (
       projectId: string,
       {
         data,
@@ -296,7 +297,7 @@ export class Store {
 
   updateServerHandler: UpdateServerHandler = {
     resource: 'updateServer',
-    handler:  (
+    handler: async (
       projectId: string,
       {
         data,
@@ -315,7 +316,7 @@ export class Store {
       ),
   };
 
-   deleteGeneric<T extends { id: string }>(
+  deleteGeneric<T extends { id: string }>(
     crud: GenericCrud<T>,
     projectId: string,
     id: string
@@ -327,7 +328,7 @@ export class Store {
 
   deleteServerHandler: DeleteServerHandler = {
     resource: 'deleteServer',
-    handler: (
+    handler: async (
       projectId: string,
       {
         id,
@@ -339,7 +340,7 @@ export class Store {
 
   deleteConnectorHandler: DeleteConnectorHandler = {
     resource: 'deleteConnector',
-    handler: (
+    handler: async (
       projectId: string,
       {
         id,
@@ -351,7 +352,7 @@ export class Store {
 
   deletePageHandler: DeletePageHandler = {
     resource: 'deletePage',
-    handler: (
+    handler: async (
       projectId: string,
       {
         id,
@@ -363,7 +364,7 @@ export class Store {
 
   deletePanelHandler: DeletePanelHandler = {
     resource: 'deletePanel',
-    handler: (
+    handler: async (
       projectId: string,
       {
         id,

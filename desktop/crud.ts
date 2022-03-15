@@ -1,4 +1,4 @@
-import SQLiteDatabase from 'better-sqlite3';
+import * as sqlite3 from 'better-sqlite3';
 import {
   ConnectorInfo,
   PanelInfo,
@@ -16,8 +16,8 @@ export class GenericCrud<T extends { id: string }> {
     this.stubMaker = stubMaker;
   }
 
-   get(
-    db: SQLiteDatabase,
+  get(
+    db: sqlite3.Database,
     extraFilter?: {
       q: string;
       args: Array<any>;
@@ -28,10 +28,11 @@ export class GenericCrud<T extends { id: string }> {
     if (extra) {
       values.push(...extraFilter.args);
     }
-    const rows =  db.all(
-      `SELECT * FROM "${this.entity}"${extra} ORDER BY position ASC`,
-      ...values
+
+    const stmt = db.prepare(
+      `SELECT * FROM "${this.entity}"${extra} ORDER BY position ASC`
     );
+    const rows = stmt.all(values);
     const mapped: Array<T> = rows.map(function mapObject({
       data_json,
     }: {
@@ -42,14 +43,14 @@ export class GenericCrud<T extends { id: string }> {
     return mapped;
   }
 
-   getOne(db: SQLiteDatabase, id: string): [T, number] {
+  getOne(db: sqlite3.Database, id: string): [T, number] {
     const stubMaker = this.stubMaker();
-    const row =  db.get(
+    const stmt = db.prepare(
       `SELECT data_json, position FROM "${
         this.entity
-      }" WHERE id = ${stubMaker()}`,
-      id
+      }" WHERE id = ${stubMaker()}`
     );
+    const row = stmt.get(id);
     if (!row) {
       return [null, -1];
     }
@@ -57,33 +58,33 @@ export class GenericCrud<T extends { id: string }> {
     return [JSON.parse(row.data_json), row.position];
   }
 
-   del(db: SQLiteDatabase, id: string) {
+  del(db: sqlite3.Database, id: string) {
     const stubMaker = this.stubMaker();
-     db.run(`DELETE FROM "${this.entity}" WHERE id = ${stubMaker()}`, id);
+    const stmt = db.prepare(
+      `DELETE FROM "${this.entity}" WHERE id = ${stubMaker()}`
+    );
+    stmt.run(id);
   }
 
-   insert(db: SQLiteDatabase, obj: T, position: number) {
+  insert(db: sqlite3.Database, obj: T, position: number) {
     const j = JSON.stringify(obj);
     const stubMaker = this.stubMaker();
     const stubs = [stubMaker(), stubMaker(), stubMaker()].join(', ');
-     db.run(
-      `INSERT INTO "${this.entity}" (id, position, data_json) VALUES (${stubs})`,
-      obj.id,
-      position,
-      j
+    const stmt = db.prepare(
+      `INSERT INTO "${this.entity}" (id, position, data_json) VALUES (${stubs})`
     );
+    stmt.run(obj.id, position, j);
   }
 
-   update(db: SQLiteDatabase, obj: T) {
+  update(db: sqlite3.Database, obj: T) {
     const j = JSON.stringify(obj);
     const stubMaker = this.stubMaker();
-     db.run(
+    const stmt = db.prepare(
       `UPDATE ${
         this.entity
-      } SET data_json = ${stubMaker()} WHERE id = ${stubMaker()}`,
-      j,
-      obj.id
+      } SET data_json = ${stubMaker()} WHERE id = ${stubMaker()}`
     );
+    stmt.run(j, obj.id);
   }
 }
 
@@ -93,8 +94,9 @@ export const connectorCrud = new GenericCrud<ConnectorInfo>('ds_connector');
 export const panelCrud = new GenericCrud<PanelInfo>('ds_panel');
 
 export const metadataCrud = {
-   get(db: SQLiteDatabase) {
-    const rows =  db.all('SELECT * FROM ds_metadata');
+  get(db: sqlite3.Database) {
+    const stmt = db.prepare('SELECT * FROM ds_metadata');
+    const rows = stmt.all();
     const metadata: Record<string, string> = {};
     for (const row of rows) {
       metadata[row.key] = row.value;
@@ -103,13 +105,12 @@ export const metadataCrud = {
     return metadata;
   },
 
-   insert(db: SQLiteDatabase, metadata: Record<string, string>) {
-    const stmt =  db.prepare(
+  insert(db: sqlite3.Database, metadata: Record<string, string>) {
+    const stmt = db.prepare(
       'INSERT INTO ds_metadata (key, value) VALUES (?, ?)'
     );
     for (const kv of Object.entries(metadata)) {
-       stmt.bind(kv);
-       stmt.run();
+      stmt.run(kv);
     }
   },
 };
