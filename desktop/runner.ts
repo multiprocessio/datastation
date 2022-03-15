@@ -4,7 +4,9 @@ import { APP_NAME, DEBUG, VERSION } from '../shared/constants';
 import log from '../shared/log';
 import '../shared/polyfill';
 import {
+  DISK_ROOT,
   DSPROJ_FLAG,
+  FS_BASE_FLAG,
   IS_DESKTOP_RUNNER,
   PANEL_FLAG,
   PANEL_META_FLAG,
@@ -38,6 +40,11 @@ export function initialize({
 
     if (process.argv[i] === PANEL_FLAG) {
       panel = process.argv[i + 1];
+      continue;
+    }
+
+    if (process.argv[i] === FS_BASE_FLAG) {
+      DISK_ROOT.value = process.argv[i + 1];
       continue;
     }
 

@@ -148,10 +148,6 @@ func (ec EvalContext) getServersFromDatabase(db *sql.DB) ([]ServerInfo, error) {
 }
 
 func (ec EvalContext) getProjectPanel(projectId, panelId string) (*ProjectState, int, *PanelInfo, error) {
-	if strings.Contains(os.Args[0], "go_server_runner") {
-		return getProjectPanelFromDatabase(projectId, panelId)
-	}
-
 	file := ec.getProjectFile(projectId)
 
 	var project ProjectState

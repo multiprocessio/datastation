@@ -23,7 +23,9 @@ import {
 } from '../../shared/state';
 import {
   CODE_ROOT,
+  DISK_ROOT,
   DSPROJ_FLAG,
+  FS_BASE_FLAG,
   PANEL_FLAG,
   PANEL_META_FLAG,
   SETTINGS_FILE_FLAG,
@@ -110,6 +112,8 @@ export async function evalInSubprocess(
       panel.id,
       PANEL_META_FLAG,
       tmp.path,
+      FS_BASE_FLAG,
+      DISK_ROOT.value,
     ];
 
     if (subprocess.settingsFileOverride) {

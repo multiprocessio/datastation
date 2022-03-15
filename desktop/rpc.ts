@@ -13,6 +13,8 @@ import {
   Endpoint,
   GetProjectRequest,
   GetProjectResponse,
+  GetProjectsRequest,
+  GetProjectsResponse,
   IPCRendererResponse,
   MakeProjectRequest,
   MakeProjectResponse,
@@ -55,6 +57,10 @@ export interface RPCHandler<Request, Response> {
 export type GetProjectHandler = RPCHandler<
   GetProjectRequest,
   GetProjectResponse
+>;
+export type GetProjectsHandler = RPCHandler<
+  GetProjectsRequest,
+  GetProjectsResponse
 >;
 export type MakeProjectHandler = RPCHandler<
   MakeProjectRequest,

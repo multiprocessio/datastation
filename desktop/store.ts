@@ -39,6 +39,8 @@ import {
   DeletePanelHandler,
   DeleteServerHandler,
   GetProjectHandler,
+  GetProjectsHandler,
+  InternalEndpoint,
   MakeProjectHandler,
   RPCHandler,
   UpdateConnectorHandler,
@@ -52,7 +54,7 @@ export function getProjectResultsFile(projectId: string) {
   const fileName = path
     .basename(projectId)
     .replace('.' + PROJECT_EXTENSION, '');
-  const base = path.join(DISK_ROOT, '.' + fileName + '.results');
+  const base = path.join(DISK_ROOT.value, '.' + fileName + '.results');
   ensureFile(base);
   return base;
 }
@@ -80,11 +82,59 @@ export function encryptProjectSecrets(s: any, existingState: any) {
   });
 }
 
+function minSemver(real: string, min: string) {
+  const realParts = real.split('.');
+  const minParts = min.split('.');
+  for (let i = 0; i < realParts.length; i++) {
+    if (+realParts[i] < +minParts[i]) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 export class Store {
+  firstTime: boolean = true;
+
+  validateSQLiteDriver() {
+    const memdb = new sqlite3.default(':memory:');
+    const stmt = memdb.prepare('SELECT sqlite_version() AS version');
+    const row = stmt.get();
+    if (!minSemver(row.version, '3.38.1')) {
+      throw new Error(
+        'Unsupported SQLite driver version: ' + JSON.stringify(row)
+      );
+    }
+  }
+
   getConnection(projectId: string) {
+    if (this.firstTime) {
+      this.validateSQLiteDriver();
+      this.firstTime = false;
+    }
+
     const filename = ensureProjectFile(projectId);
     return new sqlite3.default(filename);
   }
+
+  getProjectsHandler: GetProjectsHandler = {
+    resource: 'getProjects',
+    handler: async () => {
+      const files = fs
+        .readdirSync(DISK_ROOT.value)
+        .filter((f) => f.endsWith('.' + PROJECT_EXTENSION))
+        .map((f) => {
+          const createdAt = fs
+            .statSync(path.join(DISK_ROOT.value, f))
+            .birthtime.toISOString();
+          const name = f.slice(0, f.length - ('.' + PROJECT_EXTENSION).length);
+          return { createdAt, name };
+        });
+      files.sort();
+      return files;
+    },
+  };
 
   getProjectHandler: GetProjectHandler = {
     resource: 'getProject',
@@ -106,13 +156,37 @@ export class Store {
       rawProject.connectors = connectors;
       rawProject.servers = servers;
 
-      for (const page of pages) {
-        page.panels = [];
-        for (const panel of panels) {
-          if (page.id === panel.pageId) {
-            page.panels.push(panel);
-          }
+      const stmt = db.prepare(`
+SELECT
+  panel_id,
+  (SELECT
+     data_json
+   FROM ds_result inner
+   WHERE inner.panel_id = outer.panel_id
+   ORDER BY created_at DESC
+   LIMIT 1) data_json
+FROM ds_result outer
+GROUP BY panel_id`);
+      const results = stmt.all();
+
+      const resultPanelMap: Record<string, PanelResultMeta> = {};
+      for (const result of results) {
+        resultPanelMap[result.panel_id] = JSON.parse(result);
+      }
+
+      const panelPageMap: Record<string, Array<PanelInfo>> = {};
+      for (const panel of panels) {
+        panel.resultMeta = resultPanelMap[panel.id];
+
+        if (!panelPageMap[panel.pageId]) {
+          panelPageMap[panel.pageId] = [];
         }
+
+        panelPageMap[panel.pageId].push(panel);
+      }
+
+      for (const page of pages) {
+        page.panels = panelPageMap[page.id] || [];
       }
       rawProject.pages = pages;
 
@@ -174,6 +248,7 @@ export class Store {
     db.transaction(() => {
       const [existing, existingPosition] = crud.getOne(db, data.id);
       if (!existing) {
+        log.info(`Updating ${crud.entity}: ${data}`);
         encryptProjectSecrets(data, factory());
         crud.insert(db, data, position);
         return;
@@ -187,13 +262,14 @@ export class Store {
       }
 
       encryptProjectSecrets(data, existing);
+      log.info(`Inserting ${crud.entity}: ${data}`);
       crud.update(db, data);
-    });
+    })();
   }
 
   // INTERNAL ONLY
   updatePanelResultHandler = {
-    resource: 'updatePanelResult',
+    resource: 'updatePanelResult' as InternalEndpoint,
     handler: async (
       projectId: string,
       body: {
@@ -203,9 +279,9 @@ export class Store {
     ) => {
       const db = this.getConnection(projectId);
       const stmt = db.prepare(
-        `UPDATE "${panelCrud.entity}" SET json_data->'resultMeta' = ? WHERE id = ?`
+        `UPDATE OR REPLACE "ds_result" (panel_id, created_at, data_json) VALUES (?, STRFTIME('%s', 'now'), ?)`
       );
-      stmt.run(JSON.stringify(body.resultMeta), body.panelId);
+      stmt.run(body.panelId, JSON.stringify(body.resultMeta));
     },
   };
 
@@ -222,6 +298,7 @@ export class Store {
       }
     ) => {
       data.lastEdited = new Date();
+      delete data.resultMeta;
       return this.updateGeneric(
         panelCrud,
         projectId,
@@ -286,6 +363,7 @@ export class Store {
     ) => {
       delete data.panels;
       delete data.schedules;
+      log.info('START UPDATE PAGE');
       this.updateGeneric(
         pageCrud,
         projectId,
@@ -293,6 +371,7 @@ export class Store {
         position,
         () => new ProjectPage()
       );
+      log.info('DONE UPDATE PAGE');
     },
   };
 
@@ -390,7 +469,7 @@ export class Store {
           `DELETE FROM "${panelCrud.entity}" WHERE data_json->>'pageId' = ?`
         );
         stmt.run(id);
-      });
+      })();
     },
   };
 
@@ -411,6 +490,7 @@ export class Store {
   getHandlers(): RPCHandler<any, any>[] {
     return [
       this.getProjectHandler,
+      this.getProjectsHandler,
       this.updatePanelHandler,
       this.updateConnectorHandler,
       this.updatePageHandler,
@@ -420,6 +500,7 @@ export class Store {
       this.deletePageHandler,
       this.deleteServerHandler,
       this.makeProjectHandler,
+      this.updatePanelResultHandler,
     ];
   }
 }

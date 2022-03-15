@@ -22,6 +22,13 @@ CREATE TABLE ds_panel(
   data_json TEXT NOT NULL
 ) STRICT;
 
+CREATE TABLE ds_result(
+  panel_id TEXT NOT NULL,
+  created_at BIGINT NOT NULL, -- UNIX timestamp
+  data_json TEXT NOT NULL,
+  FOREIGN KEY (panel_id) REFERENCES ds_panel(id)
+) STRICT;
+
 CREATE TABLE ds_metadata(
   key TEXT PRIMARY KEY,
   value TEXT NOT NULL

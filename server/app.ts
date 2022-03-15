@@ -8,12 +8,12 @@ import pg from 'pg';
 import { CODE_ROOT } from '../desktop/constants';
 import { RPCHandler } from '../desktop/rpc';
 import { initialize } from '../desktop/runner';
+import { Store } from '../desktop/store';
 import { humanSize } from '../shared/text';
 import { registerAuth } from './auth';
 import { Config } from './config';
 import { registerDashboard } from './dashboard';
 import log from './log';
-import { getProjectHandlers } from './project';
 import { handleRPC } from './rpc';
 
 type PgPoolFactory = (c: pg.PoolConfig) => pg.Pool;
@@ -25,7 +25,6 @@ export class App {
   fs: typeof fs;
   http: typeof http;
   https: typeof https;
-  projectHandlers: RPCHandler<any, any>[];
 
   constructor(config: Config, poolFactory: PgPoolFactory) {
     this.express = express();
@@ -45,8 +44,6 @@ export class App {
       host,
       port: +port || undefined,
     });
-
-    this.projectHandlers = getProjectHandlers(this.dbpool);
   }
 
   static make(config: Config) {
@@ -174,6 +171,7 @@ export class App {
 }
 
 export async function init(app: App, withSubprocess = true) {
+  const store = new Store();
   const { handlers } = initialize({
     subprocess: withSubprocess
       ? {
@@ -181,7 +179,7 @@ export async function init(app: App, withSubprocess = true) {
           go: path.join(CODE_ROOT, 'build', 'go_server_runner'),
         }
       : undefined,
-    additionalHandlers: app.projectHandlers,
+    additionalHandlers: store.getHandlers(),
   });
 
   return { handlers };
