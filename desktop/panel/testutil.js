@@ -9,7 +9,7 @@ const {
   ProjectPage,
   ContentTypeInfo,
 } = require('../../shared/state');
-const { updateProjectHandler, flushUnwritten } = require('../store');
+const { Store } = require('../store');
 const { makeEvalHandler } = require('./eval');
 const { fetchResultsHandler } = require('./columns');
 
@@ -35,6 +35,35 @@ exports.fileIsEmpty = function (fileName) {
   }
 };
 
+exports.updateProject = async function (project, opts) {
+  const store = new Store();
+  const handlers = store.getHandlers();
+  if (opts?.isNew) {
+    await handlers.find(h => h.resource === 'makeProject').handler(null, project);
+  }
+
+  const updatePanelHandler = handlers.find(h => h.resource === 'updatePanel');
+  const updatePageHandler = handlers.find(h => h.resource === 'updatePage');
+  for (const page of project.pages) {
+    const panels = page.panels;
+    updatePageHandler.handler(project.projectName, page);
+
+    for (const panel of panels) {
+      updatePanelHandler.handler(project.projectName, panel);
+    }
+  }
+
+  const updateServerHandler = handlers.find(h => h.resource === 'updateServer');
+  for (const server of project.servers) {
+    updateServerHandler.handler(project.projectName, server);
+  }
+
+  const updateConnectorHandler = handlers.find(h => h.resource === 'updateConnector');
+  for (const connector of project.connectors) {
+    updateConnectorHandler.handler(project.projectName, connector);
+  }
+}
+
 exports.withSavedPanels = async function (
   panels,
   cb,
@@ -56,8 +85,7 @@ exports.withSavedPanels = async function (
   };
 
   try {
-    await updateProjectHandler.handler(project.projectName, project);
-    await flushUnwritten();
+    await exports.updateProject(project, { isNew: true });
     expect(exports.fileIsEmpty(project.projectName + '.dsproj')).toBe(false);
 
     if (evalPanels) {
@@ -112,8 +140,7 @@ exports.withSavedPanels = async function (
         );
 
         // Write results back to disk
-        await updateProjectHandler.handler(project.projectName, project);
-        await flushUnwritten();
+        await exports.updateProject(project);
 
         // Make panel results are saved to disk
         expect(
