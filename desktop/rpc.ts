@@ -44,7 +44,7 @@ export type DispatchPayload = Omit<RPCPayload, 'messageNumber' | 'body'> & {
 export type Dispatch = (payload: DispatchPayload) => Promise<any>;
 
 export interface RPCHandler<Request, Response> {
-  resource: Endpoint;
+  resource: Endpoint | InternalEndpoint;
   handler: (
     projectId: string,
     body: Request,
