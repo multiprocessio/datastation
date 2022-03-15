@@ -5,22 +5,12 @@ services:
     ports:
       - "8080:8080"
     environment:
-      DATASTATION_DATABASE_ADDRESS: "postgres:5432?sslmode=disable"
       DATASTATION_SERVER_ADDRESS: "0.0.0.0"
     volumes:
       - /etc/datastation:/etc/datastation
-    depends_on:
-      - postgres
     deploy:
       restart_policy:
         condition: on-failure
         delay: 5s
         max_attempts: 3
         window: 120s
-  postgres:
-    image: "docker.io/postgres"
-    environment:
-      POSTGRES_USER: datastation
-      POSTGRES_PASSWORD: datastation
-      POSTGRES_DB: datastation
-      PGDATA: data
