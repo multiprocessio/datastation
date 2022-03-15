@@ -57,7 +57,7 @@ func getSSHPrivateKeySigner(privateKeyFile, passphrase string) (ssh.AuthMethod, 
 }
 
 // ssh.NewSignerFromKey actually takes an interface{}... so great.
-func parsePemBlock(block *pem.Block) (interface{}, error) {
+func parsePemBlock(block *pem.Block) (any, error) {
 	switch block.Type {
 	case "RSA PRIVATE KEY":
 		key, err := x509.ParsePKCS1PrivateKey(block.Bytes)

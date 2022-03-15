@@ -7,11 +7,11 @@ import (
 )
 
 type DSError struct {
-	Name          string                 `json:"name"`
-	Message       string                 `json:"message"`
-	Stack         string                 `json:"stack"`
-	TargetPanelId string                 `json:"targetPanelId"`
-	Extra         map[string]interface{} `json:"extra"`
+	Name          string         `json:"name"`
+	Message       string         `json:"message"`
+	Stack         string         `json:"stack"`
+	TargetPanelId string         `json:"targetPanelId"`
+	Extra         map[string]any `json:"extra"`
 }
 
 func (dse *DSError) Error() string {
@@ -78,6 +78,6 @@ func makeErrException(e error) *DSError {
 var edse = makeErrException
 var Edse = edse
 
-func edsef(msg string, args ...interface{}) *DSError {
+func edsef(msg string, args ...any) *DSError {
 	return edse(fmt.Errorf(msg, args...))
 }

@@ -32,7 +32,7 @@ func transformCSV(in io.Reader, out io.Writer, delimiter rune) error {
 	return withJSONArrayOutWriterFile(out, func(w *jsonutil.StreamEncoder) error {
 		isHeader := true
 		var fields []string
-		row := map[string]interface{}{}
+		row := map[string]any{}
 
 		for {
 			record, err := r.Read()
@@ -148,7 +148,7 @@ func transformORC(in *orc.Reader, out io.Writer) error {
 	c := in.Select(cols...)
 
 	return withJSONArrayOutWriterFile(out, func(w *jsonutil.StreamEncoder) error {
-		row := map[string]interface{}{}
+		row := map[string]any{}
 
 		for c.Stripes() {
 			for c.Next() {
@@ -183,7 +183,7 @@ func writeSheet(rows [][]string, w *jsonutil.StreamEncoder) error {
 	var header []string
 	isHeader := true
 
-	row := map[string]interface{}{}
+	row := map[string]any{}
 	for _, r := range rows {
 		if isHeader {
 			header = r
@@ -479,7 +479,7 @@ var BUILTIN_REGEX = map[MimeType]*regexp.Regexp{
 func transformRegexp(in io.Reader, out io.Writer, re *regexp.Regexp) error {
 	scanner := bufio.NewScanner(in)
 	return withJSONArrayOutWriterFile(out, func(w *jsonutil.StreamEncoder) error {
-		row := map[string]interface{}{}
+		row := map[string]any{}
 		for scanner.Scan() {
 			match := re.FindStringSubmatch(scanner.Text())
 			for i, name := range re.SubexpNames() {

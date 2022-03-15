@@ -28,13 +28,13 @@ func Test_transformJSONLines(t *testing.T) {
 	err = transformJSONLinesFile(tmp.Name(), tmp2)
 	assert.Nil(t, err)
 
-	var m []map[string]interface{}
+	var m []map[string]any
 	tmp2Bs, err := ioutil.ReadFile(tmp2.Name())
 	assert.Nil(t, err)
 	err = json.Unmarshal(tmp2Bs, &m)
 	assert.Nil(t, err)
 
-	assert.Equal(t, []map[string]interface{}{
+	assert.Equal(t, []map[string]any{
 		{
 			"a": float64(1),
 			"b": float64(2),
@@ -49,32 +49,32 @@ func Test_transformJSONLines(t *testing.T) {
 func Test_transformJSONConcat(t *testing.T) {
 	tests := []struct {
 		in  string
-		out interface{}
+		out any
 	}{
 		{
 			in: `{"a": 1}{"a": 2}`,
-			out: []map[string]interface{}{
+			out: []map[string]any{
 				{"a": float64(1)},
 				{"a": float64(2)},
 			},
 		},
 		{
 			in: `{"a {}": 1}{"a {}": 2}`,
-			out: []map[string]interface{}{
+			out: []map[string]any{
 				{"a {}": float64(1)},
 				{"a {}": float64(2)},
 			},
 		},
 		{
 			in: `{"a {": "}"}{"a {": "{"}`,
-			out: []map[string]interface{}{
+			out: []map[string]any{
 				{"a {": "}"},
 				{"a {": "{"},
 			},
 		},
 		{
 			in: `{"a {": "\"}}"}{"a {": "{\"{"}`,
-			out: []map[string]interface{}{
+			out: []map[string]any{
 				{"a {": `"}}`},
 				{"a {": `{"{`},
 			},
@@ -86,16 +86,16 @@ func Test_transformJSONConcat(t *testing.T) {
 
 
 {"a": 2}`,
-			out: []map[string]interface{}{
+			out: []map[string]any{
 				{"a": float64(1)},
 				{"a": float64(2)},
 			},
 		},
 		{
 			in: `{"a": 1, "b": { "c": [1, {"d": 2}] }}{"a": 1, "b": { "c": [1, {"d": 2}] }}`,
-			out: []map[string]interface{}{
-				{"a": float64(1), "b": map[string]interface{}{"c": []interface{}{float64(1), map[string]interface{}{"d": float64(2)}}}},
-				{"a": float64(1), "b": map[string]interface{}{"c": []interface{}{float64(1), map[string]interface{}{"d": float64(2)}}}},
+			out: []map[string]any{
+				{"a": float64(1), "b": map[string]any{"c": []any{float64(1), map[string]any{"d": float64(2)}}}},
+				{"a": float64(1), "b": map[string]any{"c": []any{float64(1), map[string]any{"d": float64(2)}}}},
 			},
 		},
 	}
@@ -114,7 +114,7 @@ func Test_transformJSONConcat(t *testing.T) {
 		err = transformJSONConcatFile(inTmp.Name(), outTmp)
 		assert.Nil(t, err)
 
-		var m []map[string]interface{}
+		var m []map[string]any
 		outTmpBs, err := ioutil.ReadFile(outTmp.Name())
 		assert.Nil(t, err)
 		err = json.Unmarshal(outTmpBs, &m)
@@ -140,27 +140,27 @@ func Test_transformORCFile(t *testing.T) {
 	length := 2 // number of rows to create
 
 	// will hold output data for test
-	var expJson []map[string]interface{}
+	var expJson []map[string]any
 
 	// generate test data
 	for i := 0; i < length; i++ {
-		nestedValues := []interface{}{
+		nestedValues := []any{
 			rand.Float64(),
 			rand.Int63n(10000) > 5000,
 		}
 
-		values := []interface{}{
+		values := []any{
 			fmt.Sprintf("%x", rand.Int63n(1000)),
 			rand.Int63n(10000) > 4444,
 			rand.Float64(),
 			nestedValues,
 		}
 
-		expJson = append(expJson, map[string]interface{}{
+		expJson = append(expJson, map[string]any{
 			"username":      values[0],
 			"administrator": values[1],
 			"score":         values[2],
-			"nested": map[string]interface{}{
+			"nested": map[string]any{
 				"randomnumber": nestedValues[0],
 				"correct":      nestedValues[1],
 			},
@@ -180,7 +180,7 @@ func Test_transformORCFile(t *testing.T) {
 	err = transformORCFile(inTmp.Name(), outTmp)
 	assert.Nil(t, err)
 
-	var m []map[string]interface{}
+	var m []map[string]any
 	outTmpBs, err := ioutil.ReadFile(outTmp.Name())
 	assert.Nil(t, err)
 
@@ -213,7 +213,7 @@ cdef`,
 		err = transformGenericFile(inTmp.Name(), outTmp)
 		assert.Nil(t, err)
 
-		var m interface{}
+		var m any
 		outTmpBs, err := ioutil.ReadFile(outTmp.Name())
 		assert.Nil(t, err)
 		err = json.Unmarshal(outTmpBs, &m)

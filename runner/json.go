@@ -51,7 +51,7 @@ func withJSONArrayOutWriterFile(out io.Writer, cb func(w *jsonutil.StreamEncoder
 	return withJSONArrayOutWriter(out, cb)
 }
 
-func readJSONFileInto(file string, into interface{}) error {
+func readJSONFileInto(file string, into any) error {
 	f, err := os.Open(file)
 	if err != nil {
 		return err
@@ -80,7 +80,7 @@ func writeAll(w io.Writer, bs []byte) error {
 	return nil
 }
 
-func WriteJSONFile(file string, value interface{}) error {
+func WriteJSONFile(file string, value any) error {
 	f, err := openTruncate(file)
 	if err != nil {
 		return err
@@ -91,8 +91,8 @@ func WriteJSONFile(file string, value interface{}) error {
 	return encoder.Encode(value)
 }
 
-func loadJSONArrayFile(f string) (chan map[string]interface{}, error) {
-	out := make(chan map[string]interface{}, 1000)
+func loadJSONArrayFile(f string) (chan map[string]any, error) {
+	out := make(chan map[string]any, 1000)
 
 	fd, err := os.Open(f)
 	if err != nil {
@@ -122,7 +122,7 @@ func loadJSONArrayFile(f string) (chan map[string]interface{}, error) {
 			// Needs to be recreated each time because of buffered data
 			dec := goccy_json.NewDecoder(r)
 
-			var obj map[string]interface{}
+			var obj map[string]any
 			err := dec.Decode(&obj)
 			if err == io.EOF {
 				return

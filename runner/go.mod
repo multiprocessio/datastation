@@ -3,16 +3,16 @@ module github.com/multiprocessio/datastation/runner
 go 1.18
 
 require (
-	cloud.google.com/go/bigquery v1.28.0
+	cloud.google.com/go/bigquery v1.29.0
 	github.com/ClickHouse/clickhouse-go/v2 v2.0.12
-	github.com/aws/aws-sdk-go v1.30.19
+	github.com/aws/aws-sdk-go v1.43.19
 	github.com/denisenkom/go-mssqldb v0.12.0
 	github.com/elastic/go-elasticsearch/v6 v6.8.10
 	github.com/flosch/pongo2 v0.0.0-20200913210552-0d938eb266f3
 	github.com/go-sql-driver/mysql v1.6.0
-	github.com/goccy/go-json v0.9.4
+	github.com/goccy/go-json v0.9.5
 	github.com/goccy/go-yaml v1.9.5
-	github.com/gocql/gocql v0.0.0-20220216114134-360b71ee0a29
+	github.com/gocql/gocql v1.0.0
 	github.com/google/uuid v1.3.0
 	github.com/influxdata/influxdb-client-go/v2 v2.8.0
 	github.com/jmoiron/sqlx v1.3.4
@@ -23,19 +23,19 @@ require (
 	github.com/prometheus/client_golang v1.12.1
 	github.com/prometheus/common v0.32.1
 	github.com/scritchley/orc v0.0.0-20210513144143-06dddf1ad665
-	github.com/sijms/go-ora/v2 v2.4.0
-	github.com/snowflakedb/gosnowflake v1.6.7
-	github.com/stretchr/testify v1.7.0
+	github.com/sijms/go-ora/v2 v2.4.11
+	github.com/snowflakedb/gosnowflake v1.6.8
+	github.com/stretchr/testify v1.7.1
 	github.com/xitongsys/parquet-go v1.6.2
-	github.com/xitongsys/parquet-go-source v0.0.0-20211228015320-b4f792c43cd0
+	github.com/xitongsys/parquet-go-source v0.0.0-20220315005136-aec0fe3e777c
 	github.com/xuri/excelize/v2 v2.5.0
-	golang.org/x/crypto v0.0.0-20220214200702-86341886e292
-	google.golang.org/api v0.70.0
+	golang.org/x/crypto v0.0.0-20220315160706-3147a52a75dd
+	google.golang.org/api v0.73.0
 )
 
 require (
 	cloud.google.com/go v0.100.2 // indirect
-	cloud.google.com/go/compute v1.3.0 // indirect
+	cloud.google.com/go/compute v1.5.0 // indirect
 	cloud.google.com/go/iam v0.1.1 // indirect
 	github.com/Azure/azure-pipeline-go v0.2.3 // indirect
 	github.com/Azure/azure-storage-blob-go v0.14.0 // indirect
@@ -96,14 +96,14 @@ require (
 	go.opencensus.io v0.23.0 // indirect
 	go.opentelemetry.io/otel v1.4.1 // indirect
 	go.opentelemetry.io/otel/trace v1.4.1 // indirect
-	golang.org/x/net v0.0.0-20220127200216-cd36cc0744dd // indirect
-	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8 // indirect
-	golang.org/x/sys v0.0.0-20220209214540-3681064d5158 // indirect
+	golang.org/x/net v0.0.0-20220225172249-27dd8689420f // indirect
+	golang.org/x/oauth2 v0.0.0-20220309155454-6242fa91716a // indirect
+	golang.org/x/sys v0.0.0-20220310020820-b874c991c1a5 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/genproto v0.0.0-20220218161850-94dd64e39d7c // indirect
-	google.golang.org/grpc v1.44.0 // indirect
+	google.golang.org/genproto v0.0.0-20220310185008-1973136f34c6 // indirect
+	google.golang.org/grpc v1.45.0 // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect

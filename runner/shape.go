@@ -28,7 +28,7 @@ type Shape struct {
 }
 
 func (s *Shape) UnmarshalJSON(data []byte) error {
-	var m map[string]interface{}
+	var m map[string]any
 	err := json.Unmarshal(data, &m)
 	if err != nil {
 		// If these every go bad just try to reset rather than
@@ -271,7 +271,7 @@ func shapeMerge(a Shape, b Shape) Shape {
 	return addUniqueVaried(a, b)
 }
 
-func getArrayShape(id string, raw []interface{}, sampleSize int) Shape {
+func getArrayShape(id string, raw []any, sampleSize int) Shape {
 	if len(raw) == 0 {
 		return Shape{Kind: ArrayKind, ArrayShape: &ArrayShape{Children: UnknownShape}}
 	}
@@ -290,11 +290,11 @@ func getArrayShape(id string, raw []interface{}, sampleSize int) Shape {
 	return Shape{Kind: ArrayKind, ArrayShape: &ArrayShape{Children: merged}}
 }
 
-func GetShape(id string, value interface{}, sampleSize int) Shape {
+func GetShape(id string, value any, sampleSize int) Shape {
 	switch t := value.(type) {
-	case []interface{}:
+	case []any:
 		return getArrayShape(id, t, sampleSize)
-	case map[string]interface{}:
+	case map[string]any:
 		o := ObjectShape{Children: map[string]Shape{}}
 		for key, val := range t {
 			o.Children[key] = GetShape(id, val, sampleSize)
@@ -386,7 +386,7 @@ func ShapeFromFile(file, id string, maxBytesToRead int, sampleSize int) (*Shape,
 	size := stat.Size()
 
 	if size < int64(maxBytesToRead) {
-		var value interface{}
+		var value any
 		decoder := json.NewDecoder(fd)
 		err := decoder.Decode(&value)
 		if err != nil {
@@ -461,7 +461,7 @@ func ShapeFromFile(file, id string, maxBytesToRead int, sampleSize int) (*Shape,
 		}
 	}
 
-	var value interface{}
+	var value any
 	err = json.Unmarshal(f, &value)
 	if err != nil {
 		return nil, edse(err)

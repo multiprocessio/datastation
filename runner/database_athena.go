@@ -13,7 +13,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/athena"
 )
 
-func mapAthenaType(value, t string) interface{} {
+func mapAthenaType(value, t string) any {
 	switch t {
 	case "boolean":
 		return value == "true"
@@ -87,7 +87,7 @@ func evalAthena(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, w io.Wri
 	var ip athena.GetQueryResultsInput
 	ip.SetQueryExecutionId(*result.QueryExecutionId)
 
-	row := map[string]interface{}{}
+	row := map[string]any{}
 	return withJSONArrayOutWriterFile(w, func(w *jsonutil.StreamEncoder) error {
 		first := true
 		var columns []string

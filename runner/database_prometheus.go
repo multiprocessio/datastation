@@ -76,7 +76,7 @@ func evalPrometheus(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, serv
 		return withJSONArrayOutWriterFile(w, func(w *jsonutil.StreamEncoder) error {
 			for _, sample := range m {
 				for _, row := range sample.Values {
-					err := w.EncodeRow(map[string]interface{}{
+					err := w.EncodeRow(map[string]any{
 						"metric": sample.Metric,
 						"value":  row.Value,
 						"time":   row.Timestamp,

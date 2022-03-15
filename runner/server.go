@@ -22,7 +22,7 @@ type ServerConfig struct {
 	Database ServerDatabaseConfig `yaml:"database"`
 }
 
-func readYAMLFileInto(file string, into interface{}) error {
+func readYAMLFileInto(file string, into any) error {
 	bs, err := ioutil.ReadFile(file)
 	if err != nil {
 		return edse(err)
