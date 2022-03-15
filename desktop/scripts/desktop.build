@@ -1,6 +1,10 @@
 setenv UI_CONFIG_OVERRIDES "window.DS_CONFIG_MODE = 'desktop';"
 yarn build-ui
 
+# https://www.npmjs.com/package/electron-rebuild
+# https://github.com/JoshuaWise/better-sqlite3/blob/master/docs/troubleshooting.md
+yarn electron-rebuild
+
 cd runner && go build -ldflags="-s -w" -o ../build/go_desktop_runner{required_ext} cmd/main.go
 
 yarn esbuild desktop/preload.ts --external:electron --sourcemap --bundle --outfile=build/preload.js

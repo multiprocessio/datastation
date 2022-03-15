@@ -16,6 +16,7 @@ import {
   LiteralPanelInfo,
   PanelInfo,
   PanelInfoType,
+  PanelResultMeta,
   ProgramPanelInfo,
   ProjectPage,
   ProjectState,
@@ -189,6 +190,24 @@ export class Store {
       crud.update(db, data);
     });
   }
+
+  // INTERNAL ONLY
+  updatePanelResultHandler = {
+    resource: 'updatePanelResult',
+    handler: async (
+      projectId: string,
+      body: {
+        panelId: string;
+        resultMeta: PanelResultMeta;
+      }
+    ) => {
+      const db = this.getConnection(projectId);
+      const stmt = db.prepare(
+        `UPDATE "${panelCrud.entity}" SET json_data->'resultMeta' = ? WHERE id = ?`
+      );
+      stmt.run(JSON.stringify(body.resultMeta), body.panelId);
+    },
+  };
 
   updatePanelHandler: UpdatePanelHandler = {
     resource: 'updatePanel',

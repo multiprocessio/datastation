@@ -323,3 +323,37 @@ test('panel reordering works correctly', async () => {
     }
   }
 });
+
+test('panel result updates work correctly', async () => {
+  const testProject = new ProjectState();
+  testProject.projectName = ensureProjectFile(testProject.id);
+
+  // Delete and recreate it to be safe
+  try {
+    fs.unlinkSync(testProject.projectName);
+  } catch (e) {
+    /* nothing */
+  }
+  ensureProjectFile(testProject.projectName);
+
+  const testPage = new ProjectPage('My test page');
+  testProject.pages = [testPage];
+  const testPanel = new ProgramPanelInfo(testPage.id, { type: 'python' });
+  testPage.panels = [testPanel];
+
+  const projectId = testProject.projectName;
+
+  try {
+    await makeProject.handler(null, { projectId });
+
+    // TODO: implement this test
+    throw new Error('IMPLEMENT ME');
+  } finally {
+    const projectPath = ensureProjectFile(testProject.projectName);
+    try {
+      fs.unlinkSync(projectPath);
+    } catch (e) {
+      console.error(e);
+    }
+  }
+});

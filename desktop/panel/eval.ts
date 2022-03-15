@@ -267,12 +267,19 @@ export const makeEvalHandler = (subprocessEval?: {
     );
 
     if (subprocessEval) {
-      return evalInSubprocess(
+      const resultMeta = await evalInSubprocess(
         subprocessEval,
         project.projectName,
         panel,
         project.connectors
       );
+
+      await dispatch({
+        resource: 'updatePanelResult',
+        projectId,
+        body: { resultMeta, panelId: panel.id },
+      });
+      return resultMeta;
     }
 
     const idMap: Record<string | number, string> = {};
@@ -309,7 +316,7 @@ export const makeEvalHandler = (subprocessEval?: {
 
     const s = shape(res.value);
 
-    return {
+    const resultMeta = {
       stdout: res.stdout || '',
       preview: preview(res.value),
       shape: s,
@@ -323,6 +330,12 @@ export const makeEvalHandler = (subprocessEval?: {
           : res.arrayCount,
       contentType: res.contentType || 'application/json',
     };
+    await dispatch({
+      resource: 'updatePanelResult',
+      projectId,
+      body: { resultMeta, panelId: panel.id },
+    });
+    return;
   },
 });
 

@@ -26,9 +26,11 @@ import {
   UpdateServerResponse,
 } from '../shared/rpc';
 
+export type InternalEndpoint = 'updatePanelResult';
+
 export interface RPCPayload {
   messageNumber: number;
-  resource: Endpoint;
+  resource: Endpoint | InternalEndpoint;
   projectId: string;
   body: any;
 }
