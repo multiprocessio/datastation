@@ -1,6 +1,6 @@
 module github.com/multiprocessio/datastation/runner
 
-go 1.17
+go 1.18
 
 require (
 	cloud.google.com/go/bigquery v1.28.0
@@ -22,6 +22,7 @@ require (
 	github.com/multiprocessio/go-openoffice v0.0.0-20220110232726-064f5dda1956
 	github.com/prometheus/client_golang v1.12.1
 	github.com/prometheus/common v0.32.1
+	github.com/scritchley/orc v0.0.0-20210513144143-06dddf1ad665
 	github.com/sijms/go-ora/v2 v2.4.0
 	github.com/snowflakedb/gosnowflake v1.6.7
 	github.com/stretchr/testify v1.7.0
@@ -89,7 +90,6 @@ require (
 	github.com/prometheus/procfs v0.7.3 // indirect
 	github.com/richardlehane/mscfb v1.0.3 // indirect
 	github.com/richardlehane/msoleps v1.0.1 // indirect
-	github.com/scritchley/orc v0.0.0-20210513144143-06dddf1ad665 // indirect
 	github.com/shopspring/decimal v1.3.1 // indirect
 	github.com/sirupsen/logrus v1.8.1 // indirect
 	github.com/xuri/efp v0.0.0-20210322160811-ab561f5b45e3 // indirect
