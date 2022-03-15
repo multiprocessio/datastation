@@ -13,39 +13,68 @@ import { makeStore } from './ProjectStore';
 const store = makeStore(MODE);
 
 export type ProjectCrud = {
-  updatePanel: (panel: PanelInfo, position: number) => Promise<void>;
+  updatePanel: (
+    panel: PanelInfo,
+    position: number,
+    opts?: { internalOnly: boolean }
+  ) => Promise<void>;
   deletePanel: (panelId: string) => Promise<void>;
-  updatePage: (page: ProjectPage, position: number) => Promise<void>;
+  updatePage: (
+    page: ProjectPage,
+    position: number,
+    opts?: { internalOnly: boolean }
+  ) => Promise<void>;
   deletePage: (pageId: string) => Promise<void>;
   updateConnector: (
     connector: ConnectorInfo,
-    position: number
+    position: number,
+    opts?: { internalOnly: boolean }
   ) => Promise<void>;
   deleteConnector: (connectorId: string) => Promise<void>;
-  updateServer: (server: ServerInfo, position: number) => Promise<void>;
+  updateServer: (
+    server: ServerInfo,
+    position: number,
+    opts?: { internalOnly: boolean }
+  ) => Promise<void>;
   deleteServer: (serverId: string) => Promise<void>;
 };
 
 const defaultCrud = {
-  updateServer(server: ServerInfo, position: number) {
+  updateServer(
+    server: ServerInfo,
+    position: number,
+    opts?: { internalOnly: true }
+  ) {
     throw new Error('Context not initialized.');
   },
   deleteServer(serverId: string) {
     throw new Error('Context not initialized.');
   },
-  updateConnector(connector: ConnectorInfo, position: number) {
+  updateConnector(
+    connector: ConnectorInfo,
+    position: number,
+    opts?: { internalOnly: true }
+  ) {
     throw new Error('Context not initialized.');
   },
   deleteConnector(connectorId: string) {
     throw new Error('Context not initialized.');
   },
-  updatePanel(panel: PanelInfo, position: number) {
+  updatePanel(
+    panel: PanelInfo,
+    position: number,
+    opts?: { internalOnly: true }
+  ) {
     throw new Error('Context not initialized.');
   },
   deletePanel(panelId: string) {
     throw new Error('Context not initialized.');
   },
-  updatePage(page: ProjectPage, position: number) {
+  updatePage(
+    page: ProjectPage,
+    position: number,
+    opts?: { internalOnly: true }
+  ) {
     throw new Error('Context not initialized.');
   },
   deletePage(pageId: string) {
@@ -94,12 +123,21 @@ export function useProjectState(
     list: Array<T>,
     storeUpdate: (projectId: string, obj: T, position: number) => Promise<void>,
     opts?: { internalOnly: boolean }
-  ): (obj: T, index: number, opts?: { internalOnly: boolean }) => Promise<void> {
-    return async function update(obj: T, index: number, opts?: { internalOnly: boolean }) {
+  ): (
+    obj: T,
+    index: number,
+    opts?: { internalOnly: boolean }
+  ) => Promise<void> {
+    return async function update(
+      obj: T,
+      index: number,
+      opts?: { internalOnly: boolean }
+    ) {
+      const internalOnly = opts ? opts.internalOnly : false;
       // Actually an insert
       if (index === -1) {
         list.push(obj);
-        if (!opts.internalOnly) {
+        if (!internalOnly) {
           storeUpdate(projectId, obj, list.length - 1);
         }
 
@@ -109,7 +147,7 @@ export function useProjectState(
 
       list[index] = obj;
       setState(state);
-      if (!opts.internalOnly) {
+      if (!internalOnly) {
         storeUpdate(projectId, obj, index);
       }
     };
@@ -137,9 +175,13 @@ export function useProjectState(
         updatePage: makeUpdater(state.pages, store.updatePage),
         deletePage: makeDeleter(state.pages, store.deletePage),
 
-        updatePanel(obj: PanelInfo, index: number) {
+        updatePanel(
+          obj: PanelInfo,
+          index: number,
+          opts?: { internalOnly: true }
+        ) {
           const page = state.pages.find((p) => obj.pageId);
-          return makeUpdater(page.panels, store.updatePanel)(obj, index);
+          return makeUpdater(page.panels, store.updatePanel)(obj, index, opts);
         },
         deletePanel(id: string) {
           const page = state.pages.find(

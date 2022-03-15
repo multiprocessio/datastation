@@ -22,6 +22,7 @@ import { PanelBodyProps, PanelDetailsProps, PanelUIDetails } from './types';
 
 export async function evalHTTPPanel(panel: HTTPPanelInfo) {
   if (MODE === 'browser') {
+    const lastRun = new Date();
     const { value, contentType } = await request(
       (window as any).fetch,
       panel.http.http.method,
@@ -40,6 +41,8 @@ export async function evalHTTPPanel(panel: HTTPPanelInfo) {
       shape: s,
       stdout: '',
       loading: false,
+      lastRun,
+      elapsed: new Date().valueOf() - lastRun.valueOf(),
     };
   }
 

@@ -104,7 +104,6 @@ func (ec EvalContext) evalProgramPanel(project *ProjectState, pageIndex int, pan
 	preamble = strings.ReplaceAll(preamble, "$$JSON_ID_MAP_QUOTE_ESCAPED$$", strings.ReplaceAll(jsonIdMap, "\"", "\\\""))
 
 	body := preamble + "\n" + panel.Content
-	fmt.Println(body)
 	_, err = tmp.WriteString(body)
 	if err != nil {
 		return err

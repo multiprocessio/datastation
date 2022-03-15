@@ -5,6 +5,7 @@ import {
   DEFAULT_PROJECT,
   GraphPanelInfo,
   PanelInfo,
+  PanelResult,
   ProjectPage,
   ProjectState,
   TablePanelInfo,
@@ -44,12 +45,14 @@ export function makeReevalPanel(
         idMap[p.name] = p.id;
       });
       const panelUIDetails = PANEL_UI_DETAILS[panel.type];
-      panel.resultMeta = await panelUIDetails.eval(
-        panel,
-        page.panels,
-        idMap,
-        connectors,
-        servers
+      panel.resultMeta = PanelResult.fromJSON(
+        await panelUIDetails.eval(
+          panel,
+          page.panels,
+          idMap,
+          connectors,
+          servers
+        )
       );
       updatePanelInternal(panel);
 
@@ -66,7 +69,15 @@ export function makeReevalPanel(
           }
         }
       }
-    } catch (e) {}
+    } catch (e) {
+      panel.resultMeta.exception = e;
+      updatePanelInternal(panel);
+    } finally {
+      if (panel.resultMeta.loading) {
+        panel.resultMeta.loading = false;
+        updatePanelInternal(panel);
+      }
+    }
   };
 }
 

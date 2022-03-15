@@ -28,6 +28,7 @@ export async function evalColumnPanel(
   panels: Array<PanelInfo>
 ) {
   if (MODE === 'browser') {
+    const lastRun = new Date();
     const panelIndex = (panels || []).findIndex(function findIndex(p) {
       return p.id === panelSource;
     });
@@ -49,6 +50,8 @@ export async function evalColumnPanel(
         shape: s,
         loading: false,
         stdout: '',
+        lastRun,
+        elapsed: new Date().valueOf() - lastRun.valueOf(),
         size: value ? JSON.stringify(value).length : 0,
         arrayCount: s.kind === 'array' ? (value || []).length : null,
         contentType: 'application/json',

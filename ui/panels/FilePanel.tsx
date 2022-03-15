@@ -25,6 +25,7 @@ export async function evalFilePanel(
     const s = shape(value);
     return {
       lastRun,
+      elapsed: new Date().valueOf() - lastRun.valueOf(),
       value,
       loading: false,
       preview: preview(value),

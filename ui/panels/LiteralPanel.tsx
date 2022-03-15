@@ -11,6 +11,11 @@ import { FormGroup } from '../components/FormGroup';
 import { PanelBodyProps, PanelDetailsProps, PanelUIDetails } from './types';
 
 export async function evalLiteralPanel(panel: LiteralPanelInfo) {
+  if (MODE !== 'browser') {
+    return panelRPC('eval', panel.id);
+  }
+
+  const lastRun = new Date();
   const literal = panel.literal;
   const array = new TextEncoder().encode(panel.content);
   const { value, contentType } = await parseArrayBuffer(
@@ -18,10 +23,6 @@ export async function evalLiteralPanel(panel: LiteralPanelInfo) {
     'literal.' + literal.contentTypeInfo.type,
     array
   );
-
-  if (MODE !== 'browser') {
-    return panelRPC('eval', panel.id);
-  }
 
   const s = shape(value);
   return {
@@ -33,6 +34,8 @@ export async function evalLiteralPanel(panel: LiteralPanelInfo) {
     contentType,
     arrayCount: s.kind === 'array' ? (value || []).length : null,
     size: panel.content.length,
+    lastRun,
+    elapsed: new Date().valueOf() - lastRun.valueOf(),
   };
 }
 

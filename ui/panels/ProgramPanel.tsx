@@ -18,6 +18,7 @@ export async function evalProgramPanel(
     return panelRPC('eval', panel.id);
   }
 
+  const lastRun = new Date();
   const language = LANGUAGES[program.type];
   if (!language || !language.inMemoryEval) {
     throw new Error(`Unknown program type: '${program.type}'`);
@@ -38,6 +39,8 @@ export async function evalProgramPanel(
     arrayCount: s.kind === 'array' ? (res.value || []).length : null,
     contentType: 'application/json',
     loading: false,
+    lastRun,
+    elapsed: new Date().valueOf() - lastRun.valueOf(),
   };
 }
 

@@ -114,7 +114,6 @@ test('write project with encrypted secrets, read with nulled secrets', async () 
     // Passwords come back as null
     const readProject = await getProject.handler(null, { projectId });
     readProject.id = testProject.id; // id is generated newly on every instantiation which is ok
-    console.trace(readProject);
     // Time objects don't compare well
     readProject.pages[0].panels[0].lastEdited =
       testProject.pages[0].panels[0].lastEdited = null;

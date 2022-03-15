@@ -64,6 +64,7 @@ export async function evalFilterAggregatePanel(
   panels: Array<PanelInfo>
 ) {
   if (MODE === 'browser') {
+    const lastRun = new Date();
     const panelIndex = (panels || []).findIndex(
       (p) => p.id === panel.filagg.panelSource
     );
@@ -94,6 +95,8 @@ export async function evalFilterAggregatePanel(
       contentType: 'application/json',
       shape: s,
       loading: false,
+      lastRun,
+      elapsed: new Date().valueOf() - lastRun.valueOf(),
     };
   }
 
