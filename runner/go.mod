@@ -2,6 +2,10 @@ module github.com/multiprocessio/datastation/runner
 
 go 1.18
 
+// Fixes issue with macos builds after Go 1.18 upgrade
+// See: https://github.com/multiprocessio/datastation/runs/5562004293?check_suite_focus=true
+replace golang.org/x/sys => golang.org/x/sys v0.0.0-20220315180522-27bbf83dae87
+
 require (
 	cloud.google.com/go/bigquery v1.29.0
 	github.com/ClickHouse/clickhouse-go/v2 v2.0.12
