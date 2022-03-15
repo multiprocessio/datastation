@@ -204,20 +204,18 @@ export class LocalStorageStore extends ProjectStore {
     }
 
     for (const page of state.pages) {
-      if (page.id === id) {
-        if (!page.panels) {
-          page.panels = [];
-        }
-
-        const index = page.panels.findIndex((p) => p.id === id);
-        if (index === -1) {
-          return;
-        }
-
-        page.panels.splice(index, 1);
-        this.update(projectId, state);
-        return;
+      if (!page.panels) {
+        page.panels = [];
       }
+
+      const index = page.panels.findIndex((p) => p.id === id);
+      if (index === -1) {
+        continue;
+      }
+
+      page.panels.splice(index, 1);
+      this.update(projectId, state);
+      return;
     }
   };
 

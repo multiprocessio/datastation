@@ -165,7 +165,7 @@ export function useProjectState(
 
       list.splice(index, 1);
       setState(state);
-      return storeDelete(projectId, list[index].id);
+      return storeDelete(projectId, id);
     };
   }
 
