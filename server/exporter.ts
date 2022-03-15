@@ -179,7 +179,6 @@ export async function main(
   }
 ) {
   const { handlers } = await init(app);
-  await app.migrate();
   fetchAndRunAllExports(handlers, nodemailerFactory, runPeriods);
 }
 

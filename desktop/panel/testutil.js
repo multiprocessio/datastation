@@ -39,36 +39,68 @@ exports.updateProject = async function (project, opts) {
   const store = new Store();
   const handlers = store.getHandlers();
   if (opts?.isNew) {
-    await handlers.find(h => h.resource === 'makeProject').handler(null, project);
+    const makeProjectHandler = handlers.find(
+      (h) => h.resource === 'makeProject'
+    );
+    await makeProjectHandler.handler(null, { projectId: project.projectName });
   }
 
-  const updatePanelHandler = handlers.find(h => h.resource === 'updatePanel');
-  const updatePageHandler = handlers.find(h => h.resource === 'updatePage');
-  for (const page of project.pages) {
+  const updatePanelHandler = handlers.find((h) => h.resource === 'updatePanel');
+  const updatePageHandler = handlers.find((h) => h.resource === 'updatePage');
+  for (let i = 0; i < project.pages.length; i++) {
+    const page = project.pages[i];
+    // Save before update these get deleted off the object.
     const panels = page.panels;
-    updatePageHandler.handler(project.projectName, page);
+    await updatePageHandler.handler(project.projectName, {
+      data: page,
+      position: i,
+    });
+    page.panels = panels;
 
-    for (const panel of panels) {
-      updatePanelHandler.handler(project.projectName, panel);
+    for (let j = 0; j < panels.length; j++) {
+      panels[j].pageId = page.id;
+      await updatePanelHandler.handler(project.projectName, {
+        data: panels[j],
+        position: j,
+      });
     }
   }
 
-  const updateServerHandler = handlers.find(h => h.resource === 'updateServer');
-  for (const server of project.servers) {
-    updateServerHandler.handler(project.projectName, server);
+  const updateServerHandler = handlers.find(
+    (h) => h.resource === 'updateServer'
+  );
+  for (let i = 0; i < project.servers.length; i++) {
+    const server = project.servers[i];
+    await updateServerHandler.handler(project.projectName, {
+      data: server,
+      position: i,
+    });
   }
 
-  const updateConnectorHandler = handlers.find(h => h.resource === 'updateConnector');
-  for (const connector of project.connectors) {
-    updateConnectorHandler.handler(project.projectName, connector);
+  const updateConnectorHandler = handlers.find(
+    (h) => h.resource === 'updateConnector'
+  );
+  for (let i = 0; i < project.connectors.length; i++) {
+    const connector = project.connectors[i];
+    await updateConnectorHandler.handler(project.projectName, {
+      data: connector,
+      position: i,
+    });
   }
-}
+};
 
 exports.withSavedPanels = async function (
   panels,
   cb,
   { evalPanels, subprocessName, settings, connectors, servers } = {}
 ) {
+  const store = new Store();
+  const handlers = store.getHandlers();
+  const getProjectHandler = handlers.find((h) => h.resource === 'getProject');
+  const updatePanelResultHandler = handlers.find(
+    (h) => h.resource === 'updatePanelResult'
+  );
+
   const tmp = await makeTmpFile({ prefix: 'saved-panel-project-' });
 
   const project = {
@@ -107,15 +139,13 @@ exports.withSavedPanels = async function (
           )
         ).toBe(true);
 
-        function dispatch(r) {
+        async function dispatch(r) {
           if (r.resource === 'getProject') {
-            const p = ProjectState.fromJSON(
-              JSON.parse(
-                fs.readFileSync(project.projectName + '.dsproj').toString()
-              ),
-              false
-            );
-            return p;
+            return getProjectHandler.handler(r.projectId, r.body);
+          }
+
+          if (r.resource === 'updatePanelResult') {
+            return updatePanelResultHandler.handler(r.projectId, r.body);
           }
 
           if (r.resource === 'fetchResults') {
@@ -124,7 +154,7 @@ exports.withSavedPanels = async function (
 
           // TODO: support more resources as needed
           throw new Error(
-            "Unsupported resource in tests. You'll need to add support for it here."
+            `Unsupported resource (${r.resource}) in tests. You'll need to add support for it here.`
           );
         }
 

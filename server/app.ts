@@ -4,7 +4,6 @@ import fs from 'fs';
 import http from 'http';
 import https from 'https';
 import path from 'path';
-import pg from 'pg';
 import { CODE_ROOT } from '../desktop/constants';
 import { RPCHandler } from '../desktop/rpc';
 import { initialize } from '../desktop/runner';
@@ -16,17 +15,14 @@ import { registerDashboard } from './dashboard';
 import log from './log';
 import { handleRPC } from './rpc';
 
-type PgPoolFactory = (c: pg.PoolConfig) => pg.Pool;
-
 export class App {
   config: Config;
-  dbpool: pg.Pool;
   express: express.Express;
   fs: typeof fs;
   http: typeof http;
   https: typeof https;
 
-  constructor(config: Config, poolFactory: PgPoolFactory) {
+  constructor(config: Config) {
     this.express = express();
     this.config = config;
 
@@ -35,65 +31,10 @@ export class App {
     this.http = http;
     this.https = https;
     // Done for overrides
-
-    const [host, port] = this.config.database.address.split('?')[0].split(':');
-    this.dbpool = poolFactory({
-      user: this.config.database.username || '',
-      password: this.config.database.password || '',
-      database: this.config.database.database,
-      host,
-      port: +port || undefined,
-    });
   }
 
   static make(config: Config) {
-    return new App(config, (c: pg.PoolConfig) => new pg.Pool(c));
-  }
-
-  async migrate() {
-    log.info('Starting migrations');
-    const migrationsDirectory = path.join(__dirname, 'migrations');
-    const files = this.fs.readdirSync(migrationsDirectory);
-    files.sort();
-    const client = await this.dbpool.connect();
-    let migrations: Array<string> = [];
-    try {
-      try {
-        const res = await client.query('SELECT migration_name FROM migrations');
-        migrations = res.rows.map((r) => r.migration_name);
-      } catch (e) {
-        log.info(e);
-      }
-
-      for (const file of files) {
-        if (migrations.includes(file)) {
-          continue;
-        }
-
-        log.info('Starting migration: ' + file);
-        await client.query('BEGIN');
-        try {
-          const migration = this.fs
-            .readFileSync(path.join(migrationsDirectory, file))
-            .toString();
-          await client.query(migration);
-          await client.query(
-            'INSERT INTO migrations (migration_name) VALUES ($1)',
-            [file]
-          );
-          await client.query('COMMIT');
-          log.info('Finished migration: ' + file);
-        } catch (e) {
-          log.info('Failed to run migration: ' + file);
-          await client.query('ROLLBACK');
-          throw e;
-        }
-      }
-    } finally {
-      client.release();
-    }
-
-    log.info('Done migrations');
+    return new App(config);
   }
 
   async serve(handlers: RPCHandler<any, any>[]) {

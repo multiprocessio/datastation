@@ -277,8 +277,14 @@ GROUP BY panel_id
       body: {
         panelId: string;
         resultMeta: PanelResult;
-      }
+      },
+      _: unknown,
+      external: boolean
     ) => {
+      if (external) {
+        throw new Error('Bad access.');
+      }
+
       const db = this.getConnection(projectId);
       const stmt = db.prepare(
         `REPLACE INTO "ds_result" (panel_id, created_at, data_json) VALUES (?, STRFTIME('%s', 'now'), ?)`

@@ -14,7 +14,6 @@ log.info(APP_NAME, VERSION, DEBUG ? 'DEBUG' : '');
 async function main() {
   const app = App.make(readConfig());
   const { handlers } = await init(app);
-  await app.migrate();
   await app.serve(handlers);
 }
 
