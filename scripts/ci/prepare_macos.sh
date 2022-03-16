@@ -6,7 +6,7 @@ set -eux
 brew uninstall --force go
 brew cleanup -s go
 brew cleanup --prune-prefix
-brew install cmake jq r julia node@16 npm
+brew install cmake jq r julia node@16 npm go-jsonnet
 brew link --overwrite node@16
 
 # Install go
@@ -17,7 +17,8 @@ sudo mv /usr/local/go/bin/go /usr/local/bin/go
 sudo mv /usr/local/go/bin/gofmt /usr/local/bin/gofmt
 
 # Install Go helpers
-go install github.com/google/go-jsonnet/cmd/jsonnet@latest
+# Failing: https://github.com/google/go-jsonnet/issues/596
+# go install github.com/google/go-jsonnet/cmd/jsonnet@latest
 go install github.com/multiprocessio/httpmirror@latest
 cp ~/go/bin/httpmirror /usr/local/bin/httpmirror
 
