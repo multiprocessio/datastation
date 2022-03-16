@@ -60,7 +60,7 @@ func (ec EvalContext) getPagesFromDatabase(db *sql.DB) ([]ProjectPage, error) {
 	return pages, nil
 }
 
-func (ec EvalContext) getPanelsFromDatabase(db *sql.DB) ([]PanelInfo, error) {
+func (ec EvalContext) getPanelsFromDatabase(db *sql.DB) (map[string][]PanelInfo, error) {
 	rows, err := db.Query(`SELECT data_json FROM "ds_panel" ORDER BY position ASC`)
 	if err != nil {
 		return nil, err
@@ -70,7 +70,7 @@ func (ec EvalContext) getPanelsFromDatabase(db *sql.DB) ([]PanelInfo, error) {
 
 	var j []byte
 	var p PanelInfo
-	var panels []PanelInfo
+	panelPageMap := map[string][]PanelInfo{}
 
 	for rows.Next() {
 		err = rows.Scan(&j)
@@ -83,10 +83,50 @@ func (ec EvalContext) getPanelsFromDatabase(db *sql.DB) ([]PanelInfo, error) {
 			return nil, err
 		}
 
-		panels = append(panels, p)
+		panelPageMap[p.PageId] = append(panelPageMap[p.PageId], p)
 	}
 
-	return panels, nil
+	return panelPageMap, nil
+}
+
+func (ec EvalContext) getResultsFromDatabase(db *sql.DB) (map[string]PanelResult, error) {
+	rows, err := db.Query(`SELECT
+  panel_id,
+  (
+    SELECT data_json
+    FROM ds_result i
+    WHERE i.panel_id = o.panel_id
+    ORDER BY created_at DESC
+    LIMIT 1
+  ) data_json
+FROM ds_result o
+GROUP BY panel_id`)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	var panelId string
+	var j []byte
+	results := map[string]PanelResult{}
+
+	for rows.Next() {
+		err = rows.Scan(&panelId, &j)
+		if err != nil {
+			return nil, err
+		}
+
+		var p PanelResult
+		err = jsonUnmarshal(j, &p)
+		if err != nil {
+			return nil, err
+		}
+
+		results[panelId] = p
+	}
+
+	return results, nil
 }
 
 func (ec EvalContext) getConnectorsFromDatabase(db *sql.DB) ([]ConnectorInfo, error) {
@@ -178,17 +218,25 @@ func (ec EvalContext) getProjectPanel(projectId, panelId string) (*ProjectState,
 		return nil, 0, nil, err
 	}
 
+	results, err := ec.getResultsFromDatabase(db)
+	if err != nil {
+		return nil, 0, nil, err
+	}
+
 	thisPage := -1
 	var thisPanel PanelInfo
 	for i, page := range project.Pages {
-		for _, panel := range panels {
-			if panel.PageId == page.Id {
-				page.Panels = append(page.Panels, panel)
-			}
+		// Need to assign directly, not to the copy
+		project.Pages[i].Panels = panels[page.Id]
+		page = project.Pages[i]
+
+		for j, panel := range page.Panels {
+			// Need to assign directly, not to the copy
+			page.Panels[j].ResultMeta = results[panel.Id]
 
 			if panel.Id == panelId {
-				thisPage = i
 				thisPanel = panel
+				thisPage = i
 			}
 		}
 	}

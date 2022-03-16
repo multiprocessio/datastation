@@ -160,7 +160,6 @@ func (ec EvalContext) Eval(projectId, panelId string) error {
 		return ec.evalLiteralPanel(project, pageIndex, panel)
 	case ProgramPanel:
 		Logln("Evaling program panel")
-		fmt.Println(panel)
 		return ec.evalProgramPanel(project, pageIndex, panel)
 	case DatabasePanel:
 		Logln("Evaling database panel")

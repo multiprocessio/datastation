@@ -169,6 +169,8 @@ exports.withSavedPanels = async function (
           dispatch
         );
 
+        console.log( "PHIL ", getProjectResultsFile(project.projectName) + panel.id);
+
         // Make panel results are saved to disk
         expect(
           exports.fileIsEmpty(
