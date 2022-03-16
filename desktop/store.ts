@@ -354,8 +354,7 @@ GROUP BY panel_id
             `UPDATE ${panelCrud.entity} SET position = ? WHERE id = ?`
           );
           for (const i of allExisting.map((_, i) => i)) {
-            stmt.bind([i, allExisting[i].id]);
-            stmt.run();
+            stmt.run(i, allExisting[i].id);
           }
           return true;
         }
