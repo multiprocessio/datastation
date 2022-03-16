@@ -46,7 +46,8 @@ func getDatabaseHostPortExtra(raw, defaultPort string) (string, string, string, 
 }
 
 func debugObject(obj interface{}) {
-	log.Printf("%#v\n", obj)
+	b, _ := jsonMarshal(obj)
+	log.Printf("%s\n", string(b))
 }
 
 func (e *Encrypt) decrypt() (string, error) {

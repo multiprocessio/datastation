@@ -287,9 +287,15 @@ GROUP BY panel_id
 
       const db = this.getConnection(projectId);
       const stmt = db.prepare(
-        `REPLACE INTO "ds_result" (panel_id, created_at, data_json) VALUES (?, STRFTIME('%s', 'now'), ?)`
+        `UPDATE "ds_result" SET created_at = STRFTIME('%s', 'now'), data_json = ? WHERE panel_id = ?;`
       );
-      stmt.run(body.panelId, JSON.stringify(body.resultMeta));
+      const res = stmt.run(JSON.stringify(body.resultMeta), body.panelId);
+      if (res.changes === 0) {
+        const stmt = db.prepare(
+          `INSERT INTO "ds_result" (data_json, created_at, panel_id) VALUES(?, STRFTIME('%s', 'now'), ?);`
+        );
+        stmt.run(JSON.stringify(body.resultMeta), body.panelId);
+      }
     },
   };
 
@@ -488,7 +494,15 @@ GROUP BY panel_id
       }: {
         id: string;
       }
-    ) => this.deleteGeneric(panelCrud, projectId, id),
+    ) => {
+      const db = this.getConnection(projectId);
+      db.transaction(() => {
+        panelCrud.del(db, id);
+        // Panel and result must be deleted
+        const stmt = db.prepare(`DELETE FROM "ds_result" WHERE panel_id = ?`);
+        stmt.run(id);
+      })();
+    },
   };
 
   // Break handlers out so they can be individually typed without `any`,

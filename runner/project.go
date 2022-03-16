@@ -232,7 +232,8 @@ func (ec EvalContext) getProjectPanel(projectId, panelId string) (*ProjectState,
 
 		for j, panel := range page.Panels {
 			// Need to assign directly, not to the copy
-			page.Panels[j].ResultMeta = results[panel.Id]
+			project.Pages[i].Panels[j].ResultMeta = results[panel.Id]
+			debugObject(results[panel.Id])
 
 			if panel.Id == panelId {
 				thisPanel = panel
