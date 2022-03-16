@@ -13,9 +13,9 @@ import (
 )
 
 type influxSeries struct {
-	Values  [][]interface{} `json:"values"`
-	Columns []string        `json:"columns"`
-	Name    string          `json:"name"`
+	Values  [][]any  `json:"values"`
+	Columns []string `json:"columns"`
+	Name    string   `json:"name"`
 }
 
 type influxResult struct {
@@ -93,7 +93,7 @@ func (ec EvalContext) evalInfluxQL(panel *PanelInfo, dbInfo DatabaseConnectorInf
 			for _, result := range r.Results {
 				for _, series := range result.Series {
 					for _, r := range series.Values {
-						row := map[string]interface{}{
+						row := map[string]any{
 							"__series_name__": series.Name,
 						}
 						for i, cell := range r {

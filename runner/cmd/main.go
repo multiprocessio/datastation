@@ -84,7 +84,7 @@ func main() {
 			err.(*runner.DSError).Stack = "Unknown"
 		}
 
-		err := runner.WriteJSONFile(panelMetaOut, map[string]interface{}{
+		err := runner.WriteJSONFile(panelMetaOut, map[string]any{
 			"exception": err,
 		})
 		if err != nil {

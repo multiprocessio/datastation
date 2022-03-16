@@ -160,7 +160,7 @@ func TestGetShape(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		var j interface{}
+		var j any
 		err := json.Unmarshal([]byte(test.json), &j)
 		assert.Nil(t, err)
 		fmt.Println(j)
@@ -358,7 +358,7 @@ func TestShapePathIsObjectArray(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		var j interface{}
+		var j any
 		err := json.Unmarshal([]byte(test.json), &j)
 		assert.Nil(t, err)
 		s := GetShape("", j, len(test.json))

@@ -41,7 +41,7 @@ func evalBigQuery(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, w io.W
 				return err
 			}
 
-			row := map[string]interface{}{}
+			row := map[string]any{}
 			for i, field := range it.Schema {
 				row[field.Name] = values[i]
 			}

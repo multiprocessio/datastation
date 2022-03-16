@@ -118,7 +118,7 @@ func Test_transformDM_getPanel_callsWithPaths(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		var j interface{}
+		var j any
 		err := json.Unmarshal([]byte(test.data), &j)
 		assert.Nil(t, err)
 		s := GetShape("", j, len(test.data))
@@ -151,27 +151,27 @@ func Test_postgresMangleInsert(t *testing.T) {
 
 func Test_getObjectAtPath(t *testing.T) {
 	tests := []struct {
-		input    map[string]interface{}
+		input    map[string]any
 		path     string
-		expected interface{}
+		expected any
 	}{
 		{
-			map[string]interface{}{
+			map[string]any{
 				"x": 1,
 			},
 			"x",
 			1,
 		},
 		{
-			map[string]interface{}{
+			map[string]any{
 				"x.y": 3,
 			},
 			"x.y",
 			3,
 		},
 		{
-			map[string]interface{}{
-				"x": map[string]interface{}{
+			map[string]any{
+				"x": map[string]any{
 					"y": 4,
 				},
 			},
@@ -179,8 +179,8 @@ func Test_getObjectAtPath(t *testing.T) {
 			4,
 		},
 		{
-			map[string]interface{}{
-				"x.z": map[string]interface{}{
+			map[string]any{
+				"x.z": map[string]any{
 					"y": 6,
 				},
 			},
@@ -188,9 +188,9 @@ func Test_getObjectAtPath(t *testing.T) {
 			6,
 		},
 		{
-			map[string]interface{}{
-				"x.z": map[string]interface{}{
-					"y": map[string]interface{}{
+			map[string]any{
+				"x.z": map[string]any{
+					"y": map[string]any{
 						"z": "19",
 					},
 				},
@@ -209,44 +209,44 @@ func Test_getObjectAtPath(t *testing.T) {
 func Test_sqlIngest_e2e(t *testing.T) {
 	tests := []struct {
 		json      string
-		expResult []interface{}
+		expResult []any
 	}{
 		{
 			`[{"a": 1},{"b": 2}]`,
-			[]interface{}{
-				map[string]interface{}{"a": float64(1), "b": nil},
-				map[string]interface{}{"a": nil, "b": float64(2)},
+			[]any{
+				map[string]any{"a": float64(1), "b": nil},
+				map[string]any{"a": nil, "b": float64(2)},
 			},
 		},
 		{
 			`[{"a": 1},{"b": 2}, {"a": 1},{"b": 2}, {"a": 1},{"b": 2}, {"a": 1},{"b": 2}, {"a": 1},{"b": 2}]`,
-			[]interface{}{
-				map[string]interface{}{"a": float64(1), "b": nil},
-				map[string]interface{}{"a": float64(1), "b": nil},
-				map[string]interface{}{"a": float64(1), "b": nil},
-				map[string]interface{}{"a": float64(1), "b": nil},
-				map[string]interface{}{"a": float64(1), "b": nil},
-				map[string]interface{}{"a": nil, "b": float64(2)},
-				map[string]interface{}{"a": nil, "b": float64(2)},
-				map[string]interface{}{"a": nil, "b": float64(2)},
-				map[string]interface{}{"a": nil, "b": float64(2)},
-				map[string]interface{}{"a": nil, "b": float64(2)},
+			[]any{
+				map[string]any{"a": float64(1), "b": nil},
+				map[string]any{"a": float64(1), "b": nil},
+				map[string]any{"a": float64(1), "b": nil},
+				map[string]any{"a": float64(1), "b": nil},
+				map[string]any{"a": float64(1), "b": nil},
+				map[string]any{"a": nil, "b": float64(2)},
+				map[string]any{"a": nil, "b": float64(2)},
+				map[string]any{"a": nil, "b": float64(2)},
+				map[string]any{"a": nil, "b": float64(2)},
+				map[string]any{"a": nil, "b": float64(2)},
 			},
 		},
 		{
 			`[{"a": 1},{"b": 2}, {"a": 1},{"b": 2}, {"a": 1},{"b": 2}, {"a": 1},{"b": 2}, {"a": 1},{"b": 2},{"b": 2}]`,
-			[]interface{}{
-				map[string]interface{}{"a": float64(1), "b": nil},
-				map[string]interface{}{"a": float64(1), "b": nil},
-				map[string]interface{}{"a": float64(1), "b": nil},
-				map[string]interface{}{"a": float64(1), "b": nil},
-				map[string]interface{}{"a": float64(1), "b": nil},
-				map[string]interface{}{"a": nil, "b": float64(2)},
-				map[string]interface{}{"a": nil, "b": float64(2)},
-				map[string]interface{}{"a": nil, "b": float64(2)},
-				map[string]interface{}{"a": nil, "b": float64(2)},
-				map[string]interface{}{"a": nil, "b": float64(2)},
-				map[string]interface{}{"a": nil, "b": float64(2)},
+			[]any{
+				map[string]any{"a": float64(1), "b": nil},
+				map[string]any{"a": float64(1), "b": nil},
+				map[string]any{"a": float64(1), "b": nil},
+				map[string]any{"a": float64(1), "b": nil},
+				map[string]any{"a": float64(1), "b": nil},
+				map[string]any{"a": nil, "b": float64(2)},
+				map[string]any{"a": nil, "b": float64(2)},
+				map[string]any{"a": nil, "b": float64(2)},
+				map[string]any{"a": nil, "b": float64(2)},
+				map[string]any{"a": nil, "b": float64(2)},
+				map[string]any{"a": nil, "b": float64(2)},
 			},
 		},
 	}
@@ -299,14 +299,14 @@ func Test_sqlIngest_e2e(t *testing.T) {
 		}
 
 		ec := EvalContext{}
-		err = ec.EvalDatabasePanel(project, 0, panel2, func(projectId, panelId string) (chan map[string]interface{}, error) {
+		err = ec.EvalDatabasePanel(project, 0, panel2, func(projectId, panelId string) (chan map[string]any, error) {
 			return loadJSONArrayFile(readFile.Name())
 		})
 		assert.Nil(t, err)
 
 		f := ec.GetPanelResultsFile(project.Id, panel2.Id)
 		a, err := loadJSONArrayFile(f)
-		var pieces []interface{}
+		var pieces []any
 		for r := range a {
 			pieces = append(pieces, r)
 		}
@@ -367,7 +367,7 @@ func Test_sqlIngest_BENCHMARK(t *testing.T) {
 	}
 
 	ec := EvalContext{}
-	err = ec.EvalDatabasePanel(project, 0, panel2, func(projectId, panelId string) (chan map[string]interface{}, error) {
+	err = ec.EvalDatabasePanel(project, 0, panel2, func(projectId, panelId string) (chan map[string]any, error) {
 		return loadJSONArrayFile(readFile)
 	})
 	assert.Nil(t, err)
