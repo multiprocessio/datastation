@@ -45,7 +45,7 @@ func getDatabaseHostPortExtra(raw, defaultPort string) (string, string, string, 
 	return host, port, extra, err
 }
 
-func debugObject(obj interface{}) {
+func debugObject(obj any) {
 	log.Printf("%#v\n", obj)
 }
 
@@ -281,7 +281,7 @@ var textTypes = map[string]bool{
 }
 
 func writeRowFromDatabase(dbInfo DatabaseConnectorInfoDatabase, w *jsonutil.StreamEncoder, rows *sqlx.Rows, wroteFirstRow bool) error {
-	row := map[string]interface{}{}
+	row := map[string]any{}
 	err := rows.MapScan(row)
 	if err != nil {
 		return err
@@ -347,7 +347,7 @@ func writeRowFromDatabase(dbInfo DatabaseConnectorInfoDatabase, w *jsonutil.Stre
 	return nil
 }
 
-func (ec EvalContext) loadJSONArrayPanel(projectId, panelId string) (chan map[string]interface{}, error) {
+func (ec EvalContext) loadJSONArrayPanel(projectId, panelId string) (chan map[string]any, error) {
 	f := ec.GetPanelResultsFile(projectId, panelId)
 	return loadJSONArrayFile(f)
 }
@@ -356,7 +356,7 @@ func (ec EvalContext) EvalDatabasePanel(
 	project *ProjectState,
 	pageIndex int,
 	panel *PanelInfo,
-	panelResultLoader func(projectId, panelId string) (chan map[string]interface{}, error),
+	panelResultLoader func(projectId, panelId string) (chan map[string]any, error),
 ) error {
 	var connector *ConnectorInfo
 	for _, c := range project.Connectors {
@@ -494,13 +494,13 @@ func (ec EvalContext) EvalDatabasePanel(
 			return err
 		}
 
-		preparer := func(q string) (func([]interface{}) error, func(), error) {
+		preparer := func(q string) (func([]any) error, func(), error) {
 			stmt, err := db.Prepare(mangleInsert(q))
 			if err != nil {
 				return nil, nil, err
 			}
 
-			return func(values []interface{}) error {
+			return func(values []any) error {
 					_, err := stmt.Exec(values...)
 					return err
 				}, func() {
@@ -516,7 +516,7 @@ func (ec EvalContext) EvalDatabasePanel(
 					return err
 				},
 				preparer,
-				func(query string) ([]map[string]interface{}, error) {
+				func(query string) ([]map[string]any, error) {
 					rows, err := db.Queryx(query)
 					if err != nil {
 						return nil, err

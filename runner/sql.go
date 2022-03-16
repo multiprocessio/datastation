@@ -205,7 +205,7 @@ func transformDM_getPanelCalls(
 	return panelsToImport, query, nil
 }
 
-func getObjectAtPath(obj map[string]interface{}, path string) interface{} {
+func getObjectAtPath(obj map[string]any, path string) any {
 	if val, ok := obj[path]; ok {
 		return val
 	}
@@ -226,7 +226,7 @@ func getObjectAtPath(obj map[string]interface{}, path string) interface{} {
 				return nil
 			}
 			var ok bool
-			if next, ok = n.(map[string]interface{}); !ok {
+			if next, ok = n.(map[string]any); !ok {
 				// Some objects may have this path, some may not
 				return nil
 			}
@@ -258,10 +258,10 @@ func defaultMangleInsert(stmt string) string {
 	return stmt
 }
 
-func chunk(c chan map[string]interface{}, size int) chan []map[string]interface{} {
-	var chunk []map[string]interface{}
+func chunk(c chan map[string]any, size int) chan []map[string]any {
+	var chunk []map[string]any
 
-	out := make(chan []map[string]interface{}, 1)
+	out := make(chan []map[string]any, 1)
 
 	go func() {
 		defer close(out)
@@ -311,13 +311,13 @@ func makePreparedStatement(tname string, nColumns, chunkSize int) string {
 
 func importPanel(
 	createTable func(string) error,
-	prepare func(string) (func([]interface{}) error, func(), error),
-	makeQuery func(string) ([]map[string]interface{}, error),
+	prepare func(string) (func([]any) error, func(), error),
+	makeQuery func(string) ([]map[string]any, error),
 	projectId string,
 	query string,
 	panel panelToImport,
 	qt quoteType,
-	panelResultLoader func(string, string) (chan map[string]interface{}, error),
+	panelResultLoader func(string, string) (chan map[string]any, error),
 ) error {
 	var ddlColumns []string
 	for _, c := range panel.columns {
@@ -341,7 +341,7 @@ func importPanel(
 
 	// Preallocated this makes a 4s difference.
 	chunkSize := 10
-	toinsert := make([]interface{}, chunkSize*len(ddlColumns))
+	toinsert := make([]any, chunkSize*len(ddlColumns))
 
 	chunks := chunk(c, chunkSize)
 newprepare:
@@ -404,15 +404,15 @@ newprepare:
 
 func importAndRun(
 	createTable func(string) error,
-	prepare func(string) (func([]interface{}) error, func(), error),
-	makeQuery func(string) ([]map[string]interface{}, error),
+	prepare func(string) (func([]any) error, func(), error),
+	makeQuery func(string) ([]map[string]any, error),
 	projectId string,
 	query string,
 	panelsToImport []panelToImport,
 	qt quoteType,
 	// Postgres uses $1, mysql/sqlite use ?
-	panelResultLoader func(string, string) (chan map[string]interface{}, error),
-) ([]map[string]interface{}, error) {
+	panelResultLoader func(string, string) (chan map[string]any, error),
+) ([]map[string]any, error) {
 	for _, panel := range panelsToImport {
 		err := importPanel(createTable, prepare, makeQuery, projectId, query, panel, qt, panelResultLoader)
 		if err != nil {

@@ -12,7 +12,7 @@ import (
 	"google.golang.org/api/sheets/v4"
 )
 
-func writeGoogleSheet(sheet *sheets.Sheet, w *jsonutil.StreamEncoder, row *map[string]interface{}) error {
+func writeGoogleSheet(sheet *sheets.Sheet, w *jsonutil.StreamEncoder, row *map[string]any) error {
 	var header []string
 	if len(sheet.Data) != 1 {
 		fmt.Printf("%#v\n", sheet)
@@ -66,7 +66,7 @@ func evalGoogleSheets(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, w 
 
 	sheets := rsp.Sheets
 
-	sharedRow := map[string]interface{}{}
+	sharedRow := map[string]any{}
 	// Single sheet files get flattened into just an array, not a dict mapping sheet name to sheet contents
 	if len(sheets) == 1 {
 		return withJSONArrayOutWriterFile(w, func(w *jsonutil.StreamEncoder) error {

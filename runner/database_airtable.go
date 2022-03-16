@@ -13,7 +13,7 @@ import (
 type airtableResponse struct {
 	Offset  string `json:"offset"`
 	Records []struct {
-		Fields map[string]interface{} `json:"fields"`
+		Fields map[string]any `json:"fields"`
 	} `json:"records"`
 }
 

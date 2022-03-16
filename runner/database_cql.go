@@ -39,7 +39,7 @@ func evalCQL(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, server *Ser
 		iter := sess.Query(panel.Content).Iter()
 		return withJSONArrayOutWriterFile(w, func(w *jsonutil.StreamEncoder) error {
 			for {
-				row := map[string]interface{}{}
+				row := map[string]any{}
 				if !iter.MapScan(row) {
 					break
 				}

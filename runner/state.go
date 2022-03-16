@@ -6,14 +6,14 @@ import (
 )
 
 type PanelResult struct {
-	Exception   interface{} `json:"exception" db:"exception"`
-	Preview     string      `json:"preview" db:"preview"`
-	Stdout      string      `json:"stdout" db:"stdout"`
-	Shape       Shape       `json:"shape" db:"shape"`
-	ArrayCount  *float64    `json:"arrayCount" db:"arrayCount"`
-	Size        *float64    `json:"size" db:"size"`
-	ContentType string      `json:"contentType" db:"contentType"`
-	Elapsed     *float64    `json:"elapsed" db:"elapsed"`
+	Exception   any      `json:"exception" db:"exception"`
+	Preview     string   `json:"preview" db:"preview"`
+	Stdout      string   `json:"stdout" db:"stdout"`
+	Shape       Shape    `json:"shape" db:"shape"`
+	ArrayCount  *float64 `json:"arrayCount" db:"arrayCount"`
+	Size        *float64 `json:"size" db:"size"`
+	ContentType string   `json:"contentType" db:"contentType"`
+	Elapsed     *float64 `json:"elapsed" db:"elapsed"`
 }
 
 var defaultPanelResult = PanelResult{
@@ -202,7 +202,7 @@ const (
 )
 
 type FilaggPanelInfoFilagg struct {
-	PanelSource    interface{}     `json:"panelSource"`
+	PanelSource    any             `json:"panelSource"`
 	Filter         string          `json:"filter"`
 	Range          TimeSeriesRange `json:"range"`
 	AggregateType  AggregateType   `json:"aggregateType"`
@@ -314,11 +314,11 @@ type HttpConnectorInfo struct {
 }
 
 type ProjectPage struct {
-	Panels        []PanelInfo   `json:"panels" db:"panels"`
-	Schedules     []interface{} `json:"schedules" db:"schedules"`
-	Name          string        `json:"name" db:"name"`
-	Id            string        `json:"id" db:"id"`
-	RefreshPeriod int           `json:"refreshPeriod" db:"refreshPeriod"`
+	Panels        []PanelInfo `json:"panels" db:"panels"`
+	Schedules     []any       `json:"schedules" db:"schedules"`
+	Name          string      `json:"name" db:"name"`
+	Id            string      `json:"id" db:"id"`
+	RefreshPeriod int         `json:"refreshPeriod" db:"refreshPeriod"`
 }
 
 type ProjectState struct {

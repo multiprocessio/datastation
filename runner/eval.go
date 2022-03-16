@@ -13,7 +13,7 @@ import (
 var logPrefixSet = false
 var Verbose = true
 
-func _logln(level, msg string, args ...interface{}) {
+func _logln(level, msg string, args ...any) {
 	if !Verbose {
 		return
 	}
@@ -29,11 +29,11 @@ func _logln(level, msg string, args ...interface{}) {
 	log.Printf(baseMsg, args...)
 }
 
-func Logln(msg string, args ...interface{}) {
+func Logln(msg string, args ...any) {
 	_logln("INFO", msg, args...)
 }
 
-func Fatalln(msg string, args ...interface{}) {
+func Fatalln(msg string, args ...any) {
 	_logln("FATAL", msg, args...)
 	os.Exit(2)
 }
@@ -90,7 +90,7 @@ func (ec EvalContext) evalMacros(content string, project *ProjectState, pageInde
 
 	errC := make(chan error)
 
-	getPanel := func(nameOrIndex string) interface{} {
+	getPanel := func(nameOrIndex string) any {
 		panelId := ""
 		for panelIndex, panel := range project.Pages[pageIndex].Panels {
 			if panel.Name == nameOrIndex || fmt.Sprintf("%d", panelIndex) == nameOrIndex {
@@ -104,7 +104,7 @@ func (ec EvalContext) evalMacros(content string, project *ProjectState, pageInde
 		}
 
 		resultsFile := ec.GetPanelResultsFile(project.Id, panelId)
-		var a interface{}
+		var a any
 		err := readJSONFileInto(resultsFile, &a)
 		if err != nil {
 			errC <- err

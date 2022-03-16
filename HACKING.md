@@ -9,7 +9,7 @@ Windows (yes, you need this not MSVC because some Go packages [require
 gcc](https://github.com/mattn/go-sqlite3/issues/684)) or XCode on
 macOS. On Linux install gcc or clang.
 
-You'll need Go 1.17 or newer.
+You'll need Go 1.18 or newer.
 
 If you want to have hot-reloading, install
 [fswatch](https://github.com/emcrisostomo/fswatch).

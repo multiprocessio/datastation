@@ -3,11 +3,25 @@
 set -eux
 
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-brew uninstall go@1.15
-brew install cmake jq go r julia node@16 npm
+brew uninstall --force go
+brew cleanup -s go
+brew cleanup --prune-prefix
+brew install cmake jq r julia node@16 npm go-jsonnet
 brew link --overwrite node@16
-go install github.com/google/go-jsonnet/cmd/jsonnet@latest
+
+# Install go
+sudo curl -LO https://go.dev/dl/go1.18.darwin-amd64.tar.gz
+sudo rm -rf /usr/local/go
+sudo tar -C /usr/local -xzf go1.18.darwin-amd64.tar.gz
+sudo mv /usr/local/go/bin/go /usr/local/bin/go
+sudo mv /usr/local/go/bin/gofmt /usr/local/bin/gofmt
+
+# Install Go helpers
+# Failing: https://github.com/google/go-jsonnet/issues/596
+# go install github.com/google/go-jsonnet/cmd/jsonnet@latest
 go install github.com/multiprocessio/httpmirror@latest
 cp ~/go/bin/httpmirror /usr/local/bin/httpmirror
+
+# Install JavaScript deps
 npm install --global yarn
 yarn
