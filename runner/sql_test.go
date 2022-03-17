@@ -215,7 +215,6 @@ func makeTestEvalContext() (EvalContext, func()) {
 	}
 }
 
-
 func Test_sqlIngest_e2e(t *testing.T) {
 	tests := []struct {
 		json      string
@@ -267,7 +266,7 @@ func Test_sqlIngest_e2e(t *testing.T) {
 
 	ec, cleanup := makeTestEvalContext()
 	defer cleanup()
-	
+
 	for _, test := range tests {
 		project := &ProjectState{
 			Id: projectTmp.Name(),
