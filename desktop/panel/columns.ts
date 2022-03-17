@@ -37,6 +37,10 @@ export async function evalColumns(
     guardPanel<GraphPanelInfo>(panel, 'graph');
   }
 
+  if (!panelSource) {
+    throw new Error('Panel source not specified, cannot eval.');
+  }
+
   const { value } = await getPanelResult(
     dispatch,
     project.projectName,

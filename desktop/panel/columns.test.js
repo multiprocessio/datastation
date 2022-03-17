@@ -11,107 +11,69 @@ const {
 } = require('../../shared/state');
 const { makeEvalHandler } = require('./eval');
 const { fetchResultsHandler } = require('./columns');
-const { RUNNERS } = require('./testutil');
+const { RUNNERS, withSavedPanels } = require('./testutil');
 
 for (const runner of RUNNERS) {
   if (!runner?.go) {
     continue; // Otherwise not implemented
   }
 
-  test(`store and retrieve literal ${
-    runner ? 'using ' + runner : ''
-  }, specific columns`, async () => {
-    const tmp = await makeTmpFile({ prefix: 'columns-project-' });
-
+  test('store and retrieve literal', async () => {
     const testData = [
       { a: 1, b: 'hey' },
       { a: 19, b: 'no no' },
     ];
+    const lp = new LiteralPanelInfo(null, {
+      contentTypeInfo: { type: 'application/json' },
+      content: JSON.stringify(testData),
+      name: 'Raw Data',
+    });
 
-    const id = 'my-uuid';
+    const tp = new TablePanelInfo(null, {
+      columns: [{ field: 'a' }],
+      panelSource: lp.id,
+    });
 
-    try {
-      const projectState = {
-        ...new ProjectState(),
-        projectName: tmp.path,
-        pages: [
+    let finished = false;
+    const panels = [lp, tp];
+    await withSavedPanels(
+      panels,
+      async (project, dispatch) => {
+        const result = await makeEvalHandler(runner).handler(
+          project.projectName,
+          { panelId: lp.id },
+          dispatch
+        );
+
+        const { value: valueFromDisk } = await fetchResultsHandler.handler(
+          project.projectName,
           {
-            ...new ProjectPage(),
-            panels: [
-              {
-                ...new LiteralPanelInfo(),
-                id,
-                content: JSON.stringify(testData),
-                literal: {
-                  contentTypeInfo: {
-                    type: 'application/json',
-                  },
-                },
-                // For the fetchResults call
-                resultMeta: {
-                  contentType: 'application/json',
-                },
-              },
-            ],
+            panelId: lp.id,
           },
-        ],
-      };
-      fs.writeFileSync(tmp.path + '.dsproj', JSON.stringify(projectState));
-      const result = await makeEvalHandler(runner).handler(
-        tmp.path,
-        { panelId: id },
-        () => projectState
-      );
+          dispatch
+        );
+        expect(valueFromDisk).toStrictEqual(testData);
 
-      const { value: valueFromDisk } = await fetchResultsHandler.handler(
-        tmp.path,
-        {
-          panelId: id,
-        },
-        () => projectState
-      );
-      expect(valueFromDisk).toStrictEqual(testData);
+        expect(result.size).toStrictEqual(JSON.stringify(testData).length);
+        expect(result.shape).toStrictEqual(shape(testData));
+        expect(result.preview).toStrictEqual(preview(testData));
+        expect(result.contentType).toBe('application/json');
 
-      expect(result.size).toStrictEqual(JSON.stringify(testData).length);
-      expect(result.shape).toStrictEqual(shape(testData));
-      expect(result.preview).toStrictEqual(preview(testData));
-      expect(result.contentType).toBe('application/json');
+        const p = await makeEvalHandler().handler(
+          project.projectName,
+          { panelId: tp.id },
+          dispatch
+        );
+        const { value: selectColumns } = p;
+        expect(selectColumns).toStrictEqual([{ a: 1 }, { a: 19 }]);
 
-      const { value: selectColumns } = await makeEvalHandler().handler(
-        tmp.path,
-        { panelId: id },
-        ({ resource }) =>
-          resource === 'fetchResults'
-            ? { ...result, value: valueFromDisk }
-            : {
-                ...new ProjectState(),
-                id: tmp.path,
-                pages: [
-                  {
-                    ...new ProjectPage(),
-                    panels: [
-                      {
-                        ...new TablePanelInfo(),
-                        id,
-                        resultMeta: result,
-                        table: {
-                          columns: [{ field: 'a' }],
-                        },
-                      },
-                    ],
-                  },
-                ],
-              }
-      );
-      expect(selectColumns).toStrictEqual([{ a: 1 }, { a: 19 }]);
-    } finally {
-      try {
-        // Results file
-        await tmp.cleanup();
-        fs.unlinkSync(getProjectResultsFile(tmp.path) + id);
-      } catch (e) {
-        console.error(e); // don't fail on failure to cleanup, means an earlier step is going to fail after finally block
-      }
+        finished = true;
+      },
+      { evalPanels: false, subprocessName: runner }
+    );
+
+    if (!finished) {
+      throw new Error('Callback did not finish');
     }
   });
 }

@@ -120,6 +120,25 @@ exports.withSavedPanels = async function (
     await exports.updateProject(project, { isNew: true });
     expect(exports.fileIsEmpty(project.projectName + '.dsproj')).toBe(false);
 
+    async function dispatch(r) {
+      if (r.resource === 'getProject') {
+        return getProjectHandler.handler(r.projectId, r.body);
+      }
+
+      if (r.resource === 'updatePanelResult') {
+        return updatePanelResultHandler.handler(r.projectId, r.body);
+      }
+
+      if (r.resource === 'fetchResults') {
+        return fetchResultsHandler.handler(r.projectId, r.body, dispatch);
+      }
+
+      // TODO: support more resources as needed
+      throw new Error(
+        `Unsupported resource (${r.resource}) in tests. You'll need to add support for it here.`
+      );
+    }
+
     if (evalPanels) {
       console.log('Eval-ing panels');
       for (let i = 0; i < panels.length; i++) {
@@ -138,25 +157,6 @@ exports.withSavedPanels = async function (
             getProjectResultsFile(project.projectName) + panel.id
           )
         ).toBe(true);
-
-        async function dispatch(r) {
-          if (r.resource === 'getProject') {
-            return getProjectHandler.handler(r.projectId, r.body);
-          }
-
-          if (r.resource === 'updatePanelResult') {
-            return updatePanelResultHandler.handler(r.projectId, r.body);
-          }
-
-          if (r.resource === 'fetchResults') {
-            return fetchResultsHandler.handler(r.projectId, r.body, dispatch);
-          }
-
-          // TODO: support more resources as needed
-          throw new Error(
-            `Unsupported resource (${r.resource}) in tests. You'll need to add support for it here.`
-          );
-        }
 
         if (settings) {
           const settingsTmp = await makeTmpFile({ prefix: 'settings-' });
@@ -180,7 +180,7 @@ exports.withSavedPanels = async function (
       console.log('YOU DIDNT ASK ME TO EVAL THESE PANELS SO IM NOT GOING TO!');
     }
 
-    return await cb(project);
+    return await cb(project, dispatch);
   } finally {
     try {
       Promise.all(

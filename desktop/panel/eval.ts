@@ -360,7 +360,7 @@ export const makeEvalHandler = (subprocessEval?: {
       projectId,
       body: { resultMeta, panelId: panel.id },
     });
-    return;
+    return resultMeta;
   },
 });
 

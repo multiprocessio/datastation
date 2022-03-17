@@ -297,7 +297,7 @@ test('panel reordering works correctly', async () => {
       position: 0,
     });
     await updatePanel.handler(projectId, {
-      data: { ...testPanel2 } ,
+      data: { ...testPanel2 },
       position: 1,
     });
 

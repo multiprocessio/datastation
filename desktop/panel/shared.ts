@@ -6,6 +6,9 @@ export async function getProjectAndPanel(
   projectId: string,
   panelId: string
 ) {
+  if (!panelId) {
+    throw new Error('No panel specified when trying to look up panel.');
+  }
   const project =
     ((await dispatch({
       resource: 'getProject',
@@ -23,7 +26,7 @@ export async function getProjectAndPanel(
     }
   }
   if (!panel) {
-    throw new Error('Unable to find panel.');
+    throw new Error(`Unable to find panel: "${panelId.replace('"', '\\"')}".'`);
   }
   panelPage--; // Handle last loop ++ overshot
   return { panel, panelPage, project };
