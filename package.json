@@ -84,7 +84,6 @@
     "electron": "^17.0.1",
     "electron-chromedriver": "^17.0.0",
     "electron-packager": "^15.4.0",
-    "electron-rebuild": "^3.2.7",
     "enzyme": "^3.11.0",
     "esbuild": "^0.14.23",
     "faker": "^6.6.6",
