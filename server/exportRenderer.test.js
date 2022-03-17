@@ -8,10 +8,10 @@ const { renderPage } = require('./exportRenderer');
 
 const project = new ProjectState();
 project.pages = [new ProjectPage()];
-const tpi = new TablePanelInfo({
+const tpi = new TablePanelInfo(null, {
   columns: ['name', 'age'],
 });
-tpi.resultMeta = new PanelResult({
+tpi.resultMeta = new PanelResult(null, {
   value: [
     { name: 'Kerry', age: 44 },
     { name: 'Monroe', age: 59 },

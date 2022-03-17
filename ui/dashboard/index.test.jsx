@@ -10,7 +10,7 @@ const { Dashboard } = require('./');
 
 describe('Dashboard', function DashboardTests() {
   test('loads dashboard', async function loadsDashboard() {
-    const gp = new GraphPanelInfo({
+    const gp = new GraphPanelInfo(null, {
       name: 'Graph of ages',
       x: 'name',
       ys: [{ field: 'age', label: 'Age' }],

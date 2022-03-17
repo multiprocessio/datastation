@@ -13,7 +13,7 @@ const { TablePanel, TablePanelDetails } = require('./TablePanel');
 const project = new ProjectState();
 project.pages = [new ProjectPage()];
 const lp = new LiteralPanelInfo();
-const tp = new TablePanelInfo({
+const tp = new TablePanelInfo(null, {
   panelSource: lp.info,
   columns: [
     { field: 'name', label: 'Name' },

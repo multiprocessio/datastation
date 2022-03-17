@@ -6,7 +6,7 @@ const { ExternalDashboard } = require('./ExternalDashboard');
 
 describe('ExternalDashboard', function ExternalDashboardTests() {
   test('loads dashboard', async function loadsDashboard() {
-    const gp = new GraphPanelInfo({
+    const gp = new GraphPanelInfo(null, {
       name: 'Graph of ages',
       x: 'name',
       ys: [{ field: 'age', label: 'Age' }],

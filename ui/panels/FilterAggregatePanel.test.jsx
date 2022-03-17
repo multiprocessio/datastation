@@ -15,7 +15,7 @@ const { FilterAggregatePanelDetails } = require('./FilterAggregatePanel');
 const project = new ProjectState();
 project.pages = [new ProjectPage()];
 const lp = new LiteralPanelInfo();
-const fp = new FilterAggregatePanelInfo({
+const fp = new FilterAggregatePanelInfo(null, {
   panelSource: lp.info,
   aggregateType: 'sum',
 });

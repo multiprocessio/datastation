@@ -13,7 +13,7 @@ const { GraphPanel, GraphPanelDetails } = require('./GraphPanel');
 const project = new ProjectState();
 project.pages = [new ProjectPage()];
 const lp = new LiteralPanelInfo();
-const gp = new GraphPanelInfo({
+const gp = new GraphPanelInfo(null, {
   panelSource: lp.info,
   x: 'name',
   ys: [{ field: 'age', label: 'Age' }],

@@ -39,11 +39,11 @@ for (const language of TESTS) {
         {
           ...new ProjectPage(),
           panels: [
-            new LiteralPanelInfo({
+            new LiteralPanelInfo(null, {
               contentTypeInfo: { type: 'text/csv' },
               content: 'age,name\n40,Mel\n82,Quan',
             }),
-            new ProgramPanelInfo({
+            new ProgramPanelInfo(null, {
               content: language.content,
               type: language.type,
             }),
@@ -53,8 +53,15 @@ for (const language of TESTS) {
     };
 
     const before = new Date();
-    const reevalPanel = makeReevalPanel(project.pages[0], project, (page) => {
-      project.pages[0] = page;
+    const reevalPanel = makeReevalPanel(project.pages[0], project, (panel) => {
+      let i = 0;
+      for (const p of project.pages[0].panels) {
+        if (p.id === panel.id) {
+          project.pages[0].panels[i] = panel;
+          return;
+        }
+        i++;
+      }
     });
     for (const panel of project.pages[0].panels) {
       await reevalPanel(panel.id);
@@ -68,6 +75,7 @@ for (const language of TESTS) {
     expect(resultMetaCopy.elapsed).toBeGreaterThanOrEqual(0);
     expect(resultMetaCopy.elapsed).toBeLessThanOrEqual(new Date() - before);
     delete resultMetaCopy.elapsed;
+    delete resultMetaCopy.exception;
     expect(resultMetaCopy.lastRun.valueOf()).toBeGreaterThan(before.valueOf());
     expect(resultMetaCopy.lastRun.valueOf()).toBeLessThanOrEqual(
       new Date().valueOf()

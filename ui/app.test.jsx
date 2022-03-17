@@ -33,7 +33,7 @@ project.pages[0].panels = [
   new ProgramPanelInfo(),
   new LiteralPanelInfo(),
   ...project.connectors.map(
-    (c) => new DatabasePanelInfo({ connectorId: c.id })
+    (c) => new DatabasePanelInfo(null, { connectorId: c.id })
   ),
   new FilePanelInfo(),
   new FilterAggregatePanelInfo(),

@@ -8,7 +8,7 @@ const {
   DatabaseConnectorInfo,
   DatabasePanelInfo,
 } = require('../../shared/state');
-const { ProjectContext } = require('../ProjectStore');
+const { ProjectContext } = require('../state');
 const { DatabasePanelDetails, DatabaseInfo } = require('./DatabasePanel');
 
 test('shows database panel info', async () => {
@@ -28,7 +28,7 @@ for (const vendor of ['postgres', 'mysql', 'sqlite']) {
     type: vendor,
   });
   const connectors = [connector];
-  const panel = new DatabasePanelInfo({
+  const panel = new DatabasePanelInfo(null, {
     connectorId: connector.id,
   });
 

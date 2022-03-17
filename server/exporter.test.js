@@ -9,7 +9,7 @@ const { main, fetchAndRunAllExports, Exporter } = require('./exporter');
 
 const project = new ProjectState();
 project.pages = [new ProjectPage()];
-const tpi = new TablePanelInfo({
+const tpi = new TablePanelInfo(null, {
   columns: ['name', 'age'],
 });
 tpi.resultMeta = new PanelResult({
