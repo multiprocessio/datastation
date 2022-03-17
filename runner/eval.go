@@ -165,7 +165,6 @@ func (ec EvalContext) decrypt(e *Encrypt) (string, error) {
 
 	decrypted, ok := secretbox.Open(nil, message, &nonce, &key)
 	if !ok {
-		fmt.Println(e.Value, message, nonce, key)
 		return "", edsef("NACL open failed")
 	}
 
