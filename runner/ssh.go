@@ -91,7 +91,7 @@ var defaultKeyFiles = []string{
 	"~/.ssh/id_ed25519",
 }
 
-func getSSHClient(si ServerInfo) (*ssh.Client, error) {
+func (ec EvalContext) getSSHClient(si ServerInfo) (*ssh.Client, error) {
 	config := &ssh.ClientConfig{
 		User: si.Username,
 		// TODO: figure out if we want to validate host keys
@@ -99,14 +99,14 @@ func getSSHClient(si ServerInfo) (*ssh.Client, error) {
 	}
 	switch si.Type {
 	case SSHPassword:
-		password, err := si.Password.decrypt()
+		password, err := ec.decrypt(&si.Password)
 		if err != nil {
 			return nil, edsef("Could not decrypt server SSH password: " + err.Error())
 		}
 		config.Auth = []ssh.AuthMethod{ssh.Password(password)}
 	case SSHPrivateKey:
 		if si.PrivateKeyFile != "" {
-			passphrase, err := si.Passphrase.decrypt()
+			passphrase, err := ec.decrypt(&si.Passphrase)
 			if err != nil {
 				return nil, edsef("Could not decrypt server SSH passphrase: " + err.Error())
 			}
@@ -144,8 +144,8 @@ func getSSHClient(si ServerInfo) (*ssh.Client, error) {
 	return conn, nil
 }
 
-func remoteFileReader(si ServerInfo, remoteFileName string, callback func(r io.Reader) error) error {
-	client, err := getSSHClient(si)
+func (ec EvalContext) remoteFileReader(si ServerInfo, remoteFileName string, callback func(r io.Reader) error) error {
+	client, err := ec.getSSHClient(si)
 	if err != nil {
 		return err
 	}
@@ -251,7 +251,7 @@ func pipe(conn1 net.Conn, conn2 net.Conn) {
 	}
 }
 
-func withRemoteConnection(si *ServerInfo, host, port string, cb func(host, port string) error) error {
+func (ec EvalContext) withRemoteConnection(si *ServerInfo, host, port string, cb func(host, port string) error) error {
 	if si == nil {
 		return cb(host, port)
 	}
@@ -263,7 +263,7 @@ func withRemoteConnection(si *ServerInfo, host, port string, cb func(host, port 
 	}
 	defer localConn.Close()
 
-	client, err := getSSHClient(*si)
+	client, err := ec.getSSHClient(*si)
 	if err != nil {
 		return err
 	}

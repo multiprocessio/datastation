@@ -27,6 +27,9 @@ const updateServer = storeHandlers.filter(
 const updatePanel = storeHandlers.filter(
   (r) => r.resource === 'updatePanel'
 )[0];
+const updatePanelResults = storeHandlers.filter(
+  (r) => r.resource === 'updatePanelResults'
+)[0];
 const updatePage = storeHandlers.filter((r) => r.resource === 'updatePage')[0];
 const getProject = storeHandlers.filter((r) => r.resource === 'getProject')[0];
 
@@ -209,14 +212,14 @@ test('updates works correctly', async () => {
     });
     // Add the panel
     await updatePanel.handler(projectId, {
-      data: testPanel,
+      data: { ...testPanel },
       position: 0,
     });
 
     // Update the panel
     testPanel.content = 'DM_getPanel(1)';
     await updatePanel.handler(projectId, {
-      data: testPanel,
+      data: { ...testPanel },
       position: 0,
     });
 
@@ -290,17 +293,17 @@ test('panel reordering works correctly', async () => {
     });
     // Add the panels
     await updatePanel.handler(projectId, {
-      data: testPanel1,
+      data: { ...testPanel1 },
       position: 0,
     });
     await updatePanel.handler(projectId, {
-      data: testPanel2,
+      data: { ...testPanel2 } ,
       position: 1,
     });
 
     // Move 2 to 1
     await updatePanel.handler(projectId, {
-      data: testPanel2,
+      data: { ...testPanel2 },
       position: 0,
     });
 
@@ -323,7 +326,7 @@ test('panel reordering works correctly', async () => {
   }
 });
 
-test('panel result updates work correctly', async () => {
+test('panel delete deletes the result', async () => {
   const testProject = new ProjectState();
   testProject.projectName = ensureProjectFile(testProject.id);
 
@@ -345,8 +348,15 @@ test('panel result updates work correctly', async () => {
   try {
     await makeProject.handler(null, { projectId });
 
-    // TODO: implement this test
-    throw new Error('IMPLEMENT ME');
+    await updatePanel.handler(projectId, {
+      data: testPanel,
+      position: 0,
+    });
+
+    await updatePanelResults.handler(projectId, {
+      data: testPanel,
+      position: 0,
+    });
   } finally {
     const projectPath = ensureProjectFile(testProject.projectName);
     try {

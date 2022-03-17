@@ -34,17 +34,17 @@ func (ec EvalContext) evalInfluxQL(panel *PanelInfo, dbInfo DatabaseConnectorInf
 		return err
 	}
 
-	password, err := dbInfo.Password.decrypt()
+	password, err := ec.decrypt(&dbInfo.Password)
 	if err != nil {
 		return err
 	}
 
-	token, err := dbInfo.ApiKey.decrypt()
+	token, err := ec.decrypt(&dbInfo.ApiKey)
 	if err != nil {
 		return err
 	}
 
-	return withRemoteConnection(server, host, port, func(proxyHost, proxyPort string) error {
+	return ec.withRemoteConnection(server, host, port, func(proxyHost, proxyPort string) error {
 		params := url.Values{}
 		params.Add("q", panel.Content)
 		params.Add("db", dbInfo.Database)
@@ -114,18 +114,18 @@ func (ec EvalContext) evalInfluxQL(panel *PanelInfo, dbInfo DatabaseConnectorInf
 }
 
 // Flux language is only supported in influx2.
-func evalFlux(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, server *ServerInfo, w io.Writer) error {
+func (ec EvalContext) evalFlux(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, server *ServerInfo, w io.Writer) error {
 	tls, host, port, rest, err := getHTTPHostPort(dbInfo.Address)
 	if err != nil {
 		return err
 	}
 
-	token, err := dbInfo.ApiKey.decrypt()
+	token, err := ec.decrypt(&dbInfo.ApiKey)
 	if err != nil {
 		return err
 	}
 
-	return withRemoteConnection(server, host, port, func(proxyHost, proxyPort string) error {
+	return ec.withRemoteConnection(server, host, port, func(proxyHost, proxyPort string) error {
 		url := makeHTTPUrl(tls, proxyHost, proxyPort, rest)
 
 		// TODO: support custom certs

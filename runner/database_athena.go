@@ -35,8 +35,8 @@ func mapAthenaType(value, t string) any {
 	}
 }
 
-func evalAthena(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, w io.Writer) error {
-	secret, err := dbInfo.Password.decrypt()
+func (ec EvalContext) evalAthena(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, w io.Writer) error {
+	secret, err := ec.decrypt(&dbInfo.Password)
 	if err != nil {
 		return err
 	}

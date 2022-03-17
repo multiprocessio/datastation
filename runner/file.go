@@ -643,7 +643,7 @@ func (ec EvalContext) evalFilePanel(project *ProjectState, pageIndex int, panel 
 		// Will break if the server is not Linux.
 		fileName = strings.ReplaceAll(fileName, "~", "/home/"+server.Username)
 
-		return remoteFileReader(*server, fileName, func(r io.Reader) error {
+		return ec.remoteFileReader(*server, fileName, func(r io.Reader) error {
 			return TransformReader(r, fileName, cti, w)
 		})
 	}

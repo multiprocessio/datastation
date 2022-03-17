@@ -14,7 +14,7 @@ import (
 	"github.com/prometheus/common/model"
 )
 
-func evalPrometheus(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, server *ServerInfo, w io.Writer) error {
+func (ec EvalContext) evalPrometheus(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, server *ServerInfo, w io.Writer) error {
 	begin, end, err := timestampsFromRange(panel.DatabasePanelInfo.Database.Range)
 	if err != nil {
 		return err
@@ -25,17 +25,17 @@ func evalPrometheus(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, serv
 		return err
 	}
 
-	password, err := dbInfo.Password.decrypt()
+	password, err := ec.decrypt(&dbInfo.Password)
 	if err != nil {
 		return err
 	}
 
-	apiKey, err := dbInfo.ApiKey.decrypt()
+	apiKey, err := ec.decrypt(&dbInfo.ApiKey)
 	if err != nil {
 		return err
 	}
 
-	return withRemoteConnection(server, host, port, func(proxyHost, proxyPort string) error {
+	return ec.withRemoteConnection(server, host, port, func(proxyHost, proxyPort string) error {
 		step := time.Second * time.Duration(math.Floor(panel.DatabasePanelInfo.Database.Step))
 		if step <= 0*time.Second {
 			// Default to 15 minutes

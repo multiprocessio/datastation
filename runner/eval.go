@@ -1,11 +1,15 @@
 package runner
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"log"
 	"os"
+	"path"
 	"time"
+
+	"golang.org/x/crypto/nacl/secretbox"
 
 	"github.com/flosch/pongo2"
 )
@@ -126,6 +130,46 @@ func (ec EvalContext) evalMacros(content string, project *ProjectState, pageInde
 type EvalContext struct {
 	settings Settings
 	fsBase   string
+}
+
+func (ec EvalContext) decrypt(e *Encrypt) (string, error) {
+	if !e.Encrypted {
+		return e.Value, nil
+	}
+
+	if len(e.Value) == 0 {
+		return "", nil
+	}
+
+	v := e.Value
+	keyBytes, err := os.ReadFile(path.Join(ec.fsBase, ".signingKey"))
+	if err != nil {
+		return "", err
+	}
+
+	keyDecoded, err := base64.StdEncoding.DecodeString(string(keyBytes))
+	if err != nil {
+		return "", err
+	}
+	messageWithNonceDecoded, err := base64.StdEncoding.DecodeString(string(v))
+	if err != nil {
+		return "", err
+	}
+
+	var nonce [24]byte
+	copy(nonce[:24], messageWithNonceDecoded[0:24])
+	var key [32]byte
+	copy(key[:32], keyDecoded)
+
+	message := messageWithNonceDecoded[24:]
+
+	decrypted, ok := secretbox.Open(nil, message, &nonce, &key)
+	if !ok {
+		fmt.Println(e.Value, message, nonce, key)
+		return "", edsef("NACL open failed")
+	}
+
+	return string(decrypted), nil
 }
 
 func NewEvalContext(s Settings, fsBase string) EvalContext {
