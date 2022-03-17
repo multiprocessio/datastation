@@ -31,11 +31,3 @@ describe('app.serve', function () {
     expect(server.listen.mock.calls.length).toBe(1);
   });
 });
-
-describe('init', function () {
-  test('calls migrate', async function () {
-    const app = { projectHandlers: [] };
-    const { handlers } = await init(app);
-    expect(handlers.length).toBe(6);
-  });
-});
