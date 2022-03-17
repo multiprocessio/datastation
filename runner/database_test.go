@@ -116,8 +116,12 @@ func Test_getConnectionString(t *testing.T) {
 			"",
 		},
 	}
+
+	ec, cleanup := makeTestEvalContext()
+	defer cleanup()
+
 	for _, test := range tests {
-		vendor, connStr, err := getConnectionString(test.conn)
+		vendor, connStr, err := ec.getConnectionString(test.conn)
 		assert.Equal(t, test.expVendor, vendor)
 		assert.Equal(t, test.expConnStr, connStr)
 		assert.Equal(t, test.expErr, err)

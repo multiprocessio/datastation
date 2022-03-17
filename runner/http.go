@@ -122,13 +122,18 @@ func getTransport(customCaCerts []string) (*http.Transport, error) {
 	}
 
 	for _, customCaCert := range customCaCerts {
-		cert, err := ioutil.ReadFile(customCaCert)
+		f := strings.TrimSpace(customCaCert)
+		if f == "" {
+			continue
+		}
+
+		cert, err := ioutil.ReadFile(f)
 		if err != nil {
 			return nil, edsef("Could not add custom CA cert: %s", err)
 		}
 
 		if ok := rootCAs.AppendCertsFromPEM(cert); !ok {
-			Logln("Failed to add custom CA cert: %s", customCaCert)
+			Logln("Failed to add custom CA cert: %s", f)
 		}
 	}
 

@@ -46,6 +46,21 @@ func Test_transformJSONLines(t *testing.T) {
 	}, m)
 }
 
+func Test_parquet(t *testing.T) {
+	tmp2, err := ioutil.TempFile("", "")
+	defer os.Remove(tmp2.Name())
+	assert.Nil(t, err)
+
+	err = transformParquetFile("../testdata/allformats/userdata.parquet", tmp2)
+	assert.Nil(t, err)
+
+	var m []map[string]any
+	tmp2Bs, err := ioutil.ReadFile(tmp2.Name())
+	assert.Nil(t, err)
+	err = json.Unmarshal(tmp2Bs, &m)
+	assert.Nil(t, err)
+}
+
 func Test_transformJSONConcat(t *testing.T) {
 	tests := []struct {
 		in  string

@@ -91,6 +91,7 @@ for (const subprocessName of RUNNERS) {
     () => {
       test('correct result', () => {
         const hp = new HTTPPanelInfo(
+          null,
           '',
           new HTTPConnectorInfo(
             '',
@@ -127,6 +128,7 @@ for (const subprocessName of RUNNERS) {
     }
 
     const hp = new HTTPPanelInfo(
+      null,
       '',
       new HTTPConnectorInfo(
         '',
@@ -177,6 +179,7 @@ for (const subprocessName of RUNNERS) {
 
   for (const t of REGEXP_TESTS) {
     const hp = new HTTPPanelInfo(
+      null,
       '',
       new HTTPConnectorInfo(
         '',
@@ -218,6 +221,7 @@ for (const subprocessName of RUNNERS) {
   describe('http with headers', () => {
     test('correct result', () => {
       const hp = new HTTPPanelInfo(
+        null,
         '',
         new HTTPConnectorInfo(
           '',
@@ -254,6 +258,7 @@ for (const subprocessName of RUNNERS) {
       });
 
       const hp = new HTTPPanelInfo(
+        null,
         '',
         new HTTPConnectorInfo('', 'http://localhost:9799{{DM_getPanel("0")}}')
       );
@@ -284,6 +289,7 @@ for (const subprocessName of RUNNERS) {
       });
 
       const hp = new HTTPPanelInfo(
+        null,
         '',
         new HTTPConnectorInfo('', 'http://localhost:9798')
       );
@@ -319,6 +325,7 @@ for (const subprocessName of RUNNERS) {
           type: 'private-key',
         });
         const hp = new HTTPPanelInfo(
+          null,
           '',
           new HTTPConnectorInfo(
             '',

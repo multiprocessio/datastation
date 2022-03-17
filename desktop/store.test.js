@@ -28,7 +28,7 @@ const updatePanel = storeHandlers.filter(
   (r) => r.resource === 'updatePanel'
 )[0];
 const updatePanelResults = storeHandlers.filter(
-  (r) => r.resource === 'updatePanelResults'
+  (r) => r.resource === 'updatePanelResult'
 )[0];
 const updatePage = storeHandlers.filter((r) => r.resource === 'updatePage')[0];
 const getProject = storeHandlers.filter((r) => r.resource === 'getProject')[0];
