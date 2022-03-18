@@ -66,14 +66,28 @@ export class GenericCrud<T extends { id: string }> {
     stmt.run(id);
   }
 
-  insert(db: sqlite3.Database, obj: T, position: number) {
+  insert(
+    db: sqlite3.Database,
+    obj: T,
+    position: number,
+    foreignKey?: { column: string; value: string }
+  ) {
     const j = JSON.stringify(obj);
     const stubMaker = this.stubMaker();
-    const stubs = [stubMaker(), stubMaker(), stubMaker()].join(', ');
+    const columns = ['id', 'position', 'data_json'];
+    const stubs = [stubMaker(), stubMaker(), stubMaker()];
+    const values = [obj.id, position, j];
+    if (foreignKey) {
+      columns.push(foreignKey.column);
+      values.push(foreignKey.value);
+      stubs.push(stubMaker());
+    }
     const stmt = db.prepare(
-      `INSERT INTO "${this.entity}" (id, position, data_json) VALUES (${stubs})`
+      `INSERT INTO "${this.entity}" (${columns.join(
+        ', '
+      )}) VALUES (${stubs.join(', ')})`
     );
-    stmt.run(obj.id, position, j);
+    stmt.run(values);
   }
 
   update(db: sqlite3.Database, obj: T) {

@@ -1,4 +1,5 @@
 import * as sqlite3 from 'better-sqlite3';
+import { Buffer } from 'buffer';
 import fs from 'fs';
 import path from 'path';
 import log from '../shared/log';
@@ -94,6 +95,20 @@ function minSemver(real: string, min: string) {
   return true;
 }
 
+const FACTORIES: Record<PanelInfoType, (pageId: string) => PanelInfo> = {
+  table: (pageId: string) => new TablePanelInfo(pageId),
+  http: (pageId: string) => new HTTPPanelInfo(pageId),
+  graph: (pageId: string) => new GraphPanelInfo(pageId),
+  program: (pageId: string) => new ProgramPanelInfo(pageId),
+  literal: (pageId: string) => new LiteralPanelInfo(pageId),
+  database: (pageId: string) => new DatabasePanelInfo(pageId),
+  file: (pageId: string) => new FilePanelInfo(pageId),
+  filagg: (pageId: string) => new FilterAggregatePanelInfo(pageId),
+};
+
+// SOURCE: https://www.sqlite.org/fileformat.html
+const SQLITE_HEADER = Buffer.from('53514c69746520666f726d6174203300', 'hex');
+
 export class Store {
   firstTime: boolean = true;
 
@@ -136,6 +151,98 @@ export class Store {
     },
   };
 
+  isSQLiteFile(f: string) {
+    const fd = fs.openSync(f, 'r');
+    const buf = Buffer.from(new ArrayBuffer(16));
+    const n = fs.readSync(fd, buf);
+    fs.closeSync(fd);
+    return n == 16 && buf.equals(SQLITE_HEADER);
+  }
+
+  async migrateFromJSON(projectId: string) {
+    const f = ensureProjectFile(projectId);
+    // If it's already SQLite, do nothing.
+    if (this.isSQLiteFile(f)) {
+      return;
+    }
+
+    // Make a backup
+    const fbak = f + '.bak';
+    try {
+      fs.copyFileSync(f, fbak);
+    } catch (e) {
+      throw new Error('Could not make a backup of old project file: ' + e);
+    }
+
+    // Erase old file
+    try {
+      fs.unlinkSync(f);
+    } catch (e) {
+      throw new Error('Could not overwrite old project file: ' + e);
+    }
+
+    // Read original for copying to SQLite
+    const project = JSON.parse(fs.readFileSync(fbak).toString());
+
+    // Write out the SQLite version
+    await this.makeProjectHandler.handler(null, { projectId }, null, false);
+
+    for (let i = 0; i < project.pages.length; i++) {
+      const page = project.pages[i];
+      // Save before update these get deleted off the object.
+      const panels = page.panels;
+      await this.updatePageHandler.handler(
+        project.projectName,
+        {
+          data: page,
+          position: i,
+        },
+        null,
+        false
+      );
+      page.panels = panels;
+
+      for (let j = 0; j < panels.length; j++) {
+        panels[j].pageId = page.id;
+        await this.updatePanelHandler.handler(
+          project.projectName,
+          {
+            data: panels[j],
+            position: j,
+          },
+          null,
+          false
+        );
+      }
+    }
+
+    for (let i = 0; i < project.servers.length; i++) {
+      const server = project.servers[i];
+      await this.updateServerHandler.handler(
+        project.projectName,
+        {
+          data: server,
+          position: i,
+        },
+        null,
+        false
+      );
+    }
+
+    for (let i = 0; i < project.connectors.length; i++) {
+      const connector = project.connectors[i];
+      await this.updateConnectorHandler.handler(
+        project.projectName,
+        {
+          data: connector,
+          position: i,
+        },
+        null,
+        false
+      );
+    }
+  }
+
   getProjectHandler: GetProjectHandler = {
     resource: 'getProject',
     handler: async (
@@ -144,6 +251,7 @@ export class Store {
       _1: unknown,
       external: boolean
     ) => {
+      this.migrateFromJSON(projectId);
       const db = this.getConnection(projectId);
       const [metadata, servers, pages, panels, connectors] = [
         metadataCrud.get(db),
@@ -240,6 +348,10 @@ GROUP BY panel_id
     data: T,
     position: number,
     factory: () => T,
+    foreignKey?: {
+      column: string;
+      value: string;
+    },
     shortcircuit?: (
       db: sqlite3.Database,
       existingObj: T,
@@ -252,7 +364,7 @@ GROUP BY panel_id
       if (!existing) {
         log.info(`Updating ${crud.entity}`);
         encryptProjectSecrets(data, factory());
-        crud.insert(db, data, position);
+        crud.insert(db, data, position, foreignKey);
         return;
       }
 
@@ -276,7 +388,7 @@ GROUP BY panel_id
       projectId: string,
       body: {
         panelId: string;
-        resultMeta: PanelResult;
+        data: PanelResult;
       },
       _: unknown,
       external: boolean
@@ -289,12 +401,12 @@ GROUP BY panel_id
       const stmt = db.prepare(
         `UPDATE "ds_result" SET created_at = STRFTIME('%s', 'now'), data_json = ? WHERE panel_id = ?;`
       );
-      const res = stmt.run(JSON.stringify(body.resultMeta), body.panelId);
+      const res = stmt.run(JSON.stringify(body.data), body.panelId);
       if (res.changes === 0) {
         const stmt = db.prepare(
           `INSERT INTO "ds_result" (data_json, created_at, panel_id) VALUES(?, STRFTIME('%s', 'now'), ?);`
         );
-        stmt.run(JSON.stringify(body.resultMeta), body.panelId);
+        stmt.run(JSON.stringify(body.data), body.panelId);
       }
     },
   };
@@ -318,18 +430,10 @@ GROUP BY panel_id
         projectId,
         data,
         position,
-        () => {
-          const factories: Record<PanelInfoType, () => PanelInfo> = {
-            table: () => new TablePanelInfo(data.pageId),
-            http: () => new HTTPPanelInfo(data.pageId),
-            graph: () => new GraphPanelInfo(data.pageId),
-            program: () => new ProgramPanelInfo(data.pageId),
-            literal: () => new LiteralPanelInfo(data.pageId),
-            database: () => new DatabasePanelInfo(data.pageId),
-            file: () => new FilePanelInfo(data.pageId),
-            filagg: () => new FilterAggregatePanelInfo(data.pageId),
-          };
-          return factories[data.type]();
+        () => FACTORIES[data.type](data.pageId),
+        {
+          column: 'page_id',
+          value: data.pageId,
         },
         (
           db: sqlite3.Database,
@@ -344,7 +448,7 @@ GROUP BY panel_id
           // Nothing else can be updated with it.
           // This is all the UI needs at the moment anyway
           const allExisting = panelCrud.get(db, {
-            q: `data_json->>'pageId' = ?`,
+            q: `page_id = ?`,
             args: [data.pageId],
           });
 
@@ -471,17 +575,7 @@ GROUP BY panel_id
       }: {
         id: string;
       }
-    ) => {
-      const db = this.getConnection(projectId);
-      db.transaction(() => {
-        pageCrud.del(db, id);
-        // Page and all panels must be deleted
-        const stmt = db.prepare(
-          `DELETE FROM "${panelCrud.entity}" WHERE data_json->>'pageId' = ?`
-        );
-        stmt.run(id);
-      })();
-    },
+    ) => this.deleteGeneric(pageCrud, projectId, id),
   };
 
   deletePanelHandler: DeletePanelHandler = {
@@ -493,15 +587,7 @@ GROUP BY panel_id
       }: {
         id: string;
       }
-    ) => {
-      const db = this.getConnection(projectId);
-      db.transaction(() => {
-        panelCrud.del(db, id);
-        // Panel and result must be deleted
-        const stmt = db.prepare(`DELETE FROM "ds_result" WHERE panel_id = ?`);
-        stmt.run(id);
-      })();
-    },
+    ) => this.deleteGeneric(panelCrud, projectId, id),
   };
 
   // Break handlers out so they can be individually typed without `any`,

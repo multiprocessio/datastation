@@ -8,13 +8,15 @@ const {
   ProjectState,
   ProjectPage,
   ProgramPanelInfo,
+  PanelResult,
   Encrypt,
   DatabaseConnectorInfo,
   ServerInfo,
 } = require('../shared/state');
 const { ensureSigningKey } = require('./secret');
 
-const storeHandlers = new Store().getHandlers();
+const store = new Store();
+const storeHandlers = store.getHandlers();
 const makeProject = storeHandlers.filter(
   (r) => r.resource === 'makeProject'
 )[0];
@@ -26,6 +28,9 @@ const updateServer = storeHandlers.filter(
 )[0];
 const updatePanel = storeHandlers.filter(
   (r) => r.resource === 'updatePanel'
+)[0];
+const deletePanel = storeHandlers.filter(
+  (r) => r.resource === 'deletePanel'
 )[0];
 const updatePanelResults = storeHandlers.filter(
   (r) => r.resource === 'updatePanelResult'
@@ -342,11 +347,17 @@ test('panel delete deletes the result', async () => {
   testProject.pages = [testPage];
   const testPanel = new ProgramPanelInfo(testPage.id, { type: 'python' });
   testPage.panels = [testPanel];
+  const testResult = new PanelResult();
 
   const projectId = testProject.projectName;
 
   try {
     await makeProject.handler(null, { projectId });
+
+    await updatePage.handler(projectId, {
+      data: testPage,
+      position: 0,
+    });
 
     await updatePanel.handler(projectId, {
       data: testPanel,
@@ -354,13 +365,77 @@ test('panel delete deletes the result', async () => {
     });
 
     await updatePanelResults.handler(projectId, {
-      data: testPanel,
-      position: 0,
+      data: testResult,
+      panelId: testPanel.id,
     });
+
+    await deletePanel.handler(projectId, {
+      id: testPanel.id,
+    });
+
+    for (const table of ['ds_panel', 'ds_result']) {
+      const stmt = store
+        .getConnection(projectId)
+        .prepare('SELECT * FROM ' + table);
+      const res = stmt.all();
+      expect(res.length).toBe(0);
+    }
   } finally {
     const projectPath = ensureProjectFile(testProject.projectName);
     try {
       fs.unlinkSync(projectPath);
+    } catch (e) {
+      console.error(e);
+    }
+  }
+});
+
+test('migrates old JSON project', async () => {
+  const testProject = new ProjectState();
+  testProject.projectName = ensureProjectFile(testProject.id);
+
+  // Delete and recreate it to be safe
+  try {
+    fs.unlinkSync(testProject.projectName);
+  } catch (e) {
+    /* nothing */
+  }
+  ensureProjectFile(testProject.projectName);
+
+  const testPage = new ProjectPage('My test page');
+  testProject.pages = [testPage];
+  const testPanel = new ProgramPanelInfo(testPage.id, { type: 'python' });
+  testPage.panels = [testPanel];
+  const testResult = new PanelResult();
+  testPanel.resultMeta = testResult;
+  fs.writeFileSync(testProject.projectName, JSON.stringify(testProject));
+
+  try {
+    const result = await getProject.handler(null, {
+      projectId: testProject.projectName,
+    });
+
+    // .bak file has been written correctly
+    expect(fs.readFileSync(testProject.projectName).toString()).toBe(
+      JSON.stringify(testProject)
+    );
+
+    // Rewritten file is SQLite
+    expect(store.isSQLiteFile(testProject.projectName)).toBe(true);
+
+    // And correctly filled out
+    expect(result).toStrictEqual(testProject);
+  } finally {
+    const projectPath = ensureProjectFile(testProject.projectName);
+    try {
+      fs.unlinkSync(projectPath);
+    } catch (e) {
+      console.error(e);
+    }
+
+    const projectBakPath = ensureProjectFile(testProject.projectName + '.bak');
+    try {
+      fs.unlinkSync(projectBakPath);
     } catch (e) {
       console.error(e);
     }

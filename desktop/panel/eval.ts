@@ -284,7 +284,7 @@ export const makeEvalHandler = (subprocessEval?: {
     await dispatch({
       resource: 'updatePanelResult',
       projectId,
-      body: { resultMeta: new PanelResult(), panelId: panel.id },
+      body: { data: new PanelResult(), panelId: panel.id },
     });
 
     if (subprocessEval) {
@@ -298,7 +298,7 @@ export const makeEvalHandler = (subprocessEval?: {
       await dispatch({
         resource: 'updatePanelResult',
         projectId,
-        body: { resultMeta, panelId: panel.id },
+        body: { data: resultMeta, panelId: panel.id },
       });
       return resultMeta;
     }
@@ -358,7 +358,7 @@ export const makeEvalHandler = (subprocessEval?: {
     await dispatch({
       resource: 'updatePanelResult',
       projectId,
-      body: { resultMeta, panelId: panel.id },
+      body: { data: resultMeta, panelId: panel.id },
     });
     return resultMeta;
   },
