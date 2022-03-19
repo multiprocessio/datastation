@@ -108,5 +108,6 @@
     "set-value": "^4.0.1",
     "json-schema": "^0.4.0",
     "simple-get": "^4.0.1"
-  }
+  },
+  "version": "0.0.0"
 }
