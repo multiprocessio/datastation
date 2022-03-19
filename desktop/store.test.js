@@ -415,9 +415,9 @@ test('migrates old JSON project', async () => {
     const result = await getProject.handler(null, {
       projectId: testProject.projectName,
     });
-    
+
     // .bak file has been written correctly
-    expect(fs.readFileSync(testProject.projectName + ".bak").toString()).toBe(
+    expect(fs.readFileSync(testProject.projectName + '.bak').toString()).toBe(
       JSON.stringify(testProject)
     );
 
