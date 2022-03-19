@@ -46,6 +46,13 @@ func debugObject(obj any) {
 	log.Printf("%s\n", string(b))
 }
 
+var SQLITE_PRAGMAS = []string{
+	"journal_mode = WAL",
+	"synchronous = normal",
+	"temp_store = memory",
+	"mmap_size = 30000000000",
+}
+
 var defaultPorts = map[DatabaseConnectorInfoType]string{
 	PostgresDatabase:      "5432",
 	MySQLDatabase:         "3306",
@@ -450,6 +457,15 @@ func (ec EvalContext) EvalDatabasePanel(
 		db, err := sqlx.Open(vendor, connStr)
 		if err != nil {
 			return err
+		}
+
+		if vendor == "sqlite3_extended" {
+			for _, pragma := range SQLITE_PRAGMAS {
+				_, err = db.Exec("PRAGMA " + pragma)
+				if err != nil {
+					return err
+				}
+			}
 		}
 
 		preparer := func(q string) (func([]any) error, func(), error) {

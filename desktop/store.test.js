@@ -411,20 +411,25 @@ test('migrates old JSON project', async () => {
   fs.writeFileSync(testProject.projectName, JSON.stringify(testProject));
 
   try {
+    // Get project to trigger migration
     const result = await getProject.handler(null, {
       projectId: testProject.projectName,
     });
-
+    
     // .bak file has been written correctly
-    expect(fs.readFileSync(testProject.projectName).toString()).toBe(
+    expect(fs.readFileSync(testProject.projectName + ".bak").toString()).toBe(
       JSON.stringify(testProject)
     );
 
     // Rewritten file is SQLite
     expect(store.isSQLiteFile(testProject.projectName)).toBe(true);
 
-    // And correctly filled out
-    expect(result).toStrictEqual(testProject);
+    // It's ok that these change
+    result.id = testProject.id;
+    result.pages[0].panels[0].lastEdited = testPanel.lastEdited = null;
+
+    // But otherwise correctly filled out
+    expect(JSON.stringify(testProject)).toBe(JSON.stringify(result));
   } finally {
     const projectPath = ensureProjectFile(testProject.projectName);
     try {

@@ -109,9 +109,15 @@ const FACTORIES: Record<PanelInfoType, (pageId: string) => PanelInfo> = {
 // SOURCE: https://www.sqlite.org/fileformat.html
 const SQLITE_HEADER = Buffer.from('53514c69746520666f726d6174203300', 'hex');
 
-export class Store {
-  firstTime: boolean = true;
+// SOURCE: https://phiresky.github.io/blog/2020/sqlite-performance-tuning/
+const PRAGMAS = [
+  'journal_mode = WAL',
+  'synchronous = normal',
+  'temp_store = memory',
+  'mmap_size = 30000000000',
+];
 
+export class Store {
   validateSQLiteDriver() {
     const memdb = new sqlite3.default(':memory:');
     const stmt = memdb.prepare('SELECT sqlite_version() AS version');
@@ -123,6 +129,8 @@ export class Store {
     }
   }
 
+  pool: Record<string, sqlite3.Database> = {};
+  firstTime: boolean = true;
   getConnection(projectId: string) {
     if (this.firstTime) {
       this.validateSQLiteDriver();
@@ -130,7 +138,14 @@ export class Store {
     }
 
     const filename = ensureProjectFile(projectId);
-    return new sqlite3.default(filename);
+    if (!this.pool[filename]) {
+      this.pool[filename] = new sqlite3.default(filename);
+      for (const pragma of PRAGMAS) {
+        this.pool[filename].pragma(pragma);
+      }
+    }
+
+    return this.pool[filename];
   }
 
   getProjectsHandler: GetProjectsHandler = {
@@ -189,19 +204,17 @@ export class Store {
 
     for (let i = 0; i < project.pages.length; i++) {
       const page = project.pages[i];
-      // Save before update these get deleted off the object.
-      const panels = page.panels;
       await this.updatePageHandler.handler(
         project.projectName,
         {
-          data: page,
+          data: { ...page },
           position: i,
         },
         null,
         false
       );
-      page.panels = panels;
 
+      const panels = page.panels;
       for (let j = 0; j < panels.length; j++) {
         panels[j].pageId = page.id;
         await this.updatePanelHandler.handler(
@@ -251,7 +264,8 @@ export class Store {
       _1: unknown,
       external: boolean
     ) => {
-      this.migrateFromJSON(projectId);
+      await this.migrateFromJSON(projectId);
+
       const db = this.getConnection(projectId);
       const [metadata, servers, pages, panels, connectors] = [
         metadataCrud.get(db),

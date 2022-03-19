@@ -6,7 +6,7 @@ import path from 'path';
 export const HOME = os.homedir();
 
 // This should be a const but this can actually change, only inside the runner code.
-export const DISK_ROOT = { value: path.join(HOME, 'DataStationProjects2') };
+export const DISK_ROOT = { value: path.join(HOME, 'DataStationProjects') };
 
 export const PROJECT_EXTENSION = 'dsproj';
 
