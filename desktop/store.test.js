@@ -90,7 +90,7 @@ test('write project with encrypted secrets, read with nulled secrets', async () 
       position: 0,
     });
     await updatePage.handler(projectId, {
-      data: testPage,
+      data: { ...testPage },
       position: 0,
     });
     await updatePanel.handler(projectId, {
