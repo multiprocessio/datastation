@@ -1,14 +1,50 @@
 package runner
 
 import (
+	"encoding/json"
 	"io"
 	"os"
 	"path/filepath"
 
-	"github.com/multiprocessio/go-json"
+	jsonutil "github.com/multiprocessio/go-json"
 
 	goccy_json "github.com/goccy/go-json"
 )
+
+// goccy/go-json is the fastest library benchmarked in
+// github.com/multiprocessio/go-json-benchmarks that is
+// cross-platform and doesn't require an entire string in
+// memory (i.e. github.com/bytedance/sonic). But it also
+// panics a lot. See github.com/goccy/go-json/issues
+// So we wrap it.
+func jsonMarshal(o any) (bs []byte, err error) {
+	defer func() {
+		rerr := recover()
+		if rerr != nil {
+			Logln("Panic in goccy/go-json encoder, falling back to standard library: %s", err)
+		}
+
+		bs, err = json.Marshal(o)
+	}()
+
+	return goccy_json.Marshal(o)
+}
+
+func jsonUnmarshal(bs []byte, i any) (err error) {
+	defer func() {
+		rerr := recover()
+		if rerr != nil {
+			Logln("Panic in goccy/go-json decoder, falling back to standard library: %s", err)
+		}
+
+		err = json.Unmarshal(bs, i)
+	}()
+
+	return goccy_json.Unmarshal(bs, i)
+}
+
+var jsonNewEncoder = goccy_json.NewEncoder
+var jsonNewDecoder = goccy_json.NewDecoder
 
 type JSONStreamEncoder jsonutil.StreamEncoder
 
@@ -32,7 +68,7 @@ func withJSONOutWriter(w io.Writer, first, last string, cb func() error) error {
 }
 
 func withJSONArrayOutWriter(w io.Writer, cb func(w *jsonutil.StreamEncoder) error) error {
-	encoder := jsonutil.NewStreamEncoder(w, true)
+	encoder := jsonutil.NewGenericStreamEncoder(w, jsonMarshal, true)
 	err := cb(encoder)
 	if err != nil {
 		return err
@@ -87,7 +123,7 @@ func WriteJSONFile(file string, value any) error {
 	}
 	defer f.Close()
 
-	encoder := goccy_json.NewEncoder(f)
+	encoder := jsonNewEncoder(f)
 	return encoder.Encode(value)
 }
 
@@ -120,7 +156,7 @@ func loadJSONArrayFile(f string) (chan map[string]any, error) {
 		// Stream all JSON objects
 		for {
 			// Needs to be recreated each time because of buffered data
-			dec := goccy_json.NewDecoder(r)
+			dec := jsonNewDecoder(r)
 
 			var obj map[string]any
 			err := dec.Decode(&obj)
