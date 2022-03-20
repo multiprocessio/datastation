@@ -2,7 +2,6 @@ import { IconTrash } from '@tabler/icons';
 import * as React from 'react';
 import { MODE_FEATURES } from '../shared/constants';
 import {
-  DEFAULT_PROJECT,
   GraphPanelInfo,
   PanelInfo,
   PanelResult,
@@ -15,6 +14,7 @@ import { Confirm } from './components/Confirm';
 import { Input } from './components/Input';
 import { Link } from './components/Link';
 import { Dashboard } from './dashboard';
+import { loadDefaultProject } from './Header';
 import { NotFound } from './NotFound';
 import { VISUAL_PANELS } from './Panel';
 import { PanelList } from './PanelList';
@@ -101,8 +101,7 @@ export function PageList({
   pageIndex: number;
 }) {
   const page: ProjectPage | null = state.pages[pageIndex] || null;
-  const { state: urlState, setState: setUrlState } =
-    React.useContext(UrlStateContext);
+  const { state: urlState } = React.useContext(UrlStateContext);
 
   if (!page) {
     return (
@@ -122,16 +121,7 @@ export function PageList({
         {MODE_FEATURES.useDefaultProject && (
           <p>
             Or,{' '}
-            <Button
-              onClick={() => {
-                // TODO: figure out how to set project state
-                setUrlState({
-                  projectId: DEFAULT_PROJECT.projectName,
-                  page: 0,
-                  view: 'editor',
-                });
-              }}
-            >
+            <Button onClick={loadDefaultProject}>
               load the example project
             </Button>{' '}
             to get a feel for what DataStation can do.

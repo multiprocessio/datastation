@@ -30,23 +30,6 @@ if (MODE === 'browser') {
 export function App() {
   const [urlState, setUrlState] = useUrlState();
   const [state, crud] = useProjectState(urlState.projectId, urlState.page);
-  // TODO: figure out how to do
-  /* const [loadedDefault, setLoadedDefault] = React.useState(false);
-   * React.useEffect(
-   *   function loadDefaultProject() {
-   *     if (
-   *       !urlState.projectId &&
-   *       MODE_FEATURES.useDefaultProject &&
-   *       !loadedDefault
-   *     ) {
-   *       setLoadedDefault(true);
-   *       setUrlState({ projectId: DEFAULT_PROJECT.projectName });
-   *       setProjectState(DEFAULT_PROJECT);
-   *     }
-   *   },
-   *   [urlState.projectId, loadedDefault]
-   * );
-   */
   React.useEffect(
     function setDocumentTitle() {
       if (state && state.projectName) {

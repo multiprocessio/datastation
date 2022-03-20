@@ -109,6 +109,35 @@ export class App {
       server.close(() => process.exit(1));
     });
   }
+
+  getDashboards = {
+    resource: 'getDashboards',
+    handler: () => {},
+  };
+
+  updateDashboard = {
+    resource: 'updateDashboards',
+    handler: () => {},
+  };
+
+  getExports = {
+    resource: 'getExports',
+    handler: () => {},
+  };
+
+  updateExport = {
+    resource: 'updateExports',
+    handler: () => {},
+  };
+
+  getHandlers() {
+    return [
+      this.getDashboards,
+      this.updateDashboard,
+      this.getExports,
+      this.updateExport,
+    ];
+  }
 }
 
 export async function init(app: App, withSubprocess = true) {
@@ -120,7 +149,7 @@ export async function init(app: App, withSubprocess = true) {
           go: path.join(CODE_ROOT, 'build', 'go_server_runner'),
         }
       : undefined,
-    additionalHandlers: store.getHandlers(),
+    additionalHandlers: [...store.getHandlers(), ...app.getHandlers()],
   });
 
   return { handlers };

@@ -121,7 +121,7 @@ export const metadataCrud = {
 
   insert(db: sqlite3.Database, metadata: Record<string, string>) {
     const stmt = db.prepare(
-      'INSERT INTO ds_metadata (key, value) VALUES (?, ?)'
+      'INSERT OR REPLACE INTO ds_metadata (key, value) VALUES (?, ?)'
     );
     for (const kv of Object.entries(metadata)) {
       stmt.run(kv);

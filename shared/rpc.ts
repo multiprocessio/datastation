@@ -79,7 +79,11 @@ export type StoreEndpoint =
   | 'openProject'
   | 'getSettings'
   | 'updateSettings'
-  | 'updateResults';
+  | 'updateResults'
+  | 'getDashboards'
+  | 'updateDashboard'
+  | 'getExports'
+  | 'updateExport';
 
 export type PanelEndpoint = 'killProcess' | 'fetchResults' | 'eval';
 

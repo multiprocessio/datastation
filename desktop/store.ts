@@ -321,8 +321,6 @@ GROUP BY panel_id
   makeProjectHandler: MakeProjectHandler = {
     resource: 'makeProject',
 
-    // TODO: also need to handle migration from old dsproj format
-
     // NOTE: unlike elsewhere projectId is actually the file name not a uuid.
     handler: async (_: string, { projectId }: MakeProjectRequest) => {
       const db = this.getConnection(projectId);
