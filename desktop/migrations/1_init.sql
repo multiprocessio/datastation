@@ -39,7 +39,7 @@ CREATE TABLE ds_metadata(
 CREATE TABLE ds_dashboard(
   id TEXT PRIMARY KEY,
   position INTEGER NOT NULL,
-  data_json TEXT NOT NULL,
+  data_json TEXT NOT NULL
 ) STRICT;
 
 CREATE TABLE ds_dashboard_panel(
@@ -55,7 +55,7 @@ CREATE TABLE ds_destination(
   id TEXT PRIMARY KEY,
   position INTEGER NOT NULL,
   data_json TEXT NOT NULL
-);
+) STRICT;
 
 CREATE TABLE ds_export(
   id TEXT NOT NULL,
@@ -70,4 +70,4 @@ CREATE TABLE ds_export_destination (
   export_id TEXT NOT NULL,
   FOREIGN KEY (export_id) REFERENCES ds_panel(id) ON DELETE CASCADE,
   FOREIGN KEY (destination_id) REFERENCES ds_dashboard(id) ON DELETE CASCADE
-)
+) STRICT;
