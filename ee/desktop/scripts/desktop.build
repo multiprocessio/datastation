@@ -1,5 +1,6 @@
 rm -rf build
 rm -rf ../build
+setenv UI_TITLE "DataStation Enterprise Edition"
 setenv UI_CONFIG_OVERRIDES "window.DS_CONFIG_MODE = 'desktop';"
 cd .. && yarn build-ui
 cp -r ../build build
@@ -9,7 +10,7 @@ cd ../runner && go build -trimpath -buildmode=pie -mod=readonly -modcacherw -ldf
 
 cd .. && yarn esbuild desktop/preload.ts --external:electron --sourcemap --bundle --outfile=ee/build/preload.js
 cd .. && yarn esbuild desktop/runner.ts --bundle --platform=node --sourcemap --external:better-sqlite3 --external:electron --target=node10.4 --outfile=ee/build/desktop_runner.js
-yarn esbuild desktop/app.ts --bundle --platform=node --sourcemap --external:better-sqlite3 --external:electron --target=node10.4 --outfile=ee/build/desktop.js
+yarn esbuild desktop/app.ts --bundle --platform=node --sourcemap --external:better-sqlite3 --external:electron --target=node10.4 --outfile=build/desktop.js
 
 rm -rf build/migrations
 cp -r ../desktop/migrations build/
