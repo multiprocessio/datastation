@@ -1,6 +1,5 @@
 rm -rf build
 yarn
-yarn electron-rebuild
 setenv UI_ESBUILD_ARGS "--minify"
 yarn build-desktop
 prepend "window.DS_CONFIG_MODE='desktop';" build/ui.js
