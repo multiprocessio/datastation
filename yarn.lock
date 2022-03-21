@@ -1291,9 +1291,9 @@ bcrypt-pbkdf@^1.0.0:
   dependencies:
     tweetnacl "^0.14.3"
 
-better-sqlite3@multiprocessio/better-sqlite3#a875c91:
+better-sqlite3@multiprocessio/better-sqlite3#4b9286b:
   version "8.0.0"
-  resolved "https://codeload.github.com/multiprocessio/better-sqlite3/tar.gz/a875c91d6f4c3aff16cbad530800e852f5d8dc35"
+  resolved "https://codeload.github.com/multiprocessio/better-sqlite3/tar.gz/4b9286b8dde891d76f6c3dd20143d960599feb17"
   dependencies:
     bindings "^1.5.0"
     prebuild-install "^7.0.0"
