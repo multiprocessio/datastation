@@ -22,14 +22,36 @@ export class Store extends store_ce.Store {
       this.guardInternalOnly(external);
 
       const db = this.getConnection(projectId);
-      const columns = [id, table, pk, dt, error, old_value, new_value];
+      const columns = [
+        'id',
+        'table',
+        'pk',
+        'dt',
+        'error',
+        'old_value',
+        'new_value',
+        'user_id',
+      ];
       const stubMaker = this.stubMaker();
       const stubs = columns.map(() => stubMaker());
-      const values = [data.id, data.table, data.pk, unix(data.dt), data.error, data.oldValue, data.newValue];
-      const stmt = db.prepare(`INSERT INTO ds_history (${columns.join(', ')}) VALUES(${stubs.join(', ')})`);
+      const values = [
+        data.id,
+        data.table,
+        data.pk,
+        unix(data.dt),
+        data.error,
+        data.oldValue,
+        data.newValue,
+        data.userId,
+      ];
+      const stmt = db.prepare(
+        `INSERT INTO ds_history (${columns.join(', ')}) VALUES(${stubs.join(
+          ', '
+        )})`
+      );
       stmt.run(values);
     },
-  }
+  };
 
   getHistoryHandler = {
     resource: 'getHistory' as InternalEndpoint,
@@ -42,15 +64,21 @@ export class Store extends store_ce.Store {
       external: boolean
     ) => {
       const stubMaker = this.stubMaker();
-      const maybeWhere = lastId ? `WHERE dt < (SELECT dt FROM ds_history WHERE id = ${stubMaker()}) ` : '';
-      const stmt = db.prepare(`SELECT * FROM ds_history ${maybeWhere}ORDER BY dt DESC LIMIT 100`);
+      const maybeWhere = lastId
+        ? `WHERE dt < (SELECT dt FROM ds_history WHERE id = ${stubMaker()}) `
+        : '';
+      const stmt = db.prepare(
+        `SELECT * FROM ds_history ${maybeWhere}ORDER BY dt DESC LIMIT 100`
+      );
       const rows = lastId ? stmt.all(lastId) : stmt.all();
-      return rows.map(r =>
-	new History({
-	  ...r,
-	  oldValue: r.old_value,
-	  newValue: r.new_value,
-	}));
+      return rows.map(
+        (r) =>
+          new History({
+            ...r,
+            oldValue: r.old_value,
+            newValue: r.new_value,
+          })
+      );
     },
-  }
+  };
 }

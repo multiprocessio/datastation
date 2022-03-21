@@ -10,7 +10,7 @@ import { configureLogger } from '../../desktop/log';
 import { openWindow } from '../../desktop/project';
 import { registerRPCHandlers } from '../../desktop/rpc';
 import { initialize } from '../../desktop/runner';
-import { Store } from '../../desktop/store';
+import { Store } from './store';
 import { History } from './history';
 
 const binaryExtension: Record<string, string> = {
@@ -45,7 +45,11 @@ function main() {
       await openWindow(project);
 
       const history = new History(store, handlers);
-      registerRPCHandlers(ipcMain, handlers, history.audit);
+      registerRPCHandlers(
+        ipcMain,
+        [...handlers, store.getHistoryHandler],
+        history.audit
+      );
     });
 
     app.on('window-all-closed', function () {

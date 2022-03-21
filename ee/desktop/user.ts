@@ -3,5 +3,5 @@
 import { Store } from './store';
 
 export function ensureUser(store: Store) {
-  store.
+  const db = store.getConnection();
 }

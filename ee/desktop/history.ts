@@ -36,8 +36,14 @@ class History {
         error: String(exception),
         oldValue,
         newValue,
+        userId: '1',
       });
-      await this.store.insertHistoryHandler.handler(payload.projectId, { data }, null, true);
+      await this.store.insertHistoryHandler.handler(
+        payload.projectId,
+        { data },
+        null,
+        true
+      );
     }
 
     if (exception) {
@@ -91,7 +97,16 @@ class History {
     );
   }
 
+  ensureUser(projectId: string) {
+    const db = this.store.getConnection(projectId);
+    db.exec(
+      `INSERT OR REPLACE INTO ds_user (id, name) VALUES ('1', 'Default User')`
+    );
+  }
+
   audit = (payload: rpc_ce.RPCPayload, external?: boolean) => {
+    this.ensureUser(payload.projectId);
+
     switch (payload.resource) {
       case 'updatePage':
         return this.auditPage(payload, external);

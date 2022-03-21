@@ -9,6 +9,7 @@ export class History {
   oldValue: any;
   newValue: any;
   error: string;
+  userId: string;
 
   constructor(defaults: Partial<History> = {}) {
     this.id = uuid.v4();
@@ -18,6 +19,7 @@ export class History {
     this.oldValue = defaults.oldValue || null;
     this.newValue = defaults.newValue || null;
     this.error = defaults.error || '';
+    this.userId = defaults.userId || '';
   }
 
   static fromJSON(raw: any): History {
