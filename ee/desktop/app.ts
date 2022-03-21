@@ -6,9 +6,9 @@ import log from '../../shared/log';
 import { IS_DESKTOP_RUNNER } from '../../desktop/constants';
 import { configureLogger } from '../../desktop/log';
 import { openWindow } from '../../desktop/project';
-import { registerRPCHandlers } from './rpc';
-import { initialize } from './runner';
-import { Store } from './store';
+import { registerRPCHandlers } from '../../desktop/rpc';
+import { initialize } from '../../desktop/runner';
+import { Store } from '../../desktop/store';
 
 const binaryExtension: Record<string, string> = {
   darwin: '',
