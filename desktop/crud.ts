@@ -1,12 +1,24 @@
 import * as sqlite3 from 'better-sqlite3';
 import {
   ConnectorInfo,
+  Dashboard,
+  DashboardPanel,
+  Destination,
+  Export,
   PanelInfo,
   ProjectPage,
   ServerInfo,
 } from '../shared/state';
 
-export type EntityType = 'ds_server' | 'ds_connector' | 'ds_page' | 'ds_panel';
+export type EntityType =
+  | 'ds_server'
+  | 'ds_connector'
+  | 'ds_page'
+  | 'ds_panel'
+  | 'ds_dashboard'
+  | 'ds_dashboard_panel'
+  | 'ds_export'
+  | 'ds_destination';
 
 export class GenericCrud<T extends { id: string }> {
   entity: string;
@@ -106,6 +118,14 @@ export const serverCrud = new GenericCrud<ServerInfo>('ds_server');
 export const pageCrud = new GenericCrud<ProjectPage>('ds_page');
 export const connectorCrud = new GenericCrud<ConnectorInfo>('ds_connector');
 export const panelCrud = new GenericCrud<PanelInfo>('ds_panel');
+export const dashboardCrud = new GenericCrud<Dashboard>('ds_dashboard');
+export const dashboardPanelCrud = new GenericCrud<DashboardPanel>(
+  'ds_dashboard_panel'
+);
+export const exportCrud = new GenericCrud<Export>('ds_export');
+export const destinationCrud = new GenericCrud<Destination>('ds_destination');
+
+export const exportDestination = {};
 
 export const metadataCrud = {
   get(db: sqlite3.Database) {

@@ -1,6 +1,8 @@
 import { Settings } from './settings';
 import {
   ConnectorInfo,
+  Dashboard,
+  Export,
   PanelInfo,
   ProjectPage,
   ProjectState,
@@ -61,7 +63,23 @@ export type UpdateSettingsResponse = void;
 export type GetSettingsRequest = void;
 export type GetSettingsResponse = Settings;
 
-export type PanelBody = { panelId: string };
+export type UpdateExportRequest = Export;
+export type UpdateExportResponse = void;
+
+export type DeleteExportRequest = { id: string };
+export type DeleteExportResponse = void;
+
+export type GetExportsRequest = void;
+export type GetExportsResponse = Array<Export>;
+
+export type UpdateDashboardRequest = Dashboard;
+export type UpdateDashboardResponse = void;
+
+export type DeleteDashboardRequest = { id: string };
+export type DeleteDashboardResponse = void;
+
+export type GetDashboardsRequest = void;
+export type GetDashboardsResponse = Array<Dashboard>;
 
 export type StoreEndpoint =
   | 'getProjects'
@@ -79,12 +97,14 @@ export type StoreEndpoint =
   | 'openProject'
   | 'getSettings'
   | 'updateSettings'
-  | 'updateResults'
   | 'getDashboards'
+  | 'deleteDashboard'
   | 'updateDashboard'
   | 'getExports'
+  | 'deleteExport'
   | 'updateExport';
 
+export type PanelBody = { panelId: string };
 export type PanelEndpoint = 'killProcess' | 'fetchResults' | 'eval';
 
 export type Endpoint = PanelEndpoint | StoreEndpoint;

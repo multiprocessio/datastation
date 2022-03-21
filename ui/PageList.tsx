@@ -13,13 +13,10 @@ import { Button } from './components/Button';
 import { Confirm } from './components/Confirm';
 import { Input } from './components/Input';
 import { Link } from './components/Link';
-import { Dashboard } from './dashboard';
 import { loadDefaultProject } from './Header';
-import { NotFound } from './NotFound';
 import { VISUAL_PANELS } from './Panel';
 import { PanelList } from './PanelList';
 import { PANEL_UI_DETAILS } from './panels';
-import { Scheduler } from './scheduler';
 import { UrlStateContext } from './urlState';
 
 export function makeReevalPanel(
@@ -141,14 +138,6 @@ export function PageList({
     updatePanel(panel, index, { internalOnly: true });
   });
 
-  const MainChild =
-    {
-      editor: PanelList,
-      dashboard: Dashboard,
-      scheduler: Scheduler,
-      settings: null,
-    }[urlState.view] || NotFound;
-
   return (
     <div className="section pages">
       <div className="section-title">
@@ -240,14 +229,11 @@ export function PageList({
         </Link>
       </div>
 
-      <MainChild
+      <PanelList
         page={page}
         pageIndex={pageIndex}
-        updatePage={updatePage}
-        projectId={state.projectName}
         reevalPanel={reevalPanel}
         panelResults={panelResults}
-        modeFeatures={MODE_FEATURES}
       />
     </div>
   );

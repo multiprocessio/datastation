@@ -4,6 +4,10 @@ import log from '../shared/log';
 import {
   DeleteConnectorRequest,
   DeleteConnectorResponse,
+  DeleteDashboardRequest,
+  DeleteDashboardResponse,
+  DeleteExportRequest,
+  DeleteExportResponse,
   DeletePageRequest,
   DeletePageResponse,
   DeletePanelRequest,
@@ -11,6 +15,10 @@ import {
   DeleteServerRequest,
   DeleteServerResponse,
   Endpoint,
+  GetDashboardsRequest,
+  GetDashboardsResponse,
+  GetExportsRequest,
+  GetExportsResponse,
   GetProjectRequest,
   GetProjectResponse,
   GetProjectsRequest,
@@ -97,6 +105,22 @@ export type DeletePageHandler = RPCHandler<
 export type DeletePanelHandler = RPCHandler<
   DeletePanelRequest,
   DeletePanelResponse
+>;
+export type GetDashboardsHandler = RPCHandler<
+  GetDashboardsRequest,
+  GetDashboardsResponse
+>;
+export type DeleteDashboardHandler = RPCHandler<
+  DeleteDashboardRequest,
+  DeleteDashboardResponse
+>;
+export type GetExportsHandler = RPCHandler<
+  GetExportsRequest,
+  GetExportsResponse
+>;
+export type DeleteExportHandler = RPCHandler<
+  DeleteExportRequest,
+  DeleteExportResponse
 >;
 
 // Stub to ensure msg is always typed

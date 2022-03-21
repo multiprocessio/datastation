@@ -491,7 +491,6 @@ GROUP BY panel_id
       }
     ) => {
       delete data.panels;
-      delete data.schedules;
       this.updateGeneric(
         pageCrud,
         projectId,

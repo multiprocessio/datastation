@@ -38,25 +38,36 @@ CREATE TABLE ds_metadata(
 
 CREATE TABLE ds_dashboard(
   id TEXT PRIMARY KEY,
-  name TEXT NOT NULL,
   position INTEGER NOT NULL,
-  visibility TEXT NOT NULL,
-  update_frequency INTEGER NOT NULL
+  data_json TEXT NOT NULL,
 ) STRICT;
 
 CREATE TABLE ds_dashboard_panel(
-  panel_id TEXT PRIMARY KEY,
+  panel_id TEXT NOT NULL,
   dashboard_id TEXT NOT NULL,
   position INTEGER NOT NULL,
-  data_json TEXT NOT NULL,  
-  FOREIGN KEY (panel_id) REFERENCES ds_panel(id) ON DELETE CASCADE
+  data_json TEXT NOT NULL,
+  FOREIGN KEY (panel_id) REFERENCES ds_panel(id) ON DELETE CASCADE,
   FOREIGN KEY (dashboard_id) REFERENCES ds_dashboard(id) ON DELETE CASCADE
 ) STRICT;
 
-CREATE TABLE ds_dashboard_export(
+CREATE TABLE ds_destination(
+  id TEXT PRIMARY KEY,
+  position INTEGER NOT NULL,
+  data_json TEXT NOT NULL
+);
+
+CREATE TABLE ds_export(
   id TEXT NOT NULL,
   dashboard_id TEXT NOT NULL,
   position INTEGER NOT NULL,
   data_json TEXT NOT NULL,
   FOREIGN KEY (dashboard_id) REFERENCES ds_dashboard(id) ON DELETE CASCADE
 ) STRICT;
+
+CREATE TABLE ds_export_destination (
+  destination_id TEXT NOT NULL,
+  export_id TEXT NOT NULL,
+  FOREIGN KEY (export_id) REFERENCES ds_panel(id) ON DELETE CASCADE,
+  FOREIGN KEY (destination_id) REFERENCES ds_dashboard(id) ON DELETE CASCADE
+)

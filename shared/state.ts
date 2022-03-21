@@ -594,57 +594,61 @@ export class LiteralPanelInfo extends PanelInfo {
   }
 }
 
-export class ScheduledExport {
-  period: 'day' | 'week' | 'month';
-  name: string;
+export class DashboardPanel {
   id: string;
-  destination: {
-    type: 'email';
-    from: string;
-    recipients: string;
-    server: string;
-    username: string;
-    password_encrypt: Encrypt;
-  };
-
-  constructor(defaults: Partial<ScheduledExport> = {}) {
-    this.period = defaults.period || 'day';
-    this.name = defaults.name || 'DataStation Export';
-    this.destination = {
-      ...defaults.destination,
-    };
-    this.destination.type = this.destination.type || 'email';
-    // In preparation for supporting other types
-    if (this.destination.type === 'email') {
-      this.destination.from || this.destination.from || '';
-      this.destination.recipients = this.destination.recipients || '';
-      this.destination.server = this.destination.server || '';
-      this.destination.username = this.destination.username || '';
-      this.destination.password_encrypt =
-        this.destination.password_encrypt || new Encrypt('');
-    }
-
-    this.id = uuid.v4();
-  }
+  panelId: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
 }
 
 export type ProjectPageVisibility = 'no-link' | 'private-link' | 'public-link';
 
-export class ProjectPage {
-  panels: Array<PanelInfo>;
-  schedules: Array<ScheduledExport>;
+export class Dashboard {
+  id: string;
+  disabled: boolean;
   refreshPeriod: number;
   visibility: ProjectPageVisibility;
+  name: string;
+  panels: Array<{ name: string; id: string }>;
+  exports: Array<{ name: string; id: string }>;
+}
+
+// For exports specifically
+export type Destination = { id: string } & {
+  // Leaves room for other destination types in the future
+  type: 'email';
+  from: string;
+  recipients: string;
+  server: string;
+  username: string;
+  password_encrypt: Encrypt;
+};
+
+export class Export {
+  period: 'day' | 'week' | 'month';
+  disabled: boolean;
+  name: string;
+  id: string;
+  destinations: Array<Destination>;
+
+  constructor(defaults: Partial<Export> = {}) {
+    this.period = defaults.period || 'day';
+    this.name = defaults.name || 'DataStation Export';
+    this.id = uuid.v4();
+  }
+}
+
+export class ProjectPage {
+  panels: Array<PanelInfo>;
   name: string;
   id: string;
 
   constructor(name?: string, panels?: Array<PanelInfo>) {
     this.name = name || '';
     this.panels = panels || [];
-    this.schedules = [];
     this.id = uuid.v4();
-    this.visibility = 'no-link';
-    this.refreshPeriod = 60 * 60;
   }
 
   static fromJSON(raw: any): ProjectPage {
@@ -653,9 +657,6 @@ export class ProjectPage {
     pp.panels = (raw.panels || []).map(PanelInfo.fromJSON);
     pp.name = raw.name;
     pp.id = raw.id || uuid.v4();
-    pp.schedules = raw.schedules || [];
-    pp.visibility = raw.visibility || pp.visibility;
-    pp.refreshPeriod = raw.refreshPeriod || pp.refreshPeriod;
     return pp;
   }
 }

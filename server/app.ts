@@ -11,7 +11,6 @@ import { Store } from '../desktop/store';
 import { humanSize } from '../shared/text';
 import { registerAuth } from './auth';
 import { Config } from './config';
-import { registerDashboard } from './dashboard';
 import log from './log';
 import { handleRPC } from './rpc';
 
@@ -54,7 +53,6 @@ export class App {
       next();
     });
     const auth = await registerAuth('/a/auth', this, this.config);
-    registerDashboard('/dashboard', '/a/dashboard', this, handlers);
 
     this.express.post('/a/rpc', auth.requireAuth, (req, rsp) =>
       handleRPC(req, rsp, handlers)
@@ -109,35 +107,6 @@ export class App {
       server.close(() => process.exit(1));
     });
   }
-
-  getDashboards = {
-    resource: 'getDashboards',
-    handler: () => {},
-  };
-
-  updateDashboard = {
-    resource: 'updateDashboards',
-    handler: () => {},
-  };
-
-  getExports = {
-    resource: 'getExports',
-    handler: () => {},
-  };
-
-  updateExport = {
-    resource: 'updateExports',
-    handler: () => {},
-  };
-
-  getHandlers() {
-    return [
-      this.getDashboards,
-      this.updateDashboard,
-      this.getExports,
-      this.updateExport,
-    ];
-  }
 }
 
 export async function init(app: App, withSubprocess = true) {
@@ -149,7 +118,7 @@ export async function init(app: App, withSubprocess = true) {
           go: path.join(CODE_ROOT, 'build', 'go_server_runner'),
         }
       : undefined,
-    additionalHandlers: [...store.getHandlers(), ...app.getHandlers()],
+    additionalHandlers: store.getHandlers(),
   });
 
   return { handlers };
