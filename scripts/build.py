@@ -139,6 +139,11 @@ def eval_line(line):
         return
     if line[0] == 'cp' and IS_WINDOWS:
         line[0] = 'copy'
+
+        if line[1] == '-r':
+            shutil.copytree(line[2], line[3])
+            quote_line(line, show=True)
+            return
     elif line[0] == 'rm' and line[1] == '-rf' and IS_WINDOWS:
         quote_line(line, show=True)
         for todelete in line[2:]:
