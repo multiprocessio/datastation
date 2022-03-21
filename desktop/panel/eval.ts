@@ -23,7 +23,9 @@ import {
 } from '../../shared/state';
 import {
   CODE_ROOT,
+  DISK_ROOT,
   DSPROJ_FLAG,
+  FS_BASE_FLAG,
   PANEL_FLAG,
   PANEL_META_FLAG,
   SETTINGS_FILE_FLAG,
@@ -31,7 +33,7 @@ import {
 import { ensureFile } from '../fs';
 import { parsePartialJSONFile } from '../partial';
 import { Dispatch, RPCHandler } from '../rpc';
-import { flushUnwritten, getProjectResultsFile } from '../store';
+import { getProjectResultsFile } from '../store';
 import { getProjectAndPanel } from './shared';
 import { EvalHandlerExtra, EvalHandlerResponse } from './types';
 
@@ -110,6 +112,8 @@ export async function evalInSubprocess(
       panel.id,
       PANEL_META_FLAG,
       tmp.path,
+      FS_BASE_FLAG,
+      DISK_ROOT.value,
     ];
 
     if (subprocess.settingsFileOverride) {
@@ -132,6 +136,7 @@ export async function evalInSubprocess(
       );
     }
 
+    const lastRun = new Date();
     log.info(`Launching "${base} ${args.join(' ')}"`);
     const child = execFile(base, args, {
       windowsHide: true,
@@ -188,7 +193,7 @@ export async function evalInSubprocess(
     const resultMeta = fs.readFileSync(tmp.path).toString();
     let parsePartial = !resultMeta;
     if (!parsePartial) {
-      const rm = JSON.parse(resultMeta);
+      const rm: Partial<PanelResult> = JSON.parse(resultMeta);
       if (rm.exception) {
         const e = EVAL_ERRORS.find((e) => e.name === rm.exception.name);
 
@@ -203,16 +208,25 @@ export async function evalInSubprocess(
         }
 
         // Unclear what case this is, probably a developer mistake.
-        throw new e(rm.exception);
+        throw new e(rm.exception as any);
       }
 
       // Case of existing Node.js runner
+      rm.lastRun = lastRun;
+      rm.loading = false;
+      rm.elapsed = new Date().valueOf() - lastRun.valueOf();
       return rm;
     }
 
     // Case of new Go runner
     const projectResultsFile = getProjectResultsFile(projectName);
-    return parsePartialJSONFile(projectResultsFile + panel.id);
+    const rm: Partial<PanelResult> = parsePartialJSONFile(
+      projectResultsFile + panel.id
+    );
+    rm.lastRun = lastRun;
+    rm.loading = false;
+    rm.elapsed = new Date().valueOf() - lastRun.valueOf();
+    return rm;
   } finally {
     try {
       if (pid) {
@@ -260,22 +274,33 @@ export const makeEvalHandler = (subprocessEval?: {
     body: PanelBody,
     dispatch: Dispatch
   ): Promise<PanelResult> {
-    // Flushes desktop panel writes to disk. Not relevant in server context.
-    flushUnwritten();
-
     const { project, panel, panelPage } = await getProjectAndPanel(
       dispatch,
       projectId,
       body.panelId
     );
 
+    // Reset the result
+    await dispatch({
+      resource: 'updatePanelResult',
+      projectId,
+      body: { data: new PanelResult(), panelId: panel.id },
+    });
+
     if (subprocessEval) {
-      return evalInSubprocess(
+      const resultMeta = (await evalInSubprocess(
         subprocessEval,
         project.projectName,
         panel,
         project.connectors
-      );
+      )) as PanelResult;
+
+      await dispatch({
+        resource: 'updatePanelResult',
+        projectId,
+        body: { data: resultMeta, panelId: panel.id },
+      });
+      return resultMeta;
     }
 
     const idMap: Record<string | number, string> = {};
@@ -290,6 +315,7 @@ export const makeEvalHandler = (subprocessEval?: {
     assertValidDependentPanels(projectId, panel.content, idMap);
 
     const evalHandler = EVAL_HANDLERS[panel.type]();
+    const lastRun = new Date();
     const res = await evalHandler(
       project,
       panel,
@@ -312,12 +338,15 @@ export const makeEvalHandler = (subprocessEval?: {
 
     const s = shape(res.value);
 
-    return {
+    const resultMeta = {
       stdout: res.stdout || '',
       preview: preview(res.value),
       shape: s,
       value: res.returnValue ? res.value : null,
       size: res.size === undefined ? json.length : res.size,
+      lastRun,
+      loading: false,
+      elapsed: new Date().valueOf() - lastRun.valueOf(),
       arrayCount:
         res.arrayCount === undefined
           ? s.kind === 'array'
@@ -326,6 +355,12 @@ export const makeEvalHandler = (subprocessEval?: {
           : res.arrayCount,
       contentType: res.contentType || 'application/json',
     };
+    await dispatch({
+      resource: 'updatePanelResult',
+      projectId,
+      body: { data: resultMeta, panelId: panel.id },
+    });
+    return resultMeta;
   },
 });
 

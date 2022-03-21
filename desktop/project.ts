@@ -161,7 +161,7 @@ export async function openWindow(
 export async function openProject() {
   const { filePaths } = await dialog.showOpenDialog({
     properties: ['openFile'],
-    defaultPath: DISK_ROOT,
+    defaultPath: DISK_ROOT.value,
     filters: [
       {
         name: 'DataStation Projects',

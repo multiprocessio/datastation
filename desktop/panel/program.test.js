@@ -151,20 +151,20 @@ for (const t of TESTS) {
           (VERBOSE ? ', program: `' + t.content + '`' : ''),
         async () => {
           try {
-            const lp = new LiteralPanelInfo({
+            const lp = new LiteralPanelInfo(null, {
               contentTypeInfo: { type: 'text/csv' },
               content: 'age,name\n12,Kev\n18,Nyra',
               name: 'Raw Data',
             });
 
             // Not valid array data
-            const lp2 = new LiteralPanelInfo({
+            const lp2 = new LiteralPanelInfo(null, {
               contentTypeInfo: {},
               content: '',
               name: 'Not Array Data',
             });
 
-            const pp = new ProgramPanelInfo({
+            const pp = new ProgramPanelInfo(null, {
               type: t.type,
               content: t.content,
             });
@@ -207,7 +207,7 @@ for (const t of TESTS) {
           lp.literal.contentTypeInfo = { type: 'text/csv' };
           lp.content = 'age,name\n12,Kev\n18,Nyra';
 
-          const pp = new ProgramPanelInfo();
+          const pp = new ProgramPanelInfo(null);
           pp.program.type = t.type;
           pp.content = LANGUAGES[t.type].defaultContent(n);
 
@@ -260,7 +260,7 @@ for (const subprocessName of RUNNERS) {
 
     describe(`runs ${language} program to fetch panel file name via ${subprocessName.go}`, function () {
       test('it returns its own file name', async () => {
-        const pp = new ProgramPanelInfo({
+        const pp = new ProgramPanelInfo(null, {
           type: language,
           content: 'DM_setPanel(DM_getPanelFile(0));',
         });
@@ -286,14 +286,14 @@ for (const subprocessName of RUNNERS) {
   }
 
   describe('runs python program with macros', function () {
-    const lp = new LiteralPanelInfo({
+    const lp = new LiteralPanelInfo(null, {
       contentTypeInfo: { type: 'text/csv' },
       content: 'age,name\n12,Kev\n18,Nyra',
       name: 'Raw Data',
     });
 
     test('it handles basic macros correctly', async () => {
-      const pp = new ProgramPanelInfo({
+      const pp = new ProgramPanelInfo(null, {
         type: 'python',
         content:
           'DM_setPanel("{% for row in DM_getPanel("0") %}{{ row.name }}: {{ row.age }}, {% endfor %}");',
@@ -318,7 +318,7 @@ for (const subprocessName of RUNNERS) {
     });
 
     test('it handles json macros correctly', async () => {
-      const pp = new ProgramPanelInfo({
+      const pp = new ProgramPanelInfo(null, {
         type: 'python',
         content: 'DM_setPanel({{ DM_getPanel("0") | json }});',
       });
@@ -345,7 +345,7 @@ for (const subprocessName of RUNNERS) {
     });
 
     test('it handles bad DM_getPanel macros correctly', async () => {
-      const pp = new ProgramPanelInfo({
+      const pp = new ProgramPanelInfo(null, {
         type: 'python',
         content:
           'DM_setPanel({{ DM_getPanel("2000") }}, {{ DM_getPanel("100") }});',
@@ -372,7 +372,7 @@ for (const subprocessName of RUNNERS) {
     });
 
     test('it handles loop counter macros correctly', async () => {
-      const pp = new ProgramPanelInfo({
+      const pp = new ProgramPanelInfo(null, {
         type: 'python',
         content:
           'DM_setPanel("{% for row in DM_getPanel("0") %}{{ row.name }}: {{ row.age }}{% if not forloop.Last %}, {% endif %}{% endfor %}");',
@@ -398,14 +398,14 @@ for (const subprocessName of RUNNERS) {
   });
 
   describe('basic sql tests', function () {
-    const lp = new LiteralPanelInfo({
+    const lp = new LiteralPanelInfo(null, {
       contentTypeInfo: { type: 'text/csv' },
       content: 'age,name\n12,Kev\n18,Nyra',
       name: 'Raw Data',
     });
 
     test('it handles table aliases correctly', async () => {
-      const pp = new ProgramPanelInfo({
+      const pp = new ProgramPanelInfo(null, {
         type: 'sql',
         content:
           'select testt.age from DM_getPanel(0) testt order by testt.age desc',
@@ -430,7 +430,7 @@ for (const subprocessName of RUNNERS) {
     });
 
     test('it handles regex correctly', async () => {
-      const pp = new ProgramPanelInfo({
+      const pp = new ProgramPanelInfo(null, {
         type: 'sql',
         content: `select * from DM_getPanel(0) where name regexp 'K[a-zA-Z]*'`,
       });
@@ -454,7 +454,7 @@ for (const subprocessName of RUNNERS) {
     });
 
     test('it handles new json syntax correctly', async () => {
-      const pp = new ProgramPanelInfo({
+      const pp = new ProgramPanelInfo(null, {
         type: 'sql',
         content: `select '[11,22,33,44]' -> 3 AS test`,
       });

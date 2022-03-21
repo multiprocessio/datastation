@@ -17,7 +17,7 @@ for (const subprocessName of RUNNERS) {
   describe(`filagg tests via ${
     subprocessName ? subprocessName.node || subprocessName.go : 'same-process'
   }`, () => {
-    const lp = new LiteralPanelInfo({
+    const lp = new LiteralPanelInfo(null, {
       contentTypeInfo: { type: 'application/json' },
       content: JSON.stringify([
         { age: 19, name: 'Kate' },
@@ -29,7 +29,7 @@ for (const subprocessName of RUNNERS) {
     });
 
     test('filters no group', async () => {
-      const vp = new FilterAggregatePanelInfo({
+      const vp = new FilterAggregatePanelInfo(null, {
         filter: 'age > 10',
         sortOn: 'age',
         panelSource: lp.id,
@@ -59,7 +59,7 @@ for (const subprocessName of RUNNERS) {
     }, 30_000);
 
     test('filters with group', async () => {
-      const vp = new FilterAggregatePanelInfo({
+      const vp = new FilterAggregatePanelInfo(null, {
         filter: 'age < 10',
         sortOn: 'Aggregate: count',
         groupBy: 'age',
@@ -95,12 +95,12 @@ for (const subprocessName of RUNNERS) {
         time: subMinutes(new Date(), timeOffset).toISOString(),
         value: timeOffset,
       }));
-      const lp = new LiteralPanelInfo({
+      const lp = new LiteralPanelInfo(null, {
         contentTypeInfo: { type: 'application/json' },
         content: JSON.stringify(rows),
       });
 
-      const vp = new FilterAggregatePanelInfo({
+      const vp = new FilterAggregatePanelInfo(null, {
         sortOn: 'time',
         range: {
           field: 'time',
@@ -142,12 +142,12 @@ for (const subprocessName of RUNNERS) {
           value: timeOffset,
         })
       );
-      const lp = new LiteralPanelInfo({
+      const lp = new LiteralPanelInfo(null, {
         contentTypeInfo: { type: 'application/json' },
         content: JSON.stringify(rows),
       });
 
-      const vp = new FilterAggregatePanelInfo({
+      const vp = new FilterAggregatePanelInfo(null, {
         sortOn: 'time',
         groupBy: 'time',
         aggregateType: 'count',

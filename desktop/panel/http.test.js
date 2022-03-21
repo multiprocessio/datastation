@@ -91,6 +91,7 @@ for (const subprocessName of RUNNERS) {
     () => {
       test('correct result', () => {
         const hp = new HTTPPanelInfo(
+          null,
           '',
           new HTTPConnectorInfo(
             '',
@@ -127,6 +128,7 @@ for (const subprocessName of RUNNERS) {
     }
 
     const hp = new HTTPPanelInfo(
+      null,
       '',
       new HTTPConnectorInfo(
         '',
@@ -177,6 +179,7 @@ for (const subprocessName of RUNNERS) {
 
   for (const t of REGEXP_TESTS) {
     const hp = new HTTPPanelInfo(
+      null,
       '',
       new HTTPConnectorInfo(
         '',
@@ -218,6 +221,7 @@ for (const subprocessName of RUNNERS) {
   describe('http with headers', () => {
     test('correct result', () => {
       const hp = new HTTPPanelInfo(
+        null,
         '',
         new HTTPConnectorInfo(
           '',
@@ -247,13 +251,14 @@ for (const subprocessName of RUNNERS) {
 
   describe('http with macro', () => {
     test('macro as url', () => {
-      const lp = new LiteralPanelInfo({
+      const lp = new LiteralPanelInfo(null, {
         contentTypeInfo: { type: 'text/plain' },
         content: '/testdata/allformats/unknown',
         name: 'Raw Data',
       });
 
       const hp = new HTTPPanelInfo(
+        null,
         '',
         new HTTPConnectorInfo('', 'http://localhost:9799{{DM_getPanel("0")}}')
       );
@@ -277,13 +282,14 @@ for (const subprocessName of RUNNERS) {
     });
 
     test('macro as body', () => {
-      const lp = new LiteralPanelInfo({
+      const lp = new LiteralPanelInfo(null, {
         contentTypeInfo: { type: 'application/json' },
         content: '[{"name": "jim", "age": 12}]',
         name: 'Raw Data',
       });
 
       const hp = new HTTPPanelInfo(
+        null,
         '',
         new HTTPConnectorInfo('', 'http://localhost:9798')
       );
@@ -319,6 +325,7 @@ for (const subprocessName of RUNNERS) {
           type: 'private-key',
         });
         const hp = new HTTPPanelInfo(
+          null,
           '',
           new HTTPConnectorInfo(
             '',

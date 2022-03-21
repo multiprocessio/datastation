@@ -486,7 +486,7 @@ export const graphPanel: PanelUIDetails<GraphPanelInfo> = {
   details: GraphPanelDetails,
   body: GraphPanel,
   previewable: false,
-  factory: () => new GraphPanelInfo(),
+  factory: (pageId: string) => new GraphPanelInfo(pageId),
   hasStdout: false,
   info: null,
   dashboard: true,

@@ -87,6 +87,7 @@ type PanelInfo struct {
 	Id         string        `json:"id" db:"id"`
 	ServerId   string        `json:"serverId" db:"serverId"`
 	ResultMeta PanelResult   `json:"resultMeta" db:"resultMeta"`
+	PageId     string        `json:"pageId" db:"pageId"`
 	*ProgramPanelInfo
 	*FilePanelInfo
 	*LiteralPanelInfo

@@ -6,7 +6,7 @@ import (
 	"os/exec"
 )
 
-func evalMongo(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, server *ServerInfo, w io.Writer) error {
+func (ec EvalContext) evalMongo(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, server *ServerInfo, w io.Writer) error {
 	prog := "mongo"
 	_, err := exec.LookPath(prog)
 	if err != nil {
@@ -19,9 +19,9 @@ func evalMongo(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, server *S
 		return err
 	}
 
-	return withRemoteConnection(server, host, port, func(proxyHost, proxyPort string) error {
+	return ec.withRemoteConnection(server, host, port, func(proxyHost, proxyPort string) error {
 		dbInfo.Address = proxyHost + ":" + proxyPort
-		_, conn, err := getConnectionString(dbInfo)
+		_, conn, err := ec.getConnectionString(dbInfo)
 		if err != nil {
 			return err
 		}

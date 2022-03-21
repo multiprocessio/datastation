@@ -1,11 +1,10 @@
 import { IconTrash } from '@tabler/icons';
 import * as React from 'react';
 import { MODE_FEATURES } from '../shared/constants';
-import { EVAL_ERRORS } from '../shared/errors';
 import {
-  DEFAULT_PROJECT,
   GraphPanelInfo,
-  PanelResultMeta,
+  PanelInfo,
+  PanelResult,
   ProjectPage,
   ProjectState,
   TablePanelInfo,
@@ -14,38 +13,27 @@ import { Button } from './components/Button';
 import { Confirm } from './components/Confirm';
 import { Input } from './components/Input';
 import { Link } from './components/Link';
-import { Dashboard } from './dashboard';
-import { PanelPlayWarning } from './errors';
-import { NotFound } from './NotFound';
+import { loadDefaultProject } from './Header';
 import { VISUAL_PANELS } from './Panel';
 import { PanelList } from './PanelList';
 import { PANEL_UI_DETAILS } from './panels';
-import { ProjectContext } from './ProjectStore';
-import { Scheduler } from './scheduler';
 import { UrlStateContext } from './urlState';
 
 export function makeReevalPanel(
   page: ProjectPage,
   state: ProjectState,
-  updatePage: (page: ProjectPage) => void
+  updatePanelInternal: (p: PanelInfo) => void
 ) {
-  return async function reevalPanel(panelId: string, reset?: boolean) {
+  return async function reevalPanel(panelId: string) {
     const { connectors, servers } = state;
-    const start = new Date();
 
     const panel = page.panels.find((p) => p.id === panelId);
     if (!panel) {
       return;
     }
-    let resultMeta = panel.resultMeta || new PanelResultMeta();
-    resultMeta.loading = !reset;
 
-    panel.resultMeta = resultMeta;
-    updatePage(page);
-    if (reset) {
-      resultMeta.lastRun = null;
-      return;
-    }
+    panel.resultMeta.loading = true;
+    updatePanelInternal(panel);
 
     try {
       const idMap: Record<string | number, string> = {};
@@ -54,27 +42,16 @@ export function makeReevalPanel(
         idMap[p.name] = p.id;
       });
       const panelUIDetails = PANEL_UI_DETAILS[panel.type];
-      const { value, size, contentType, preview, stdout, shape, arrayCount } =
+      panel.resultMeta = PanelResult.fromJSON(
         await panelUIDetails.eval(
           panel,
           page.panels,
           idMap,
           connectors,
           servers
-        );
-      panel.resultMeta = {
-        lastRun: new Date(),
-        elapsed: new Date().valueOf() - start.valueOf(),
-        value,
-        preview,
-        stdout,
-        shape,
-        arrayCount,
-        contentType,
-        size,
-        loading: false,
-      };
-      updatePage(page);
+        )
+      );
+      updatePanelInternal(panel);
 
       // Re-run all dependent visual panels
       if (!VISUAL_PANELS.includes(panel.type)) {
@@ -90,46 +67,38 @@ export function makeReevalPanel(
         }
       }
     } catch (e) {
-      if (EVAL_ERRORS.map((cls) => new (cls as any)().name).includes(e.name)) {
-        e = new PanelPlayWarning(e.message);
+      panel.resultMeta.exception = e;
+      updatePanelInternal(panel);
+    } finally {
+      if (panel.resultMeta.loading) {
+        panel.resultMeta.loading = false;
+        updatePanelInternal(panel);
       }
-
-      panel.resultMeta = {
-        loading: false,
-        elapsed: new Date().valueOf() - start.valueOf(),
-        lastRun: new Date(),
-        exception: e,
-        stdout: e.stdout,
-        preview: '',
-        contentType: 'unknown',
-        size: 0,
-        arrayCount: null,
-        shape: { kind: 'unknown' },
-      };
-      updatePage(page);
     }
   };
 }
 
 export function PageList({
   state,
-  addPage,
   deletePage,
   updatePage,
+  updatePanel,
   setPageIndex,
   pageIndex,
 }: {
   state: ProjectState;
-  addPage: (page: ProjectPage) => void;
-  deletePage: (i: number) => void;
-  updatePage: (page: ProjectPage) => void;
+  deletePage: (id: string) => void;
+  updatePage: (page: ProjectPage, position: number) => void;
+  updatePanel: (
+    panel: PanelInfo,
+    position: number,
+    opts?: { internalOnly: boolean }
+  ) => void;
   setPageIndex: (i: number) => void;
   pageIndex: number;
 }) {
   const page: ProjectPage | null = state.pages[pageIndex] || null;
-  const { state: urlState, setState: setUrlState } =
-    React.useContext(UrlStateContext);
-  const { setState: setProjectState } = React.useContext(ProjectContext);
+  const { state: urlState } = React.useContext(UrlStateContext);
 
   if (!page) {
     return (
@@ -139,8 +108,7 @@ export function PageList({
           <Button
             type="primary"
             onClick={() => {
-              addPage(new ProjectPage('Untitled Page'));
-              setPageIndex(state.pages.length - 1);
+              updatePage(new ProjectPage('Untitled Page'), -1);
             }}
           >
             Add a page
@@ -150,16 +118,7 @@ export function PageList({
         {MODE_FEATURES.useDefaultProject && (
           <p>
             Or,{' '}
-            <Button
-              onClick={() => {
-                setProjectState(DEFAULT_PROJECT);
-                setUrlState({
-                  projectId: DEFAULT_PROJECT.projectName,
-                  page: 0,
-                  view: 'editor',
-                });
-              }}
-            >
+            <Button onClick={loadDefaultProject}>
               load the example project
             </Button>{' '}
             to get a feel for what DataStation can do.
@@ -170,15 +129,14 @@ export function PageList({
   }
 
   const panelResults = page.panels.map((p) => p.resultMeta);
-  const reevalPanel = makeReevalPanel(page, state, updatePage);
+  const reevalPanel = makeReevalPanel(page, state, (panel: PanelInfo) => {
+    const index = page.panels.findIndex((p) => p.id === panel.id);
+    if (index === -1) {
+      return;
+    }
 
-  const MainChild =
-    {
-      editor: PanelList,
-      dashboard: Dashboard,
-      scheduler: Scheduler,
-      settings: null,
-    }[urlState.view] || NotFound;
+    updatePanel(panel, index, { internalOnly: true });
+  });
 
   return (
     <div className="section pages">
@@ -192,7 +150,7 @@ export function PageList({
               <Input
                 onChange={(value: string) => {
                   page.name = value;
-                  updatePage(page);
+                  updatePage(page, i);
                 }}
                 value={page.name}
               />
@@ -201,7 +159,7 @@ export function PageList({
                 <Confirm
                   right
                   onConfirm={() => {
-                    deletePage(pageIndex);
+                    deletePage(page.id);
                     setPageIndex(Math.min(state.pages.length - 1, 0));
                   }}
                   message="delete this page"
@@ -236,7 +194,7 @@ export function PageList({
         <Button
           className="add-page"
           onClick={() => {
-            addPage(new ProjectPage('Untitled Page'));
+            updatePage(new ProjectPage('Untitled Page'), -1);
             setPageIndex(state.pages.length - 1);
           }}
         >
@@ -271,13 +229,11 @@ export function PageList({
         </Link>
       </div>
 
-      <MainChild
+      <PanelList
         page={page}
-        projectId={state.projectName}
-        updatePage={updatePage}
+        pageIndex={pageIndex}
         reevalPanel={reevalPanel}
         panelResults={panelResults}
-        modeFeatures={MODE_FEATURES}
       />
     </div>
   );

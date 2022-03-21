@@ -11,10 +11,10 @@ import (
 	"google.golang.org/api/option"
 )
 
-func evalBigQuery(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, w io.Writer) error {
+func (ec EvalContext) evalBigQuery(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, w io.Writer) error {
 	ctx := context.Background()
 
-	token, err := dbInfo.ApiKey.decrypt()
+	token, err := ec.decrypt(&dbInfo.ApiKey)
 	if err != nil {
 		return err
 	}

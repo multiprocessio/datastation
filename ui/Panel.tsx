@@ -18,14 +18,10 @@ import * as CSV from 'papaparse';
 import * as React from 'react';
 import { toString } from 'shape';
 import { MODE, MODE_FEATURES } from '../shared/constants';
+import { EVAL_ERRORS } from '../shared/errors';
 import log from '../shared/log';
 import { deepEquals } from '../shared/object';
-import {
-  PanelInfo,
-  PanelInfoType,
-  PanelResult,
-  PanelResultMeta,
-} from '../shared/state';
+import { PanelInfo, PanelInfoType, PanelResult } from '../shared/state';
 import { humanSize } from '../shared/text';
 import { panelRPC } from './asyncRPC';
 import { Alert } from './components/Alert';
@@ -111,7 +107,7 @@ function PreviewResults({
   panelId,
 }: {
   panelOut: 'preview' | 'stdout' | 'shape' | 'metadata';
-  results: PanelResultMeta & { metadata?: string };
+  results: PanelResult & { metadata?: string };
   panelId: string;
 }) {
   if (!results.lastRun) {
@@ -220,28 +216,49 @@ export function PanelPlayWarningWithLinks({
   return <Alert type="warning" children={children} />;
 }
 
+function PanelError({ panels, e }: { panels: Array<PanelInfo>; e: Error }) {
+  if (!e) {
+    return null;
+  }
+
+  if (EVAL_ERRORS.map((cls) => new (cls as any)().name).includes(e.name)) {
+    e = new PanelPlayWarning(e.message);
+  }
+
+  if (e instanceof PanelPlayWarning) {
+    return <PanelPlayWarningWithLinks panels={panels} msg={e.message} />;
+  }
+
+  return (
+    <Alert type="error">
+      <div>Error evaluating panel:</div>
+      <pre>
+        <code>{e.stack || e.message || String(e)}</code>
+      </pre>
+    </Alert>
+  );
+}
+
 export function Panel({
   panel,
   updatePanel,
   reevalPanel,
   panelIndex,
   removePanel,
-  movePanel,
   panels,
 }: {
   panel: PanelInfo;
-  updatePanel: (d: PanelInfo) => void;
-  panelResults: Array<PanelResultMeta>;
+  updatePanel: (d: PanelInfo, position?: number) => void;
+  panelResults: Array<PanelResult>;
   reevalPanel: (id: string) => void;
   panelIndex: number;
-  removePanel: (i: number) => void;
-  movePanel: (from: number, to: number) => void;
+  removePanel: (id: string) => void;
   panels: Array<PanelInfo>;
 }) {
   // Fall back to empty dict in case panel.type names ever change
   const panelUIDetails =
     PANEL_UI_DETAILS[panel.type] || PANEL_UI_DETAILS.literal;
-  const blank = panelUIDetails.factory();
+  const blank = panelUIDetails.factory(panel.pageId);
   blank.id = panel.id;
   blank.name = panel.name;
   const isBlank = deepEquals(panel, blank);
@@ -267,7 +284,7 @@ export function Panel({
   const [panelOut, setPanelOut] = React.useState<
     'preview' | 'stdout' | 'shape' | 'metadata'
   >('preview');
-  const results = panel.resultMeta || new PanelResultMeta();
+  const results = panel.resultMeta || new PanelResult();
 
   const panelRef = React.useRef(null);
   function keyboardShortcuts(e: React.KeyboardEvent) {
@@ -335,9 +352,7 @@ export function Panel({
               <Button
                 icon
                 disabled={panelIndex === 0}
-                onClick={() => {
-                  movePanel(panelIndex, panelIndex - 1);
-                }}
+                onClick={() => updatePanel(panel, panelIndex - 1)}
               >
                 <IconChevronUp />
               </Button>
@@ -346,9 +361,7 @@ export function Panel({
               <Button
                 icon
                 disabled={panelIndex === panels.length - 1}
-                onClick={() => {
-                  movePanel(panelIndex, panelIndex + 1);
-                }}
+                onClick={() => updatePanel(panel, panelIndex + 1)}
               >
                 <IconChevronDown />
               </Button>
@@ -358,7 +371,9 @@ export function Panel({
               value={panel.type}
               onChange={(value: string) => {
                 const panelType = value as PanelInfoType;
-                const newPanel = PANEL_UI_DETAILS[panelType].factory();
+                const newPanel = PANEL_UI_DETAILS[panelType].factory(
+                  panel.pageId
+                );
                 (panel as any)[panelType] = newPanel[panelType];
                 panel.type = panelType;
                 updatePanel(panel);
@@ -446,9 +461,13 @@ export function Panel({
               >
                 <Button
                   icon
-                  onClick={() =>
-                    killable ? killProcess() : reevalPanel(panel.id)
-                  }
+                  onClick={async () => {
+                    if (killable) {
+                      killProcess();
+                    }
+
+                    reevalPanel(panel.id);
+                  }}
                   type="primary"
                 >
                   {results.loading ? <IconPlayerPause /> : <IconPlayerPlay />}
@@ -493,7 +512,7 @@ export function Panel({
               </span>
               <span title="Delete Panel">
                 <Confirm
-                  onConfirm={() => removePanel(panelIndex)}
+                  onConfirm={() => removePanel(panel.id)}
                   message="delete this panel"
                   action="Delete"
                   render={(confirm: () => void) => (
@@ -532,25 +551,7 @@ export function Panel({
                         updatePanel={updatePanel}
                       />
                     )}
-                  {results.exception instanceof PanelPlayWarning ? (
-                    <PanelPlayWarningWithLinks
-                      panels={panels}
-                      msg={results.exception.message}
-                    />
-                  ) : (
-                    results.exception && (
-                      <Alert type="error">
-                        <div>Error evaluating panel:</div>
-                        <pre>
-                          <code>
-                            {results.exception.stack ||
-                              results.exception.message ||
-                              String(results.exception)}
-                          </code>
-                        </pre>
-                      </Alert>
-                    )
-                  )}
+                  <PanelError panels={panels} e={results.exception} />
                   {info}
                 </div>
                 {panelUIDetails.previewable && (

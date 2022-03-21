@@ -28,6 +28,7 @@ export async function evalColumnPanel(
   panels: Array<PanelInfo>
 ) {
   if (MODE === 'browser') {
+    const lastRun = new Date();
     const panelIndex = (panels || []).findIndex(function findIndex(p) {
       return p.id === panelSource;
     });
@@ -47,7 +48,10 @@ export async function evalColumnPanel(
         value: valueWithRequestedColumns,
         preview: preview(valueWithRequestedColumns),
         shape: s,
+        loading: false,
         stdout: '',
+        lastRun,
+        elapsed: new Date().valueOf() - lastRun.valueOf(),
         size: value ? JSON.stringify(value).length : 0,
         arrayCount: s.kind === 'array' ? (value || []).length : null,
         contentType: 'application/json',
@@ -263,8 +267,8 @@ export const tablePanel: PanelUIDetails<TablePanelInfo> = {
   details: TablePanelDetails,
   body: TablePanel,
   previewable: false,
-  factory: function () {
-    return new TablePanelInfo();
+  factory: function (pageId: string) {
+    return new TablePanelInfo(pageId);
   },
   hasStdout: false,
   info: null,

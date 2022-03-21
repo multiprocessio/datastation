@@ -17,11 +17,12 @@ import { FormGroup } from '../components/FormGroup';
 import { Input } from '../components/Input';
 import { Select } from '../components/Select';
 import { ServerPicker } from '../components/ServerPicker';
-import { ProjectContext } from '../ProjectStore';
+import { ProjectContext } from '../state';
 import { PanelBodyProps, PanelDetailsProps, PanelUIDetails } from './types';
 
 export async function evalHTTPPanel(panel: HTTPPanelInfo) {
   if (MODE === 'browser') {
+    const lastRun = new Date();
     const { value, contentType } = await request(
       (window as any).fetch,
       panel.http.http.method,
@@ -39,6 +40,9 @@ export async function evalHTTPPanel(panel: HTTPPanelInfo) {
       preview: preview(value),
       shape: s,
       stdout: '',
+      loading: false,
+      lastRun,
+      elapsed: new Date().valueOf() - lastRun.valueOf(),
     };
   }
 
@@ -193,7 +197,7 @@ export const httpPanel: PanelUIDetails<HTTPPanelInfo> = {
     !['PUT', 'POST', 'PATCH'].includes(panel.http.http.method.toUpperCase()),
   body: HTTPPanelBody,
   previewable: true,
-  factory: () => new HTTPPanelInfo(),
+  factory: (pageId: string) => new HTTPPanelInfo(pageId),
   info: HTTPInfo,
   hasStdout: false,
 };

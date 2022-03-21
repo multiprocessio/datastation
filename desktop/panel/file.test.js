@@ -47,7 +47,7 @@ for (const subprocessName of RUNNERS) {
       (subprocessName ? subprocessName.go || subprocessName.node : 'memory'),
     () => {
       test('correct result', () => {
-        const fp = new FilePanelInfo({
+        const fp = new FilePanelInfo(null, {
           name: path.join(testPath, 'unknown'),
         });
 
@@ -74,7 +74,7 @@ for (const subprocessName of RUNNERS) {
   );
 
   for (const userdataFileType of USERDATA_FILES) {
-    const fp = new FilePanelInfo({
+    const fp = new FilePanelInfo(null, {
       name: path.join(testPath, 'userdata.' + userdataFileType),
     });
 
@@ -121,7 +121,7 @@ for (const subprocessName of RUNNERS) {
   }
 
   for (const t of REGEXP_TESTS) {
-    const fp = new FilePanelInfo({
+    const fp = new FilePanelInfo(null, {
       name: path.join(testPathRoot, 'logs', t.filename),
       contentTypeInfo: t.contentTypeInfo,
     });
@@ -165,7 +165,7 @@ for (const subprocessName of RUNNERS) {
           const server = new ServerInfo({
             address: 'localhost',
           });
-          const fp = new FilePanelInfo({
+          const fp = new FilePanelInfo(null, {
             name: path.join(testPath, 'unknown'),
           });
           fp.serverId = server.id;
@@ -209,7 +209,7 @@ for (const subprocessName of RUNNERS) {
   for (const regression of regressions) {
     describe('regression: ' + regression.name, () => {
       test('correctness', () => {
-        const fp = new FilePanelInfo({
+        const fp = new FilePanelInfo(null, {
           name: regression.file,
         });
 

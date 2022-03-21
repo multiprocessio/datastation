@@ -4,7 +4,9 @@ import { APP_NAME, DEBUG, VERSION } from '../shared/constants';
 import log from '../shared/log';
 import '../shared/polyfill';
 import {
+  DISK_ROOT,
   DSPROJ_FLAG,
+  FS_BASE_FLAG,
   IS_DESKTOP_RUNNER,
   PANEL_FLAG,
   PANEL_META_FLAG,
@@ -15,7 +17,7 @@ import { openProjectHandler } from './project';
 import { RPCHandler, RPCPayload } from './rpc';
 import { ensureSigningKey } from './secret';
 import { loadSettings } from './settings';
-import { storeHandlers } from './store';
+import { Store } from './store';
 
 export function initialize({
   subprocess,
@@ -38,6 +40,11 @@ export function initialize({
 
     if (process.argv[i] === PANEL_FLAG) {
       panel = process.argv[i + 1];
+      continue;
+    }
+
+    if (process.argv[i] === FS_BASE_FLAG) {
+      DISK_ROOT.value = process.argv[i + 1];
       continue;
     }
 
@@ -132,5 +139,6 @@ if (IS_DESKTOP_RUNNER) {
   configureLogger();
   log.info(APP_NAME + ' Panel Runner', VERSION, DEBUG ? 'DEBUG' : '');
 
-  main(storeHandlers);
+  const store = new Store();
+  main(store.getHandlers());
 }

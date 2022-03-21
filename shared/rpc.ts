@@ -1,11 +1,52 @@
 import { Settings } from './settings';
-import { ProjectState } from './state';
+import {
+  ConnectorInfo,
+  Dashboard,
+  Export,
+  PanelInfo,
+  ProjectPage,
+  ProjectState,
+  ServerInfo,
+} from './state';
 
 export type GetProjectRequest = { projectId: string };
 export type GetProjectResponse = ProjectState | null;
 
-export type UpdateProjectRequest = ProjectState;
-export type UpdateProjectResponse = void;
+export type UpdatePanelRequest = {
+  position: number;
+  data: PanelInfo;
+};
+export type UpdatePanelResponse = void;
+
+export type UpdateConnectorRequest = {
+  position: number;
+  data: ConnectorInfo;
+};
+export type UpdateConnectorResponse = void;
+
+export type UpdateServerRequest = {
+  position: number;
+  data: ServerInfo;
+};
+export type UpdateServerResponse = void;
+
+export type UpdatePageRequest = {
+  position: number;
+  data: ProjectPage;
+};
+export type UpdatePageResponse = void;
+
+export type DeletePageRequest = { id: string };
+export type DeletePageResponse = void;
+
+export type DeletePanelRequest = { id: string };
+export type DeletePanelResponse = void;
+
+export type DeleteServerRequest = { id: string };
+export type DeleteServerResponse = void;
+
+export type DeleteConnectorRequest = { id: string };
+export type DeleteConnectorResponse = void;
 
 export type MakeProjectRequest = { projectId: string };
 export type MakeProjectResponse = void;
@@ -22,18 +63,48 @@ export type UpdateSettingsResponse = void;
 export type GetSettingsRequest = void;
 export type GetSettingsResponse = Settings;
 
-export type PanelBody = { panelId: string };
+export type UpdateExportRequest = Export;
+export type UpdateExportResponse = void;
+
+export type DeleteExportRequest = { id: string };
+export type DeleteExportResponse = void;
+
+export type GetExportsRequest = void;
+export type GetExportsResponse = Array<Export>;
+
+export type UpdateDashboardRequest = Dashboard;
+export type UpdateDashboardResponse = void;
+
+export type DeleteDashboardRequest = { id: string };
+export type DeleteDashboardResponse = void;
+
+export type GetDashboardsRequest = void;
+export type GetDashboardsResponse = Array<Dashboard>;
 
 export type StoreEndpoint =
   | 'getProjects'
   | 'makeProject'
+  | 'updatePanel'
+  | 'updatePage'
   | 'updateProject'
+  | 'updateConnector'
+  | 'updateServer'
+  | 'deletePanel'
+  | 'deletePage'
+  | 'deleteConnector'
+  | 'deleteServer'
   | 'getProject'
   | 'openProject'
   | 'getSettings'
   | 'updateSettings'
-  | 'updateResults';
+  | 'getDashboards'
+  | 'deleteDashboard'
+  | 'updateDashboard'
+  | 'getExports'
+  | 'deleteExport'
+  | 'updateExport';
 
+export type PanelBody = { panelId: string };
 export type PanelEndpoint = 'killProcess' | 'fetchResults' | 'eval';
 
 export type Endpoint = PanelEndpoint | StoreEndpoint;

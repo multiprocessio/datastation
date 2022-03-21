@@ -5,7 +5,7 @@ const { INPUT_SYNC_PERIOD } = require('../components/Input');
 const enzyme = require('enzyme');
 const {
   ProjectState,
-  PanelResultMeta,
+  PanelResult,
   ProjectPage,
   LiteralPanelInfo,
   FilterAggregatePanelInfo,
@@ -15,7 +15,7 @@ const { FilterAggregatePanelDetails } = require('./FilterAggregatePanel');
 const project = new ProjectState();
 project.pages = [new ProjectPage()];
 const lp = new LiteralPanelInfo();
-const fp = new FilterAggregatePanelInfo({
+const fp = new FilterAggregatePanelInfo(null, {
   panelSource: lp.info,
   aggregateType: 'sum',
 });

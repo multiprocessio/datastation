@@ -8,18 +8,18 @@ import (
 	"github.com/gocql/gocql"
 )
 
-func evalCQL(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, server *ServerInfo, w io.Writer) error {
+func (ec EvalContext) evalCQL(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, server *ServerInfo, w io.Writer) error {
 	_, host, port, _, err := getHTTPHostPort(dbInfo.Address)
 	if err != nil {
 		return err
 	}
 
-	password, err := dbInfo.Password.decrypt()
+	password, err := ec.decrypt(&dbInfo.Password)
 	if err != nil {
 		return err
 	}
 
-	return withRemoteConnection(server, host, port, func(proxyHost, proxyPort string) error {
+	return ec.withRemoteConnection(server, host, port, func(proxyHost, proxyPort string) error {
 		cluster := gocql.NewCluster(proxyHost + ":" + proxyPort)
 		cluster.Keyspace = dbInfo.Database
 		cluster.Consistency = gocql.Quorum

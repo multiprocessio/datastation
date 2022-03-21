@@ -21,7 +21,7 @@ type elasticsearchResponse struct {
 	} `json:"hits"`
 }
 
-func evalElasticsearch(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, server *ServerInfo, w io.Writer) error {
+func (ec EvalContext) evalElasticsearch(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, server *ServerInfo, w io.Writer) error {
 	indexes := strings.Split(panel.DatabasePanelInfo.Database.Table, ",")
 	for i := range indexes {
 		indexes[i] = strings.TrimSpace(indexes[i])
@@ -32,17 +32,17 @@ func evalElasticsearch(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, s
 		return err
 	}
 
-	password, err := dbInfo.Password.decrypt()
+	password, err := ec.decrypt(&dbInfo.Password)
 	if err != nil {
 		return err
 	}
 
-	token, err := dbInfo.ApiKey.decrypt()
+	token, err := ec.decrypt(&dbInfo.ApiKey)
 	if err != nil {
 		return err
 	}
 
-	return withRemoteConnection(server, host, port, func(proxyHost, proxyPort string) error {
+	return ec.withRemoteConnection(server, host, port, func(proxyHost, proxyPort string) error {
 		url := makeHTTPUrl(tls, proxyHost, proxyPort, rest)
 		cfg := elasticsearch.Config{
 			Addresses: []string{url},

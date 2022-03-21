@@ -122,13 +122,18 @@ func getTransport(customCaCerts []string) (*http.Transport, error) {
 	}
 
 	for _, customCaCert := range customCaCerts {
-		cert, err := ioutil.ReadFile(customCaCert)
+		f := strings.TrimSpace(customCaCert)
+		if f == "" {
+			continue
+		}
+
+		cert, err := ioutil.ReadFile(f)
 		if err != nil {
 			return nil, edsef("Could not add custom CA cert: %s", err)
 		}
 
 		if ok := rootCAs.AppendCertsFromPEM(cert); !ok {
-			Logln("Failed to add custom CA cert: %s", customCaCert)
+			Logln("Failed to add custom CA cert: %s", f)
 		}
 	}
 
@@ -192,7 +197,7 @@ func (ec EvalContext) evalHTTPPanel(project *ProjectState, pageIndex int, panel 
 		customCaCerts = append(customCaCerts, caCert.File)
 	}
 
-	return withRemoteConnection(server, host, port, func(proxyHost, proxyPort string) error {
+	return ec.withRemoteConnection(server, host, port, func(proxyHost, proxyPort string) error {
 		url := makeHTTPUrl(tls, proxyHost, proxyPort, rest)
 		rsp, err := makeHTTPRequest(httpRequest{
 			url:     url,

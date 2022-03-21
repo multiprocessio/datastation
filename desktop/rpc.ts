@@ -2,19 +2,45 @@ import { IpcMain, IpcMainEvent } from 'electron';
 import { RPC_ASYNC_REQUEST, RPC_ASYNC_RESPONSE } from '../shared/constants';
 import log from '../shared/log';
 import {
+  DeleteConnectorRequest,
+  DeleteConnectorResponse,
+  DeleteDashboardRequest,
+  DeleteDashboardResponse,
+  DeleteExportRequest,
+  DeleteExportResponse,
+  DeletePageRequest,
+  DeletePageResponse,
+  DeletePanelRequest,
+  DeletePanelResponse,
+  DeleteServerRequest,
+  DeleteServerResponse,
   Endpoint,
+  GetDashboardsRequest,
+  GetDashboardsResponse,
+  GetExportsRequest,
+  GetExportsResponse,
   GetProjectRequest,
   GetProjectResponse,
+  GetProjectsRequest,
+  GetProjectsResponse,
   IPCRendererResponse,
   MakeProjectRequest,
   MakeProjectResponse,
-  UpdateProjectRequest,
-  UpdateProjectResponse,
+  UpdateConnectorRequest,
+  UpdateConnectorResponse,
+  UpdatePageRequest,
+  UpdatePageResponse,
+  UpdatePanelRequest,
+  UpdatePanelResponse,
+  UpdateServerRequest,
+  UpdateServerResponse,
 } from '../shared/rpc';
+
+export type InternalEndpoint = 'updatePanelResult';
 
 export interface RPCPayload {
   messageNumber: number;
-  resource: Endpoint;
+  resource: Endpoint | InternalEndpoint;
   projectId: string;
   body: any;
 }
@@ -26,7 +52,7 @@ export type DispatchPayload = Omit<RPCPayload, 'messageNumber' | 'body'> & {
 export type Dispatch = (payload: DispatchPayload) => Promise<any>;
 
 export interface RPCHandler<Request, Response> {
-  resource: Endpoint;
+  resource: Endpoint | InternalEndpoint;
   handler: (
     projectId: string,
     body: Request,
@@ -40,13 +66,61 @@ export type GetProjectHandler = RPCHandler<
   GetProjectRequest,
   GetProjectResponse
 >;
-export type UpdateProjectHandler = RPCHandler<
-  UpdateProjectRequest,
-  UpdateProjectResponse
+export type GetProjectsHandler = RPCHandler<
+  GetProjectsRequest,
+  GetProjectsResponse
 >;
 export type MakeProjectHandler = RPCHandler<
   MakeProjectRequest,
   MakeProjectResponse
+>;
+export type UpdateServerHandler = RPCHandler<
+  UpdateServerRequest,
+  UpdateServerResponse
+>;
+export type UpdateConnectorHandler = RPCHandler<
+  UpdateConnectorRequest,
+  UpdateConnectorResponse
+>;
+export type UpdatePageHandler = RPCHandler<
+  UpdatePageRequest,
+  UpdatePageResponse
+>;
+export type UpdatePanelHandler = RPCHandler<
+  UpdatePanelRequest,
+  UpdatePanelResponse
+>;
+export type DeleteServerHandler = RPCHandler<
+  DeleteServerRequest,
+  DeleteServerResponse
+>;
+export type DeleteConnectorHandler = RPCHandler<
+  DeleteConnectorRequest,
+  DeleteConnectorResponse
+>;
+export type DeletePageHandler = RPCHandler<
+  DeletePageRequest,
+  DeletePageResponse
+>;
+export type DeletePanelHandler = RPCHandler<
+  DeletePanelRequest,
+  DeletePanelResponse
+>;
+export type GetDashboardsHandler = RPCHandler<
+  GetDashboardsRequest,
+  GetDashboardsResponse
+>;
+export type DeleteDashboardHandler = RPCHandler<
+  DeleteDashboardRequest,
+  DeleteDashboardResponse
+>;
+export type GetExportsHandler = RPCHandler<
+  GetExportsRequest,
+  GetExportsResponse
+>;
+export type DeleteExportHandler = RPCHandler<
+  DeleteExportRequest,
+  DeleteExportResponse
 >;
 
 // Stub to ensure msg is always typed

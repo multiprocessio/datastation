@@ -1,7 +1,6 @@
 package runner
 
 import (
-	"encoding/base64"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -9,11 +8,8 @@ import (
 	"net"
 	"net/url"
 	"os"
-	"path"
 	"strconv"
 	"strings"
-
-	"golang.org/x/crypto/nacl/secretbox"
 
 	"github.com/multiprocessio/go-json"
 
@@ -46,46 +42,15 @@ func getDatabaseHostPortExtra(raw, defaultPort string) (string, string, string, 
 }
 
 func debugObject(obj any) {
-	log.Printf("%#v\n", obj)
+	b, _ := jsonMarshal(obj)
+	log.Printf("%s\n", string(b))
 }
 
-func (e *Encrypt) decrypt() (string, error) {
-	if !e.Encrypted {
-		return e.Value, nil
-	}
-
-	if len(e.Value) == 0 {
-		return "", nil
-	}
-
-	v := e.Value
-	keyBytes, err := ioutil.ReadFile(path.Join(CONFIG_FS_BASE, ".signingKey"))
-	if err != nil {
-		return "", err
-	}
-
-	keyDecoded, err := base64.StdEncoding.DecodeString(string(keyBytes))
-	if err != nil {
-		return "", err
-	}
-	messageWithNonceDecoded, err := base64.StdEncoding.DecodeString(string(v))
-	if err != nil {
-		return "", err
-	}
-
-	var nonce [24]byte
-	copy(nonce[:24], messageWithNonceDecoded[0:24])
-	var key [32]byte
-	copy(key[:32], keyDecoded)
-
-	message := messageWithNonceDecoded[24:]
-
-	decrypted, ok := secretbox.Open(nil, message, &nonce, &key)
-	if !ok {
-		return "", edsef("NACL open failed")
-	}
-
-	return string(decrypted), nil
+var SQLITE_PRAGMAS = []string{
+	"journal_mode = WAL",
+	"synchronous = normal",
+	"temp_store = memory",
+	"mmap_size = 30000000000",
 }
 
 var defaultPorts = map[DatabaseConnectorInfoType]string{
@@ -146,13 +111,13 @@ var dbDriverOverride = map[DatabaseConnectorInfoType]string{
 	CockroachDatabase: "postgres",
 }
 
-func getGenericConnectionString(dbInfo DatabaseConnectorInfoDatabase) (string, string, error) {
+func (ec EvalContext) getGenericConnectionString(dbInfo DatabaseConnectorInfoDatabase) (string, string, error) {
 	u := getURLParts(dbInfo)
 	genericUserPass := ""
 	var pass string
 	if u.username != "" || dbInfo.Password.Value != "" {
 		var err error
-		pass, err = dbInfo.Password.decrypt()
+		pass, err = ec.decrypt(&dbInfo.Password)
 		if err != nil {
 			return "", "", err
 		}
@@ -186,9 +151,9 @@ func getGenericConnectionString(dbInfo DatabaseConnectorInfoDatabase) (string, s
 	return genericString, genericUserPass, nil
 }
 
-func getConnectionString(dbInfo DatabaseConnectorInfoDatabase) (string, string, error) {
+func (ec EvalContext) getConnectionString(dbInfo DatabaseConnectorInfoDatabase) (string, string, error) {
 	u := getURLParts(dbInfo)
-	genericString, genericUserPass, err := getGenericConnectionString(dbInfo)
+	genericString, genericUserPass, err := ec.getGenericConnectionString(dbInfo)
 	if err != nil {
 		return "", "", err
 	}
@@ -236,19 +201,19 @@ func getConnectionString(dbInfo DatabaseConnectorInfoDatabase) (string, string, 
 		// The Oracle driver we use is not cool with blank address
 		if dbInfo.Address == "" || dbInfo.Address[0] == ':' {
 			dbInfo.Address = "localhost"
-			genericString, _, _ = getGenericConnectionString(dbInfo)
+			genericString, _, _ = ec.getGenericConnectionString(dbInfo)
 		}
 		return "oracle", genericString, nil
 	case SnowflakeDatabase:
 		dbInfo.Address = dbInfo.Extra["account"]
-		genericString, _, _ = getGenericConnectionString(dbInfo)
+		genericString, _, _ = ec.getGenericConnectionString(dbInfo)
 		dsn := genericString[len("snowflake://"):] // Snowflake library doesn't use this prefix
 		return "snowflake", dsn, nil
 	case ClickHouseDatabase:
 		query := ""
 		if genericUserPass != "" {
 			// Already proven to be ok
-			pass, _ := dbInfo.Password.decrypt()
+			pass, _ := ec.decrypt(&dbInfo.Password)
 			query = fmt.Sprintf("username=%s&password=%s&", u.username, pass)
 		}
 
@@ -407,27 +372,27 @@ func (ec EvalContext) EvalDatabasePanel(
 
 	switch dbInfo.Type {
 	case ElasticsearchDatabase:
-		return evalElasticsearch(panel, dbInfo, server, w)
+		return ec.evalElasticsearch(panel, dbInfo, server, w)
 	case InfluxDatabase:
 		return ec.evalInfluxQL(panel, dbInfo, server, w)
 	case InfluxFluxDatabase:
-		return evalFlux(panel, dbInfo, server, w)
+		return ec.evalFlux(panel, dbInfo, server, w)
 	case PrometheusDatabase:
-		return evalPrometheus(panel, dbInfo, server, w)
+		return ec.evalPrometheus(panel, dbInfo, server, w)
 	case BigQueryDatabase:
-		return evalBigQuery(panel, dbInfo, w)
+		return ec.evalBigQuery(panel, dbInfo, w)
 	case SplunkDatabase:
 		return evalSplunk(panel, dbInfo, server, w)
 	case MongoDatabase:
-		return evalMongo(panel, dbInfo, server, w)
+		return ec.evalMongo(panel, dbInfo, server, w)
 	case CassandraDatabase, ScyllaDatabase:
-		return evalCQL(panel, dbInfo, server, w)
+		return ec.evalCQL(panel, dbInfo, server, w)
 	case AthenaDatabase:
-		return evalAthena(panel, dbInfo, w)
+		return ec.evalAthena(panel, dbInfo, w)
 	case GoogleSheetsDatabase:
-		return evalGoogleSheets(panel, dbInfo, w)
+		return ec.evalGoogleSheets(panel, dbInfo, w)
 	case AirtableDatabase:
-		return evalAirtable(panel, dbInfo, w)
+		return ec.evalAirtable(panel, dbInfo, w)
 	}
 
 	mangleInsert := defaultMangleInsert
@@ -463,7 +428,7 @@ func (ec EvalContext) EvalDatabasePanel(
 
 		defer os.Remove(tmp.Name())
 
-		err = remoteFileReader(*server, dbInfo.Database, func(r io.Reader) error {
+		err = ec.remoteFileReader(*server, dbInfo.Database, func(r io.Reader) error {
 			_, err := io.Copy(tmp, r)
 			return err
 		})
@@ -479,12 +444,12 @@ func (ec EvalContext) EvalDatabasePanel(
 		return err
 	}
 
-	return withRemoteConnection(server, host, port, func(proxyHost, proxyPort string) error {
+	return ec.withRemoteConnection(server, host, port, func(proxyHost, proxyPort string) error {
 		dbInfo.Address = proxyHost + ":" + proxyPort
 		if extra != "" {
 			dbInfo.Address += "?" + extra
 		}
-		vendor, connStr, err := getConnectionString(dbInfo)
+		vendor, connStr, err := ec.getConnectionString(dbInfo)
 		if err != nil {
 			return err
 		}
@@ -492,6 +457,15 @@ func (ec EvalContext) EvalDatabasePanel(
 		db, err := sqlx.Open(vendor, connStr)
 		if err != nil {
 			return err
+		}
+
+		if vendor == "sqlite3_extended" {
+			for _, pragma := range SQLITE_PRAGMAS {
+				_, err = db.Exec("PRAGMA " + pragma)
+				if err != nil {
+					return err
+				}
+			}
 		}
 
 		preparer := func(q string) (func([]any) error, func(), error) {

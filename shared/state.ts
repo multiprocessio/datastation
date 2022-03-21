@@ -14,8 +14,12 @@ export class PanelResult {
   size: number;
   contentType: string;
   elapsed?: number;
+  lastRun?: Date;
+  loading: boolean;
 
   constructor(defaults: Partial<PanelResult> = {}) {
+    this.lastRun = defaults.lastRun || null;
+    this.loading = defaults.loading || false;
     this.stdout = defaults.stdout || '';
     this.shape = defaults.shape || { kind: 'unknown' };
     this.preview = defaults.preview || '';
@@ -25,22 +29,11 @@ export class PanelResult {
     this.value = defaults.value || undefined;
     this.exception = defaults.exception || undefined;
   }
-}
 
-export class PanelResultMeta extends PanelResult {
-  lastRun: Date;
-  loading: boolean;
-
-  constructor(defaults: Partial<PanelResultMeta> = {}) {
-    super(defaults as PanelResult);
-    this.lastRun = defaults.lastRun || null;
-    this.loading = defaults.loading || false;
-  }
-
-  static fromJSON(raw: any): PanelResultMeta {
+  static fromJSON(raw: any): PanelResult {
     raw = raw || {};
     raw.loading = false;
-    const prm = mergeDeep(new PanelResultMeta(), raw);
+    const prm = mergeDeep(new PanelResult(), raw);
     prm.lastRun =
       typeof raw.lastRun === 'string'
         ? new Date(raw.lastRun)
@@ -56,6 +49,12 @@ export class Encrypt {
   constructor(value: string = '') {
     this.value = value;
     this.encrypted = false;
+  }
+
+  static Encrypted(value: string = '') {
+    const e = new Encrypt(value);
+    e.encrypted = true;
+    return e;
   }
 }
 
@@ -244,16 +243,23 @@ export class PanelInfo {
   name: string;
   id: string;
   serverId: string;
-  resultMeta: PanelResultMeta;
+  resultMeta: PanelResult;
   lastEdited: Date;
+  pageId: string;
 
-  constructor(type: PanelInfoType, name?: string, content?: string) {
+  constructor(
+    type: PanelInfoType,
+    pageId: string,
+    name?: string,
+    content?: string
+  ) {
     this.content = content || '';
     this.type = type;
     this.name = name || '';
     this.id = uuid.v4();
-    this.resultMeta = new PanelResultMeta();
+    this.resultMeta = new PanelResult();
     this.lastEdited = new Date();
+    this.pageId = pageId;
   }
 
   static fromJSON(raw: any): PanelInfo {
@@ -266,41 +272,44 @@ export class PanelInfo {
       delete raw.sql;
     }
 
-    let pit: PanelInfo = mergeDeep(new PanelInfo(raw.type || 'literal'), raw);
+    let pit: PanelInfo = mergeDeep(
+      new PanelInfo(raw.type || 'literal', raw.pageId),
+      raw
+    );
 
     pit.lastEdited =
-      typeof raw.lastEdited === 'string'
+      (typeof raw.lastEdited === 'string'
         ? new Date(raw.lastEdited)
-        : raw.lastEdited || pit.lastEdited;
+        : raw.lastEdited) || pit.lastEdited;
 
     switch (pit.type) {
       case 'table':
-        pit = mergeDeep(new TablePanelInfo(), pit);
+        pit = mergeDeep(new TablePanelInfo(pit.pageId), pit);
         break;
       case 'http':
-        pit = mergeDeep(new HTTPPanelInfo(), pit);
+        pit = mergeDeep(new HTTPPanelInfo(pit.pageId), pit);
         break;
       case 'graph':
-        pit = mergeDeep(new GraphPanelInfo(), pit);
+        pit = mergeDeep(new GraphPanelInfo(pit.pageId), pit);
         break;
       case 'program':
-        pit = mergeDeep(new ProgramPanelInfo(), pit);
+        pit = mergeDeep(new ProgramPanelInfo(pit.pageId), pit);
         break;
       case 'literal':
-        pit = mergeDeep(new LiteralPanelInfo(), pit);
+        pit = mergeDeep(new LiteralPanelInfo(pit.pageId), pit);
         break;
       case 'database':
-        pit = mergeDeep(new DatabasePanelInfo(), pit);
+        pit = mergeDeep(new DatabasePanelInfo(pit.pageId), pit);
         break;
       case 'file':
-        pit = mergeDeep(new FilePanelInfo(), pit);
+        pit = mergeDeep(new FilePanelInfo(pit.pageId), pit);
         break;
       case 'filagg':
-        pit = mergeDeep(new FilterAggregatePanelInfo(), pit);
+        pit = mergeDeep(new FilterAggregatePanelInfo(pit.pageId), pit);
         break;
     }
 
-    pit.resultMeta = PanelResultMeta.fromJSON(raw.resultMeta);
+    pit.resultMeta = PanelResult.fromJSON(raw.resultMeta);
     return pit;
   }
 }
@@ -310,14 +319,17 @@ export class ProgramPanelInfo extends PanelInfo {
     type: SupportedLanguages;
   };
 
-  constructor({
-    name,
-    type,
-    content,
-  }: Partial<
-    ProgramPanelInfo['program'] & { content: string; name: string }
-  > = {}) {
-    super('program', name || '', content || '');
+  constructor(
+    pageId: string,
+    {
+      name,
+      type,
+      content,
+    }: Partial<
+      ProgramPanelInfo['program'] & { content: string; name: string }
+    > = {}
+  ) {
+    super('program', pageId, name || '', content || '');
     this.program = {
       type: type || 'python',
     };
@@ -347,11 +359,12 @@ export class GraphPanelInfo extends PanelInfo {
   };
 
   constructor(
+    pageId: string,
     defaults: Partial<
       GraphPanelInfo['graph'] & { content: string; name: string }
     > = {}
   ) {
-    super('graph', defaults.name, defaults.content);
+    super('graph', pageId, defaults.name, defaults.content);
     this.graph = {
       panelSource: defaults.panelSource || '',
       x: defaults.x || '',
@@ -430,11 +443,12 @@ export class DatabasePanelInfo extends PanelInfo {
   };
 
   constructor(
+    pageId: string,
     panel: Partial<
       DatabasePanelInfo['database'] & { content: string; name: string }
     > = {}
   ) {
-    super('database', panel.name || '', panel.content || '');
+    super('database', pageId, panel.name || '', panel.content || '');
     this.database = {
       connectorId: panel.connectorId || '',
       range: panel.range || {
@@ -452,8 +466,13 @@ export class DatabasePanelInfo extends PanelInfo {
 export class HTTPPanelInfo extends PanelInfo {
   http: HTTPConnectorInfo;
 
-  constructor(name?: string, http?: HTTPConnectorInfo, content?: string) {
-    super('http', name, content);
+  constructor(
+    pageId: string,
+    name?: string,
+    http?: HTTPConnectorInfo,
+    content?: string
+  ) {
+    super('http', pageId, name, content);
     this.http = http || new HTTPConnectorInfo();
   }
 }
@@ -472,11 +491,12 @@ export class TablePanelInfo extends PanelInfo {
   };
 
   constructor(
+    pageId: string,
     defaults: Partial<
       TablePanelInfo['table'] & { content: string; name: string }
     > = {}
   ) {
-    super('table', defaults.name, defaults.content);
+    super('table', pageId, defaults.name, defaults.content);
     this.table = {
       columns: defaults.columns || [],
       panelSource: defaults.panelSource || '',
@@ -509,9 +529,10 @@ export class FilterAggregatePanelInfo extends PanelInfo {
   };
 
   constructor(
+    pageId: string,
     panel: Partial<FilterAggregatePanelInfo['filagg'] & { name: string }> = {}
   ) {
-    super('filagg', panel.name || '', '');
+    super('filagg', pageId, panel.name || '', '');
     this.filagg = {
       panelSource: panel.panelSource || '',
       filter: panel.filter || '',
@@ -539,9 +560,10 @@ export class FilePanelInfo extends PanelInfo {
   };
 
   constructor(
+    pageId: string,
     panel: Partial<FilePanelInfo['file'] & { panelName: string }> = {}
   ) {
-    super('file', panel.panelName, '');
+    super('file', pageId, panel.panelName, '');
     this.file = {
       name: panel.name || '',
       content: panel.content || new ArrayBuffer(0),
@@ -555,71 +577,78 @@ export class LiteralPanelInfo extends PanelInfo {
     contentTypeInfo: ContentTypeInfo;
   };
 
-  constructor({
-    name,
-    content,
-    contentTypeInfo,
-  }: Partial<
-    LiteralPanelInfo['literal'] & { content: string; name: string }
-  > = {}) {
-    super('literal', name || '', content || '');
+  constructor(
+    pageId: string,
+    {
+      name,
+      content,
+      contentTypeInfo,
+    }: Partial<
+      LiteralPanelInfo['literal'] & { content: string; name: string }
+    > = {}
+  ) {
+    super('literal', pageId, name || '', content || '');
     this.literal = {
       contentTypeInfo: contentTypeInfo || new ContentTypeInfo(),
     };
   }
 }
 
-export class ScheduledExport {
-  period: 'day' | 'week' | 'month';
-  name: string;
+export class DashboardPanel {
   id: string;
-  destination: {
-    type: 'email';
-    from: string;
-    recipients: string;
-    server: string;
-    username: string;
-    password_encrypt: Encrypt;
-  };
-
-  constructor(defaults: Partial<ScheduledExport> = {}) {
-    this.period = defaults.period || 'day';
-    this.name = defaults.name || 'DataStation Export';
-    this.destination = {
-      ...defaults.destination,
-    };
-    this.destination.type = this.destination.type || 'email';
-    // In preparation for supporting other types
-    if (this.destination.type === 'email') {
-      this.destination.from || this.destination.from || '';
-      this.destination.recipients = this.destination.recipients || '';
-      this.destination.server = this.destination.server || '';
-      this.destination.username = this.destination.username || '';
-      this.destination.password_encrypt =
-        this.destination.password_encrypt || new Encrypt('');
-    }
-
-    this.id = uuid.v4();
-  }
+  panelId: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
 }
 
 export type ProjectPageVisibility = 'no-link' | 'private-link' | 'public-link';
 
-export class ProjectPage {
-  panels: Array<PanelInfo>;
-  schedules: Array<ScheduledExport>;
+export class Dashboard {
+  id: string;
+  disabled: boolean;
   refreshPeriod: number;
   visibility: ProjectPageVisibility;
+  name: string;
+  panels: Array<{ name: string; id: string }>;
+  exports: Array<{ name: string; id: string }>;
+}
+
+// For exports specifically
+export type Destination = { id: string } & {
+  // Leaves room for other destination types in the future
+  type: 'email';
+  from: string;
+  recipients: string;
+  server: string;
+  username: string;
+  password_encrypt: Encrypt;
+};
+
+export class Export {
+  period: 'day' | 'week' | 'month';
+  disabled: boolean;
+  name: string;
+  id: string;
+  destinations: Array<Destination>;
+
+  constructor(defaults: Partial<Export> = {}) {
+    this.period = defaults.period || 'day';
+    this.name = defaults.name || 'DataStation Export';
+    this.id = uuid.v4();
+  }
+}
+
+export class ProjectPage {
+  panels: Array<PanelInfo>;
   name: string;
   id: string;
 
   constructor(name?: string, panels?: Array<PanelInfo>) {
     this.name = name || '';
     this.panels = panels || [];
-    this.schedules = [];
     this.id = uuid.v4();
-    this.visibility = 'no-link';
-    this.refreshPeriod = 60 * 60;
   }
 
   static fromJSON(raw: any): ProjectPage {
@@ -628,9 +657,6 @@ export class ProjectPage {
     pp.panels = (raw.panels || []).map(PanelInfo.fromJSON);
     pp.name = raw.name;
     pp.id = raw.id || uuid.v4();
-    pp.schedules = raw.schedules || [];
-    pp.visibility = raw.visibility || pp.visibility;
-    pp.refreshPeriod = raw.refreshPeriod || pp.refreshPeriod;
     return pp;
   }
 }
@@ -725,26 +751,28 @@ export class ProjectState {
 }
 
 export const DEFAULT_PROJECT: ProjectState = (() => {
-  const ppi = new ProgramPanelInfo({
+  const page = new ProjectPage('CSV Discovery Example');
+
+  const ppi = new ProgramPanelInfo(page.id, {
     name: 'Transform with SQL',
     type: 'sql',
     content: `SELECT name, age+5 AS age FROM DM_getPanel('Raw CSV Text');`,
   });
 
-  const gpi = new GraphPanelInfo({ name: 'Display' });
+  const gpi = new GraphPanelInfo(page.id, { name: 'Display' });
   gpi.graph.ys = [{ field: 'age', label: 'Age' }];
   gpi.graph.x = 'name';
   gpi.graph.panelSource = ppi.id;
 
-  return new ProjectState('Example project', [
-    new ProjectPage('CSV Discovery Example', [
-      new LiteralPanelInfo({
-        name: 'Raw CSV Text',
-        content: 'name,age\nMorgan,12\nJames,17',
-        contentTypeInfo: new ContentTypeInfo('text/csv'),
-      }),
-      ppi,
-      gpi,
-    ]),
-  ]);
+  page.panels = [
+    new LiteralPanelInfo(page.id, {
+      name: 'Raw CSV Text',
+      content: 'name,age\nMorgan,12\nJames,17',
+      contentTypeInfo: new ContentTypeInfo('text/csv'),
+    }),
+    ppi,
+    gpi,
+  ];
+
+  return new ProjectState('Example project', [page]);
 })();

@@ -64,6 +64,7 @@ export async function evalFilterAggregatePanel(
   panels: Array<PanelInfo>
 ) {
   if (MODE === 'browser') {
+    const lastRun = new Date();
     const panelIndex = (panels || []).findIndex(
       (p) => p.id === panel.filagg.panelSource
     );
@@ -93,6 +94,9 @@ export async function evalFilterAggregatePanel(
       arrayCount: s.kind === 'array' ? (res.value || []).length : null,
       contentType: 'application/json',
       shape: s,
+      loading: false,
+      lastRun,
+      elapsed: new Date().valueOf() - lastRun.valueOf(),
     };
   }
 
@@ -303,7 +307,7 @@ export const filaggPanel: PanelUIDetails<FilterAggregatePanelInfo> = {
   details: FilterAggregatePanelDetails,
   body: null,
   previewable: true,
-  factory: () => new FilterAggregatePanelInfo(),
+  factory: (pageId: string) => new FilterAggregatePanelInfo(pageId),
   info: null,
   hasStdout: false,
 };

@@ -1,7 +1,6 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { App } from './app';
-import { ExternalDashboard } from './ExternalDashboard';
 
 // SOURCE: https://stackoverflow.com/a/7995898/1507139
 const isMobile = navigator.userAgent.match(
@@ -11,7 +10,7 @@ const isMobile = navigator.userAgent.match(
 function index() {
   const root = document.getElementById('root');
   if (document.location.pathname.startsWith('/dashboard')) {
-    ReactDOM.render(<ExternalDashboard />, root);
+    //ReactDOM.render(<ExternalDashboard />, root);
     return;
   }
 

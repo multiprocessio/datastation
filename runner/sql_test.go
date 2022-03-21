@@ -206,6 +206,15 @@ func Test_getObjectAtPath(t *testing.T) {
 	}
 }
 
+func makeTestEvalContext() (EvalContext, func()) {
+	f, _ := ioutil.TempDir("", "datastation-unittest-space")
+
+	ec := NewEvalContext(*DefaultSettings, f)
+	return ec, func() {
+		os.Remove(f)
+	}
+}
+
 func Test_sqlIngest_e2e(t *testing.T) {
 	tests := []struct {
 		json      string
@@ -255,6 +264,9 @@ func Test_sqlIngest_e2e(t *testing.T) {
 	assert.Nil(t, err)
 	defer os.Remove(projectTmp.Name())
 
+	ec, cleanup := makeTestEvalContext()
+	defer cleanup()
+
 	for _, test := range tests {
 		project := &ProjectState{
 			Id: projectTmp.Name(),
@@ -298,7 +310,6 @@ func Test_sqlIngest_e2e(t *testing.T) {
 			},
 		}
 
-		ec := EvalContext{}
 		err = ec.EvalDatabasePanel(project, 0, panel2, func(projectId, panelId string) (chan map[string]any, error) {
 			return loadJSONArrayFile(readFile.Name())
 		})

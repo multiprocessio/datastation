@@ -10,13 +10,11 @@ import { VENDORS } from './connectors';
 
 export function ConnectorList({
   state,
-  addConnector,
   updateConnector,
   deleteConnector,
 }: {
   state: ProjectState;
-  addConnector: (dc: ConnectorInfo) => void;
-  updateConnector: (id: string, dc: ConnectorInfo) => void;
+  updateConnector: (dc: ConnectorInfo, position: number) => void;
   deleteConnector: (id: string) => void;
 }) {
   const groupedConnectors = Object.keys(VENDORS)
@@ -37,13 +35,11 @@ export function ConnectorList({
       {groupedConnectors.map((v) => (
         <React.Fragment key={v.name}>
           <small className="connector-group text-muted">{v.name}</small>
-          {v.connectors.map((dc: ConnectorInfo) => (
+          {v.connectors.map((dc: ConnectorInfo, i) => (
             <Connector
               key={dc.id}
               connector={dc}
-              updateConnector={(dc: ConnectorInfo) =>
-                updateConnector(dc.id, dc)
-              }
+              updateConnector={(dc: ConnectorInfo) => updateConnector(dc, i)}
               deleteConnector={() => deleteConnector(dc.id)}
             />
           ))}
@@ -52,7 +48,7 @@ export function ConnectorList({
       <div className="text-center">
         <Button
           onClick={() => {
-            addConnector(new DatabaseConnectorInfo());
+            updateConnector(new DatabaseConnectorInfo(), -1);
           }}
         >
           Add Data Source

@@ -16,9 +16,16 @@ func main() {
 	panelId := ""
 	panelMetaOut := ""
 	settingsFile := ""
+	fsBase := runner.DEFAULT_FS_BASE
 
 	args := os.Args
 	for i := 0; i < len(args)-1; i++ {
+		if args[i] == "--fsbase" {
+			fsBase = args[i+1]
+			i++
+			continue
+		}
+
 		if args[i] == "--dsproj" {
 			projectId = args[i+1]
 			i++
@@ -66,7 +73,7 @@ func main() {
 		settings = runner.DefaultSettings
 	}
 
-	ec := runner.NewEvalContext(*settings, runner.DEFAULT_FS_BASE)
+	ec := runner.NewEvalContext(*settings, fsBase)
 
 	err = ec.Eval(projectId, panelId)
 	if err != nil {

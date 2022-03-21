@@ -3,7 +3,7 @@ const { act } = require('react-dom/test-utils');
 const enzyme = require('enzyme');
 const {
   ProjectState,
-  PanelResultMeta,
+  PanelResult,
   ProjectPage,
   LiteralPanelInfo,
   TablePanelInfo,
@@ -13,7 +13,7 @@ const { TablePanel, TablePanelDetails } = require('./TablePanel');
 const project = new ProjectState();
 project.pages = [new ProjectPage()];
 const lp = new LiteralPanelInfo();
-const tp = new TablePanelInfo({
+const tp = new TablePanelInfo(null, {
   panelSource: lp.info,
   columns: [
     { field: 'name', label: 'Name' },
@@ -34,7 +34,7 @@ test('shows table panel details', async () => {
 });
 
 test('shows filled table panel', async () => {
-  tp.resultMeta = new PanelResultMeta({
+  tp.resultMeta = new PanelResult({
     value: [
       { name: 'Nora', age: 33 },
       { name: 'Kay', age: 20 },

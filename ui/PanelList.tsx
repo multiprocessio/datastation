@@ -4,7 +4,7 @@ import { ArrayShape, ObjectShape } from 'shape';
 import {
   GraphPanelInfo,
   PanelInfo,
-  PanelResultMeta,
+  PanelResult,
   ProgramPanelInfo,
   ProjectPage,
   TablePanelInfo,
@@ -18,42 +18,32 @@ import {
 } from './components/FieldPicker';
 import { Panel, VISUAL_PANELS } from './Panel';
 import { PANEL_GROUPS, PANEL_UI_DETAILS } from './panels';
+import { ProjectContext } from './state';
 import { UrlStateContext } from './urlState';
 
 export function PanelList({
   page,
-  updatePage,
   reevalPanel,
   panelResults,
 }: {
   page: ProjectPage;
-  updatePage: (page: ProjectPage) => void;
-  panelResults: Array<PanelResultMeta>;
+  pageIndex: number;
+  panelResults: Array<PanelResult>;
   reevalPanel: (panelId: string, reset?: boolean) => void;
 }) {
-  function movePanel(from: number, to: number) {
-    const panel = page.panels[from];
-    page.panels.splice(from, 1);
-    page.panels.splice(to, 0, panel);
-    updatePage(page);
-  }
+  const { crud } = React.useContext(ProjectContext);
 
-  function removePanel(at: number) {
-    page.panels.splice(at, 1);
-    updatePage(page);
-  }
+  async function updatePanel(panel: PanelInfo, position?: number) {
+    const index =
+      position === undefined
+        ? page.panels.findIndex((p) => p.id === panel.id)
+        : position;
+    await crud.updatePanel(panel, index);
 
-  function updatePanel(page: ProjectPage, panelId: string) {
-    return (panel: PanelInfo) => {
-      panel.lastEdited = new Date();
-      const panelIndex = page.panels.findIndex((p) => p.id === panelId);
-      page.panels[panelIndex] = panel;
-      updatePage(page);
-
-      if (VISUAL_PANELS.includes(panel.type)) {
-        reevalPanel(panel.id);
-      }
-    };
+    if (VISUAL_PANELS.includes(panel.type)) {
+      // Give time before re-evaling
+      setTimeout(() => reevalPanel(panel.id), 300);
+    }
   }
 
   function newPanel(panelIndex: number) {
@@ -84,14 +74,14 @@ export function PanelList({
       let next: PanelInfo;
       const o = (panel.resultMeta.shape as ArrayShape).children as ObjectShape;
       if (type === 'graph') {
-        next = new GraphPanelInfo({
+        next = new GraphPanelInfo(page.id, {
           name: prefix + ' ' + panel.name,
           panelSource: panel.id,
           x: firstString,
           ys: [{ field: firstNumber, label: firstNumber }],
         });
       } else {
-        next = new TablePanelInfo({
+        next = new TablePanelInfo(page.id, {
           name: prefix + ' ' + panel.name,
           panelSource: panel.id,
           columns: flattenObjectFields(o).map(([field]) => ({
@@ -101,10 +91,7 @@ export function PanelList({
         });
       }
 
-      page.panels.splice(panelIndex + 1, 0, next);
-      updatePage(page);
-      // Give time for write before evalling
-      setTimeout(() => reevalPanel(next.id), 300);
+      updatePanel(next, panelIndex + 1);
     }
 
     const offerToTable =
@@ -116,12 +103,11 @@ export function PanelList({
       <div className="new-panel">
         <Button
           onClick={() => {
-            const panel = new ProgramPanelInfo({
+            const panel = new ProgramPanelInfo(page.id, {
               name: `Untitled panel #${page.panels.length + 1}`,
               type: 'python',
             });
-            page.panels.splice(panelIndex + 1, 0, panel);
-            updatePage(page);
+            updatePanel(panel, panelIndex + 1);
           }}
           options={PANEL_GROUPS.map((group) => (
             <optgroup label={group.label} key={group.label}>
@@ -167,12 +153,11 @@ export function PanelList({
     return (
       <Panel
         panel={panel}
-        updatePanel={updatePanel(page, panel.id)}
+        updatePanel={updatePanel}
         panelResults={panelResults}
         reevalPanel={reevalPanel}
         panelIndex={fullScreenIndex}
-        movePanel={movePanel}
-        removePanel={removePanel}
+        removePanel={crud.deletePanel}
         panels={page.panels}
       />
     );
@@ -185,12 +170,11 @@ export function PanelList({
         <ErrorBoundary key={panel.id}>
           <Panel
             panel={panel}
-            updatePanel={updatePanel(page, panel.id)}
+            updatePanel={updatePanel}
             panelResults={panelResults}
             reevalPanel={reevalPanel}
             panelIndex={panelIndex}
-            movePanel={movePanel}
-            removePanel={removePanel}
+            removePanel={crud.deletePanel}
             panels={page.panels}
           />
           {newPanel(panelIndex)}

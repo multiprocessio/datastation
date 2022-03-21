@@ -3,7 +3,7 @@ const { act } = require('react-dom/test-utils');
 const enzyme = require('enzyme');
 const {
   ProjectState,
-  PanelResultMeta,
+  PanelResult,
   ProjectPage,
   LiteralPanelInfo,
   GraphPanelInfo,
@@ -13,7 +13,7 @@ const { GraphPanel, GraphPanelDetails } = require('./GraphPanel');
 const project = new ProjectState();
 project.pages = [new ProjectPage()];
 const lp = new LiteralPanelInfo();
-const gp = new GraphPanelInfo({
+const gp = new GraphPanelInfo(null, {
   panelSource: lp.info,
   x: 'name',
   ys: [{ field: 'age', label: 'Age' }],
@@ -32,7 +32,7 @@ test('shows graph panel details', async () => {
 });
 
 test('shows filled graph panel', async () => {
-  gp.resultMeta = new PanelResultMeta({
+  gp.resultMeta = new PanelResult({
     value: [
       { name: 'Nora', age: 33 },
       { name: 'Kay', age: 20 },

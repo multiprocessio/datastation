@@ -9,13 +9,14 @@ import { ContentTypePicker } from '../components/ContentTypePicker';
 import { FileInput } from '../components/FileInput';
 import { FormGroup } from '../components/FormGroup';
 import { ServerPicker } from '../components/ServerPicker';
-import { ProjectContext } from '../ProjectStore';
+import { ProjectContext } from '../state';
 import { PanelDetailsProps, PanelUIDetails } from './types';
 
 export async function evalFilePanel(
   panel: FilePanelInfo
 ): Promise<PanelResult> {
   if (MODE === 'browser') {
+    const lastRun = new Date();
     const { value, contentType } = await parseArrayBuffer(
       panel.file.contentTypeInfo,
       panel.file.name,
@@ -23,7 +24,10 @@ export async function evalFilePanel(
     );
     const s = shape(value);
     return {
+      lastRun,
+      elapsed: new Date().valueOf() - lastRun.valueOf(),
       value,
+      loading: false,
       preview: preview(value),
       shape: s,
       stdout: '',
@@ -93,7 +97,7 @@ export const filePanel: PanelUIDetails<FilePanelInfo> = {
   details: FilePanelDetails,
   body: null,
   previewable: true,
-  factory: () => new FilePanelInfo(),
+  factory: (pageId: string) => new FilePanelInfo(pageId),
   hasStdout: false,
   info: null,
 };

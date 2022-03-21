@@ -479,7 +479,7 @@ for (const subprocess of RUNNERS) {
           apiKey_encrypt: new Encrypt(process.env.BIGQUERY_TOKEN),
         }),
       ];
-      const dp = new DatabasePanelInfo({
+      const dp = new DatabasePanelInfo(null, {
         table: '1osiz0yumwHxfovIAIYTpf5ozDapQzIHv_2jk4P2AvZg',
       });
       dp.database.connectorId = connectors[0].id;
@@ -545,7 +545,7 @@ for (const subprocess of RUNNERS) {
           apiKey_encrypt: new Encrypt(process.env.AIRTABLE_TOKEN),
         }),
       ];
-      const dp = new DatabasePanelInfo({
+      const dp = new DatabasePanelInfo(null, {
         table: 'tblaafwMIxhqwdHkj',
         extra: {
           airtable_view: 'viwk6vMHsOT3NRn63',
@@ -592,7 +592,7 @@ for (const subprocess of RUNNERS) {
           apiKey_encrypt: new Encrypt(process.env.AIRTABLE_TOKEN),
         }),
       ];
-      const dp = new DatabasePanelInfo({
+      const dp = new DatabasePanelInfo(null, {
         table: 'tblaafwMIxhqwdHkj',
         extra: {
           airtable_view: 'viwk6vMHsOT3NRn63',
@@ -742,7 +742,6 @@ for (const subprocess of RUNNERS) {
           },
         }),
       ];
-      console.log(connectors[0].database.extra);
       const dp = new DatabasePanelInfo();
       dp.database.connectorId = connectors[0].id;
       dp.content =

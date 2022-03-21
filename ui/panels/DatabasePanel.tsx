@@ -15,7 +15,7 @@ import { Select } from '../components/Select';
 import { ServerPicker } from '../components/ServerPicker';
 import { TimeSeriesRange } from '../components/TimeSeriesRange';
 import { VENDORS } from '../connectors';
-import { ProjectContext } from '../ProjectStore';
+import { ProjectContext } from '../state';
 import { PanelBodyProps, PanelDetailsProps, PanelUIDetails } from './types';
 
 export async function evalDatabasePanel(
@@ -266,7 +266,7 @@ export const databasePanel: PanelUIDetails<DatabasePanelInfo> = {
   details: DatabasePanelDetails,
   body: DatabasePanelBody,
   previewable: true,
-  factory: () => new DatabasePanelInfo(),
+  factory: (pageId: string) => new DatabasePanelInfo(pageId),
   hasStdout: false,
   info: DatabaseInfo,
 };

@@ -17,8 +17,8 @@ type airtableResponse struct {
 	} `json:"records"`
 }
 
-func evalAirtable(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, w io.Writer) error {
-	token, err := dbInfo.ApiKey.decrypt()
+func (ec EvalContext) evalAirtable(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, w io.Writer) error {
+	token, err := ec.decrypt(&dbInfo.ApiKey)
 	if err != nil {
 		return edse(err)
 	}
