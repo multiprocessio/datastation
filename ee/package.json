@@ -3,12 +3,14 @@
   "productName": "DataStation Enterprise Edition",
   "version": "0.0.1",
   "scripts": {
+    "format": "yarn prettier --write \"**/*.ts\"",
     "build-desktop": "python3 ../scripts/build.py ./desktop/scripts/desktop.build",
     "start-desktop": "yarn build-desktop && yarn electron --trace-warning --unhandled-rejection=warn build/desktop.js"
   },
   "devDependencies": {
     "electron": "^17.1.2",
     "esbuild": "^0.14.27",
+    "prettier": "^2.6.0",
     "typescript": "^4.6.2"
   }
 }

@@ -1,3 +1,5 @@
+// Copyright 2022 Multiprocess Labs LLC
+
 import { app, ipcMain } from 'electron';
 import path from 'path';
 import { DEBUG, VERSION } from '../../shared/constants';
@@ -9,6 +11,7 @@ import { openWindow } from '../../desktop/project';
 import { registerRPCHandlers } from '../../desktop/rpc';
 import { initialize } from '../../desktop/runner';
 import { Store } from '../../desktop/store';
+import { History } from './history';
 
 const binaryExtension: Record<string, string> = {
   darwin: '',
@@ -41,7 +44,8 @@ function main() {
 
       await openWindow(project);
 
-      registerRPCHandlers(ipcMain, handlers);
+      const history = new History(store, handlers);
+      registerRPCHandlers(ipcMain, handlers, history.audit);
     });
 
     app.on('window-all-closed', function () {

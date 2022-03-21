@@ -256,6 +256,50 @@ export class Store {
     }
   }
 
+  getPageHandler: GetPageHandler = {
+    resource: 'getPage',
+    handler: async (
+      _0: string,
+      { id }: { id: string },
+    ) => {
+      const db = this.getConnection(projectId);
+      return pageCrud.getOne(db, id);
+    },
+  }
+
+  getPanelHandler = {
+    resource: 'getPanel',
+    handler: async (
+      _0: string,
+      { id }: { id: string },
+    ) => {
+      const db = this.getConnection(projectId);
+      return panelCrud.getOne(db, id);
+    },
+  }
+
+  getConnectorHandler = {
+    resource: 'getConnector',
+    handler: async (
+      _0: string,
+      { id }: { id: string },
+    ) => {
+      const db = this.getConnection(projectId);
+      return connectorCrud.getOne(db, id);
+    },
+  }
+
+  getServerHandler = {
+    resource: 'getServer',
+    handler: async (
+      _0: string,
+      { id }: { id: string },
+    ) => {
+      const db = this.getConnection(projectId);
+      return serverCrud.getOne(db, id);
+    },
+  }
+
   getProjectHandler: GetProjectHandler = {
     resource: 'getProject',
     handler: async (
@@ -393,6 +437,12 @@ GROUP BY panel_id
     })();
   }
 
+  guardInternal = (external: boolean) => {
+    if (external) {
+      throw new Error('Bad access.');
+    }
+  }
+
   // INTERNAL ONLY
   updatePanelResultHandler = {
     resource: 'updatePanelResult' as InternalEndpoint,
@@ -405,9 +455,7 @@ GROUP BY panel_id
       _: unknown,
       external: boolean
     ) => {
-      if (external) {
-        throw new Error('Bad access.');
-      }
+      this.guardInternalOnly(external);
 
       const db = this.getConnection(projectId);
       const stmt = db.prepare(

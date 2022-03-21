@@ -132,10 +132,7 @@ function sendIPCRendererResponse(
   event.sender.send(channel, msg);
 }
 
-export function registerRPCHandlers(
-  ipcMain: IpcMain,
-  handlers: RPCHandler<any, any>[]
-) {
+export function makeDispatch(handlers: RPCHandler<any, any>[]) {
   function dispatch(payload: RPCPayload, external = false) {
     if (external) {
       log.info(`Handling request: ${payload.resource}`);
@@ -146,6 +143,18 @@ export function registerRPCHandlers(
     }
 
     return handler.handler(payload.projectId, payload.body, dispatch, external);
+  }
+
+  return dispatch;
+}
+
+export function registerRPCHandlers(
+  ipcMain: IpcMain,
+  handlers: RPCHandler<any, any>[],
+  dispatch?: Dispatch,
+) {
+  if (!dispatch) {
+    dispatch = makeDispatch(handlers);
   }
 
   ipcMain.on(

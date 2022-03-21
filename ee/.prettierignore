@@ -1,0 +1,4 @@
+node_modules
+build
+releases
+server/release/config.json
