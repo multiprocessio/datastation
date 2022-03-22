@@ -5,9 +5,10 @@ import * as rpc_types_ce from '../../shared/rpc';
 import { Store } from './store';
 import { History as HistoryT } from '../shared/state';
 
-class History {
+export class History {
   store: Store;
-  constructor(store: Store, handlers: rpc_ce.RPCHandler[]) {
+  dispatch: rpc_ce.Dispatch;
+  constructor(store: Store, handlers: rpc_ce.RPCHandler<any, any>[]) {
     this.store = store;
     this.dispatch = rpc_ce.makeDispatch(handlers);
   }
@@ -19,7 +20,7 @@ class History {
     id: string,
     getter: (projectId: string, id: string) => any
   ) {
-    const oldValue = JSON.stringify(await getter(body.projectId, body.data.id));
+    const oldValue = JSON.stringify(await getter(payload.projectId, id));
     let exception: Error;
     let res: any;
     try {
@@ -28,7 +29,7 @@ class History {
       exception = e;
     }
 
-    const newValue = JSON.stringify(await getter(body.projectId, body.data.id));
+    const newValue = JSON.stringify(await getter(payload.projectId, id));
     if (oldValue !== newValue) {
       const data = new History({
         table,

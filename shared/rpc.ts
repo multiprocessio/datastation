@@ -12,11 +12,17 @@ import {
 export type GetProjectRequest = { projectId: string };
 export type GetProjectResponse = ProjectState | null;
 
+export type GetPanelRequest = {id: string};
+export type GetPanelResponse = PanelInfo;
+
 export type UpdatePanelRequest = {
   position: number;
   data: PanelInfo;
 };
 export type UpdatePanelResponse = void;
+
+export type GetConnectorRequest = {id: string};
+export type GetConnectorResponse = ConnectorInfo;
 
 export type UpdateConnectorRequest = {
   position: number;
@@ -24,11 +30,17 @@ export type UpdateConnectorRequest = {
 };
 export type UpdateConnectorResponse = void;
 
+export type GetServerRequest = {id: string};
+export type GetServerResponse = ServerInfo;
+
 export type UpdateServerRequest = {
   position: number;
   data: ServerInfo;
 };
 export type UpdateServerResponse = void;
+
+export type GetPageRequest = {id: string};
+export type GetPageResponse = ProjectPage;
 
 export type UpdatePageRequest = {
   position: number;
@@ -89,6 +101,10 @@ export type StoreEndpoint =
   | 'updateProject'
   | 'updateConnector'
   | 'updateServer'
+  | 'getPage'
+  |'getPanel'
+  | 'getConnector'
+| 'getServer'
   | 'deletePanel'
   | 'deletePage'
   | 'deleteConnector'

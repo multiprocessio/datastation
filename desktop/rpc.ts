@@ -15,6 +15,14 @@ import {
   DeleteServerRequest,
   DeleteServerResponse,
   Endpoint,
+  GetConnectorRequest,
+  GetConnectorResponse,
+  GetPanelRequest,
+  GetPanelResponse,
+  GetPageRequest,
+  GetPageResponse,
+  GetServerRequest,
+  GetServerResponse,
   GetDashboardsRequest,
   GetDashboardsResponse,
   GetExportsRequest,
@@ -78,17 +86,33 @@ export type UpdateServerHandler = RPCHandler<
   UpdateServerRequest,
   UpdateServerResponse
 >;
+export type GetServerHandler = RPCHandler<
+  GetServerRequest,
+  GetServerResponse
+>;
 export type UpdateConnectorHandler = RPCHandler<
   UpdateConnectorRequest,
   UpdateConnectorResponse
+>;
+export type GetConnectorHandler = RPCHandler<
+  GetConnectorRequest,
+  GetConnectorResponse
 >;
 export type UpdatePageHandler = RPCHandler<
   UpdatePageRequest,
   UpdatePageResponse
 >;
+export type GetPageHandler = RPCHandler<
+  GetPageRequest,
+  GetPageResponse
+>;
 export type UpdatePanelHandler = RPCHandler<
   UpdatePanelRequest,
   UpdatePanelResponse
+>;
+export type GetPanelHandler = RPCHandler<
+  GetPanelRequest,
+  GetPanelResponse
 >;
 export type DeleteServerHandler = RPCHandler<
   DeleteServerRequest,
@@ -151,7 +175,7 @@ export function makeDispatch(handlers: RPCHandler<any, any>[]) {
 export function registerRPCHandlers(
   ipcMain: IpcMain,
   handlers: RPCHandler<any, any>[],
-  dispatch?: Dispatch,
+  dispatch?: (p: RPCPayload, external?: boolean) => Promise<any>,
 ) {
   if (!dispatch) {
     dispatch = makeDispatch(handlers);

@@ -13,7 +13,9 @@ export class Store extends store_ce.Store {
     resource: 'insertHistory' as InternalEndpoint,
     handler: async (
       projectId: string,
-      body: {
+      {
+        data,
+      }: {
         data: History;
       },
       _: unknown,
@@ -64,13 +66,14 @@ export class Store extends store_ce.Store {
       external: boolean
     ) => {
       const stubMaker = this.stubMaker();
-      const maybeWhere = lastId
+      const maybeWhere = body.lastId
         ? `WHERE dt < (SELECT dt FROM ds_history WHERE id = ${stubMaker()}) `
         : '';
+      const db = this.getConnection(projectId);
       const stmt = db.prepare(
         `SELECT * FROM ds_history ${maybeWhere}ORDER BY dt DESC LIMIT 100`
       );
-      const rows = lastId ? stmt.all(lastId) : stmt.all();
+      const rows: Array<any> = body.lastId ? stmt.all(body.lastId) : stmt.all();
       return rows.map(
         (r) =>
           new History({

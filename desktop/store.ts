@@ -41,6 +41,10 @@ import {
   DeleteServerHandler,
   GetProjectHandler,
   GetProjectsHandler,
+  GetPanelHandler,
+  GetPageHandler,
+  GetServerHandler,
+  GetConnectorHandler,
   InternalEndpoint,
   MakeProjectHandler,
   RPCHandler,
@@ -118,6 +122,11 @@ const PRAGMAS = [
 ];
 
 export class Store {
+  stubMaker: () => () => string;
+  constructor(stubMaker = () => () => '?') {
+    this.stubMaker = stubMaker;
+  }
+
   validateSQLiteDriver() {
     const memdb = new sqlite3.default(':memory:');
     const stmt = memdb.prepare('SELECT sqlite_version() AS version');
@@ -267,7 +276,7 @@ export class Store {
     },
   }
 
-  getPanelHandler = {
+  getPanelHandler: GetPanelHandler = {
     resource: 'getPanel',
     handler: async (
       _0: string,
@@ -278,7 +287,7 @@ export class Store {
     },
   }
 
-  getConnectorHandler = {
+  getConnectorHandler: GetConnectorHandler = {
     resource: 'getConnector',
     handler: async (
       _0: string,
@@ -289,7 +298,7 @@ export class Store {
     },
   }
 
-  getServerHandler = {
+  getServerHandler: GetServerHandler = {
     resource: 'getServer',
     handler: async (
       _0: string,
@@ -437,13 +446,12 @@ GROUP BY panel_id
     })();
   }
 
-  guardInternal = (external: boolean) => {
+  guardInternalOnly = (external: boolean) => {
     if (external) {
       throw new Error('Bad access.');
     }
   }
 
-  // INTERNAL ONLY
   updatePanelResultHandler = {
     resource: 'updatePanelResult' as InternalEndpoint,
     handler: async (
