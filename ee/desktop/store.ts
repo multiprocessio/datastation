@@ -2,7 +2,7 @@
 
 import * as store_ce from '../../desktop/store';
 import { History } from '../shared/state';
-import { Endpoint } from '../shared/rpc';
+import { GetHistoryHandler } from './rpc';
 
 function unix(dt: Date) {
   return Math.floor(dt.getTime() / 1000);
@@ -10,7 +10,7 @@ function unix(dt: Date) {
 
 export class Store extends store_ce.Store {
   insertHistoryHandler = {
-    resource: 'insertHistory' as Endpoint,
+    resource: 'insertHistory',
     handler: async (
       projectId: string,
       {
@@ -55,8 +55,8 @@ export class Store extends store_ce.Store {
     },
   };
 
-  getHistoryHandler = {
-    resource: 'getHistory' as Endpoint,
+  getHistoryHandler: GetHistoryHandler = {
+    resource: 'getHistory',
     handler: async (
       projectId: string,
       body: {
@@ -74,7 +74,7 @@ export class Store extends store_ce.Store {
         `SELECT * FROM ds_history ${maybeWhere}ORDER BY dt DESC LIMIT 100`
       );
       const rows: Array<any> = body.lastId ? stmt.all(body.lastId) : stmt.all();
-      return rows.map(
+      const history = rows.map(
         (r) =>
           new History({
             ...r,
@@ -82,6 +82,8 @@ export class Store extends store_ce.Store {
             newValue: r.new_value,
           })
       );
+
+      return { history };
     },
   };
 }
