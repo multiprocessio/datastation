@@ -119,7 +119,7 @@ export type StoreEndpoint =
   | 'getExports'
   | 'deleteExport'
   | 'updateExport'
-| 'updatePanelResult';
+  | 'updatePanelResult';
 
 export type PanelBody = { panelId: string };
 export type PanelEndpoint = 'killProcess' | 'fetchResults' | 'eval';

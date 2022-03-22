@@ -2,9 +2,9 @@
 
 import * as rpc_ce from '../../desktop/rpc';
 import * as rpc_types_ce from '../../shared/rpc';
-import { RPCPayload, Dispatch } from './rpc';
-import { Store } from './store';
 import { History as HistoryT } from '../shared/state';
+import { Dispatch, RPCPayload } from './rpc';
+import { Store } from './store';
 
 export class History {
   store: Store;

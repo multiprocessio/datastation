@@ -4,7 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import log from '../shared/log';
 import { getPath } from '../shared/object';
-import { GetProjectRequest, MakeProjectRequest, Endpoint } from '../shared/rpc';
+import { Endpoint, GetProjectRequest, MakeProjectRequest } from '../shared/rpc';
 import {
   ConnectorInfo,
   DatabasePanelInfo,

@@ -53,11 +53,16 @@ export interface GenericRPCPayload<EndpointT> {
 
 export type RPCPayload = GenericRPCPayload<Endpoint>;
 
-export type DispatchPayload<EndpointT> = Omit<GenericRPCPayload<EndpointT>, 'messageNumber' | 'body'> & {
+export type DispatchPayload<EndpointT> = Omit<
+  GenericRPCPayload<EndpointT>,
+  'messageNumber' | 'body'
+> & {
   body?: any;
 };
 
-export type GenericDispatch<EndpointT> = (payload: DispatchPayload<EndpointT>) => Promise<any>;
+export type GenericDispatch<EndpointT> = (
+  payload: DispatchPayload<EndpointT>
+) => Promise<any>;
 
 export type Dispatch = GenericDispatch<Endpoint>;
 
@@ -89,24 +94,31 @@ export type UpdateServerHandler = RPCHandler<
   UpdateServerResponse
 >;
 export type GetServerHandler = RPCHandler<GetServerRequest, GetServerResponse>;
+
 export type UpdateConnectorHandler = RPCHandler<
   UpdateConnectorRequest,
   UpdateConnectorResponse
 >;
+
 export type GetConnectorHandler = RPCHandler<
   GetConnectorRequest,
   GetConnectorResponse
 >;
+
 export type UpdatePageHandler = RPCHandler<
   UpdatePageRequest,
   UpdatePageResponse
 >;
+
 export type GetPageHandler = RPCHandler<GetPageRequest, GetPageResponse>;
+
 export type UpdatePanelHandler = RPCHandler<
   UpdatePanelRequest,
   UpdatePanelResponse
 >;
+
 export type GetPanelHandler = RPCHandler<GetPanelRequest, GetPanelResponse>;
+
 export type DeleteServerHandler = RPCHandler<
   DeleteServerRequest,
   DeleteServerResponse
@@ -149,7 +161,9 @@ function sendIPCRendererResponse(
   event.sender.send(channel, msg);
 }
 
-export function makeDispatch<EndpointT>(handlers: RPCHandler<any, any, EndpointT>[]): GenericDispatch<EndpointT> {
+export function makeDispatch<EndpointT>(
+  handlers: RPCHandler<any, any, EndpointT>[]
+): GenericDispatch<EndpointT> {
   function dispatch(payload: GenericRPCPayload<EndpointT>, external = false) {
     if (external) {
       log.info(`Handling request: ${payload.resource}`);
@@ -168,7 +182,10 @@ export function makeDispatch<EndpointT>(handlers: RPCHandler<any, any, EndpointT
 export function registerRPCHandlers<EndpointT>(
   ipcMain: IpcMain,
   handlers: RPCHandler<any, any, EndpointT>[],
-  dispatch?: (p: GenericRPCPayload<EndpointT>, external?: boolean) => Promise<any>
+  dispatch?: (
+    p: GenericRPCPayload<EndpointT>,
+    external?: boolean
+  ) => Promise<any>
 ) {
   if (!dispatch) {
     dispatch = makeDispatch<EndpointT>(handlers);
@@ -176,7 +193,10 @@ export function registerRPCHandlers<EndpointT>(
 
   ipcMain.on(
     RPC_ASYNC_REQUEST,
-    async function (event: IpcMainEvent, payload: GenericRPCPayload<EndpointT>) {
+    async function (
+      event: IpcMainEvent,
+      payload: GenericRPCPayload<EndpointT>
+    ) {
       const responseChannel = `${RPC_ASYNC_RESPONSE}:${payload.messageNumber}`;
       try {
         const rsp = await dispatch(payload, true);

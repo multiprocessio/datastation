@@ -25,7 +25,7 @@ jobs:
           -H "Content-Type: application/zip" \
           --data-binary @./releases/datastation-server-x64-$GIT_TAG.zip \
           "https://uploads.github.com/repos/multiprocessio/datastation/releases/$RELEASE_ID/assets?name=datastation-server-x64-$GIT_TAG.zip"
-          
+
   build-linux-desktop:
     runs-on: ubuntu-latest
 

@@ -7,10 +7,10 @@ import { configureLogger } from '../../desktop/log';
 import { openWindow } from '../../desktop/project';
 import { registerRPCHandlers } from '../../desktop/rpc';
 import { initialize } from '../../desktop/runner';
-import { Endpoint } from '../shared/rpc';
 import { DEBUG, VERSION } from '../../shared/constants';
 import log from '../../shared/log';
 import { APP_NAME } from '../shared/constants';
+import { Endpoint } from '../shared/rpc';
 import { History } from './history';
 import { Store } from './store';
 
