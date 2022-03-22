@@ -4,7 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import log from '../shared/log';
 import { getPath } from '../shared/object';
-import { GetProjectRequest, MakeProjectRequest } from '../shared/rpc';
+import { GetProjectRequest, MakeProjectRequest, Endpoint } from '../shared/rpc';
 import {
   ConnectorInfo,
   DatabasePanelInfo,
@@ -39,13 +39,12 @@ import {
   DeletePageHandler,
   DeletePanelHandler,
   DeleteServerHandler,
+  GetConnectorHandler,
+  GetPageHandler,
+  GetPanelHandler,
   GetProjectHandler,
   GetProjectsHandler,
-  GetPanelHandler,
-  GetPageHandler,
   GetServerHandler,
-  GetConnectorHandler,
-  InternalEndpoint,
   MakeProjectHandler,
   RPCHandler,
   UpdateConnectorHandler,
@@ -267,47 +266,35 @@ export class Store {
 
   getPageHandler: GetPageHandler = {
     resource: 'getPage',
-    handler: async (
-      _0: string,
-      { id }: { id: string },
-    ) => {
+    handler: async (projectId: string, { id }: { id: string }) => {
       const db = this.getConnection(projectId);
-      return pageCrud.getOne(db, id);
+      return pageCrud.getOne(db, id)[0];
     },
-  }
+  };
 
   getPanelHandler: GetPanelHandler = {
     resource: 'getPanel',
-    handler: async (
-      _0: string,
-      { id }: { id: string },
-    ) => {
+    handler: async (projectId: string, { id }: { id: string }) => {
       const db = this.getConnection(projectId);
-      return panelCrud.getOne(db, id);
+      return panelCrud.getOne(db, id)[0];
     },
-  }
+  };
 
   getConnectorHandler: GetConnectorHandler = {
     resource: 'getConnector',
-    handler: async (
-      _0: string,
-      { id }: { id: string },
-    ) => {
+    handler: async (projectId: string, { id }: { id: string }) => {
       const db = this.getConnection(projectId);
-      return connectorCrud.getOne(db, id);
+      return connectorCrud.getOne(db, id)[0];
     },
-  }
+  };
 
   getServerHandler: GetServerHandler = {
     resource: 'getServer',
-    handler: async (
-      _0: string,
-      { id }: { id: string },
-    ) => {
+    handler: async (projectId: string, { id }: { id: string }) => {
       const db = this.getConnection(projectId);
-      return serverCrud.getOne(db, id);
+      return serverCrud.getOne(db, id)[0];
     },
-  }
+  };
 
   getProjectHandler: GetProjectHandler = {
     resource: 'getProject',
@@ -450,10 +437,10 @@ GROUP BY panel_id
     if (external) {
       throw new Error('Bad access.');
     }
-  }
+  };
 
   updatePanelResultHandler = {
-    resource: 'updatePanelResult' as InternalEndpoint,
+    resource: 'updatePanelResult' as Endpoint,
     handler: async (
       projectId: string,
       body: {

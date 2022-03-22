@@ -2,16 +2,17 @@
 
 import { app, ipcMain } from 'electron';
 import path from 'path';
-import { DEBUG, VERSION } from '../../shared/constants';
-import { APP_NAME } from '../shared/constants';
-import log from '../../shared/log';
 import { IS_DESKTOP_RUNNER } from '../../desktop/constants';
 import { configureLogger } from '../../desktop/log';
 import { openWindow } from '../../desktop/project';
 import { registerRPCHandlers } from '../../desktop/rpc';
 import { initialize } from '../../desktop/runner';
-import { Store } from './store';
+import { Endpoint } from '../shared/rpc';
+import { DEBUG, VERSION } from '../../shared/constants';
+import log from '../../shared/log';
+import { APP_NAME } from '../shared/constants';
 import { History } from './history';
+import { Store } from './store';
 
 const binaryExtension: Record<string, string> = {
   darwin: '',
@@ -45,7 +46,7 @@ function main() {
       await openWindow(project);
 
       const history = new History(store, handlers);
-      registerRPCHandlers(
+      registerRPCHandlers<Endpoint>(
         ipcMain,
         [...handlers, store.getHistoryHandler],
         history.audit

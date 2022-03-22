@@ -17,20 +17,20 @@ import {
   Endpoint,
   GetConnectorRequest,
   GetConnectorResponse,
-  GetPanelRequest,
-  GetPanelResponse,
-  GetPageRequest,
-  GetPageResponse,
-  GetServerRequest,
-  GetServerResponse,
   GetDashboardsRequest,
   GetDashboardsResponse,
   GetExportsRequest,
   GetExportsResponse,
+  GetPageRequest,
+  GetPageResponse,
+  GetPanelRequest,
+  GetPanelResponse,
   GetProjectRequest,
   GetProjectResponse,
   GetProjectsRequest,
   GetProjectsResponse,
+  GetServerRequest,
+  GetServerResponse,
   IPCRendererResponse,
   MakeProjectRequest,
   MakeProjectResponse,
@@ -44,27 +44,29 @@ import {
   UpdateServerResponse,
 } from '../shared/rpc';
 
-export type InternalEndpoint = 'updatePanelResult';
-
-export interface RPCPayload {
+export interface GenericRPCPayload<EndpointT> {
   messageNumber: number;
-  resource: Endpoint | InternalEndpoint;
+  resource: EndpointT;
   projectId: string;
   body: any;
 }
 
-export type DispatchPayload = Omit<RPCPayload, 'messageNumber' | 'body'> & {
+export type RPCPayload = GenericRPCPayload<Endpoint>;
+
+export type DispatchPayload<EndpointT> = Omit<GenericRPCPayload<EndpointT>, 'messageNumber' | 'body'> & {
   body?: any;
 };
 
-export type Dispatch = (payload: DispatchPayload) => Promise<any>;
+export type GenericDispatch<EndpointT> = (payload: DispatchPayload<EndpointT>) => Promise<any>;
 
-export interface RPCHandler<Request, Response> {
-  resource: Endpoint | InternalEndpoint;
+export type Dispatch = GenericDispatch<Endpoint>;
+
+export interface RPCHandler<Request, Response, EndpointT = Endpoint> {
+  resource: EndpointT;
   handler: (
     projectId: string,
     body: Request,
-    dispatch: Dispatch,
+    dispatch: GenericDispatch<EndpointT>,
     external: boolean
   ) => Promise<Response>;
 }
@@ -86,10 +88,7 @@ export type UpdateServerHandler = RPCHandler<
   UpdateServerRequest,
   UpdateServerResponse
 >;
-export type GetServerHandler = RPCHandler<
-  GetServerRequest,
-  GetServerResponse
->;
+export type GetServerHandler = RPCHandler<GetServerRequest, GetServerResponse>;
 export type UpdateConnectorHandler = RPCHandler<
   UpdateConnectorRequest,
   UpdateConnectorResponse
@@ -102,18 +101,12 @@ export type UpdatePageHandler = RPCHandler<
   UpdatePageRequest,
   UpdatePageResponse
 >;
-export type GetPageHandler = RPCHandler<
-  GetPageRequest,
-  GetPageResponse
->;
+export type GetPageHandler = RPCHandler<GetPageRequest, GetPageResponse>;
 export type UpdatePanelHandler = RPCHandler<
   UpdatePanelRequest,
   UpdatePanelResponse
 >;
-export type GetPanelHandler = RPCHandler<
-  GetPanelRequest,
-  GetPanelResponse
->;
+export type GetPanelHandler = RPCHandler<GetPanelRequest, GetPanelResponse>;
 export type DeleteServerHandler = RPCHandler<
   DeleteServerRequest,
   DeleteServerResponse
@@ -156,8 +149,8 @@ function sendIPCRendererResponse(
   event.sender.send(channel, msg);
 }
 
-export function makeDispatch(handlers: RPCHandler<any, any>[]) {
-  function dispatch(payload: RPCPayload, external = false) {
+export function makeDispatch<EndpointT>(handlers: RPCHandler<any, any, EndpointT>[]): GenericDispatch<EndpointT> {
+  function dispatch(payload: GenericRPCPayload<EndpointT>, external = false) {
     if (external) {
       log.info(`Handling request: ${payload.resource}`);
     }
@@ -172,18 +165,18 @@ export function makeDispatch(handlers: RPCHandler<any, any>[]) {
   return dispatch;
 }
 
-export function registerRPCHandlers(
+export function registerRPCHandlers<EndpointT>(
   ipcMain: IpcMain,
-  handlers: RPCHandler<any, any>[],
-  dispatch?: (p: RPCPayload, external?: boolean) => Promise<any>,
+  handlers: RPCHandler<any, any, EndpointT>[],
+  dispatch?: (p: GenericRPCPayload<EndpointT>, external?: boolean) => Promise<any>
 ) {
   if (!dispatch) {
-    dispatch = makeDispatch(handlers);
+    dispatch = makeDispatch<EndpointT>(handlers);
   }
 
   ipcMain.on(
     RPC_ASYNC_REQUEST,
-    async function (event: IpcMainEvent, payload: RPCPayload) {
+    async function (event: IpcMainEvent, payload: GenericRPCPayload<EndpointT>) {
       const responseChannel = `${RPC_ASYNC_RESPONSE}:${payload.messageNumber}`;
       try {
         const rsp = await dispatch(payload, true);

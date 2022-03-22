@@ -1,8 +1,8 @@
 // Copyright 2022 Multiprocess Labs LLC
 
 import * as store_ce from '../../desktop/store';
-import { InternalEndpoint, Endpoint } from './rpc';
 import { History } from '../shared/state';
+import { Endpoint } from '../shared/rpc';
 
 function unix(dt: Date) {
   return Math.floor(dt.getTime() / 1000);
@@ -10,7 +10,7 @@ function unix(dt: Date) {
 
 export class Store extends store_ce.Store {
   insertHistoryHandler = {
-    resource: 'insertHistory' as InternalEndpoint,
+    resource: 'insertHistory' as Endpoint,
     handler: async (
       projectId: string,
       {
@@ -56,7 +56,7 @@ export class Store extends store_ce.Store {
   };
 
   getHistoryHandler = {
-    resource: 'getHistory' as InternalEndpoint,
+    resource: 'getHistory' as Endpoint,
     handler: async (
       projectId: string,
       body: {

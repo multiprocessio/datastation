@@ -12,7 +12,7 @@ import {
 export type GetProjectRequest = { projectId: string };
 export type GetProjectResponse = ProjectState | null;
 
-export type GetPanelRequest = {id: string};
+export type GetPanelRequest = { id: string };
 export type GetPanelResponse = PanelInfo;
 
 export type UpdatePanelRequest = {
@@ -21,7 +21,7 @@ export type UpdatePanelRequest = {
 };
 export type UpdatePanelResponse = void;
 
-export type GetConnectorRequest = {id: string};
+export type GetConnectorRequest = { id: string };
 export type GetConnectorResponse = ConnectorInfo;
 
 export type UpdateConnectorRequest = {
@@ -30,7 +30,7 @@ export type UpdateConnectorRequest = {
 };
 export type UpdateConnectorResponse = void;
 
-export type GetServerRequest = {id: string};
+export type GetServerRequest = { id: string };
 export type GetServerResponse = ServerInfo;
 
 export type UpdateServerRequest = {
@@ -39,7 +39,7 @@ export type UpdateServerRequest = {
 };
 export type UpdateServerResponse = void;
 
-export type GetPageRequest = {id: string};
+export type GetPageRequest = { id: string };
 export type GetPageResponse = ProjectPage;
 
 export type UpdatePageRequest = {
@@ -102,9 +102,9 @@ export type StoreEndpoint =
   | 'updateConnector'
   | 'updateServer'
   | 'getPage'
-  |'getPanel'
+  | 'getPanel'
   | 'getConnector'
-| 'getServer'
+  | 'getServer'
   | 'deletePanel'
   | 'deletePage'
   | 'deleteConnector'
@@ -118,7 +118,8 @@ export type StoreEndpoint =
   | 'updateDashboard'
   | 'getExports'
   | 'deleteExport'
-  | 'updateExport';
+  | 'updateExport'
+| 'updatePanelResult';
 
 export type PanelBody = { panelId: string };
 export type PanelEndpoint = 'killProcess' | 'fetchResults' | 'eval';
