@@ -116,16 +116,18 @@ export class History {
   }
 
   audit = (payload: RPCPayload, external?: boolean) => {
-    this.ensureUser(payload.projectId);
-
     switch (payload.resource) {
       case 'updatePage':
+	this.ensureUser(payload.projectId);
         return this.auditPage(payload, external);
       case 'updatePanel':
+	this.ensureUser(payload.projectId);
         return this.auditPanel(payload, external);
       case 'updateServer':
+	this.ensureUser(payload.projectId);
         return this.auditServer(payload, external);
       case 'updateConnector':
+	this.ensureUser(payload.projectId);
         return this.auditConnector(payload, external);
     }
   };
