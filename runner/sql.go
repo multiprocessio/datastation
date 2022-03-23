@@ -78,7 +78,7 @@ func sqlColumnsAndTypesFromShape(rowShape ObjectShape) []column {
 			}
 		}
 
-		if (childShape.Kind == ScalarKind || childShape.Kind == VariedKind) && columnType == "" {
+		if columnType == "" {
 			// Otherwise just fall back to being TEXT
 			columnType = "TEXT"
 		}
@@ -261,7 +261,7 @@ func defaultMangleInsert(stmt string) string {
 func chunk(c chan map[string]any, size int) chan []map[string]any {
 	var chunk []map[string]any
 
-	out := make(chan []map[string]any, 1)
+	out := make(chan []map[string]any)
 
 	go func() {
 		defer close(out)
@@ -307,6 +307,17 @@ func makePreparedStatement(tname string, nColumns, chunkSize int) string {
 	}
 
 	return fmt.Sprintf("INSERT INTO %s VALUES %s", tname, strings.Join(values, ", "))
+}
+
+func IsScalar(v any) bool {
+	switch v.(type) {
+	case bool, byte, complex64, complex128, error, float32, float64,
+		int, int8, int16, int32, int64,
+		uint, uint16, uint32, uint64, uintptr, string:
+		return true
+	default:
+		return false
+	}
 }
 
 func importPanel(
@@ -359,7 +370,21 @@ newprepare:
 
 			for i, row := range rows {
 				for j, col := range panel.columns {
-					toinsert[i*len(ddlColumns)+j] = getObjectAtPath(row, col.name)
+					v := getObjectAtPath(row, col.name)
+					// Non-scalars get JSON
+					// encoded. This can basically
+					// only be arrays because
+					// nested objects are
+					// supported.
+					if v != nil && !IsScalar(v) {
+						if col.kind == "TEXT" {
+							v, _ = jsonMarshal(v)
+						} else {
+							// SQL won't be happy to put a string in a REAL column for example
+							v = nil
+						}
+					}
+					toinsert[i*len(ddlColumns)+j] = v
 				}
 			}
 
@@ -371,6 +396,7 @@ newprepare:
 
 			err = inserter(toinsert)
 			if err != nil {
+				closer()
 				return err
 			}
 
