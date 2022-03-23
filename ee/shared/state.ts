@@ -8,6 +8,7 @@ export class History {
   dt: Date;
   oldValue: any;
   newValue: any;
+  action: 'update' | 'delete';
   error: string;
   userId: string;
 

@@ -14,6 +14,7 @@ CREATE TABLE ds_history(
   old_value TEXT NOT NULL,
   new_value TEXT NOT NULL,
   user_id TEXT NOT NULL,
+  action TEXT NOT NULL,
   FOREIGN KEY (user_id) REFERENCES ds_user(id)
 ) STRICT;
 

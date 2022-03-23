@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "noImplicitAny": true,
+    "noUnusedLocals": true,
+    "noEmit": true,
+    "jsx": "react",
+    "allowJs": true,
+    "target": "esnext",
+    "module": "commonjs",
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "typeRoots": ["./node_modules/@types", "./type-overrides"],
+    "resolveJsonModule": true
+  },
+  "exclude": ["node_modules", "*.js", "build"]
+}

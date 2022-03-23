@@ -1,7 +1,7 @@
 // Copyright 2022 Multiprocess Labs LLC
 
 import * as store_ce from '../../desktop/store';
-import { deepClone, setPath } from '../../shared/object';
+import { deepClone } from '../../shared/object';
 import { doOnMatchingFields } from '../../shared/state';
 import { History } from '../shared/state';
 import { GetHistoryHandler } from './rpc';
@@ -11,18 +11,15 @@ function unix(dt: Date) {
 }
 
 export class Store extends store_ce.Store {
-  async getAuditableValue(value: any) {
+  getAuditableValue(value: any) {
     const copy = deepClone(value);
     // Blank out all encrypted fields, all temporal-changing fields.
-    await doOnMatchingFields(
+    doOnMatchingFields(
       copy,
-      (f) => {
-        console.log(f);
-        return f.endsWith('_encrypt') || f.endsWith('lastEdited');
-      },
-      (_: any, p: string) => setPath(copy, p, undefined)
+      (f) => f.endsWith('_encrypt') || f.endsWith('lastEdited'),
+      () => undefined
     );
-    return copy;
+    return JSON.stringify(copy);
   }
 
   insertHistoryHandler = {
@@ -39,8 +36,8 @@ export class Store extends store_ce.Store {
     ) => {
       this.guardInternalOnly(external);
 
-      const auditableOld = await this.getAuditableValue(data.oldValue);
-      const auditableNew = await this.getAuditableValue(data.newValue);
+      const auditableOld = this.getAuditableValue(data.oldValue);
+      const auditableNew = this.getAuditableValue(data.newValue);
 
       const db = this.getConnection(projectId);
       const columns = [
@@ -52,6 +49,7 @@ export class Store extends store_ce.Store {
         'old_value',
         'new_value',
         'user_id',
+	'action',
       ];
       const stubMaker = this.stubMaker();
       const stubs = columns.map(() => stubMaker());
@@ -64,6 +62,7 @@ export class Store extends store_ce.Store {
         auditableOld,
         auditableNew,
         data.userId,
+	action,
       ];
       db.transaction(() => {
         // Grab the last value

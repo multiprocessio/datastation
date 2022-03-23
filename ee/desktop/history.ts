@@ -14,7 +14,7 @@ export class History {
     this.dispatch = rpc_ce.makeDispatch(handlers);
   }
 
-  async auditGeneric(
+  async auditUpdateGeneric(
     payload: RPCPayload,
     external: boolean,
     table: string,
@@ -26,9 +26,8 @@ export class History {
       external: boolean
     ) => Promise<any>
   ) {
-    const oldValue = JSON.stringify(
-      await getter(payload.projectId, { id }, null, false)
-    );
+    this.ensureUser(payload.projectId);
+    const oldValue = await getter(payload.projectId, { id }, null, false);
     let exception: Error;
     let res: any;
     try {
@@ -37,9 +36,7 @@ export class History {
       exception = e;
     }
 
-    const newValue = JSON.stringify(
-      await getter(payload.projectId, { id }, null, false)
-    );
+    const newValue = await getter(payload.projectId, { id }, null, false);
     if (oldValue !== newValue) {
       const data = new HistoryT({
         table,
@@ -48,6 +45,7 @@ export class History {
         oldValue,
         newValue,
         userId: '1',
+	action: 'update'
       });
       await this.store.insertHistoryHandler.handler(
         payload.projectId,
@@ -64,9 +62,9 @@ export class History {
     return res;
   }
 
-  async auditPage(payload: RPCPayload, external?: boolean) {
+  async auditUpdatePage(payload: RPCPayload, external?: boolean) {
     const body = payload.body as rpc_types_ce.UpdatePageRequest;
-    return this.auditGeneric(
+    return this.auditUpdateGeneric(
       payload,
       external,
       'ds_page',
@@ -75,9 +73,9 @@ export class History {
     );
   }
 
-  async auditPanel(payload: RPCPayload, external?: boolean) {
+  async auditUpdatePanel(payload: RPCPayload, external?: boolean) {
     const body = payload.body as rpc_types_ce.UpdatePanelRequest;
-    return this.auditGeneric(
+    return this.auditUpdateGeneric(
       payload,
       external,
       'ds_panel',
@@ -86,9 +84,9 @@ export class History {
     );
   }
 
-  async auditConnector(payload: RPCPayload, external?: boolean) {
+  async auditUpdateConnector(payload: RPCPayload, external?: boolean) {
     const body = payload.body as rpc_types_ce.UpdateConnectorRequest;
-    return this.auditGeneric(
+    return this.auditUpdateGeneric(
       payload,
       external,
       'ds_connector',
@@ -97,9 +95,9 @@ export class History {
     );
   }
 
-  async auditServer(payload: RPCPayload, external?: boolean) {
+  async auditUpdateServer(payload: RPCPayload, external?: boolean) {
     const body = payload.body as rpc_types_ce.UpdateServerRequest;
-    return this.auditGeneric(
+    return this.auditUpdateGeneric(
       payload,
       external,
       'ds_server',
@@ -120,17 +118,23 @@ export class History {
     if (external) {
       switch (payload.resource) {
         case 'updatePage':
-          this.ensureUser(payload.projectId);
-          return this.auditPage(payload, external);
+          return this.auditUpdatePage(payload, external);
         case 'updatePanel':
-          this.ensureUser(payload.projectId);
-          return this.auditPanel(payload, external);
+          return this.auditUpdatePanel(payload, external);
         case 'updateServer':
-          this.ensureUser(payload.projectId);
-          return this.auditServer(payload, external);
+          return this.auditUpdateServer(payload, external);
         case 'updateConnector':
-          this.ensureUser(payload.projectId);
-          return this.auditConnector(payload, external);
+          return this.auditUpdateConnector(payload, external);
+
+	  // TODO: implement these
+	case 'deletePage':
+          return this.auditDeletePage(payload, external);
+        case 'deletePanel':
+          return this.auditDeletePanel(payload, external);
+        case 'deleteServer':
+          return this.auditDeleteServer(payload, external);
+        case 'deleteConnector':
+          return this.auditDeleteConnector(payload, external);
       }
     }
 
