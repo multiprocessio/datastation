@@ -78,7 +78,7 @@ func sqlColumnsAndTypesFromShape(rowShape ObjectShape) []column {
 			}
 		}
 
-		if (childShape.Kind == ScalarKind || childShape.Kind == VariedKind) && columnType == "" {
+		if columnType == "" {
 			// Otherwise just fall back to being TEXT
 			columnType = "TEXT"
 		}

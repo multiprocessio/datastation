@@ -266,6 +266,12 @@ func Test_sqlIngest_e2e(t *testing.T) {
 				map[string]any{"a": nil, "b": nil, "c": "[1]"},
 			},
 		},
+		{
+			`[{"a": 1,"b": 2,"c": [1]}]`,
+			[]any{
+				map[string]any{"a": float64(1), "b": float64(2), "c": "[1]"},
+			},
+		},
 	}
 
 	projectTmp, err := ioutil.TempFile("", "dsq-project")
