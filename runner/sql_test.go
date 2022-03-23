@@ -258,6 +258,14 @@ func Test_sqlIngest_e2e(t *testing.T) {
 				map[string]any{"a": nil, "b": float64(2)},
 			},
 		},
+		{
+			`[{"a": 1},{"b": 2},{"c": [1]}]`,
+			[]any{
+				map[string]any{"a": float64(1), "b": nil, "c": nil},
+				map[string]any{"a": nil, "b": float64(2), "c": nil},
+				map[string]any{"a": nil, "b": nil, "c": "[1]"},
+			},
+		},
 	}
 
 	projectTmp, err := ioutil.TempFile("", "dsq-project")
@@ -313,7 +321,10 @@ func Test_sqlIngest_e2e(t *testing.T) {
 		err = ec.EvalDatabasePanel(project, 0, panel2, func(projectId, panelId string) (chan map[string]any, error) {
 			return loadJSONArrayFile(readFile.Name())
 		})
-		assert.Nil(t, err)
+		if err != nil {
+			// Otherwise the channel below gets weird to debug
+			panic(err)
+		}
 
 		f := ec.GetPanelResultsFile(project.Id, panel2.Id)
 		a, err := loadJSONArrayFile(f)
