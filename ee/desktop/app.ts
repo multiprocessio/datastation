@@ -1,6 +1,7 @@
 // Copyright 2022 Multiprocess Labs LLC
 
 import { app, ipcMain } from 'electron';
+import fs from 'fs';
 import path from 'path';
 import { IS_DESKTOP_RUNNER } from '../../desktop/constants';
 import { configureLogger } from '../../desktop/log';
@@ -12,6 +13,7 @@ import log from '../../shared/log';
 import { APP_NAME } from '../shared/constants';
 import { Endpoint } from '../shared/rpc';
 import { History } from './history';
+import { RPCPayload } from './rpc';
 import { Store } from './store';
 
 const binaryExtension: Record<string, string> = {
@@ -19,6 +21,37 @@ const binaryExtension: Record<string, string> = {
   linux: '',
   win32: '.exe',
 };
+
+function dispatchWithMigrations(
+  store: Store,
+  dispatch: (payload: RPCPayload, external?: boolean) => Promise<any>
+) {
+  return function (payload: RPCPayload, external?: boolean) {
+    const res = dispatch(payload, external);
+    if (payload.resource === 'getProject') {
+      const db = store.getConnection(payload.projectId);
+      try {
+        const migrationsBase = path.join(__dirname, 'migrations');
+        const files = fs
+          .readdirSync(migrationsBase)
+          .filter((f) => f.endsWith('_ee.sql'));
+        files.sort();
+        for (const file of files) {
+          log.info('Running migration: ' + file);
+          const contents = fs
+            .readFileSync(path.join(migrationsBase, file))
+            .toString();
+          db.exec(contents);
+          log.info('Done migration: ' + file);
+        }
+      } catch (e) {
+        log.error(e);
+      }
+    }
+
+    return res;
+  };
+}
 
 function main() {
   configureLogger();
@@ -49,7 +82,7 @@ function main() {
       registerRPCHandlers<Endpoint>(
         ipcMain,
         [...handlers, store.getHistoryHandler],
-        history.audit
+        dispatchWithMigrations(store, history.audit)
       );
     });
 

@@ -26,7 +26,7 @@ export class Store extends store_ce.Store {
       const db = this.getConnection(projectId);
       const columns = [
         'id',
-        'table',
+        'tbl',
         'pk',
         'dt',
         'error',
@@ -46,12 +46,25 @@ export class Store extends store_ce.Store {
         data.newValue,
         data.userId,
       ];
-      const stmt = db.prepare(
-        `INSERT INTO ds_history (${columns.join(', ')}) VALUES(${stubs.join(
-          ', '
-        )})`
-      );
-      stmt.run(values);
+      db.transaction(() => {
+        // Grab the last value
+        const row = db
+          .prepare(
+            `SELECT new_value AS val FROM ds_history WHERE tbl = ? AND pk = ? ORDER BY dt DESC LIMIT 1`
+          )
+          .get(data.table, data.pk);
+        // Don't log the same value twice
+        if (row && row.val === data.newVal) {
+          return;
+        }
+
+        const stmt = db.prepare(
+          `INSERT INTO ds_history (${columns.join(', ')}) VALUES(${stubs.join(
+            ', '
+          )})`
+        );
+        stmt.run(values);
+      });
     },
   };
 
@@ -78,6 +91,7 @@ export class Store extends store_ce.Store {
         (r) =>
           new History({
             ...r,
+            table: r.tbl,
             oldValue: r.old_value,
             newValue: r.new_value,
           })
