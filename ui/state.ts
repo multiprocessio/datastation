@@ -135,14 +135,14 @@ export function useProjectState(
     ) {
       const internalOnly = opts ? opts.internalOnly : false;
       if (internalOnly) {
-	return;
+        return;
       }
       // Actually an insert
       if (index === -1) {
         list.push(obj);
-	setState(state);
+        setState(state);
         await storeUpdate(projectId, obj, list.length - 1);
-	await reread(projectId);
+        await reread(projectId);
         return;
       }
 

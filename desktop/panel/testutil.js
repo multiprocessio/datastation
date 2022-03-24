@@ -10,6 +10,7 @@ const {
   ContentTypeInfo,
 } = require('../../shared/state');
 const { Store } = require('../store');
+const { makeDispatch } = require('../rpc');
 const { makeEvalHandler } = require('./eval');
 const { fetchResultsHandler } = require('./columns');
 const { ensureSigningKey } = require('../secret');
@@ -43,7 +44,7 @@ exports.updateProject = async function (project, opts) {
     opts.store = new Store();
   }
 
-  const handlers = store.getHandlers();
+  const handlers = opts.store.getHandlers();
   if (opts?.isNew) {
     const makeProjectHandler = handlers.find(
       (h) => h.resource === 'makeProject'
