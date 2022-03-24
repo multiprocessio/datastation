@@ -23,6 +23,7 @@ export class History {
     this.newValue = defaults.newValue || null;
     this.error = defaults.error || '';
     this.userId = defaults.userId || '';
+    this.action = defaults.action || 'update';
   }
 
   static fromJSON(raw: any): History {

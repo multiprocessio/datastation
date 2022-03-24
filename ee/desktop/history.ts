@@ -143,34 +143,31 @@ export class History {
   }
 
   audit = (payload: RPCPayload, external?: boolean) => {
-    // Only need to audit external requests (i.e by the user)
-    if (external) {
-      switch (payload.resource) {
-        case 'updatePage':
-          return this.auditUpdatePage(payload);
-        case 'updatePanel':
-          return this.auditUpdatePanel(payload);
-        case 'updateServer':
-          return this.auditUpdateServer(payload);
-        case 'updateConnector':
-          return this.auditUpdateConnector(payload);
+    switch (payload.resource) {
+      case 'updatePage':
+        return this.auditUpdatePage(payload);
+      case 'updatePanel':
+        return this.auditUpdatePanel(payload);
+      case 'updateServer':
+        return this.auditUpdateServer(payload);
+      case 'updateConnector':
+        return this.auditUpdateConnector(payload);
 
-        case 'deletePage': {
-          const body = payload.body as rpc_types_ce.DeletePageRequest;
-          return this.auditDeleteGeneric(payload, 'ds_page', body.id);
-        }
-        case 'deletePanel': {
-          const body = payload.body as rpc_types_ce.DeletePanelRequest;
-          return this.auditDeleteGeneric(payload, 'ds_panel', body.id);
-        }
-        case 'deleteServer': {
-          const body = payload.body as rpc_types_ce.DeleteServerRequest;
-          return this.auditDeleteGeneric(payload, 'ds_server', body.id);
-        }
-        case 'deleteConnector': {
-          const body = payload.body as rpc_types_ce.DeleteConnectorRequest;
-          return this.auditDeleteGeneric(payload, 'ds_connector', body.id);
-        }
+      case 'deletePage': {
+        const body = payload.body as rpc_types_ce.DeletePageRequest;
+        return this.auditDeleteGeneric(payload, 'ds_page', body.id);
+      }
+      case 'deletePanel': {
+        const body = payload.body as rpc_types_ce.DeletePanelRequest;
+        return this.auditDeleteGeneric(payload, 'ds_panel', body.id);
+      }
+      case 'deleteServer': {
+        const body = payload.body as rpc_types_ce.DeleteServerRequest;
+        return this.auditDeleteGeneric(payload, 'ds_server', body.id);
+      }
+      case 'deleteConnector': {
+        const body = payload.body as rpc_types_ce.DeleteConnectorRequest;
+        return this.auditDeleteGeneric(payload, 'ds_connector', body.id);
       }
     }
 

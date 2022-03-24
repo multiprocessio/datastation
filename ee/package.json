@@ -7,7 +7,7 @@
     "build-desktop": "python3 ../scripts/build.py ./desktop/scripts/desktop.build",
     "start-desktop": "yarn build-desktop && yarn electron --trace-warning --unhandled-rejection=warn build/desktop.js",
     "test": "yarn test-local --coverage",
-    "test-local": "cross-env NODE_OPTIONS=--unhandled-rejections=warn jest --passWithNoTests"
+    "test-local": "cross-env NODE_OPTIONS=--unhandled-rejections=warn jest --passWithNoTests "
   },
   "devDependencies": {
     "cross-env": "^7.0.3",

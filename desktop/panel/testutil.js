@@ -40,66 +40,72 @@ exports.fileIsEmpty = function (fileName) {
 };
 
 exports.updateProject = async function (project, opts) {
-  if (!opts?.store) {
-    opts.store = new Store();
+  let dispatch = opts?.dispatch;
+  console.log(dispatch, 'now here');
+  if (!dispatch) {
+    dispatch = makeDispatch(new Store().getHandlers());
   }
 
-  const handlers = opts.store.getHandlers();
   if (opts?.isNew) {
-    const makeProjectHandler = handlers.find(
-      (h) => h.resource === 'makeProject'
-    );
-    await makeProjectHandler.handler(null, { projectId: project.projectName });
+    await dispatch({ resource: 'makeProject', body: { projectId: project.projectName } }, true);
   }
 
-  const updatePanelHandler = handlers.find((h) => h.resource === 'updatePanel');
-  const updatePageHandler = handlers.find((h) => h.resource === 'updatePage');
   for (let i = 0; i < project.pages.length; i++) {
     const page = project.pages[i];
     // Save before update these get deleted off the object.
     const panels = page.panels;
-    await updatePageHandler.handler(project.projectName, {
-      data: page,
-      position: i,
-    });
+    await dispatch({
+      resource: 'updatePage',
+      projectId: project.projectName,
+      body: {
+        data: page,
+        position: i,
+      },
+    }, true);
     page.panels = panels;
 
     for (let j = 0; j < panels.length; j++) {
       panels[j].pageId = page.id;
-      await updatePanelHandler.handler(project.projectName, {
-        data: panels[j],
-        position: j,
-      });
+      await dispatch({
+        resource: 'updatePanel',
+        projectId: project.projectName,
+        body: {
+          data: panels[j],
+          position: j,
+        },
+      }, true);
     }
   }
 
-  const updateServerHandler = handlers.find(
-    (h) => h.resource === 'updateServer'
-  );
   for (let i = 0; i < project.servers.length; i++) {
     const server = project.servers[i];
-    await updateServerHandler.handler(project.projectName, {
-      data: server,
-      position: i,
-    });
+    await dispatch({
+      resource: 'updateServer',
+      projectId: project.projectName,
+      body: {
+        data: server,
+        position: i,
+      },
+    }, true);
   }
 
-  const updateConnectorHandler = handlers.find(
-    (h) => h.resource === 'updateConnector'
-  );
   for (let i = 0; i < project.connectors.length; i++) {
     const connector = project.connectors[i];
-    await updateConnectorHandler.handler(project.projectName, {
-      data: connector,
-      position: i,
-    });
+    await dispatch({
+      resource: 'updateConnector',
+      projectId: project.projectName,
+      body: {
+        data: connector,
+        position: i,
+      },
+    }, true);
   }
 };
 
 exports.withSavedPanels = async function (
   panels,
   cb,
-  { evalPanels, subprocessName, settings, connectors, servers, store } = {}
+  { evalPanels, subprocessName, settings, connectors, servers, store, dispatch } = {}
 ) {
   if (!store) {
     store = new Store();
@@ -110,7 +116,10 @@ exports.withSavedPanels = async function (
   const updatePanelResultHandler = handlers.find(
     (h) => h.resource === 'updatePanelResult'
   );
-  const dispatch = makeDispatch(handlers);
+  console.log('here', dispatch);
+  if (!dispatch) {
+    dispatch = makeDispatch(handlers);
+  }
 
   const tmp = await makeTmpFile({ prefix: 'saved-panel-project-' });
 
@@ -128,7 +137,7 @@ exports.withSavedPanels = async function (
   };
 
   try {
-    await exports.updateProject(project, { isNew: true, store });
+    await exports.updateProject(project, { isNew: true, dispatch });
     expect(exports.fileIsEmpty(project.projectName + '.dsproj')).toBe(false);
 
     if (evalPanels) {

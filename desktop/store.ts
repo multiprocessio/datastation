@@ -57,9 +57,9 @@ import { encrypt } from './secret';
 export function getMigrations() {
   const migrationsBase = path.join(__dirname, 'migrations');
   const migrations = fs
-  .readdirSync(migrationsBase)
-  .filter((f) => f.endsWith('.sql'))
-  .map(file => path.join(migrationsBase, file));
+    .readdirSync(migrationsBase)
+    .filter((f) => f.endsWith('.sql'))
+    .map((file) => path.join(migrationsBase, file));
   migrations.sort();
   return migrations;
 }
@@ -384,9 +384,7 @@ GROUP BY panel_id
       newProject.projectName = ensureProjectFile(projectId);
       for (const file of this.migrations) {
         log.info('Running migration: ' + file);
-        const contents = fs
-          .readFileSync(file)
-          .toString();
+        const contents = fs.readFileSync(file).toString();
         db.exec(contents);
         log.info('Done migration: ' + file);
       }
