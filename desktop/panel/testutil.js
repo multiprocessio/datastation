@@ -47,65 +47,88 @@ exports.updateProject = async function (project, opts) {
   }
 
   if (opts?.isNew) {
-    await dispatch({ resource: 'makeProject', body: { projectId: project.projectName } }, true);
+    await dispatch(
+      { resource: 'makeProject', body: { projectId: project.projectName } },
+      true
+    );
   }
 
   for (let i = 0; i < project.pages.length; i++) {
     const page = project.pages[i];
     // Save before update these get deleted off the object.
     const panels = page.panels;
-    await dispatch({
-      resource: 'updatePage',
-      projectId: project.projectName,
-      body: {
-        data: page,
-        position: i,
+    await dispatch(
+      {
+        resource: 'updatePage',
+        projectId: project.projectName,
+        body: {
+          data: page,
+          position: i,
+        },
       },
-    }, true);
+      true
+    );
     page.panels = panels;
 
     for (let j = 0; j < panels.length; j++) {
       panels[j].pageId = page.id;
-      await dispatch({
-        resource: 'updatePanel',
-        projectId: project.projectName,
-        body: {
-          data: panels[j],
-          position: j,
+      await dispatch(
+        {
+          resource: 'updatePanel',
+          projectId: project.projectName,
+          body: {
+            data: panels[j],
+            position: j,
+          },
         },
-      }, true);
+        true
+      );
     }
   }
 
   for (let i = 0; i < project.servers.length; i++) {
     const server = project.servers[i];
-    await dispatch({
-      resource: 'updateServer',
-      projectId: project.projectName,
-      body: {
-        data: server,
-        position: i,
+    await dispatch(
+      {
+        resource: 'updateServer',
+        projectId: project.projectName,
+        body: {
+          data: server,
+          position: i,
+        },
       },
-    }, true);
+      true
+    );
   }
 
   for (let i = 0; i < project.connectors.length; i++) {
     const connector = project.connectors[i];
-    await dispatch({
-      resource: 'updateConnector',
-      projectId: project.projectName,
-      body: {
-        data: connector,
-        position: i,
+    await dispatch(
+      {
+        resource: 'updateConnector',
+        projectId: project.projectName,
+        body: {
+          data: connector,
+          position: i,
+        },
       },
-    }, true);
+      true
+    );
   }
 };
 
 exports.withSavedPanels = async function (
   panels,
   cb,
-  { evalPanels, subprocessName, settings, connectors, servers, store, dispatch } = {}
+  {
+    evalPanels,
+    subprocessName,
+    settings,
+    connectors,
+    servers,
+    store,
+    dispatch,
+  } = {}
 ) {
   if (!store) {
     store = new Store();

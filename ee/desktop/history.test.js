@@ -1,8 +1,13 @@
 // Copyright 2022 Multiprocess Labs LLC
 
-const {History } = require('./history');
+const { History } = require('./history');
 const { Store } = require('./store');
-const { LiteralPanelInfo, ServerInfo, Encrypt, DatabaseConnectorInfo } = require('../../shared/state');
+const {
+  LiteralPanelInfo,
+  ServerInfo,
+  Encrypt,
+  DatabaseConnectorInfo,
+} = require('../../shared/state');
 const { withSavedPanels } = require('../../desktop/panel/testutil');
 
 const store = new Store();
@@ -17,7 +22,7 @@ test('project changes are audited', async () => {
   await withSavedPanels(
     [lp],
     async (project, dispatch) => {
-      let {history} = await dispatch({
+      let { history } = await dispatch({
         resource: 'getHistory',
         body: {},
         projectId: project.projectName,
@@ -26,11 +31,14 @@ test('project changes are audited', async () => {
       expect(history[0].table).toBe('ds_panel');
 
       // No change, no new history.
-      await dispatch({
-        resource: 'updatePanel',
-        projectId: project.projectName,
-        body: { data: lp, position: 0 },
-      }, true);
+      await dispatch(
+        {
+          resource: 'updatePanel',
+          projectId: project.projectName,
+          body: { data: lp, position: 0 },
+        },
+        true
+      );
 
       ({ history } = await dispatch({
         resource: 'getHistory',
@@ -41,11 +49,14 @@ test('project changes are audited', async () => {
 
       // Make a panel change, new history entry
       lp.content = '{"b": 1}';
-      await dispatch({
-        resource: 'updatePanel',
-        projectId: project.projectName,
-        body: { data: lp, position: 0 },
-      }, true);
+      await dispatch(
+        {
+          resource: 'updatePanel',
+          projectId: project.projectName,
+          body: { data: lp, position: 0 },
+        },
+        true
+      );
 
       ({ history } = await dispatch({
         resource: 'getHistory',
@@ -57,11 +68,14 @@ test('project changes are audited', async () => {
 
       // Make a page change, new history entry
       project.pages[0].name = 'One fancy new name';
-      await dispatch({
-        resource: 'updatePage',
-        projectId: project.projectName,
-        body: { data: project.pages[0], position: 0 },
-      }, true);
+      await dispatch(
+        {
+          resource: 'updatePage',
+          projectId: project.projectName,
+          body: { data: project.pages[0], position: 0 },
+        },
+        true
+      );
 
       ({ history } = await dispatch({
         resource: 'getHistory',
@@ -74,11 +88,14 @@ test('project changes are audited', async () => {
       expect(history[0].table).toBe('ds_page');
 
       // Delete the panel
-      await dispatch({
-        resource: 'deletePanel',
-        projectId: project.projectName,
-        body: { id: lp.id },
-      }, true);
+      await dispatch(
+        {
+          resource: 'deletePanel',
+          projectId: project.projectName,
+          body: { id: lp.id },
+        },
+        true
+      );
 
       ({ history } = await dispatch({
         resource: 'getHistory',
@@ -90,11 +107,14 @@ test('project changes are audited', async () => {
       expect(history[0].action).toBe('delete');
 
       // Delete the page
-      await dispatch({
-        resource: 'deletePage',
-        projectId: project.projectName,
-        body: { id: project.pages[0].id },
-      }, true);
+      await dispatch(
+        {
+          resource: 'deletePage',
+          projectId: project.projectName,
+          body: { id: project.pages[0].id },
+        },
+        true
+      );
 
       ({ history } = await dispatch({
         resource: 'getHistory',
@@ -107,13 +127,16 @@ test('project changes are audited', async () => {
 
       // Add a server
       const server = new ServerInfo({
-        password_encrypt: new Encrypt('bubbly'),        
+        password_encrypt: new Encrypt('bubbly'),
       });
-      await dispatch({
-        resource: 'updateServer',
-        projectId: project.projectName,
-        body: { position: 0, data: server },
-      }, true);
+      await dispatch(
+        {
+          resource: 'updateServer',
+          projectId: project.projectName,
+          body: { position: 0, data: server },
+        },
+        true
+      );
 
       ({ history } = await dispatch({
         resource: 'getHistory',
@@ -131,11 +154,14 @@ test('project changes are audited', async () => {
       const connector = new DatabaseConnectorInfo({
         password_encrypt: new Encrypt('bubbly'),
       });
-      await dispatch({
-        resource: 'updateConnector',
-        projectId: project.projectName,
-        body: { position: 0, data: connector },
-      }, true);
+      await dispatch(
+        {
+          resource: 'updateConnector',
+          projectId: project.projectName,
+          body: { position: 0, data: connector },
+        },
+        true
+      );
 
       ({ history } = await dispatch({
         resource: 'getHistory',
@@ -147,14 +173,19 @@ test('project changes are audited', async () => {
       expect(history[0].table).toBe('ds_connector');
       // Encrypted during save
       expect(connector.database.password_encrypt.encrypted).toBe(true);
-      expect(JSON.parse(history[0].newValue).database.password_encrypt).toBe(undefined);
+      expect(JSON.parse(history[0].newValue).database.password_encrypt).toBe(
+        undefined
+      );
 
       // Delete server
-      await dispatch({
-        resource: 'deleteServer',
-        projectId: project.projectName,
-        body: server,
-      }, true);
+      await dispatch(
+        {
+          resource: 'deleteServer',
+          projectId: project.projectName,
+          body: server,
+        },
+        true
+      );
 
       ({ history } = await dispatch({
         resource: 'getHistory',
@@ -166,11 +197,14 @@ test('project changes are audited', async () => {
       expect(history[0].table).toBe('ds_server');
 
       // Delete connector
-      await dispatch({
-        resource: 'deleteConnector',
-        projectId: project.projectName,
-        body: connector,
-      }, true);
+      await dispatch(
+        {
+          resource: 'deleteConnector',
+          projectId: project.projectName,
+          body: connector,
+        },
+        true
+      );
 
       ({ history } = await dispatch({
         resource: 'getHistory',
