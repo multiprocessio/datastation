@@ -2,7 +2,7 @@ import express from 'express';
 import { DispatchPayload, RPCHandler } from '../desktop/rpc';
 import log from '../shared/log';
 
-export function makeDispatch<EndpointT>(
+export function makeDispatch<EndpointT extends string>(
   handlers: RPCHandler<any, any, EndpointT>[]
 ) {
   return async function dispatch(
@@ -23,17 +23,17 @@ export function makeDispatch<EndpointT>(
   };
 }
 
-export async function handleRPC(
+export async function handleRPC<EndpointT extends string>(
   req: express.Request,
   rsp: express.Response,
-  rpcHandlers: RPCHandler<any, any>[]
+  rpcHandlers: RPCHandler<any, any, any>[]
 ) {
   const payload = {
     ...req.query,
     ...req.body,
   };
 
-  const dispatch = makeDispatch(rpcHandlers);
+  const dispatch = makeDispatch<EndpointT>(rpcHandlers);
 
   try {
     const rpcResponse = await dispatch(payload, true);

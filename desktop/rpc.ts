@@ -44,7 +44,7 @@ import {
   UpdateServerResponse,
 } from '../shared/rpc';
 
-export interface GenericRPCPayload<EndpointT> {
+export interface GenericRPCPayload<EndpointT extends string> {
   messageNumber: number;
   resource: EndpointT;
   projectId: string;
@@ -53,21 +53,21 @@ export interface GenericRPCPayload<EndpointT> {
 
 export type RPCPayload = GenericRPCPayload<Endpoint>;
 
-export type DispatchPayload<EndpointT> = Omit<
+export type DispatchPayload<EndpointT extends string> = Omit<
   GenericRPCPayload<EndpointT>,
   'messageNumber' | 'body'
 > & {
   body?: any;
 };
 
-export type GenericDispatch<EndpointT> = (
+export type GenericDispatch<EndpointT extends string> = (
   payload: DispatchPayload<EndpointT>,
   external?: boolean,
 ) => Promise<any>;
 
 export type Dispatch = GenericDispatch<Endpoint>;
 
-export interface RPCHandler<Request, Response, EndpointT = Endpoint> {
+export interface RPCHandler<Request, Response, EndpointT extends string = Endpoint> {
   resource: EndpointT;
   handler: (
     projectId: string,
@@ -162,7 +162,7 @@ function sendIPCRendererResponse(
   event.sender.send(channel, msg);
 }
 
-export function makeDispatch<EndpointT>(
+export function makeDispatch<EndpointT extends string>(
   handlers: RPCHandler<any, any, EndpointT>[]
 ): GenericDispatch<EndpointT> {
   function dispatch(payload: GenericRPCPayload<EndpointT>, external = false) {
@@ -180,7 +180,7 @@ export function makeDispatch<EndpointT>(
   return dispatch;
 }
 
-export function registerRPCHandlers<EndpointT>(
+export function registerRPCHandlers<EndpointT extends string>(
   ipcMain: IpcMain,
   handlers: RPCHandler<any, any, EndpointT>[],
   dispatch?: GenericDispatch<EndpointT>,

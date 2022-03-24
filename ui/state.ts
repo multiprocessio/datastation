@@ -157,7 +157,7 @@ export function useProjectState(
     list: Array<T>,
     storeDelete: (projectId: string, id: string) => Promise<void>
   ): (id: string) => Promise<void> {
-    return function del(id: string) {
+    return async function del(id: string) {
       const index = (list || []).findIndex((c) => c.id === id);
       if (index === -1) {
         return;

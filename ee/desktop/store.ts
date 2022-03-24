@@ -1,10 +1,10 @@
 // Copyright 2022 Multiprocess Labs LLC
 
+import * as rpc_ce from '../../desktop/rpc';
 import * as store_ce from '../../desktop/store';
 import { deepClone } from '../../shared/object';
 import { doOnMatchingFields } from '../../shared/state';
 import { History } from '../shared/state';
-import { Endpoint } from '../shared/rpc';
 import { GetHistoryHandler } from './rpc';
 
 function unix(dt: Date) {
@@ -121,11 +121,7 @@ export class Store extends store_ce.Store {
   };
 
   // Only used in tests
-  getHandlers<Endpoint>() {
-    return [
-      ...super.getHandlers(),
-      this.getHistoryHandler,
-      this.insertHistoryHandler,
-    ]
+  getHandlers(): rpc_ce.RPCHandler<any, any, any>[] {
+    return [...super.getHandlers(), this.getHistoryHandler];
   }
 }

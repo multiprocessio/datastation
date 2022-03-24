@@ -646,7 +646,7 @@ GROUP BY panel_id
 
   // Break handlers out so they can be individually typed without `any`,
   // only brought here and masked as `any`.
-  getHandlers<EndpointT>(): RPCHandler<any, any, EndpointT>[] {
+  getHandlers(): RPCHandler<any, any, any>[] {
     return [
       this.getProjectHandler,
       this.getProjectsHandler,
