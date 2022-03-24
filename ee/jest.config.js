@@ -1,3 +1,5 @@
+// Copyright 2022 Multiprocess Labs LLC
+
 module.exports = {
   // Only on linux do all tests run
   coverageThreshold:

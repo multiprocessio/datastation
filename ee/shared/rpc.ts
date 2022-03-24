@@ -1,3 +1,5 @@
+// Copyright 2022 Multiprocess Labs LLC
+
 import * as rpc_ce from '../../shared/rpc';
 import { History } from './state';
 

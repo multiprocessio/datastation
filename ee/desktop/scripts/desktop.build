@@ -1,3 +1,5 @@
+# Copyright 2022 Multiprocess Labs LLC
+
 rm -rf build
 rm -rf ../build
 setenv UI_TITLE "DataStation Enterprise Edition"

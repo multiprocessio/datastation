@@ -54,6 +54,16 @@ import {
 } from './rpc';
 import { encrypt } from './secret';
 
+export function getMigrations() {
+  const migrationsBase = path.join(__dirname, 'migrations');
+  const migrations = fs
+  .readdirSync(migrationsBase)
+  .filter((f) => f.endsWith('.sql'))
+  .map(file => path.join(migrationsBase, file));
+  migrations.sort();
+  return migrations;
+}
+
 export function getProjectResultsFile(projectId: string) {
   const fileName = path
     .basename(projectId)
@@ -122,8 +132,10 @@ const PRAGMAS = [
 
 export class Store {
   stubMaker: () => () => string;
-  constructor(stubMaker = () => () => '?') {
+  migrations: Array<string>;
+  constructor(stubMaker = () => () => '?', migrations = getMigrations()) {
     this.stubMaker = stubMaker;
+    this.migrations = migrations;
   }
 
   validateSQLiteDriver() {
@@ -143,6 +155,10 @@ export class Store {
     if (this.firstTime) {
       this.validateSQLiteDriver();
       this.firstTime = false;
+    }
+
+    if (!projectId) {
+      throw new Error('Expected a project id.');
     }
 
     const filename = ensureProjectFile(projectId);
@@ -366,15 +382,10 @@ GROUP BY panel_id
       const db = this.getConnection(projectId);
       const newProject = new ProjectState();
       newProject.projectName = ensureProjectFile(projectId);
-      const migrationsBase = path.join(__dirname, 'migrations');
-      const files = fs
-        .readdirSync(migrationsBase)
-        .filter((f) => f.endsWith('.sql'));
-      files.sort();
-      for (const file of files) {
+      for (const file of this.migrations) {
         log.info('Running migration: ' + file);
         const contents = fs
-          .readFileSync(path.join(migrationsBase, file))
+          .readFileSync(file)
           .toString();
         db.exec(contents);
         log.info('Done migration: ' + file);

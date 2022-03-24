@@ -1,3 +1,5 @@
+// Copyright 2022 Multiprocess Labs LLC
+
 const { Store } = require('./store');
 const { LiteralPanelInfo } = require('../../shared/state');
 const { withSavedPanels } = require('../../desktop/panel/testutil');
@@ -13,7 +15,8 @@ test('project changes are audited', async () => {
   await withSavedPanels(
     [lp],
     async (project, dispatch) => {
-      let [history] = await dispatch({ resource: 'getHistory', body: {}, projectId: project.id });
+      dispatch = new History(store, store.getHandlers()).audit;
+      let res = await dispatch({ resource: 'getHistory', body: {}, projectId: project.projectName });
       expect(history.length).toBe(4);
 
       // No change, no new history.
@@ -22,7 +25,7 @@ test('project changes are audited', async () => {
         body: lp,
       });
 
-      [history] = await dispatch({ resource: 'getHistory', body: {}, projectId: project.id });
+      ({history}= await dispatch({ resource: 'getHistory', body: {}, projectId: project.projectName }));
       expect(history.length).toBe(4);
 
       // Make a change, new history entry
@@ -32,7 +35,7 @@ test('project changes are audited', async () => {
         body: lp,
       });
 
-      [history] = await dispatch({ resource: 'getHistory', body: {}, projectId: project.id});
+      ({history}= await dispatch({ resource: 'getHistory', body: {}, projectId: project.projectName}));
       expect(history.length).toBe(5);
       finished = true;
     },

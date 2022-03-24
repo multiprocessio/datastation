@@ -1,3 +1,5 @@
+// Copyright 2022 Multiprocess Labs LLC
+
 import * as uuid from 'uuid';
 import { mergeDeep } from '../../shared/object';
 

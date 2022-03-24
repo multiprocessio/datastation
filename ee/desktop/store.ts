@@ -1,5 +1,7 @@
 // Copyright 2022 Multiprocess Labs LLC
 
+import fs from 'fs';
+import path from 'path';
 import * as rpc_ce from '../../desktop/rpc';
 import * as store_ce from '../../desktop/store';
 import { deepClone } from '../../shared/object';
@@ -11,7 +13,27 @@ function unix(dt: Date) {
   return Math.floor(dt.getTime() / 1000);
 }
 
+export function getMigrations() {
+  const migrationsBase = path.join(__dirname, 'migrations');
+  const migrations = fs
+    .readdirSync(migrationsBase)
+    .filter((f) => f.endsWith('.sql'))
+    .map((file) => path.join(migrationsBase, file));
+  migrations.sort();
+  return migrations;
+}
+
 export class Store extends store_ce.Store {
+  constructor() {
+    const migrations = store_ce.getMigrations();
+    for (const f of getMigrations()) {
+      if (!migrations.includes(f)) {
+        migrations.push(f);
+      }
+    }
+
+    super(undefined, migrations);
+  }
   getAuditableValue(value: any) {
     const copy = deepClone(value);
     // Blank out all encrypted fields, all temporal-changing fields.
