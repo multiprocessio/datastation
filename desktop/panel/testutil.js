@@ -39,7 +39,10 @@ exports.fileIsEmpty = function (fileName) {
 };
 
 exports.updateProject = async function (project, opts) {
-  const store = new Store();
+  if (!opts?.store) {
+    opts.store = new Store();
+  }
+
   const handlers = store.getHandlers();
   if (opts?.isNew) {
     const makeProjectHandler = handlers.find(
@@ -95,14 +98,18 @@ exports.updateProject = async function (project, opts) {
 exports.withSavedPanels = async function (
   panels,
   cb,
-  { evalPanels, subprocessName, settings, connectors, servers } = {}
+  { evalPanels, subprocessName, settings, connectors, servers, store } = {}
 ) {
-  const store = new Store();
+  if (!store) {
+    store = new Store();
+  }
+
   const handlers = store.getHandlers();
   const getProjectHandler = handlers.find((h) => h.resource === 'getProject');
   const updatePanelResultHandler = handlers.find(
     (h) => h.resource === 'updatePanelResult'
   );
+  const dispatch = makeDispatch(handlers);
 
   const tmp = await makeTmpFile({ prefix: 'saved-panel-project-' });
 
@@ -120,27 +127,8 @@ exports.withSavedPanels = async function (
   };
 
   try {
-    await exports.updateProject(project, { isNew: true });
+    await exports.updateProject(project, { isNew: true, store });
     expect(exports.fileIsEmpty(project.projectName + '.dsproj')).toBe(false);
-
-    async function dispatch(r) {
-      if (r.resource === 'getProject') {
-        return getProjectHandler.handler(r.projectId, r.body);
-      }
-
-      if (r.resource === 'updatePanelResult') {
-        return updatePanelResultHandler.handler(r.projectId, r.body);
-      }
-
-      if (r.resource === 'fetchResults') {
-        return fetchResultsHandler.handler(r.projectId, r.body, dispatch);
-      }
-
-      // TODO: support more resources as needed
-      throw new Error(
-        `Unsupported resource (${r.resource}) in tests. You'll need to add support for it here.`
-      );
-    }
 
     if (evalPanels) {
       console.log('Eval-ing panels');

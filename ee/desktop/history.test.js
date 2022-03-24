@@ -1,13 +1,7 @@
 const { Store } = require('./store');
 const {
-  ProjectState,
-  ProjectPage,
-  ProgramPanelInfo,
-  PanelResult,
-  Encrypt,
-  DatabaseConnectorInfo,
-  ServerInfo,
-} = require('../shared/state');
+  LiteralPanelInfo,
+} = require('../../shared/state');
 const { withSavedPanels } = require('../../desktop/panel/testutil');
 
 const store = new Store();
@@ -44,7 +38,8 @@ test('project changes are audited', async () => {
       expect(history.length).toBe(5);
       finished = true;
     },
-    { evalPanels: false, subprocessName: runner }
+    {},
+    store,
   );
 
   if (!finished) {

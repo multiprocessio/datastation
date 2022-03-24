@@ -4,6 +4,7 @@ import * as store_ce from '../../desktop/store';
 import { deepClone } from '../../shared/object';
 import { doOnMatchingFields } from '../../shared/state';
 import { History } from '../shared/state';
+import { Endpoint } from '../shared/rpc';
 import { GetHistoryHandler } from './rpc';
 
 function unix(dt: Date) {
@@ -118,4 +119,13 @@ export class Store extends store_ce.Store {
       return { history };
     },
   };
+
+  // Only used in tests
+  getHandlers<Endpoint>() {
+    return [
+      ...super.getHandlers(),
+      this.getHistoryHandler,
+      this.insertHistoryHandler,
+    ]
+  }
 }
