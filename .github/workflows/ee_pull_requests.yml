@@ -5,7 +5,7 @@ on:
     branches: [main]
 
 jobs:
-  ee/test:
+  ee_test:
     runs-on: ubuntu-latest
 
     steps:
