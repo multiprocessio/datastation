@@ -49,7 +49,7 @@ export class Store extends store_ce.Store {
         'old_value',
         'new_value',
         'user_id',
-	'action',
+        'action',
       ];
       const stubMaker = this.stubMaker();
       const stubs = columns.map(() => stubMaker());
@@ -62,17 +62,17 @@ export class Store extends store_ce.Store {
         auditableOld,
         auditableNew,
         data.userId,
-	action,
+        data.action,
       ];
       db.transaction(() => {
         // Grab the last value
         const row = db
           .prepare(
-            `SELECT new_value AS val FROM ds_history WHERE tbl = ? AND pk = ? ORDER BY dt DESC LIMIT 1`
+            `SELECT action, new_value AS val FROM ds_history WHERE tbl = ? AND pk = ? ORDER BY dt DESC LIMIT 1`
           )
           .get(data.table, data.pk);
         // Don't log the same value twice
-        if (row && row.val === auditableNew) {
+        if (row && row.val === auditableNew && row.action === data.action) {
           return;
         }
 

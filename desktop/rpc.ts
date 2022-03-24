@@ -61,7 +61,8 @@ export type DispatchPayload<EndpointT> = Omit<
 };
 
 export type GenericDispatch<EndpointT> = (
-  payload: DispatchPayload<EndpointT>
+  payload: DispatchPayload<EndpointT>,
+  external?: boolean,
 ) => Promise<any>;
 
 export type Dispatch = GenericDispatch<Endpoint>;
@@ -182,10 +183,7 @@ export function makeDispatch<EndpointT>(
 export function registerRPCHandlers<EndpointT>(
   ipcMain: IpcMain,
   handlers: RPCHandler<any, any, EndpointT>[],
-  dispatch?: (
-    p: GenericRPCPayload<EndpointT>,
-    external?: boolean
-  ) => Promise<any>
+  dispatch?: GenericDispatch<EndpointT>,
 ) {
   if (!dispatch) {
     dispatch = makeDispatch<EndpointT>(handlers);

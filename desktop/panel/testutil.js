@@ -12,6 +12,9 @@ const {
 const { Store } = require('../store');
 const { makeEvalHandler } = require('./eval');
 const { fetchResultsHandler } = require('./columns');
+const { ensureSigningKey } = require('../secret');
+
+ensureSigningKey();
 
 exports.inPath = function (program) {
   const where = {

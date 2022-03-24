@@ -16,7 +16,6 @@ export class History {
 
   async auditUpdateGeneric(
     payload: RPCPayload,
-    external: boolean,
     table: string,
     id: string,
     getter: (
@@ -45,7 +44,7 @@ export class History {
         oldValue,
         newValue,
         userId: '1',
-	action: 'update'
+        action: 'update',
       });
       await this.store.insertHistoryHandler.handler(
         payload.projectId,
@@ -62,44 +61,41 @@ export class History {
     return res;
   }
 
-  async auditUpdatePage(payload: RPCPayload, external?: boolean) {
+  auditUpdatePage(payload: RPCPayload) {
     const body = payload.body as rpc_types_ce.UpdatePageRequest;
     return this.auditUpdateGeneric(
       payload,
-      external,
+
       'ds_page',
       body.data.id,
       this.store.getPageHandler.handler
     );
   }
 
-  async auditUpdatePanel(payload: RPCPayload, external?: boolean) {
+  auditUpdatePanel(payload: RPCPayload) {
     const body = payload.body as rpc_types_ce.UpdatePanelRequest;
     return this.auditUpdateGeneric(
       payload,
-      external,
       'ds_panel',
       body.data.id,
       this.store.getPanelHandler.handler
     );
   }
 
-  async auditUpdateConnector(payload: RPCPayload, external?: boolean) {
+  auditUpdateConnector(payload: RPCPayload) {
     const body = payload.body as rpc_types_ce.UpdateConnectorRequest;
     return this.auditUpdateGeneric(
       payload,
-      external,
       'ds_connector',
       body.data.id,
       this.store.getConnectorHandler.handler
     );
   }
 
-  async auditUpdateServer(payload: RPCPayload, external?: boolean) {
+  auditUpdateServer(payload: RPCPayload) {
     const body = payload.body as rpc_types_ce.UpdateServerRequest;
     return this.auditUpdateGeneric(
       payload,
-      external,
       'ds_server',
       body.data.id,
       this.store.getServerHandler.handler
@@ -113,31 +109,71 @@ export class History {
     );
   }
 
+  async auditDeleteGeneric(payload: RPCPayload, table: string, id: string) {
+    this.ensureUser(payload.projectId);
+    let exception: Error;
+    let res: any;
+    try {
+      res = await this.dispatch(payload);
+    } catch (e) {
+      exception = e;
+    }
+
+    const data = new HistoryT({
+      table,
+      pk: id,
+      error: String(exception),
+      oldValue: null,
+      newValue: null,
+      userId: '1',
+      action: 'delete',
+    });
+    await this.store.insertHistoryHandler.handler(
+      payload.projectId,
+      { data },
+      null,
+      false
+    );
+
+    if (exception) {
+      throw exception;
+    }
+
+    return res;
+  }
+
   audit = (payload: RPCPayload, external?: boolean) => {
     // Only need to audit external requests (i.e by the user)
     if (external) {
       switch (payload.resource) {
         case 'updatePage':
-          return this.auditUpdatePage(payload, external);
+          return this.auditUpdatePage(payload);
         case 'updatePanel':
-          return this.auditUpdatePanel(payload, external);
+          return this.auditUpdatePanel(payload);
         case 'updateServer':
-          return this.auditUpdateServer(payload, external);
+          return this.auditUpdateServer(payload);
         case 'updateConnector':
-          return this.auditUpdateConnector(payload, external);
+          return this.auditUpdateConnector(payload);
 
-	  // TODO: implement these
-	case 'deletePage':
-          return this.auditDeletePage(payload, external);
-        case 'deletePanel':
-          return this.auditDeletePanel(payload, external);
-        case 'deleteServer':
-          return this.auditDeleteServer(payload, external);
-        case 'deleteConnector':
-          return this.auditDeleteConnector(payload, external);
+        case 'deletePage': {
+          const body = payload.body as rpc_types_ce.DeletePageRequest;
+          return this.auditDeleteGeneric(payload, 'ds_page', body.id);
+        }
+        case 'deletePanel': {
+          const body = payload.body as rpc_types_ce.DeletePanelRequest;
+          return this.auditDeleteGeneric(payload, 'ds_panel', body.id);
+        }
+        case 'deleteServer': {
+          const body = payload.body as rpc_types_ce.DeleteServerRequest;
+          return this.auditDeleteGeneric(payload, 'ds_server', body.id);
+        }
+        case 'deleteConnector': {
+          const body = payload.body as rpc_types_ce.DeleteConnectorRequest;
+          return this.auditDeleteGeneric(payload, 'ds_connector', body.id);
+        }
       }
     }
 
-    return this.dispatch(payload);
+    return this.dispatch(payload, external);
   };
 }

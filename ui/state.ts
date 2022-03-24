@@ -97,23 +97,23 @@ export function useProjectState(
     [projectId, store, setProjectState]
   );
 
+  async function reread(projectId: string) {
+    let state;
+    try {
+      let rawState = await store.get(projectId);
+      state = ProjectState.fromJSON(rawState);
+    } catch (e) {
+      log.error(e);
+      window.location.href = '/';
+    }
+
+    setProjectState(state);
+  }
+
   React.useEffect(
     function reReadStateWhenProjectIdChanges() {
-      async function fetch() {
-        let state;
-        try {
-          let rawState = await store.get(projectId);
-          state = ProjectState.fromJSON(rawState);
-        } catch (e) {
-          log.error(e);
-          window.location.href = '/';
-        }
-
-        setProjectState(state);
-      }
-
       if (projectId) {
-        fetch();
+        reread(projectId);
       }
     },
     [projectId]
@@ -134,22 +134,22 @@ export function useProjectState(
       opts?: { internalOnly: boolean }
     ) {
       const internalOnly = opts ? opts.internalOnly : false;
+      if (internalOnly) {
+	return;
+      }
       // Actually an insert
       if (index === -1) {
         list.push(obj);
-        if (!internalOnly) {
-          storeUpdate(projectId, obj, list.length - 1);
-        }
-
-        setState(state);
+	setState(state);
+        await storeUpdate(projectId, obj, list.length - 1);
+	await reread(projectId);
         return;
       }
 
       list[index] = obj;
       setState(state);
-      if (!internalOnly) {
-        storeUpdate(projectId, obj, index);
-      }
+      await storeUpdate(projectId, obj, index);
+      return reread(projectId);
     };
   }
 
@@ -165,7 +165,8 @@ export function useProjectState(
 
       list.splice(index, 1);
       setState(state);
-      return storeDelete(projectId, id);
+      await storeDelete(projectId, id);
+      return reread(projectId);
     };
   }
 

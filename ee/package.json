@@ -5,11 +5,15 @@
   "scripts": {
     "format": "yarn prettier --write \"**/*.ts\"",
     "build-desktop": "python3 ../scripts/build.py ./desktop/scripts/desktop.build",
-    "start-desktop": "yarn build-desktop && yarn electron --trace-warning --unhandled-rejection=warn build/desktop.js"
+    "start-desktop": "yarn build-desktop && yarn electron --trace-warning --unhandled-rejection=warn build/desktop.js",
+    "test": "yarn test-local --coverage",
+    "test-local": "cross-env NODE_OPTIONS=--unhandled-rejections=warn jest --passWithNoTests"
   },
   "devDependencies": {
+    "cross-env": "^7.0.3",
     "electron": "^17.1.2",
     "esbuild": "^0.14.27",
+    "jest": "^27.5.1",
     "prettier": "^2.6.0",
     "prettier-plugin-organize-imports": "^2.3.4",
     "typescript": "^4.6.2"
