@@ -31,7 +31,6 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { Highlight } from './components/Highlight';
 import { Input } from './components/Input';
 import { Select } from './components/Select';
-import { PanelPlayWarning } from './errors';
 import { PANEL_GROUPS, PANEL_UI_DETAILS } from './panels';
 import { UrlStateContext } from './urlState';
 
@@ -221,11 +220,8 @@ function PanelError({ panels, e }: { panels: Array<PanelInfo>; e: Error }) {
     return null;
   }
 
+  // ui eval emits PanelPlayWarning directly
   if (EVAL_ERRORS.map((cls) => new (cls as any)().name).includes(e.name)) {
-    e = new PanelPlayWarning(e.message);
-  }
-
-  if (e instanceof PanelPlayWarning) {
     return <PanelPlayWarningWithLinks panels={panels} msg={e.message} />;
   }
 
