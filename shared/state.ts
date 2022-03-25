@@ -5,7 +5,7 @@ import { SupportedLanguages } from './languages';
 import { mergeDeep, setPath } from './object';
 
 export class PanelResult {
-  exception?: Error;
+  exception?: any;
   value?: Array<any>;
   preview: string;
   stdout: string;
