@@ -23,10 +23,6 @@ export function deepEquals(a: any, b: any) {
 }
 
 export function deepClone(a: any) {
-  if (globalThis.history === undefined) {
-    return JSON.parse(JSON.stringify(a));
-  }
-
   // https://twitter.com/DasSurma/status/955484341358022657
   const oldState = history.state;
   history.replaceState(a, (window as any).title);

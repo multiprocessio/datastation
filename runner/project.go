@@ -40,7 +40,6 @@ func (ec EvalContext) getPagesFromDatabase(db *sql.DB) ([]ProjectPage, error) {
 	defer rows.Close()
 
 	var j []byte
-	var p ProjectPage
 	var pages []ProjectPage
 
 	for rows.Next() {
@@ -49,6 +48,7 @@ func (ec EvalContext) getPagesFromDatabase(db *sql.DB) ([]ProjectPage, error) {
 			return nil, err
 		}
 
+		var p ProjectPage
 		err = jsonUnmarshal(j, &p)
 		if err != nil {
 			return nil, err
@@ -69,7 +69,6 @@ func (ec EvalContext) getPanelsFromDatabase(db *sql.DB) (map[string][]PanelInfo,
 	defer rows.Close()
 
 	var j []byte
-	var p PanelInfo
 	panelPageMap := map[string][]PanelInfo{}
 
 	for rows.Next() {
@@ -78,6 +77,7 @@ func (ec EvalContext) getPanelsFromDatabase(db *sql.DB) (map[string][]PanelInfo,
 			return nil, err
 		}
 
+		var p PanelInfo
 		err = jsonUnmarshal(j, &p)
 		if err != nil {
 			return nil, err
@@ -138,7 +138,6 @@ func (ec EvalContext) getConnectorsFromDatabase(db *sql.DB) ([]ConnectorInfo, er
 	defer rows.Close()
 
 	var j []byte
-	var p ConnectorInfo
 	var connectors []ConnectorInfo
 
 	for rows.Next() {
@@ -147,6 +146,7 @@ func (ec EvalContext) getConnectorsFromDatabase(db *sql.DB) ([]ConnectorInfo, er
 			return nil, err
 		}
 
+		var p ConnectorInfo
 		err = jsonUnmarshal(j, &p)
 		if err != nil {
 			return nil, err
@@ -167,7 +167,6 @@ func (ec EvalContext) getServersFromDatabase(db *sql.DB) ([]ServerInfo, error) {
 	defer rows.Close()
 
 	var j []byte
-	var p ServerInfo
 	var servers []ServerInfo
 
 	for rows.Next() {
@@ -176,6 +175,7 @@ func (ec EvalContext) getServersFromDatabase(db *sql.DB) ([]ServerInfo, error) {
 			return nil, err
 		}
 
+		var p ServerInfo
 		err = jsonUnmarshal(j, &p)
 		if err != nil {
 			return nil, err

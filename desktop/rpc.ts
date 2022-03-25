@@ -167,7 +167,7 @@ function sendIPCRendererResponse(
 }
 
 export function makeDispatch<EndpointT extends string>(
-  handlers: RPCHandler<any, any, EndpointT>[]
+  handlers: RPCHandler<any, any, any>[]
 ): GenericDispatch<EndpointT> {
   function dispatch(payload: GenericRPCPayload<EndpointT>, external = false) {
     if (external) {
@@ -186,7 +186,7 @@ export function makeDispatch<EndpointT extends string>(
 
 export function registerRPCHandlers<EndpointT extends string>(
   ipcMain: IpcMain,
-  handlers: RPCHandler<any, any, EndpointT>[],
+  handlers: RPCHandler<any, any, any>[],
   dispatch?: GenericDispatch<EndpointT>
 ) {
   if (!dispatch) {

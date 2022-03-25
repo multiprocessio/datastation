@@ -286,8 +286,13 @@ export function Panel({
   >('preview');
   const results = panel.resultMeta || new PanelResult();
 
+  const [loading, setLoading] = React.useState(results.loading);
+  React.useEffect(() => {
+    setLoading(results.loading);
+  }, [results.loading]);
+
   const panelRef = React.useRef(null);
-  function keyboardShortcuts(e: React.KeyboardEvent) {
+  async function keyboardShortcuts(e: React.KeyboardEvent) {
     if (
       !panelRef.current &&
       panelRef.current !== document.activeElement &&
@@ -297,14 +302,20 @@ export function Panel({
     }
 
     if (e.ctrlKey && e.code === 'Enter') {
-      reevalPanel(panel.id);
       if (e.preventDefault) {
         e.preventDefault();
+      }
+
+      setLoading(true);
+      try {
+        await reevalPanel(panel.id);
+      } finally {
+        setLoading(false);
       }
     }
   }
 
-  const killable = results.loading && MODE_FEATURES.killProcess;
+  const killable = loading && MODE_FEATURES.killProcess;
   function killProcess() {
     return panelRPC('killProcess', panel.id);
   }
@@ -325,6 +336,8 @@ export function Panel({
     }
   }
 
+  console.log(results);
+
   return (
     <div
       id={`panel-${panel.id}`}
@@ -336,7 +349,7 @@ export function Panel({
         !results.exception
           ? 'panel--empty'
           : ''
-      } ${results.loading ? 'panel--loading' : ''}`}
+      } ${loading ? 'panel--loading' : ''}`}
       tabIndex={1001}
       ref={panelRef}
       onKeyDown={keyboardShortcuts}
@@ -417,7 +430,7 @@ export function Panel({
 
             <span className="panel-controls vertical-align-center flex-right">
               <span className="text-muted">
-                {results.loading ? (
+                {loading ? (
                   'Running...'
                 ) : results.lastRun ? (
                   <>
@@ -452,7 +465,7 @@ export function Panel({
               </span>
               <span
                 title={
-                  results.loading
+                  loading
                     ? killable
                       ? 'Cancel'
                       : 'Running'
@@ -463,14 +476,20 @@ export function Panel({
                   icon
                   onClick={async () => {
                     if (killable) {
-                      killProcess();
+                      await killProcess();
+                      setLoading(false);
                     }
 
-                    reevalPanel(panel.id);
+                    setLoading(true);
+                    try {
+                      await reevalPanel(panel.id);
+                    } finally {
+                      setLoading(false);
+                    }
                   }}
                   type="primary"
                 >
-                  {results.loading ? <IconPlayerPause /> : <IconPlayerPlay />}
+                  {loading ? <IconPlayerPause /> : <IconPlayerPlay />}
                 </Button>
               </span>
               <span title="Full screen mode">

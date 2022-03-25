@@ -3,7 +3,7 @@ import { DispatchPayload, RPCHandler } from '../desktop/rpc';
 import log from '../shared/log';
 
 export function makeDispatch<EndpointT extends string>(
-  handlers: RPCHandler<any, any, EndpointT>[]
+  handlers: RPCHandler<any, any, any>[]
 ) {
   return async function dispatch(
     payload: DispatchPayload<EndpointT>,

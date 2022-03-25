@@ -4,7 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import log from '../shared/log';
 import { getPath } from '../shared/object';
-import { Endpoint, GetProjectRequest, MakeProjectRequest } from '../shared/rpc';
+import { GetProjectRequest, MakeProjectRequest } from '../shared/rpc';
 import {
   ConnectorInfo,
   DatabasePanelInfo,
@@ -448,8 +448,8 @@ GROUP BY panel_id
     }
   };
 
-  updatePanelResultHandler = {
-    resource: 'updatePanelResult' as Endpoint,
+  updatePanelResultHandler: RPCHandler<any, any, any> = {
+    resource: 'updatePanelResult',
     handler: async (
       projectId: string,
       body: {

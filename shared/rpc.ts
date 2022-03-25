@@ -101,15 +101,16 @@ export type StoreEndpoint =
   | 'updateProject'
   | 'updateConnector'
   | 'updateServer'
-  | 'getPage'
-  | 'getPanel'
-  | 'getConnector'
-  | 'getServer'
+  | 'updatePanelResult'
   | 'deletePanel'
   | 'deletePage'
   | 'deleteConnector'
   | 'deleteServer'
   | 'getProject'
+  | 'getPage'
+  | 'getPanel'
+  | 'getServer'
+  | 'getConnector'
   | 'openProject'
   | 'getSettings'
   | 'updateSettings'
@@ -118,8 +119,7 @@ export type StoreEndpoint =
   | 'updateDashboard'
   | 'getExports'
   | 'deleteExport'
-  | 'updateExport'
-  | 'updatePanelResult';
+  | 'updateExport';
 
 export type PanelBody = { panelId: string };
 export type PanelEndpoint = 'killProcess' | 'fetchResults' | 'eval';
