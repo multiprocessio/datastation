@@ -95,7 +95,7 @@ export async function evalInSubprocess(
   projectName: string,
   panel: PanelInfo,
   connectors: ConnectorInfo[]
-): Promise<[PanelResult, string]> {
+): Promise<[Partial<PanelResult>, string]> {
   const tmp = await makeTmpFile({ prefix: 'resultmeta-' });
   let pid = 0;
 
@@ -255,7 +255,7 @@ async function evalNoUpdate(
     node: string;
     go?: string;
   }
-): Promise<[PanelResult, string]> {
+): Promise<[Partial<PanelResult>, string]> {
   const { project, panel, panelPage } = await getProjectAndPanel(
     dispatch,
     projectId,
@@ -346,7 +346,7 @@ export const makeEvalHandler = (subprocessEval?: {
     dispatch: Dispatch
   ): Promise<PanelResult> {
     let stderr = '';
-    let res: PanelResult;
+    let res: Partial<PanelResult>;
     try {
       [res, stderr] = await evalNoUpdate(
         projectId,
@@ -367,7 +367,7 @@ export const makeEvalHandler = (subprocessEval?: {
       projectId,
       body: { data: res, panelId: body.panelId },
     });
-    return res;
+    return Object.assign(new PanelResult(), res);
   },
 });
 
