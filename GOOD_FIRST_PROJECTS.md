@@ -10,7 +10,7 @@ and [try out dsq](https://github.com/multiprocessio/dsq).
 You'll need to have this little bit of experience using DataStation
 and dsq for these tasks to make sense.
 
-## Trivial
+## Easy
 
 * Add a new supported file type
   * Example: Messagepack, BSON, CBOR, UBJSON, XML, Yaml, Protobuf, Avro? HDF5?
