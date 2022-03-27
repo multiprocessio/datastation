@@ -51,5 +51,5 @@ Find user guides for all different kinds of databases and scenarios
 Download the app and use it! Report bugs on
 [Discord](https://discord.gg/f2wQBc4bXX).
 
-If you want to contribute, there are many great first-timer tasks. Say
-hi on the #dev channel on Discord if you're interested!
+If you're a developer with some Go experience looking to hack on open
+source, check out [GOOD_FIRST_PROJECTS.md](GOOD_FIRST_PROJECTS.md).
