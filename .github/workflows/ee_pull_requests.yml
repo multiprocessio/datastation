@@ -7,6 +7,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    working-directory: ee
 
     steps:
     - uses: actions/checkout@master
@@ -26,12 +27,14 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-yarn-
 
-    - run: ./scripts/ci/prepare_linux.sh --integration-tests
-    - run: cd ee && yarn format
-    - run: cd ee && yarn tsc
-    - run: ./scripts/fail_on_diff.sh
-    - run: cd ee && ./scripts/require_copyright.sh
-    - run: cd ee && yarn test
+    - run: cd .. && ./scripts/ci/prepare_linux.sh --integration-tests
+    - run: cd .. && yarn
+    - run: yarn
+    - run: yarn format
+    - run: yarn tsc
+    - run: cd .. && ./scripts/fail_on_diff.sh
+    - run: ./scripts/require_copyright.sh
+    - run: yarn test
 
   macos:
     runs-on: macos-latest
