@@ -32,6 +32,7 @@
     "better-sqlite3": "multiprocessio/better-sqlite3#11866f1",
     "chart.js": "^3.5.1",
     "cookie-parser": "^1.4.5",
+    "core-js": "^3.21.1",
     "date-fns": "^2.24.0",
     "express": "^4.17.1",
     "express-session": "^1.17.2",

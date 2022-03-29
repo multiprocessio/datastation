@@ -136,7 +136,6 @@ export async function evalInSubprocess(
       );
     }
 
-    const lastRun = new Date();
     log.info(`Launching "${base} ${args.join(' ')}"`);
     const child = execFile(base, args, {
       windowsHide: true,
@@ -195,9 +194,6 @@ export async function evalInSubprocess(
     if (!parsePartial) {
       const rm: Partial<PanelResult> = JSON.parse(resultMeta);
       // Case of existing Node.js runner
-      rm.lastRun = lastRun;
-      rm.loading = false;
-      rm.elapsed = new Date().valueOf() - lastRun.valueOf();
       return [rm, stderr];
     }
 
@@ -206,9 +202,6 @@ export async function evalInSubprocess(
     const rm: Partial<PanelResult> = parsePartialJSONFile(
       projectResultsFile + panel.id
     );
-    rm.lastRun = lastRun;
-    rm.loading = false;
-    rm.elapsed = new Date().valueOf() - lastRun.valueOf();
     return [rm, stderr];
   } finally {
     try {
@@ -290,7 +283,6 @@ async function evalNoUpdate(
   assertValidDependentPanels(projectId, panel.content, idMap);
 
   const evalHandler = EVAL_HANDLERS[panel.type]();
-  const lastRun = new Date();
   const res = await evalHandler(
     project,
     panel,
@@ -320,9 +312,6 @@ async function evalNoUpdate(
       shape: s,
       value: res.returnValue ? res.value : null,
       size: res.size === undefined ? json.length : res.size,
-      lastRun,
-      loading: false,
-      elapsed: new Date().valueOf() - lastRun.valueOf(),
       arrayCount:
         res.arrayCount === undefined
           ? s.kind === 'array'
@@ -345,8 +334,17 @@ export const makeEvalHandler = (subprocessEval?: {
     body: PanelBody,
     dispatch: Dispatch
   ): Promise<PanelResult> {
+    // Clear out existing results. This isn't ideal but harder to do correctness without
+    const projectResultsFile = getProjectResultsFile(projectId);
+    try {
+      fs.unlinkSync(projectResultsFile + body.panelId);
+    } catch (e) {
+      /* ignore */
+    }
+
     let stderr = '';
-    let res: Partial<PanelResult>;
+    const start = new Date();
+    let res: Partial<PanelResult> = { loading: true };
     try {
       [res, stderr] = await evalNoUpdate(
         projectId,
@@ -354,6 +352,12 @@ export const makeEvalHandler = (subprocessEval?: {
         dispatch,
         subprocessEval
       );
+
+      // This is to handle "exceptions" within the runner.
+      if (res.exception) {
+        throw res.exception;
+      }
+      // The outer try-catch is to handle exceptions within this Node code
     } catch (e) {
       log.error(e);
       res.exception = e;
@@ -362,6 +366,9 @@ export const makeEvalHandler = (subprocessEval?: {
         res.exception = stderr;
       }
     }
+    res.lastRun = start;
+    res.loading = false;
+    res.elapsed = new Date().valueOf() - start.valueOf();
     await dispatch({
       resource: 'updatePanelResult',
       projectId,

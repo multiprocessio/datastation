@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"runtime/debug"
+	"strings"
 )
 
 type DSError struct {
@@ -19,9 +20,14 @@ func (dse *DSError) Error() string {
 	return "DSError " + string(s) + "\n" + dse.Stack
 }
 
+func escapedPanelIdentifier(id string) string {
+	return fmt.Sprintf("[%s]", strings.ReplaceAll(id, "]", "\\]"))
+}
+
 func makeErrNotAnArrayOfObjects(id string) *DSError {
 	return &DSError{
 		Name:          "NotAnArrayOfObjectsError",
+		Message:       fmt.Sprintf("This panel requires an array of objects as input. Make sure panel %s returns an array of objects.", escapedPanelIdentifier(id)),
 		TargetPanelId: id,
 		Stack:         string(debug.Stack()),
 	}
@@ -38,6 +44,7 @@ func makeErrUnsupported(msg string) *DSError {
 func makeErrInvalidDependentPanel(id string) *DSError {
 	return &DSError{
 		Name:          "InvalidDependentPanelError",
+		Message:       fmt.Sprintf("A dependent panel's results are not valid. Did you run panel %s?", escapedPanelIdentifier(id)),
 		Stack:         string(debug.Stack()),
 		TargetPanelId: id,
 	}

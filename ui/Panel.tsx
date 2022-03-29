@@ -182,6 +182,7 @@ export function PanelPlayWarningWithLinks({
   const parts = msg.split(/(\[(?:[^\]\\]|\\.)*\])|(DM_setPanel\([$a-zA-Z]*\))/);
 
   let children = [];
+  console.log(parts, msg);
   for (const c of parts) {
     if (!c) {
       continue;
@@ -189,6 +190,7 @@ export function PanelPlayWarningWithLinks({
 
     if (c.startsWith('DM_setPanel(')) {
       children.push(<code>{c}</code>);
+      continue;
     }
 
     if (!(c[0] === '[' && c[c.length - 1] === ']')) {
@@ -244,7 +246,11 @@ export function Panel({
   panels,
 }: {
   panel: PanelInfo;
-  updatePanel: (d: PanelInfo, position?: number) => void;
+  updatePanel: (
+    d: PanelInfo,
+    position?: number,
+    opts?: { internalOnly: boolean }
+  ) => void;
   panelResults: Array<PanelResult>;
   reevalPanel: (id: string) => void;
   panelIndex: number;
@@ -283,9 +289,27 @@ export function Panel({
   const results = panel.resultMeta || new PanelResult();
 
   const [loading, setLoading] = React.useState(results.loading);
+  // Sync when props change
   React.useEffect(() => {
     setLoading(results.loading);
   }, [results.loading]);
+
+  const [error, setError] = React.useState(results.exception);
+  // Sync when props change
+  React.useEffect(() => {
+    setError(results.exception);
+  }, [results.exception]);
+
+  async function evalThis() {
+    setLoading(true);
+    try {
+      await reevalPanel(panel.id);
+    } catch (e) {
+      setError(e);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   const panelRef = React.useRef(null);
   async function keyboardShortcuts(e: React.KeyboardEvent) {
@@ -302,12 +326,7 @@ export function Panel({
         e.preventDefault();
       }
 
-      setLoading(true);
-      try {
-        await reevalPanel(panel.id);
-      } finally {
-        setLoading(false);
-      }
+      evalThis();
     }
   }
 
@@ -332,8 +351,6 @@ export function Panel({
     }
   }
 
-  console.log(results);
-
   return (
     <div
       id={`panel-${panel.id}`}
@@ -342,7 +359,7 @@ export function Panel({
       } ${
         (panelUIDetails.body === null ||
           (panelUIDetails.hideBody && panelUIDetails.hideBody(panel))) &&
-        !results.exception
+        !error
           ? 'panel--empty'
           : ''
       } ${loading ? 'panel--loading' : ''}`}
@@ -430,12 +447,8 @@ export function Panel({
                   'Running...'
                 ) : results.lastRun ? (
                   <>
-                    <span
-                      className={
-                        results.exception ? 'text-failure' : 'text-success'
-                      }
-                    >
-                      {results.exception ? 'Failed' : 'Succeeded'}
+                    <span className={error ? 'text-failure' : 'text-success'}>
+                      {error ? 'Failed' : 'Succeeded'}
                     </span>{' '}
                     {results.lastRun ? (
                       <>
@@ -566,7 +579,7 @@ export function Panel({
                         updatePanel={updatePanel}
                       />
                     )}
-                  <PanelError panels={panels} e={results.exception} />
+                  <PanelError panels={panels} e={error} />
                   {info}
                 </div>
                 {panelUIDetails.previewable && (
