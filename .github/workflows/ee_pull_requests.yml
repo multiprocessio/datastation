@@ -7,7 +7,9 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    working-directory: ee
+    defaults:
+      run:
+        working-directory: ee
 
     steps:
     - uses: actions/checkout@master
