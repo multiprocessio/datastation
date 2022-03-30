@@ -5,6 +5,7 @@ import { LANGUAGES, SupportedLanguages } from '../../shared/languages';
 import { PanelInfo, PanelResult, ProgramPanelInfo } from '../../shared/state';
 import { panelRPC } from '../asyncRPC';
 import { CodeEditor } from '../components/CodeEditor';
+import { Input } from '../components/Input';
 import { Select } from '../components/Select';
 import { PanelBodyProps, PanelDetailsProps, PanelUIDetails } from './types';
 
@@ -67,7 +68,7 @@ export function ProgramPanelDetails({
           label="Language"
           value={panel.program.type}
           onChange={(value: string) => {
-            panel.program.type = value as SupportedLanguages;
+            panel.program.type = value as SupportedLanguages | 'custom';
             if (panel.content === '') {
               panel.content =
                 LANGUAGES[panel.program.type].defaultContent(panelIndex);
@@ -81,8 +82,27 @@ export function ProgramPanelDetails({
               {o.name}
             </option>
           ))}
+          {MODE !== 'browser' && (
+            <option key="custom" value="custom">
+              Custom
+            </option>
+          )}
         </Select>
       </div>
+      {panel.program.type === 'custom' && (
+        <div className="form-row">
+          <Input
+            label="Custom"
+            value={panel.program.customExe}
+            placeholder="/myinterpreter --file {}"
+            tooltip="Provide any command to run and use `{}` as a placeholder for the file name. It will be replaced with the file name containing the panel contents when you run this panel."
+            onChange={(value: string) => {
+              panel.program.customExe = value;
+              updatePanel(panel);
+            }}
+          />
+        </div>
+      )}
     </React.Fragment>
   );
 }
