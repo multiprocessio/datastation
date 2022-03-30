@@ -24,7 +24,9 @@ export function makeReevalPanel(
   state: ProjectState,
   updatePanelInternal: (p: PanelInfo) => void
 ) {
-  return async function reevalPanel(panelId: string) {
+  return async function reevalPanel(
+    panelId: string
+  ): Promise<Array<PanelInfo>> {
     const { connectors, servers } = state;
 
     const panel = page.panels.find((p) => p.id === panelId);
@@ -44,6 +46,7 @@ export function makeReevalPanel(
     // Important! Just needs to trigger a state reload.
     updatePanelInternal(panel);
 
+    const affectedPanels = [panel];
     // Re-run all dependent visual panels
     if (!VISUAL_PANELS.includes(panel.type)) {
       for (const dep of page.panels) {
@@ -53,10 +56,12 @@ export function makeReevalPanel(
           (dep.type === 'table' &&
             (dep as TablePanelInfo).table.panelSource === panel.id)
         ) {
-          await reevalPanel(dep.id);
+          affectedPanels.push(...(await reevalPanel(dep.id)));
         }
       }
     }
+
+    return affectedPanels;
   };
 }
 

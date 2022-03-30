@@ -29,7 +29,7 @@ export function PanelList({
   page: ProjectPage;
   pageIndex: number;
   panelResults: Array<PanelResult>;
-  reevalPanel: (panelId: string, reset?: boolean) => void;
+  reevalPanel: (panelId: string) => Promise<Array<PanelInfo>>;
 }) {
   const { crud } = React.useContext(ProjectContext);
 

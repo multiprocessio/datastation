@@ -21,7 +21,7 @@ if (MODE === 'browser') {
   Object.values(LANGUAGES).map(function processLanguageInit(l) {
     if (l.inMemoryInit) {
       // These can be really big, so run it out of band
-      setTimeout(function() {
+      setTimeout(function () {
         l.inMemoryInit();
       });
     }
@@ -59,7 +59,11 @@ export function App() {
   // Load default project in browser mode
   const [loadingDefault, setLoadingDefault] = React.useState(false);
   React.useEffect(() => {
-    if (MODE_FEATURES.useDefaultProject && !urlState.projectId && !loadingDefault) {
+    if (
+      MODE_FEATURES.useDefaultProject &&
+      !urlState.projectId &&
+      !loadingDefault
+    ) {
       setLoadingDefault(true);
       loadDefaultProject();
       setLoadingDefault(false);
@@ -83,8 +87,8 @@ export function App() {
     const hasSidebar =
       Boolean(
         MODE_FEATURES.connectors ||
-        state.connectors?.length ||
-        state.servers?.length
+          state.connectors?.length ||
+          state.servers?.length
       ) && urlState.view === 'editor';
 
     main = (

@@ -182,7 +182,6 @@ export function PanelPlayWarningWithLinks({
   const parts = msg.split(/(\[(?:[^\]\\]|\\.)*\])|(DM_setPanel\([$a-zA-Z]*\))/);
 
   let children = [];
-  console.log(parts, msg);
   for (const c of parts) {
     if (!c) {
       continue;
@@ -252,7 +251,7 @@ export function Panel({
     opts?: { internalOnly: boolean }
   ) => void;
   panelResults: Array<PanelResult>;
-  reevalPanel: (id: string) => void;
+  reevalPanel: (id: string) => Promise<Array<PanelInfo>>;
   panelIndex: number;
   removePanel: (id: string) => void;
   panels: Array<PanelInfo>;
@@ -303,7 +302,10 @@ export function Panel({
   async function evalThis() {
     setLoading(true);
     try {
-      await reevalPanel(panel.id);
+      const affectedPanels = await reevalPanel(panel.id);
+      if (MODE === 'browser') {
+        affectedPanels.forEach((p) => updatePanel(p));
+      }
     } catch (e) {
       setError(e);
     } finally {
