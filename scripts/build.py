@@ -167,10 +167,10 @@ def eval_line(line):
         quote_line(line, show=True)
         if not what:
             return
-        with open(to, 'r+') as to:
+        with open(to, 'rb+') as to:
             current = to.read()
             to.seek(0)
-            to.write(what+'\n'+current)
+            to.write(what.encode()+b'\n'+current)
             to.truncate()
         return
 
