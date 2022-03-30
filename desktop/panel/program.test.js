@@ -367,7 +367,7 @@ for (const subprocessName of RUNNERS) {
           subprocessName,
         });
       } catch (e) {
-        if (e instanceof InvalidDependentPanelError) {
+        if (e.name === 'InvalidDependentPanelError') {
           finished = true;
         } else {
           throw e;
