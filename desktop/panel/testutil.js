@@ -41,7 +41,6 @@ exports.fileIsEmpty = function (fileName) {
 
 exports.updateProject = async function (project, opts) {
   let dispatch = opts?.dispatch;
-  console.log(dispatch, 'now here');
   if (!dispatch) {
     dispatch = makeDispatch(new Store().getHandlers());
   }
@@ -134,12 +133,11 @@ exports.withSavedPanels = async function (
     store = new Store();
   }
 
-  const handlers = store.getHandlers();
+  const handlers = [...store.getHandlers(), fetchResultsHandler];
   const getProjectHandler = handlers.find((h) => h.resource === 'getProject');
   const updatePanelResultHandler = handlers.find(
     (h) => h.resource === 'updatePanelResult'
   );
-  console.log('here', dispatch);
   if (!dispatch) {
     dispatch = makeDispatch(handlers);
   }
@@ -187,13 +185,16 @@ exports.withSavedPanels = async function (
           fs.writeFileSync(settingsTmp.path, JSON.stringify(settings));
           subprocessName.settingsFileOverride = settingsTmp.path;
         }
-        await makeEvalHandler(subprocessName).handler(
+        const res = await makeEvalHandler(subprocessName).handler(
           project.projectName,
           { panelId: panel.id },
           dispatch
         );
+        if (res.exception) {
+          throw res.exception;
+        }
 
-        // Make panel results are saved to disk
+        // Make sure panel results are saved to disk
         expect(
           exports.fileIsEmpty(
             getProjectResultsFile(project.projectName) + panel.id
