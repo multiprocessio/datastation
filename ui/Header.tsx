@@ -13,7 +13,7 @@ import { UrlStateContext } from './urlState';
 export function loadDefaultProject() {
   const store = new LocalStorageStore();
   store.update(DEFAULT_PROJECT.projectName, DEFAULT_PROJECT);
-  window.location.pathname = '/?project=' + DEFAULT_PROJECT.projectName;
+  window.location.href = '/?projectId=' + DEFAULT_PROJECT.projectName;
 }
 
 export function Header() {

@@ -120,7 +120,10 @@ export async function openWindow(
     } else {
       SETTINGS.lastProject = project;
     }
-    await SETTINGS.save();
+
+    if (SETTINGS.lastProject) {
+      await SETTINGS.save();
+    }
   }
 
   const preload = path.join(__dirname, 'preload.js');

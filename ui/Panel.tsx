@@ -368,7 +368,14 @@ export function Panel({
       onKeyDown={keyboardShortcuts}
     >
       <ErrorBoundary>
-        <div className="panel-head">
+        <div
+          className="panel-head"
+          onDoubleClick={(e: React.MouseEvent<HTMLDivElement>) =>
+            setUrlState({
+              fullScreen: fullScreen === panel.id ? null : panel.id,
+            })
+          }
+        >
           <div
             className={`panel-header ${
               details ? 'panel-header--open' : ''

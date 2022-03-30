@@ -28,14 +28,16 @@ export function useDebouncedLocalState(
   }, [nonLocalValue]);
 
   function wrapSetLocalValue(v: string) {
-    // Only important the first time
-    setDefaultChanged(true);
+    if (String(v) !== String(nonLocalValue)) {
+      // Only important the first time
+      setDefaultChanged(true);
 
-    // First update local state
-    setLocalValue(v);
+      // First update local state
+      setLocalValue(v);
 
-    // Then set off debouncer to eventually update external state
-    debounced(v);
+      // Then set off debouncer to eventually update external state
+      debounced(v);
+    }
   }
 
   function flushValue() {
