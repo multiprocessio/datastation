@@ -63,7 +63,7 @@ export function CodeEditor({
     if (editor.current) {
       const panel = editor.current.editor.container.closest('.panel');
       const obs = new ResizeObserver(function handleEditorResize() {
-        editor.current.editor.resize();
+        editor.current.editor?.resize();
       });
       obs.observe(panel);
 

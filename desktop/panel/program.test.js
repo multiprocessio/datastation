@@ -184,14 +184,22 @@ for (const t of TESTS) {
 
                 finished = true;
               },
-              { evalPanels: true, subprocessName, settings: t.settings }
+              {
+                evalPanels: true,
+                subprocessName,
+              }
             );
 
             if (!finished) {
               throw new Error('Callback did not finish');
             }
           } catch (e) {
-            if (!t.exception || !(e instanceof t.exception)) {
+            if (
+              !(
+                t.exception &&
+                (e instanceof t.exception || e.name === new t.exception().name)
+              )
+            ) {
               throw e;
             }
           }
@@ -235,7 +243,7 @@ for (const t of TESTS) {
 
               finished = true;
             },
-            { evalPanels: true, subprocessName, settings: t.settings }
+            { evalPanels: true, subprocessName }
           );
 
           if (!finished) {
@@ -359,7 +367,7 @@ for (const subprocessName of RUNNERS) {
           subprocessName,
         });
       } catch (e) {
-        if (e instanceof InvalidDependentPanelError) {
+        if (e.name === 'InvalidDependentPanelError') {
           finished = true;
         } else {
           throw e;

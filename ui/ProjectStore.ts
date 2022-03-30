@@ -86,9 +86,13 @@ export class LocalStorageStore extends ProjectStore {
     return `projectState:${projectId}`;
   }
 
-  get(projectId: string): Promise<ProjectState> {
-    const p = JSON.parse(window.localStorage.getItem(this.makeKey(projectId)));
-    return Promise.resolve(p);
+  async get(projectId: string): Promise<ProjectState> {
+    // There are either bugs in Phil's code elsewhere or
+    // localStorage.get/set are not actually truly synchronous. Because
+    // without pulling out of the control flow here it returns with data
+    // that is out of date even though we just called localstorage.set.
+    await new Promise((r) => setTimeout(r, 10));
+    return JSON.parse(window.localStorage.getItem(this.makeKey(projectId)));
   }
 
   async getOrCreate(projectId: string) {

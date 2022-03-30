@@ -15,14 +15,22 @@ import {
   DeleteServerRequest,
   DeleteServerResponse,
   Endpoint,
+  GetConnectorRequest,
+  GetConnectorResponse,
   GetDashboardsRequest,
   GetDashboardsResponse,
   GetExportsRequest,
   GetExportsResponse,
+  GetPageRequest,
+  GetPageResponse,
+  GetPanelRequest,
+  GetPanelResponse,
   GetProjectRequest,
   GetProjectResponse,
   GetProjectsRequest,
   GetProjectsResponse,
+  GetServerRequest,
+  GetServerResponse,
   IPCRendererResponse,
   MakeProjectRequest,
   MakeProjectResponse,
@@ -36,27 +44,39 @@ import {
   UpdateServerResponse,
 } from '../shared/rpc';
 
-export type InternalEndpoint = 'updatePanelResult';
-
-export interface RPCPayload {
+export interface GenericRPCPayload<EndpointT extends string> {
   messageNumber: number;
-  resource: Endpoint | InternalEndpoint;
+  resource: EndpointT;
   projectId: string;
   body: any;
 }
 
-export type DispatchPayload = Omit<RPCPayload, 'messageNumber' | 'body'> & {
+export type RPCPayload = GenericRPCPayload<Endpoint>;
+
+export type DispatchPayload<EndpointT extends string> = Omit<
+  GenericRPCPayload<EndpointT>,
+  'messageNumber' | 'body'
+> & {
   body?: any;
 };
 
-export type Dispatch = (payload: DispatchPayload) => Promise<any>;
+export type GenericDispatch<EndpointT extends string> = (
+  payload: DispatchPayload<EndpointT>,
+  external?: boolean
+) => Promise<any>;
 
-export interface RPCHandler<Request, Response> {
-  resource: Endpoint | InternalEndpoint;
+export type Dispatch = GenericDispatch<Endpoint>;
+
+export interface RPCHandler<
+  Request,
+  Response,
+  EndpointT extends string = Endpoint
+> {
+  resource: EndpointT;
   handler: (
     projectId: string,
     body: Request,
-    dispatch: Dispatch,
+    dispatch: GenericDispatch<EndpointT>,
     external: boolean
   ) => Promise<Response>;
 }
@@ -78,18 +98,32 @@ export type UpdateServerHandler = RPCHandler<
   UpdateServerRequest,
   UpdateServerResponse
 >;
+export type GetServerHandler = RPCHandler<GetServerRequest, GetServerResponse>;
+
 export type UpdateConnectorHandler = RPCHandler<
   UpdateConnectorRequest,
   UpdateConnectorResponse
 >;
+
+export type GetConnectorHandler = RPCHandler<
+  GetConnectorRequest,
+  GetConnectorResponse
+>;
+
 export type UpdatePageHandler = RPCHandler<
   UpdatePageRequest,
   UpdatePageResponse
 >;
+
+export type GetPageHandler = RPCHandler<GetPageRequest, GetPageResponse>;
+
 export type UpdatePanelHandler = RPCHandler<
   UpdatePanelRequest,
   UpdatePanelResponse
 >;
+
+export type GetPanelHandler = RPCHandler<GetPanelRequest, GetPanelResponse>;
+
 export type DeleteServerHandler = RPCHandler<
   DeleteServerRequest,
   DeleteServerResponse
@@ -132,11 +166,10 @@ function sendIPCRendererResponse(
   event.sender.send(channel, msg);
 }
 
-export function registerRPCHandlers(
-  ipcMain: IpcMain,
-  handlers: RPCHandler<any, any>[]
-) {
-  function dispatch(payload: RPCPayload, external = false) {
+export function makeDispatch<EndpointT extends string>(
+  handlers: RPCHandler<any, any, any>[]
+): GenericDispatch<EndpointT> {
+  function dispatch(payload: GenericRPCPayload<EndpointT>, external = false) {
     if (external) {
       log.info(`Handling request: ${payload.resource}`);
     }
@@ -148,9 +181,24 @@ export function registerRPCHandlers(
     return handler.handler(payload.projectId, payload.body, dispatch, external);
   }
 
+  return dispatch;
+}
+
+export function registerRPCHandlers<EndpointT extends string>(
+  ipcMain: IpcMain,
+  handlers: RPCHandler<any, any, any>[],
+  dispatch?: GenericDispatch<EndpointT>
+) {
+  if (!dispatch) {
+    dispatch = makeDispatch<EndpointT>(handlers);
+  }
+
   ipcMain.on(
     RPC_ASYNC_REQUEST,
-    async function (event: IpcMainEvent, payload: RPCPayload) {
+    async function (
+      event: IpcMainEvent,
+      payload: GenericRPCPayload<EndpointT>
+    ) {
       const responseChannel = `${RPC_ASYNC_RESPONSE}:${payload.messageNumber}`;
       try {
         const rsp = await dispatch(payload, true);

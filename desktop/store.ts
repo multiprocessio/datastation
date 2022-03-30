@@ -39,9 +39,12 @@ import {
   DeletePageHandler,
   DeletePanelHandler,
   DeleteServerHandler,
+  GetConnectorHandler,
+  GetPageHandler,
+  GetPanelHandler,
   GetProjectHandler,
   GetProjectsHandler,
-  InternalEndpoint,
+  GetServerHandler,
   MakeProjectHandler,
   RPCHandler,
   UpdateConnectorHandler,
@@ -50,6 +53,16 @@ import {
   UpdateServerHandler,
 } from './rpc';
 import { encrypt } from './secret';
+
+export function getMigrations() {
+  const migrationsBase = path.join(__dirname, 'migrations');
+  const migrations = fs
+    .readdirSync(migrationsBase)
+    .filter((f) => f.endsWith('.sql'))
+    .map((file) => path.join(migrationsBase, file));
+  migrations.sort();
+  return migrations;
+}
 
 export function getProjectResultsFile(projectId: string) {
   const fileName = path
@@ -118,6 +131,13 @@ const PRAGMAS = [
 ];
 
 export class Store {
+  stubMaker: () => () => string;
+  migrations: Array<string>;
+  constructor(stubMaker = () => () => '?', migrations = getMigrations()) {
+    this.stubMaker = stubMaker;
+    this.migrations = migrations;
+  }
+
   validateSQLiteDriver() {
     const memdb = new sqlite3.default(':memory:');
     const stmt = memdb.prepare('SELECT sqlite_version() AS version');
@@ -135,6 +155,10 @@ export class Store {
     if (this.firstTime) {
       this.validateSQLiteDriver();
       this.firstTime = false;
+    }
+
+    if (!projectId) {
+      throw new Error('Expected a project id.');
     }
 
     const filename = ensureProjectFile(projectId);
@@ -256,6 +280,38 @@ export class Store {
     }
   }
 
+  getPageHandler: GetPageHandler = {
+    resource: 'getPage',
+    handler: async (projectId: string, { id }: { id: string }) => {
+      const db = this.getConnection(projectId);
+      return pageCrud.getOne(db, id)[0];
+    },
+  };
+
+  getPanelHandler: GetPanelHandler = {
+    resource: 'getPanel',
+    handler: async (projectId: string, { id }: { id: string }) => {
+      const db = this.getConnection(projectId);
+      return panelCrud.getOne(db, id)[0];
+    },
+  };
+
+  getConnectorHandler: GetConnectorHandler = {
+    resource: 'getConnector',
+    handler: async (projectId: string, { id }: { id: string }) => {
+      const db = this.getConnection(projectId);
+      return connectorCrud.getOne(db, id)[0];
+    },
+  };
+
+  getServerHandler: GetServerHandler = {
+    resource: 'getServer',
+    handler: async (projectId: string, { id }: { id: string }) => {
+      const db = this.getConnection(projectId);
+      return serverCrud.getOne(db, id)[0];
+    },
+  };
+
   getProjectHandler: GetProjectHandler = {
     resource: 'getProject',
     handler: async (
@@ -326,16 +382,9 @@ GROUP BY panel_id
       const db = this.getConnection(projectId);
       const newProject = new ProjectState();
       newProject.projectName = ensureProjectFile(projectId);
-      const migrationsBase = path.join(__dirname, 'migrations');
-      const files = fs
-        .readdirSync(migrationsBase)
-        .filter((f) => f.endsWith('.sql'));
-      files.sort();
-      for (const file of files) {
+      for (const file of this.migrations) {
         log.info('Running migration: ' + file);
-        const contents = fs
-          .readFileSync(path.join(migrationsBase, file))
-          .toString();
+        const contents = fs.readFileSync(file).toString();
         db.exec(contents);
         log.info('Done migration: ' + file);
       }
@@ -393,9 +442,14 @@ GROUP BY panel_id
     })();
   }
 
-  // INTERNAL ONLY
-  updatePanelResultHandler = {
-    resource: 'updatePanelResult' as InternalEndpoint,
+  guardInternalOnly = (external: boolean) => {
+    if (external) {
+      throw new Error('Bad access.');
+    }
+  };
+
+  updatePanelResultHandler: RPCHandler<any, any, any> = {
+    resource: 'updatePanelResult',
     handler: async (
       projectId: string,
       body: {
@@ -405,9 +459,7 @@ GROUP BY panel_id
       _: unknown,
       external: boolean
     ) => {
-      if (external) {
-        throw new Error('Bad access.');
-      }
+      this.guardInternalOnly(external);
 
       const db = this.getConnection(projectId);
       const stmt = db.prepare(
@@ -603,7 +655,7 @@ GROUP BY panel_id
 
   // Break handlers out so they can be individually typed without `any`,
   // only brought here and masked as `any`.
-  getHandlers(): RPCHandler<any, any>[] {
+  getHandlers(): RPCHandler<any, any, any>[] {
     return [
       this.getProjectHandler,
       this.getProjectsHandler,

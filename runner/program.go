@@ -122,6 +122,7 @@ func (ec EvalContext) evalProgramPanel(project *ProjectState, pageIndex int, pan
 		}
 	}
 
+	Logln("Running program: %s %v", path, args)
 	cmd := exec.Command(path, args...)
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout

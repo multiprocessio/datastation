@@ -1,5 +1,8 @@
 Copyright 2021-2022 Multiprocess Labs LLC
 
+* All content that resides under the "ee/" directory of this repository, if that directory exists, is licensed under the license defined in "ee/LICENSE.md".
+* Content outside of the above mentioned directories or restrictions above is available under the "Apache 2.0" license as defined below.
+
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at

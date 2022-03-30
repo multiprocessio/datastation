@@ -5,7 +5,7 @@ import { SupportedLanguages } from './languages';
 import { mergeDeep, setPath } from './object';
 
 export class PanelResult {
-  exception?: Error;
+  exception?: any;
   value?: Array<any>;
   preview: string;
   stdout: string;
@@ -316,7 +316,8 @@ export class PanelInfo {
 
 export class ProgramPanelInfo extends PanelInfo {
   program: {
-    type: SupportedLanguages;
+    type: SupportedLanguages | 'custom';
+    customExe: string;
   };
 
   constructor(
@@ -325,6 +326,7 @@ export class ProgramPanelInfo extends PanelInfo {
       name,
       type,
       content,
+      customExe,
     }: Partial<
       ProgramPanelInfo['program'] & { content: string; name: string }
     > = {}
@@ -332,6 +334,7 @@ export class ProgramPanelInfo extends PanelInfo {
     super('program', pageId, name || '', content || '');
     this.program = {
       type: type || 'python',
+      customExe: customExe || '',
     };
   }
 }

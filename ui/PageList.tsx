@@ -24,7 +24,9 @@ export function makeReevalPanel(
   state: ProjectState,
   updatePanelInternal: (p: PanelInfo) => void
 ) {
-  return async function reevalPanel(panelId: string) {
+  return async function reevalPanel(
+    panelId: string
+  ): Promise<Array<PanelInfo>> {
     const { connectors, servers } = state;
 
     const panel = page.panels.find((p) => p.id === panelId);
@@ -32,49 +34,34 @@ export function makeReevalPanel(
       return;
     }
 
-    panel.resultMeta.loading = true;
+    const idMap: Record<string | number, string> = {};
+    page.panels.forEach((p, index) => {
+      idMap[index] = p.id;
+      idMap[p.name] = p.id;
+    });
+    const panelUIDetails = PANEL_UI_DETAILS[panel.type];
+    panel.resultMeta = PanelResult.fromJSON(
+      await panelUIDetails.eval(panel, page.panels, idMap, connectors, servers)
+    );
+    // Important! Just needs to trigger a state reload.
     updatePanelInternal(panel);
 
-    try {
-      const idMap: Record<string | number, string> = {};
-      page.panels.forEach((p, index) => {
-        idMap[index] = p.id;
-        idMap[p.name] = p.id;
-      });
-      const panelUIDetails = PANEL_UI_DETAILS[panel.type];
-      panel.resultMeta = PanelResult.fromJSON(
-        await panelUIDetails.eval(
-          panel,
-          page.panels,
-          idMap,
-          connectors,
-          servers
-        )
-      );
-      updatePanelInternal(panel);
-
-      // Re-run all dependent visual panels
-      if (!VISUAL_PANELS.includes(panel.type)) {
-        for (const dep of page.panels) {
-          if (
-            (dep.type === 'graph' &&
-              (dep as GraphPanelInfo).graph.panelSource === panel.id) ||
-            (dep.type === 'table' &&
-              (dep as TablePanelInfo).table.panelSource === panel.id)
-          ) {
-            await reevalPanel(dep.id);
-          }
+    const affectedPanels = [panel];
+    // Re-run all dependent visual panels
+    if (!VISUAL_PANELS.includes(panel.type)) {
+      for (const dep of page.panels) {
+        if (
+          (dep.type === 'graph' &&
+            (dep as GraphPanelInfo).graph.panelSource === panel.id) ||
+          (dep.type === 'table' &&
+            (dep as TablePanelInfo).table.panelSource === panel.id)
+        ) {
+          affectedPanels.push(...(await reevalPanel(dep.id)));
         }
       }
-    } catch (e) {
-      panel.resultMeta.exception = e;
-      updatePanelInternal(panel);
-    } finally {
-      if (panel.resultMeta.loading) {
-        panel.resultMeta.loading = false;
-        updatePanelInternal(panel);
-      }
     }
+
+    return affectedPanels;
   };
 }
 

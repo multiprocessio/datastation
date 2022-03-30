@@ -6,11 +6,12 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { Loading } from './components/Loading';
 import { Version } from './components/Version';
 import { ConnectorList } from './ConnectorList';
-import { Header } from './Header';
+import { Header, loadDefaultProject } from './Header';
 import { MakeSelectProject } from './MakeSelectProject';
 import { PageList } from './PageList';
 import { ServerList } from './ServerList';
 import { Settings, SettingsContext, useSettings } from './Settings';
+import { useShortcuts } from './shortcuts';
 import { Sidebar } from './Sidebar';
 import { ProjectContext, useProjectState } from './state';
 import { Updates } from './Updates';
@@ -52,6 +53,22 @@ export function App() {
     },
     [settings && settings.theme]
   );
+
+  useShortcuts(urlState, setUrlState);
+
+  // Load default project in browser mode
+  const [loadingDefault, setLoadingDefault] = React.useState(false);
+  React.useEffect(() => {
+    if (
+      MODE_FEATURES.useDefaultProject &&
+      !urlState.projectId &&
+      !loadingDefault
+    ) {
+      setLoadingDefault(true);
+      loadDefaultProject();
+      setLoadingDefault(false);
+    }
+  });
 
   let main = <Loading />;
   if (!state || !settings) {
@@ -99,7 +116,7 @@ export function App() {
             updatePage={crud.updatePage}
             deletePage={crud.deletePage}
             updatePanel={crud.updatePanel}
-            pageIndex={urlState.page}
+            pageIndex={urlState.page % (state.pages || []).length}
             setPageIndex={(i) => setUrlState({ page: i, view: 'editor' })}
           />
           <Version />
@@ -117,7 +134,7 @@ export function App() {
           value={{ state: settings, setState: setSettings }}
         >
           <div className={`app app--${MODE} app--${settings.theme}`}>
-            {MODE_FEATURES.appHeader && <Header />}
+            <Header />
             <main className={'view-' + (urlState.view || 'editor')}>
               {main}
             </main>

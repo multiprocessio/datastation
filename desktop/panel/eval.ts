@@ -95,7 +95,7 @@ export async function evalInSubprocess(
   projectName: string,
   panel: PanelInfo,
   connectors: ConnectorInfo[]
-) {
+): Promise<[Partial<PanelResult>, string]> {
   const tmp = await makeTmpFile({ prefix: 'resultmeta-' });
   let pid = 0;
 
@@ -136,7 +136,6 @@ export async function evalInSubprocess(
       );
     }
 
-    const lastRun = new Date();
     log.info(`Launching "${base} ${args.join(' ')}"`);
     const child = execFile(base, args, {
       windowsHide: true,
@@ -194,28 +193,8 @@ export async function evalInSubprocess(
     let parsePartial = !resultMeta;
     if (!parsePartial) {
       const rm: Partial<PanelResult> = JSON.parse(resultMeta);
-      if (rm.exception) {
-        const e = EVAL_ERRORS.find((e) => e.name === rm.exception.name);
-
-        // Just a generic exception, we already caught all info in `stderr`, so just throw that.
-        if (!e) {
-          throw new Error(stderr);
-        }
-
-        // These are specific exceptions that will be handled specially in the UI such as InvalidDependentPanelError
-        if (e && (e as any).fromJSON) {
-          throw (e as any).fromJSON(rm.exception);
-        }
-
-        // Unclear what case this is, probably a developer mistake.
-        throw new e(rm.exception as any);
-      }
-
       // Case of existing Node.js runner
-      rm.lastRun = lastRun;
-      rm.loading = false;
-      rm.elapsed = new Date().valueOf() - lastRun.valueOf();
-      return rm;
+      return [rm, stderr];
     }
 
     // Case of new Go runner
@@ -223,10 +202,7 @@ export async function evalInSubprocess(
     const rm: Partial<PanelResult> = parsePartialJSONFile(
       projectResultsFile + panel.id
     );
-    rm.lastRun = lastRun;
-    rm.loading = false;
-    rm.elapsed = new Date().valueOf() - lastRun.valueOf();
-    return rm;
+    return [rm, stderr];
   } finally {
     try {
       if (pid) {
@@ -264,6 +240,90 @@ function assertValidDependentPanels(
   }
 }
 
+async function evalNoUpdate(
+  projectId: string,
+  body: PanelBody,
+  dispatch: Dispatch,
+  subprocessEval?: {
+    node: string;
+    go?: string;
+  }
+): Promise<[Partial<PanelResult>, string]> {
+  const { project, panel, panelPage } = await getProjectAndPanel(
+    dispatch,
+    projectId,
+    body.panelId
+  );
+
+  // Reset the result
+  await dispatch({
+    resource: 'updatePanelResult',
+    projectId,
+    body: { data: new PanelResult(), panelId: panel.id },
+  });
+
+  if (subprocessEval) {
+    return evalInSubprocess(
+      subprocessEval,
+      project.projectName,
+      panel,
+      project.connectors
+    );
+  }
+
+  const idMap: Record<string | number, string> = {};
+  const idShapeMap: Record<string | number, Shape> = {};
+  project.pages[panelPage].panels.forEach((p, i) => {
+    idMap[i] = p.id;
+    idMap[p.name] = p.id;
+    idShapeMap[i] = p.resultMeta.shape;
+    idShapeMap[p.name] = p.resultMeta.shape;
+  });
+
+  assertValidDependentPanels(projectId, panel.content, idMap);
+
+  const evalHandler = EVAL_HANDLERS[panel.type]();
+  const res = await evalHandler(
+    project,
+    panel,
+    {
+      idMap,
+      idShapeMap,
+    },
+    dispatch
+  );
+
+  // TODO: is it a problem panels like Program skip this escaping?
+  // This library is important for escaping responses otherwise some
+  // characters can blow up various panel processes.
+  const json = jsesc(res.value, { quotes: 'double', json: true });
+
+  if (!res.skipWrite) {
+    const projectResultsFile = getProjectResultsFile(projectId);
+    fs.writeFileSync(projectResultsFile + panel.id, json);
+  }
+
+  const s = shape(res.value);
+
+  return [
+    {
+      stdout: res.stdout || '',
+      preview: preview(res.value),
+      shape: s,
+      value: res.returnValue ? res.value : null,
+      size: res.size === undefined ? json.length : res.size,
+      arrayCount:
+        res.arrayCount === undefined
+          ? s.kind === 'array'
+            ? (res.value || []).length
+            : null
+          : res.arrayCount,
+      contentType: res.contentType || 'application/json',
+    },
+    '',
+  ];
+}
+
 export const makeEvalHandler = (subprocessEval?: {
   node: string;
   go?: string;
@@ -274,93 +334,47 @@ export const makeEvalHandler = (subprocessEval?: {
     body: PanelBody,
     dispatch: Dispatch
   ): Promise<PanelResult> {
-    const { project, panel, panelPage } = await getProjectAndPanel(
-      dispatch,
-      projectId,
-      body.panelId
-    );
+    // Clear out existing results. This isn't ideal but harder to do correctness without
+    const projectResultsFile = getProjectResultsFile(projectId);
+    try {
+      fs.unlinkSync(projectResultsFile + body.panelId);
+    } catch (e) {
+      /* ignore */
+    }
 
-    // Reset the result
-    await dispatch({
-      resource: 'updatePanelResult',
-      projectId,
-      body: { data: new PanelResult(), panelId: panel.id },
-    });
-
-    if (subprocessEval) {
-      const resultMeta = (await evalInSubprocess(
-        subprocessEval,
-        project.projectName,
-        panel,
-        project.connectors
-      )) as PanelResult;
-
-      await dispatch({
-        resource: 'updatePanelResult',
+    let stderr = '';
+    const start = new Date();
+    let res: Partial<PanelResult> = { loading: true };
+    try {
+      [res, stderr] = await evalNoUpdate(
         projectId,
-        body: { data: resultMeta, panelId: panel.id },
-      });
-      return resultMeta;
+        body,
+        dispatch,
+        subprocessEval
+      );
+
+      // This is to handle "exceptions" within the runner.
+      if (res.exception) {
+        throw res.exception;
+      }
+      // The outer try-catch is to handle exceptions within this Node code
+    } catch (e) {
+      log.error(e);
+      res.exception = e;
+      if (!EVAL_ERRORS.find((ee) => ee.name === e.name) && stderr) {
+        // Just a generic exception, we already caught all info in `stderr`, so just throw that.
+        res.exception = stderr;
+      }
     }
-
-    const idMap: Record<string | number, string> = {};
-    const idShapeMap: Record<string | number, Shape> = {};
-    project.pages[panelPage].panels.forEach((p, i) => {
-      idMap[i] = p.id;
-      idMap[p.name] = p.id;
-      idShapeMap[i] = p.resultMeta.shape;
-      idShapeMap[p.name] = p.resultMeta.shape;
-    });
-
-    assertValidDependentPanels(projectId, panel.content, idMap);
-
-    const evalHandler = EVAL_HANDLERS[panel.type]();
-    const lastRun = new Date();
-    const res = await evalHandler(
-      project,
-      panel,
-      {
-        idMap,
-        idShapeMap,
-      },
-      dispatch
-    );
-
-    // TODO: is it a problem panels like Program skip this escaping?
-    // This library is important for escaping responses otherwise some
-    // characters can blow up various panel processes.
-    const json = jsesc(res.value, { quotes: 'double', json: true });
-
-    if (!res.skipWrite) {
-      const projectResultsFile = getProjectResultsFile(projectId);
-      fs.writeFileSync(projectResultsFile + panel.id, json);
-    }
-
-    const s = shape(res.value);
-
-    const resultMeta = {
-      stdout: res.stdout || '',
-      preview: preview(res.value),
-      shape: s,
-      value: res.returnValue ? res.value : null,
-      size: res.size === undefined ? json.length : res.size,
-      lastRun,
-      loading: false,
-      elapsed: new Date().valueOf() - lastRun.valueOf(),
-      arrayCount:
-        res.arrayCount === undefined
-          ? s.kind === 'array'
-            ? (res.value || []).length
-            : null
-          : res.arrayCount,
-      contentType: res.contentType || 'application/json',
-    };
+    res.lastRun = start;
+    res.loading = false;
+    res.elapsed = new Date().valueOf() - start.valueOf();
     await dispatch({
       resource: 'updatePanelResult',
       projectId,
-      body: { data: resultMeta, panelId: panel.id },
+      body: { data: res, panelId: body.panelId },
     });
-    return resultMeta;
+    return Object.assign(new PanelResult(), res);
   },
 });
 

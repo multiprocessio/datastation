@@ -31,7 +31,6 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { Highlight } from './components/Highlight';
 import { Input } from './components/Input';
 import { Select } from './components/Select';
-import { PanelPlayWarning } from './errors';
 import { PANEL_GROUPS, PANEL_UI_DETAILS } from './panels';
 import { UrlStateContext } from './urlState';
 
@@ -190,6 +189,7 @@ export function PanelPlayWarningWithLinks({
 
     if (c.startsWith('DM_setPanel(')) {
       children.push(<code>{c}</code>);
+      continue;
     }
 
     if (!(c[0] === '[' && c[c.length - 1] === ']')) {
@@ -221,11 +221,8 @@ function PanelError({ panels, e }: { panels: Array<PanelInfo>; e: Error }) {
     return null;
   }
 
+  // ui eval emits PanelPlayWarning directly
   if (EVAL_ERRORS.map((cls) => new (cls as any)().name).includes(e.name)) {
-    e = new PanelPlayWarning(e.message);
-  }
-
-  if (e instanceof PanelPlayWarning) {
     return <PanelPlayWarningWithLinks panels={panels} msg={e.message} />;
   }
 
@@ -248,9 +245,13 @@ export function Panel({
   panels,
 }: {
   panel: PanelInfo;
-  updatePanel: (d: PanelInfo, position?: number) => void;
+  updatePanel: (
+    d: PanelInfo,
+    position?: number,
+    opts?: { internalOnly: boolean }
+  ) => void;
   panelResults: Array<PanelResult>;
-  reevalPanel: (id: string) => void;
+  reevalPanel: (id: string) => Promise<Array<PanelInfo>>;
   panelIndex: number;
   removePanel: (id: string) => void;
   panels: Array<PanelInfo>;
@@ -286,8 +287,34 @@ export function Panel({
   >('preview');
   const results = panel.resultMeta || new PanelResult();
 
+  const [loading, setLoading] = React.useState(results.loading);
+  // Sync when props change
+  React.useEffect(() => {
+    setLoading(results.loading);
+  }, [results.loading]);
+
+  const [error, setError] = React.useState(results.exception);
+  // Sync when props change
+  React.useEffect(() => {
+    setError(results.exception);
+  }, [results.exception]);
+
+  async function evalThis() {
+    setLoading(true);
+    try {
+      const affectedPanels = await reevalPanel(panel.id);
+      if (MODE === 'browser') {
+        affectedPanels.forEach((p) => updatePanel(p));
+      }
+    } catch (e) {
+      setError(e);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   const panelRef = React.useRef(null);
-  function keyboardShortcuts(e: React.KeyboardEvent) {
+  async function keyboardShortcuts(e: React.KeyboardEvent) {
     if (
       !panelRef.current &&
       panelRef.current !== document.activeElement &&
@@ -297,14 +324,15 @@ export function Panel({
     }
 
     if (e.ctrlKey && e.code === 'Enter') {
-      reevalPanel(panel.id);
       if (e.preventDefault) {
         e.preventDefault();
       }
+
+      evalThis();
     }
   }
 
-  const killable = results.loading && MODE_FEATURES.killProcess;
+  const killable = loading && MODE_FEATURES.killProcess;
   function killProcess() {
     return panelRPC('killProcess', panel.id);
   }
@@ -333,16 +361,23 @@ export function Panel({
       } ${
         (panelUIDetails.body === null ||
           (panelUIDetails.hideBody && panelUIDetails.hideBody(panel))) &&
-        !results.exception
+        !error
           ? 'panel--empty'
           : ''
-      } ${results.loading ? 'panel--loading' : ''}`}
+      } ${loading ? 'panel--loading' : ''}`}
       tabIndex={1001}
       ref={panelRef}
       onKeyDown={keyboardShortcuts}
     >
       <ErrorBoundary>
-        <div className="panel-head">
+        <div
+          className="panel-head"
+          onDoubleClick={(e: React.MouseEvent<HTMLDivElement>) =>
+            setUrlState({
+              fullScreen: fullScreen === panel.id ? null : panel.id,
+            })
+          }
+        >
           <div
             className={`panel-header ${
               details ? 'panel-header--open' : ''
@@ -417,16 +452,12 @@ export function Panel({
 
             <span className="panel-controls vertical-align-center flex-right">
               <span className="text-muted">
-                {results.loading ? (
+                {loading ? (
                   'Running...'
                 ) : results.lastRun ? (
                   <>
-                    <span
-                      className={
-                        results.exception ? 'text-failure' : 'text-success'
-                      }
-                    >
-                      {results.exception ? 'Failed' : 'Succeeded'}
+                    <span className={error ? 'text-failure' : 'text-success'}>
+                      {error ? 'Failed' : 'Succeeded'}
                     </span>{' '}
                     {results.lastRun ? (
                       <>
@@ -452,7 +483,7 @@ export function Panel({
               </span>
               <span
                 title={
-                  results.loading
+                  loading
                     ? killable
                       ? 'Cancel'
                       : 'Running'
@@ -463,14 +494,20 @@ export function Panel({
                   icon
                   onClick={async () => {
                     if (killable) {
-                      killProcess();
+                      await killProcess();
+                      setLoading(false);
                     }
 
-                    reevalPanel(panel.id);
+                    setLoading(true);
+                    try {
+                      await reevalPanel(panel.id);
+                    } finally {
+                      setLoading(false);
+                    }
                   }}
                   type="primary"
                 >
-                  {results.loading ? <IconPlayerPause /> : <IconPlayerPlay />}
+                  {loading ? <IconPlayerPause /> : <IconPlayerPlay />}
                 </Button>
               </span>
               <span title="Full screen mode">
@@ -551,7 +588,7 @@ export function Panel({
                         updatePanel={updatePanel}
                       />
                     )}
-                  <PanelError panels={panels} e={results.exception} />
+                  <PanelError panels={panels} e={error} />
                   {info}
                 </div>
                 {panelUIDetails.previewable && (

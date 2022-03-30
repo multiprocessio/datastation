@@ -1,3 +1,5 @@
+import 'core-js/actual/structured-clone';
+
 // SOURCE: https://stackoverflow.com/a/34749873/1507139
 function isObject(item: any) {
   return item && typeof item === 'object' && !Array.isArray(item);
@@ -23,12 +25,11 @@ export function deepEquals(a: any, b: any) {
 }
 
 export function deepClone(a: any) {
-  // https://twitter.com/DasSurma/status/955484341358022657
-  const oldState = history.state;
-  history.replaceState(a, (window as any).title);
-  const copy = history.state;
-  history.replaceState(oldState, (window as any).title);
-  return copy;
+  if ((globalThis as any).structuredClone) {
+    return (globalThis as any).structuredClone(a);
+  }
+
+  return JSON.parse(JSON.stringify(a));
 }
 
 export function getPath(obj: any, path: string): any {

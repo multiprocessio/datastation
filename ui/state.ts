@@ -88,32 +88,23 @@ export function useProjectState(
 ): [ProjectState, ProjectCrud] {
   const [state, setProjectState] = React.useState<ProjectState>(null);
 
-  const setState = React.useCallback(
-    function setState(newState: ProjectState) {
-      const c = { ...newState };
-      Object.setPrototypeOf(c, ProjectState.prototype);
-      setProjectState(c);
-    },
-    [projectId, store, setProjectState]
-  );
+  async function reread(projectId: string) {
+    let state;
+    try {
+      let rawState = await store.get(projectId);
+      state = ProjectState.fromJSON(rawState);
+    } catch (e) {
+      log.error(e);
+      window.location.href = '/';
+    }
+
+    setProjectState(state);
+  }
 
   React.useEffect(
     function reReadStateWhenProjectIdChanges() {
-      async function fetch() {
-        let state;
-        try {
-          let rawState = await store.get(projectId);
-          state = ProjectState.fromJSON(rawState);
-        } catch (e) {
-          log.error(e);
-          window.location.href = '/';
-        }
-
-        setProjectState(state);
-      }
-
       if (projectId) {
-        fetch();
+        reread(projectId);
       }
     },
     [projectId]
@@ -134,22 +125,22 @@ export function useProjectState(
       opts?: { internalOnly: boolean }
     ) {
       const internalOnly = opts ? opts.internalOnly : false;
+
       // Actually an insert
       if (index === -1) {
         list.push(obj);
         if (!internalOnly) {
-          storeUpdate(projectId, obj, list.length - 1);
+          await storeUpdate(projectId, obj, list.length - 1);
         }
-
-        setState(state);
+        await reread(projectId);
         return;
       }
 
       list[index] = obj;
-      setState(state);
       if (!internalOnly) {
-        storeUpdate(projectId, obj, index);
+        await storeUpdate(projectId, obj, index);
       }
+      return reread(projectId);
     };
   }
 
@@ -157,15 +148,15 @@ export function useProjectState(
     list: Array<T>,
     storeDelete: (projectId: string, id: string) => Promise<void>
   ): (id: string) => Promise<void> {
-    return function del(id: string) {
+    return async function del(id: string) {
       const index = (list || []).findIndex((c) => c.id === id);
       if (index === -1) {
         return;
       }
 
       list.splice(index, 1);
-      setState(state);
-      return storeDelete(projectId, id);
+      await storeDelete(projectId, id);
+      return reread(projectId);
     };
   }
 
