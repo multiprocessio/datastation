@@ -134,7 +134,7 @@ export function App() {
           value={{ state: settings, setState: setSettings }}
         >
           <div className={`app app--${MODE} app--${settings.theme}`}>
-            <Header />
+            {MODE_FEATURES.appHeader && <Header />}
             <main className={'view-' + (urlState.view || 'editor')}>
               {main}
             </main>

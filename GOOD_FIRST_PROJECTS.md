@@ -21,10 +21,9 @@ and dsq for these tasks to make sense.
   * Make sure there’s a library for every language
   * Figure out how to embed the library inside DataStation
 * More databases
-  * IBM DB2, Neo4j, Apache Presto/Trino, Meilisearch, Apache Hive, Apache Druid, Apache Pinot
+  * IBM DB2, Neo4j, Apache Presto/Trino, Meilisearch, Apache Hive, Apache Druid, Apache Pinot, Quickwit
 * Add a new supported log format
   * Example: logfmt
-* Fakegen help text
 
 ## Medium
 

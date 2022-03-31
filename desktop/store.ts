@@ -426,14 +426,19 @@ GROUP BY panel_id
         log.info(`Updating ${crud.entity}`);
         encryptProjectSecrets(data, factory());
         crud.insert(db, data, position, foreignKey);
-        return;
       }
 
+      // Give it a chance to do stuff on insert
       if (shortcircuit) {
         const stop = shortcircuit(db, existing, existingPosition);
         if (stop) {
           return;
         }
+      }
+
+      if (!existing) {
+        // But exit before updating if just inserting.
+        return;
       }
 
       encryptProjectSecrets(data, existing);
@@ -515,6 +520,11 @@ GROUP BY panel_id
             q: `page_id = ?`,
             args: [data.pageId],
           });
+
+          // It's new so fetch it's new position
+          if (existingPosition === -1) {
+            existingPosition = allExisting.findIndex((p) => p.id === data.id);
+          }
 
           allExisting.splice(existingPosition, 1);
           allExisting.splice(position, 0, data);
