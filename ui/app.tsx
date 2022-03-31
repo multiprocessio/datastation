@@ -82,6 +82,16 @@ export function App() {
     }
   } else if (urlState.view === 'settings') {
     main = <Settings />;
+  } else if (urlState.view === 'projects') {
+    main = <MakeSelectProject />;
+  } else if (urlState.view === 'dashboard') {
+    main = (
+      <p className="text-center">Must be running the DataStation server to access this feature.</p>
+    );
+  } else if (urlState.view === 'exports') {
+    main = (
+      <p className="text-center">Must be running the DataStation server to access this feature.</p>
+    );
   } else {
     // This allows us to render the sidebar in tests where we
     // prepopulate connectors and servers
