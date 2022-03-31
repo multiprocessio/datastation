@@ -84,13 +84,11 @@ export function App() {
     main = <Settings />;
   } else if (urlState.view === 'projects') {
     main = <MakeSelectProject />;
-  } else if (urlState.view === 'dashboard') {
+  } else if (urlState.view === 'dashboard' || urlState.view === 'exports') {
     main = (
-      <p className="text-center">Must be running the DataStation server to access this feature.</p>
-    );
-  } else if (urlState.view === 'exports') {
-    main = (
-      <p className="text-center">Must be running the DataStation server to access this feature.</p>
+      <div className="card">
+        <p>Must be running the DataStation server to access this feature.</p>
+      </div>
     );
   } else {
     // This allows us to render the sidebar in tests where we
