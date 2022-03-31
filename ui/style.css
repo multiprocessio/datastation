@@ -483,6 +483,7 @@ input + input[type='file'] {
   margin-right: calc(2 * var(--margin-base));
 }
 
+/* TODO: need to do dark mode of this! */
 .navigation {
   border-right: 1px solid var(--border-light);
 
@@ -493,6 +494,10 @@ input + input[type='file'] {
       height: 25px;
       width: 25px;
     }
+  }
+
+  .navigation-item--active svg {
+    color: #333;
   }
 }
 
@@ -1380,6 +1385,14 @@ body.dark {
   .global-dropdown-sectionName,
   .global-dropdown p {
     color: var(--color-dark);
+  }
+
+  .navigation {
+      border-color: var(--border-dark);
+  }
+
+  .navigation-item--active svg {
+      color: var(--color-dark);
   }
 }
 

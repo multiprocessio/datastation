@@ -145,7 +145,7 @@ export function App() {
           <div className={`app app--${MODE} app--${settings.theme}`}>
             {MODE_FEATURES.appHeader && <Header />}
             <main className={'view-' + (urlState.view || 'editor')}>
-              <Navigation />
+              {urlState.projectId && <Navigation />}
               {main}
             </main>
           </div>

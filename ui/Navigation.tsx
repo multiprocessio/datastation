@@ -12,7 +12,7 @@ import { UrlState, UrlStateContext } from './urlState';
 
 export function Navigation() {
   const {
-    state: { projectId },
+    state: { projectId, view },
     setState: setUrlState,
   } = React.useContext(UrlStateContext);
 
@@ -53,7 +53,12 @@ export function Navigation() {
   return (
     <div className="navigation">
       {pages.map((page) => (
-        <div className="navigation-item" title={page.title}>
+        <div
+          className={`navigation-item ${
+            view === page.view ? 'navigation-item--active' : ''
+          }`}
+          title={page.title}
+        >
           <Button
             key={page.view}
             icon
