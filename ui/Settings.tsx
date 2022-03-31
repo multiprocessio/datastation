@@ -109,12 +109,6 @@ export function Settings() {
               }}
             />
           </div>
-          {MODE === 'desktop' && (
-            <Alert type="warning">
-              After making changes, restart DataStation for them to take effect
-              across all windows.
-            </Alert>
-          )}
         </FormGroup>
         {MODE !== 'browser' && (
           <>

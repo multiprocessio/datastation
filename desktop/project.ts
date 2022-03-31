@@ -85,17 +85,6 @@ const menuTemplate = [
       { type: 'separator' },
       { role: 'togglefullscreen' },
       { type: 'separator' },
-      {
-        label: 'Settings',
-        click: () =>
-          openWindow('', false, {
-            view: 'settings',
-            width: 500,
-            height: 500,
-            hideMenu: true,
-            title: 'DataStation Settings',
-          }),
-      },
     ],
   },
 ];

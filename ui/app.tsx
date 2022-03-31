@@ -86,7 +86,7 @@ export function App() {
     main = <MakeSelectProject />;
   } else if (urlState.view === 'dashboard' || urlState.view === 'exports') {
     main = (
-      <div className="card">
+      <div className="card card--center">
         <p>Must be running the DataStation server to access this feature.</p>
       </div>
     );

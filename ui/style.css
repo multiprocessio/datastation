@@ -1024,6 +1024,7 @@ canvas {
   width: 500px;
 }
 
+.card--center,
 .app--server .project-name {
   margin: 0 auto;
   margin-top: calc(2 * var(--margin-base));
@@ -1388,11 +1389,11 @@ body.dark {
   }
 
   .navigation {
-      border-color: var(--border-dark);
+    border-color: var(--border-dark);
   }
 
   .navigation-item--active svg {
-      color: var(--color-dark);
+    color: var(--color-dark);
   }
 }
 
