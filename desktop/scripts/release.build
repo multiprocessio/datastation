@@ -1,6 +1,5 @@
 rm -rf build
 yarn
-yarn electron-rebuild
 setenv UI_ESBUILD_ARGS "--minify"
 yarn build-desktop
 prepend "window.DS_CONFIG_MODE='desktop';" build/ui.js
@@ -35,6 +34,8 @@ rm -rf desktop
 rm -rf ui
 rm -rf shared
 rm -rf releases
+
+yarn electron-rebuild
 
 # Build and package
 yarn electron-packager --asar --overwrite --icon=build/icon.png --out=releases --build-version={arg0} --app-version={arg0} . "DataStation Community Edition"
