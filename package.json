@@ -61,6 +61,7 @@
   "optionalDependencies": {},
   "devDependencies": {
     "@dsnp/parquetjs": "^1.1.2",
+    "@faker-js/faker": "faker-js/faker",
     "@multiprocess/cssplus": "^0.4.0",
     "@types/better-sqlite3": "^7.5.0",
     "@types/cookie-parser": "^1.4.2",
@@ -84,7 +85,6 @@
     "electron-rebuild": "^3.2.7",
     "enzyme": "^3.11.0",
     "esbuild": "^0.14.27",
-    "faker": "^6.6.6",
     "jest": "^27.2.4",
     "license-checker": "^25.0.1",
     "node-fetch": "2",

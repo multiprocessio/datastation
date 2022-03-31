@@ -300,6 +300,11 @@ export function Panel({
   }, [results.exception]);
 
   async function evalThis() {
+    if (killable) {
+      await killProcess();
+      setLoading(false);
+    }
+
     setLoading(true);
     try {
       const affectedPanels = await reevalPanel(panel.id);
@@ -492,19 +497,7 @@ export function Panel({
               >
                 <Button
                   icon
-                  onClick={async () => {
-                    if (killable) {
-                      await killProcess();
-                      setLoading(false);
-                    }
-
-                    setLoading(true);
-                    try {
-                      await reevalPanel(panel.id);
-                    } finally {
-                      setLoading(false);
-                    }
-                  }}
+                  onClick={evalThis}
                   type="primary"
                 >
                   {loading ? <IconPlayerPause /> : <IconPlayerPlay />}
