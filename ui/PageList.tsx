@@ -12,12 +12,10 @@ import {
 import { Button } from './components/Button';
 import { Confirm } from './components/Confirm';
 import { Input } from './components/Input';
-import { Link } from './components/Link';
 import { loadDefaultProject } from './Header';
 import { VISUAL_PANELS } from './Panel';
 import { PanelList } from './PanelList';
 import { PANEL_UI_DETAILS } from './panels';
-import { UrlStateContext } from './urlState';
 
 export function makeReevalPanel(
   page: ProjectPage,
@@ -85,7 +83,6 @@ export function PageList({
   pageIndex: number;
 }) {
   const page: ProjectPage | null = state.pages[pageIndex] || null;
-  const { state: urlState } = React.useContext(UrlStateContext);
 
   if (!page) {
     return (
@@ -187,33 +184,6 @@ export function PageList({
         >
           +
         </Button>
-      </div>
-
-      <div className="vertical-align-center section-subtitle">
-        <Link
-          className={`page-mode ${
-            urlState.view === 'editor' ? 'page-mode--on' : ''
-          }`}
-          args={{ view: 'editor' }}
-        >
-          Editor
-        </Link>
-        <Link
-          className={`page-mode ${
-            urlState.view === 'scheduler' ? 'page-mode--on' : ''
-          }`}
-          args={{ view: 'scheduler' }}
-        >
-          Schedule Exports
-        </Link>
-        <Link
-          className={`page-mode ${
-            urlState.view === 'dashboard' ? 'page-mode--on' : ''
-          }`}
-          args={{ view: 'dashboard' }}
-        >
-          Dashboard
-        </Link>
       </div>
 
       <PanelList

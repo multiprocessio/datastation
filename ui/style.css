@@ -477,9 +477,22 @@ input + input[type='file'] {
 
 .section-subtitle {
   padding: calc(2 * var(--margin-base));
+}
 
-  .select:not(:last-of-type) {
-    margin-right: calc(2 * var(--margin-base));
+.section-subtitle .select:not(:last-of-type) {
+  margin-right: calc(2 * var(--margin-base));
+}
+
+.navigation {
+  border-right: 1px solid var(--border-light);
+
+  .navigation-item {
+    padding: calc(2 * var(--margin-base));
+
+    svg {
+      height: 25px;
+      width: 25px;
+    }
   }
 }
 

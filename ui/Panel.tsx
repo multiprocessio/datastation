@@ -495,11 +495,7 @@ export function Panel({
                     : 'Evaluate Panel (Ctrl-Enter)'
                 }
               >
-                <Button
-                  icon
-                  onClick={evalThis}
-                  type="primary"
-                >
+                <Button icon onClick={evalThis} type="primary">
                   {loading ? <IconPlayerPause /> : <IconPlayerPlay />}
                 </Button>
               </span>

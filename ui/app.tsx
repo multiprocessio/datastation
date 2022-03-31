@@ -8,6 +8,7 @@ import { Version } from './components/Version';
 import { ConnectorList } from './ConnectorList';
 import { Header, loadDefaultProject } from './Header';
 import { MakeSelectProject } from './MakeSelectProject';
+import { Navigation } from './Navigation';
 import { PageList } from './PageList';
 import { ServerList } from './ServerList';
 import { Settings, SettingsContext, useSettings } from './Settings';
@@ -136,6 +137,7 @@ export function App() {
           <div className={`app app--${MODE} app--${settings.theme}`}>
             {MODE_FEATURES.appHeader && <Header />}
             <main className={'view-' + (urlState.view || 'editor')}>
+              <Navigation />
               {main}
             </main>
           </div>

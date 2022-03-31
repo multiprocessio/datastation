@@ -19,7 +19,7 @@ export interface UrlState {
   projectId: string;
   page: number;
   fullScreen?: string;
-  view: 'editor' | 'dashboard' | 'scheduler' | 'settings';
+  view: 'editor' | 'dashboard' | 'exports' | 'settings' | 'projects';
   expanded?: Array<string>;
   sidebar?: boolean;
 }
