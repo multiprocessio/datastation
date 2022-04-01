@@ -1,4 +1,4 @@
-import debounce from 'lodash.debounce';
+import { useDebouncedCallback } from 'use-debounce';
 import * as React from 'react';
 import { IN_TESTS } from '../../shared/constants';
 import { Tooltip } from './Tooltip';
@@ -13,7 +13,19 @@ export function useDebouncedLocalState(
   defaultValue = ''
 ): [string | number | readonly string[], (v: string) => void, () => void] {
   const [defaultChanged, setDefaultChanged] = React.useState(false);
-  const debounced = React.useCallback(debounce(nonLocalSet, delay), []);
+  const debounced = useDebouncedCallback(
+    (value: string) => nonLocalSet(value),
+    delay,
+    { maxWait: delay * 4 }
+  );
+
+  // When the component goes to be unmounted, we will fetch data if the input has changed.
+  React.useEffect(
+    () => () => {
+      debounced.flush();
+    },
+    [debounced]
+  );
 
   const [localValue, setLocalValue] = React.useState(nonLocalValue);
   // Resync to props when props changes
@@ -26,7 +38,7 @@ export function useDebouncedLocalState(
     setLocalValue(nonLocalValue);
   }, [nonLocalValue, debounced, isText]);
 
-  function wrapSetLocalValue(v: string) {
+  const wrapSetLocalValue = React.useCallback(function wrapSetLocalValue(v: string) {
     if (String(v) !== String(nonLocalValue)) {
       // Only important the first time
       setDefaultChanged(true);
@@ -37,7 +49,7 @@ export function useDebouncedLocalState(
       // Then set off debouncer to eventually update external state
       debounced(v);
     }
-  }
+  }, [nonLocalValue, debounced]);
 
   function flushValue() {
     debounced.flush();
@@ -52,7 +64,7 @@ export function useDebouncedLocalState(
     if (!localValue && defaultValue && !defaultChanged) {
       wrapSetLocalValue(defaultValue);
     }
-  }, [isText]);
+  }, [isText, defaultChanged, defaultValue, localValue, wrapSetLocalValue]);
 
   if (!isText) {
     return [

@@ -56,6 +56,7 @@
     "tmp-promise": "^3.0.2",
     "tweetnacl": "^1.0.3",
     "tweetnacl-util": "^0.15.1",
+    "use-debounce": "^7.0.1",
     "xlsx": "^0.18.4"
   },
   "optionalDependencies": {},

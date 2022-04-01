@@ -53,7 +53,7 @@ export function Select({
 
   const optionValues = getOptionValues(children);
   React.useEffect(() => {
-    const values = [allowNone ? NONE : null, optionValues].filter(Boolean);
+    const values = [allowNone ? NONE : null, ...optionValues].filter(Boolean);
     if (values.length && !values.includes(value)) {
       let foundUnused = false;
       for (const value of values) {
@@ -75,7 +75,7 @@ export function Select({
         onChange(values[0]);
       }
     }
-  }, [value, allowNone, children, onChange, used, optionValues]);
+  }, [value, allowNone, onChange, used, optionValues]);
 
   const select = (
     <div className="vertical-align-center">

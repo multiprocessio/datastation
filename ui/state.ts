@@ -117,7 +117,6 @@ export function makeUpdater<T extends { id: string }>(
     }
     list.splice(newIndex, 0, obj);
     if (!internalOnly) {
-      console.log(list.map((l) => [l.name, l.id]));
       await storeUpdate(
         projectId,
         obj,
@@ -195,7 +194,7 @@ export function useProjectState(
           index: number,
           opts?: { internalOnly: boolean }
         ) {
-          const page = state.pages.find((p) => p === obj.pageId);
+          const page = state.pages.find((p) => p.id === obj.pageId);
           return makeUpdater(
             projectId,
             page.panels,
