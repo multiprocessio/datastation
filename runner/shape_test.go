@@ -109,6 +109,33 @@ func TestGetShape(t *testing.T) {
 			},
 		},
 		{
+			`[{"a": "9", "b": 1}, {"a": "2", "b": 2}, {"a": 1, "b": 3}]`,
+			Shape{
+				Kind: ArrayKind,
+				ArrayShape: &ArrayShape{
+					Children: Shape{
+						Kind: ObjectKind,
+						ObjectShape: &ObjectShape{
+							Children: map[string]Shape{
+								"a": {
+									Kind: VariedKind,
+									VariedShape: &VariedShape{
+										Children: []Shape{
+											{Kind: ScalarKind, ScalarShape: &ScalarShape{Name: StringScalar}},
+											{Kind: ScalarKind, ScalarShape: &ScalarShape{Name: NumberScalar}},
+										},
+									},
+								},
+								"b": {
+									Kind: ScalarKind, ScalarShape: &ScalarShape{Name: NumberScalar},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		{
 			`[{"a": {"b": 1}, "c": "2"}]`,
 			Shape{
 				Kind: ArrayKind,
