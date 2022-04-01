@@ -52,21 +52,26 @@ export function Select({
   }
 
   const optionValues = getOptionValues(children);
+  const oldValue = value;
   React.useEffect(() => {
     const values = [allowNone ? NONE : null, ...optionValues].filter(Boolean);
     if (values.length && !values.includes(value)) {
       let foundUnused = false;
       for (const value of values) {
+        // Good value is already set, no default to set.
+        if (value === oldValue) {
+          return;
+        }
+
         if ((used && used.includes(value)) || allowNone) {
           continue;
         }
 
         foundUnused = true;
-        onChange(value);
         break;
       }
 
-      if (allowNone) {
+      if (!foundUnused && allowNone) {
         onChange(NONE);
         return;
       }
@@ -75,7 +80,7 @@ export function Select({
         onChange(values[0]);
       }
     }
-  }, [value, allowNone, onChange, used, optionValues]);
+  }, [value, oldValue, allowNone, onChange, used, optionValues]);
 
   const select = (
     <div className="vertical-align-center">

@@ -270,7 +270,7 @@ export class LocalStorageStore extends ProjectStore {
 }
 
 class RemoteStore extends ProjectStore {
-  updatePanel(
+  async updatePanel(
     projectId: string,
     data: PanelInfo,
     position: number,

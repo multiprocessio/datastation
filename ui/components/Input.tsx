@@ -1,5 +1,5 @@
-import { useDebouncedCallback } from 'use-debounce';
 import * as React from 'react';
+import { useDebouncedCallback } from 'use-debounce';
 import { IN_TESTS } from '../../shared/constants';
 import { Tooltip } from './Tooltip';
 
@@ -14,7 +14,11 @@ export function useDebouncedLocalState(
 ): [string | number | readonly string[], (v: string) => void, () => void] {
   const [defaultChanged, setDefaultChanged] = React.useState(false);
   const debounced = useDebouncedCallback(
-    (value: string) => nonLocalSet(value),
+    (value: string) => {
+      if (value !== nonLocalValue) {
+        nonLocalSet(value);
+      }
+    },
     delay,
     { maxWait: delay * 4 }
   );
@@ -38,18 +42,21 @@ export function useDebouncedLocalState(
     setLocalValue(nonLocalValue);
   }, [nonLocalValue, debounced, isText]);
 
-  const wrapSetLocalValue = React.useCallback(function wrapSetLocalValue(v: string) {
-    if (String(v) !== String(nonLocalValue)) {
-      // Only important the first time
-      setDefaultChanged(true);
+  const wrapSetLocalValue = React.useCallback(
+    function wrapSetLocalValue(v: string) {
+      if (String(v) !== String(nonLocalValue)) {
+        // Only important the first time
+        setDefaultChanged(true);
 
-      // First update local state
-      setLocalValue(v);
+        // First update local state
+        setLocalValue(v);
 
-      // Then set off debouncer to eventually update external state
-      debounced(v);
-    }
-  }, [nonLocalValue, debounced]);
+        // Then set off debouncer to eventually update external state
+        debounced(v);
+      }
+    },
+    [nonLocalValue, debounced]
+  );
 
   function flushValue() {
     debounced.flush();

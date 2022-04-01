@@ -12,6 +12,13 @@ export function ServerPicker({
   servers: Array<ServerInfo>;
   onChange: (v: string) => void;
 }) {
+  const [internalValue, setInternalValue] = React.useState(
+    serverId === '' ? 'null' : serverId
+  );
+  React.useEffect(() => {
+    setInternalValue(serverId === '' ? 'null' : serverId);
+  }, [serverId]);
+
   if (!servers.length) {
     return null;
   }
@@ -20,7 +27,7 @@ export function ServerPicker({
     <FormGroup>
       <div className="form-row">
         <Select
-          value={serverId}
+          value={internalValue}
           label="Via server"
           onChange={(v) => onChange(v === 'null' ? null : v)}
         >

@@ -161,9 +161,9 @@ export function TablePanelDetails({
                 onDelete={
                   panel.table.columns.length > 1
                     ? function handleColumnDelete() {
-                      panel.table.columns.splice(i, 1);
-                      updatePanel(panel);
-                    }
+                        panel.table.columns.splice(i, 1);
+                        updatePanel(panel);
+                      }
                     : undefined
                 }
                 label="Column"
@@ -264,7 +264,7 @@ export const tablePanel: PanelUIDetails<TablePanelInfo> = {
   details: TablePanelDetails,
   body: TablePanel,
   previewable: false,
-  factory: function(pageId: string) {
+  factory: function (pageId: string) {
     return new TablePanelInfo(pageId);
   },
   hasStdout: false,

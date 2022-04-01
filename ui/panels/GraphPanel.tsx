@@ -110,19 +110,19 @@ function getPieDatasets(
         callbacks:
           panel.graph.type === 'pie'
             ? {
-              label: (ctx: any) => {
-                const reversedIndex = ys.length - ctx.datasetIndex - 1;
-                // Explicitly do read from the not-reversed panel.graph.ys array.
-                // This library stacks levels in reverse of what you'd expect.
-                const serieses = panel.graph.ys.slice(0, reversedIndex + 1);
-                const labels = serieses.map(
-                  ({ label, field }) =>
-                    `${label}: ${+value[ctx.dataIndex][field]}`
-                );
-                labels.unshift(ctx.label);
-                return labels;
-              },
-            }
+                label: (ctx: any) => {
+                  const reversedIndex = ys.length - ctx.datasetIndex - 1;
+                  // Explicitly do read from the not-reversed panel.graph.ys array.
+                  // This library stacks levels in reverse of what you'd expect.
+                  const serieses = panel.graph.ys.slice(0, reversedIndex + 1);
+                  const labels = serieses.map(
+                    ({ label, field }) =>
+                      `${label}: ${+value[ctx.dataIndex][field]}`
+                  );
+                  labels.unshift(ctx.label);
+                  return labels;
+                },
+              }
             : undefined,
       },
     };
@@ -215,7 +215,7 @@ export function GraphPanel({ panel }: PanelBodyProps<GraphPanelInfo>) {
     if (!Array.isArray(value)) {
       log.error(
         `Expected array input to graph, got (${typeof value}): ` +
-        preview(value)
+          preview(value)
       );
       return;
     }
@@ -247,7 +247,7 @@ export function GraphPanel({ panel }: PanelBodyProps<GraphPanelInfo>) {
           id: 'background-of-chart',
           // Pretty silly there's no builtin way to set a background color
           // https://stackoverflow.com/a/38493678/1507139
-          beforeDraw: function() {
+          beforeDraw: function () {
             if (!ref || !ref.current) {
               return;
             }
@@ -387,9 +387,9 @@ export function GraphPanelDetails({
                   onDelete={
                     panel.graph.ys.length > 1
                       ? () => {
-                        panel.graph.ys.splice(i, 1);
-                        updatePanel(panel);
-                      }
+                          panel.graph.ys.splice(i, 1);
+                          updatePanel(panel);
+                        }
                       : undefined
                   }
                   preferredDefaultType="number"
@@ -435,7 +435,7 @@ export function GraphPanelDetails({
                   </div>
                 ) : null}
                 {panel.graph.type === 'bar' &&
-                  (!panel.graph.uniqueBy || panel.graph.uniqueBy === NONE) ? (
+                (!panel.graph.uniqueBy || panel.graph.uniqueBy === NONE) ? (
                   <div className="form-row">
                     <Radio
                       label="Unique colors"

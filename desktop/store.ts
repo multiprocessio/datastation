@@ -477,6 +477,7 @@ GROUP BY panel_id
         panelPositions: string[];
       }
     ) => {
+      console.log('updaitng', data);
       data.lastEdited = new Date();
       delete data.resultMeta;
       await this.updateGeneric(

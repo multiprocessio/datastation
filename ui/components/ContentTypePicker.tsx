@@ -17,12 +17,18 @@ export function ContentTypePicker({
   inMemoryEval: boolean;
   label?: string;
 }) {
+  const [internalValue, setInternalValue] = React.useState(
+    value.type === '' ? 'null' : value.type
+  );
+  React.useEffect(() => {
+    setInternalValue(value.type === '' ? 'null' : value.type);
+  }, [value.type]);
   return (
     <React.Fragment>
       <div className="form-row">
         <Select
           label={label || 'Content Type'}
-          value={value.type}
+          value={internalValue}
           onChange={(type: string) => {
             if (type === 'null') {
               type = '';
