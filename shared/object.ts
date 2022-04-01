@@ -93,9 +93,7 @@ export const windowOrGlobal = (() => {
   }
 })();
 
-export function newId() {
-  return customAlphabet(
-    '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',
-    12
-  );
-}
+export const newId = customAlphabet(
+  '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',
+  12
+);

@@ -16,7 +16,6 @@ export type ProjectCrud = {
   updatePanel: (
     panel: PanelInfo,
     position: number,
-    panelPositions?: string[],
     opts?: { internalOnly: boolean }
   ) => Promise<void>;
   deletePanel: (panelId: string) => Promise<void>;
@@ -64,7 +63,6 @@ const defaultCrud = {
   updatePanel(
     panel: PanelInfo,
     position: number,
-    panelPositions?: string[],
     opts?: { internalOnly: boolean }
   ) {
     throw new Error('Context not initialized.');
@@ -87,13 +85,12 @@ const defaultCrud = {
 export function makeUpdater<T extends { id: string }>(
   projectId: string,
   list: Array<T>,
-  storeUpdate: (projectId: string, obj: T, position: number) => Promise<void>,
+  storeUpdate: (projectId: string, obj: T, position: number, panelPositions?: string[]) => Promise<void>,
   reread: (projectId: string) => Promise<void>
 ) {
   return async function update(
     obj: T,
     newIndex: number,
-    panelPositions?: string[],
     opts?: { internalOnly: boolean }
   ) {
     const internalOnly = opts ? opts.internalOnly : false;
@@ -113,7 +110,7 @@ export function makeUpdater<T extends { id: string }>(
     list.splice(existingIndex, 1);
     list.splice(newIndex, 0, obj);
     if (!internalOnly) {
-      await storeUpdate(projectId, obj, newIndex);
+      await storeUpdate(projectId, obj, newIndex, list.map(l => l.id));
     }
     return reread(projectId);
   };
@@ -184,15 +181,13 @@ export function useProjectState(
         updatePanel(
           obj: PanelInfo,
           index: number,
-          panelPositions?: string[],
           opts?: { internalOnly: boolean }
         ) {
           const page = state.pages.find((p) => obj.pageId);
           return makeUpdater(projectId, page.panels, store.updatePanel, reread)(
             obj,
             index,
-            panelPositions,
-            newOpts
+	    opts,
           );
         },
         deletePanel(id: string) {

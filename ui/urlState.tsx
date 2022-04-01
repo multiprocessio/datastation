@@ -88,7 +88,7 @@ export function useUrlState<T extends DefaultView = DefaultView>(): [
   });
 
   const setState = React.useCallback(
-    function setState(newState: Partial<UrlState>) {
+    function setState(newState: Partial<UrlState<T>>) {
       setStateInternal({
         ...state,
         ...newState,

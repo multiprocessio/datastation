@@ -77,7 +77,6 @@ export function PageList({
   updatePanel: (
     panel: PanelInfo,
     position: number,
-    panelPositions: string[],
     opts?: { internalOnly: boolean }
   ) => void;
   setPageIndex: (i: number) => void;
@@ -120,7 +119,7 @@ export function PageList({
       return;
     }
 
-    updatePanel(panel, index, undefined, { internalOnly: true });
+    updatePanel(panel, index, { internalOnly: true });
   });
 
   return (

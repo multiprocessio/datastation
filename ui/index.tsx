@@ -1,6 +1,6 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { App } from './app';
+import { App, defaultRoutes } from './app';
 
 // SOURCE: https://stackoverflow.com/a/7995898/1507139
 const isMobile = navigator.userAgent.match(
@@ -15,7 +15,7 @@ function index() {
   }
 
   if (!isMobile) {
-    ReactDOM.render(<App routes={routes} />, root);
+    ReactDOM.render(<App routes={defaultRoutes} />, root);
     return;
   }
 

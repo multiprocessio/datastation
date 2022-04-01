@@ -42,7 +42,6 @@ export function PanelList({
     await crud.updatePanel(
       panel,
       index,
-      page.panels.map((p) => p.id)
     );
 
     if (VISUAL_PANELS.includes(panel.type)) {
@@ -60,8 +59,8 @@ export function PanelList({
 
     const orderedFields = shapeIsOk
       ? orderedObjectFields(
-          (panel.resultMeta.shape as ArrayShape).children as ObjectShape
-        )
+        (panel.resultMeta.shape as ArrayShape).children as ObjectShape
+      )
       : [];
     let firstNumber: string;
     let firstString: string;

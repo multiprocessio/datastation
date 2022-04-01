@@ -416,7 +416,7 @@ GROUP BY panel_id
   ) {
     const db = this.getConnection(projectId);
     db.transaction(() => {
-      const [existing, existingPosition] = crud.getOne(db, data.id);
+      const [existing] = crud.getOne(db, data.id);
       if (!existing) {
         log.info(`Inserting ${crud.entity}`);
         encryptProjectSecrets(data, factory());
@@ -492,6 +492,7 @@ GROUP BY panel_id
       );
 
       if (panelPositions) {
+	const db = this.getConnection(projectId);
         // Don't trust the UI to be up-to-date with all existing panels
         // So fetch the existing ones
         const getStmt = db.prepare(
@@ -516,7 +517,7 @@ GROUP BY panel_id
           `UPDATE ${panelCrud.entity} SET position = ? WHERE id = ?`
         );
         for (const i of panelPositions.map((_, i) => i)) {
-          stmt.run(i, panelPositions.id);
+          stmt.run(i, panelPositions[i]);
         }
       }
     },
