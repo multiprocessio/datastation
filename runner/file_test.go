@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"math/rand"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -14,36 +15,59 @@ import (
 )
 
 func Test_transformJSONLines(t *testing.T) {
-	tmp, err := ioutil.TempFile("", "")
-	defer os.Remove(tmp.Name())
-	assert.Nil(t, err)
-
-	tmp.WriteString(`{"a": 1, "b": 2}
-{"a": 2, "b": 3}`)
-
-	tmp2, err := ioutil.TempFile("", "")
-	defer os.Remove(tmp2.Name())
-	assert.Nil(t, err)
-
-	err = transformJSONLinesFile(tmp.Name(), tmp2)
-	assert.Nil(t, err)
-
-	var m []map[string]any
-	tmp2Bs, err := ioutil.ReadFile(tmp2.Name())
-	assert.Nil(t, err)
-	err = json.Unmarshal(tmp2Bs, &m)
-	assert.Nil(t, err)
-
-	assert.Equal(t, []map[string]any{
+	longString := strings.Repeat("Omnis ut ut voluptatem provident eaque necessitatibus quia. Eos veniam qui. ", 1024) // 76kb
+	tests := []struct {
+		input  string
+		output []map[string]any
+	}{
 		{
-			"a": float64(1),
-			"b": float64(2),
+			`{"a": 1, "b": 2}
+{"a": 2, "b": 3}`,
+			[]map[string]any{
+				{
+					"a": float64(1),
+					"b": float64(2),
+				},
+				{
+					"a": float64(2),
+					"b": float64(3),
+				},
+			},
 		},
 		{
-			"a": float64(2),
-			"b": float64(3),
+			`{"a": 1, "b": "` + longString + `"}`,
+			[]map[string]any{
+				{
+					"a": float64(1),
+					"b": longString,
+				},
+			},
 		},
-	}, m)
+	}
+
+	for _, test := range tests {
+		tmp, err := ioutil.TempFile("", "")
+		assert.Nil(t, err)
+
+		tmp.WriteString(test.input)
+
+		tmp2, err := ioutil.TempFile("", "")
+		assert.Nil(t, err)
+
+		err = transformJSONLinesFile(tmp.Name(), tmp2)
+		assert.Nil(t, err)
+
+		var m []map[string]any
+		tmp2Bs, err := ioutil.ReadFile(tmp2.Name())
+		assert.Nil(t, err)
+		err = json.Unmarshal(tmp2Bs, &m)
+		assert.Nil(t, err)
+
+		assert.Equal(t, test.output, m)
+
+		os.Remove(tmp.Name())
+		os.Remove(tmp2.Name())
+	}
 }
 
 func Test_parquet(t *testing.T) {

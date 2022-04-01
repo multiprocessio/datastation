@@ -437,10 +437,19 @@ func transformJSONConcatFile(in string, out io.Writer) error {
 	return transformJSONConcat(r, out)
 }
 
+func newLargeLineScanner(in io.Reader) *bufio.Scanner {
+	scanner := bufio.NewScanner(in)
+
+	// Bump line length limit to 1MB (from 64k)
+	buf := make([]byte, 4096)
+	scanner.Buffer(buf, 1024*1024)
+	return scanner
+}
+
 func transformJSONLines(in io.Reader, out io.Writer) error {
 	first := true
 	return withJSONOutWriter(out, "[", "]", func() error {
-		scanner := bufio.NewScanner(in)
+		scanner := newLargeLineScanner(in)
 		for scanner.Scan() {
 			if !first {
 				_, err := out.Write([]byte(",\n"))
@@ -477,7 +486,7 @@ var BUILTIN_REGEX = map[MimeType]*regexp.Regexp{
 }
 
 func transformRegexp(in io.Reader, out io.Writer, re *regexp.Regexp) error {
-	scanner := bufio.NewScanner(in)
+	scanner := newLargeLineScanner(in)
 	return withJSONArrayOutWriterFile(out, func(w *jsonutil.StreamEncoder) error {
 		row := map[string]any{}
 		for scanner.Scan() {
