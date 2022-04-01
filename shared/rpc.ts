@@ -18,6 +18,7 @@ export type GetPanelResponse = PanelInfo;
 export type UpdatePanelRequest = {
   position: number;
   data: PanelInfo;
+  panelPositions?: string[];
 };
 export type UpdatePanelResponse = void;
 

@@ -16,6 +16,7 @@ export type ProjectCrud = {
   updatePanel: (
     panel: PanelInfo,
     position: number,
+    panelPositions?: string[],
     opts?: { internalOnly: boolean }
   ) => Promise<void>;
   deletePanel: (panelId: string) => Promise<void>;
@@ -63,6 +64,7 @@ const defaultCrud = {
   updatePanel(
     panel: PanelInfo,
     position: number,
+    panelPositions?: string[],
     opts?: { internalOnly: true }
   ) {
     throw new Error('Context not initialized.');
@@ -169,6 +171,7 @@ export function useProjectState(
         updatePanel(
           obj: PanelInfo,
           index: number,
+	  panelPositions?: string[],
           opts?: { internalOnly: true }
         ) {
           const page = state.pages.find((p) => obj.pageId);

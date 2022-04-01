@@ -50,6 +50,7 @@ import {
   UpdateConnectorHandler,
   UpdatePageHandler,
   UpdatePanelHandler,
+  UpdatePanelOrderHandler,
   UpdateServerHandler,
 } from './rpc';
 import { encrypt } from './secret';
@@ -413,36 +414,19 @@ GROUP BY panel_id
       column: string;
       value: string;
     },
-    shortcircuit?: (
-      db: sqlite3.Database,
-      existingObj: T,
-      existingPosition: number
-    ) => boolean
   ) {
     const db = this.getConnection(projectId);
     db.transaction(() => {
       const [existing, existingPosition] = crud.getOne(db, data.id);
       if (!existing) {
-        log.info(`Updating ${crud.entity}`);
+        log.info(`Inserting ${crud.entity}`);
         encryptProjectSecrets(data, factory());
         crud.insert(db, data, position, foreignKey);
-      }
-
-      // Give it a chance to do stuff on insert
-      if (shortcircuit) {
-        const stop = shortcircuit(db, existing, existingPosition);
-        if (stop) {
-          return;
-        }
-      }
-
-      if (!existing) {
-        // But exit before updating if just inserting.
-        return;
+	return;
       }
 
       encryptProjectSecrets(data, existing);
-      log.info(`Inserting ${crud.entity}`);
+      log.info(`Updating ${crud.entity}`);
       crud.update(db, data);
     })();
   }
@@ -487,14 +471,16 @@ GROUP BY panel_id
       {
         data,
         position,
+	panelPositions,
       }: {
         data: PanelInfo;
         position: number;
+	panelPositions: string[];
       }
     ) => {
       data.lastEdited = new Date();
       delete data.resultMeta;
-      return this.updateGeneric(
+      await this.updateGeneric(
         panelCrud,
         projectId,
         data,
@@ -503,40 +489,35 @@ GROUP BY panel_id
         {
           column: 'page_id',
           value: data.pageId,
-        },
-        (
-          db: sqlite3.Database,
-          existing: PanelInfo,
-          existingPosition: number
-        ) => {
-          if (position === existingPosition) {
-            return false;
-          }
-
-          // If updating position, do that in one dedicated step.
-          // Nothing else can be updated with it.
-          // This is all the UI needs at the moment anyway
-          const allExisting = panelCrud.get(db, {
-            q: `page_id = ?`,
-            args: [data.pageId],
-          });
-
-          // It's new so fetch it's new position
-          if (existingPosition === -1) {
-            existingPosition = allExisting.findIndex((p) => p.id === data.id);
-          }
-
-          allExisting.splice(existingPosition, 1);
-          allExisting.splice(position, 0, data);
-          const stmt = db.prepare(
-            `UPDATE ${panelCrud.entity} SET position = ? WHERE id = ?`
-          );
-          for (const i of allExisting.map((_, i) => i)) {
-            stmt.run(i, allExisting[i].id);
-          }
-          return true;
         }
       );
+
+      if (panelPositions) {
+	// Don't trust the UI to be up-to-date with all existing panels
+	// So fetch the existing ones
+	const getStmt = db.prepare(`SELECT id FROM ${panelCrud.entity} WHERE page_id = ?`);
+        const allExisting = getStmt.all(data.pageId);
+
+	// Then sort the existing ones based on the positions passed in
+	allExisting.sort((a, b) => {
+	  const ao = panelPositions.indexOf(a.id);
+	  const bo = panelPositions.indexOf(b.id);
+
+	  // Put unknown items at the end
+	  if (ao === -1) {
+	    return 1;
+	  }
+
+	  return ao - bo;
+	});
+
+	const stmt = db.prepare(
+          `UPDATE ${panelCrud.entity} SET position = ? WHERE id = ?`
+	);
+	for (const i of panelPositions.map((_, i) => i)) {
+          stmt.run(i, panelPositions.id);
+	}
+      }
     },
   };
 

@@ -483,7 +483,6 @@ input + input[type='file'] {
   margin-right: calc(2 * var(--margin-base));
 }
 
-/* TODO: need to do dark mode of this! */
 .navigation {
   border-right: 1px solid var(--border-light);
 

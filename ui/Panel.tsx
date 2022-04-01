@@ -358,18 +358,17 @@ export function Panel({
     }
   }
 
+  console.log(panel);
   return (
     <div
       id={`panel-${panel.id}`}
-      className={`panel ${fullScreen === panel.id ? 'panel--fullscreen' : ''} ${
-        hidden ? 'panel--hidden' : ''
-      } ${
-        (panelUIDetails.body === null ||
+      className={`panel ${fullScreen === panel.id ? 'panel--fullscreen' : ''} ${hidden ? 'panel--hidden' : ''
+        } ${(panelUIDetails.body === null ||
           (panelUIDetails.hideBody && panelUIDetails.hideBody(panel))) &&
-        !error
+          !error
           ? 'panel--empty'
           : ''
-      } ${loading ? 'panel--loading' : ''}`}
+        } ${loading ? 'panel--loading' : ''}`}
       tabIndex={1001}
       ref={panelRef}
       onKeyDown={keyboardShortcuts}
@@ -384,9 +383,8 @@ export function Panel({
           }
         >
           <div
-            className={`panel-header ${
-              details ? 'panel-header--open' : ''
-            } vertical-align-center`}
+            className={`panel-header ${details ? 'panel-header--open' : ''
+              } vertical-align-center`}
           >
             <span title="Move Up">
               <Button
@@ -474,7 +472,7 @@ export function Panel({
                             Took{' '}
                             {formatDistanceStrict(
                               results.lastRun.valueOf() -
-                                (results.elapsed || 0),
+                              (results.elapsed || 0),
                               results.lastRun.valueOf()
                             )}
                           </small>
