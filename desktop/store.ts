@@ -50,7 +50,6 @@ import {
   UpdateConnectorHandler,
   UpdatePageHandler,
   UpdatePanelHandler,
-  UpdatePanelOrderHandler,
   UpdateServerHandler,
 } from './rpc';
 import { encrypt } from './secret';
@@ -413,7 +412,7 @@ GROUP BY panel_id
     foreignKey?: {
       column: string;
       value: string;
-    },
+    }
   ) {
     const db = this.getConnection(projectId);
     db.transaction(() => {
@@ -422,7 +421,7 @@ GROUP BY panel_id
         log.info(`Inserting ${crud.entity}`);
         encryptProjectSecrets(data, factory());
         crud.insert(db, data, position, foreignKey);
-	return;
+        return;
       }
 
       encryptProjectSecrets(data, existing);
@@ -471,11 +470,11 @@ GROUP BY panel_id
       {
         data,
         position,
-	panelPositions,
+        panelPositions,
       }: {
         data: PanelInfo;
         position: number;
-	panelPositions: string[];
+        panelPositions: string[];
       }
     ) => {
       data.lastEdited = new Date();
@@ -493,30 +492,32 @@ GROUP BY panel_id
       );
 
       if (panelPositions) {
-	// Don't trust the UI to be up-to-date with all existing panels
-	// So fetch the existing ones
-	const getStmt = db.prepare(`SELECT id FROM ${panelCrud.entity} WHERE page_id = ?`);
-        const allExisting = getStmt.all(data.pageId);
+        // Don't trust the UI to be up-to-date with all existing panels
+        // So fetch the existing ones
+        const getStmt = db.prepare(
+          `SELECT id FROM ${panelCrud.entity} WHERE page_id = ?`
+        );
+        const allExisting: Array<{ id: string }> = getStmt.all(data.pageId);
 
-	// Then sort the existing ones based on the positions passed in
-	allExisting.sort((a, b) => {
-	  const ao = panelPositions.indexOf(a.id);
-	  const bo = panelPositions.indexOf(b.id);
+        // Then sort the existing ones based on the positions passed in
+        allExisting.sort((a, b) => {
+          const ao = panelPositions.indexOf(a.id);
+          const bo = panelPositions.indexOf(b.id);
 
-	  // Put unknown items at the end
-	  if (ao === -1) {
-	    return 1;
-	  }
+          // Put unknown items at the end
+          if (ao === -1) {
+            return 1;
+          }
 
-	  return ao - bo;
-	});
+          return ao - bo;
+        });
 
-	const stmt = db.prepare(
+        const stmt = db.prepare(
           `UPDATE ${panelCrud.entity} SET position = ? WHERE id = ?`
-	);
-	for (const i of panelPositions.map((_, i) => i)) {
+        );
+        for (const i of panelPositions.map((_, i) => i)) {
           stmt.run(i, panelPositions.id);
-	}
+        }
       }
     },
   };

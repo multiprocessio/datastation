@@ -15,7 +15,7 @@ function index() {
   }
 
   if (!isMobile) {
-    ReactDOM.render(<App />, root);
+    ReactDOM.render(<App routes={routes} />, root);
     return;
   }
 

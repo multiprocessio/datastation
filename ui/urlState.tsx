@@ -15,7 +15,12 @@ function getQueryParameter(param: String) {
   return '';
 }
 
-export type DefaultView = 'editor' | 'dashboard' | 'exports' | 'settings' | 'projects';
+export type DefaultView =
+  | 'editor'
+  | 'dashboard'
+  | 'exports'
+  | 'settings'
+  | 'projects';
 
 export interface UrlState<T extends DefaultView = DefaultView> {
   projectId: string;
@@ -26,7 +31,9 @@ export interface UrlState<T extends DefaultView = DefaultView> {
   sidebar?: boolean;
 }
 
-export function getUrlState<T extends DefaultView = DefaultView>(): UrlState<T> {
+export function getUrlState<
+  T extends DefaultView = DefaultView
+>(): UrlState<T> {
   return {
     projectId: getQueryParameter('projectId'),
     page: +getQueryParameter('page') || 0,
@@ -40,7 +47,9 @@ export function getUrlState<T extends DefaultView = DefaultView>(): UrlState<T> 
 const lsPrefix = 'urlstate:';
 
 // TODO: how to clear state if this ever goes bad?
-export function getDefaultState<T extends DefaultView = DefaultView>(): UrlState<T> {
+export function getDefaultState<
+  T extends DefaultView = DefaultView
+>(): UrlState<T> {
   const urlState = getUrlState<T>();
   const key = lsPrefix + urlState.projectId;
   try {
@@ -57,7 +66,10 @@ export function getDefaultState<T extends DefaultView = DefaultView>(): UrlState
   return urlState;
 }
 
-export function useUrlState<T extends DefaultView = DefaultView>(): [UrlState<T>, (a0: Partial<UrlState<T>>) => void] {
+export function useUrlState<T extends DefaultView = DefaultView>(): [
+  UrlState<T>,
+  (a0: Partial<UrlState<T>>) => void
+] {
   const defaultState = getDefaultState<T>();
   const [state, setStateInternal] = React.useState<UrlState<T>>(defaultState);
 
@@ -88,11 +100,12 @@ export function useUrlState<T extends DefaultView = DefaultView>(): [UrlState<T>
   return [state, setState];
 }
 
-export const UrlStateContext<T extends DefaultView = DefaultView> = React.createContext<{
+// TODO: how to parameterize this for ee?
+export const UrlStateContext = React.createContext<{
   state: UrlState;
-  setState: (a: Partial<UrlState<T>>) => void;
+  setState: (a: Partial<UrlState>) => void;
 }>({
-  state: getUrlState<T>(),
+  state: getUrlState(),
   setState(a) {
     throw new Error('Context not initialized.');
   },

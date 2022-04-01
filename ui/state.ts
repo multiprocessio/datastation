@@ -44,7 +44,7 @@ const defaultCrud = {
   updateServer(
     server: ServerInfo,
     position: number,
-    opts?: { internalOnly: true }
+    opts?: { internalOnly: boolean }
   ) {
     throw new Error('Context not initialized.');
   },
@@ -54,7 +54,7 @@ const defaultCrud = {
   updateConnector(
     connector: ConnectorInfo,
     position: number,
-    opts?: { internalOnly: true }
+    opts?: { internalOnly: boolean }
   ) {
     throw new Error('Context not initialized.');
   },
@@ -65,7 +65,7 @@ const defaultCrud = {
     panel: PanelInfo,
     position: number,
     panelPositions?: string[],
-    opts?: { internalOnly: true }
+    opts?: { internalOnly: boolean }
   ) {
     throw new Error('Context not initialized.');
   },
@@ -75,7 +75,7 @@ const defaultCrud = {
   updatePage(
     page: ProjectPage,
     position: number,
-    opts?: { internalOnly: true }
+    opts?: { internalOnly: boolean }
   ) {
     throw new Error('Context not initialized.');
   },
@@ -83,6 +83,59 @@ const defaultCrud = {
     throw new Error('Context not initialized.');
   },
 };
+
+export function makeUpdater<T extends { id: string }>(
+  projectId: string,
+  list: Array<T>,
+  storeUpdate: (projectId: string, obj: T, position: number) => Promise<void>,
+  reread: (projectId: string) => Promise<void>
+) {
+  return async function update(
+    obj: T,
+    newIndex: number,
+    panelPositions?: string[],
+    opts?: { internalOnly: boolean }
+  ) {
+    const internalOnly = opts ? opts.internalOnly : false;
+
+    const existingIndex = list.findIndex((i) => i.id === obj.id);
+
+    // Actually an insert
+    if (newIndex === -1 || existingIndex === -1) {
+      list.push(obj);
+      if (!internalOnly) {
+        await storeUpdate(projectId, obj, list.length - 1);
+      }
+      await reread(projectId);
+      return;
+    }
+
+    list.splice(existingIndex, 1);
+    list.splice(newIndex, 0, obj);
+    if (!internalOnly) {
+      await storeUpdate(projectId, obj, newIndex);
+    }
+    return reread(projectId);
+  };
+}
+
+export function makeDeleter<T extends { id: string }>(
+  projectId: string,
+  list: Array<T>,
+  storeDelete: (projectId: string, id: string) => Promise<void>,
+  reread: (projectId: string) => Promise<void>
+): (id: string) => Promise<void> {
+  return async function del(id: string) {
+    const index = (list || []).findIndex((c) => c.id === id);
+    if (index === -1) {
+      return;
+    }
+
+    list.splice(index, 1);
+    await storeDelete(projectId, id);
+    return reread(projectId);
+  };
+}
 
 export function useProjectState(
   projectId: string,
@@ -112,70 +165,35 @@ export function useProjectState(
     [projectId]
   );
 
-  function makeUpdater<T extends { id: string }>(
-    list: Array<T>,
-    storeUpdate: (projectId: string, obj: T, position: number) => Promise<void>,
-    opts?: { internalOnly: boolean }
-  ): (
-    obj: T,
-    index: number,
-    opts?: { internalOnly: boolean }
-  ) => Promise<void> {
-    return async function update(
-      obj: T,
-      index: number,
-      opts?: { internalOnly: boolean }
-    ) {
-      const internalOnly = opts ? opts.internalOnly : false;
-
-      // Actually an insert
-      if (index === -1) {
-        list.push(obj);
-        if (!internalOnly) {
-          await storeUpdate(projectId, obj, list.length - 1);
-        }
-        await reread(projectId);
-        return;
-      }
-
-      list[index] = obj;
-      if (!internalOnly) {
-        await storeUpdate(projectId, obj, index);
-      }
-      return reread(projectId);
-    };
-  }
-
-  function makeDeleter<T extends { id: string }>(
-    list: Array<T>,
-    storeDelete: (projectId: string, id: string) => Promise<void>
-  ): (id: string) => Promise<void> {
-    return async function del(id: string) {
-      const index = (list || []).findIndex((c) => c.id === id);
-      if (index === -1) {
-        return;
-      }
-
-      list.splice(index, 1);
-      await storeDelete(projectId, id);
-      return reread(projectId);
-    };
-  }
-
   const crud = !state
     ? defaultCrud
     : {
-        updatePage: makeUpdater(state.pages, store.updatePage),
-        deletePage: makeDeleter(state.pages, store.deletePage),
+        updatePage: makeUpdater(
+          projectId,
+          state.pages,
+          store.updatePage,
+          reread
+        ),
+        deletePage: makeDeleter(
+          projectId,
+          state.pages,
+          store.deletePage,
+          reread
+        ),
 
         updatePanel(
           obj: PanelInfo,
           index: number,
-	  panelPositions?: string[],
-          opts?: { internalOnly: true }
+          panelPositions?: string[],
+          opts?: { internalOnly: boolean }
         ) {
           const page = state.pages.find((p) => obj.pageId);
-          return makeUpdater(page.panels, store.updatePanel)(obj, index, opts);
+          return makeUpdater(projectId, page.panels, store.updatePanel, reread)(
+            obj,
+            index,
+            panelPositions,
+            newOpts
+          );
         },
         deletePanel(id: string) {
           const page = state.pages.find(
@@ -184,14 +202,39 @@ export function useProjectState(
           if (!page) {
             return;
           }
-          return makeDeleter(page.panels, store.deletePanel)(id);
+          return makeDeleter(
+            projectId,
+            page.panels,
+            store.deletePanel,
+            reread
+          )(id);
         },
 
-        updateConnector: makeUpdater(state.connectors, store.updateConnector),
-        deleteConnector: makeDeleter(state.connectors, store.deleteConnector),
+        updateConnector: makeUpdater(
+          projectId,
+          state.connectors,
+          store.updateConnector,
+          reread
+        ),
+        deleteConnector: makeDeleter(
+          projectId,
+          state.connectors,
+          store.deleteConnector,
+          reread
+        ),
 
-        updateServer: makeUpdater(state.servers, store.updateServer),
-        deleteServer: makeDeleter(state.servers, store.deleteServer),
+        updateServer: makeUpdater(
+          projectId,
+          state.servers,
+          store.updateServer,
+          reread
+        ),
+        deleteServer: makeDeleter(
+          projectId,
+          state.servers,
+          store.deleteServer,
+          reread
+        ),
       };
 
   return [state, crud];

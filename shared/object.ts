@@ -94,5 +94,8 @@ export const windowOrGlobal = (() => {
 })();
 
 export function newId() {
-  return nanoid.customAlphabet('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', 12);
+  return customAlphabet(
+    '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',
+    12
+  );
 }
