@@ -1,11 +1,11 @@
 import { preview } from 'preview';
 import { Shape } from 'shape';
-import { v4 as uuidv4 } from 'uuid';
 import {
   InvalidDependentPanelError,
   NotAnArrayOfObjectsError,
 } from '../errors';
 import log from '../log';
+import { newId } from '../object';
 import { PanelResult } from '../state';
 
 function exceptionRewriter(msg: string, _: string) {
@@ -32,7 +32,7 @@ function runSQL(prog: string, fetchResults: (n: string | number) => any[]) {
   // Functions like this can only be declared globally. So we make
   // sure DM_getPanel gets renamed to something unique so they don't
   // conflict if multiple run at the same time.
-  const thisDM_getPanel = 'DM_getPanel_' + uuidv4().replaceAll('-', '_');
+  const thisDM_getPanel = 'DM_getPanel_' + newId().replaceAll('-', '_');
   const fromAddons = (window as any).alasql.from;
   fromAddons[thisDM_getPanel] = function (
     n: number,

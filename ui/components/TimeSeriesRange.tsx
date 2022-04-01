@@ -1,7 +1,7 @@
 import subMinutes from 'date-fns/subMinutes';
 import * as React from 'react';
 import { Shape } from 'shape';
-import * as uuid from 'uuid';
+import { newId } from '../../shared/object';
 import {
   TimeSeriesFixedTimes,
   TimeSeriesRange as TimeSeriesRangeT,
@@ -116,7 +116,7 @@ export function TimeSeriesRange({
     },
   ];
 
-  const fieldName = 'range-type-' + uuid.v4();
+  const fieldName = 'range-type-' + newId();
 
   return (
     <FormGroup>

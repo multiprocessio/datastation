@@ -1,4 +1,5 @@
 import 'core-js/actual/structured-clone';
+import { customAlphabet } from 'nanoid';
 
 // SOURCE: https://stackoverflow.com/a/34749873/1507139
 function isObject(item: any) {
@@ -91,3 +92,7 @@ export const windowOrGlobal = (() => {
     return window;
   }
 })();
+
+export function newId() {
+  return nanoid.customAlphabet('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', 12);
+}

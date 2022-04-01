@@ -29,8 +29,8 @@ if (MODE === 'browser') {
   });
 }
 
-export function App() {
-  const [urlState, setUrlState] = useUrlState();
+export function App<T extends string>(routes: Record<T, React.FC>) {
+  const [urlState, setUrlState] = useUrlState<T>();
   const [state, crud] = useProjectState(urlState.projectId, urlState.page);
   React.useEffect(
     function setDocumentTitle() {
@@ -80,6 +80,9 @@ export function App() {
     if (!MODE_FEATURES.useDefaultProject) {
       main = <MakeSelectProject />;
     }
+  } else {
+    const route = routes[urlState.view];
+    main = <route />;
   } else if (urlState.view === 'settings') {
     main = <Settings />;
   } else if (urlState.view === 'projects') {

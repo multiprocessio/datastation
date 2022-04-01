@@ -15,21 +15,23 @@ function getQueryParameter(param: String) {
   return '';
 }
 
-export interface UrlState {
+export type DefaultView = 'editor' | 'dashboard' | 'exports' | 'settings' | 'projects';
+
+export interface UrlState<T extends DefaultView = DefaultView> {
   projectId: string;
   page: number;
   fullScreen?: string;
-  view: 'editor' | 'dashboard' | 'exports' | 'settings' | 'projects';
+  view: T;
   expanded?: Array<string>;
   sidebar?: boolean;
 }
 
-export function getUrlState(): UrlState {
+export function getUrlState<T extends DefaultView = DefaultView>(): UrlState<T> {
   return {
     projectId: getQueryParameter('projectId'),
     page: +getQueryParameter('page') || 0,
     fullScreen: getQueryParameter('fullScreen'),
-    view: (getQueryParameter('view') || 'editor') as UrlState['view'],
+    view: (getQueryParameter('view') || 'editor') as T,
     expanded: getQueryParameter('expanded').split(','),
     sidebar: getQueryParameter('sidebar') !== 'false',
   };
@@ -38,11 +40,11 @@ export function getUrlState(): UrlState {
 const lsPrefix = 'urlstate:';
 
 // TODO: how to clear state if this ever goes bad?
-export function getDefaultState(): UrlState {
-  const urlState = getUrlState();
+export function getDefaultState<T extends DefaultView = DefaultView>(): UrlState<T> {
+  const urlState = getUrlState<T>();
   const key = lsPrefix + urlState.projectId;
   try {
-    const localStorageState: UrlState = JSON.parse(
+    const localStorageState: UrlState<T> = JSON.parse(
       localStorage.getItem(key) || '{}'
     );
     urlState.page = localStorageState.page || urlState.page;
@@ -55,9 +57,9 @@ export function getDefaultState(): UrlState {
   return urlState;
 }
 
-export function useUrlState(): [UrlState, (a0: Partial<UrlState>) => void] {
-  const defaultState = getDefaultState();
-  const [state, setStateInternal] = React.useState<UrlState>(defaultState);
+export function useUrlState<T extends DefaultView = DefaultView>(): [UrlState<T>, (a0: Partial<UrlState<T>>) => void] {
+  const defaultState = getDefaultState<T>();
+  const [state, setStateInternal] = React.useState<UrlState<T>>(defaultState);
 
   React.useEffect(function compareUrlStates() {
     const currentState = getUrlState();
@@ -86,11 +88,11 @@ export function useUrlState(): [UrlState, (a0: Partial<UrlState>) => void] {
   return [state, setState];
 }
 
-export const UrlStateContext = React.createContext<{
+export const UrlStateContext<T extends DefaultView = DefaultView> = React.createContext<{
   state: UrlState;
-  setState: (a: Partial<UrlState>) => void;
+  setState: (a: Partial<UrlState<T>>) => void;
 }>({
-  state: getUrlState(),
+  state: getUrlState<T>(),
   setState(a) {
     throw new Error('Context not initialized.');
   },

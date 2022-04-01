@@ -6,8 +6,6 @@ import (
 	"os"
 	"os/exec"
 	"strings"
-
-	"github.com/google/uuid"
 )
 
 type ProgramEvalInfo struct {
@@ -47,7 +45,7 @@ func getIdMapJson(page ProjectPage) string {
 func MakeTmpSQLiteConnector() (*ConnectorInfo, error) {
 	connector := &ConnectorInfo{
 		Type: DatabaseConnector,
-		Id:   uuid.New().String(),
+		Id:   newId(),
 		DatabaseConnectorInfo: &DatabaseConnectorInfo{
 			Database: DatabaseConnectorInfoDatabase{
 				Type:     SQLiteDatabase,

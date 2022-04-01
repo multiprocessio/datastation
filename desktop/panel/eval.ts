@@ -6,13 +6,13 @@ import path from 'path';
 import { preview } from 'preview';
 import { shape, Shape } from 'shape';
 import { file as makeTmpFile } from 'tmp-promise';
-import * as uuid from 'uuid';
 import {
   Cancelled,
   EVAL_ERRORS,
   InvalidDependentPanelError,
 } from '../../shared/errors';
 import log from '../../shared/log';
+import { newId } from '../../shared/object';
 import { PanelBody } from '../../shared/rpc';
 import {
   ConnectorInfo,
@@ -131,9 +131,7 @@ export async function evalInSubprocess(
       ensureFile(path.join(CODE_ROOT, 'coverage', 'fake.cov'));
       args.unshift('-test.run');
       args.unshift('^TestRunMain$');
-      args.unshift(
-        '-test.coverprofile=coverage/gorunner.' + uuid.v4() + '.cov'
-      );
+      args.unshift('-test.coverprofile=coverage/gorunner.' + newId + '.cov');
     }
 
     log.info(`Launching "${base} ${args.join(' ')}"`);

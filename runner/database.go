@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"net"
 	"net/url"
 	"os"
@@ -39,11 +38,6 @@ func getDatabaseHostPortExtra(raw, defaultPort string) (string, string, string, 
 
 	host, port, err := net.SplitHostPort(beforeQuery)
 	return host, port, extra, err
-}
-
-func debugObject(obj any) {
-	b, _ := jsonMarshal(obj)
-	log.Printf("%s\n", string(b))
 }
 
 var SQLITE_PRAGMAS = []string{

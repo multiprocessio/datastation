@@ -6,7 +6,6 @@ import (
 	"os"
 	"testing"
 
-	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -301,7 +300,7 @@ func Test_sqlIngest_e2e(t *testing.T) {
 
 		readFile.WriteString(test.json)
 
-		panelId := uuid.New().String()
+		panelId := newId()
 		s, err := ShapeFromFile(readFile.Name(), panelId, 10_000, 100)
 		assert.Nil(t, err)
 		project.Pages[0].Panels = append(project.Pages[0].Panels, PanelInfo{
@@ -309,14 +308,14 @@ func Test_sqlIngest_e2e(t *testing.T) {
 				Shape: *s,
 			},
 			Id:   panelId,
-			Name: uuid.New().String(),
+			Name: newId(),
 		})
 
 		panel2 := &PanelInfo{
 			Type:    DatabasePanel,
 			Content: "SELECT * FROM DM_getPanel(0) ORDER BY a DESC",
-			Id:      uuid.New().String(),
-			Name:    uuid.New().String(),
+			Id:      newId(),
+			Name:    newId(),
 			DatabasePanelInfo: &DatabasePanelInfo{
 				Database: DatabasePanelInfoDatabase{
 					ConnectorId: connector.Id,
@@ -371,7 +370,7 @@ func Test_sqlIngest_BENCHMARK(t *testing.T) {
 	// dsq yellow_tripdata_2021-04.csv > taxi.json
 	readFile := "taxi.json"
 
-	panelId := uuid.New().String()
+	panelId := newId()
 	s, err := ShapeFromFile(readFile, panelId, 10_000, 100)
 	assert.Nil(t, err)
 	project.Pages[0].Panels = append(project.Pages[0].Panels, PanelInfo{
@@ -379,14 +378,14 @@ func Test_sqlIngest_BENCHMARK(t *testing.T) {
 			Shape: *s,
 		},
 		Id:   panelId,
-		Name: uuid.New().String(),
+		Name: newId(),
 	})
 
 	panel2 := &PanelInfo{
 		Type:    DatabasePanel,
 		Content: "SELECT COUNT(1) FROM DM_getPanel(0)",
-		Id:      uuid.New().String(),
-		Name:    uuid.New().String(),
+		Id:      newId(),
+		Name:    newId(),
 		DatabasePanelInfo: &DatabasePanelInfo{
 			Database: DatabasePanelInfoDatabase{
 				ConnectorId: connector.Id,

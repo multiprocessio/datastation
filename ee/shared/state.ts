@@ -1,7 +1,6 @@
 // Copyright 2022 Multiprocess Labs LLC
 
-import * as uuid from 'uuid';
-import { mergeDeep } from '../../shared/object';
+import { mergeDeep, newId } from '../../shared/object';
 
 export class History {
   id: string;
@@ -15,7 +14,7 @@ export class History {
   userId: string;
 
   constructor(defaults: Partial<History> = {}) {
-    this.id = uuid.v4();
+    this.id = defaults.id || newId();
     this.table = defaults.table || '';
     this.pk = defaults.pk || '';
     this.dt = defaults.dt || new Date();

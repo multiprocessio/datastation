@@ -2,8 +2,6 @@ package runner
 
 import (
 	"path"
-
-	"github.com/google/uuid"
 )
 
 type LanguageSettings struct {
@@ -32,7 +30,7 @@ type Settings struct {
 var SettingsFileDefaultLocation = path.Join(CONFIG_FS_BASE, ".settings")
 
 var DefaultSettings = &Settings{
-	Id:            uuid.New().String(),
+	Id:            newId(),
 	File:          SettingsFileDefaultLocation,
 	StdoutMaxSize: 5000,
 	Theme:         "light",
