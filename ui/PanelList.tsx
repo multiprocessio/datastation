@@ -38,11 +38,7 @@ export function PanelList({
       position === undefined
         ? page.panels.findIndex((p) => p.id === panel.id)
         : position;
-    // TODO: need to modify the in-memory backend to support this panelPositions index
-    await crud.updatePanel(
-      panel,
-      index,
-    );
+    await crud.updatePanel(panel, index);
 
     if (VISUAL_PANELS.includes(panel.type)) {
       // Give time before re-evaling
@@ -59,8 +55,8 @@ export function PanelList({
 
     const orderedFields = shapeIsOk
       ? orderedObjectFields(
-        (panel.resultMeta.shape as ArrayShape).children as ObjectShape
-      )
+          (panel.resultMeta.shape as ArrayShape).children as ObjectShape
+        )
       : [];
     let firstNumber: string;
     let firstString: string;
@@ -103,6 +99,7 @@ export function PanelList({
 
     const offerToGraph = offerToTable && firstNumber && firstString;
 
+    console.log(page.panels.map((p) => p.name));
     return (
       <div className="new-panel">
         <Button

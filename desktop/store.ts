@@ -492,7 +492,7 @@ GROUP BY panel_id
       );
 
       if (panelPositions) {
-	const db = this.getConnection(projectId);
+        const db = this.getConnection(projectId);
         // Don't trust the UI to be up-to-date with all existing panels
         // So fetch the existing ones
         const getStmt = db.prepare(
@@ -517,6 +517,7 @@ GROUP BY panel_id
           `UPDATE ${panelCrud.entity} SET position = ? WHERE id = ?`
         );
         for (const i of panelPositions.map((_, i) => i)) {
+          console.log(i, panelPositions[i]);
           stmt.run(i, panelPositions[i]);
         }
       }

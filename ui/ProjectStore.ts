@@ -270,10 +270,16 @@ export class LocalStorageStore extends ProjectStore {
 }
 
 class RemoteStore extends ProjectStore {
-  updatePanel(projectId: string, data: PanelInfo, position: number) {
+  updatePanel(
+    projectId: string,
+    data: PanelInfo,
+    position: number,
+    panelPositions?: string[]
+  ) {
     return asyncRPC<UpdatePanelRequest, UpdatePanelResponse>('updatePanel', {
       data,
       position,
+      panelPositions,
     });
   }
 

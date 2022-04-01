@@ -12,14 +12,15 @@ import { Updates } from './Updates';
 import { UrlStateContext } from './urlState';
 
 export function Editor() {
-  const { state: urlState, setState: setUrlState } = React.useContext(UrlStateContext);
+  const { state: urlState, setState: setUrlState } =
+    React.useContext(UrlStateContext);
   const { state, crud } = React.useContext(ProjectContext);
   // This allows us to render the sidebar in tests where we
   // prepopulate connectors and servers
   const hasSidebar = Boolean(
     MODE_FEATURES.connectors ||
-    state.connectors?.length ||
-    state.servers?.length
+      state.connectors?.length ||
+      state.servers?.length
   );
 
   return (

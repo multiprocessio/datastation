@@ -85,7 +85,12 @@ const defaultCrud = {
 export function makeUpdater<T extends { id: string }>(
   projectId: string,
   list: Array<T>,
-  storeUpdate: (projectId: string, obj: T, position: number, panelPositions?: string[]) => Promise<void>,
+  storeUpdate: (
+    projectId: string,
+    obj: T,
+    position: number,
+    panelPositions?: string[]
+  ) => Promise<void>,
   reread: (projectId: string) => Promise<void>
 ) {
   return async function update(
@@ -98,7 +103,7 @@ export function makeUpdater<T extends { id: string }>(
     const existingIndex = list.findIndex((i) => i.id === obj.id);
 
     // Actually an insert
-    if (newIndex === -1 || existingIndex === -1) {
+    if (newIndex === -1) {
       list.push(obj);
       if (!internalOnly) {
         await storeUpdate(projectId, obj, list.length - 1);
@@ -107,10 +112,18 @@ export function makeUpdater<T extends { id: string }>(
       return;
     }
 
-    list.splice(existingIndex, 1);
+    if (existingIndex >= 0) {
+      list.splice(existingIndex, 1);
+    }
     list.splice(newIndex, 0, obj);
     if (!internalOnly) {
-      await storeUpdate(projectId, obj, newIndex, list.map(l => l.id));
+      console.log(list.map((l) => [l.name, l.id]));
+      await storeUpdate(
+        projectId,
+        obj,
+        newIndex,
+        list.map((l) => l.id)
+      );
     }
     return reread(projectId);
   };
@@ -184,11 +197,12 @@ export function useProjectState(
           opts?: { internalOnly: boolean }
         ) {
           const page = state.pages.find((p) => obj.pageId);
-          return makeUpdater(projectId, page.panels, store.updatePanel, reread)(
-            obj,
-            index,
-	    opts,
-          );
+          return makeUpdater(
+            projectId,
+            page.panels,
+            store.updatePanel,
+            reread
+          )(obj, index, opts);
         },
         deletePanel(id: string) {
           const page = state.pages.find(

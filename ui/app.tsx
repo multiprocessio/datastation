@@ -98,7 +98,10 @@ export function App<T extends DefaultView = DefaultView>({
       main = <MakeSelectProject />;
     }
   } else {
-    const Route = routes[urlState.view] || NotFound;
+    // No clue why this needs to be casted. T must extend DefaultView
+    // and DefaultView contains 'editor'!!!
+    const view = urlState.view || ('editor' as T);
+    const Route = routes[view] || NotFound;
     main = <Route />;
   }
 
