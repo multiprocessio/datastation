@@ -11,7 +11,7 @@ export function Tooltip({ children }: { children: React.ReactNode }) {
       b.style.left += ref.current.offsetLeft;
       setPositioned(true);
     }
-  }, [ref.current]);
+  }, [positioned]);
 
   return (
     <span

@@ -48,7 +48,7 @@ export function App<T extends DefaultView = DefaultView>({
   routes: Record<T, React.FC>;
 }) {
   const [urlState, setUrlState] = useUrlState<T>();
-  const [state, crud] = useProjectState(urlState.projectId, urlState.page);
+  const [state, crud] = useProjectState(urlState.projectId);
   React.useEffect(
     function setDocumentTitle() {
       if (state && state.projectName) {
@@ -59,7 +59,7 @@ export function App<T extends DefaultView = DefaultView>({
         }
       }
     },
-    [state && state.projectName]
+    [state, state?.projectName, urlState?.view]
   );
 
   const [settings, setSettings] = useSettings();
@@ -69,7 +69,7 @@ export function App<T extends DefaultView = DefaultView>({
         document.body.className = settings.theme;
       }
     },
-    [settings && settings.theme]
+    [settings, settings?.theme]
   );
 
   useShortcuts(urlState, setUrlState);
@@ -86,7 +86,7 @@ export function App<T extends DefaultView = DefaultView>({
       loadDefaultProject();
       setLoadingDefault(false);
     }
-  });
+  }, [urlState.projectId, loadingDefault]);
 
   let main = <Loading />;
   if (!state || !settings) {

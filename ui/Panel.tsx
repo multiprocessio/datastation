@@ -181,7 +181,7 @@ export function PanelPlayWarningWithLinks({
 }) {
   const parts = msg.split(/(\[(?:[^\]\\]|\\.)*\])|(DM_setPanel\([$a-zA-Z]*\))/);
 
-  let children = [];
+  const children = [];
   for (const c of parts) {
     if (!c) {
       continue;
@@ -378,7 +378,7 @@ export function Panel({
       <ErrorBoundary>
         <div
           className="panel-head"
-          onDoubleClick={(e: React.MouseEvent<HTMLDivElement>) =>
+          onDoubleClick={() =>
             setUrlState({
               fullScreen: fullScreen === panel.id ? null : panel.id,
             })

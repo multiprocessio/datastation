@@ -12,20 +12,19 @@ export function useDebouncedLocalState(
   delay = INPUT_SYNC_PERIOD,
   defaultValue = ''
 ): [string | number | readonly string[], (v: string) => void, () => void] {
-  if (!isText) {
-    return [nonLocalValue, nonLocalSet, () => {}];
-  }
-
   const [defaultChanged, setDefaultChanged] = React.useState(false);
   const debounced = React.useCallback(debounce(nonLocalSet, delay), []);
 
   const [localValue, setLocalValue] = React.useState(nonLocalValue);
   // Resync to props when props changes
   React.useEffect(() => {
+    if (!isText) {
+      return;
+    }
     debounced.flush();
     setDefaultChanged(true);
     setLocalValue(nonLocalValue);
-  }, [nonLocalValue]);
+  }, [nonLocalValue, debounced, isText]);
 
   function wrapSetLocalValue(v: string) {
     if (String(v) !== String(nonLocalValue)) {
@@ -46,10 +45,24 @@ export function useDebouncedLocalState(
 
   // Set up initial value if there is any
   React.useEffect(() => {
+    if (!isText) {
+      return;
+    }
+
     if (!localValue && defaultValue && !defaultChanged) {
       wrapSetLocalValue(defaultValue);
     }
-  });
+  }, [isText]);
+
+  if (!isText) {
+    return [
+      nonLocalValue,
+      nonLocalSet,
+      () => {
+        /* do nothing */
+      },
+    ];
+  }
 
   return [localValue, wrapSetLocalValue, flushValue];
 }
@@ -78,7 +91,7 @@ export function Input({
   tooltip,
   ...props
 }: InputProps) {
-  let inputClass = `input ${className ? ' ' + className : ''}`;
+  const inputClass = `input ${className ? ' ' + className : ''}`;
 
   const [localValue, setLocalValue, flushLocalValue] = useDebouncedLocalState(
     value,

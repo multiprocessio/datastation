@@ -101,7 +101,7 @@ function getPieDatasets(
   ys: Array<GraphField>
 ): { labels: string[]; datasets: any[]; legendLabels: any } {
   const labels = value.map((d) => d[panel.graph.x]);
-  const datasets = ys.map(({ field, label }, i) => {
+  const datasets = ys.map(({ field, label }) => {
     return {
       label,
       data: value.map((d) => +d[field]),
@@ -230,7 +230,7 @@ export function GraphPanel({ panel }: PanelBodyProps<GraphPanelInfo>) {
       Chart.defaults.color = theme === 'light' || !theme ? 'black' : 'white';
     }
 
-    let ys = [...panel.graph.ys];
+    const ys = [...panel.graph.ys];
     if (panel.graph.type === 'pie') {
       ys.reverse();
     }
@@ -287,8 +287,9 @@ export function GraphPanel({ panel }: PanelBodyProps<GraphPanelInfo>) {
 
     return () => chart.destroy();
   }, [
-    ref.current,
     data,
+    panel,
+    value,
     panel.name,
     panel.graph.x,
     panel.graph.ys,

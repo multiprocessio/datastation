@@ -1,7 +1,7 @@
 import React from 'react';
 import { deepEquals } from '../shared/object';
 
-function getQueryParameter(param: String) {
+function getQueryParameter(param: string) {
   const query = window.location.search.substring(1);
   const vars = query.split('&');
 
@@ -106,7 +106,7 @@ export const UrlStateContext = React.createContext<{
   setState: (a: Partial<UrlState>) => void;
 }>({
   state: getUrlState(),
-  setState(a) {
+  setState(_a) {
     throw new Error('Context not initialized.');
   },
 });

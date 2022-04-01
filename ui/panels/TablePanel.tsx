@@ -37,28 +37,24 @@ export async function evalColumnPanel(
       throw new InvalidDependentPanelError(panelSource);
     }
     const { value } = resultMeta;
-    try {
-      const valueWithRequestedColumns = columnsFromObject(
-        value,
-        columns,
-        panelSource
-      );
-      const s = shape(valueWithRequestedColumns);
-      return {
-        value: valueWithRequestedColumns,
-        preview: preview(valueWithRequestedColumns),
-        shape: s,
-        loading: false,
-        stdout: '',
-        lastRun,
-        elapsed: new Date().valueOf() - lastRun.valueOf(),
-        size: value ? JSON.stringify(value).length : 0,
-        arrayCount: s.kind === 'array' ? (value || []).length : null,
-        contentType: 'application/json',
-      };
-    } catch (e) {
-      throw e;
-    }
+    const valueWithRequestedColumns = columnsFromObject(
+      value,
+      columns,
+      panelSource
+    );
+    const s = shape(valueWithRequestedColumns);
+    return {
+      value: valueWithRequestedColumns,
+      preview: preview(valueWithRequestedColumns),
+      shape: s,
+      loading: false,
+      stdout: '',
+      lastRun,
+      elapsed: new Date().valueOf() - lastRun.valueOf(),
+      size: value ? JSON.stringify(value).length : 0,
+      arrayCount: s.kind === 'array' ? (value || []).length : null,
+      contentType: 'application/json',
+    };
   }
 
   return await panelRPC('eval', panelId);
@@ -105,7 +101,7 @@ export function TablePanelDetails({
         updatePanel(panel);
       }
     },
-    [panel.table.panelSource, data]
+    [panel, updatePanel, panel.table.panelSource, data]
   );
 
   return (
@@ -198,7 +194,7 @@ export function TablePanelDetails({
   );
 }
 
-export function TablePanel({ panel, panels }: PanelBodyProps<TablePanelInfo>) {
+export function TablePanel({ panel }: PanelBodyProps<TablePanelInfo>) {
   const data = panel.resultMeta || new PanelResult();
 
   let valueAsArray: Array<any> = [];

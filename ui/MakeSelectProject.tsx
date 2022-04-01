@@ -39,17 +39,17 @@ export function MakeSelectProject() {
   );
   React.useEffect(() => {
     async function load() {
-      const projects = await asyncRPC<GetProjectsRequest, GetProjectsResponse>(
+      const loaded = await asyncRPC<GetProjectsRequest, GetProjectsResponse>(
         'getProjects',
         null
       );
-      setProjects(projects);
+      setProjects(loaded);
     }
 
     if (MODE === 'server' && !projects) {
       load();
     }
-  }, []);
+  }, [projects]);
 
   async function openProject() {
     await asyncRPC<OpenProjectRequest, OpenProjectResponse>(

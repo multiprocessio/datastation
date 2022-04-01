@@ -23,7 +23,7 @@ export const SettingsContext = React.createContext<{
   setState: (a0: Partial<SettingsT>) => void;
 }>({
   state: new SettingsT(''),
-  setState(a) {
+  setState() {
     throw new Error('Context not initialized.');
   },
 });
@@ -39,7 +39,9 @@ export function useSettings(): [SettingsT, (s: SettingsT) => Promise<void>] {
           settings,
           JSON.parse(localStorage.getItem('settings'))
         );
-      } catch (e) {}
+      } catch (e) {
+        // Do nothing
+      }
 
       setSettingsInternal(settings);
     }

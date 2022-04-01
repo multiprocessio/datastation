@@ -1,4 +1,4 @@
-const { makeUpdater, makeDeleter } = require('./state');
+const { makeUpdater } = require('./state');
 
 test('test makeUpdater', async () => {
   const panels = [{ id: 9 }, { id: 2 }];

@@ -39,7 +39,7 @@ export function FileInput({
   allowFilePicker,
   placeholder,
 }: Props) {
-  let inputClass = `input ${className ? ' ' + className : ''}`;
+  const inputClass = `input ${className ? ' ' + className : ''}`;
 
   const manualInput = (
     <Input

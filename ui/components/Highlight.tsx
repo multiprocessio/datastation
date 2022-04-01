@@ -9,7 +9,7 @@ window.addEventListener('load', function () {
   SyntaxHighlighter.registerLanguage('javascript', javascript);
   SyntaxHighlighter.registerLanguage('json', json);
 
-  for (let style of [vsdpStyle, vsStyle]) {
+  for (const style of [vsdpStyle, vsStyle]) {
     style['code[class*="language-"]'].fontFamily = '';
     style['code[class*="language-"]'].fontSize = '';
     style['code[class*="language-"]'].background = '';

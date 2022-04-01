@@ -69,7 +69,7 @@ export function CodeEditor({
 
       return () => obs.disconnect();
     }
-  }, [editor.current]);
+  });
 
   return (
     <div
@@ -118,8 +118,9 @@ export function CodeEditor({
             ? {
                 name: 'disable newlines',
                 bindKey: { win: 'Enter|Shift-Enter', mac: 'Enter|Shift-Enter' },
-                // Do nothing
-                exec: () => {},
+                exec: () => {
+                  /* do nothing */
+                },
               }
             : undefined,
         ].filter(Boolean)}

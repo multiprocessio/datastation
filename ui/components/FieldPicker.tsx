@@ -9,7 +9,7 @@ import { Select } from './Select';
 export type FieldGroup = { name: string; elements: Array<[string, Shape]> };
 
 export function flattenObjectFields(o: ObjectShape): Array<[string, Shape]> {
-  let stack: [[string[], Shape]] = [[[], o]];
+  const stack: [[string[], Shape]] = [[[], o]];
   const flat: Array<[string, Shape]> = [];
 
   while (stack.length) {
@@ -61,7 +61,7 @@ export function orderedObjectFields(
   fields.forEach(([field, shape]) => {
     const ss = shape as ScalarShape;
     const scalar = shape.kind === 'scalar';
-    let last = groups[groups.length - 1];
+    const last = groups[groups.length - 1];
 
     // If first time, start a new group with this name
     if (!last) {

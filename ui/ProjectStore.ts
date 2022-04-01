@@ -29,54 +29,54 @@ import { asyncRPC } from './asyncRPC';
 
 export class ProjectStore {
   updatePanel(
-    projectId: string,
-    p: PanelInfo,
-    position: number
+    _projectId: string,
+    _p: PanelInfo,
+    _position: number
   ): Promise<void> {
     throw new Error('Not implemented');
   }
 
   updatePage(
-    projectId: string,
-    p: ProjectPage,
-    position: number
+    _projectId: string,
+    _p: ProjectPage,
+    _position: number
   ): Promise<void> {
     throw new Error('Not implemented');
   }
 
   updateServer(
-    projectId: string,
-    p: ServerInfo,
-    position: number
+    _projectId: string,
+    _p: ServerInfo,
+    _position: number
   ): Promise<void> {
     throw new Error('Not implemented');
   }
 
   updateConnector(
-    projectId: string,
-    p: ConnectorInfo,
-    position: number
+    _projectId: string,
+    _p: ConnectorInfo,
+    _position: number
   ): Promise<void> {
     throw new Error('Not implemented');
   }
 
-  deletePanel(projectId: string, id: string): Promise<void> {
+  deletePanel(_projectId: string, _id: string): Promise<void> {
     throw new Error('Not implemented');
   }
 
-  deletePage(projectId: string, id: string): Promise<void> {
+  deletePage(_projectId: string, _id: string): Promise<void> {
     throw new Error('Not implemented');
   }
 
-  deleteServer(projectId: string, id: string): Promise<void> {
+  deleteServer(_projectId: string, _id: string): Promise<void> {
     throw new Error('Not implemented');
   }
 
-  deleteConnector(projectId: string, id: string): Promise<void> {
+  deleteConnector(_projectId: string, _id: string): Promise<void> {
     throw new Error('Not implemented');
   }
 
-  get(projectId: string): Promise<ProjectState> {
+  get(_projectId: string): Promise<ProjectState> {
     return Promise.reject('Not implemented');
   }
 }

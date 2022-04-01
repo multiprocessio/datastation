@@ -41,43 +41,43 @@ export type ProjectCrud = {
 
 const defaultCrud = {
   updateServer(
-    server: ServerInfo,
-    position: number,
-    opts?: { internalOnly: boolean }
+    _server: ServerInfo,
+    _position: number,
+    _opts?: { internalOnly: boolean }
   ) {
     throw new Error('Context not initialized.');
   },
-  deleteServer(serverId: string) {
+  deleteServer(_serverId: string) {
     throw new Error('Context not initialized.');
   },
   updateConnector(
-    connector: ConnectorInfo,
-    position: number,
-    opts?: { internalOnly: boolean }
+    _connector: ConnectorInfo,
+    _position: number,
+    _opts?: { internalOnly: boolean }
   ) {
     throw new Error('Context not initialized.');
   },
-  deleteConnector(connectorId: string) {
+  deleteConnector(_connectorId: string) {
     throw new Error('Context not initialized.');
   },
   updatePanel(
-    panel: PanelInfo,
-    position: number,
-    opts?: { internalOnly: boolean }
+    _panel: PanelInfo,
+    _position: number,
+    _opts?: { internalOnly: boolean }
   ) {
     throw new Error('Context not initialized.');
   },
-  deletePanel(panelId: string) {
+  deletePanel(_panelId: string) {
     throw new Error('Context not initialized.');
   },
   updatePage(
-    page: ProjectPage,
-    position: number,
-    opts?: { internalOnly: boolean }
+    _page: ProjectPage,
+    _position: number,
+    _opts?: { internalOnly: boolean }
   ) {
     throw new Error('Context not initialized.');
   },
-  deletePage(pageId: string) {
+  deletePage(_pageId: string) {
     throw new Error('Context not initialized.');
   },
 };
@@ -148,15 +148,14 @@ export function makeDeleter<T extends { id: string }>(
 }
 
 export function useProjectState(
-  projectId: string,
-  currentPage: number
+  projectId: string
 ): [ProjectState, ProjectCrud] {
   const [state, setProjectState] = React.useState<ProjectState>(null);
 
   async function reread(projectId: string) {
     let state;
     try {
-      let rawState = await store.get(projectId);
+      const rawState = await store.get(projectId);
       state = ProjectState.fromJSON(rawState);
     } catch (e) {
       log.error(e);
@@ -196,7 +195,7 @@ export function useProjectState(
           index: number,
           opts?: { internalOnly: boolean }
         ) {
-          const page = state.pages.find((p) => obj.pageId);
+          const page = state.pages.find((p) => p === obj.pageId);
           return makeUpdater(
             projectId,
             page.panels,

@@ -8,26 +8,29 @@ import { SettingsContext } from './Settings';
 export function Updates() {
   const { state: settings } = React.useContext(SettingsContext);
   const [updates, setUpdates] = React.useState(null);
-  React.useEffect(function getUpdates() {
-    async function run() {
-      try {
-        const updates = await request(
-          window.fetch,
-          'GET',
-          `${SITE_ROOT}/api/updates?version=${VERSION}&i=${settings.id}`,
-          new ContentTypeInfo(),
-          [],
-          '',
-          true
-        );
-        setUpdates(updates);
-      } catch (e) {
-        log.error(e);
+  React.useEffect(
+    function getUpdates() {
+      async function run() {
+        try {
+          const updates = await request(
+            window.fetch,
+            'GET',
+            `${SITE_ROOT}/api/updates?version=${VERSION}&i=${settings.id}`,
+            new ContentTypeInfo(),
+            [],
+            '',
+            true
+          );
+          setUpdates(updates);
+        } catch (e) {
+          log.error(e);
+        }
       }
-    }
 
-    run();
-  }, []);
+      run();
+    },
+    [settings.id]
+  );
 
   if (!updates) {
     return null;
