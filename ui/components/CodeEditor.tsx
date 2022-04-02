@@ -73,17 +73,16 @@ export function CodeEditor({
   } = React.useContext(SettingsContext);
 
   const [editorNode, editorRef] = React.useState<AceEditor>(null);
-  const flush = React.useRef<() => void>(() => {/* ignore */ });
+  const flush = React.useRef<() => void>(() => {
+    /* ignore */
+  });
 
   React.useEffect(() => {
     if (!editorNode) {
       return;
     }
 
-    flush.current = registerDebouncedChangeHandler(
-      editorNode,
-      onChange,
-    );
+    flush.current = registerDebouncedChangeHandler(editorNode, onChange);
   }, [editorNode, onChange]);
 
   // Make sure editor resizes if the overall panel changes size. For
@@ -102,8 +101,9 @@ export function CodeEditor({
 
   return (
     <div
-      className={`editor-container ${singleLine ? 'editor-container--singleLine vertical-align-center' : ''
-        }`}
+      className={`editor-container ${
+        singleLine ? 'editor-container--singleLine vertical-align-center' : ''
+      }`}
     >
       {label && <label className="label input-label">{label}</label>}
       <AceEditor
@@ -112,7 +112,10 @@ export function CodeEditor({
         theme={theme === 'dark' ? 'dracula' : 'github'}
         maxLines={singleLine ? 1 : undefined}
         wrapEnabled={true}
-        onBlur={flush.current}
+        onBlur={
+          () =>
+            flush.current() /* Simplifying this to onBlur={flush.current} doesn't work. */
+        }
         name={id}
         defaultValue={String(value)}
         placeholder={placeholder}
@@ -143,12 +146,12 @@ export function CodeEditor({
           },
           singleLine
             ? {
-              name: 'disable newlines',
-              bindKey: { win: 'Enter|Shift-Enter', mac: 'Enter|Shift-Enter' },
-              exec: () => {
-                /* do nothing */
-              },
-            }
+                name: 'disable newlines',
+                bindKey: { win: 'Enter|Shift-Enter', mac: 'Enter|Shift-Enter' },
+                exec: () => {
+                  /* do nothing */
+                },
+              }
             : undefined,
         ].filter(Boolean)}
         showGutter={!singleLine}

@@ -54,7 +54,9 @@ export function Input({
 }: InputProps) {
   const inputClass = `input ${className ? ' ' + className : ''}`;
   const [inputNode, inputRef] = React.useState<HTMLInputElement>(null);
-  const flush = React.useRef<() => void>(() => {/* ignore */ });
+  const flush = React.useRef<() => void>(() => {
+    /* ignore */
+  });
 
   React.useEffect(() => {
     if (!inputNode) {
@@ -77,7 +79,10 @@ export function Input({
         type={type}
         ref={inputRef}
         className={label ? '' : inputClass}
-        onBlur={() => flush.current()}
+        onBlur={
+          () =>
+            flush.current() /* Simplifying this to onBlur={flush.current} doesn't work. */
+        }
         {...props}
         size={autoWidth ? Math.max(20, String(value).length) : undefined}
       />
