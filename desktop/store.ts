@@ -233,6 +233,7 @@ export class Store {
         {
           data: { ...page },
           position: i,
+          insert: true,
         },
         null,
         false
@@ -246,6 +247,7 @@ export class Store {
           {
             data: panels[j],
             position: j,
+            insert: true,
           },
           null,
           false
@@ -260,6 +262,7 @@ export class Store {
         {
           data: server,
           position: i,
+          insert: true,
         },
         null,
         false
@@ -273,6 +276,7 @@ export class Store {
         {
           data: connector,
           position: i,
+          insert: true,
         },
         null,
         false
@@ -408,6 +412,7 @@ GROUP BY panel_id
     projectId: string,
     data: T,
     position: number,
+    insert: boolean,
     factory: () => T,
     foreignKey?: {
       column: string;
@@ -416,14 +421,14 @@ GROUP BY panel_id
   ) {
     const db = this.getConnection(projectId);
     db.transaction(() => {
-      const [existing] = crud.getOne(db, data.id);
-      if (!existing) {
+      if (insert) {
         log.info(`Inserting ${crud.entity}`);
         encryptProjectSecrets(data, factory());
         crud.insert(db, data, position, foreignKey);
         return;
       }
 
+      const [existing] = crud.getOne(db, data.id);
       encryptProjectSecrets(data, existing);
       log.info(`Updating ${crud.entity}`);
       crud.update(db, data);
@@ -470,10 +475,12 @@ GROUP BY panel_id
       {
         data,
         position,
+        insert,
         panelPositions,
       }: {
         data: PanelInfo;
         position: number;
+        insert: boolean;
         panelPositions: string[];
       }
     ) => {
@@ -485,6 +492,7 @@ GROUP BY panel_id
         projectId,
         data,
         position,
+        insert,
         () => FACTORIES[data.type](data.pageId),
         {
           column: 'page_id',
@@ -532,9 +540,11 @@ GROUP BY panel_id
       {
         data,
         position,
+        insert,
       }: {
         data: ProjectPage;
         position: number;
+        insert: boolean;
       }
     ) => {
       delete data.panels;
@@ -543,6 +553,7 @@ GROUP BY panel_id
         projectId,
         data,
         position,
+        insert,
         () => new ProjectPage()
       );
     },
@@ -555,9 +566,11 @@ GROUP BY panel_id
       {
         data,
         position,
+        insert,
       }: {
         data: ConnectorInfo;
         position: number;
+        insert: boolean;
       }
     ) =>
       this.updateGeneric(
@@ -565,6 +578,7 @@ GROUP BY panel_id
         projectId,
         data,
         position,
+        insert,
         () => new ConnectorInfo()
       ),
   };
@@ -576,9 +590,11 @@ GROUP BY panel_id
       {
         data,
         position,
+        insert,
       }: {
         data: ServerInfo;
         position: number;
+        insert: boolean;
       }
     ) =>
       this.updateGeneric(
@@ -586,6 +602,7 @@ GROUP BY panel_id
         projectId,
         data,
         position,
+        insert,
         () => new ServerInfo()
       ),
   };

@@ -245,11 +245,7 @@ export function Panel({
   panels,
 }: {
   panel: PanelInfo;
-  updatePanel: (
-    d: PanelInfo,
-    position?: number,
-    opts?: { internalOnly: boolean }
-  ) => void;
+  updatePanel: (d: PanelInfo, position?: number) => void;
   panelResults: Array<PanelResult>;
   reevalPanel: (id: string) => Promise<Array<PanelInfo>>;
   panelIndex: number;

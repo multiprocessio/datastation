@@ -16,24 +16,28 @@ export type ProjectCrud = {
   updatePanel: (
     panel: PanelInfo,
     position: number,
+    insert: boolean,
     opts?: { internalOnly: boolean }
   ) => Promise<void>;
   deletePanel: (panelId: string) => Promise<void>;
   updatePage: (
     page: ProjectPage,
     position: number,
+    insert: boolean,
     opts?: { internalOnly: boolean }
   ) => Promise<void>;
   deletePage: (pageId: string) => Promise<void>;
   updateConnector: (
     connector: ConnectorInfo,
     position: number,
+    insert: boolean,
     opts?: { internalOnly: boolean }
   ) => Promise<void>;
   deleteConnector: (connectorId: string) => Promise<void>;
   updateServer: (
     server: ServerInfo,
     position: number,
+    insert: boolean,
     opts?: { internalOnly: boolean }
   ) => Promise<void>;
   deleteServer: (serverId: string) => Promise<void>;
@@ -43,6 +47,7 @@ const defaultCrud = {
   updateServer(
     _server: ServerInfo,
     _position: number,
+    _insert: boolean,
     _opts?: { internalOnly: boolean }
   ) {
     throw new Error('Context not initialized.');
@@ -53,6 +58,7 @@ const defaultCrud = {
   updateConnector(
     _connector: ConnectorInfo,
     _position: number,
+    _insert: boolean,
     _opts?: { internalOnly: boolean }
   ) {
     throw new Error('Context not initialized.');
@@ -63,6 +69,7 @@ const defaultCrud = {
   updatePanel(
     _panel: PanelInfo,
     _position: number,
+    _insert: boolean,
     _opts?: { internalOnly: boolean }
   ) {
     throw new Error('Context not initialized.');
@@ -73,6 +80,7 @@ const defaultCrud = {
   updatePage(
     _page: ProjectPage,
     _position: number,
+    _insert: boolean,
     _opts?: { internalOnly: boolean }
   ) {
     throw new Error('Context not initialized.');
@@ -89,6 +97,7 @@ export function makeUpdater<T extends { id: string }>(
     projectId: string,
     obj: T,
     position: number,
+    insert: boolean,
     panelPositions?: string[]
   ) => Promise<void>,
   reread: (projectId: string) => Promise<void>
@@ -96,6 +105,7 @@ export function makeUpdater<T extends { id: string }>(
   return async function update(
     obj: T,
     newIndex: number,
+    insert: boolean,
     opts?: { internalOnly: boolean }
   ) {
     const internalOnly = opts ? opts.internalOnly : false;
@@ -103,24 +113,28 @@ export function makeUpdater<T extends { id: string }>(
     const existingIndex = list.findIndex((i) => i.id === obj.id);
 
     // Actually an insert
-    if (newIndex === -1) {
+    if (insert) {
       list.push(obj);
       if (!internalOnly) {
-        await storeUpdate(projectId, obj, list.length - 1);
+        await storeUpdate(projectId, obj, list.length - 1, insert);
       }
       await reread(projectId);
       return;
     }
 
-    if (existingIndex >= 0) {
-      list.splice(existingIndex, 1);
+    if (existingIndex === -1) {
+      // Probably a deleted panel
+      return;
     }
+
+    list.splice(existingIndex, 1);
     list.splice(newIndex, 0, obj);
     if (!internalOnly) {
       await storeUpdate(
         projectId,
         obj,
         newIndex,
+        insert,
         list.map((l) => l.id)
       );
     }
@@ -192,15 +206,16 @@ export function useProjectState(
         updatePanel(
           obj: PanelInfo,
           index: number,
+          insert: boolean,
           opts?: { internalOnly: boolean }
         ) {
           const page = state.pages.find((p) => p.id === obj.pageId);
-          return makeUpdater(
-            projectId,
-            page.panels,
-            store.updatePanel,
-            reread
-          )(obj, index, opts);
+          return makeUpdater(projectId, page.panels, store.updatePanel, reread)(
+            obj,
+            index,
+            insert,
+            opts
+          );
         },
         deletePanel(id: string) {
           const page = state.pages.find(

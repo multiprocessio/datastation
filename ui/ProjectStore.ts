@@ -31,7 +31,8 @@ export class ProjectStore {
   updatePanel(
     _projectId: string,
     _p: PanelInfo,
-    _position: number
+    _position: number,
+    _insert: boolean
   ): Promise<void> {
     throw new Error('Not implemented');
   }
@@ -39,7 +40,8 @@ export class ProjectStore {
   updatePage(
     _projectId: string,
     _p: ProjectPage,
-    _position: number
+    _position: number,
+    _insert: boolean
   ): Promise<void> {
     throw new Error('Not implemented');
   }
@@ -47,7 +49,8 @@ export class ProjectStore {
   updateServer(
     _projectId: string,
     _p: ServerInfo,
-    _position: number
+    _position: number,
+    _insert: boolean
   ): Promise<void> {
     throw new Error('Not implemented');
   }
@@ -55,7 +58,8 @@ export class ProjectStore {
   updateConnector(
     _projectId: string,
     _p: ConnectorInfo,
-    _position: number
+    _position: number,
+    _insert: boolean
   ): Promise<void> {
     throw new Error('Not implemented');
   }
@@ -274,33 +278,52 @@ class RemoteStore extends ProjectStore {
     projectId: string,
     data: PanelInfo,
     position: number,
+    insert: boolean,
     panelPositions?: string[]
   ) {
     return asyncRPC<UpdatePanelRequest, UpdatePanelResponse>('updatePanel', {
       data,
       position,
+      insert,
       panelPositions,
     });
   }
 
-  updatePage(projectId: string, data: ProjectPage, position: number) {
+  updatePage(
+    projectId: string,
+    data: ProjectPage,
+    position: number,
+    insert: boolean
+  ) {
     return asyncRPC<UpdatePageRequest, UpdatePageResponse>('updatePage', {
       data,
       position,
+      insert,
     });
   }
 
-  updateServer(projectId: string, data: ServerInfo, position: number) {
+  updateServer(
+    projectId: string,
+    data: ServerInfo,
+    position: number,
+    insert: boolean
+  ) {
     return asyncRPC<UpdateServerRequest, UpdateServerResponse>('updateServer', {
       data,
       position,
+      insert,
     });
   }
 
-  updateConnector(projectId: string, data: ConnectorInfo, position: number) {
+  updateConnector(
+    projectId: string,
+    data: ConnectorInfo,
+    position: number,
+    insert: boolean
+  ) {
     return asyncRPC<UpdateConnectorRequest, UpdateConnectorResponse>(
       'updateConnector',
-      { data, position }
+      { data, position, insert }
     );
   }
 

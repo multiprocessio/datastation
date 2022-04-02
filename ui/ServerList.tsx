@@ -9,7 +9,7 @@ export function ServerList({
   deleteServer,
 }: {
   state: ProjectState;
-  updateServer: (dc: ServerInfo, position: number) => void;
+  updateServer: (dc: ServerInfo, position: number, insert: boolean) => void;
   deleteServer: (id: string) => void;
 }) {
   return (
@@ -19,14 +19,14 @@ export function ServerList({
         <Server
           key={dc.id}
           server={dc}
-          updateServer={(dc: ServerInfo) => updateServer(dc, i)}
+          updateServer={(dc: ServerInfo) => updateServer(dc, i, false)}
           deleteServer={() => deleteServer(dc.id)}
         />
       ))}
       <div className="text-center">
         <Button
           onClick={() => {
-            updateServer(new ServerInfo(), -1);
+            updateServer(new ServerInfo(), -1, true);
           }}
         >
           Add Server

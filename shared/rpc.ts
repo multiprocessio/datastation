@@ -16,6 +16,7 @@ export type GetPanelRequest = { id: string };
 export type GetPanelResponse = PanelInfo;
 
 export type UpdatePanelRequest = {
+  insert: boolean;
   position: number;
   data: PanelInfo;
   panelPositions?: string[];
@@ -26,6 +27,7 @@ export type GetConnectorRequest = { id: string };
 export type GetConnectorResponse = ConnectorInfo;
 
 export type UpdateConnectorRequest = {
+  insert: boolean;
   position: number;
   data: ConnectorInfo;
 };
@@ -35,6 +37,7 @@ export type GetServerRequest = { id: string };
 export type GetServerResponse = ServerInfo;
 
 export type UpdateServerRequest = {
+  insert: boolean;
   position: number;
   data: ServerInfo;
 };
@@ -44,6 +47,7 @@ export type GetPageRequest = { id: string };
 export type GetPageResponse = ProjectPage;
 
 export type UpdatePageRequest = {
+  insert: boolean;
   position: number;
   data: ProjectPage;
 };

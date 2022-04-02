@@ -73,10 +73,11 @@ export function PageList({
 }: {
   state: ProjectState;
   deletePage: (id: string) => void;
-  updatePage: (page: ProjectPage, position: number) => void;
+  updatePage: (page: ProjectPage, position: number, insert: boolean) => void;
   updatePanel: (
     panel: PanelInfo,
     position: number,
+    insert: boolean,
     opts?: { internalOnly: boolean }
   ) => void;
   setPageIndex: (i: number) => void;
@@ -92,7 +93,7 @@ export function PageList({
           <Button
             type="primary"
             onClick={() => {
-              updatePage(new ProjectPage('Untitled Page'), -1);
+              updatePage(new ProjectPage('Untitled Page'), -1, true);
             }}
           >
             Add a page
@@ -119,7 +120,7 @@ export function PageList({
       return;
     }
 
-    updatePanel(panel, index, { internalOnly: true });
+    updatePanel(panel, index, false, { internalOnly: true });
   });
 
   return (
@@ -134,7 +135,7 @@ export function PageList({
               <Input
                 onChange={(value: string) => {
                   page.name = value;
-                  updatePage(page, i);
+                  updatePage(page, i, false);
                 }}
                 value={page.name}
               />
@@ -178,7 +179,7 @@ export function PageList({
         <Button
           className="add-page"
           onClick={() => {
-            updatePage(new ProjectPage('Untitled Page'), -1);
+            updatePage(new ProjectPage('Untitled Page'), -1, true);
             setPageIndex(state.pages.length - 1);
           }}
         >

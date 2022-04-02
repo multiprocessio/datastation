@@ -33,12 +33,16 @@ export function PanelList({
 }) {
   const { crud } = React.useContext(ProjectContext);
 
-  async function updatePanel(panel: PanelInfo, position?: number) {
+  async function updatePanel(
+    panel: PanelInfo,
+    position?: number,
+    insert?: boolean
+  ) {
     const index =
       position === undefined
         ? page.panels.findIndex((p) => p.id === panel.id)
         : position;
-    await crud.updatePanel(panel, index);
+    await crud.updatePanel(panel, index, !!insert);
 
     if (VISUAL_PANELS.includes(panel.type)) {
       // Give time before re-evaling
@@ -91,7 +95,7 @@ export function PanelList({
         });
       }
 
-      updatePanel(next, panelIndex);
+      updatePanel(next, panelIndex, true);
     }
 
     const offerToTable =
@@ -99,7 +103,6 @@ export function PanelList({
 
     const offerToGraph = offerToTable && firstNumber && firstString;
 
-    console.log(page.panels.map((p) => p.name));
     return (
       <div className="new-panel">
         <Button
@@ -108,7 +111,7 @@ export function PanelList({
               name: `Untitled panel #${page.panels.length + 1}`,
               type: 'python',
             });
-            updatePanel(panel, panelIndex + 1);
+            updatePanel(panel, panelIndex + 1, true);
           }}
           options={PANEL_GROUPS.map((group) => (
             <optgroup label={group.label} key={group.label}>
