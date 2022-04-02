@@ -41,7 +41,7 @@ export function Updates() {
       <div className="title">Updates</div>
       <ul>
         {updates.updates.map(function renderUpdate(u: string) {
-          return <li>{u}</li>;
+          return <li key={u}>{u}</li>;
         })}
       </ul>
     </div>

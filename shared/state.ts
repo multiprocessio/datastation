@@ -146,7 +146,7 @@ export class ContentTypeInfo {
 
 export class HTTPConnectorInfo extends ConnectorInfo {
   http: {
-    headers: Array<{ value: string; name: string }>;
+    headers: Array<{ value: string; name: string; id: string }>;
     url: string;
     method: HTTPConnectorInfoMethod;
     contentTypeInfo: ContentTypeInfo;
@@ -155,7 +155,7 @@ export class HTTPConnectorInfo extends ConnectorInfo {
   constructor(
     name?: string,
     url?: string,
-    headers: Array<{ value: string; name: string }> = [],
+    headers: Array<{ value: string; name: string; id: string }> = [],
     method?: HTTPConnectorInfoMethod,
     contentTypeInfo?: ContentTypeInfo
   ) {

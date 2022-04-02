@@ -264,8 +264,8 @@ export const tablePanel: PanelUIDetails<TablePanelInfo> = {
   details: TablePanelDetails,
   body: TablePanel,
   previewable: false,
-  factory: function (pageId: string) {
-    return new TablePanelInfo(pageId);
+  factory: function (pageId: string, name: string) {
+    return new TablePanelInfo(pageId, { name });
   },
   hasStdout: false,
   info: null,

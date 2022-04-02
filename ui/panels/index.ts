@@ -45,7 +45,7 @@ export const PANEL_GROUPS: Array<{
     panels: ['program', 'filagg'],
   },
   {
-    label: 'Display',
+    label: 'Visualize',
     panels: ['graph', 'table'],
   },
 ];

@@ -56,18 +56,13 @@ export function Select({
   React.useEffect(() => {
     const values = [allowNone ? NONE : null, ...optionValues].filter(Boolean);
     if (values.length && !values.includes(value)) {
-      let foundUnused = false;
+      let foundUnused = '';
       for (const value of values) {
-        // Good value is already set, no default to set.
-        if (value === oldValue) {
-          return;
-        }
-
         if ((used && used.includes(value)) || allowNone) {
           continue;
         }
 
-        foundUnused = true;
+        foundUnused = value;
         break;
       }
 
@@ -76,9 +71,7 @@ export function Select({
         return;
       }
 
-      if (!foundUnused) {
-        onChange(values[0]);
-      }
+      onChange(foundUnused);
     }
   }, [value, oldValue, allowNone, onChange, used, optionValues]);
 

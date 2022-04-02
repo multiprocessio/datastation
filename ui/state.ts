@@ -114,9 +114,15 @@ export function makeUpdater<T extends { id: string }>(
 
     // Actually an insert
     if (insert) {
-      list.push(obj);
+      list.splice(newIndex, 0, obj);
       if (!internalOnly) {
-        await storeUpdate(projectId, obj, list.length - 1, insert);
+        await storeUpdate(
+          projectId,
+          obj,
+          -1,
+          insert,
+          list.map((l) => l.id)
+        );
       }
       await reread(projectId);
       return;

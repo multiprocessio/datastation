@@ -95,7 +95,8 @@ export const literalPanel: PanelUIDetails<LiteralPanelInfo> = {
   details: LiteralPanelDetails,
   body: LiteralPanelBody,
   previewable: true,
-  factory: (pageId: string) => new LiteralPanelInfo(pageId),
+  factory: (pageId: string, name: string) =>
+    new LiteralPanelInfo(pageId, { name }),
   info: null,
   hasStdout: false,
 };

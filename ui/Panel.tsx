@@ -21,7 +21,7 @@ import { MODE, MODE_FEATURES } from '../shared/constants';
 import { EVAL_ERRORS } from '../shared/errors';
 import log from '../shared/log';
 import { deepEquals } from '../shared/object';
-import { PanelInfo, PanelInfoType, PanelResult } from '../shared/state';
+import { PanelInfo, PanelResult } from '../shared/state';
 import { humanSize } from '../shared/text';
 import { panelRPC } from './asyncRPC';
 import { Alert } from './components/Alert';
@@ -30,8 +30,7 @@ import { Confirm } from './components/Confirm';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { Highlight } from './components/Highlight';
 import { Input } from './components/Input';
-import { Select } from './components/Select';
-import { PANEL_GROUPS, PANEL_UI_DETAILS } from './panels';
+import { PANEL_UI_DETAILS } from './panels';
 import { UrlStateContext } from './urlState';
 
 export const VISUAL_PANELS = ['graph', 'table'];
@@ -255,9 +254,10 @@ export function Panel({
   // Fall back to empty dict in case panel.type names ever change
   const panelUIDetails =
     PANEL_UI_DETAILS[panel.type] || PANEL_UI_DETAILS.literal;
-  const blank = panelUIDetails.factory(panel.pageId);
+  const blank = panelUIDetails.factory(panel.pageId, panel.name);
   blank.id = panel.id;
-  blank.name = panel.name;
+  blank.lastEdited = panel.lastEdited;
+  console.log(blank, panel);
   const isBlank = deepEquals(panel, blank);
   const [hidden, setHidden] = React.useState(false);
 
@@ -371,25 +371,23 @@ export function Panel({
       onKeyDown={keyboardShortcuts}
     >
       <ErrorBoundary>
-        <div
-          className="panel-head"
-          onDoubleClick={(e: React.MouseEvent) => {
-            // Need to make sure if the user clicks into the name input they don't trigger the fullscreen toggle.
-            const textNodeType = 3;
-            const target = e.target as HTMLElement;
-            if (
-              target.tagName.toLowerCase() === 'input' ||
-              target.nodeType === textNodeType
-            ) {
-              return;
-            }
-
-            setUrlState({
-              fullScreen: fullScreen === panel.id ? null : panel.id,
-            });
-          }}
-        >
+        <div className="panel-head">
           <div
+            onDoubleClick={(e: React.MouseEvent) => {
+              // Need to make sure if the user clicks into the name input they don't trigger the fullscreen toggle.
+              const textNodeType = 3;
+              const target = e.target as HTMLElement;
+              if (
+                target.tagName.toLowerCase() === 'input' ||
+                target.nodeType === textNodeType
+              ) {
+                return;
+              }
+
+              setUrlState({
+                fullScreen: fullScreen === panel.id ? null : panel.id,
+              });
+            }}
             className={`panel-header ${
               details ? 'panel-header--open' : ''
             } vertical-align-center`}
@@ -412,36 +410,14 @@ export function Panel({
                 <IconChevronDown />
               </Button>
             </span>
-            <Select
-              label="Type"
-              value={panel.type}
-              onChange={(value: string) => {
-                const panelType = value as PanelInfoType;
-                const newPanel = PANEL_UI_DETAILS[panelType].factory(
-                  panel.pageId
-                );
-                (panel as any)[panelType] = newPanel[panelType];
-                panel.type = panelType;
-                updatePanel(panel);
-              }}
-            >
-              {PANEL_GROUPS.map((group) => (
-                <optgroup label={group.label} key={group.label}>
-                  {group.panels.map((name) => {
-                    const panelDetails = PANEL_UI_DETAILS[name];
-                    return (
-                      <option value={panelDetails.id} key={panelDetails.id}>
-                        {panelDetails.label}
-                      </option>
-                    );
-                  })}
-                </optgroup>
-              ))}
-            </Select>
+
+            <label className="ml-2 text-muted">
+              {PANEL_UI_DETAILS[panel.type].label}
+            </label>
 
             <Input
               label="Name"
-              className="panel-name"
+              className="panel-name ml-1"
               placeholder={`Untitled panel #${panels.length + 1}`}
               onChange={(value: string) => {
                 panel.name = value;
@@ -583,7 +559,13 @@ export function Panel({
                         updatePanel={updatePanel}
                       />
                     )}
-                  <PanelError panels={panels} e={error} />
+                  {
+                    /* Visual panels get run automatically. Don't show the Cancelled alert since this will happen all the time. */ VISUAL_PANELS.includes(
+                      panel.type
+                    ) && error?.name === 'Cancelled' ? null : (
+                      <PanelError panels={panels} e={error} />
+                    )
+                  }
                   {info}
                 </div>
                 {panelUIDetails.previewable && (

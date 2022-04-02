@@ -307,7 +307,8 @@ export const filaggPanel: PanelUIDetails<FilterAggregatePanelInfo> = {
   details: FilterAggregatePanelDetails,
   body: null,
   previewable: true,
-  factory: (pageId: string) => new FilterAggregatePanelInfo(pageId),
+  factory: (pageId: string, name: string) =>
+    new FilterAggregatePanelInfo(pageId, { name }),
   info: null,
   hasStdout: false,
 };

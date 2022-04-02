@@ -5,11 +5,11 @@ import {
   GraphPanelInfo,
   PanelInfo,
   PanelResult,
-  ProgramPanelInfo,
   ProjectPage,
   TablePanelInfo,
 } from '../shared/state';
 import { Button } from './components/Button';
+import { Dropdown } from './components/Dropdown';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import {
   flattenObjectFields,
@@ -20,6 +20,50 @@ import { Panel, VISUAL_PANELS } from './Panel';
 import { PANEL_GROUPS, PANEL_UI_DETAILS } from './panels';
 import { ProjectContext } from './state';
 import { UrlStateContext } from './urlState';
+
+function NewPanel({
+  onClick,
+}: {
+  onClick: (type: keyof typeof PANEL_UI_DETAILS) => void;
+}) {
+  const groups = PANEL_GROUPS.map((g) => ({
+    name: g.label,
+    id: g.label,
+    items: g.panels.map((p) => ({
+      render(close: () => void) {
+        return (
+          <Button
+            onClick={() => {
+              onClick(p);
+              close();
+            }}
+          >
+            {PANEL_UI_DETAILS[p].label}
+          </Button>
+        );
+      },
+      id: p,
+    })),
+  }));
+
+  return (
+    <Dropdown
+      className="add-panel"
+      trigger={(open) => (
+        <Button
+          onClick={(e) => {
+            e.preventDefault();
+            open();
+          }}
+        >
+          Add Panel
+        </Button>
+      )}
+      title="Add Panel"
+      groups={groups}
+    />
+  );
+}
 
 export function PanelList({
   page,
@@ -105,29 +149,16 @@ export function PanelList({
 
     return (
       <div className="new-panel">
-        <Button
-          onClick={() => {
-            const panel = new ProgramPanelInfo(page.id, {
-              name: `Untitled panel #${page.panels.length + 1}`,
-              type: 'python',
-            });
+        <NewPanel
+          onClick={(type: keyof typeof PANEL_UI_DETAILS) => {
+            const panel = PANEL_UI_DETAILS[type].factory(
+              page.id,
+              `Untitled panel #${page.panels.length + 1}`
+            );
             updatePanel(panel, panelIndex + 1, true);
           }}
-          options={PANEL_GROUPS.map((group) => (
-            <optgroup label={group.label} key={group.label}>
-              {group.panels.map((name) => {
-                const panelDetails = PANEL_UI_DETAILS[name];
-                return (
-                  <option value={panelDetails.id} key={panelDetails.id}>
-                    {panelDetails.label}
-                  </option>
-                );
-              })}
-            </optgroup>
-          ))}
-        >
-          Add Panel
-        </Button>
+        />
+
         {offerToGraph ? (
           <span title="Generate a graph for the above panel">
             <Button onClick={() => makePanel('graph', 'Graph of')} icon>

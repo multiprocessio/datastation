@@ -334,6 +334,14 @@ input + input[type='file'] {
   align-items: center;
 }
 
+.ml-1 {
+  margin-left: var(--margin-base);
+}
+
+.ml-2 {
+  margin-left: calc(2 * var(--margin-base));
+}
+
 .mt-2 {
   margin-top: calc(2 * var(--margin-base));
 }
@@ -792,14 +800,8 @@ input + input[type='file'] {
   display: flex;
   justify-content: center;
   align-items: center;
-
-  .button {
-    margin: 0 5px;
-  }
-}
-
-.new-panel {
   margin: calc(2 * var(--margin-base)) 0;
+  margin-right: var(--margin-base);
 }
 
 .card p {
@@ -1101,7 +1103,7 @@ tbody tr {
   right: unset;
 }
 
-.global-dropdown {
+.dropdown {
   position: relative;
 
   a {
@@ -1110,12 +1112,12 @@ tbody tr {
   }
 
   p,
-  .global-dropdown-anchor a {
+  .dropdown-anchor a {
     font-size: 0.75rem;
   }
 }
 
-.global-dropdown-body {
+.dropdown-body {
   display: none;
   z-index: 15;
   position: absolute;
@@ -1127,23 +1129,23 @@ tbody tr {
   box-shadow: 0 1px 3px 0 #aaa;
 }
 
-.global-dropdown-section:not(:last-of-type) {
+.dropdown-section:not(:last-of-type) {
   border-bottom: 1px solid var(--border-light);
   padding-bottom: 10px;
   margin-bottom: calc(2 * var(--margin-base));
 }
 
-.global-dropdown-sectionName {
+.dropdown-sectionName {
   text-transform: uppercase;
   font-size: 0.9rem;
   color: #999;
 }
 
-.global-dropdown-item {
+.dropdown-item {
   padding-top: calc(2 * var(--margin-base));
 }
 
-.global-dropdown.global-dropdown--open .global-dropdown-body {
+.dropdown.dropdown--open .dropdown-body {
   display: initial;
 }
 
@@ -1152,6 +1154,27 @@ tbody tr {
 
   .alert {
     max-width: 600px;
+  }
+}
+
+.dropdown.add-panel {
+  .dropdown-body {
+    width: 200px;
+  }
+
+  .dropdown-section {
+    border-bottom: 0;
+  }
+
+  .dropdown-item {
+    padding-top: var(--margin-base);
+
+    .button {
+      width: 100%;
+      border: 0;
+      box-shadow: none;
+      text-align: left;
+    }
   }
 }
 
@@ -1260,7 +1283,7 @@ body.dark {
     border-right: 0;
   }
 
-  .global-dropdown-item a {
+  .dropdown-item a {
     color: #61b6ff;
   }
 
@@ -1269,7 +1292,7 @@ body.dark {
     background: var(--gutter-dark);
   }
 
-  .global-dropdown-body {
+  .dropdown-body {
     background: var(--background-dark);
     box-shadow: 0 1px 3px 0 var(--border-dark);
   }
@@ -1383,8 +1406,8 @@ body.dark {
   }
 
   .header-project-name,
-  .global-dropdown-sectionName,
-  .global-dropdown p {
+  .dropdown-sectionName,
+  .dropdown p {
     color: var(--color-dark);
   }
 

@@ -97,7 +97,7 @@ export function MakeSelectProject() {
         <div className="project-existing">
           <h2>Existing project</h2>
           {projects.map(({ name, createdAt }) => (
-            <div className="form-row">
+            <div className="form-row" key={name}>
               <h3 className="project-selector">{name}</h3>
               <div className="project-timestamp">
                 Created{' '}

@@ -165,7 +165,8 @@ export const programPanel: PanelUIDetails<ProgramPanelInfo> = {
   details: ProgramPanelDetails,
   body: ProgramPanelBody,
   previewable: true,
-  factory: (pageId: string) => new ProgramPanelInfo(pageId),
+  factory: (pageId: string, name: string) =>
+    new ProgramPanelInfo(pageId, { name }),
   hasStdout: true,
   info: ProgramInfo,
 };
