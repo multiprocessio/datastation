@@ -28,7 +28,7 @@ export const PANEL_GROUPS: Array<{
   panels: Array<PanelInfoType>;
 }> = [
   {
-    label: 'Import',
+    label: 'Import from',
     panels: (() => {
       const panels: Array<PanelInfoType> = ['http', 'file', 'literal'];
 
@@ -41,11 +41,11 @@ export const PANEL_GROUPS: Array<{
     })(),
   },
   {
-    label: 'Operate',
+    label: 'Operate with',
     panels: ['program', 'filagg'],
   },
   {
-    label: 'Visualize',
+    label: 'Visualize with',
     panels: ['graph', 'table'],
   },
 ];

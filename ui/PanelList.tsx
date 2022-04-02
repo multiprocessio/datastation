@@ -160,14 +160,20 @@ export function PanelList({
         />
 
         {offerToGraph ? (
-          <span className="new-panel-short" title="Generate a graph for the above panel">
+          <span
+            className="new-panel-short"
+            title="Generate a graph for the above panel"
+          >
             <Button onClick={() => makePanel('graph', 'Graph of')} icon>
               <IconChartBar />
             </Button>
           </span>
         ) : null}
         {offerToTable ? (
-          <span className="new-panel-short" title="Generate a table for the above panel">
+          <span
+            className="new-panel-short"
+            title="Generate a table for the above panel"
+          >
             <Button onClick={() => makePanel('table', 'Data from')} icon>
               <IconTable />
             </Button>

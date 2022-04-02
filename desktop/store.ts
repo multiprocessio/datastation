@@ -407,7 +407,7 @@ GROUP BY panel_id
     },
   };
 
-  updateGeneric<T extends { id: string }>(
+  updateGeneric<T extends { id: string; defaultModified: boolean }>(
     crud: GenericCrud<T>,
     projectId: string,
     data: T,
@@ -428,6 +428,7 @@ GROUP BY panel_id
         return;
       }
 
+      data.defaultModified = true;
       const [existing] = crud.getOne(db, data.id);
       encryptProjectSecrets(data, existing);
       log.info(`Updating ${crud.entity}`);

@@ -60,6 +60,7 @@ export class Encrypt {
 export type ServerInfoType = 'ssh-agent' | 'password' | 'private-key';
 
 export class ServerInfo {
+  defaultModified: boolean;
   name: string;
   address: string;
   port: number;
@@ -71,6 +72,7 @@ export class ServerInfo {
   id: string;
 
   constructor(panel: Partial<ServerInfo> = {}) {
+    this.defaultModified = false;
     this.type = panel.type || 'private-key';
     this.name = panel.name || 'Untitled Server';
     this.address = panel.address || '';
@@ -91,12 +93,14 @@ export class ServerInfo {
 export type ConnectorInfoType = 'database' | 'http';
 
 export class ConnectorInfo {
+  defaultModified: boolean;
   name: string;
   type: ConnectorInfoType;
   id: string;
   serverId?: string;
 
   constructor(type?: ConnectorInfoType, name?: string, serverId?: string) {
+    this.defaultModified = false;
     this.name = name || 'Untitled Data Source';
     this.type = type || 'database';
     this.serverId = serverId;
@@ -237,6 +241,7 @@ export type PanelInfoType =
   | 'filagg';
 
 export class PanelInfo {
+  defaultModified: boolean;
   content: string;
   type: PanelInfoType;
   name: string;
@@ -252,6 +257,7 @@ export class PanelInfo {
     name?: string,
     content?: string
   ) {
+    this.defaultModified = false;
     this.content = content || '';
     this.type = type;
     this.name = name || '';
@@ -643,6 +649,7 @@ export class Export {
 }
 
 export class ProjectPage {
+  defaultModified: boolean;
   panels: Array<PanelInfo>;
   name: string;
   id: string;

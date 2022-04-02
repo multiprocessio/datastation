@@ -55,6 +55,7 @@ export function Select({
   const oldValue = value;
   React.useEffect(() => {
     const values = [allowNone ? NONE : null, ...optionValues].filter(Boolean);
+
     if (values.length && !values.includes(value)) {
       let foundUnused = '';
       for (const value of values) {

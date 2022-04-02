@@ -13,10 +13,10 @@ export function ServerPicker({
   onChange: (v: string) => void;
 }) {
   const [internalValue, setInternalValue] = React.useState(
-    serverId === '' ? 'null' : serverId
+    serverId === '' || serverId === null ? 'null' : serverId
   );
   React.useEffect(() => {
-    setInternalValue(serverId === '' ? 'null' : serverId);
+    setInternalValue(serverId === '' || serverId === null ? 'null' : serverId);
   }, [serverId]);
 
   if (!servers.length) {

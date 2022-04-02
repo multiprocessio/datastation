@@ -1,3 +1,4 @@
+import debounce from 'lodash.debounce';
 // organize-imports-ignore
 // Must be loaded before other ace-builds imports
 import AceEditor from 'react-ace';
@@ -19,8 +20,28 @@ import * as React from 'react';
 // This steals Ctrl-a so this should not be a default
 //import 'ace-builds/src-min-noconflict/keybinding-emacs';
 import { SettingsContext } from '../Settings';
-import { useDebouncedLocalState } from './Input';
+import { INPUT_SYNC_PERIOD } from './Input';
 import { Tooltip } from './Tooltip';
+
+export function registerDebouncedChangeHandler(
+  editor: AceEditor,
+  onChange: (v: string) => void,
+  noDelay?: boolean
+): () => void {
+  const debounced = debounce(onChange, INPUT_SYNC_PERIOD);
+  function listener(e: Event) {
+    const v = String((e.target as HTMLInputElement).value).trim();
+    if (noDelay) {
+      onChange(v);
+      return;
+    }
+
+    debounced(v);
+  }
+
+  editor.onChange(listener);
+  return () => debounced.flush();
+}
 
 export function CodeEditor({
   value,
@@ -50,20 +71,28 @@ export function CodeEditor({
   const {
     state: { theme },
   } = React.useContext(SettingsContext);
-  const [localValue, setLocalValue, flushLocalValue] = useDebouncedLocalState(
-    value,
-    onChange
-  );
 
-  const editor = React.useRef(null);
+  const [editorNode, editorRef] = React.useState<AceEditor>(null);
+  const flush = React.useRef<() => void>(() => {/* ignore */ });
+
+  React.useEffect(() => {
+    if (!editorNode) {
+      return;
+    }
+
+    flush.current = registerDebouncedChangeHandler(
+      editorNode,
+      onChange,
+    );
+  }, [editorNode, onChange]);
 
   // Make sure editor resizes if the overall panel changes size. For
   // example this happens when the preview height changes.
   React.useEffect(() => {
-    if (editor.current) {
-      const panel = editor.current.editor.container.closest('.panel');
+    if (editorNode) {
+      const panel = editorNode.editor.container.closest('.panel');
       const obs = new ResizeObserver(function handleEditorResize() {
-        editor.current.editor?.resize();
+        editorNode.editor?.resize();
       });
       obs.observe(panel);
 
@@ -73,27 +102,25 @@ export function CodeEditor({
 
   return (
     <div
-      className={`editor-container ${
-        singleLine ? 'editor-container--singleLine vertical-align-center' : ''
-      }`}
+      className={`editor-container ${singleLine ? 'editor-container--singleLine vertical-align-center' : ''
+        }`}
     >
       {label && <label className="label input-label">{label}</label>}
       <AceEditor
-        ref={(r) => (editor.current = r)}
+        ref={editorRef}
         mode={language}
         theme={theme === 'dark' ? 'dracula' : 'github'}
         maxLines={singleLine ? 1 : undefined}
         wrapEnabled={true}
-        onChange={setLocalValue}
-        onBlur={flushLocalValue}
+        onBlur={flush.current}
         name={id}
-        value={String(localValue)}
+        defaultValue={String(value)}
         placeholder={placeholder}
         className={`${className} ${singleLine ? 'input' : ''}`}
         readOnly={disabled}
         width={
           singleLine
-            ? String(Math.max(300, String(localValue).length * 10)) + 'px'
+            ? String(Math.max(300, String(value).length * 10)) + 'px'
             : '100%'
         }
         fontSize="1rem"
@@ -104,7 +131,7 @@ export function CodeEditor({
             name: 'ctrl-enter',
             bindKey: { win: 'Ctrl-Enter', mac: 'Ctrl-Enter' },
             exec: () => {
-              flushLocalValue();
+              flush.current();
               // Give time to flush
               return setTimeout(() =>
                 onKeyDown({
@@ -116,12 +143,12 @@ export function CodeEditor({
           },
           singleLine
             ? {
-                name: 'disable newlines',
-                bindKey: { win: 'Enter|Shift-Enter', mac: 'Enter|Shift-Enter' },
-                exec: () => {
-                  /* do nothing */
-                },
-              }
+              name: 'disable newlines',
+              bindKey: { win: 'Enter|Shift-Enter', mac: 'Enter|Shift-Enter' },
+              exec: () => {
+                /* do nothing */
+              },
+            }
             : undefined,
         ].filter(Boolean)}
         showGutter={!singleLine}

@@ -15,7 +15,7 @@ export function Connector({
   updateConnector: (dc: ConnectorInfo) => void;
   deleteConnector: () => void;
 }) {
-  const [expanded, setExpanded] = React.useState(false);
+  const [expanded, setExpanded] = React.useState(!connector.defaultModified);
 
   return (
     <div className={`connector ${expanded ? 'connector--expanded' : ''}`}>

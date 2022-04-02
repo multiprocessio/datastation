@@ -20,7 +20,6 @@ import { toString } from 'shape';
 import { MODE, MODE_FEATURES } from '../shared/constants';
 import { EVAL_ERRORS } from '../shared/errors';
 import log from '../shared/log';
-import { deepEquals } from '../shared/object';
 import { PanelInfo, PanelResult } from '../shared/state';
 import { humanSize } from '../shared/text';
 import { panelRPC } from './asyncRPC';
@@ -251,15 +250,9 @@ export function Panel({
   removePanel: (id: string) => void;
   panels: Array<PanelInfo>;
 }) {
-  // Fall back to empty dict in case panel.type names ever change
+  const [hidden, setHidden] = React.useState(false);
   const panelUIDetails =
     PANEL_UI_DETAILS[panel.type] || PANEL_UI_DETAILS.literal;
-  const blank = panelUIDetails.factory(panel.pageId, panel.name);
-  blank.id = panel.id;
-  blank.lastEdited = panel.lastEdited;
-  console.log(blank, panel);
-  const isBlank = deepEquals(panel, blank);
-  const [hidden, setHidden] = React.useState(false);
 
   const {
     state: { fullScreen, expanded },
@@ -267,16 +260,24 @@ export function Panel({
   } = React.useContext(UrlStateContext);
 
   const [details, setDetailsInternal] = React.useState(
-    isBlank || expanded.includes(panel.id)
+    expanded.includes(panel.id)
   );
-  function setDetails(b: boolean) {
-    setDetailsInternal(b);
-    if (!b) {
-      setUrlState({ expanded: expanded.filter((i) => i !== panel.id) });
-    } else {
-      setUrlState({ expanded: Array.from(new Set([...expanded, panel.id])) });
+  const setDetails = React.useCallback(
+    (b: boolean) => {
+      setDetailsInternal(b);
+      if (!b) {
+        setUrlState({ expanded: expanded.filter((i) => i !== panel.id) });
+      } else {
+        setUrlState({ expanded: Array.from(new Set([...expanded, panel.id])) });
+      }
+    },
+    [setUrlState, expanded, setDetailsInternal, panel.id]
+  );
+  React.useEffect(() => {
+    if (!panel.defaultModified && !details) {
+      setDetails(true);
     }
-  }
+  }, [panel.defaultModified, details, setDetails]);
 
   const [panelOut, setPanelOut] = React.useState<
     'preview' | 'stdout' | 'shape' | 'metadata'
