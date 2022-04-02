@@ -801,7 +801,10 @@ input + input[type='file'] {
   justify-content: center;
   align-items: center;
   margin: calc(2 * var(--margin-base)) 0;
-  margin-right: var(--margin-base);
+}
+
+.new-panel-short {
+  margin-left: var(--margin-base);  
 }
 
 .card p {
