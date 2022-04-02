@@ -326,7 +326,7 @@ test('panel reordering works correctly', async () => {
       data: { ...testPanel2 },
       position: 0,
       insert: false,
-      panelPositions: [testPanel2.id, testPanel1.id];
+      panelPositions: [testPanel2.id, testPanel1.id],
     });
 
     const read = await getProject.handler(null, {

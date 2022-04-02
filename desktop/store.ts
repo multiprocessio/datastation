@@ -484,7 +484,6 @@ GROUP BY panel_id
         panelPositions: string[];
       }
     ) => {
-      console.log('updaitng', data);
       data.lastEdited = new Date();
       delete data.resultMeta;
       await this.updateGeneric(
@@ -526,7 +525,6 @@ GROUP BY panel_id
           `UPDATE ${panelCrud.entity} SET position = ? WHERE id = ?`
         );
         for (const i of panelPositions.map((_, i) => i)) {
-          console.log(i, panelPositions[i]);
           stmt.run(i, panelPositions[i]);
         }
       }

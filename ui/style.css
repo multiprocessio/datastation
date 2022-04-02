@@ -8,10 +8,10 @@
   --button-light: #fdfdff;
 
   /* Dark theme settings */
-  --background-dark: #454f73;
+  --background-dark: #24242e;
   --border-dark: #1b1b1d;
   --color-dark: #dfdfdf;
-  --lighter-dark: #323254;
+  --lighter-dark: #2a2a38;
   --gutter-dark: var(--lighter-dark);
 
   /* Generic settings */

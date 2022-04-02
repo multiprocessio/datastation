@@ -354,7 +354,6 @@ export function Panel({
     }
   }
 
-  console.log(panel);
   return (
     <div
       id={`panel-${panel.id}`}
@@ -374,11 +373,21 @@ export function Panel({
       <ErrorBoundary>
         <div
           className="panel-head"
-          onDoubleClick={() =>
+          onDoubleClick={(e: React.MouseEvent) => {
+            // Need to make sure if the user clicks into the name input they don't trigger the fullscreen toggle.
+            const textNodeType = 3;
+            const target = e.target as HTMLElement;
+            if (
+              target.tagName.toLowerCase() === 'input' ||
+              target.nodeType === textNodeType
+            ) {
+              return;
+            }
+
             setUrlState({
               fullScreen: fullScreen === panel.id ? null : panel.id,
-            })
-          }
+            });
+          }}
         >
           <div
             className={`panel-header ${
