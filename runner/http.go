@@ -35,7 +35,7 @@ func fullPath(u *url.URL) string {
 // Not the most beautiful code, but it is well tested.
 func getHTTPHostPort(raw string) (bool, string, string, string, error) {
 	if len(raw) == 0 {
-		return false, "", "","", makeErrUser("URL must not be blank.")
+		return false, "", "", "", makeErrUser("URL must not be blank.")
 	}
 
 	// Handle shorthand like `curl /xyz` meaning `curl http://localhost:80/xyz`

@@ -11,7 +11,6 @@ func debugObject(obj any) {
 	log.Printf("%s\n", string(b))
 }
 
-
 func newId() string {
 	id, err := nanoid.Generate("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz", 12)
 	if err != nil {
