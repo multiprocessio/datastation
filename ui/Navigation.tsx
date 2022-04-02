@@ -54,13 +54,13 @@ export function Navigation() {
     <div className="navigation">
       {pages.map((page) => (
         <div
+          key={page.title}
           className={`navigation-item ${
             view === page.view ? 'navigation-item--active' : ''
           }`}
           title={page.title}
         >
           <Button
-            key={page.view}
             icon
             onClick={() => setUrlState({ view: page.view, page: 0, projectId })}
           >

@@ -80,6 +80,10 @@ export function FileInput({
     />
   );
 
+  if (!allowManualEntry && !allowFilePicker) {
+    throw new Error('Developer error: neither manual nor file picker allowed.');
+  }
+
   return (
     <label className={inputClass}>
       {label && <span className="input-label">{label}</span>}

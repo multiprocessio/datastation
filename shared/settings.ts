@@ -16,7 +16,7 @@ export class Settings {
   file: string;
   stdoutMaxSize: number;
   theme: 'light' | 'dark';
-  caCerts: Array<{ file: string }>;
+  caCerts: Array<{ file: string; id: string }>;
 
   constructor(
     file: string,

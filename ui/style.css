@@ -798,8 +798,8 @@ input + input[type='file'] {
   }
 }
 
-.new-panel:not(:last-child) {
-  margin-bottom: calc(2 * var(--margin-base));
+.new-panel {
+  margin: calc(2 * var(--margin-base)) 0;
 }
 
 .card p {
@@ -1335,6 +1335,7 @@ body.dark {
   .input-label,
   .select-label,
   .text-muted,
+  .toggle-label,
   .title {
     color: #999;
   }

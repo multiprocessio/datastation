@@ -2,6 +2,7 @@ import * as React from 'react';
 import { MODE, MODE_FEATURES } from '../shared/constants';
 import { LANGUAGES } from '../shared/languages';
 import '../shared/polyfill';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { Loading } from './components/Loading';
 import { Editor } from './Editor';
 import { Header, loadDefaultProject } from './Header';
@@ -102,7 +103,11 @@ export function App<T extends DefaultView = DefaultView>({
     // and DefaultView contains 'editor'!!!
     const view = urlState.view || ('editor' as T);
     const Route = routes[view] || NotFound;
-    main = <Route />;
+    main = (
+      <ErrorBoundary>
+        <Route />
+      </ErrorBoundary>
+    );
   }
 
   return (

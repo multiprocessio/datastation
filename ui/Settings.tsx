@@ -2,7 +2,7 @@ import { IconTrash } from '@tabler/icons';
 import React from 'react';
 import { MODE } from '../shared/constants';
 import { LANGUAGES } from '../shared/languages';
-import { mergeDeep } from '../shared/object';
+import { mergeDeep, newId } from '../shared/object';
 import {
   GetSettingsRequest,
   GetSettingsResponse,
@@ -119,7 +119,7 @@ export function Settings() {
                 .sort()
                 .filter((k) => k !== 'sql')
                 .map((languageId) => (
-                  <div className="form-row form-row--multi">
+                  <div key={languageId} className="form-row form-row--multi">
                     <Input
                       onChange={function handleLanguagePathChange(
                         newValue: string
@@ -155,34 +155,40 @@ export function Settings() {
 
             <FormGroup major label="Custom CA Certificates">
               {settings.caCerts.map((cert, i) => {
-                <div className="form-row form-row--multi">
-                  <FileInput
-                    onChange={(v) => {
-                      cert.file = v;
-                    }}
-                    allowFilePicker={MODE === 'desktop'}
-                    value={cert.file}
-                    label="Location"
-                  />
-                  <Button
-                    icon
-                    onClick={() => {
-                      settings.caCerts.splice(i, 1);
-                      setSettings(settings);
-                    }}
-                  >
-                    <IconTrash />
-                  </Button>
-                </div>;
+                return (
+                  <div key={cert.id} className="form-row form-row--multi">
+                    <FileInput
+                      onChange={(v) => {
+                        cert.file = v;
+                        setSettings(settings);
+                      }}
+                      allowFilePicker={MODE === 'desktop'}
+                      allowManualEntry={MODE !== 'desktop'}
+                      value={cert.file}
+                      label="Location"
+                    />
+                    <Button
+                      icon
+                      onClick={() => {
+                        settings.caCerts.splice(i, 1);
+                        setSettings(settings);
+                      }}
+                    >
+                      <IconTrash />
+                    </Button>
+                  </div>
+                );
               })}
-              <Button
-                onClick={() => {
-                  settings.caCerts.push({ file: '' });
-                  setSettings(settings);
-                }}
-              >
-                Add CA Cert
-              </Button>
+              <div className="form-row">
+                <Button
+                  onClick={() => {
+                    settings.caCerts.push({ file: '', id: newId() });
+                    setSettings(settings);
+                  }}
+                >
+                  Add CA Cert
+                </Button>
+              </div>
 
               <Alert type="info">
                 <div>
