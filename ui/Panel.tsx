@@ -228,7 +228,13 @@ function PanelError({ panels, e }: { panels: Array<PanelInfo>; e: Error }) {
     <Alert type="error">
       <div>Error evaluating panel:</div>
       <pre>
-        <code>{e.stack || e.message || String(e)}</code>
+        <code>
+          {e.stack ||
+            e.message ||
+            (String(e) === '[object Object]' /* this might be Chrome specific */
+              ? circularSafeStringify(e, null, 2)
+              : String(e))}
+        </code>
       </pre>
     </Alert>
   );
