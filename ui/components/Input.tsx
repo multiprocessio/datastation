@@ -31,7 +31,10 @@ export function Input({
 }: InputProps) {
   const inputClass = `input ${className ? ' ' + className : ''}`;
 
-  const debounced = useDebouncedCallback(onChange, INPUT_SYNC_PERIOD);
+  const debounced = useDebouncedCallback(
+    onChange,
+    noDelay ? 0 : INPUT_SYNC_PERIOD
+  );
   // Flush on unmount
   React.useEffect(
     () => () => {
