@@ -32,7 +32,8 @@ export class ProjectStore {
     _projectId: string,
     _p: PanelInfo,
     _position: number,
-    _insert: boolean
+    _insert: boolean,
+    _panelPositions?: string[]
   ): Promise<void> {
     throw new Error('Not implemented');
   }
@@ -118,7 +119,9 @@ export class LocalStorageStore extends ProjectStore {
   updatePanel = async (
     projectId: string,
     p: PanelInfo,
-    position: number
+    position: number,
+    insert: boolean,
+    panelPositions?: string[]
   ): Promise<void> => {
     const state = await this.getOrCreate(projectId);
     if (!state.pages) {
@@ -131,18 +134,29 @@ export class LocalStorageStore extends ProjectStore {
           page.panels = [];
         }
 
-        const existingPosition = page.panels.findIndex(
-          (panel) => panel.id === p.id
-        );
-        if (existingPosition === -1) {
-          page.panels.push(p);
-        } else if (existingPosition === position) {
-          page.panels[existingPosition] = p;
-        } else {
-          page.panels.splice(existingPosition, 1);
+        if (insert) {
           page.panels.splice(position, 0, p);
+        } else {
+          const i = page.panels.findIndex((pp) => pp.id === p.id);
+          page.panels[i] = p;
         }
 
+        if (panelPositions) {
+          // Then sort the existing ones based on the positions passed in
+          page.panels.sort((a, b) => {
+            const ao = panelPositions.indexOf(a.id);
+            const bo = panelPositions.indexOf(b.id);
+
+            // Put unknown items at the end
+            if (ao === -1) {
+              return 1;
+            }
+
+            return ao - bo;
+          });
+        }
+
+        console.log(state);
         this.update(projectId, state);
       }
     }

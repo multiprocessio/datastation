@@ -1,4 +1,4 @@
-import debounce from 'lodash.debounce';
+import { useDebouncedCallback } from 'use-debounce';
 // organize-imports-ignore
 // Must be loaded before other ace-builds imports
 import AceEditor from 'react-ace';
@@ -20,28 +20,8 @@ import * as React from 'react';
 // This steals Ctrl-a so this should not be a default
 //import 'ace-builds/src-min-noconflict/keybinding-emacs';
 import { SettingsContext } from '../Settings';
-import { INPUT_SYNC_PERIOD } from './Input';
 import { Tooltip } from './Tooltip';
-
-export function registerDebouncedChangeHandler(
-  editor: AceEditor,
-  onChange: (v: string) => void,
-  noDelay?: boolean
-): () => void {
-  const debounced = debounce(onChange, INPUT_SYNC_PERIOD);
-  function listener(e: Event) {
-    const v = String((e.target as HTMLInputElement).value).trim();
-    if (noDelay) {
-      onChange(v);
-      return;
-    }
-
-    debounced(v);
-  }
-
-  editor.onChange(listener);
-  return () => debounced.flush();
-}
+import { INPUT_SYNC_PERIOD } from './Input';
 
 export function CodeEditor({
   value,
@@ -73,17 +53,14 @@ export function CodeEditor({
   } = React.useContext(SettingsContext);
 
   const [editorNode, editorRef] = React.useState<AceEditor>(null);
-  const flush = React.useRef<() => void>(() => {
-    /* ignore */
-  });
-
-  React.useEffect(() => {
-    if (!editorNode) {
-      return;
-    }
-
-    flush.current = registerDebouncedChangeHandler(editorNode, onChange);
-  }, [editorNode, onChange]);
+  const debounced = useDebouncedCallback(onChange, INPUT_SYNC_PERIOD);
+  // Flush on unmount
+  React.useEffect(
+    () => () => {
+      debounced.flush();
+    },
+    [debounced]
+  );
 
   // Make sure editor resizes if the overall panel changes size. For
   // example this happens when the preview height changes.
@@ -114,10 +91,11 @@ export function CodeEditor({
         wrapEnabled={true}
         onBlur={
           () =>
-            flush.current() /* Simplifying this to onBlur={flush.current} doesn't work. */
+            debounced.flush() /* Simplifying this to onBlur={debounced.flush} doesn't work. */
         }
         name={id}
         defaultValue={String(value)}
+        onChange={(v) => debounced(v)}
         placeholder={placeholder}
         className={`${className} ${singleLine ? 'input' : ''}`}
         readOnly={disabled}
@@ -134,7 +112,7 @@ export function CodeEditor({
             name: 'ctrl-enter',
             bindKey: { win: 'Ctrl-Enter', mac: 'Ctrl-Enter' },
             exec: () => {
-              flush.current();
+              debounced.flush();
               // Give time to flush
               return setTimeout(() =>
                 onKeyDown({
