@@ -1,11 +1,11 @@
 import React from 'react';
 import { Button } from './components/Button';
-import { UrlState, UrlStateContext } from './urlState';
+import { DefaultView, UrlStateContext } from './urlState';
 import {
   TablerIcon
 } from '@tabler/icons';
 
-export function Navigation<View extends string = UrlState['view']>({ pages }: { pages: Array<{ title: string; icon: TablerIcon, view: View }> }) {
+export function Navigation<View extends string = DefaultView>({ pages }: { pages: Array<{ title: string; icon: TablerIcon, endpoint: View }> }) {
   const {
     state: { projectId, view },
     setState: setUrlState,
@@ -16,13 +16,13 @@ export function Navigation<View extends string = UrlState['view']>({ pages }: { 
       {pages.map((page) => (
         <div
           key={page.title}
-          className={`navigation-item ${view === page.view ? 'navigation-item--active' : ''
+          className={`navigation-item ${view === page.endpoint ? 'navigation-item--active' : ''
             }`}
           title={page.title}
         >
           <Button
             icon
-            onClick={() => setUrlState({ view: page.view, page: 0, projectId })}
+            onClick={() => setUrlState({ view: page.endpoint as DefaultView /* this is unideal but made difficult because the UrlStateContext is global */, page: 0, projectId })}
           >
             <page.icon />
           </Button>

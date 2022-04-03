@@ -123,7 +123,7 @@ export class History {
       table,
       pk: id,
       error: String(exception),
-      oldValue: null,
+      oldValue: data,
       newValue: null,
       userId: '1',
       action: 'delete',

@@ -33,7 +33,7 @@ if (MODE === 'browser') {
   });
 }
 
-type Routes = Array<{ endpoint: string; view: React.FC, title?: string; icon?: TablerIcon; }>;
+type Routes = Array<{ endpoint: string; view: React.FC, title: string; icon: TablerIcon; }>;
 
 export function defaultRoutes(): Routes {
   function makeServerRequired(title: string) {

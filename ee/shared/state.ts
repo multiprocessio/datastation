@@ -29,7 +29,13 @@ export class History {
     raw = raw || {};
 
     const his = mergeDeep(new History(), raw);
-    his.dt = (typeof raw.dt === 'string' ? new Date(raw.dt) : raw.dt) || his.dt;
+    if (typeof raw.dt === 'number') {
+      raw.dt *= 1000;
+    }
+    his.dt =
+      (['string', 'number'].includes(typeof raw.dt)
+        ? new Date(raw.dt)
+        : raw.dt) || his.dt;
     return his;
   }
 }

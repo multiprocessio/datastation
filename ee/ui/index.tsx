@@ -1,15 +1,15 @@
+import {
+  IconHistory,
+} from '@tabler/icons';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { App, defaultRoutes } from '../../ui/app';
-import { DefaultView } from '../../ui/urlState';
 import { History } from './History';
 
 // SOURCE: https://stackoverflow.com/a/7995898/1507139
 const isMobile = navigator.userAgent.match(
   /(iPad)|(iPhone)|(iPod)|(android)|(webOS)/i
 );
-
-type EEView = DefaultView | & 'history';
 
 function index() {
   const root = document.getElementById('root');
@@ -19,10 +19,16 @@ function index() {
   }
 
   if (!isMobile) {
-    const routes: Record<EEView, React.FC> = {
-      history: History,
-      ...defaultRoutes()
-    };
+    const routes = [
+      ...defaultRoutes(),
+    ];
+    // Place last before settings
+    routes.splice(routes.length - 1, 0, {
+      endpoint: 'history',
+      view: History,
+      title: 'History',
+      icon: IconHistory,
+    });
     ReactDOM.render(<App routes={routes} />, root);
     return;
   }
