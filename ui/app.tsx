@@ -26,19 +26,22 @@ if (MODE === 'browser') {
 }
 
 export function defaultRoutes(): Record<DefaultView, React.FC> {
-  function ServerRequired() {
-    return (
-      <div className="card card--center">
-        <p>Must be running the DataStation server to access this feature.</p>
-      </div>
-    );
+  function makeServerRequired(title: string) {
+    return function ServerRequired() {
+      return (
+        <div className="card card--center">
+          <h1>{title}</h1>
+          <p>Must be running the DataStation server to access this feature.</p>
+        </div>
+      );
+    };
   }
 
   return {
     settings: Settings,
     projects: MakeSelectProject,
-    dashboard: ServerRequired,
-    exports: ServerRequired,
+    dashboard: makeServerRequired('Dashboards'),
+    exports: makeServerRequired('Exports'),
     editor: Editor,
   };
 }
