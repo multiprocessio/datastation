@@ -1,3 +1,11 @@
+import {
+  IconCalendar,
+  IconCode,
+  IconFiles,
+  IconLayoutDashboard,
+  IconSettings,
+  TablerIcon,
+} from '@tabler/icons';
 import * as React from 'react';
 import { MODE, MODE_FEATURES } from '../shared/constants';
 import { LANGUAGES } from '../shared/languages';
@@ -18,14 +26,16 @@ if (MODE === 'browser') {
   Object.values(LANGUAGES).map(function processLanguageInit(l) {
     if (l.inMemoryInit) {
       // These can be really big, so run it out of band
-      setTimeout(function () {
+      setTimeout(function() {
         l.inMemoryInit();
       });
     }
   });
 }
 
-export function defaultRoutes(): Record<DefaultView, React.FC> {
+type Routes = Array<{ endpoint: string; view: React.FC, title?: string; icon?: TablerIcon; }>;
+
+export function defaultRoutes(): Routes {
   function makeServerRequired(title: string) {
     return function ServerRequired() {
       return (
@@ -37,19 +47,46 @@ export function defaultRoutes(): Record<DefaultView, React.FC> {
     };
   }
 
-  return {
-    settings: Settings,
-    projects: MakeSelectProject,
-    dashboard: makeServerRequired('Dashboards'),
-    exports: makeServerRequired('Exports'),
-    editor: Editor,
-  };
+  return [
+    {
+      endpoint: 'editor',
+      view: Editor,
+      title: 'Editor',
+      icon: IconCode,
+    },
+    {
+      endpoint: 'dashboard',
+      view: makeServerRequired('Dashboards'),
+      title: 'Dashboards',
+      icon: IconLayoutDashboard,
+    },
+    {
+      endpoint: 'exports',
+      view: makeServerRequired('Exports'),
+      title: 'Exports',
+      icon: IconCalendar,
+    },
+    MODE === 'server'
+      ? {
+        endpoint: 'projects',
+        view: MakeSelectProject,
+        title: 'Switch project',
+        icon: IconFiles,
+      }
+      : null,
+    {
+      endpoint: 'settings',
+      view: Settings,
+      title: 'Settings',
+      icon: IconSettings,
+    },
+  ].filter(Boolean);
 }
 
 export function App<T extends DefaultView = DefaultView>({
   routes,
 }: {
-  routes: Record<T, React.FC>;
+  routes: Routes;
 }) {
   const [urlState, setUrlState] = useUrlState<T>();
   const [state, crud] = useProjectState(urlState.projectId);
@@ -105,7 +142,7 @@ export function App<T extends DefaultView = DefaultView>({
     // No clue why this needs to be casted. T must extend DefaultView
     // and DefaultView contains 'editor'!!!
     const view = urlState.view || ('editor' as T);
-    const Route = routes[view] || NotFound;
+    const Route = routes.find(r => r.endpoint === view)?.view || NotFound;
     main = (
       <ErrorBoundary>
         <Route />
@@ -124,7 +161,7 @@ export function App<T extends DefaultView = DefaultView>({
           <div className={`app app--${MODE} app--${settings.theme}`}>
             {MODE_FEATURES.appHeader && <Header />}
             <main className={'view-' + (urlState.view || 'editor')}>
-              {urlState.projectId && <Navigation />}
+              {urlState.projectId && <Navigation pages={routes} />}
               {main}
             </main>
           </div>

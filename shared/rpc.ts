@@ -131,8 +131,8 @@ export type PanelEndpoint = 'killProcess' | 'fetchResults' | 'eval';
 
 export type Endpoint = PanelEndpoint | StoreEndpoint;
 
-export type WindowAsyncRPC = <Request, Response = void>(
-  resource: Endpoint,
+export type WindowAsyncRPC = <Request, Response = void, EndpointT extends string = Endpoint>(
+  resource: EndpointT,
   projectId: string,
   body: Request
 ) => Promise<Response>;

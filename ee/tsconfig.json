@@ -9,8 +9,8 @@
     "module": "commonjs",
     "skipLibCheck": true,
     "esModuleInterop": true,
-    "typeRoots": ["./node_modules/@types", "./type-overrides"],
+    "typeRoots": ["../node_modules/@types", "../type-overrides", "./node_modules/@types"],
     "resolveJsonModule": true
   },
-  "exclude": ["node_modules", "*.js", "build"]
+  "exclude": ["node_modules", "*.js", "build", "../node_modules", "../build", "../*.js"]
 }
