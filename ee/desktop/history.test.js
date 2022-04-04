@@ -35,7 +35,7 @@ test('project changes are audited', async () => {
         {
           resource: 'updatePanel',
           projectId: project.projectName,
-          body: { data: lp, position: 0 },
+          body: { data: lp, position: 0, insert: false },
         },
         true
       );
@@ -45,6 +45,7 @@ test('project changes are audited', async () => {
         body: {},
         projectId: project.projectName,
       }));
+      console.log('here', history);
       expect(history.length).toBe(2);
 
       // Make a panel change, new history entry
@@ -53,7 +54,7 @@ test('project changes are audited', async () => {
         {
           resource: 'updatePanel',
           projectId: project.projectName,
-          body: { data: lp, position: 0 },
+          body: { data: lp, position: 0, insert: false },
         },
         true
       );
@@ -133,7 +134,7 @@ test('project changes are audited', async () => {
         {
           resource: 'updateServer',
           projectId: project.projectName,
-          body: { position: 0, data: server },
+          body: { position: 0, data: server, insert: true },
         },
         true
       );
@@ -143,8 +144,9 @@ test('project changes are audited', async () => {
         body: {},
         projectId: project.projectName,
       }));
+      console.log(history);
       expect(history.length).toBe(7);
-      expect(history[0].action).toBe('update');
+      expect(history[0].action).toBe('insert');
       expect(history[0].table).toBe('ds_server');
       // Encrypted during save
       expect(server.password_encrypt.encrypted).toBe(true);
@@ -158,7 +160,7 @@ test('project changes are audited', async () => {
         {
           resource: 'updateConnector',
           projectId: project.projectName,
-          body: { position: 0, data: connector },
+          body: { position: 0, data: connector, insert: true },
         },
         true
       );
@@ -169,7 +171,7 @@ test('project changes are audited', async () => {
         projectId: project.projectName,
       }));
       expect(history.length).toBe(8);
-      expect(history[0].action).toBe('update');
+      expect(history[0].action).toBe('insert');
       expect(history[0].table).toBe('ds_connector');
       // Encrypted during save
       expect(connector.database.password_encrypt.encrypted).toBe(true);

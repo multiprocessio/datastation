@@ -84,7 +84,7 @@ export class Store extends store_ce.Store {
         data.id,
         data.table,
         data.pk,
-        unix(data.dt),
+        unix(new Date()),
         data.error,
         auditableOld,
         auditableNew,
@@ -99,7 +99,13 @@ export class Store extends store_ce.Store {
           )
           .get(data.table, data.pk);
         // Don't log the same value twice
-        if (row && row.val === auditableNew && row.action === data.action) {
+        // The || RHS is for when you are calling update after creating a thing but the thing hasn't changed.
+        if (
+          row &&
+          row.val === auditableNew &&
+          (row.action === data.action ||
+            (row.action === 'insert' && data.action === 'update'))
+        ) {
           return;
         }
 

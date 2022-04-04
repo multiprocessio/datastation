@@ -111,33 +111,13 @@ function formatAction(action: HistoryT['action']) {
   return 'Updated';
 }
 
-export function History() {
-  const [page, setPage] = React.useState<GetHistoryResponse['history']>([]);
-  const [lastId, setLastId] = React.useState('');
-
-  React.useEffect(() => {
-    async function load() {
-      const rsp = await asyncRPC<
-        GetHistoryRequest,
-        GetHistoryResponse,
-        Endpoint
-      >('getHistory', {
-        lastId,
-      });
-      setPage(rsp.history.map(HistoryT.fromJSON));
-    }
-
-    load();
-  }, [lastId]);
-
-  if (!page || !page.length) {
-    return <Loading />;
-  }
-
+export function HistoryList({
+  page
+}: {
+  page: GetHistoryResponse['history'],
+}) {
   return (
-    <div className="card history card--full">
-      <h1>History</h1>
-      <table className="table table--large">
+        <table className="table table--large">
         <thead>
           <tr>
             <th>Entity</th>
@@ -171,6 +151,36 @@ export function History() {
           ))}
         </tbody>
       </table>
+);
+}
+
+export function History() {
+  const [page, setPage] = React.useState<GetHistoryResponse['history']>([]);
+  const [lastId, setLastId] = React.useState('');
+
+  React.useEffect(() => {
+    async function load() {
+      const rsp = await asyncRPC<
+        GetHistoryRequest,
+        GetHistoryResponse,
+        Endpoint
+      >('getHistory', {
+        lastId,
+      });
+      setPage(rsp.history.map(HistoryT.fromJSON));
+    }
+
+    load();
+  }, [lastId]);
+
+  if (!page || !page.length) {
+    return <Loading />;
+  }
+
+  return (
+    <div className="card history card--full">
+      <h1>History</h1>
+      <HistoryList page={page} />
 
       <Button onClick={() => setLastId(page[page.length - 1].id)}>
         Next page
