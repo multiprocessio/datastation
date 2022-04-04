@@ -34,6 +34,7 @@ export async function evalColumnPanel(
     });
     const resultMeta = (panels[panelIndex] || {}).resultMeta;
     if (!resultMeta || !resultMeta.value) {
+      console.trace(panelSource, panels, resultMeta, panelId);
       throw new InvalidDependentPanelError(panelSource);
     }
     const { value } = resultMeta;

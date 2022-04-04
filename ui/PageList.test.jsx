@@ -53,7 +53,7 @@ for (const language of TESTS) {
     };
 
     const before = new Date();
-    const reevalPanel = makeReevalPanel(project.pages[0], project, (panel) => {
+    const reevalPanel = makeReevalPanel(project, (panel) => {
       let i = 0;
       for (const p of project.pages[0].panels) {
         if (p.id === panel.id) {

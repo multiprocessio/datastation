@@ -65,16 +65,28 @@ export function CodeEditor({
   // Make sure editor resizes if the overall panel changes size. For
   // example this happens when the preview height changes.
   React.useEffect(() => {
-    if (editorNode) {
-      const panel = editorNode.editor.container.closest('.panel');
-      const obs = new ResizeObserver(function handleEditorResize() {
-        editorNode.editor?.resize();
-      });
-      obs.observe(panel);
-
-      return () => obs.disconnect();
+    if (!editorNode) {
+      return;
     }
-  });
+
+    const panel = editorNode.editor.container.closest('.panel');
+    const obs = new ResizeObserver(function handleEditorResize() {
+      editorNode.editor?.resize();
+    });
+    obs.observe(panel);
+
+    return () => obs.disconnect();
+  }, [editorNode]);
+
+  // Resync value when outer changes
+  React.useEffect(() => {
+    if (!editorNode || value == editorNode.editor.getValue()) {
+      return;
+    }
+
+    editorNode.editor.setValue(value);
+    editorNode.editor.clearSelection();
+  }, [value, editorNode]);
 
   return (
     <div

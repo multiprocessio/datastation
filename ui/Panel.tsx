@@ -310,10 +310,7 @@ export function Panel({
 
     setLoading(true);
     try {
-      const affectedPanels = await reevalPanel(panel.id);
-      if (MODE === 'browser') {
-        affectedPanels.forEach((p) => updatePanel(p));
-      }
+      await reevalPanel(panel.id);
     } catch (e) {
       setError(e);
     } finally {
