@@ -43,9 +43,18 @@ export function Input({
     [debounced]
   );
 
+  // Resync value when outer changes
+  const inputRef = React.useRef<HTMLInputElement>();
+  React.useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.value = String(value);
+    }
+  }, [value]);
+
   const input = (
     <React.Fragment>
       <input
+        ref={inputRef}
         defaultValue={value || defaultValue}
         type={type}
         className={label ? '' : inputClass}

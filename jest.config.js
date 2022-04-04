@@ -26,5 +26,5 @@ module.exports = {
     'server/**/*.ts',
     'server/**/*.tsx',
   ],
-  modulePathIgnorePatterns: ['<rootDir>/releases/', '<rootDir>/build/'],
+  modulePathIgnorePatterns: ['<rootDir>/releases/', '<rootDir>/build/', 'ee/'],
 };
