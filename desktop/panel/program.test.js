@@ -1,4 +1,3 @@
-const path = require('path');
 const { LANGUAGES } = require('../../shared/languages');
 const {
   InvalidDependentPanelError,
@@ -7,9 +6,6 @@ const {
 const { getProjectResultsFile } = require('../store');
 const fs = require('fs');
 const { LiteralPanelInfo, ProgramPanelInfo } = require('../../shared/state');
-const { updateProjectHandler } = require('../store');
-const { CODE_ROOT } = require('../constants');
-const { makeEvalHandler } = require('./eval');
 const { inPath, withSavedPanels, RUNNERS, VERBOSE } = require('./testutil');
 
 const TESTS = [
@@ -478,6 +474,58 @@ for (const subprocessName of RUNNERS) {
           finished = true;
         },
         { evalPanels: true, subprocessName }
+      );
+
+      if (!finished) {
+        throw new Error('Callback did not finish');
+      }
+    });
+  });
+
+  describe('stdout/stderr capture', function () {
+    test('it captures print in successful program', async () => {
+      const pp = new ProgramPanelInfo(null, {
+        type: 'python',
+        content: 'print(1002)\nDM_setPanel(1)',
+      });
+
+      let finished = false;
+      const panels = [pp];
+      await withSavedPanels(
+        panels,
+        async (project) => {
+          console.log(project.pages[0].panels[0]);
+          finished = true;
+        },
+        {
+          evalPanels: true,
+          subprocessName,
+        }
+      );
+
+      if (!finished) {
+        throw new Error('Callback did not finish');
+      }
+    });
+
+    test('it captures print in unsuccessful program', async () => {
+      const pp = new ProgramPanelInfo(null, {
+        type: 'python',
+        content: 'print(1002)',
+      });
+
+      let finished = false;
+      const panels = [pp];
+      await withSavedPanels(
+        panels,
+        async (project) => {
+          console.log(project.pages[0].panels[0]);
+          finished = true;
+        },
+        {
+          evalPanels: true,
+          subprocessName,
+        }
       );
 
       if (!finished) {

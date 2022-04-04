@@ -188,10 +188,10 @@ export async function evalInSubprocess(
       }
     });
 
-    const resultMeta = fs.readFileSync(tmp.path).toString();
-    let parsePartial = !resultMeta;
+    const resultMeta = JSON.parse(fs.readFileSync(tmp.path).toString());
+    let parsePartial = typeof resultMeta.preview === 'undefined';
     if (!parsePartial) {
-      const rm: Partial<PanelResult> = JSON.parse(resultMeta);
+      const rm: Partial<PanelResult> = resultMeta;
       // Case of existing Node.js runner
       return [rm, stderr];
     }
@@ -201,7 +201,7 @@ export async function evalInSubprocess(
     const rm: Partial<PanelResult> = parsePartialJSONFile(
       projectResultsFile + panel.id
     );
-    return [rm, stderr];
+    return [{ ...rm, ...resultMeta }, stderr];
   } finally {
     try {
       if (pid) {

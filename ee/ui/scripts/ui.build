@@ -1,3 +1,5 @@
+# Copyright 2022 Multiprocess Labs LLC
+
 mkdir build
 # This is overwritten in production builds
 setenv_default UI_ESBUILD_ARGS ""

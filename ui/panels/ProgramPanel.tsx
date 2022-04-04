@@ -69,7 +69,7 @@ export function ProgramPanelDetails({
           value={panel.program.type}
           onChange={(value: string) => {
             panel.program.type = value as SupportedLanguages | 'custom';
-            if (panel.content === '') {
+            if (panel.content === '' && value !== 'custom') {
               panel.content =
                 LANGUAGES[panel.program.type].defaultContent(panelIndex);
             }

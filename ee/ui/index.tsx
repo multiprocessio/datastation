@@ -1,3 +1,5 @@
+// Copyright 2022 Multiprocess Labs LLC
+
 import { IconHistory } from '@tabler/icons';
 import React from 'react';
 import ReactDOM from 'react-dom';

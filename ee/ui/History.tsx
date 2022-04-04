@@ -1,3 +1,5 @@
+// Copyright 2022 Multiprocess Labs LLC
+
 import formatDistanceToNow from 'date-fns/formatDistanceToNow';
 import React from 'react';
 import { title } from '../../shared/text';

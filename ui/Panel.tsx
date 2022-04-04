@@ -601,7 +601,7 @@ export function Panel({
                           className={panelOut === 'stdout' ? 'selected' : ''}
                           onClick={() => setPanelOut('stdout')}
                         >
-                          Stdout
+                          Stdout/Stderr
                         </Button>
                       )}
                     </div>
