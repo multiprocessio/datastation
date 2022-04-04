@@ -26,14 +26,19 @@ if (MODE === 'browser') {
   Object.values(LANGUAGES).map(function processLanguageInit(l) {
     if (l.inMemoryInit) {
       // These can be really big, so run it out of band
-      setTimeout(function() {
+      setTimeout(function () {
         l.inMemoryInit();
       });
     }
   });
 }
 
-type Routes = Array<{ endpoint: string; view: React.FC, title: string; icon: TablerIcon; }>;
+type Routes = Array<{
+  endpoint: string;
+  view: React.FC;
+  title: string;
+  icon: TablerIcon;
+}>;
 
 export function defaultRoutes(): Routes {
   function makeServerRequired(title: string) {
@@ -68,11 +73,11 @@ export function defaultRoutes(): Routes {
     },
     MODE === 'server'
       ? {
-        endpoint: 'projects',
-        view: MakeSelectProject,
-        title: 'Switch project',
-        icon: IconFiles,
-      }
+          endpoint: 'projects',
+          view: MakeSelectProject,
+          title: 'Switch project',
+          icon: IconFiles,
+        }
       : null,
     {
       endpoint: 'settings',
@@ -142,7 +147,7 @@ export function App<T extends DefaultView = DefaultView>({
     // No clue why this needs to be casted. T must extend DefaultView
     // and DefaultView contains 'editor'!!!
     const view = urlState.view || ('editor' as T);
-    const Route = routes.find(r => r.endpoint === view)?.view || NotFound;
+    const Route = routes.find((r) => r.endpoint === view)?.view || NotFound;
     main = (
       <ErrorBoundary>
         <Route />

@@ -44,7 +44,7 @@ export class History {
         oldValue,
         newValue,
         userId: '1',
-        action: 'update',
+        action: (payload as any).body?.insert ? 'insert' : 'update',
       });
       await this.store.insertHistoryHandler.handler(
         payload.projectId,
@@ -109,7 +109,18 @@ export class History {
     );
   }
 
-  async auditDeleteGeneric(payload: RPCPayload, table: string, id: string) {
+  async auditDeleteGeneric(
+    payload: RPCPayload,
+    table: string,
+    id: string,
+    getter: (
+      projectId: string,
+      body: { id: string },
+      dispatch: Dispatch,
+      external: boolean
+    ) => Promise<any>
+  ) {
+    const oldValue = await getter(payload.projectId, { id }, null, false);
     this.ensureUser(payload.projectId);
     let exception: Error;
     let res: any;
@@ -123,7 +134,7 @@ export class History {
       table,
       pk: id,
       error: String(exception),
-      oldValue: data,
+      oldValue,
       newValue: null,
       userId: '1',
       action: 'delete',
@@ -155,19 +166,39 @@ export class History {
 
       case 'deletePage': {
         const body = payload.body as rpc_types_ce.DeletePageRequest;
-        return this.auditDeleteGeneric(payload, 'ds_page', body.id);
+        return this.auditDeleteGeneric(
+          payload,
+          'ds_page',
+          body.id,
+          this.store.getPageHandler.handler
+        );
       }
       case 'deletePanel': {
         const body = payload.body as rpc_types_ce.DeletePanelRequest;
-        return this.auditDeleteGeneric(payload, 'ds_panel', body.id);
+        return this.auditDeleteGeneric(
+          payload,
+          'ds_panel',
+          body.id,
+          this.store.getPanelHandler.handler
+        );
       }
       case 'deleteServer': {
         const body = payload.body as rpc_types_ce.DeleteServerRequest;
-        return this.auditDeleteGeneric(payload, 'ds_server', body.id);
+        return this.auditDeleteGeneric(
+          payload,
+          'ds_server',
+          body.id,
+          this.store.getServerHandler.handler
+        );
       }
       case 'deleteConnector': {
         const body = payload.body as rpc_types_ce.DeleteConnectorRequest;
-        return this.auditDeleteGeneric(payload, 'ds_connector', body.id);
+        return this.auditDeleteGeneric(
+          payload,
+          'ds_connector',
+          body.id,
+          this.store.getConnectorHandler.handler
+        );
       }
     }
 

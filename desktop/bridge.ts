@@ -6,11 +6,11 @@ import { Endpoint, IPCRendererResponse, WindowAsyncRPC } from '../shared/rpc';
 let messageNumber = -1;
 
 export function bridgeAsyncRPC() {
-  const asyncRPC: WindowAsyncRPC = async function <Request, Response = void, EndpointT extends string = Endpoint>(
-    resource: EndpointT,
-    projectId: string,
-    body: Request
-  ): Promise<Response> {
+  const asyncRPC: WindowAsyncRPC = async function <
+    Request,
+    Response = void,
+    EndpointT extends string = Endpoint
+  >(resource: EndpointT, projectId: string, body: Request): Promise<Response> {
     const payload = {
       // Assign a new message number
       messageNumber: ++messageNumber,
@@ -22,27 +22,27 @@ export function bridgeAsyncRPC() {
 
     const result = await new Promise<IPCRendererResponse<Response>>(
       (resolve, reject) => {
-	try {
+        try {
           ipcRenderer.once(
             `${RPC_ASYNC_RESPONSE}:${payload.messageNumber}`,
             (e: IpcRendererEvent, response: IPCRendererResponse<Response>) =>
               resolve(response)
           );
-	} catch (e) {
+        } catch (e) {
           reject(e);
-	}
+        }
       }
     );
 
     if (result.kind === 'error') {
       try {
-	throw result.error;
+        throw result.error;
       } catch (e) {
-	// The result.error object isn't a real Error at this point with
-	// prototype after going through serialization. So throw it to get
-	// a real Error instance that has full info for logs.
-	log.error(e);
-	throw e;
+        // The result.error object isn't a real Error at this point with
+        // prototype after going through serialization. So throw it to get
+        // a real Error instance that has full info for logs.
+        log.error(e);
+        throw e;
       }
     }
 

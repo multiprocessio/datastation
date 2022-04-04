@@ -39,7 +39,11 @@ export class Store extends store_ce.Store {
     // Blank out all encrypted fields, all temporal-changing fields.
     doOnMatchingFields(
       copy,
-      (f) => f.endsWith('_encrypt') || f.endsWith('lastEdited'),
+      (f) =>
+        f.endsWith('_encrypt') ||
+        f.endsWith('lastEdited') ||
+        f.endsWith('defaultModified') ||
+        f.endsWith('id'),
       () => undefined
     );
     return JSON.stringify(copy);

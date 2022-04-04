@@ -346,6 +346,10 @@ input + input[type='file'] {
   margin-top: calc(2 * var(--margin-base));
 }
 
+.mb-1 {
+  margin-bottom: var(--margin-base);
+}
+
 .mb-2 {
   margin-bottom: calc(2 * var(--margin-base));
 }
@@ -1028,6 +1032,10 @@ canvas {
   width: 500px;
 }
 
+.card--full {
+  width: 100%;
+}
+
 .card--center,
 .app--server .project-name {
   margin: 0 auto;
@@ -1178,6 +1186,13 @@ tbody tr {
       box-shadow: none;
       text-align: left;
     }
+  }
+}
+
+.value {
+  .value-part {
+    display: flex;
+    align-items: baseline;
   }
 }
 

@@ -1,6 +1,4 @@
-import {
-  IconHistory,
-} from '@tabler/icons';
+import { IconHistory } from '@tabler/icons';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { App, defaultRoutes } from '../../ui/app';
@@ -19,9 +17,7 @@ function index() {
   }
 
   if (!isMobile) {
-    const routes = [
-      ...defaultRoutes(),
-    ];
+    const routes = [...defaultRoutes()];
     // Place last before settings
     routes.splice(routes.length - 1, 0, {
       endpoint: 'history',

@@ -364,13 +364,15 @@ export function Panel({
   return (
     <div
       id={`panel-${panel.id}`}
-      className={`panel ${fullScreen === panel.id ? 'panel--fullscreen' : ''} ${hidden ? 'panel--hidden' : ''
-        } ${(panelUIDetails.body === null ||
+      className={`panel ${fullScreen === panel.id ? 'panel--fullscreen' : ''} ${
+        hidden ? 'panel--hidden' : ''
+      } ${
+        (panelUIDetails.body === null ||
           (panelUIDetails.hideBody && panelUIDetails.hideBody(panel))) &&
-          !error
+        !error
           ? 'panel--empty'
           : ''
-        } ${loading ? 'panel--loading' : ''}`}
+      } ${loading ? 'panel--loading' : ''}`}
       tabIndex={1001}
       ref={panelRef}
       onKeyDown={keyboardShortcuts}
@@ -393,8 +395,9 @@ export function Panel({
                 fullScreen: fullScreen === panel.id ? null : panel.id,
               });
             }}
-            className={`panel-header ${details ? 'panel-header--open' : ''
-              } vertical-align-center`}
+            className={`panel-header ${
+              details ? 'panel-header--open' : ''
+            } vertical-align-center`}
           >
             <span title="Move Up">
               <Button
@@ -460,7 +463,7 @@ export function Panel({
                             Took{' '}
                             {formatDistanceStrict(
                               results.lastRun.valueOf() -
-                              (results.elapsed || 0),
+                                (results.elapsed || 0),
                               results.lastRun.valueOf()
                             )}
                           </small>
@@ -565,8 +568,8 @@ export function Panel({
                     )}
                   {
                     /* Visual panels get run automatically. Don't show the Cancelled alert since this will happen all the time. */ VISUAL_PANELS.includes(
-                    panel.type
-                  ) && error?.name === 'Cancelled' ? null : (
+                      panel.type
+                    ) && error?.name === 'Cancelled' ? null : (
                       <PanelError panels={panels} e={error} />
                     )
                   }

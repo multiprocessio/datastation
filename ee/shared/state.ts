@@ -9,7 +9,7 @@ export class History {
   dt: Date;
   oldValue: any;
   newValue: any;
-  action: 'update' | 'delete';
+  action: 'update' | 'insert' | 'delete';
   error: string;
   userId: string;
 

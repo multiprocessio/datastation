@@ -6,12 +6,14 @@ import {
   WindowAsyncRPC,
 } from '../shared/rpc';
 import { PanelResult } from '../shared/state';
-import { getUrlState, DefaultView } from './urlState';
+import { DefaultView, getUrlState } from './urlState';
 
-export async function asyncRPC<Request = void, Response = void, EndpointT extends string = Endpoint, ViewT extends DefaultView = DefaultView>(
-  resource: EndpointT,
-  body: Request
-): Promise<Response> {
+export async function asyncRPC<
+  Request = void,
+  Response = void,
+  EndpointT extends string = Endpoint,
+  ViewT extends DefaultView = DefaultView
+>(resource: EndpointT, body: Request): Promise<Response> {
   const { projectId } = getUrlState<ViewT>();
 
   if (MODE === 'desktop') {
