@@ -20,7 +20,9 @@ test('shows program panel details', async () => {
       table: 'ds_panel',
       pk: newId(),
       oldValue: JSON.stringify(new ProgramPanelInfo()),
-      newValue: JSON.stringify(new ProgramPanelInfo(null, { content: 'DM_setPanel(1)' })),
+      newValue: JSON.stringify(
+        new ProgramPanelInfo(null, { content: 'DM_setPanel(1)' })
+      ),
       userId: '1',
       action: 'update',
     }),
@@ -62,7 +64,9 @@ test('shows program panel details', async () => {
   delete auditedOldValue.id;
   delete auditedOldValue.defaultModified;
   delete auditedOldValue.type;
-  expect(JSON.parse(trows.at(1).find('td').at(1).text())).toStrictEqual(auditedOldValue);
+  expect(JSON.parse(trows.at(1).find('td').at(1).text())).toStrictEqual(
+    auditedOldValue
+  );
 
   // Test new value column
   const auditedNewValue = JSON.parse(entries[1].newValue);
@@ -70,11 +74,17 @@ test('shows program panel details', async () => {
   delete auditedNewValue.defaultModified;
   delete auditedNewValue.pageId;
   delete auditedNewValue.type;
-  expect(JSON.parse(trows.at(1).find('td').at(2).text())).toStrictEqual(auditedNewValue);
+  expect(JSON.parse(trows.at(1).find('td').at(2).text())).toStrictEqual(
+    auditedNewValue
+  );
 
   // Test diff column
-  expect(trows.at(1).find('td').at(3).text().includes('Content became')).toBe(true);
-  expect(trows.at(1).find('td').at(3).text().includes('DM_setPanel(1)')).toBe(true);
+  expect(trows.at(1).find('td').at(3).text().includes('Content became')).toBe(
+    true
+  );
+  expect(trows.at(1).find('td').at(3).text().includes('DM_setPanel(1)')).toBe(
+    true
+  );
 
   const thirdRowFirstCell = trows.at(2).find('td').at(0);
   expect(thirdRowFirstCell.contains('Program')).toBe(true);
