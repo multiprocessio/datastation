@@ -1,3 +1,5 @@
+// Copyright 2022 Multiprocess Labs LLC
+
 const React = require('react');
 const { act } = require('react-dom/test-utils');
 const enzyme = require('enzyme');

@@ -1,3 +1,5 @@
+// Copyright 2022 Multiprocess Labs LLC
+
 const { act } = require('react-dom/test-utils');
 const { wait } = require('../shared/promise');
 require('../shared/polyfill');
