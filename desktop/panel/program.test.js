@@ -493,8 +493,17 @@ for (const subprocessName of RUNNERS) {
       const panels = [pp];
       await withSavedPanels(
         panels,
-        async (project) => {
-          console.log(project.pages[0].panels[0]);
+        async (project, dispatch) => {
+          const savedProject = await dispatch({
+            resource: 'getProject',
+            projectId: project.projectName,
+            body: {
+              projectId: project.projectName,
+            },
+          });
+          expect(savedProject.pages[0].panels[0].resultMeta.stdout).toBe(
+            '1002\n'
+          );
           finished = true;
         },
         {
@@ -511,22 +520,41 @@ for (const subprocessName of RUNNERS) {
     test('it captures print in unsuccessful program', async () => {
       const pp = new ProgramPanelInfo(null, {
         type: 'python',
-        content: 'print(1002)',
+        content: 'print("hey there")\nraise Exception(1)',
       });
 
       let finished = false;
       const panels = [pp];
-      await withSavedPanels(
-        panels,
-        async (project) => {
-          console.log(project.pages[0].panels[0]);
+      try {
+        await withSavedPanels(
+          panels,
+          async (project, dispatch) => {
+            finished = true;
+          },
+          {
+            evalPanels: true,
+            subprocessName,
+          }
+        );
+      } catch (e) {
+        const savedProject = await e.dispatch({
+          resource: 'getProject',
+          projectId: e.project.projectName,
+          body: {
+            projectId: e.project.projectName,
+          },
+        });
+        expect(
+          savedProject.pages[0].panels[0].resultMeta.stdout.startsWith(
+            'hey there\nTraceback'
+          )
+        ).toBe(true);
+        if (e.name === 'NoResultError') {
           finished = true;
-        },
-        {
-          evalPanels: true,
-          subprocessName,
+        } else {
+          throw e;
         }
-      );
+      }
 
       if (!finished) {
         throw new Error('Callback did not finish');

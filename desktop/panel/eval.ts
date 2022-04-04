@@ -132,7 +132,7 @@ export async function evalInSubprocess(
       ensureFile(path.join(CODE_ROOT, 'coverage', 'fake.cov'));
       args.unshift('-test.run');
       args.unshift('^TestRunMain$');
-      args.unshift('-test.coverprofile=coverage/gorunner.' + newId + '.cov');
+      args.unshift('-test.coverprofile=coverage/gorunner.' + newId() + '.cov');
     }
 
     log.info(`Launching "${base} ${args.join(' ')}"`);
@@ -198,9 +198,15 @@ export async function evalInSubprocess(
 
     // Case of new Go runner
     const projectResultsFile = getProjectResultsFile(projectName);
-    const rm: Partial<PanelResult> = parsePartialJSONFile(
-      projectResultsFile + panel.id
-    );
+    let rm: Partial<PanelResult>;
+    try {
+      rm = parsePartialJSONFile(projectResultsFile + panel.id);
+    } catch (e) {
+      if (!e.stdout) {
+        e.stdout = resultMeta.stdout;
+      }
+      throw e;
+    }
     return [{ ...rm, ...resultMeta }, stderr];
   } finally {
     try {
@@ -354,6 +360,10 @@ export const makeEvalHandler = (subprocessEval?: {
     } catch (e) {
       log.error(e);
       res.exception = e;
+      if (res.exception.stdout) {
+        res.stdout = res.exception.stdout;
+        delete res.exception.stdout;
+      }
     }
 
     if (

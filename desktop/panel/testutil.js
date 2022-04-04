@@ -63,6 +63,7 @@ exports.updateProject = async function (project, opts) {
         body: {
           data: page,
           position: i,
+          insert: true,
         },
       },
       true
@@ -78,6 +79,7 @@ exports.updateProject = async function (project, opts) {
           body: {
             data: panels[j],
             position: j,
+            insert: true,
           },
         },
         true
@@ -94,6 +96,7 @@ exports.updateProject = async function (project, opts) {
         body: {
           data: server,
           position: i,
+          insert: true,
         },
       },
       true
@@ -109,6 +112,7 @@ exports.updateProject = async function (project, opts) {
         body: {
           data: connector,
           position: i,
+          insert: true,
         },
       },
       true
@@ -191,6 +195,9 @@ exports.withSavedPanels = async function (
           dispatch
         );
         if (res.exception) {
+          // So that callers can get access to project data if needed
+          res.exception.project = project;
+          res.exception.dispatch = dispatch;
           throw res.exception;
         }
 
