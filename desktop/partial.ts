@@ -23,8 +23,8 @@ export function parsePartialJSONFile(
     try {
       value = JSON.parse(f);
     } catch (e) {
-      log.info(e);
-      throw new Error('Could not parse JSON: ' + f);
+      log.info('Could not parse JSON: ', e, { json: f });
+      value = {};
     }
     return {
       size,
