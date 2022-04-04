@@ -135,7 +135,7 @@ export class LocalStorageStore extends ProjectStore {
         }
 
         if (insert) {
-          page.panels.splice(position, 0, p);
+          page.panels.push(p);
         } else {
           const i = page.panels.findIndex((pp) => pp.id === p.id);
           page.panels[i] = p;
@@ -156,7 +156,6 @@ export class LocalStorageStore extends ProjectStore {
           });
         }
 
-        console.log(state);
         this.update(projectId, state);
       }
     }

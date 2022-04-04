@@ -101,7 +101,7 @@ function formatTable(entry: HistoryT) {
 
 function formatAction(action: HistoryT['action']) {
   if (action === 'insert') {
-    return 'Inserted';
+    return 'Created';
   }
 
   if (action === 'delete') {
@@ -111,47 +111,43 @@ function formatAction(action: HistoryT['action']) {
   return 'Updated';
 }
 
-export function HistoryList({
-  page
-}: {
-  page: GetHistoryResponse['history'],
-}) {
+export function HistoryList({ page }: { page: GetHistoryResponse['history'] }) {
   return (
-        <table className="table table--large">
-        <thead>
-          <tr>
-            <th>Entity</th>
-            <th>Old Value</th>
-            <th>New Value</th>
-            <th>Changes</th>
+    <table className="table table--large">
+      <thead>
+        <tr>
+          <th>Entity</th>
+          <th>Old Value</th>
+          <th>New Value</th>
+          <th>Changes</th>
+        </tr>
+      </thead>
+      <tbody>
+        {page.map((entry) => (
+          <tr key={entry.id}>
+            <td>
+              <div className="mb-1 text-muted">
+                {formatTable(entry)} {entry.pk}
+              </div>
+              <div className="mb-1">
+                {formatAction(entry.action)}{' '}
+                <span title={entry.dt.toISOString()}>
+                  {formatDistanceToNow(entry.dt, { addSuffix: true })}
+                </span>
+              </div>
+            </td>
+            <td>{formatObject(entry.oldValue)}</td>
+            <td>{formatObject(entry.newValue)}</td>
+            <td>
+              {entry.action === 'update'
+                ? formatDiff(entry.oldValue, entry.newValue)
+                : null}
+            </td>
           </tr>
-        </thead>
-        <tbody>
-          {page.map((entry) => (
-            <tr key={entry.id}>
-              <td>
-                <div className="mb-1 text-muted">
-                  {formatTable(entry)} {entry.pk}
-                </div>
-                <div className="mb-1">
-                  {formatAction(entry.action)}{' '}
-                  <span title={entry.dt.toISOString()}>
-                    {formatDistanceToNow(entry.dt, { addSuffix: true })}
-                  </span>
-                </div>
-              </td>
-              <td>{formatObject(entry.oldValue)}</td>
-              <td>{formatObject(entry.newValue)}</td>
-              <td>
-                {entry.action === 'update'
-                  ? formatDiff(entry.oldValue, entry.newValue)
-                  : null}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-);
+        ))}
+      </tbody>
+    </table>
+  );
 }
 
 export function History() {

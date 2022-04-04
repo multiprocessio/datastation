@@ -114,14 +114,16 @@ export function makeUpdater<T extends { id: string }>(
 
     // Actually an insert
     if (insert) {
-      list.splice(newIndex, 0, obj);
+      const copy = [...list];
+      list.push(obj);
       if (!internalOnly) {
+        copy.splice(newIndex === -1 ? copy.length : newIndex, 0, obj);
         await storeUpdate(
           projectId,
           obj,
-          -1,
+          newIndex,
           insert,
-          list.map((l) => l.id)
+          copy.map((l) => l.id)
         );
       }
       await reread(projectId);

@@ -22,8 +22,8 @@
     "@types/nanoid": "^3.0.0",
     "@types/papaparse": "^5.3.2",
     "@types/passport": "^1.0.7",
-    "@types/react": "^17.0.43",
-    "@types/react-dom": "^17.0.14",
+    "@types/react": "17",
+    "@types/react-dom": "17",
     "@types/react-syntax-highlighter": "^13.5.2",
     "@typescript-eslint/eslint-plugin": "^5.17.0",
     "@typescript-eslint/parser": "^5.17.0",
@@ -43,7 +43,7 @@
   },
   "dependencies": {
     "core-js": "^3.21.1",
-    "react": "^18.0.0",
-    "react-dom": "^18.0.0"
+    "react": "17",
+    "react-dom": "17"
   }
 }
