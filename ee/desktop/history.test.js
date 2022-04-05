@@ -45,7 +45,6 @@ test('project changes are audited', async () => {
         body: {},
         projectId: project.projectName,
       }));
-      console.log('here', history);
       expect(history.length).toBe(2);
 
       // Make a panel change, new history entry
@@ -144,7 +143,6 @@ test('project changes are audited', async () => {
         body: {},
         projectId: project.projectName,
       }));
-      console.log(history);
       expect(history.length).toBe(7);
       expect(history[0].action).toBe('insert');
       expect(history[0].table).toBe('ds_server');

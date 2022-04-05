@@ -28,7 +28,8 @@ export function MakeSelectProject() {
       await asyncRPC<MakeProjectRequest, MakeProjectResponse>('makeProject', {
         projectId,
       });
-      setUrlState({ projectId });
+
+      window.location.href = '/?projectId=' + projectId;
     } catch (e) {
       setMakeProjectError(e.message);
     }

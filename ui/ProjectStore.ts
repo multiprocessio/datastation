@@ -97,7 +97,6 @@ export class LocalStorageStore extends ProjectStore {
     // without pulling out of the control flow here it returns with data
     // that is out of date even though we just called localstorage.set.
     await new Promise((r) => setTimeout(r, 10));
-    console.log('Getting again');
     return JSON.parse(window.localStorage.getItem(this.makeKey(projectId)));
   }
 
@@ -129,7 +128,6 @@ export class LocalStorageStore extends ProjectStore {
       state.pages = [];
     }
 
-    console.trace(projectId, p, position, insert, panelPositions);
     for (const page of state.pages) {
       if (page.id === p.pageId) {
         if (!page.panels) {

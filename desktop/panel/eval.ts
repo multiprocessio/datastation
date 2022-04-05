@@ -197,7 +197,6 @@ export async function evalInSubprocess(
     }
 
     // Case of new Go runner
-    console.log({ resultMeta });
     const projectResultsFile = getProjectResultsFile(projectName);
     let rm: Partial<PanelResult>;
     try {
