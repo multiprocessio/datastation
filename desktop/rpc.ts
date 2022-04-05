@@ -204,11 +204,10 @@ export function registerRPCHandlers<EndpointT extends string>(
       const responseChannel = `${RPC_ASYNC_RESPONSE}:${payload.messageNumber}`;
       try {
         const rsp = await dispatch(payload, true);
-        if (
-          payload.resource === 'makeProject' &&
-          OPEN_WINDOWS[payload.projectId]
-        ) {
-          OPEN_WINDOWS[payload.projectId].setSize(1400, 800);
+        const win = OPEN_WINDOWS[payload.projectId];
+        if (payload.resource === 'makeProject' && win) {
+          win.setSize(1400, 800);
+          win.center();
         }
         sendIPCRendererResponse(event, responseChannel, {
           kind: 'response',

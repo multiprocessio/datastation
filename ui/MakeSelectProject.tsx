@@ -22,11 +22,14 @@ export function MakeSelectProject() {
   const [makeProjectError, setMakeProjectError] = React.useState('');
   async function makeProject(projectId: string) {
     try {
-      await asyncRPC<MakeProjectRequest, MakeProjectResponse>('makeProject', {
+      const { projectId: finalId } = await asyncRPC<
+        MakeProjectRequest,
+        MakeProjectResponse
+      >('makeProject', {
         projectId,
       });
 
-      window.location.href = '/?projectId=' + projectId;
+      window.location.href = '/?projectId=' + finalId;
     } catch (e) {
       setMakeProjectError(e.message);
     }

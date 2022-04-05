@@ -66,7 +66,7 @@ export type DeleteConnectorRequest = { id: string };
 export type DeleteConnectorResponse = void;
 
 export type MakeProjectRequest = { projectId: string };
-export type MakeProjectResponse = void;
+export type MakeProjectResponse = { projectId: string };
 
 export type OpenProjectRequest = void;
 export type OpenProjectResponse = void;

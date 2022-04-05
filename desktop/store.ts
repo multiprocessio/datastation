@@ -404,6 +404,8 @@ GROUP BY panel_id
         }
       }
       metadataCrud.insert(db, metadata);
+
+      return { projectId: newProject.projectName };
     },
   };
 
