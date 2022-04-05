@@ -768,6 +768,15 @@ input + input[type='file'] {
   background: 0;
   padding: 5px calc(2 * var(--margin-base));
   border-radius: 0;
+        display: inline-flex;
+      align-items: center;
+
+      svg {
+	  color: red;
+	  height: 18px;
+	  width: 18px;
+      }
+
 }
 
 .panel-out-header .button.selected {
@@ -1363,7 +1372,7 @@ body.dark {
   }
 
   .panel-out-header .button {
-    background: transparent;
+      background: transparent;
   }
 
   .panel-out-header .button.selected {

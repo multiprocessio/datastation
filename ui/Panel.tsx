@@ -1,4 +1,5 @@
 import {
+  IconAlertTriangle,
   IconArrowsDiagonal,
   IconArrowsDiagonalMinimize2,
   IconChevronDown,
@@ -118,9 +119,9 @@ function PreviewResults({
       {
         name: 'Estimated # of Elements',
         value:
-          results.arrayCount === null
+          !results.arrayCount && String(results.arrayCount) !== '0'
             ? 'Not an array'
-            : results.arrayCount.toLocaleString(),
+            : String(results.arrayCount).toLocaleString(),
       },
       {
         name: 'Panel ID',
@@ -585,7 +586,7 @@ export function Panel({
                         className={panelOut === 'shape' ? 'selected' : ''}
                         onClick={() => setPanelOut('shape')}
                       >
-                        Inferred Schema
+                        Schema
                       </Button>
                       <Button
                         className={panelOut === 'metadata' ? 'selected' : ''}
@@ -598,7 +599,7 @@ export function Panel({
                           className={panelOut === 'stdout' ? 'selected' : ''}
                           onClick={() => setPanelOut('stdout')}
                         >
-                          Stdout/Stderr
+                          Stdout/Stderr<span className="ml-1">{results.stdout ? <IconAlertTriangle /> : null}</span>
                         </Button>
                       )}
                     </div>
