@@ -191,6 +191,15 @@ func (ec EvalContext) Eval(projectId, panelId string) (error, string) {
 		return err, ""
 	}
 
+	// Delete any panel results if they exist already because this causes problems on Windows.
+	if ec.panelResultsExist(projectId, panelId) {
+		resultsFile := ec.GetPanelResultsFile(projectId, panelId)
+		err = os.Remove(resultsFile)
+		if err != nil {
+			Logln("Could not delete results file '%s': %s", resultsFile, err)
+		}
+	}
+
 	switch panel.Type {
 	case FilePanel:
 		Logln("Evaling file panel")
