@@ -1,4 +1,4 @@
-import { IpcMain, IpcMainEvent } from 'electron';
+import { BrowserWindow, IpcMain, IpcMainEvent } from 'electron';
 import { RPC_ASYNC_REQUEST, RPC_ASYNC_RESPONSE } from '../shared/constants';
 import log from '../shared/log';
 import {
