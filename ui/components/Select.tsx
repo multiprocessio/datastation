@@ -51,33 +51,30 @@ export function Select({
     selectClass += ' ' + className;
   }
 
+  const optionValues = getOptionValues(children);
+  const oldValue = value;
   React.useEffect(() => {
-    const values = [
-      allowNone ? NONE : null,
-      ...getOptionValues(children),
-    ].filter(Boolean);
+    const values = [allowNone ? NONE : null, ...optionValues].filter(Boolean);
+
     if (values.length && !values.includes(value)) {
-      let foundUnused = false;
-      for (let value of values) {
+      let foundUnused = '';
+      for (const value of values) {
         if ((used && used.includes(value)) || allowNone) {
           continue;
         }
 
-        foundUnused = true;
-        onChange(value);
+        foundUnused = value;
         break;
       }
 
-      if (allowNone) {
+      if (!foundUnused && allowNone) {
         onChange(NONE);
         return;
       }
 
-      if (!foundUnused) {
-        onChange(values[0]);
-      }
+      onChange(foundUnused);
     }
-  }, [value, getOptionValues(children).join(',')]);
+  }, [value, oldValue, allowNone, onChange, used, optionValues]);
 
   const select = (
     <div className="vertical-align-center">

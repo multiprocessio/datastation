@@ -99,18 +99,20 @@ type PanelInfo struct {
 type SupportedLanguages string
 
 const (
-	Python     SupportedLanguages = "python"
-	JavaScript                    = "javascript"
-	Deno                          = "deno"
-	Ruby                          = "ruby"
-	R                             = "r"
-	Julia                         = "julia"
-	SQL                           = "sql"
+	Python        SupportedLanguages = "python"
+	JavaScript                       = "javascript"
+	Deno                             = "deno"
+	Ruby                             = "ruby"
+	R                                = "r"
+	Julia                            = "julia"
+	SQL                              = "sql"
+	CustomProgram                    = "custom"
 )
 
 type ProgramPanelInfo struct {
 	Program struct {
-		Type SupportedLanguages `json:"type" db:"type"`
+		Type      SupportedLanguages `json:"type" db:"type"`
+		CustomExe string             `json:"customExe" db:"customExe"`
 	} `json:"program" db:"program"`
 }
 

@@ -6,10 +6,10 @@ module.exports = {
     process.platform === 'linux'
       ? {
           global: {
-            statements: 80,
-            branches: 62,
-            functions: 81,
-            lines: 80,
+            statements: 73,
+            branches: 67,
+            functions: 74,
+            lines: 74,
           },
         }
       : undefined,
@@ -17,7 +17,7 @@ module.exports = {
   transformIgnorePatterns: [
     'node_modules/(?!react-syntax-highlighter|refractor|node-fetch|fetch-blob)',
   ],
-  setupFiles: ['../shared/polyfill.ts', '../testsetup.js'],
+  setupFiles: ['../shared/polyfill.ts', './testsetup.js'],
   testURL: 'http://localhost/',
   testEnvironment: 'node',
   collectCoverageFrom: [

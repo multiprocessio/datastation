@@ -5,11 +5,11 @@ import {
   GraphPanelInfo,
   PanelInfo,
   PanelResult,
-  ProgramPanelInfo,
   ProjectPage,
   TablePanelInfo,
 } from '../shared/state';
 import { Button } from './components/Button';
+import { Dropdown } from './components/Dropdown';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import {
   flattenObjectFields,
@@ -20,6 +20,50 @@ import { Panel, VISUAL_PANELS } from './Panel';
 import { PANEL_GROUPS, PANEL_UI_DETAILS } from './panels';
 import { ProjectContext } from './state';
 import { UrlStateContext } from './urlState';
+
+function NewPanel({
+  onClick,
+}: {
+  onClick: (type: keyof typeof PANEL_UI_DETAILS) => void;
+}) {
+  const groups = PANEL_GROUPS.map((g) => ({
+    name: g.label,
+    id: g.label,
+    items: g.panels.map((p) => ({
+      render(close: () => void) {
+        return (
+          <Button
+            onClick={() => {
+              onClick(p);
+              close();
+            }}
+          >
+            {PANEL_UI_DETAILS[p].label}
+          </Button>
+        );
+      },
+      id: p,
+    })),
+  }));
+
+  return (
+    <Dropdown
+      className="add-panel"
+      trigger={(open) => (
+        <Button
+          onClick={(e) => {
+            e.preventDefault();
+            open();
+          }}
+        >
+          Add Panel
+        </Button>
+      )}
+      title="Add Panel"
+      groups={groups}
+    />
+  );
+}
 
 export function PanelList({
   page,
@@ -33,12 +77,16 @@ export function PanelList({
 }) {
   const { crud } = React.useContext(ProjectContext);
 
-  async function updatePanel(panel: PanelInfo, position?: number) {
+  async function updatePanel(
+    panel: PanelInfo,
+    position?: number,
+    insert?: boolean
+  ) {
     const index =
       position === undefined
         ? page.panels.findIndex((p) => p.id === panel.id)
         : position;
-    await crud.updatePanel(panel, index);
+    await crud.updatePanel(panel, index, !!insert);
 
     if (VISUAL_PANELS.includes(panel.type)) {
       // Give time before re-evaling
@@ -91,7 +139,7 @@ export function PanelList({
         });
       }
 
-      updatePanel(next, panelIndex + 1);
+      updatePanel(next, panelIndex, true);
     }
 
     const offerToTable =
@@ -101,38 +149,31 @@ export function PanelList({
 
     return (
       <div className="new-panel">
-        <Button
-          onClick={() => {
-            const panel = new ProgramPanelInfo(page.id, {
-              name: `Untitled panel #${page.panels.length + 1}`,
-              type: 'python',
-            });
-            updatePanel(panel, panelIndex + 1);
+        <NewPanel
+          onClick={(type: keyof typeof PANEL_UI_DETAILS) => {
+            const panel = PANEL_UI_DETAILS[type].factory(
+              page.id,
+              `Untitled panel #${page.panels.length + 1}`
+            );
+            updatePanel(panel, panelIndex + 1, true);
           }}
-          options={PANEL_GROUPS.map((group) => (
-            <optgroup label={group.label} key={group.label}>
-              {group.panels.map((name) => {
-                const panelDetails = PANEL_UI_DETAILS[name];
-                return (
-                  <option value={panelDetails.id} key={panelDetails.id}>
-                    {panelDetails.label}
-                  </option>
-                );
-              })}
-            </optgroup>
-          ))}
-        >
-          Add Panel
-        </Button>
+        />
+
         {offerToGraph ? (
-          <span title="Generate a graph for the above panel">
+          <span
+            className="new-panel-short"
+            title="Generate a graph for the above panel"
+          >
             <Button onClick={() => makePanel('graph', 'Graph of')} icon>
               <IconChartBar />
             </Button>
           </span>
         ) : null}
         {offerToTable ? (
-          <span title="Generate a table for the above panel">
+          <span
+            className="new-panel-short"
+            title="Generate a table for the above panel"
+          >
             <Button onClick={() => makePanel('table', 'Data from')} icon>
               <IconTable />
             </Button>

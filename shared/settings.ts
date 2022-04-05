@@ -1,5 +1,5 @@
-import * as uuid from 'uuid';
 import { LANGUAGES, SupportedLanguages } from './languages';
+import { newId } from './object';
 
 export class LanguageSettings {
   path: string;
@@ -16,7 +16,7 @@ export class Settings {
   file: string;
   stdoutMaxSize: number;
   theme: 'light' | 'dark';
-  caCerts: Array<{ file: string }>;
+  caCerts: Array<{ file: string; id: string }>;
 
   constructor(
     file: string,
@@ -25,7 +25,7 @@ export class Settings {
     languages?: Record<SupportedLanguages, LanguageSettings>,
     stdoutMaxSize?: number
   ) {
-    this.id = id || uuid.v4();
+    this.id = id || newId();
     this.lastProject = lastProject || '';
     this.languages =
       languages ||

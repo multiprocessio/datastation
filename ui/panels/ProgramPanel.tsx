@@ -69,7 +69,7 @@ export function ProgramPanelDetails({
           value={panel.program.type}
           onChange={(value: string) => {
             panel.program.type = value as SupportedLanguages | 'custom';
-            if (panel.content === '') {
+            if (panel.content === '' && value !== 'custom') {
               panel.content =
                 LANGUAGES[panel.program.type].defaultContent(panelIndex);
             }
@@ -82,11 +82,11 @@ export function ProgramPanelDetails({
               {o.name}
             </option>
           ))}
-          {MODE !== 'browser' && (
+          {/* TODO: support when tested MODE !== 'browser' && (
             <option key="custom" value="custom">
               Custom
             </option>
-          )}
+          ) */}
         </Select>
       </div>
       {panel.program.type === 'custom' && (
@@ -165,7 +165,8 @@ export const programPanel: PanelUIDetails<ProgramPanelInfo> = {
   details: ProgramPanelDetails,
   body: ProgramPanelBody,
   previewable: true,
-  factory: (pageId: string) => new ProgramPanelInfo(pageId),
+  factory: (pageId: string, name: string) =>
+    new ProgramPanelInfo(pageId, { name }),
   hasStdout: true,
   info: ProgramInfo,
 };

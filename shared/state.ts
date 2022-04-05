@@ -1,8 +1,7 @@
 import { Shape } from 'shape';
-import * as uuid from 'uuid';
 import { VERSION } from './constants';
 import { SupportedLanguages } from './languages';
-import { mergeDeep, setPath } from './object';
+import { mergeDeep, newId, setPath } from './object';
 
 export class PanelResult {
   exception?: any;
@@ -61,6 +60,7 @@ export class Encrypt {
 export type ServerInfoType = 'ssh-agent' | 'password' | 'private-key';
 
 export class ServerInfo {
+  defaultModified: boolean;
   name: string;
   address: string;
   port: number;
@@ -72,6 +72,7 @@ export class ServerInfo {
   id: string;
 
   constructor(panel: Partial<ServerInfo> = {}) {
+    this.defaultModified = false;
     this.type = panel.type || 'private-key';
     this.name = panel.name || 'Untitled Server';
     this.address = panel.address || '';
@@ -80,7 +81,7 @@ export class ServerInfo {
     this.password_encrypt = panel.password_encrypt || new Encrypt('');
     this.privateKeyFile = panel.privateKeyFile || '';
     this.passphrase_encrypt = panel.passphrase_encrypt || new Encrypt('');
-    this.id = uuid.v4();
+    this.id = newId();
   }
 
   static fromJSON(raw: any): ServerInfo {
@@ -92,16 +93,18 @@ export class ServerInfo {
 export type ConnectorInfoType = 'database' | 'http';
 
 export class ConnectorInfo {
+  defaultModified: boolean;
   name: string;
   type: ConnectorInfoType;
   id: string;
   serverId?: string;
 
   constructor(type?: ConnectorInfoType, name?: string, serverId?: string) {
+    this.defaultModified = false;
     this.name = name || 'Untitled Data Source';
     this.type = type || 'database';
     this.serverId = serverId;
-    this.id = uuid.v4();
+    this.id = newId();
   }
 
   static fromJSON(raw: any): ConnectorInfo {
@@ -147,7 +150,7 @@ export class ContentTypeInfo {
 
 export class HTTPConnectorInfo extends ConnectorInfo {
   http: {
-    headers: Array<{ value: string; name: string }>;
+    headers: Array<{ value: string; name: string; id: string }>;
     url: string;
     method: HTTPConnectorInfoMethod;
     contentTypeInfo: ContentTypeInfo;
@@ -156,7 +159,7 @@ export class HTTPConnectorInfo extends ConnectorInfo {
   constructor(
     name?: string,
     url?: string,
-    headers: Array<{ value: string; name: string }> = [],
+    headers: Array<{ value: string; name: string; id: string }> = [],
     method?: HTTPConnectorInfoMethod,
     contentTypeInfo?: ContentTypeInfo
   ) {
@@ -238,6 +241,7 @@ export type PanelInfoType =
   | 'filagg';
 
 export class PanelInfo {
+  defaultModified: boolean;
   content: string;
   type: PanelInfoType;
   name: string;
@@ -253,10 +257,11 @@ export class PanelInfo {
     name?: string,
     content?: string
   ) {
+    this.defaultModified = false;
     this.content = content || '';
     this.type = type;
     this.name = name || '';
-    this.id = uuid.v4();
+    this.id = newId();
     this.resultMeta = new PanelResult();
     this.lastEdited = new Date();
     this.pageId = pageId;
@@ -639,11 +644,12 @@ export class Export {
   constructor(defaults: Partial<Export> = {}) {
     this.period = defaults.period || 'day';
     this.name = defaults.name || 'DataStation Export';
-    this.id = uuid.v4();
+    this.id = newId();
   }
 }
 
 export class ProjectPage {
+  defaultModified: boolean;
   panels: Array<PanelInfo>;
   name: string;
   id: string;
@@ -651,7 +657,7 @@ export class ProjectPage {
   constructor(name?: string, panels?: Array<PanelInfo>) {
     this.name = name || '';
     this.panels = panels || [];
-    this.id = uuid.v4();
+    this.id = newId();
   }
 
   static fromJSON(raw: any): ProjectPage {
@@ -659,7 +665,7 @@ export class ProjectPage {
     const pp = new ProjectPage();
     pp.panels = (raw.panels || []).map(PanelInfo.fromJSON);
     pp.name = raw.name;
-    pp.id = raw.id || uuid.v4();
+    pp.id = raw.id || newId();
     return pp;
   }
 }
@@ -717,7 +723,7 @@ export class ProjectState {
     this.servers = servers || [];
     this.originalVersion = originalVersion || VERSION;
     this.lastVersion = lastVersion || VERSION;
-    this.id = uuid.v4();
+    this.id = newId();
   }
 
   static fromJSON(raw: any, external = true): ProjectState {
@@ -727,7 +733,7 @@ export class ProjectState {
     ps.pages = (raw.pages || []).map(ProjectPage.fromJSON);
     ps.connectors = (raw.connectors || []).map(ConnectorInfo.fromJSON);
     ps.servers = (raw.servers || []).map(ServerInfo.fromJSON);
-    ps.id = raw.id || uuid.v4();
+    ps.id = raw.id || newId();
     ps.originalVersion = raw.originalVersion || VERSION;
     ps.lastVersion = raw.lastVersion || VERSION;
     if (external) {

@@ -28,6 +28,7 @@ jobs:
 
     - run: ./scripts/ci/prepare_linux.sh --integration-tests
     - run: yarn format
+    - run: yarn eslint ui
     - run: yarn tsc
     - run: cd runner && gofmt -w .
     - run: yarn build-language-definitions

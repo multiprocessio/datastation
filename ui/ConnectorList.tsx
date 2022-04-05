@@ -14,7 +14,11 @@ export function ConnectorList({
   deleteConnector,
 }: {
   state: ProjectState;
-  updateConnector: (dc: ConnectorInfo, position: number) => void;
+  updateConnector: (
+    dc: ConnectorInfo,
+    position: number,
+    insert: boolean
+  ) => void;
   deleteConnector: (id: string) => void;
 }) {
   const groupedConnectors = Object.keys(VENDORS)
@@ -39,7 +43,9 @@ export function ConnectorList({
             <Connector
               key={dc.id}
               connector={dc}
-              updateConnector={(dc: ConnectorInfo) => updateConnector(dc, i)}
+              updateConnector={(dc: ConnectorInfo) =>
+                updateConnector(dc, i, false)
+              }
               deleteConnector={() => deleteConnector(dc.id)}
             />
           ))}
@@ -48,7 +54,7 @@ export function ConnectorList({
       <div className="text-center">
         <Button
           onClick={() => {
-            updateConnector(new DatabaseConnectorInfo(), -1);
+            updateConnector(new DatabaseConnectorInfo(), -1, true);
           }}
         >
           Add Data Source

@@ -1,3 +1,4 @@
+import { useDebouncedCallback } from 'use-debounce';
 // organize-imports-ignore
 // Must be loaded before other ace-builds imports
 import AceEditor from 'react-ace';
@@ -19,8 +20,8 @@ import * as React from 'react';
 // This steals Ctrl-a so this should not be a default
 //import 'ace-builds/src-min-noconflict/keybinding-emacs';
 import { SettingsContext } from '../Settings';
-import { useDebouncedLocalState } from './Input';
 import { Tooltip } from './Tooltip';
+import { INPUT_SYNC_PERIOD } from './Input';
 
 export function CodeEditor({
   value,
@@ -50,26 +51,42 @@ export function CodeEditor({
   const {
     state: { theme },
   } = React.useContext(SettingsContext);
-  const [localValue, setLocalValue, flushLocalValue] = useDebouncedLocalState(
-    value,
-    onChange
-  );
 
-  const editor = React.useRef(null);
+  const [editorNode, editorRef] = React.useState<AceEditor>(null);
+  const debounced = useDebouncedCallback(onChange, INPUT_SYNC_PERIOD);
+  // Flush on unmount
+  React.useEffect(
+    () => () => {
+      debounced.flush();
+    },
+    [debounced]
+  );
 
   // Make sure editor resizes if the overall panel changes size. For
   // example this happens when the preview height changes.
   React.useEffect(() => {
-    if (editor.current) {
-      const panel = editor.current.editor.container.closest('.panel');
-      const obs = new ResizeObserver(function handleEditorResize() {
-        editor.current.editor?.resize();
-      });
-      obs.observe(panel);
-
-      return () => obs.disconnect();
+    if (!editorNode) {
+      return;
     }
-  }, [editor.current]);
+
+    const panel = editorNode.editor.container.closest('.panel');
+    const obs = new ResizeObserver(function handleEditorResize() {
+      editorNode.editor?.resize();
+    });
+    obs.observe(panel);
+
+    return () => obs.disconnect();
+  }, [editorNode]);
+
+  // Resync value when outer changes
+  React.useEffect(() => {
+    if (!editorNode || value == editorNode.editor.getValue()) {
+      return;
+    }
+
+    editorNode.editor.setValue(value);
+    editorNode.editor.clearSelection();
+  }, [value, editorNode]);
 
   return (
     <div
@@ -79,21 +96,24 @@ export function CodeEditor({
     >
       {label && <label className="label input-label">{label}</label>}
       <AceEditor
-        ref={(r) => (editor.current = r)}
+        ref={editorRef}
         mode={language}
         theme={theme === 'dark' ? 'dracula' : 'github'}
         maxLines={singleLine ? 1 : undefined}
         wrapEnabled={true}
-        onChange={setLocalValue}
-        onBlur={flushLocalValue}
+        onBlur={
+          () =>
+            debounced.flush() /* Simplifying this to onBlur={debounced.flush} doesn't work. */
+        }
         name={id}
-        value={String(localValue)}
+        defaultValue={String(value)}
+        onChange={(v) => debounced(v)}
         placeholder={placeholder}
         className={`${className} ${singleLine ? 'input' : ''}`}
         readOnly={disabled}
         width={
           singleLine
-            ? String(Math.max(300, String(localValue).length * 10)) + 'px'
+            ? String(Math.max(300, String(value).length * 10)) + 'px'
             : '100%'
         }
         fontSize="1rem"
@@ -104,7 +124,7 @@ export function CodeEditor({
             name: 'ctrl-enter',
             bindKey: { win: 'Ctrl-Enter', mac: 'Ctrl-Enter' },
             exec: () => {
-              flushLocalValue();
+              debounced.flush();
               // Give time to flush
               return setTimeout(() =>
                 onKeyDown({
@@ -118,8 +138,9 @@ export function CodeEditor({
             ? {
                 name: 'disable newlines',
                 bindKey: { win: 'Enter|Shift-Enter', mac: 'Enter|Shift-Enter' },
-                // Do nothing
-                exec: () => {},
+                exec: () => {
+                  /* do nothing */
+                },
               }
             : undefined,
         ].filter(Boolean)}

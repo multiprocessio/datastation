@@ -4,13 +4,12 @@ rm -rf build
 rm -rf ../build
 setenv UI_TITLE "DataStation Enterprise Edition"
 setenv UI_CONFIG_OVERRIDES "window.DS_CONFIG_MODE = 'desktop';"
-cd .. && yarn build-ui
-cp -r ../build build
+yarn build-ui
 
 # Flags from various package management guidelines: https://wiki.archlinux.org/title/Go_package_guidelines
 cd ../runner && go build -trimpath -buildmode=pie -mod=readonly -modcacherw -ldflags="-s -w" -o ../ee/build/go_desktop_runner{required_ext} cmd/main.go
 
-cd .. && yarn esbuild desktop/preload.ts --external:electron --sourcemap --bundle --outfile=ee/build/preload.js
+yarn esbuild desktop/preload.ts --external:electron --sourcemap --bundle --outfile=./build/preload.js
 cd .. && yarn esbuild desktop/runner.ts --bundle --platform=node --sourcemap --external:better-sqlite3 --external:electron --target=node10.4 --outfile=ee/build/desktop_runner.js
 yarn esbuild desktop/app.ts --bundle --platform=node --sourcemap --external:better-sqlite3 --external:electron --target=node10.4 --outfile=build/desktop.js
 

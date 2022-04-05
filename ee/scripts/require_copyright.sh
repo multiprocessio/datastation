@@ -4,7 +4,7 @@ set -e
 
 code="0"
 for f in $(git ls-files); do
-    if [[ "$f" == *".json" ]] || [[ "$f" == *".lock" ]] || [[ "$f" == *"ignore" ]]; then
+    if [[ "$f" == *".json" ]] || [[ "$f" == *".lock" ]] || [[ "$f" == *"ignore" ]] || [[ "$f" == ".eslintrc" ]]; then
 	continue
     fi
 

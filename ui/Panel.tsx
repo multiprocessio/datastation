@@ -1,4 +1,5 @@
 import {
+  IconAlertTriangle,
   IconArrowsDiagonal,
   IconArrowsDiagonalMinimize2,
   IconChevronDown,
@@ -20,8 +21,7 @@ import { toString } from 'shape';
 import { MODE, MODE_FEATURES } from '../shared/constants';
 import { EVAL_ERRORS } from '../shared/errors';
 import log from '../shared/log';
-import { deepEquals } from '../shared/object';
-import { PanelInfo, PanelInfoType, PanelResult } from '../shared/state';
+import { PanelInfo, PanelResult } from '../shared/state';
 import { humanSize } from '../shared/text';
 import { panelRPC } from './asyncRPC';
 import { Alert } from './components/Alert';
@@ -30,8 +30,7 @@ import { Confirm } from './components/Confirm';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { Highlight } from './components/Highlight';
 import { Input } from './components/Input';
-import { Select } from './components/Select';
-import { PANEL_GROUPS, PANEL_UI_DETAILS } from './panels';
+import { PANEL_UI_DETAILS } from './panels';
 import { UrlStateContext } from './urlState';
 
 export const VISUAL_PANELS = ['graph', 'table'];
@@ -120,9 +119,9 @@ function PreviewResults({
       {
         name: 'Estimated # of Elements',
         value:
-          results.arrayCount === null
+          !results.arrayCount && String(results.arrayCount) !== '0'
             ? 'Not an array'
-            : results.arrayCount.toLocaleString(),
+            : String(results.arrayCount).toLocaleString(),
       },
       {
         name: 'Panel ID',
@@ -181,7 +180,7 @@ export function PanelPlayWarningWithLinks({
 }) {
   const parts = msg.split(/(\[(?:[^\]\\]|\\.)*\])|(DM_setPanel\([$a-zA-Z]*\))/);
 
-  let children = [];
+  const children = [];
   for (const c of parts) {
     if (!c) {
       continue;
@@ -230,7 +229,13 @@ function PanelError({ panels, e }: { panels: Array<PanelInfo>; e: Error }) {
     <Alert type="error">
       <div>Error evaluating panel:</div>
       <pre>
-        <code>{e.stack || e.message || String(e)}</code>
+        <code>
+          {e.stack ||
+            e.message ||
+            (String(e) === '[object Object]' /* this might be Chrome specific */
+              ? circularSafeStringify(e, null, 2)
+              : String(e))}
+        </code>
       </pre>
     </Alert>
   );
@@ -245,25 +250,16 @@ export function Panel({
   panels,
 }: {
   panel: PanelInfo;
-  updatePanel: (
-    d: PanelInfo,
-    position?: number,
-    opts?: { internalOnly: boolean }
-  ) => void;
+  updatePanel: (d: PanelInfo, position?: number) => void;
   panelResults: Array<PanelResult>;
   reevalPanel: (id: string) => Promise<Array<PanelInfo>>;
   panelIndex: number;
   removePanel: (id: string) => void;
   panels: Array<PanelInfo>;
 }) {
-  // Fall back to empty dict in case panel.type names ever change
+  const [hidden, setHidden] = React.useState(false);
   const panelUIDetails =
     PANEL_UI_DETAILS[panel.type] || PANEL_UI_DETAILS.literal;
-  const blank = panelUIDetails.factory(panel.pageId);
-  blank.id = panel.id;
-  blank.name = panel.name;
-  const isBlank = deepEquals(panel, blank);
-  const [hidden, setHidden] = React.useState(false);
 
   const {
     state: { fullScreen, expanded },
@@ -271,16 +267,24 @@ export function Panel({
   } = React.useContext(UrlStateContext);
 
   const [details, setDetailsInternal] = React.useState(
-    isBlank || expanded.includes(panel.id)
+    expanded.includes(panel.id)
   );
-  function setDetails(b: boolean) {
-    setDetailsInternal(b);
-    if (!b) {
-      setUrlState({ expanded: expanded.filter((i) => i !== panel.id) });
-    } else {
-      setUrlState({ expanded: Array.from(new Set([...expanded, panel.id])) });
+  const setDetails = React.useCallback(
+    (b: boolean) => {
+      setDetailsInternal(b);
+      if (!b) {
+        setUrlState({ expanded: expanded.filter((i) => i !== panel.id) });
+      } else {
+        setUrlState({ expanded: Array.from(new Set([...expanded, panel.id])) });
+      }
+    },
+    [setUrlState, expanded, setDetailsInternal, panel.id]
+  );
+  React.useEffect(() => {
+    if (!panel.defaultModified && !details) {
+      setDetails(true);
     }
-  }
+  }, [panel.defaultModified, details, setDetails]);
 
   const [panelOut, setPanelOut] = React.useState<
     'preview' | 'stdout' | 'shape' | 'metadata'
@@ -300,12 +304,14 @@ export function Panel({
   }, [results.exception]);
 
   async function evalThis() {
+    if (killable) {
+      await killProcess();
+      setLoading(false);
+    }
+
     setLoading(true);
     try {
-      const affectedPanels = await reevalPanel(panel.id);
-      if (MODE === 'browser') {
-        affectedPanels.forEach((p) => updatePanel(p));
-      }
+      await reevalPanel(panel.id);
     } catch (e) {
       setError(e);
     } finally {
@@ -370,15 +376,23 @@ export function Panel({
       onKeyDown={keyboardShortcuts}
     >
       <ErrorBoundary>
-        <div
-          className="panel-head"
-          onDoubleClick={(e: React.MouseEvent<HTMLDivElement>) =>
-            setUrlState({
-              fullScreen: fullScreen === panel.id ? null : panel.id,
-            })
-          }
-        >
+        <div className="panel-head">
           <div
+            onDoubleClick={(e: React.MouseEvent) => {
+              // Need to make sure if the user clicks into the name input they don't trigger the fullscreen toggle.
+              const textNodeType = 3;
+              const target = e.target as HTMLElement;
+              if (
+                target.tagName.toLowerCase() === 'input' ||
+                target.nodeType === textNodeType
+              ) {
+                return;
+              }
+
+              setUrlState({
+                fullScreen: fullScreen === panel.id ? null : panel.id,
+              });
+            }}
             className={`panel-header ${
               details ? 'panel-header--open' : ''
             } vertical-align-center`}
@@ -401,36 +415,14 @@ export function Panel({
                 <IconChevronDown />
               </Button>
             </span>
-            <Select
-              label="Type"
-              value={panel.type}
-              onChange={(value: string) => {
-                const panelType = value as PanelInfoType;
-                const newPanel = PANEL_UI_DETAILS[panelType].factory(
-                  panel.pageId
-                );
-                (panel as any)[panelType] = newPanel[panelType];
-                panel.type = panelType;
-                updatePanel(panel);
-              }}
-            >
-              {PANEL_GROUPS.map((group) => (
-                <optgroup label={group.label} key={group.label}>
-                  {group.panels.map((name) => {
-                    const panelDetails = PANEL_UI_DETAILS[name];
-                    return (
-                      <option value={panelDetails.id} key={panelDetails.id}>
-                        {panelDetails.label}
-                      </option>
-                    );
-                  })}
-                </optgroup>
-              ))}
-            </Select>
+
+            <label className="ml-2 text-muted">
+              {PANEL_UI_DETAILS[panel.type].label}
+            </label>
 
             <Input
               label="Name"
-              className="panel-name"
+              className="panel-name ml-1"
               placeholder={`Untitled panel #${panels.length + 1}`}
               onChange={(value: string) => {
                 panel.name = value;
@@ -490,23 +482,7 @@ export function Panel({
                     : 'Evaluate Panel (Ctrl-Enter)'
                 }
               >
-                <Button
-                  icon
-                  onClick={async () => {
-                    if (killable) {
-                      await killProcess();
-                      setLoading(false);
-                    }
-
-                    setLoading(true);
-                    try {
-                      await reevalPanel(panel.id);
-                    } finally {
-                      setLoading(false);
-                    }
-                  }}
-                  type="primary"
-                >
+                <Button icon onClick={evalThis} type="primary">
                   {loading ? <IconPlayerPause /> : <IconPlayerPlay />}
                 </Button>
               </span>
@@ -588,7 +564,13 @@ export function Panel({
                         updatePanel={updatePanel}
                       />
                     )}
-                  <PanelError panels={panels} e={error} />
+                  {
+                    /* Visual panels get run automatically. Don't show the Cancelled alert since this will happen all the time. */ VISUAL_PANELS.includes(
+                      panel.type
+                    ) && error?.name === 'Cancelled' ? null : (
+                      <PanelError panels={panels} e={error} />
+                    )
+                  }
                   {info}
                 </div>
                 {panelUIDetails.previewable && (
@@ -598,13 +580,13 @@ export function Panel({
                         className={panelOut === 'preview' ? 'selected' : ''}
                         onClick={() => setPanelOut('preview')}
                       >
-                        Result
+                        Preview
                       </Button>
                       <Button
                         className={panelOut === 'shape' ? 'selected' : ''}
                         onClick={() => setPanelOut('shape')}
                       >
-                        Inferred Schema
+                        Schema
                       </Button>
                       <Button
                         className={panelOut === 'metadata' ? 'selected' : ''}
@@ -617,7 +599,10 @@ export function Panel({
                           className={panelOut === 'stdout' ? 'selected' : ''}
                           onClick={() => setPanelOut('stdout')}
                         >
-                          Stdout
+                          Stdout/Stderr
+                          <span className="ml-1">
+                            {results.stdout ? <IconAlertTriangle /> : null}
+                          </span>
                         </Button>
                       )}
                     </div>

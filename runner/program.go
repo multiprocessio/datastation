@@ -6,8 +6,6 @@ import (
 	"os"
 	"os/exec"
 	"strings"
-
-	"github.com/google/uuid"
 )
 
 type ProgramEvalInfo struct {
@@ -47,7 +45,7 @@ func getIdMapJson(page ProjectPage) string {
 func MakeTmpSQLiteConnector() (*ConnectorInfo, error) {
 	connector := &ConnectorInfo{
 		Type: DatabaseConnector,
-		Id:   uuid.New().String(),
+		Id:   newId(),
 		DatabaseConnectorInfo: &DatabaseConnectorInfo{
 			Database: DatabaseConnectorInfoDatabase{
 				Type:     SQLiteDatabase,
@@ -78,20 +76,22 @@ func (ec EvalContext) evalProgramSQLPanel(project *ProjectState, pageIndex int, 
 	}, nil)
 }
 
-func (ec EvalContext) evalProgramPanel(project *ProjectState, pageIndex int, panel *PanelInfo) error {
+func (ec EvalContext) evalProgramPanel(project *ProjectState, pageIndex int, panel *PanelInfo) (error, string) {
 	if panel.Program.Type == SQL {
-		return ec.evalProgramSQLPanel(project, pageIndex, panel)
+		return ec.evalProgramSQLPanel(project, pageIndex, panel), ""
 	}
 
 	var p ProgramEvalInfo
-	err := json.Unmarshal([]byte(packedProgramTypeInfo[panel.Program.Type]), &p)
-	if err != nil {
-		return edsef("Invalid program type: %s", panel.Program.Type)
+	if panel.Program.Type != CustomProgram {
+		err := json.Unmarshal([]byte(packedProgramTypeInfo[panel.Program.Type]), &p)
+		if err != nil {
+			return edsef("Invalid program type: %s", panel.Program.Type), ""
+		}
 	}
 
 	tmp, err := os.CreateTemp("", "program-panel-")
 	if err != nil {
-		return edse(err)
+		return edse(err), ""
 	}
 	defer os.Remove(tmp.Name())
 
@@ -106,7 +106,7 @@ func (ec EvalContext) evalProgramPanel(project *ProjectState, pageIndex int, pan
 	body := preamble + "\n" + panel.Content
 	_, err = tmp.WriteString(body)
 	if err != nil {
-		return err
+		return err, ""
 	}
 
 	args := append(p.CommandArgs, tmp.Name())
@@ -122,15 +122,26 @@ func (ec EvalContext) evalProgramPanel(project *ProjectState, pageIndex int, pan
 		}
 	}
 
-	Logln("Running program: %s %v", path, args)
-	cmd := exec.Command(path, args...)
-	cmd.Stderr = os.Stderr
-	cmd.Stdout = os.Stdout
-
-	err = cmd.Start()
-	if err != nil {
-		return err
+	if panel.Program.Type == CustomProgram {
+		args = nil
+		path = strings.ReplaceAll(panel.Program.CustomExe, "{}", tmp.Name())
+		if strings.Contains(path, " ") {
+			bits := strings.Split(path, " ")
+			path = bits[0]
+			args = bits[1:]
+		}
 	}
 
-	return cmd.Wait()
+	Logln("Running program: %s %v", path, args)
+	combined, err := exec.Command(path, args...).CombinedOutput()
+	maxSize := 100_000
+	if ec.settings.StdoutMaxSize > 0 {
+		maxSize = ec.settings.StdoutMaxSize
+	}
+
+	if len(combined) > maxSize {
+		return err, string(combined[:maxSize]) + "..."
+	}
+
+	return err, string(combined)
 }

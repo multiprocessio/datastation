@@ -233,6 +233,7 @@ export class Store {
         {
           data: { ...page },
           position: i,
+          insert: true,
         },
         null,
         false
@@ -246,6 +247,7 @@ export class Store {
           {
             data: panels[j],
             position: j,
+            insert: true,
           },
           null,
           false
@@ -260,6 +262,7 @@ export class Store {
         {
           data: server,
           position: i,
+          insert: true,
         },
         null,
         false
@@ -273,6 +276,7 @@ export class Store {
         {
           data: connector,
           position: i,
+          insert: true,
         },
         null,
         false
@@ -403,41 +407,31 @@ GROUP BY panel_id
     },
   };
 
-  updateGeneric<T extends { id: string }>(
+  updateGeneric<T extends { id: string; defaultModified: boolean }>(
     crud: GenericCrud<T>,
     projectId: string,
     data: T,
     position: number,
+    insert: boolean,
     factory: () => T,
     foreignKey?: {
       column: string;
       value: string;
-    },
-    shortcircuit?: (
-      db: sqlite3.Database,
-      existingObj: T,
-      existingPosition: number
-    ) => boolean
+    }
   ) {
     const db = this.getConnection(projectId);
     db.transaction(() => {
-      const [existing, existingPosition] = crud.getOne(db, data.id);
-      if (!existing) {
-        log.info(`Updating ${crud.entity}`);
+      if (insert) {
+        log.info(`Inserting ${crud.entity}`);
         encryptProjectSecrets(data, factory());
         crud.insert(db, data, position, foreignKey);
         return;
       }
 
-      if (shortcircuit) {
-        const stop = shortcircuit(db, existing, existingPosition);
-        if (stop) {
-          return;
-        }
-      }
-
+      data.defaultModified = true;
+      const [existing] = crud.getOne(db, data.id);
       encryptProjectSecrets(data, existing);
-      log.info(`Inserting ${crud.entity}`);
+      log.info(`Updating ${crud.entity}`);
       crud.update(db, data);
     })();
   }
@@ -482,51 +476,59 @@ GROUP BY panel_id
       {
         data,
         position,
+        insert,
+        panelPositions,
       }: {
         data: PanelInfo;
         position: number;
+        insert: boolean;
+        panelPositions: string[];
       }
     ) => {
       data.lastEdited = new Date();
       delete data.resultMeta;
-      return this.updateGeneric(
+      await this.updateGeneric(
         panelCrud,
         projectId,
         data,
         position,
+        insert,
         () => FACTORIES[data.type](data.pageId),
         {
           column: 'page_id',
           value: data.pageId,
-        },
-        (
-          db: sqlite3.Database,
-          existing: PanelInfo,
-          existingPosition: number
-        ) => {
-          if (position === existingPosition) {
-            return false;
-          }
-
-          // If updating position, do that in one dedicated step.
-          // Nothing else can be updated with it.
-          // This is all the UI needs at the moment anyway
-          const allExisting = panelCrud.get(db, {
-            q: `page_id = ?`,
-            args: [data.pageId],
-          });
-
-          allExisting.splice(existingPosition, 1);
-          allExisting.splice(position, 0, data);
-          const stmt = db.prepare(
-            `UPDATE ${panelCrud.entity} SET position = ? WHERE id = ?`
-          );
-          for (const i of allExisting.map((_, i) => i)) {
-            stmt.run(i, allExisting[i].id);
-          }
-          return true;
         }
       );
+
+      if (panelPositions) {
+        const db = this.getConnection(projectId);
+        // Don't trust the UI to be up-to-date with all existing panels
+        // So fetch the existing ones
+        const getStmt = db.prepare(
+          `SELECT id FROM ${panelCrud.entity} WHERE page_id = ?`
+        );
+        const allExisting: Array<{ id: string }> = getStmt.all(data.pageId);
+
+        // Then sort the existing ones based on the positions passed in
+        allExisting.sort((a, b) => {
+          const ao = panelPositions.indexOf(a.id);
+          const bo = panelPositions.indexOf(b.id);
+
+          // Put unknown items at the end
+          if (ao === -1) {
+            return 1;
+          }
+
+          return ao - bo;
+        });
+
+        const stmt = db.prepare(
+          `UPDATE ${panelCrud.entity} SET position = ? WHERE id = ?`
+        );
+        for (const i of panelPositions.map((_, i) => i)) {
+          stmt.run(i, panelPositions[i]);
+        }
+      }
     },
   };
 
@@ -537,9 +539,11 @@ GROUP BY panel_id
       {
         data,
         position,
+        insert,
       }: {
         data: ProjectPage;
         position: number;
+        insert: boolean;
       }
     ) => {
       delete data.panels;
@@ -548,6 +552,7 @@ GROUP BY panel_id
         projectId,
         data,
         position,
+        insert,
         () => new ProjectPage()
       );
     },
@@ -560,9 +565,11 @@ GROUP BY panel_id
       {
         data,
         position,
+        insert,
       }: {
         data: ConnectorInfo;
         position: number;
+        insert: boolean;
       }
     ) =>
       this.updateGeneric(
@@ -570,6 +577,7 @@ GROUP BY panel_id
         projectId,
         data,
         position,
+        insert,
         () => new ConnectorInfo()
       ),
   };
@@ -581,9 +589,11 @@ GROUP BY panel_id
       {
         data,
         position,
+        insert,
       }: {
         data: ServerInfo;
         position: number;
+        insert: boolean;
       }
     ) =>
       this.updateGeneric(
@@ -591,6 +601,7 @@ GROUP BY panel_id
         projectId,
         data,
         position,
+        insert,
         () => new ServerInfo()
       ),
   };

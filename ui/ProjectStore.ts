@@ -29,54 +29,59 @@ import { asyncRPC } from './asyncRPC';
 
 export class ProjectStore {
   updatePanel(
-    projectId: string,
-    p: PanelInfo,
-    position: number
+    _projectId: string,
+    _p: PanelInfo,
+    _position: number,
+    _insert: boolean,
+    _panelPositions?: string[]
   ): Promise<void> {
     throw new Error('Not implemented');
   }
 
   updatePage(
-    projectId: string,
-    p: ProjectPage,
-    position: number
+    _projectId: string,
+    _p: ProjectPage,
+    _position: number,
+    _insert: boolean
   ): Promise<void> {
     throw new Error('Not implemented');
   }
 
   updateServer(
-    projectId: string,
-    p: ServerInfo,
-    position: number
+    _projectId: string,
+    _p: ServerInfo,
+    _position: number,
+    _insert: boolean
   ): Promise<void> {
     throw new Error('Not implemented');
   }
 
   updateConnector(
-    projectId: string,
-    p: ConnectorInfo,
-    position: number
+    _projectId: string,
+    _p: ConnectorInfo,
+    _position: number,
+    _insert: boolean
   ): Promise<void> {
     throw new Error('Not implemented');
   }
 
-  deletePanel(projectId: string, id: string): Promise<void> {
+  deletePanel(_projectId: string, _id: string): Promise<void> {
     throw new Error('Not implemented');
   }
 
-  deletePage(projectId: string, id: string): Promise<void> {
+  deletePage(_projectId: string, _id: string): Promise<void> {
     throw new Error('Not implemented');
   }
 
-  deleteServer(projectId: string, id: string): Promise<void> {
+  deleteServer(_projectId: string, _id: string): Promise<void> {
     throw new Error('Not implemented');
   }
 
-  deleteConnector(projectId: string, id: string): Promise<void> {
+  deleteConnector(_projectId: string, _id: string): Promise<void> {
     throw new Error('Not implemented');
   }
 
-  get(projectId: string): Promise<ProjectState> {
+  get(_projectId: string): Promise<ProjectState> {
     return Promise.reject('Not implemented');
   }
 }
@@ -114,7 +119,9 @@ export class LocalStorageStore extends ProjectStore {
   updatePanel = async (
     projectId: string,
     p: PanelInfo,
-    position: number
+    position: number,
+    insert: boolean,
+    panelPositions?: string[]
   ): Promise<void> => {
     const state = await this.getOrCreate(projectId);
     if (!state.pages) {
@@ -127,16 +134,26 @@ export class LocalStorageStore extends ProjectStore {
           page.panels = [];
         }
 
-        const existingPosition = page.panels.findIndex(
-          (panel) => panel.id === p.id
-        );
-        if (existingPosition === -1) {
+        if (insert) {
           page.panels.push(p);
-        } else if (existingPosition === position) {
-          page.panels[existingPosition] = p;
         } else {
-          page.panels.splice(existingPosition, 1);
-          page.panels.splice(position, 0, p);
+          const i = page.panels.findIndex((pp) => pp.id === p.id);
+          page.panels[i] = p;
+        }
+
+        if (panelPositions) {
+          // Then sort the existing ones based on the positions passed in
+          page.panels.sort((a, b) => {
+            const ao = panelPositions.indexOf(a.id);
+            const bo = panelPositions.indexOf(b.id);
+
+            // Put unknown items at the end
+            if (ao === -1) {
+              return 1;
+            }
+
+            return ao - bo;
+          });
         }
 
         this.update(projectId, state);
@@ -270,31 +287,56 @@ export class LocalStorageStore extends ProjectStore {
 }
 
 class RemoteStore extends ProjectStore {
-  updatePanel(projectId: string, data: PanelInfo, position: number) {
+  async updatePanel(
+    projectId: string,
+    data: PanelInfo,
+    position: number,
+    insert: boolean,
+    panelPositions?: string[]
+  ) {
     return asyncRPC<UpdatePanelRequest, UpdatePanelResponse>('updatePanel', {
       data,
       position,
+      insert,
+      panelPositions,
     });
   }
 
-  updatePage(projectId: string, data: ProjectPage, position: number) {
+  updatePage(
+    projectId: string,
+    data: ProjectPage,
+    position: number,
+    insert: boolean
+  ) {
     return asyncRPC<UpdatePageRequest, UpdatePageResponse>('updatePage', {
       data,
       position,
+      insert,
     });
   }
 
-  updateServer(projectId: string, data: ServerInfo, position: number) {
+  updateServer(
+    projectId: string,
+    data: ServerInfo,
+    position: number,
+    insert: boolean
+  ) {
     return asyncRPC<UpdateServerRequest, UpdateServerResponse>('updateServer', {
       data,
       position,
+      insert,
     });
   }
 
-  updateConnector(projectId: string, data: ConnectorInfo, position: number) {
+  updateConnector(
+    projectId: string,
+    data: ConnectorInfo,
+    position: number,
+    insert: boolean
+  ) {
     return asyncRPC<UpdateConnectorRequest, UpdateConnectorResponse>(
       'updateConnector',
-      { data, position }
+      { data, position, insert }
     );
   }
 

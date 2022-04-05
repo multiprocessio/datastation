@@ -1,6 +1,6 @@
 import { IconTrash } from '@tabler/icons';
 import * as React from 'react';
-import { MODE_FEATURES } from '../shared/constants';
+import { MODE, MODE_FEATURES } from '../shared/constants';
 import {
   GraphPanelInfo,
   PanelInfo,
@@ -12,24 +12,37 @@ import {
 import { Button } from './components/Button';
 import { Confirm } from './components/Confirm';
 import { Input } from './components/Input';
-import { Link } from './components/Link';
 import { loadDefaultProject } from './Header';
 import { VISUAL_PANELS } from './Panel';
 import { PanelList } from './PanelList';
 import { PANEL_UI_DETAILS } from './panels';
-import { UrlStateContext } from './urlState';
+import { LocalStorageStore } from './ProjectStore';
 
 export function makeReevalPanel(
-  page: ProjectPage,
   state: ProjectState,
   updatePanelInternal: (p: PanelInfo) => void
 ) {
   return async function reevalPanel(
     panelId: string
   ): Promise<Array<PanelInfo>> {
+    // Somehow stuff goes out of date in browser mode. So fetch before eval
+    if (MODE === 'browser') {
+      const store = new LocalStorageStore();
+      state = await store.get(state.projectName);
+    }
     const { connectors, servers } = state;
 
-    const panel = page.panels.find((p) => p.id === panelId);
+    let panel: PanelInfo;
+    let page: ProjectPage;
+    outer: for (const pagep of state.pages) {
+      for (const p of pagep.panels) {
+        if (p.id === panelId) {
+          page = pagep;
+          panel = p;
+          break outer;
+        }
+      }
+    }
     if (!panel) {
       return;
     }
@@ -46,7 +59,6 @@ export function makeReevalPanel(
     // Important! Just needs to trigger a state reload.
     updatePanelInternal(panel);
 
-    const affectedPanels = [panel];
     // Re-run all dependent visual panels
     if (!VISUAL_PANELS.includes(panel.type)) {
       for (const dep of page.panels) {
@@ -56,12 +68,10 @@ export function makeReevalPanel(
           (dep.type === 'table' &&
             (dep as TablePanelInfo).table.panelSource === panel.id)
         ) {
-          affectedPanels.push(...(await reevalPanel(dep.id)));
+          await reevalPanel(dep.id);
         }
       }
     }
-
-    return affectedPanels;
   };
 }
 
@@ -75,17 +85,17 @@ export function PageList({
 }: {
   state: ProjectState;
   deletePage: (id: string) => void;
-  updatePage: (page: ProjectPage, position: number) => void;
+  updatePage: (page: ProjectPage, position: number, insert: boolean) => void;
   updatePanel: (
     panel: PanelInfo,
     position: number,
+    insert: boolean,
     opts?: { internalOnly: boolean }
   ) => void;
   setPageIndex: (i: number) => void;
   pageIndex: number;
 }) {
   const page: ProjectPage | null = state.pages[pageIndex] || null;
-  const { state: urlState } = React.useContext(UrlStateContext);
 
   if (!page) {
     return (
@@ -95,7 +105,7 @@ export function PageList({
           <Button
             type="primary"
             onClick={() => {
-              updatePage(new ProjectPage('Untitled Page'), -1);
+              updatePage(new ProjectPage('Untitled Page'), -1, true);
             }}
           >
             Add a page
@@ -116,13 +126,14 @@ export function PageList({
   }
 
   const panelResults = page.panels.map((p) => p.resultMeta);
-  const reevalPanel = makeReevalPanel(page, state, (panel: PanelInfo) => {
+  const reevalPanel = makeReevalPanel(state, (panel: PanelInfo) => {
     const index = page.panels.findIndex((p) => p.id === panel.id);
     if (index === -1) {
       return;
     }
 
-    updatePanel(panel, index, { internalOnly: true });
+    // Only an internal update if not in browser mode. Otherwise the browser does need to save the resultmeta
+    updatePanel(panel, index, false, { internalOnly: MODE !== 'browser' });
   });
 
   return (
@@ -137,7 +148,7 @@ export function PageList({
               <Input
                 onChange={(value: string) => {
                   page.name = value;
-                  updatePage(page, i);
+                  updatePage(page, i, false);
                 }}
                 value={page.name}
               />
@@ -181,39 +192,12 @@ export function PageList({
         <Button
           className="add-page"
           onClick={() => {
-            updatePage(new ProjectPage('Untitled Page'), -1);
+            updatePage(new ProjectPage('Untitled Page'), -1, true);
             setPageIndex(state.pages.length - 1);
           }}
         >
           +
         </Button>
-      </div>
-
-      <div className="vertical-align-center section-subtitle">
-        <Link
-          className={`page-mode ${
-            urlState.view === 'editor' ? 'page-mode--on' : ''
-          }`}
-          args={{ view: 'editor' }}
-        >
-          Editor
-        </Link>
-        <Link
-          className={`page-mode ${
-            urlState.view === 'scheduler' ? 'page-mode--on' : ''
-          }`}
-          args={{ view: 'scheduler' }}
-        >
-          Schedule Exports
-        </Link>
-        <Link
-          className={`page-mode ${
-            urlState.view === 'dashboard' ? 'page-mode--on' : ''
-          }`}
-          args={{ view: 'dashboard' }}
-        >
-          Dashboard
-        </Link>
       </div>
 
       <PanelList

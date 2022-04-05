@@ -16,8 +16,10 @@ export type GetPanelRequest = { id: string };
 export type GetPanelResponse = PanelInfo;
 
 export type UpdatePanelRequest = {
+  insert: boolean;
   position: number;
   data: PanelInfo;
+  panelPositions?: string[];
 };
 export type UpdatePanelResponse = void;
 
@@ -25,6 +27,7 @@ export type GetConnectorRequest = { id: string };
 export type GetConnectorResponse = ConnectorInfo;
 
 export type UpdateConnectorRequest = {
+  insert: boolean;
   position: number;
   data: ConnectorInfo;
 };
@@ -34,6 +37,7 @@ export type GetServerRequest = { id: string };
 export type GetServerResponse = ServerInfo;
 
 export type UpdateServerRequest = {
+  insert: boolean;
   position: number;
   data: ServerInfo;
 };
@@ -43,6 +47,7 @@ export type GetPageRequest = { id: string };
 export type GetPageResponse = ProjectPage;
 
 export type UpdatePageRequest = {
+  insert: boolean;
   position: number;
   data: ProjectPage;
 };
@@ -126,8 +131,12 @@ export type PanelEndpoint = 'killProcess' | 'fetchResults' | 'eval';
 
 export type Endpoint = PanelEndpoint | StoreEndpoint;
 
-export type WindowAsyncRPC = <Request, Response = void>(
-  resource: Endpoint,
+export type WindowAsyncRPC = <
+  Request,
+  Response = void,
+  EndpointT extends string = Endpoint
+>(
+  resource: EndpointT,
   projectId: string,
   body: Request
 ) => Promise<Response>;

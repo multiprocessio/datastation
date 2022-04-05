@@ -15,12 +15,9 @@ import { Alert } from './components/Alert';
 import { Button } from './components/Button';
 import { Input } from './components/Input';
 import { Loading } from './components/Loading';
-import { UrlStateContext } from './urlState';
 
 export function MakeSelectProject() {
   const [projectNameTmp, setProjectNameTmp] = React.useState('');
-
-  const { setState: setUrlState } = React.useContext(UrlStateContext);
 
   const [makeProjectError, setMakeProjectError] = React.useState('');
   async function makeProject(projectId: string) {
@@ -28,7 +25,11 @@ export function MakeSelectProject() {
       await asyncRPC<MakeProjectRequest, MakeProjectResponse>('makeProject', {
         projectId,
       });
-      setUrlState({ projectId });
+
+      // So loading ui shows up while changing page.
+      setProjects([]);
+      window.location.href =
+        window.location.pathname + '?projectId=' + projectId;
     } catch (e) {
       setMakeProjectError(e.message);
     }
@@ -39,17 +40,17 @@ export function MakeSelectProject() {
   );
   React.useEffect(() => {
     async function load() {
-      const projects = await asyncRPC<GetProjectsRequest, GetProjectsResponse>(
+      const loaded = await asyncRPC<GetProjectsRequest, GetProjectsResponse>(
         'getProjects',
         null
       );
-      setProjects(projects);
+      setProjects(loaded);
     }
 
     if (MODE === 'server' && !projects) {
       load();
     }
-  }, []);
+  }, [projects]);
 
   async function openProject() {
     await asyncRPC<OpenProjectRequest, OpenProjectResponse>(
@@ -97,7 +98,7 @@ export function MakeSelectProject() {
         <div className="project-existing">
           <h2>Existing project</h2>
           {projects.map(({ name, createdAt }) => (
-            <div className="form-row">
+            <div className="form-row" key={name}>
               <h3 className="project-selector">{name}</h3>
               <div className="project-timestamp">
                 Created{' '}

@@ -17,7 +17,7 @@ export function Server({
   updateServer: (dc: ServerInfo) => void;
   deleteServer: () => void;
 }) {
-  const [expanded, setExpanded] = React.useState(false);
+  const [expanded, setExpanded] = React.useState(!server.defaultModified);
 
   // Don't try to show initial password
   const [password, setPassword] = React.useState({

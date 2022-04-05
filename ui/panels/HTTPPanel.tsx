@@ -4,6 +4,7 @@ import * as React from 'react';
 import { shape } from 'shape';
 import { MODE, MODE_FEATURES } from '../../shared/constants';
 import { request } from '../../shared/http';
+import { newId } from '../../shared/object';
 import {
   ContentTypeInfo,
   HTTPConnectorInfoMethod,
@@ -98,8 +99,14 @@ export function HTTPPanelDetails({
 
       <FormGroup>
         {panel.http.http.headers.map(
-          (header: { value: string; name: string }, headerIndex: number) => (
-            <div className="form-row form-row--multi vertical-align-center">
+          (
+            header: { value: string; name: string; id: string },
+            headerIndex: number
+          ) => (
+            <div
+              key={header.id}
+              className="form-row form-row--multi vertical-align-center"
+            >
               <Input
                 label="Header"
                 value={header.name}
@@ -131,7 +138,7 @@ export function HTTPPanelDetails({
         )}
         <Button
           onClick={() => {
-            panel.http.http.headers.push({ name: '', value: '' });
+            panel.http.http.headers.push({ name: '', value: '', id: newId() });
             updatePanel(panel);
           }}
         >
@@ -197,7 +204,11 @@ export const httpPanel: PanelUIDetails<HTTPPanelInfo> = {
     !['PUT', 'POST', 'PATCH'].includes(panel.http.http.method.toUpperCase()),
   body: HTTPPanelBody,
   previewable: true,
-  factory: (pageId: string) => new HTTPPanelInfo(pageId),
+  factory: (pageId: string, name: string) => {
+    const p = new HTTPPanelInfo(pageId);
+    p.name = name;
+    return p;
+  },
   info: HTTPInfo,
   hasStdout: false,
 };

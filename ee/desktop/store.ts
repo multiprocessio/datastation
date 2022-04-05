@@ -39,7 +39,11 @@ export class Store extends store_ce.Store {
     // Blank out all encrypted fields, all temporal-changing fields.
     doOnMatchingFields(
       copy,
-      (f) => f.endsWith('_encrypt') || f.endsWith('lastEdited'),
+      (f) =>
+        f.endsWith('_encrypt') ||
+        f.endsWith('lastEdited') ||
+        f.endsWith('defaultModified') ||
+        f.endsWith('id'),
       () => undefined
     );
     return JSON.stringify(copy);
@@ -80,7 +84,7 @@ export class Store extends store_ce.Store {
         data.id,
         data.table,
         data.pk,
-        unix(data.dt),
+        unix(new Date()),
         data.error,
         auditableOld,
         auditableNew,
@@ -95,7 +99,13 @@ export class Store extends store_ce.Store {
           )
           .get(data.table, data.pk);
         // Don't log the same value twice
-        if (row && row.val === auditableNew && row.action === data.action) {
+        // The || RHS is for when you are calling update after creating a thing but the thing hasn't changed.
+        if (
+          row &&
+          row.val === auditableNew &&
+          (row.action === data.action ||
+            (row.action === 'insert' && data.action === 'update'))
+        ) {
           return;
         }
 

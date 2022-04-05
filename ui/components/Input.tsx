@@ -1,58 +1,9 @@
-import debounce from 'lodash.debounce';
 import * as React from 'react';
+import { useDebouncedCallback } from 'use-debounce';
 import { IN_TESTS } from '../../shared/constants';
 import { Tooltip } from './Tooltip';
 
 export const INPUT_SYNC_PERIOD = IN_TESTS ? 0 : 3000;
-
-export function useDebouncedLocalState(
-  nonLocalValue: string | number | readonly string[],
-  nonLocalSet: (v: string) => void,
-  isText = true,
-  delay = INPUT_SYNC_PERIOD,
-  defaultValue = ''
-): [string | number | readonly string[], (v: string) => void, () => void] {
-  if (!isText) {
-    return [nonLocalValue, nonLocalSet, () => {}];
-  }
-
-  const [defaultChanged, setDefaultChanged] = React.useState(false);
-  const debounced = React.useCallback(debounce(nonLocalSet, delay), []);
-
-  const [localValue, setLocalValue] = React.useState(nonLocalValue);
-  // Resync to props when props changes
-  React.useEffect(() => {
-    debounced.flush();
-    setDefaultChanged(true);
-    setLocalValue(nonLocalValue);
-  }, [nonLocalValue]);
-
-  function wrapSetLocalValue(v: string) {
-    if (String(v) !== String(nonLocalValue)) {
-      // Only important the first time
-      setDefaultChanged(true);
-
-      // First update local state
-      setLocalValue(v);
-
-      // Then set off debouncer to eventually update external state
-      debounced(v);
-    }
-  }
-
-  function flushValue() {
-    debounced.flush();
-  }
-
-  // Set up initial value if there is any
-  React.useEffect(() => {
-    if (!localValue && defaultValue && !defaultChanged) {
-      wrapSetLocalValue(defaultValue);
-    }
-  });
-
-  return [localValue, wrapSetLocalValue, flushValue];
-}
 
 export interface InputProps
   extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'> {
@@ -78,38 +29,42 @@ export function Input({
   tooltip,
   ...props
 }: InputProps) {
-  let inputClass = `input ${className ? ' ' + className : ''}`;
+  const inputClass = `input ${className ? ' ' + className : ''}`;
 
-  const [localValue, setLocalValue, flushLocalValue] = useDebouncedLocalState(
-    value,
+  const debounced = useDebouncedCallback(
     onChange,
-    type !== 'checkbox' && type !== 'radio' && !noDelay,
-    INPUT_SYNC_PERIOD,
-    defaultValue
+    noDelay ? 0 : INPUT_SYNC_PERIOD
+  );
+  // Flush on unmount
+  React.useEffect(
+    () => () => {
+      debounced.flush();
+    },
+    [debounced]
   );
 
-  function removeOuterWhitespaceOnFinish() {
-    let v = localValue;
-    if (typeof localValue === 'string') {
-      v = localValue.trim();
-      setLocalValue(v);
+  // Resync value when outer changes
+  const inputRef = React.useRef<HTMLInputElement>();
+  React.useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.value = String(value);
     }
-
-    flushLocalValue();
-  }
+  }, [value]);
 
   const input = (
     <React.Fragment>
       <input
-        value={localValue}
+        ref={inputRef}
+        defaultValue={value || defaultValue}
         type={type}
         className={label ? '' : inputClass}
-        onBlur={removeOuterWhitespaceOnFinish}
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-          setLocalValue(String(e.target.value))
+        onChange={(e) => debounced(e.target.value)}
+        onBlur={
+          () =>
+            debounced.flush() /* Simplifying this to onBlur={debounced.flush} doesn't work. */
         }
         {...props}
-        size={autoWidth ? Math.max(20, String(localValue).length) : undefined}
+        size={autoWidth ? Math.max(20, String(value).length) : undefined}
       />
       {tooltip && <Tooltip children={tooltip} />}
       {invalid && <small className="input-invalid">{invalid}</small>}

@@ -1,4 +1,4 @@
-const path = require('path');
+const os = require('os');
 const { LANGUAGES } = require('../../shared/languages');
 const {
   InvalidDependentPanelError,
@@ -7,9 +7,6 @@ const {
 const { getProjectResultsFile } = require('../store');
 const fs = require('fs');
 const { LiteralPanelInfo, ProgramPanelInfo } = require('../../shared/state');
-const { updateProjectHandler } = require('../store');
-const { CODE_ROOT } = require('../constants');
-const { makeEvalHandler } = require('./eval');
 const { inPath, withSavedPanels, RUNNERS, VERBOSE } = require('./testutil');
 
 const TESTS = [
@@ -479,6 +476,86 @@ for (const subprocessName of RUNNERS) {
         },
         { evalPanels: true, subprocessName }
       );
+
+      if (!finished) {
+        throw new Error('Callback did not finish');
+      }
+    });
+  });
+
+  describe('stdout/stderr capture', function () {
+    test('it captures print in successful program', async () => {
+      const pp = new ProgramPanelInfo(null, {
+        type: 'python',
+        content: 'print(1002)\nDM_setPanel(1)',
+      });
+
+      let finished = false;
+      const panels = [pp];
+      await withSavedPanels(
+        panels,
+        async (project, dispatch) => {
+          const savedProject = await dispatch({
+            resource: 'getProject',
+            projectId: project.projectName,
+            body: {
+              projectId: project.projectName,
+            },
+          });
+          expect(savedProject.pages[0].panels[0].resultMeta.stdout).toBe(
+            '1002' + os.EOL
+          );
+          finished = true;
+        },
+        {
+          evalPanels: true,
+          subprocessName,
+        }
+      );
+
+      if (!finished) {
+        throw new Error('Callback did not finish');
+      }
+    });
+
+    test('it captures print in unsuccessful program', async () => {
+      const pp = new ProgramPanelInfo(null, {
+        type: 'python',
+        content: 'print("hey there")\nraise Exception(1)',
+      });
+
+      let finished = false;
+      const panels = [pp];
+      try {
+        await withSavedPanels(
+          panels,
+          async (project, dispatch) => {
+            finished = true;
+          },
+          {
+            evalPanels: true,
+            subprocessName,
+          }
+        );
+      } catch (e) {
+        const savedProject = await e.dispatch({
+          resource: 'getProject',
+          projectId: e.project.projectName,
+          body: {
+            projectId: e.project.projectName,
+          },
+        });
+        expect(
+          savedProject.pages[0].panels[0].resultMeta.stdout.startsWith(
+            'hey there' + os.EOL + 'Traceback'
+          )
+        ).toBe(true);
+        if (e instanceof Error || e.name === 'Error') {
+          finished = true;
+        } else {
+          throw e;
+        }
+      }
 
       if (!finished) {
         throw new Error('Callback did not finish');

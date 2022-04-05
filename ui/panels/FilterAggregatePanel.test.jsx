@@ -27,7 +27,7 @@ test('shows filagg panel details', async () => {
       panel={project.pages[0].panels[1]}
       panels={project.pages[0].panels}
       updatePanel={(p) => {
-        project.pages[0].panels[1] = p;
+        Object.assign(project.pages[0].panels[1], p);
       }}
     />
   );
@@ -46,5 +46,4 @@ test('shows filagg panel details', async () => {
   await sortField().simulate('change', { target: { value: 'flubberty' } });
   await wait();
   expect(fp.filagg.sortOn).toBe('flubberty');
-  expect(sortField().props().value).toBe('flubberty');
 });

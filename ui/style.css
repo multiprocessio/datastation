@@ -8,10 +8,10 @@
   --button-light: #fdfdff;
 
   /* Dark theme settings */
-  --background-dark: #454f73;
+  --background-dark: #24242e;
   --border-dark: #1b1b1d;
   --color-dark: #dfdfdf;
-  --lighter-dark: #323254;
+  --lighter-dark: #2a2a38;
   --gutter-dark: var(--lighter-dark);
 
   /* Generic settings */
@@ -334,8 +334,20 @@ input + input[type='file'] {
   align-items: center;
 }
 
+.ml-1 {
+  margin-left: var(--margin-base);
+}
+
+.ml-2 {
+  margin-left: calc(2 * var(--margin-base));
+}
+
 .mt-2 {
   margin-top: calc(2 * var(--margin-base));
+}
+
+.mb-1 {
+  margin-bottom: var(--margin-base);
 }
 
 .mb-2 {
@@ -477,9 +489,26 @@ input + input[type='file'] {
 
 .section-subtitle {
   padding: calc(2 * var(--margin-base));
+}
 
-  .select:not(:last-of-type) {
-    margin-right: calc(2 * var(--margin-base));
+.section-subtitle .select:not(:last-of-type) {
+  margin-right: calc(2 * var(--margin-base));
+}
+
+.navigation {
+  border-right: 1px solid var(--border-light);
+
+  .navigation-item {
+    padding: calc(2 * var(--margin-base));
+
+    svg {
+      height: 25px;
+      width: 25px;
+    }
+  }
+
+  .navigation-item--active svg {
+    color: #333;
   }
 }
 
@@ -739,6 +768,14 @@ input + input[type='file'] {
   background: 0;
   padding: 5px calc(2 * var(--margin-base));
   border-radius: 0;
+  display: inline-flex;
+  align-items: center;
+
+  svg {
+    color: red;
+    height: 15px;
+    width: 15px;
+  }
 }
 
 .panel-out-header .button.selected {
@@ -775,14 +812,11 @@ input + input[type='file'] {
   display: flex;
   justify-content: center;
   align-items: center;
-
-  .button {
-    margin: 0 5px;
-  }
+  margin: calc(2 * var(--margin-base)) 0;
 }
 
-.new-panel:not(:last-child) {
-  margin-bottom: calc(2 * var(--margin-base));
+.new-panel-short {
+  margin-left: var(--margin-base);
 }
 
 .card p {
@@ -1006,6 +1040,11 @@ canvas {
   width: 500px;
 }
 
+.card--full {
+  width: 100%;
+}
+
+.card--center,
 .app--server .project-name {
   margin: 0 auto;
   margin-top: calc(2 * var(--margin-base));
@@ -1083,7 +1122,7 @@ tbody tr {
   right: unset;
 }
 
-.global-dropdown {
+.dropdown {
   position: relative;
 
   a {
@@ -1092,12 +1131,12 @@ tbody tr {
   }
 
   p,
-  .global-dropdown-anchor a {
+  .dropdown-anchor a {
     font-size: 0.75rem;
   }
 }
 
-.global-dropdown-body {
+.dropdown-body {
   display: none;
   z-index: 15;
   position: absolute;
@@ -1109,23 +1148,23 @@ tbody tr {
   box-shadow: 0 1px 3px 0 #aaa;
 }
 
-.global-dropdown-section:not(:last-of-type) {
+.dropdown-section:not(:last-of-type) {
   border-bottom: 1px solid var(--border-light);
   padding-bottom: 10px;
   margin-bottom: calc(2 * var(--margin-base));
 }
 
-.global-dropdown-sectionName {
+.dropdown-sectionName {
   text-transform: uppercase;
   font-size: 0.9rem;
   color: #999;
 }
 
-.global-dropdown-item {
+.dropdown-item {
   padding-top: calc(2 * var(--margin-base));
 }
 
-.global-dropdown.global-dropdown--open .global-dropdown-body {
+.dropdown.dropdown--open .dropdown-body {
   display: initial;
 }
 
@@ -1134,6 +1173,34 @@ tbody tr {
 
   .alert {
     max-width: 600px;
+  }
+}
+
+.dropdown.add-panel {
+  .dropdown-body {
+    width: 200px;
+  }
+
+  .dropdown-section {
+    border-bottom: 0;
+  }
+
+  .dropdown-item {
+    padding-top: var(--margin-base);
+
+    .button {
+      width: 100%;
+      border: 0;
+      box-shadow: none;
+      text-align: left;
+    }
+  }
+}
+
+.value {
+  .value-part {
+    display: flex;
+    align-items: baseline;
   }
 }
 
@@ -1242,7 +1309,7 @@ body.dark {
     border-right: 0;
   }
 
-  .global-dropdown-item a {
+  .dropdown-item a {
     color: #61b6ff;
   }
 
@@ -1251,7 +1318,7 @@ body.dark {
     background: var(--gutter-dark);
   }
 
-  .global-dropdown-body {
+  .dropdown-body {
     background: var(--background-dark);
     box-shadow: 0 1px 3px 0 var(--border-dark);
   }
@@ -1317,6 +1384,7 @@ body.dark {
   .input-label,
   .select-label,
   .text-muted,
+  .toggle-label,
   .title {
     color: #999;
   }
@@ -1364,8 +1432,16 @@ body.dark {
   }
 
   .header-project-name,
-  .global-dropdown-sectionName,
-  .global-dropdown p {
+  .dropdown-sectionName,
+  .dropdown p {
+    color: var(--color-dark);
+  }
+
+  .navigation {
+    border-color: var(--border-dark);
+  }
+
+  .navigation-item--active svg {
     color: var(--color-dark);
   }
 }

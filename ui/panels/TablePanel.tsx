@@ -34,31 +34,28 @@ export async function evalColumnPanel(
     });
     const resultMeta = (panels[panelIndex] || {}).resultMeta;
     if (!resultMeta || !resultMeta.value) {
+      console.trace(panelSource, panels, resultMeta, panelId);
       throw new InvalidDependentPanelError(panelSource);
     }
     const { value } = resultMeta;
-    try {
-      const valueWithRequestedColumns = columnsFromObject(
-        value,
-        columns,
-        panelSource
-      );
-      const s = shape(valueWithRequestedColumns);
-      return {
-        value: valueWithRequestedColumns,
-        preview: preview(valueWithRequestedColumns),
-        shape: s,
-        loading: false,
-        stdout: '',
-        lastRun,
-        elapsed: new Date().valueOf() - lastRun.valueOf(),
-        size: value ? JSON.stringify(value).length : 0,
-        arrayCount: s.kind === 'array' ? (value || []).length : null,
-        contentType: 'application/json',
-      };
-    } catch (e) {
-      throw e;
-    }
+    const valueWithRequestedColumns = columnsFromObject(
+      value,
+      columns,
+      panelSource
+    );
+    const s = shape(valueWithRequestedColumns);
+    return {
+      value: valueWithRequestedColumns,
+      preview: preview(valueWithRequestedColumns),
+      shape: s,
+      loading: false,
+      stdout: '',
+      lastRun,
+      elapsed: new Date().valueOf() - lastRun.valueOf(),
+      size: value ? JSON.stringify(value).length : 0,
+      arrayCount: s.kind === 'array' ? (value || []).length : null,
+      contentType: 'application/json',
+    };
   }
 
   return await panelRPC('eval', panelId);
@@ -93,10 +90,11 @@ export function TablePanelDetails({
         return p.id === panel.table.panelSource;
       }) || {}
     ).resultMeta || new PanelResult();
+  const shape = data.shape;
   React.useEffect(
     function addInitialFields() {
       const fields = unusedFields(
-        data?.shape,
+        shape,
         ...panel.table.columns.map(mapColumnToField)
       );
 
@@ -105,7 +103,7 @@ export function TablePanelDetails({
         updatePanel(panel);
       }
     },
-    [panel.table.panelSource, data]
+    [panel, updatePanel, panel.table.panelSource, shape]
   );
 
   return (
@@ -198,7 +196,7 @@ export function TablePanelDetails({
   );
 }
 
-export function TablePanel({ panel, panels }: PanelBodyProps<TablePanelInfo>) {
+export function TablePanel({ panel }: PanelBodyProps<TablePanelInfo>) {
   const data = panel.resultMeta || new PanelResult();
 
   let valueAsArray: Array<any> = [];
@@ -267,8 +265,8 @@ export const tablePanel: PanelUIDetails<TablePanelInfo> = {
   details: TablePanelDetails,
   body: TablePanel,
   previewable: false,
-  factory: function (pageId: string) {
-    return new TablePanelInfo(pageId);
+  factory: function (pageId: string, name: string) {
+    return new TablePanelInfo(pageId, { name });
   },
   hasStdout: false,
   info: null,

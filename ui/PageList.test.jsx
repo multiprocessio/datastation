@@ -6,6 +6,7 @@ const {
   LiteralPanelInfo,
   ProgramPanelInfo,
 } = require('../shared/state');
+const { LocalStorageStore } = require('./ProjectStore');
 const { LANGUAGES } = require('../shared/languages');
 const { makeReevalPanel } = require('./PageList');
 
@@ -53,11 +54,14 @@ for (const language of TESTS) {
     };
 
     const before = new Date();
-    const reevalPanel = makeReevalPanel(project.pages[0], project, (panel) => {
+    const store = new LocalStorageStore();
+    store.update(project.projectName, project);
+    const reevalPanel = makeReevalPanel(project, (panel) => {
       let i = 0;
       for (const p of project.pages[0].panels) {
         if (p.id === panel.id) {
           project.pages[0].panels[i] = panel;
+          store.update(project.projectName, project);
           return;
         }
         i++;

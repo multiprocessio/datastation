@@ -2,7 +2,7 @@ import { IconTrash } from '@tabler/icons';
 import React from 'react';
 import { MODE } from '../shared/constants';
 import { LANGUAGES } from '../shared/languages';
-import { mergeDeep } from '../shared/object';
+import { mergeDeep, newId } from '../shared/object';
 import {
   GetSettingsRequest,
   GetSettingsResponse,
@@ -23,7 +23,7 @@ export const SettingsContext = React.createContext<{
   setState: (a0: Partial<SettingsT>) => void;
 }>({
   state: new SettingsT(''),
-  setState(a) {
+  setState() {
     throw new Error('Context not initialized.');
   },
 });
@@ -39,7 +39,9 @@ export function useSettings(): [SettingsT, (s: SettingsT) => Promise<void>] {
           settings,
           JSON.parse(localStorage.getItem('settings'))
         );
-      } catch (e) {}
+      } catch (e) {
+        // Do nothing
+      }
 
       setSettingsInternal(settings);
     }
@@ -98,7 +100,7 @@ export function Settings() {
     <div className="card settings">
       <h1>Settings</h1>
       <div className="form">
-        <FormGroup major label="Visual">
+        <FormGroup major label="General">
           <div className="form-row">
             <Toggle
               label={settings.theme !== 'dark' ? 'Light Mode' : 'Dark Mode'}
@@ -109,12 +111,25 @@ export function Settings() {
               }}
             />
           </div>
-          {MODE === 'desktop' && (
-            <Alert type="warning">
-              After making changes, restart DataStation for them to take effect
-              across all windows.
-            </Alert>
-          )}
+          <div className="form-row form-row--multi">
+            <Input
+              onChange={function handleMaxStdoutSizeChange(newValue: string) {
+                settings.stdoutMaxSize = +newValue || 0;
+                setSettings(settings);
+              }}
+              label="Max Stdout/Stderr Size"
+              type="number"
+              value={settings.stdoutMaxSize}
+            />
+            <Button
+              onClick={function resetMaxStdoutSize() {
+                settings.stdoutMaxSize = 100_000;
+                setSettings(settings);
+              }}
+            >
+              Reset
+            </Button>
+          </div>
         </FormGroup>
         {MODE !== 'browser' && (
           <>
@@ -123,7 +138,7 @@ export function Settings() {
                 .sort()
                 .filter((k) => k !== 'sql')
                 .map((languageId) => (
-                  <div className="form-row form-row--multi">
+                  <div key={languageId} className="form-row form-row--multi">
                     <Input
                       onChange={function handleLanguagePathChange(
                         newValue: string
@@ -159,34 +174,40 @@ export function Settings() {
 
             <FormGroup major label="Custom CA Certificates">
               {settings.caCerts.map((cert, i) => {
-                <div className="form-row form-row--multi">
-                  <FileInput
-                    onChange={(v) => {
-                      cert.file = v;
-                    }}
-                    allowFilePicker={MODE === 'desktop'}
-                    value={cert.file}
-                    label="Location"
-                  />
-                  <Button
-                    icon
-                    onClick={() => {
-                      settings.caCerts.splice(i, 1);
-                      setSettings(settings);
-                    }}
-                  >
-                    <IconTrash />
-                  </Button>
-                </div>;
+                return (
+                  <div key={cert.id} className="form-row form-row--multi">
+                    <FileInput
+                      onChange={(v) => {
+                        cert.file = v;
+                        setSettings(settings);
+                      }}
+                      allowFilePicker={MODE === 'desktop'}
+                      allowManualEntry={MODE !== 'desktop'}
+                      value={cert.file}
+                      label="Location"
+                    />
+                    <Button
+                      icon
+                      onClick={() => {
+                        settings.caCerts.splice(i, 1);
+                        setSettings(settings);
+                      }}
+                    >
+                      <IconTrash />
+                    </Button>
+                  </div>
+                );
               })}
-              <Button
-                onClick={() => {
-                  settings.caCerts.push({ file: '' });
-                  setSettings(settings);
-                }}
-              >
-                Add CA Cert
-              </Button>
+              <div className="form-row">
+                <Button
+                  onClick={() => {
+                    settings.caCerts.push({ file: '', id: newId() });
+                    setSettings(settings);
+                  }}
+                >
+                  Add CA Cert
+                </Button>
+              </div>
 
               <Alert type="info">
                 <div>

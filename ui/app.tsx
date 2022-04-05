@@ -1,21 +1,26 @@
+import {
+  IconCalendar,
+  IconCode,
+  IconFiles,
+  IconLayoutDashboard,
+  IconSettings,
+  TablerIcon,
+} from '@tabler/icons';
 import * as React from 'react';
 import { MODE, MODE_FEATURES } from '../shared/constants';
 import { LANGUAGES } from '../shared/languages';
 import '../shared/polyfill';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { Loading } from './components/Loading';
-import { Version } from './components/Version';
-import { ConnectorList } from './ConnectorList';
+import { Editor } from './Editor';
 import { Header, loadDefaultProject } from './Header';
 import { MakeSelectProject } from './MakeSelectProject';
-import { PageList } from './PageList';
-import { ServerList } from './ServerList';
+import { Navigation } from './Navigation';
+import { NotFound } from './NotFound';
 import { Settings, SettingsContext, useSettings } from './Settings';
 import { useShortcuts } from './shortcuts';
-import { Sidebar } from './Sidebar';
 import { ProjectContext, useProjectState } from './state';
-import { Updates } from './Updates';
-import { UrlStateContext, useUrlState } from './urlState';
+import { DefaultView, UrlStateContext, useUrlState } from './urlState';
 
 if (MODE === 'browser') {
   Object.values(LANGUAGES).map(function processLanguageInit(l) {
@@ -28,9 +33,68 @@ if (MODE === 'browser') {
   });
 }
 
-export function App() {
-  const [urlState, setUrlState] = useUrlState();
-  const [state, crud] = useProjectState(urlState.projectId, urlState.page);
+type Routes = Array<{
+  endpoint: string;
+  view: React.FC;
+  title: string;
+  icon: TablerIcon;
+}>;
+
+export function defaultRoutes(): Routes {
+  function makeServerRequired(title: string) {
+    return function ServerRequired() {
+      return (
+        <div className="card card--center">
+          <h1>{title}</h1>
+          <p>Must be running the DataStation server to access this feature.</p>
+        </div>
+      );
+    };
+  }
+
+  return [
+    {
+      endpoint: 'editor',
+      view: Editor,
+      title: 'Editor',
+      icon: IconCode,
+    },
+    {
+      endpoint: 'dashboard',
+      view: makeServerRequired('Dashboards'),
+      title: 'Dashboards',
+      icon: IconLayoutDashboard,
+    },
+    {
+      endpoint: 'exports',
+      view: makeServerRequired('Exports'),
+      title: 'Exports',
+      icon: IconCalendar,
+    },
+    MODE === 'server'
+      ? {
+          endpoint: 'projects',
+          view: MakeSelectProject,
+          title: 'Switch project',
+          icon: IconFiles,
+        }
+      : null,
+    {
+      endpoint: 'settings',
+      view: Settings,
+      title: 'Settings',
+      icon: IconSettings,
+    },
+  ].filter(Boolean);
+}
+
+export function App<T extends DefaultView = DefaultView>({
+  routes,
+}: {
+  routes: Routes;
+}) {
+  const [urlState, setUrlState] = useUrlState<T>();
+  const [state, crud] = useProjectState(urlState.projectId);
   React.useEffect(
     function setDocumentTitle() {
       if (state && state.projectName) {
@@ -41,7 +105,7 @@ export function App() {
         }
       }
     },
-    [state && state.projectName]
+    [state, state?.projectName, urlState?.view]
   );
 
   const [settings, setSettings] = useSettings();
@@ -51,7 +115,7 @@ export function App() {
         document.body.className = settings.theme;
       }
     },
-    [settings && settings.theme]
+    [settings, settings?.theme]
   );
 
   useShortcuts(urlState, setUrlState);
@@ -68,7 +132,7 @@ export function App() {
       loadDefaultProject();
       setLoadingDefault(false);
     }
-  });
+  }, [urlState.projectId, loadingDefault]);
 
   let main = <Loading />;
   if (!state || !settings) {
@@ -79,49 +143,15 @@ export function App() {
     if (!MODE_FEATURES.useDefaultProject) {
       main = <MakeSelectProject />;
     }
-  } else if (urlState.view === 'settings') {
-    main = <Settings />;
   } else {
-    // This allows us to render the sidebar in tests where we
-    // prepopulate connectors and servers
-    const hasSidebar =
-      Boolean(
-        MODE_FEATURES.connectors ||
-          state.connectors?.length ||
-          state.servers?.length
-      ) && urlState.view === 'editor';
-
+    // No clue why this needs to be casted. T must extend DefaultView
+    // and DefaultView contains 'editor'!!!
+    const view = urlState.view || ('editor' as T);
+    const Route = routes.find((r) => r.endpoint === view)?.view || NotFound;
     main = (
-      <React.Fragment>
-        {urlState.projectId && hasSidebar && (
-          <Sidebar>
-            <ConnectorList
-              state={state}
-              updateConnector={crud.updateConnector}
-              deleteConnector={crud.deleteConnector}
-            />
-            <ServerList
-              state={state}
-              updateServer={crud.updateServer}
-              deleteServer={crud.deleteServer}
-            />
-            <ErrorBoundary>
-              <Updates />
-            </ErrorBoundary>
-          </Sidebar>
-        )}
-        <div className="main-body">
-          <PageList
-            state={state}
-            updatePage={crud.updatePage}
-            deletePage={crud.deletePage}
-            updatePanel={crud.updatePanel}
-            pageIndex={urlState.page % (state.pages || []).length}
-            setPageIndex={(i) => setUrlState({ page: i, view: 'editor' })}
-          />
-          <Version />
-        </div>
-      </React.Fragment>
+      <ErrorBoundary>
+        <Route />
+      </ErrorBoundary>
     );
   }
 
@@ -134,8 +164,9 @@ export function App() {
           value={{ state: settings, setState: setSettings }}
         >
           <div className={`app app--${MODE} app--${settings.theme}`}>
-            <Header />
+            {MODE_FEATURES.appHeader && <Header />}
             <main className={'view-' + (urlState.view || 'editor')}>
+              {urlState.projectId && <Navigation pages={routes} />}
               {main}
             </main>
           </div>

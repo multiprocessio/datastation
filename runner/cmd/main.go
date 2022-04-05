@@ -75,22 +75,23 @@ func main() {
 
 	ec := runner.NewEvalContext(*settings, fsBase)
 
-	err = ec.Eval(projectId, panelId)
-	if err != nil {
-		runner.Logln("Failed to eval: %s", err)
+	errToWrite, output := ec.Eval(projectId, panelId)
+	if errToWrite != nil {
+		runner.Logln("Failed to eval: %s", errToWrite)
 
-		if _, ok := err.(*runner.DSError); !ok {
-			err = runner.Edse(err)
-			err.(*runner.DSError).Stack = "Unknown"
-		}
-
-		err := runner.WriteJSONFile(panelMetaOut, map[string]any{
-			"exception": err,
-		})
-		if err != nil {
-			runner.Fatalln("Could not write panel meta out: %s", err)
+		if _, ok := errToWrite.(*runner.DSError); !ok {
+			errToWrite = runner.Edse(errToWrite)
+			errToWrite.(*runner.DSError).Stack = "Unknown"
 		}
 
 		// Explicitly don't fail here so that the parent can read the exception from disk
+	}
+
+	err = runner.WriteJSONFile(panelMetaOut, map[string]any{
+		"exception": errToWrite,
+		"stdout":    output,
+	})
+	if err != nil {
+		runner.Fatalln("Could not write panel meta out: %s", errToWrite)
 	}
 }

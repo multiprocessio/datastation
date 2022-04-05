@@ -6,18 +6,20 @@ import {
   WindowAsyncRPC,
 } from '../shared/rpc';
 import { PanelResult } from '../shared/state';
-import { getUrlState } from './urlState';
+import { DefaultView, getUrlState } from './urlState';
 
-export async function asyncRPC<Request = void, Response = void>(
-  resource: Endpoint,
-  body: Request
-): Promise<Response> {
-  const { projectId } = getUrlState();
+export async function asyncRPC<
+  Request = void,
+  Response = void,
+  EndpointT extends string = Endpoint,
+  ViewT extends DefaultView = DefaultView
+>(resource: EndpointT, body: Request): Promise<Response> {
+  const { projectId } = getUrlState<ViewT>();
 
   if (MODE === 'desktop') {
-    // this method is exposed by ./desktop/preload.ts in Electron environments
+    // this method is exposed by ../desktop/preload.ts in Electron environments
     const arpc = (window as any).asyncRPC as WindowAsyncRPC;
-    return arpc(resource, projectId, body);
+    return arpc<Request, Response, EndpointT>(resource, projectId, body);
   }
 
   const rsp = await window.fetch(

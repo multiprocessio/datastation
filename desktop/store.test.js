@@ -84,18 +84,22 @@ test('write project with encrypted secrets, read with nulled secrets', async () 
     await updateServer.handler(projectId, {
       data: testServer,
       position: 0,
+      insert: true,
     });
     await updateConnector.handler(projectId, {
       data: testDatabase,
       position: 0,
+      insert: true,
     });
     await updatePage.handler(projectId, {
       data: { ...testPage },
       position: 0,
+      insert: true,
     });
     await updatePanel.handler(projectId, {
       data: testPanel,
       position: 0,
+      insert: true,
     });
 
     const onDisk = await getProject.handler(null, { projectId }, null, false);
@@ -125,6 +129,7 @@ test('write project with encrypted secrets, read with nulled secrets', async () 
     // Time objects don't compare well
     readProject.pages[0].panels[0].lastEdited =
       testProject.pages[0].panels[0].lastEdited = null;
+    testProject.pages[0].panels[0].defaultModified = false;
     // Super weird but it fails saying "serializes to the same string" even when you use spread operator.
     expect(JSON.stringify(readProject)).toStrictEqual(
       JSON.stringify(ProjectState.fromJSON(testProject))
@@ -204,21 +209,25 @@ test('updates works correctly', async () => {
     await updateServer.handler(projectId, {
       data: testServer,
       position: 0,
+      insert: true,
     });
     // Add the database
     await updateConnector.handler(projectId, {
       data: testDatabase,
       position: 0,
+      insert: true,
     });
     // Add the page
     await updatePage.handler(projectId, {
       data: testPage,
       position: 0,
+      insert: true,
     });
     // Add the panel
     await updatePanel.handler(projectId, {
       data: { ...testPanel },
       position: 0,
+      insert: true,
     });
 
     // Update the panel
@@ -226,6 +235,7 @@ test('updates works correctly', async () => {
     await updatePanel.handler(projectId, {
       data: { ...testPanel },
       position: 0,
+      insert: false,
     });
 
     // Update the page
@@ -233,6 +243,7 @@ test('updates works correctly', async () => {
     await updatePage.handler(projectId, {
       data: testPage,
       position: 0,
+      insert: false,
     });
 
     // Update the server
@@ -240,6 +251,7 @@ test('updates works correctly', async () => {
     await updateServer.handler(projectId, {
       data: testServer,
       position: 0,
+      insert: false,
     });
 
     // Update the database
@@ -247,6 +259,7 @@ test('updates works correctly', async () => {
     await updateConnector.handler(projectId, {
       data: testDatabase,
       position: 0,
+      insert: false,
     });
 
     const read = await getProject.handler(null, {
@@ -257,6 +270,7 @@ test('updates works correctly', async () => {
     expect(read.connectors[0].name).toBe('A great database');
     expect(read.pages[0].panels[0].lastEdited > testPanel.lastEdited);
     read.pages[0].panels[0].lastEdited = testPanel.lastEdited = null;
+    testPanel.defaultModified = true;
     expect(read.pages[0].panels[0]).toStrictEqual(testPanel);
   } finally {
     const projectPath = ensureProjectFile(testProject.projectName);
@@ -295,21 +309,26 @@ test('panel reordering works correctly', async () => {
     await updatePage.handler(projectId, {
       data: testPage,
       position: 0,
+      insert: true,
     });
     // Add the panels
     await updatePanel.handler(projectId, {
       data: { ...testPanel1 },
       position: 0,
+      insert: true,
     });
     await updatePanel.handler(projectId, {
       data: { ...testPanel2 },
       position: 1,
+      insert: true,
     });
 
     // Move 2 to 1
     await updatePanel.handler(projectId, {
       data: { ...testPanel2 },
       position: 0,
+      insert: false,
+      panelPositions: [testPanel2.id, testPanel1.id],
     });
 
     const read = await getProject.handler(null, {
@@ -319,6 +338,7 @@ test('panel reordering works correctly', async () => {
     [...read.pages[0].panels, testPanel2, testPanel1].forEach((p) => {
       p.lastEdited = null;
     });
+    testPanel2.defaultModified = true;
     // Reversed
     expect(read.pages[0].panels).toStrictEqual([testPanel2, testPanel1]);
   } finally {
@@ -357,11 +377,13 @@ test('panel delete deletes the result', async () => {
     await updatePage.handler(projectId, {
       data: testPage,
       position: 0,
+      insert: true,
     });
 
     await updatePanel.handler(projectId, {
       data: testPanel,
       position: 0,
+      insert: true,
     });
 
     await updatePanelResults.handler(projectId, {

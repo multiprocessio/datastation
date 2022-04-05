@@ -1,4 +1,4 @@
-import { IpcMain, IpcMainEvent } from 'electron';
+import { BrowserWindow, IpcMain, IpcMainEvent } from 'electron';
 import { RPC_ASYNC_REQUEST, RPC_ASYNC_RESPONSE } from '../shared/constants';
 import log from '../shared/log';
 import {
@@ -184,6 +184,8 @@ export function makeDispatch<EndpointT extends string>(
   return dispatch;
 }
 
+export const OPEN_WINDOWS: Record<string, BrowserWindow> = {};
+
 export function registerRPCHandlers<EndpointT extends string>(
   ipcMain: IpcMain,
   handlers: RPCHandler<any, any, any>[],
@@ -202,6 +204,11 @@ export function registerRPCHandlers<EndpointT extends string>(
       const responseChannel = `${RPC_ASYNC_RESPONSE}:${payload.messageNumber}`;
       try {
         const rsp = await dispatch(payload, true);
+        const win = OPEN_WINDOWS[payload.projectId];
+        if (payload.resource === 'makeProject' && win) {
+          win.setSize(1400, 800);
+          win.center();
+        }
         sendIPCRendererResponse(event, responseChannel, {
           kind: 'response',
           body: rsp,

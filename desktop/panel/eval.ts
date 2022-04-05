@@ -1,18 +1,20 @@
 import { execFile } from 'child_process';
 import fs from 'fs';
 import jsesc from 'jsesc';
+import circularSafeStringify from 'json-stringify-safe';
 import { EOL } from 'os';
 import path from 'path';
 import { preview } from 'preview';
 import { shape, Shape } from 'shape';
 import { file as makeTmpFile } from 'tmp-promise';
-import * as uuid from 'uuid';
 import {
   Cancelled,
   EVAL_ERRORS,
   InvalidDependentPanelError,
+  NoResultError,
 } from '../../shared/errors';
 import log from '../../shared/log';
+import { newId } from '../../shared/object';
 import { PanelBody } from '../../shared/rpc';
 import {
   ConnectorInfo,
@@ -131,9 +133,7 @@ export async function evalInSubprocess(
       ensureFile(path.join(CODE_ROOT, 'coverage', 'fake.cov'));
       args.unshift('-test.run');
       args.unshift('^TestRunMain$');
-      args.unshift(
-        '-test.coverprofile=coverage/gorunner.' + uuid.v4() + '.cov'
-      );
+      args.unshift('-test.coverprofile=coverage/gorunner.' + newId() + '.cov');
     }
 
     log.info(`Launching "${base} ${args.join(' ')}"`);
@@ -189,20 +189,31 @@ export async function evalInSubprocess(
       }
     });
 
-    const resultMeta = fs.readFileSync(tmp.path).toString();
-    let parsePartial = !resultMeta;
+    const resultMeta = JSON.parse(fs.readFileSync(tmp.path).toString());
+    let parsePartial = typeof resultMeta.preview === 'undefined';
     if (!parsePartial) {
-      const rm: Partial<PanelResult> = JSON.parse(resultMeta);
+      const rm: Partial<PanelResult> = resultMeta;
       // Case of existing Node.js runner
       return [rm, stderr];
     }
 
     // Case of new Go runner
     const projectResultsFile = getProjectResultsFile(projectName);
-    const rm: Partial<PanelResult> = parsePartialJSONFile(
-      projectResultsFile + panel.id
-    );
-    return [rm, stderr];
+    let rm: Partial<PanelResult>;
+    try {
+      rm = parsePartialJSONFile(projectResultsFile + panel.id);
+    } catch (e) {
+      if (!e.stdout) {
+        e.stdout = resultMeta.stdout;
+      }
+
+      if (e instanceof NoResultError && resultMeta.exception) {
+        // do nothing. The underlying exception is more interesting
+      } else {
+        throw e;
+      }
+    }
+    return [{ ...rm, ...resultMeta }, stderr];
   } finally {
     try {
       if (pid) {
@@ -352,20 +363,36 @@ export const makeEvalHandler = (subprocessEval?: {
         dispatch,
         subprocessEval
       );
-
-      // This is to handle "exceptions" within the runner.
-      if (res.exception) {
-        throw res.exception;
-      }
-      // The outer try-catch is to handle exceptions within this Node code
     } catch (e) {
       log.error(e);
       res.exception = e;
-      if (!EVAL_ERRORS.find((ee) => ee.name === e.name) && stderr) {
-        // Just a generic exception, we already caught all info in `stderr`, so just throw that.
-        res.exception = stderr;
+      if (res.exception.stdout) {
+        res.stdout = res.exception.stdout;
+        delete res.exception.stdout;
       }
     }
+
+    if (
+      res.exception &&
+      !EVAL_ERRORS.find((ee) => ee.name === res.exception.name) &&
+      stderr
+    ) {
+      // Just a generic exception, we already caught all info in `stderr`, so just store that.
+      res.exception = new Error(res.stdout || stderr);
+    }
+
+    // I'm not really sure why this is necessary but sometimes the
+    // exception comes out in an object that can't be stringified. And
+    // yet I don't believe there's any throwing of errors from the Go
+    // code.
+    if (res.exception && circularSafeStringify(res.exception) === '{}') {
+      res.exception = {
+        name: res.exception.name,
+        message: res.exception.message,
+        ...res.exception,
+      };
+    }
+
     res.lastRun = start;
     res.loading = false;
     res.elapsed = new Date().valueOf() - start.valueOf();

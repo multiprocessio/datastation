@@ -175,42 +175,42 @@ func NewEvalContext(s Settings, fsBase string) EvalContext {
 	return EvalContext{s, fsBase}
 }
 
-func (ec EvalContext) Eval(projectId, panelId string) error {
+func (ec EvalContext) Eval(projectId, panelId string) (error, string) {
 	project, pageIndex, panel, err := ec.getProjectPanel(projectId, panelId)
 	if err != nil {
-		return err
+		return err, ""
 	}
 
 	panelId, ok := ec.allImportedPanelResultsExist(*project, project.Pages[pageIndex], *panel)
 	if !ok {
-		return makeErrInvalidDependentPanel(panelId)
+		return makeErrInvalidDependentPanel(panelId), ""
 	}
 
 	panel.Content, err = ec.evalMacros(panel.Content, project, pageIndex)
 	if err != nil {
-		return err
+		return err, ""
 	}
 
 	switch panel.Type {
 	case FilePanel:
 		Logln("Evaling file panel")
-		return ec.evalFilePanel(project, pageIndex, panel)
+		return ec.evalFilePanel(project, pageIndex, panel), ""
 	case HttpPanel:
 		Logln("Evaling http panel")
-		return ec.evalHTTPPanel(project, pageIndex, panel)
+		return ec.evalHTTPPanel(project, pageIndex, panel), ""
 	case LiteralPanel:
 		Logln("Evaling literal panel")
-		return ec.evalLiteralPanel(project, pageIndex, panel)
+		return ec.evalLiteralPanel(project, pageIndex, panel), ""
 	case ProgramPanel:
 		Logln("Evaling program panel")
 		return ec.evalProgramPanel(project, pageIndex, panel)
 	case DatabasePanel:
 		Logln("Evaling database panel")
-		return ec.EvalDatabasePanel(project, pageIndex, panel, nil)
+		return ec.EvalDatabasePanel(project, pageIndex, panel, nil), ""
 	case FilaggPanel:
 		Logln("Evaling database panel")
-		return ec.evalFilaggPanel(project, pageIndex, panel)
+		return ec.evalFilaggPanel(project, pageIndex, panel), ""
 	}
 
-	return makeErrUnsupported("Unsupported panel type " + string(panel.Type) + " in Go runner")
+	return makeErrUnsupported("Unsupported panel type " + string(panel.Type) + " in Go runner"), ""
 }

@@ -1,6 +1,5 @@
 rm -rf build
 yarn
-yarn electron-rebuild
 setenv UI_ESBUILD_ARGS "--minify"
 yarn build-desktop
 prepend "window.DS_CONFIG_MODE='desktop';" build/ui.js
@@ -15,6 +14,7 @@ cp icon.icns build/icon.icns
 rm -rf coverage
 yarn remove xlsx papaparse express express-session nodemailer openid-client cookie-parser chart.js ace-builds js-yaml passport react react-ace react-dom react-syntax-highlighter date-fns jsdom
 rm -rf certs
+rm -rf ee
 rm -rf *.md
 rm -rf *.yml
 rm -rf server
@@ -35,6 +35,8 @@ rm -rf desktop
 rm -rf ui
 rm -rf shared
 rm -rf releases
+
+yarn electron-rebuild
 
 # Build and package
 yarn electron-packager --asar --overwrite --icon=build/icon.png --out=releases --build-version={arg0} --app-version={arg0} . "DataStation Community Edition"

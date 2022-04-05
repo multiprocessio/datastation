@@ -39,7 +39,7 @@ export function FileInput({
   allowFilePicker,
   placeholder,
 }: Props) {
-  let inputClass = `input ${className ? ' ' + className : ''}`;
+  const inputClass = `input ${className ? ' ' + className : ''}`;
 
   const manualInput = (
     <Input
@@ -79,6 +79,10 @@ export function FileInput({
       accept={accept}
     />
   );
+
+  if (!allowManualEntry && !allowFilePicker) {
+    throw new Error('Developer error: neither manual nor file picker allowed.');
+  }
 
   return (
     <label className={inputClass}>
