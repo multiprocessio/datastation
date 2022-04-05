@@ -1,3 +1,4 @@
+const os = require('os');
 const { LANGUAGES } = require('../../shared/languages');
 const {
   InvalidDependentPanelError,
@@ -502,7 +503,7 @@ for (const subprocessName of RUNNERS) {
             },
           });
           expect(savedProject.pages[0].panels[0].resultMeta.stdout).toBe(
-            '1002\n'
+            '1002' + os.EOL
           );
           finished = true;
         },
@@ -546,7 +547,7 @@ for (const subprocessName of RUNNERS) {
         });
         expect(
           savedProject.pages[0].panels[0].resultMeta.stdout.startsWith(
-            'hey there\nTraceback'
+            'hey there' + os.EOL + 'Traceback'
           )
         ).toBe(true);
         if (e instanceof Error || e.name === 'Error') {
