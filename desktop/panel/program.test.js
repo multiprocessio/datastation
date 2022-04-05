@@ -549,7 +549,7 @@ for (const subprocessName of RUNNERS) {
             'hey there\nTraceback'
           )
         ).toBe(true);
-        if (e instanceof Error) {
+        if (e instanceof Error || e.name === 'Error') {
           finished = true;
         } else {
           throw e;
