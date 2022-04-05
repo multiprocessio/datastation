@@ -26,6 +26,8 @@ export function MakeSelectProject() {
         projectId,
       });
 
+      // So loading ui shows up while changing page.
+      setProjects([]);
       window.location.href =
         window.location.pathname + '?projectId=' + projectId;
     } catch (e) {
