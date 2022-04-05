@@ -15,12 +15,9 @@ import { Alert } from './components/Alert';
 import { Button } from './components/Button';
 import { Input } from './components/Input';
 import { Loading } from './components/Loading';
-import { UrlStateContext } from './urlState';
 
 export function MakeSelectProject() {
   const [projectNameTmp, setProjectNameTmp] = React.useState('');
-
-  const { setState: setUrlState } = React.useContext(UrlStateContext);
 
   const [makeProjectError, setMakeProjectError] = React.useState('');
   async function makeProject(projectId: string) {
