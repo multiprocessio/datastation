@@ -134,5 +134,14 @@ func (ec EvalContext) evalProgramPanel(project *ProjectState, pageIndex int, pan
 
 	Logln("Running program: %s %v", path, args)
 	combined, err := exec.Command(path, args...).CombinedOutput()
+	maxSize := 100_000
+	if ec.settings.StdoutMaxSize > 0 {
+		maxSize = ec.settings.StdoutMaxSize
+	}
+
+	if len(combined) > maxSize {
+		return err, string(combined[:maxSize]) + "..."
+	}
+
 	return err, string(combined)
 }

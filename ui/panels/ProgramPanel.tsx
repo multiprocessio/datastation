@@ -82,11 +82,11 @@ export function ProgramPanelDetails({
               {o.name}
             </option>
           ))}
-          {MODE !== 'browser' && (
+          {/* TODO: support when tested MODE !== 'browser' && (
             <option key="custom" value="custom">
               Custom
             </option>
-          )}
+          ) */}
         </Select>
       </div>
       {panel.program.type === 'custom' && (

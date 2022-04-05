@@ -580,7 +580,7 @@ export function Panel({
                         className={panelOut === 'preview' ? 'selected' : ''}
                         onClick={() => setPanelOut('preview')}
                       >
-                        Result
+                        Preview
                       </Button>
                       <Button
                         className={panelOut === 'shape' ? 'selected' : ''}

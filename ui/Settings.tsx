@@ -100,7 +100,7 @@ export function Settings() {
     <div className="card settings">
       <h1>Settings</h1>
       <div className="form">
-        <FormGroup major label="Visual">
+        <FormGroup major label="General">
           <div className="form-row">
             <Toggle
               label={settings.theme !== 'dark' ? 'Light Mode' : 'Dark Mode'}
@@ -110,6 +110,25 @@ export function Settings() {
                 setSettings(settings);
               }}
             />
+          </div>
+          <div className="form-row form-row--multi">
+            <Input
+              onChange={function handleMaxStdoutSizeChange(newValue: string) {
+                settings.stdoutMaxSize = +newValue || 0;
+                setSettings(settings);
+              }}
+              label="Max Stdout/Stderr Size"
+              type="number"
+              value={settings.stdoutMaxSize}
+            />
+            <Button
+              onClick={function resetMaxStdoutSize() {
+                settings.stdoutMaxSize = 100_000;
+                setSettings(settings);
+              }}
+            >
+              Reset
+            </Button>
           </div>
         </FormGroup>
         {MODE !== 'browser' && (

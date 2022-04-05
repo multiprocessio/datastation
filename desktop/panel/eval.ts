@@ -11,6 +11,7 @@ import {
   Cancelled,
   EVAL_ERRORS,
   InvalidDependentPanelError,
+  NoResultError,
 } from '../../shared/errors';
 import log from '../../shared/log';
 import { newId } from '../../shared/object';
@@ -205,7 +206,12 @@ export async function evalInSubprocess(
       if (!e.stdout) {
         e.stdout = resultMeta.stdout;
       }
-      throw e;
+
+      if (e instanceof NoResultError && resultMeta.exception) {
+        // do nothing. The underlying exception is more interesting
+      } else {
+        throw e;
+      }
     }
     return [{ ...rm, ...resultMeta }, stderr];
   } finally {
@@ -372,7 +378,7 @@ export const makeEvalHandler = (subprocessEval?: {
       stderr
     ) {
       // Just a generic exception, we already caught all info in `stderr`, so just store that.
-      res.exception = stderr;
+      res.exception = new Error(res.stdout || stderr);
     }
 
     // I'm not really sure why this is necessary but sometimes the
