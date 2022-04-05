@@ -28,6 +28,7 @@ and dsq for these tasks to make sense.
 ## Medium
 
 * Add caching to dsq
+* Add dump schema support to dsq
 * Autocomplete support in the UI
 * HTTP Range support for faster downloads
 * Add support for FTP
