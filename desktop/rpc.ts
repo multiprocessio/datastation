@@ -184,6 +184,8 @@ export function makeDispatch<EndpointT extends string>(
   return dispatch;
 }
 
+export const OPEN_WINDOWS: Record<string, BrowserWindow> = {};
+
 export function registerRPCHandlers<EndpointT extends string>(
   ipcMain: IpcMain,
   handlers: RPCHandler<any, any, any>[],
@@ -202,6 +204,12 @@ export function registerRPCHandlers<EndpointT extends string>(
       const responseChannel = `${RPC_ASYNC_RESPONSE}:${payload.messageNumber}`;
       try {
         const rsp = await dispatch(payload, true);
+        if (
+          payload.resource === 'makeProject' &&
+          OPEN_WINDOWS[payload.projectId]
+        ) {
+          OPEN_WINDOWS[payload.projectId].setSize(1400, 800);
+        }
         sendIPCRendererResponse(event, responseChannel, {
           kind: 'response',
           body: rsp,

@@ -9,7 +9,7 @@ import path from 'path';
 import { APP_NAME, CHAT_LINK, DEBUG, DOCS_ROOT } from '../shared/constants';
 import { OpenProjectRequest, OpenProjectResponse } from '../shared/rpc';
 import { DISK_ROOT, PROJECT_EXTENSION } from './constants';
-import { RPCHandler } from './rpc';
+import { OPEN_WINDOWS, RPCHandler } from './rpc';
 import { SETTINGS } from './settings';
 
 const menuTemplate = [
@@ -148,6 +148,7 @@ export async function openWindow(
     .join('&');
 
   win.loadURL('file://' + path.join(__dirname, 'index.html?' + params));
+  OPEN_WINDOWS[project] = win;
 }
 
 export async function openProject() {
