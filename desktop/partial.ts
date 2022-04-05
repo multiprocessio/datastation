@@ -15,28 +15,29 @@ export function parsePartialJSONFile(
     throw new NoResultError();
   }
 
-  const { size } = fs.statSync(file);
-
-  if (size < maxBytesToRead) {
-    const f = fs.readFileSync(file).toString();
-    let value: any = null;
-    try {
-      value = JSON.parse(f);
-    } catch (e) {
-      log.info('Could not parse JSON: ', e, { json: f });
-      value = {};
-    }
-    return {
-      size,
-      arrayCount: Array.isArray(value) ? value.length : null,
-      shape: shape(value),
-      preview: preview(value),
-      skipWrite: true,
-      contentType: 'application/json',
-    };
-  }
-
   try {
+    const { size } = fs.statSync(file);
+
+    if (size < maxBytesToRead) {
+      const f = fs.readFileSync(file).toString();
+      let value: any = null;
+      try {
+        value = JSON.parse(f);
+      } catch (e) {
+        log.info('Could not parse JSON: ', e, { json: f });
+        value = {};
+      }
+
+      return {
+        size,
+        arrayCount: Array.isArray(value) ? value.length : null,
+        shape: shape(value),
+        preview: preview(value),
+        skipWrite: true,
+        contentType: 'application/json',
+      };
+    }
+
     let done = false;
     let f = '';
     const incomplete = [];

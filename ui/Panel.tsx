@@ -599,7 +599,10 @@ export function Panel({
                           className={panelOut === 'stdout' ? 'selected' : ''}
                           onClick={() => setPanelOut('stdout')}
                         >
-                          Stdout/Stderr<span className="ml-1">{results.stdout ? <IconAlertTriangle /> : null}</span>
+                          Stdout/Stderr
+                          <span className="ml-1">
+                            {results.stdout ? <IconAlertTriangle /> : null}
+                          </span>
                         </Button>
                       )}
                     </div>
