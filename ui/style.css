@@ -78,6 +78,11 @@ a:hover {
   display: block;
 }
 
+.view {
+  /* Very important! Gives the main panel list it's overflow so it scrolls independent of the sidebar */
+  width: 100%;
+}
+
 .main-body {
   flex: 1;
   overflow-y: auto;

@@ -84,6 +84,10 @@ export function CodeEditor({
       return;
     }
 
+    if (editorNode.editor.container.contains(document.activeElement)) {
+      return;
+    }
+
     editorNode.editor.setValue(value);
     editorNode.editor.clearSelection();
   }, [value, editorNode]);

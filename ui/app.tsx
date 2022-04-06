@@ -165,7 +165,7 @@ export function App<T extends DefaultView = DefaultView>({
         >
           <div className={`app app--${MODE} app--${settings.theme}`}>
             {MODE_FEATURES.appHeader && <Header />}
-            <main className={'view-' + (urlState.view || 'editor')}>
+            <main className={'view view-' + (urlState.view || 'editor')}>
               {urlState.projectId && <Navigation pages={routes} />}
               {main}
             </main>
