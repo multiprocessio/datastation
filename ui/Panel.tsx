@@ -306,7 +306,14 @@ export function Panel({
   async function evalThis() {
     if (killable) {
       await killProcess();
-      setLoading(false);
+
+      // Only don't reeval if we think it's already not running.  //
+      // This allows the UI to kill any background running process that
+      // might have started on a different page or something like that.
+      if (loading) {
+        setLoading(false);
+        return;
+      }
     }
 
     setLoading(true);
@@ -416,7 +423,7 @@ export function Panel({
               </Button>
             </span>
 
-            <label className="ml-2 text-muted">
+            <label className="ml-2 text-muted" title={panel.id}>
               {PANEL_UI_DETAILS[panel.type].label}
             </label>
 

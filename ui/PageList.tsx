@@ -59,6 +59,10 @@ export function makeReevalPanel(
     // Important! Just needs to trigger a state reload.
     updatePanelInternal(panel);
 
+    if (panel.resultMeta.exception) {
+      return;
+    }
+
     // Re-run all dependent visual panels
     if (!VISUAL_PANELS.includes(panel.type)) {
       for (const dep of page.panels) {
