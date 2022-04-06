@@ -84,7 +84,14 @@ export function CodeEditor({
       return;
     }
 
+    // Without this the clearSelection call below moves the cursor to the end of the textarea destroying in-action edits
+    if (editorNode.editor.container.contains(document.activeElement)) {
+      return;
+    }
+
     editorNode.editor.setValue(value);
+    // setValue() also highlights the inserted values so this gets rid
+    // of the highlight. Kind of a weird API really
     editorNode.editor.clearSelection();
   }, [value, editorNode]);
 

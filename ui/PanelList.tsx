@@ -139,7 +139,7 @@ export function PanelList({
         });
       }
 
-      updatePanel(next, panelIndex, true);
+      updatePanel(next, panelIndex + 1, true);
     }
 
     const offerToTable =
