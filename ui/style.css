@@ -86,7 +86,7 @@ a:hover {
 /* Correct for header height */
 .app--server .view,
 .app--browser .view {
-    height: calc(100% - 39px);
+  height: calc(100% - 39px);
 }
 
 .main-body {
