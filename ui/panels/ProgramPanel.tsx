@@ -186,7 +186,7 @@ export function dotAccessPanelShapeCompletions(
       value: path,
       score: 1000,
       meta: 'Field',
-    }));
+    })).filter(c => !c.value.includes('.'));
   });
 }
 
@@ -216,7 +216,7 @@ export function stringPanelShapeCompletions(
       value: path,
       score: 1000,
       meta: 'Field',
-    }));
+    })).filter(c => c && !c.value.includes('\\\\'));
   });
 }
 
