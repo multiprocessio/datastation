@@ -181,12 +181,14 @@ export function dotAccessPanelShapeCompletions(
       return [];
     }
 
-    return (allFields(shape) || []).map(([path, shape]) => ({
-      name: panel.name + ': ' + shapeToString(shape).replace('\n', ' '),
-      value: path,
-      score: 1000,
-      meta: 'Field',
-    })).filter(c => !c.value.includes('.'));
+    return (allFields(shape) || [])
+      .map(([path, shape]) => ({
+        name: panel.name + ': ' + shapeToString(shape).replace('\n', ' '),
+        value: path,
+        score: 1000,
+        meta: 'Field',
+      }))
+      .filter((c) => !c.value.includes('.'));
   });
 }
 
@@ -211,12 +213,14 @@ export function stringPanelShapeCompletions(
       return [];
     }
 
-    return (allFields(shape) || []).map(([path, shape]) => ({
-      name: panel.name + ': ' + shapeToString(shape).replace('\n', ' '),
-      value: path,
-      score: 1000,
-      meta: 'Field',
-    })).filter(c => c && !c.value.includes('\\\\'));
+    return (allFields(shape) || [])
+      .map(([path, shape]) => ({
+        name: panel.name + ': ' + shapeToString(shape).replace('\n', ' '),
+        value: path,
+        score: 1000,
+        meta: 'Field',
+      }))
+      .filter((c) => c && !c.value.includes('\\\\'));
   });
 }
 
