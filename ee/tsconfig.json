@@ -12,7 +12,8 @@
     "typeRoots": [
       "../node_modules/@types",
       "../type-overrides",
-      "./node_modules/@types"
+      "./node_modules/@types",
+      "./type-overrides"
     ],
     "resolveJsonModule": true
   },
