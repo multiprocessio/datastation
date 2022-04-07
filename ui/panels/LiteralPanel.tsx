@@ -74,7 +74,7 @@ export function LiteralPanelBody({
 
   return (
     <CodeEditor
-      id={panel.id}
+      id={'editor-' + panel.id}
       onKeyDown={keyboardShortcuts}
       value={panel.content}
       onChange={(value: string) => {

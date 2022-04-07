@@ -137,7 +137,7 @@ export function FilterAggregatePanelDetails({
         <div className="form-row">
           <CodeEditor
             singleLine
-            id={panel.id + 'filter'}
+            id={'filter-' + panel.id}
             label="Filter"
             placeholder="x LIKE '%town%' AND y IN (1, 2)"
             value={panel.filagg.filter}

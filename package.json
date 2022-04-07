@@ -28,7 +28,7 @@
   "dependencies": {
     "@tabler/icons": "^1.56.0",
     "ace-builds": "^1.4.13",
-    "better-sqlite3": "multiprocessio/better-sqlite3#11866f1",
+    "better-sqlite3": "^7.5.1",
     "chart.js": "^3.5.1",
     "cookie-parser": "^1.4.5",
     "core-js": "^3.21.1",

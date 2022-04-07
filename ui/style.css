@@ -80,7 +80,13 @@ a:hover {
 
 .view {
   /* Very important! Gives the main panel list it's overflow so it scrolls independent of the sidebar */
-  width: 100%;
+  height: 100%;
+}
+
+/* Correct for header height */
+.app--server .view,
+.app--browser .view {
+  height: calc(100% - 39px);
 }
 
 .main-body {

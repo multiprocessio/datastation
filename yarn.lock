@@ -1448,9 +1448,10 @@ base64-js@^1.3.1, base64-js@^1.5.1:
   resolved "https://registry.yarnpkg.com/base64-js/-/base64-js-1.5.1.tgz#1b1b440160a5bf7ad40b650f095963481903930a"
   integrity sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA==
 
-better-sqlite3@multiprocessio/better-sqlite3#11866f1:
-  version "8.0.2"
-  resolved "https://codeload.github.com/multiprocessio/better-sqlite3/tar.gz/11866f1b04557c10c7690d87809de21753667aa9"
+better-sqlite3@^7.5.1:
+  version "7.5.1"
+  resolved "https://registry.yarnpkg.com/better-sqlite3/-/better-sqlite3-7.5.1.tgz#22c87135b871afd60f7cb0469d73d5339ad38665"
+  integrity sha512-+i6tH1y9KEIol1iYpZJrqDwBDQZGHioDENU49Rnidorp3bSXvw/QTYDjQGq9+TFF7RX4q0YV1sEOIRq4vDZdRg==
   dependencies:
     bindings "^1.5.0"
     prebuild-install "^7.0.0"
