@@ -217,11 +217,17 @@ export function DatabasePanelDetails({
 export function DatabasePanelBody({
   updatePanel,
   panel,
+  panels,
   keyboardShortcuts,
 }: PanelBodyProps<DatabasePanelInfo>) {
   return (
     <CodeEditor
-      id={panel.id}
+      panels={panels.map((p) => ({
+        name: p.name,
+        id: p.id,
+        shape: p.resultMeta?.shape,
+      }))}
+      id={'editor-' + panel.id}
       onKeyDown={keyboardShortcuts}
       value={panel.content}
       onChange={(value: string) => {
