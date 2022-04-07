@@ -1,10 +1,12 @@
+import { Ace } from 'ace-builds';
 import React from 'react';
-import { shape } from 'shape';
+import { shape, toString as shapeToString } from 'shape';
 import { DOCS_ROOT, MODE } from '../../shared/constants';
 import { LANGUAGES, SupportedLanguages } from '../../shared/languages';
 import { PanelInfo, PanelResult, ProgramPanelInfo } from '../../shared/state';
 import { panelRPC } from '../asyncRPC';
 import { CodeEditor } from '../components/CodeEditor';
+import { allFields } from '../components/FieldPicker';
 import { Input } from '../components/Input';
 import { Select } from '../components/Select';
 import { PanelBodyProps, PanelDetailsProps, PanelUIDetails } from './types';
@@ -83,10 +85,10 @@ export function ProgramPanelDetails({
             </option>
           ))}
           {/* TODO: support when tested MODE !== 'browser' && (
-            <option key="custom" value="custom">
+              <option key="custom" value="custom">
               Custom
-            </option>
-          ) */}
+              </option>
+              ) */}
         </Select>
       </div>
       {panel.program.type === 'custom' && (
@@ -107,6 +109,130 @@ export function ProgramPanelDetails({
   );
 }
 
+export function builtinCompletions(
+  tokenIteratorFactory: () => Ace.TokenIterator
+) {
+  const ti = tokenIteratorFactory();
+  const token = ti.getCurrentToken();
+
+  if (token.type !== 'identifier') {
+    return [];
+  }
+
+  return [
+    {
+      value: 'DM_getPanel("indexOrName")',
+      meta: 'Builtin',
+      score: 1000,
+    },
+    {
+      value: 'DM_setPanel(result)',
+      meta: 'Builtin',
+      score: 1000,
+    },
+  ];
+}
+
+export function panelNameCompletions(
+  tokenIteratorFactory: () => Ace.TokenIterator,
+  panels: Array<PanelInfo>
+) {
+  const ti = tokenIteratorFactory();
+  const token = ti.getCurrentToken();
+  ti.stepBackward();
+  const maybeLParen = ti.getCurrentToken();
+  ti.stepBackward();
+  const maybeDmCall = ti.getCurrentToken();
+
+  if (
+    maybeDmCall.value === 'DM_getPanel' &&
+    maybeLParen.value === '(' &&
+    token.type === 'string'
+  ) {
+    return panels.map(
+      (panel) =>
+        ({
+          value: panel.name,
+          meta: 'Panel',
+          score: 1000,
+        } as Ace.Completion)
+    );
+  }
+
+  return [];
+}
+
+export function dotAccessPanelShapeCompletions(
+  tokenIteratorFactory: () => Ace.TokenIterator,
+  panels: Array<PanelInfo>
+) {
+  const ti = tokenIteratorFactory();
+
+  // Look for x.a(cursor) pattern
+  if (!ti.stepBackward()) return [];
+  if (ti.getCurrentToken().value !== '.') return [];
+
+  if (!ti.stepBackward()) return [];
+  if (ti.getCurrentToken().type !== 'identifier') return [];
+
+  return (panels || []).map(function panelShapeToFields(panel) {
+    const shape = panel?.resultMeta?.shape;
+    if (!shape) {
+      return [];
+    }
+
+    return (allFields(shape) || []).map(([path, shape]) => ({
+      name: panel.name + ': ' + shapeToString(shape).replace('\n', ' '),
+      value: path,
+      score: 1000,
+      meta: 'Field',
+    }));
+  });
+}
+
+export function stringPanelShapeCompletions(
+  tokenIteratorFactory: () => Ace.TokenIterator,
+  panels: Array<PanelInfo>
+) {
+  // No shapes necessary in a DM_getPanel call
+  if (panelNameCompletions(tokenIteratorFactory, panels).length) {
+    return [];
+  }
+
+  const ti = tokenIteratorFactory();
+  const token = ti.getCurrentToken();
+  if (token.type !== 'string') {
+    return [];
+  }
+
+  return (panels || []).map(function panelShapeToFields(panel) {
+    const shape = panel?.resultMeta?.shape;
+    if (!shape) {
+      return [];
+    }
+
+    return (allFields(shape) || []).map(([path, shape]) => ({
+      name: panel.name + ': ' + shapeToString(shape).replace('\n', ' '),
+      value: path,
+      score: 1000,
+      meta: 'Field',
+    }));
+  });
+}
+
+export function makeAutocomplete(panels: Array<PanelInfo>) {
+  return (tokenIteratorFactory: () => Ace.TokenIterator, prefix: string) => {
+    return [
+      ...builtinCompletions(tokenIteratorFactory),
+      ...panelNameCompletions(tokenIteratorFactory, panels),
+      ...dotAccessPanelShapeCompletions(tokenIteratorFactory, panels),
+      ...stringPanelShapeCompletions(tokenIteratorFactory, panels),
+    ]
+      .flat()
+      .filter((c) => c && c.value.startsWith(prefix));
+  };
+}
+
 export function ProgramPanelBody({
   updatePanel,
   panel,
@@ -117,11 +243,7 @@ export function ProgramPanelBody({
 
   return (
     <CodeEditor
-      panels={panels.map((p) => ({
-        name: p.name,
-        id: p.id,
-        shape: p.resultMeta?.shape,
-      }))}
+      autocomplete={makeAutocomplete(panels.filter((p) => p.id !== panel.id))}
       id={'editor-' + panel.id}
       onKeyDown={keyboardShortcuts}
       value={panel.content}

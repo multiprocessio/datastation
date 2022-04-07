@@ -1,11 +1,9 @@
 import log from '../../shared/log';
-import { Shape } from 'shape';
 import { useDebouncedCallback } from 'use-debounce';
 import * as React from 'react';
 import { SettingsContext } from '../Settings';
 import { Tooltip } from './Tooltip';
 import { INPUT_SYNC_PERIOD } from './Input';
-import { allFields } from './FieldPicker';
 
 // Must be loaded before other ace-builds imports
 import AceEditor from 'react-ace';
@@ -30,7 +28,7 @@ import 'ace-builds/src-min-noconflict/theme-dracula';
 // This steals Ctrl-a so this should not be a default
 //import 'ace-builds/src-min-noconflict/keybinding-emacs';
 
-function skipWhitespaceBackward(it: any /* TODO: type */) {
+export function skipWhitespaceBackward(it: Ace.TokenIterator) {
   while (!it.getCurrentToken().value.trim()) {
     if (!it.stepBackward()) {
       return;
@@ -38,7 +36,7 @@ function skipWhitespaceBackward(it: any /* TODO: type */) {
   }
 }
 
-function skipWhitespaceForward(it: any /* TODO: type */) {
+export function skipWhitespaceForward(it: Ace.TokenIterator) {
   while (!it.getCurrentToken().value.trim()) {
     if (!it.stepForward()) {
       return;
@@ -48,12 +46,12 @@ function skipWhitespaceForward(it: any /* TODO: type */) {
 
 export function CodeEditor({
   value,
-  panels,
   onChange,
   className,
   placeholder,
   disabled,
   onKeyDown,
+  autocomplete,
   language,
   id,
   singleLine,
@@ -65,8 +63,11 @@ export function CodeEditor({
   className?: string;
   disabled?: boolean;
   onKeyDown?: (e: React.KeyboardEvent) => void;
-  panels?: Array<{ id: string; name: string; shape?: Shape }>;
   placeholder?: string;
+  autocomplete?: (
+    tokenIteratorFactory: () => Ace.TokenIterator,
+    prefix: string
+  ) => Array<Ace.Completion>;
   language: string;
   id: string;
   singleLine?: boolean;
@@ -120,7 +121,6 @@ export function CodeEditor({
     editorRef.editor.clearSelection();
   }, [value, editorRef]);
 
-  const autocomplete = Boolean(panels && panels.length);
   React.useEffect(() => {
     if (!autocomplete) {
       return;
@@ -133,7 +133,7 @@ export function CodeEditor({
         editor: AceEditor,
         session: Ace.EditSession,
         pos: Ace.Point,
-        _prefix: string,
+        prefix: string,
         callback: Ace.CompleterCallback
       ) => {
         // This gets registered globally which is kind of weird.  //
@@ -144,112 +144,8 @@ export function CodeEditor({
         }
 
         try {
-          const completions: Ace.Completion[] = [];
-
-          const tokenIterator = new TokenIterator(session, pos.row, pos.column);
-          const token = tokenIterator.getCurrentToken();
-
-          if (token.type === 'identifier') {
-            completions.push(...[
-              {
-                value: 'DM_getPanel("indexOrName")',
-                meta: 'Builtin',
-              },
-              {
-                value: 'DM_setPanel(result)',
-                meta: 'Builtin',
-              },
-            ].filter(c => c.value.startsWith(token.value)));
-          }
-
-          tokenIterator.stepBackward();
-          const lParenOrDot = tokenIterator.getCurrentToken();
-          tokenIterator.stepBackward();
-          const functionOrIdent = tokenIterator.getCurrentToken();
-          if (functionOrIdent.value === 'DM_getPanel' && lParenOrDot.value === '(' && token.type === 'string') {
-            completions.push(
-              ...panels.map(
-                (panel) =>
-                ({
-                  value: panel.name,
-                  meta: 'Panel',
-                } as Ace.Completion)
-              )
-            );
-          }
-
-          if (language === 'sql') {
-          } else {
-            console.log(1, functionOrIdent, lParenOrDot, token);
-            if (functionOrIdent.type === 'identifier' && lParenOrDot.value === '.') {
-              // Make sure this was an identifier that was declared here
-              // before trying to autocomplete it.
-
-              let lastToken = functionOrIdent;
-              let panelShape: Shape = null;
-              console.log(2);
-              outer:
-              while (tokenIterator.stepBackward()) {
-                // Skip whitespace
-                skipWhitespaceBackward(tokenIterator);
-                console.log(3);
-                const token = tokenIterator.getCurrentToken();
-
-                console.log(3.5, token, lastToken);
-                // Look for an assignment/declaration
-                if (lastToken.value.includes('=') && token.value === functionOrIdent.value) {
-                  console.log(4, tokenIterator.getCurrentToken(), { toMatch: functionOrIdent.value });
-                  console.log(tokenIterator, 'before');
-                  skipWhitespaceForward(tokenIterator);
-                  console.log(tokenIterator, 'after');
-                  console.log(4.5, tokenIterator.getCurrentToken());
-                  if (tokenIterator.getCurrentToken().value !== 'DM_getPanel') {
-                    tokenIterator.stepBackward(); // Avoid infinite loop
-                    lastToken = token;
-                    continue;
-                  }
-
-                  console.log(5);
-                  skipWhitespaceForward(tokenIterator);
-                  if (tokenIterator.getCurrentToken().value !== '(') {
-                    tokenIterator.stepBackward(); // Avoid infinite loop
-                    lastToken = token;
-                    continue;
-                  }
-
-                  console.log(6);
-                  tokenIterator.stepForward();
-                  const idOrName = tokenIterator.getCurrentToken().value;
-                  if (idOrName.startsWith('"') || idOrName.startsWith("'")) {
-                    // Chop off quotes
-                    // TODO: unquote within
-                    const name = idOrName.slice(1, idOrName.length - 1);
-                    panelShape = panels.find(p => p.name === name).shape;
-                    console.log(7);
-                    break;
-                  }
-
-                  console.log(8);
-                  panelShape = panels[+idOrName].shape;
-                  break;
-                }
-
-                lastToken = token;
-              }
-
-              console.log(9);
-              if (panelShape) {
-                console.log(10);
-                completions.push(...allFields(panelShape).map(([path, shape]) => ({
-                  name: shape,
-                  value: path,
-                  meta: 'Field',
-                })));
-              }
-            }
-          }
-
-          return callback(null, completions);
+          const factory = () => new TokenIterator(session, pos.row, pos.column);
+          return callback(null, autocomplete(factory, prefix));
         } catch (e) {
           log.error(e);
           return callback(null, []);
@@ -258,12 +154,13 @@ export function CodeEditor({
     };
 
     langTools.setCompleters([completer]);
-  }, [panels, autocomplete, editorRef]);
+  }, [autocomplete, editorRef]);
 
   return (
     <div
-      className={`editor-container ${singleLine ? 'editor-container--singleLine vertical-align-center' : ''
-        }`}
+      className={`editor-container ${
+        singleLine ? 'editor-container--singleLine vertical-align-center' : ''
+      }`}
     >
       {label && <label className="label input-label">{label}</label>}
       <AceEditor
@@ -306,12 +203,12 @@ export function CodeEditor({
           },
           singleLine
             ? {
-              name: 'disable newlines',
-              bindKey: { win: 'Enter|Shift-Enter', mac: 'Enter|Shift-Enter' },
-              exec: () => {
-                /* do nothing */
-              },
-            }
+                name: 'disable newlines',
+                bindKey: { win: 'Enter|Shift-Enter', mac: 'Enter|Shift-Enter' },
+                exec: () => {
+                  /* do nothing */
+                },
+              }
             : undefined,
         ].filter(Boolean)}
         showGutter={!singleLine}
@@ -319,10 +216,10 @@ export function CodeEditor({
           singleLine
             ? { showLineNumbers: false, highlightActiveLine: false }
             : {
-              enableBasicAutocompletion: autocomplete,
-              enableLiveAutocompletion: autocomplete,
-              enableSnippets: autocomplete,
-            }
+                enableBasicAutocompletion: Boolean(autocomplete),
+                enableLiveAutocompletion: Boolean(autocomplete),
+                enableSnippets: Boolean(autocomplete),
+              }
         }
       />
       {tooltip && <Tooltip>{tooltip}</Tooltip>}
