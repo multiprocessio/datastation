@@ -158,9 +158,8 @@ export function CodeEditor({
 
   return (
     <div
-      className={`editor-container ${
-        singleLine ? 'editor-container--singleLine vertical-align-center' : ''
-      }`}
+      className={`editor-container ${singleLine ? 'editor-container--singleLine vertical-align-center' : ''
+        }`}
     >
       {label && <label className="label input-label">{label}</label>}
       <AceEditor
@@ -203,12 +202,12 @@ export function CodeEditor({
           },
           singleLine
             ? {
-                name: 'disable newlines',
-                bindKey: { win: 'Enter|Shift-Enter', mac: 'Enter|Shift-Enter' },
-                exec: () => {
-                  /* do nothing */
-                },
-              }
+              name: 'disable newlines',
+              bindKey: { win: 'Enter|Shift-Enter', mac: 'Enter|Shift-Enter' },
+              exec: () => {
+                /* do nothing */
+              },
+            }
             : undefined,
         ].filter(Boolean)}
         showGutter={!singleLine}
@@ -216,14 +215,14 @@ export function CodeEditor({
           singleLine
             ? { showLineNumbers: false, highlightActiveLine: false }
             : {
-                enableBasicAutocompletion: Boolean(
-                  autocomplete && !autocompleteDisabled
-                ),
-                enableLiveAutocompletion: Boolean(
-                  autocomplete && !autocompleteDisabled
-                ),
-                enableSnippets: Boolean(autocomplete && !autocompleteDisabled),
-              }
+              enableBasicAutocompletion: Boolean(
+                autocomplete && !autocompleteDisabled
+              ),
+              enableLiveAutocompletion: Boolean(
+                autocomplete && !autocompleteDisabled
+              ),
+              enableSnippets: Boolean(autocomplete && !autocompleteDisabled),
+            }
         }
       />
       {tooltip && <Tooltip>{tooltip}</Tooltip>}
