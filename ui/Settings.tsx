@@ -111,6 +111,20 @@ export function Settings() {
               }}
             />
           </div>
+          <div className="form-row">
+            <Toggle
+              label={
+                settings.autocompleteDisabled
+                  ? 'Enable Autocomplete'
+                  : 'Disable Autocomplete'
+              }
+              value={settings.autocompleteDisabled}
+              onChange={function handleLightModeToggle() {
+                settings.autocompleteDisabled = !settings.autocompleteDisabled;
+                setSettings(settings);
+              }}
+            />
+          </div>
           <div className="form-row form-row--multi">
             <Input
               onChange={function handleMaxStdoutSizeChange(newValue: string) {

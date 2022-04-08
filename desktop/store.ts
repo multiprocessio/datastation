@@ -383,9 +383,14 @@ GROUP BY panel_id
 
     // NOTE: unlike elsewhere projectId is actually the file name not a uuid.
     handler: async (_: string, { projectId }: MakeProjectRequest) => {
-      const db = this.getConnection(projectId);
       const newProject = new ProjectState();
       newProject.projectName = ensureProjectFile(projectId);
+
+      if (fs.existsSync(newProject.projectName)) {
+        return;
+      }
+
+      const db = this.getConnection(projectId);
       for (const file of this.migrations) {
         log.info('Running migration: ' + file);
         const contents = fs.readFileSync(file).toString();
