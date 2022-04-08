@@ -75,7 +75,7 @@ export function CodeEditor({
   tooltip?: string;
 }) {
   const {
-    state: { theme },
+    state: { theme, autocompleteDisabled },
   } = React.useContext(SettingsContext);
 
   const [editorRef, setEditorRef] = React.useState<AceEditor>(null);
@@ -216,9 +216,13 @@ export function CodeEditor({
           singleLine
             ? { showLineNumbers: false, highlightActiveLine: false }
             : {
-                enableBasicAutocompletion: Boolean(autocomplete),
-                enableLiveAutocompletion: Boolean(autocomplete),
-                enableSnippets: Boolean(autocomplete),
+                enableBasicAutocompletion: Boolean(
+                  autocomplete && !autocompleteDisabled
+                ),
+                enableLiveAutocompletion: Boolean(
+                  autocomplete && !autocompleteDisabled
+                ),
+                enableSnippets: Boolean(autocomplete && !autocompleteDisabled),
               }
         }
       />

@@ -15,6 +15,7 @@ export class Settings {
   languages: Record<SupportedLanguages, LanguageSettings>;
   file: string;
   stdoutMaxSize: number;
+  autocompleteDisabled: boolean;
   theme: 'light' | 'dark';
   caCerts: Array<{ file: string; id: string }>;
 
@@ -26,6 +27,7 @@ export class Settings {
     stdoutMaxSize?: number
   ) {
     this.id = id || newId();
+    this.autocompleteDisabled = false;
     this.lastProject = lastProject || '';
     this.languages =
       languages ||
