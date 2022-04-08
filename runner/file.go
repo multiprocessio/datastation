@@ -11,6 +11,7 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/linkedin/goavro/v2"
 	jsonutil "github.com/multiprocessio/go-json"
 	"github.com/multiprocessio/go-openoffice"
 	"github.com/scritchley/orc"
@@ -521,6 +522,38 @@ func transformRegexpFile(in string, out io.Writer, re *regexp.Regexp) error {
 	return transformRegexp(r, out, re)
 }
 
+func transformAvro(in io.Reader, out io.Writer) error {
+	ocfr, err := goavro.NewOCFReader(in)
+	if err != nil {
+		return err
+	}
+
+	return withJSONArrayOutWriterFile(out, func(w *jsonutil.StreamEncoder) error {
+		for ocfr.Scan() {
+			r, err := ocfr.Read()
+			if err != nil {
+				return err
+			}
+
+			if err := w.EncodeRow(r); err != nil {
+				return err
+			}
+		}
+
+		return ocfr.Err()
+	})
+}
+
+func transformAvroFile(in string, out io.Writer) error {
+	r, err := os.Open(in)
+	if err != nil {
+		return err
+	}
+	defer r.Close()
+
+	return transformAvro(r, out)
+}
+
 type MimeType string
 
 const (
@@ -536,6 +569,7 @@ const (
 	OpenOfficeSheetMimeType          = "application/vnd.oasis.opendocument.spreadsheet"
 	ParquetMimeType                  = "parquet"
 	ORCMimeType                      = "orc"
+	AvroMimeType                     = "avro"
 	ApacheErrorMimeType              = "text/apache2error"
 	ApacheAccessMimeType             = "text/apache2access"
 	NginxAccessMimeType              = "text/nginxaccess"
@@ -568,6 +602,8 @@ func GetMimeType(fileName string, ct ContentTypeInfo) MimeType {
 		return ParquetMimeType
 	case ".orc":
 		return ORCMimeType
+	case ".avro":
+		return AvroMimeType
 	}
 
 	return UnknownMimeType
@@ -623,6 +659,8 @@ func TransformFile(fileName string, cti ContentTypeInfo, out io.Writer) error {
 		return transformJSONLinesFile(fileName, out)
 	case OpenOfficeSheetMimeType:
 		return transformOpenOfficeSheetFile(fileName, out)
+	case AvroMimeType:
+		return transformAvroFile(fileName, out)
 	}
 
 	if re, ok := BUILTIN_REGEX[assumedType]; ok {
