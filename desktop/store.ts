@@ -386,6 +386,8 @@ GROUP BY panel_id
       const newProject = new ProjectState();
       newProject.projectName = ensureProjectFile(projectId);
 
+      // File already exists, ok and appropriate to do nothing since
+      // this merely handles creation not loading.
       if (fs.existsSync(newProject.projectName)) {
         return;
       }
