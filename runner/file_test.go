@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/linkedin/goavro/v2"
 	"github.com/scritchley/orc"
 	"github.com/stretchr/testify/assert"
 )
@@ -230,6 +231,54 @@ func Test_transformORCFile(t *testing.T) {
 
 }
 
+func Test_transformAvroFile(t *testing.T) {
+	inTmp, err := os.CreateTemp("", "")
+	assert.Nil(t, err)
+	defer inTmp.Close()
+
+	w, err := goavro.NewOCFWriter(goavro.OCFConfig{
+		W: inTmp,
+		Schema: `{
+      "type": "record",
+      "name": "LongList",
+      "fields" : [ { "name": "username", "type": "string" }, { "name": "id", "type": "double" }, { "name": "correct", "type": "boolean" } ]
+			}`,
+	})
+	assert.Nil(t, err)
+
+	length := 2
+	var expJson []map[string]any
+
+	for i := 0; i < length; i++ {
+		values := map[string]any{
+			"username": fmt.Sprintf("user_%d", rand.Int63n(5000)),
+			"id":       float64(rand.Int63n(500)),
+			"correct":  rand.Int63n(5000) > 2500,
+		}
+		expJson = append(expJson, values)
+	}
+
+	err = w.Append(expJson)
+	assert.Nil(t, err)
+
+	outTmp, err := os.CreateTemp("", "")
+	assert.Nil(t, err)
+	defer os.Remove(outTmp.Name())
+	defer outTmp.Close()
+
+	err = transformAvroFile(inTmp.Name(), outTmp)
+	assert.Nil(t, err)
+
+	outTmpBs, err := os.ReadFile(outTmp.Name())
+	assert.Nil(t, err)
+
+	var actJson []map[string]any
+	err = json.Unmarshal(outTmpBs, &actJson)
+	assert.Nil(t, err)
+
+	assert.Equal(t, expJson, actJson)
+}
+
 func Test_transformGeneric(t *testing.T) {
 	tests := []string{
 		`abcdef`,
@@ -255,7 +304,7 @@ cdef`,
 		var m any
 		outTmpBs, err := ioutil.ReadFile(outTmp.Name())
 		assert.Nil(t, err)
-		err = json.Unmarshal(outTmpBs, &m)
+		err = jsonUnmarshal(outTmpBs, &m)
 		assert.Nil(t, err)
 
 		assert.Equal(t, test, m)
