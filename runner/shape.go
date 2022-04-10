@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"bytes"
 	"io"
+	"sort"
 	"math/rand"
 	"os"
 	"strings"
@@ -195,8 +196,15 @@ func (s *Shape) Pretty(prefix string) string {
 		lines := []string{
 			"Object of",
 		}
-		for child, childShape := range s.ObjectShape.Children {
-			lines = append(lines, prefix + "  " + child + " of\n" + prefix + "    " + childShape.Pretty(prefix + "    "))
+		var keys []string
+		for key := range s.ObjectShape.Children{
+			keys = append(keys, key)
+		}
+
+		sort.Strings(keys)
+		for _, key := range keys {
+			childShape := s.ObjectShape.Children[key]
+			lines = append(lines, prefix + "  " + key + " of\n" + prefix + "    " + childShape.Pretty(prefix + "    "))
 		}
 
 		return strings.Join(lines, "\n")
