@@ -405,8 +405,8 @@ func TestShapePathIsObjectArray(t *testing.T) {
 }
 
 func TestShape_MarshalJSON(t *testing.T) {
-	tests := []struct{
-		data string
+	tests := []struct {
+		data      string
 		shapeJson string
 	}{
 		{
@@ -431,8 +431,8 @@ func TestShape_MarshalJSON(t *testing.T) {
 }
 
 func TestShape_Pretty(t *testing.T) {
-	tests := []struct{
-		data string
+	tests := []struct {
+		data   string
 		pretty string
 	}{
 		{

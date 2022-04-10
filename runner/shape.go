@@ -1,15 +1,15 @@
 package runner
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
-	"bytes"
 	"io"
-	"sort"
 	"math/rand"
 	"os"
-	"strings"
 	"reflect"
+	"sort"
+	"strings"
 )
 
 type ShapeKind string
@@ -91,7 +91,7 @@ func (s *Shape) MarshalJSON() ([]byte, error) {
 
 	switch s.Kind {
 	case ScalarKind:
-		return []byte(`{"kind": "scalar", "scalar": "`+s.ScalarShape.Name+`"}`), nil
+		return []byte(`{"kind": "scalar", "scalar": "` + s.ScalarShape.Name + `"}`), nil
 	case UnknownKind:
 		return []byte(`{"kind": "unknown"}`), nil
 	case ObjectKind:
@@ -171,7 +171,7 @@ func (s *Shape) MarshalJSON() ([]byte, error) {
 
 			_, err = buf.Write(bs)
 			if err != nil {
-				return nil ,err
+				return nil, err
 			}
 		}
 
@@ -197,29 +197,29 @@ func (s *Shape) Pretty(prefix string) string {
 			"Object of",
 		}
 		var keys []string
-		for key := range s.ObjectShape.Children{
+		for key := range s.ObjectShape.Children {
 			keys = append(keys, key)
 		}
 
 		sort.Strings(keys)
 		for _, key := range keys {
 			childShape := s.ObjectShape.Children[key]
-			lines = append(lines, prefix + "  " + key + " of\n" + prefix + "    " + childShape.Pretty(prefix + "    "))
+			lines = append(lines, prefix+"  "+key+" of\n"+prefix+"    "+childShape.Pretty(prefix+"    "))
 		}
 
 		return strings.Join(lines, "\n")
 	case ArrayKind:
-		return "Array of\n" + prefix + "  " + s.ArrayShape.Children.Pretty(prefix + "  ")
+		return "Array of\n" + prefix + "  " + s.ArrayShape.Children.Pretty(prefix+"  ")
 	case VariedKind:
 		lines := []string{
 			"Varied of",
 		}
 		for i, childShape := range s.VariedShape.Children {
 			suffix := ""
-			if i < len(s.VariedShape.Children) - 1 {
+			if i < len(s.VariedShape.Children)-1 {
 				suffix = " or"
 			}
-			lines = append(lines, prefix + "  " + childShape.Pretty(prefix + "  ") + suffix)
+			lines = append(lines, prefix+"  "+childShape.Pretty(prefix+"  ")+suffix)
 		}
 
 		return strings.Join(lines, "\n")
