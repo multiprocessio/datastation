@@ -3,9 +3,11 @@ package runner
 import (
 	"encoding/json"
 	"fmt"
+	"bytes"
 	"io"
 	"math/rand"
 	"os"
+	"strings"
 	"reflect"
 )
 
@@ -79,6 +81,143 @@ func (s *Shape) UnmarshalJSON(data []byte) error {
 	Logln("Invalid 'kind': %s", string(data))
 	s.Kind = UnknownKind
 	return nil
+}
+
+func (s *Shape) MarshalJSON() ([]byte, error) {
+	if s == nil {
+		return nil, nil
+	}
+
+	switch s.Kind {
+	case ScalarKind:
+		return []byte(`{"kind": "scalar", "scalar": "`+s.ScalarShape.Name+`"}`), nil
+	case UnknownKind:
+		return []byte(`{"kind": "unknown"}`), nil
+	case ObjectKind:
+		buf := bytes.NewBufferString(`{"kind": "object", "object": {`)
+		first := true
+		for child, childShape := range s.ObjectShape.Children {
+			if !first {
+				err := buf.WriteByte(',')
+				if err != nil {
+					return nil, err
+				}
+			}
+			first = false
+
+			err := buf.WriteByte('"')
+			if err != nil {
+				return nil, err
+			}
+
+			_, err = buf.WriteString(child)
+			if err != nil {
+				return nil, err
+			}
+
+			_, err = buf.WriteString(`": `)
+			if err != nil {
+				return nil, err
+			}
+
+			bs, err := childShape.MarshalJSON()
+			if err != nil {
+				return nil, err
+			}
+
+			_, err = buf.Write(bs)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		_, err := buf.WriteString("}}")
+		if err != nil {
+			return nil, err
+		}
+
+		return buf.Bytes(), nil
+	case ArrayKind:
+		buf := bytes.NewBufferString(`{"kind": "array", "array": `)
+		bs, err := s.ArrayShape.Children.MarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+
+		_, err = buf.Write(bs)
+		if err != nil {
+			return nil, err
+		}
+
+		err = buf.WriteByte('}')
+		return buf.Bytes(), err
+	case VariedKind:
+		buf := bytes.NewBufferString(`{"kind": "varied", "varied": [`)
+		first := true
+		for _, s := range s.VariedShape.Children {
+			if !first {
+				err := buf.WriteByte(',')
+				if err != nil {
+					return nil, err
+				}
+			}
+			first = false
+
+			bs, err := s.MarshalJSON()
+			if err != nil {
+				return nil, err
+			}
+
+			_, err = buf.Write(bs)
+			if err != nil {
+				return nil ,err
+			}
+		}
+
+		_, err := buf.WriteString("]}")
+		return buf.Bytes(), err
+	}
+
+	return nil, fmt.Errorf("Bad kind: %s", s.Kind)
+}
+
+func (s *Shape) Pretty(prefix string) string {
+	if s == nil {
+		return "Unsupported"
+	}
+
+	switch s.Kind {
+	case ScalarKind:
+		return string(s.ScalarShape.Name)
+	case UnknownKind:
+		return "Unknown"
+	case ObjectKind:
+		lines := []string{
+			"Object of",
+		}
+		for child, childShape := range s.ObjectShape.Children {
+			lines = append(lines, prefix + "  " + child + " of\n" + prefix + "    " + childShape.Pretty(prefix + "    "))
+		}
+
+		return strings.Join(lines, "\n")
+	case ArrayKind:
+		return "Array of\n" + prefix + "  " + s.ArrayShape.Children.Pretty(prefix + "  ")
+	case VariedKind:
+		lines := []string{
+			"Varied of",
+		}
+		for i, childShape := range s.VariedShape.Children {
+			suffix := ""
+			if i < len(s.VariedShape.Children) - 1 {
+				suffix = " or"
+			}
+			lines = append(lines, prefix + "  " + childShape.Pretty(prefix + "  ") + suffix)
+		}
+
+		return strings.Join(lines, "\n")
+	}
+
+	return "Malformed"
 }
 
 type ScalarName string

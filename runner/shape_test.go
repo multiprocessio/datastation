@@ -403,3 +403,73 @@ func TestShapePathIsObjectArray(t *testing.T) {
 		}
 	}
 }
+
+func TestShape_MarshalJSON(t *testing.T) {
+	tests := []struct{
+		data string
+		shapeJson string
+	}{
+		{
+			`[1, "a"]`,
+			`{"kind": "array", "array": {"kind": "varied", "varied": [{"kind": "scalar", "scalar": "number"},{"kind": "scalar", "scalar": "string"}]}}`,
+		},
+		{
+			`[{"a": 1}, {"a": 2}]`,
+			`{"kind": "array", "array": {"kind": "object", "object": {"a": {"kind": "scalar", "scalar": "number"}}}}`,
+		},
+	}
+	for _, test := range tests {
+		var j any
+		err := json.Unmarshal([]byte(test.data), &j)
+		assert.Nil(t, err)
+		s := GetShape("", j, len(test.data))
+
+		bs, err := s.MarshalJSON()
+		assert.Nil(t, err)
+		assert.Equal(t, test.shapeJson, string(bs))
+	}
+}
+
+func TestShape_Pretty(t *testing.T) {
+	tests := []struct{
+		data string
+		pretty string
+	}{
+		{
+			`[1, "a"]`,
+			`Array of
+  Varied of
+    number or
+    string`,
+		},
+		{
+			`[{"a": 1}, {"a": 2}]`,
+			`Array of
+  Object of
+    a of
+      number`,
+		},
+		{
+			`{"a": {"b": 2, "c": {"d": "flubber"}}}`,
+			`Object of
+  a of
+    Object of
+      b of
+        number
+      c of
+        Object of
+          d of
+            string`,
+		},
+	}
+	for _, test := range tests {
+		var j any
+		err := json.Unmarshal([]byte(test.data), &j)
+		assert.Nil(t, err)
+		s := GetShape("", j, len(test.data))
+
+		p := s.Pretty("")
+		assert.Nil(t, err)
+		assert.Equal(t, test.pretty, p)
+	}
+}
