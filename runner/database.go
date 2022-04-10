@@ -10,14 +10,13 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/multiprocessio/go-json"
-
 	_ "github.com/ClickHouse/clickhouse-go/v2"
 	_ "github.com/denisenkom/go-mssqldb"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
+	jsonutil "github.com/multiprocessio/go-json"
 	_ "github.com/sijms/go-ora/v2"
 	_ "github.com/snowflakedb/gosnowflake"
 )
@@ -67,6 +66,7 @@ var defaultPorts = map[DatabaseConnectorInfoType]string{
 	TimescaleDatabase:     "5432",
 	YugabyteDatabase:      "5433",
 	QuestDatabase:         "8812",
+	Neo4jDatabase:         "7687",
 }
 
 type urlParts struct {
@@ -225,7 +225,6 @@ func (ec EvalContext) getConnectionString(dbInfo DatabaseConnectorInfoDatabase) 
 		// defined in database_sqlite.go, includes regexp support
 		return "sqlite3_extended", resolvePath(u.database), nil
 	}
-
 	return "", "", nil
 }
 
@@ -387,6 +386,8 @@ func (ec EvalContext) EvalDatabasePanel(
 		return ec.evalGoogleSheets(panel, dbInfo, w)
 	case AirtableDatabase:
 		return ec.evalAirtable(panel, dbInfo, w)
+	case Neo4jDatabase:
+		return ec.evalNeo4j(panel, dbInfo, server, w)
 	}
 
 	mangleInsert := defaultMangleInsert
