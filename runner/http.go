@@ -287,21 +287,7 @@ func TransformReader(r io.Reader, fileName string, cti ContentTypeInfo, out io.W
 
 		return transformORCFile(w.Name(), out)
 	case AvroMimeType:
-		w, err := os.CreateTemp("", "http-avro-temp")
-		if err != nil {
-			return nil
-		}
-		defer os.Remove(w.Name())
-
-		_, err = w.ReadFrom(w)
-		if err == io.EOF {
-			err = nil
-		}
-		if err != nil {
-			return err
-		}
-
-		return transformAvroFile(w.Name(), out)
+		return transformAvroFile(fileName, out)
 	case RegexpLinesMimeType:
 		// There are probably weird cases this won't work but
 		// let's wait for a bug report to do more intelligent

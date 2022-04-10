@@ -569,7 +569,7 @@ const (
 	OpenOfficeSheetMimeType          = "application/vnd.oasis.opendocument.spreadsheet"
 	ParquetMimeType                  = "parquet"
 	ORCMimeType                      = "orc"
-	AvroMimeType                     = "avro"
+	AvroMimeType                     = "application/avro"
 	ApacheErrorMimeType              = "text/apache2error"
 	ApacheAccessMimeType             = "text/apache2access"
 	NginxAccessMimeType              = "text/nginxaccess"

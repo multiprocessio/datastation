@@ -55,7 +55,7 @@ export function ContentTypePicker({
             <option disabled={inMemoryEval} value="orc">
               ORC
             </option>
-            <option disabled={inMemoryEval} value="avro">
+            <option disabled={inMemoryEval} value="application/avro">
               Avro
             </option>
             <option value="application/json">JSON</option>
