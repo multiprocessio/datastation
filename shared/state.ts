@@ -201,7 +201,8 @@ export type DatabaseConnectorInfoType =
   | 'splunk'
   | 'prometheus'
   | 'influx'
-  | 'influx-flux';
+  | 'influx-flux'
+  | 'neo4j';
 
 export class DatabaseConnectorInfo extends ConnectorInfo {
   database: {
