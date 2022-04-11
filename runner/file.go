@@ -184,7 +184,6 @@ func writeSheet(rows [][]string, w *jsonutil.StreamEncoder) error {
 	var header []string
 	isHeader := true
 
-	row := map[string]any{}
 	for _, r := range rows {
 		if isHeader {
 			header = r
@@ -192,6 +191,7 @@ func writeSheet(rows [][]string, w *jsonutil.StreamEncoder) error {
 			continue
 		}
 
+		row := map[string]any{}
 		for i, cell := range r {
 			row[header[i]] = cell
 		}
