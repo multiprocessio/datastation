@@ -1,8 +1,10 @@
 package runner
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"math/rand"
 	"os"
@@ -10,6 +12,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/linkedin/goavro/v2"
 	"github.com/scritchley/orc"
 	"github.com/stretchr/testify/assert"
 )
@@ -230,6 +233,54 @@ func Test_transformORCFile(t *testing.T) {
 
 }
 
+func Test_transformAvroFile(t *testing.T) {
+	inTmp, err := os.CreateTemp("", "")
+	assert.Nil(t, err)
+	defer inTmp.Close()
+
+	w, err := goavro.NewOCFWriter(goavro.OCFConfig{
+		W: inTmp,
+		Schema: `{
+      "type": "record",
+      "name": "LongList",
+      "fields" : [ { "name": "username", "type": "string" }, { "name": "id", "type": "double" }, { "name": "correct", "type": "boolean" } ]
+			}`,
+	})
+	assert.Nil(t, err)
+
+	length := 2
+	var expJson []map[string]any
+
+	for i := 0; i < length; i++ {
+		values := map[string]any{
+			"username": fmt.Sprintf("user_%d", rand.Int63n(5000)),
+			"id":       float64(rand.Int63n(500)),
+			"correct":  rand.Int63n(5000) > 2500,
+		}
+		expJson = append(expJson, values)
+	}
+
+	err = w.Append(expJson)
+	assert.Nil(t, err)
+
+	outTmp, err := os.CreateTemp("", "")
+	assert.Nil(t, err)
+	defer os.Remove(outTmp.Name())
+	defer outTmp.Close()
+
+	err = transformAvroFile(inTmp.Name(), outTmp)
+	assert.Nil(t, err)
+
+	outTmpBs, err := os.ReadFile(outTmp.Name())
+	assert.Nil(t, err)
+
+	var actJson []map[string]any
+	err = json.Unmarshal(outTmpBs, &actJson)
+	assert.Nil(t, err)
+
+	assert.Equal(t, expJson, actJson)
+}
+
 func Test_transformGeneric(t *testing.T) {
 	tests := []string{
 		`abcdef`,
@@ -255,10 +306,61 @@ cdef`,
 		var m any
 		outTmpBs, err := ioutil.ReadFile(outTmp.Name())
 		assert.Nil(t, err)
-		err = json.Unmarshal(outTmpBs, &m)
+		err = jsonUnmarshal(outTmpBs, &m)
 		assert.Nil(t, err)
 
 		assert.Equal(t, test, m)
+	}
+}
+
+func Test_regressions(t *testing.T) {
+	tests := []struct {
+		file          string
+		expectedValue any
+		transformer   func(string, io.Writer) error
+	}{
+		{
+			"../testdata/regr/217.xlsx",
+			[]any{
+				map[string]any{
+					"A": "a1",
+					"B": "b1",
+					"C": "c1",
+					"D": "d1",
+				},
+				map[string]any{
+					"A": "a2",
+					"B": "b2",
+					"C": "c2",
+					"D": nil,
+				},
+				map[string]any{
+					"A": "a3",
+					"B": "b3",
+					"C": nil,
+					"D": nil,
+				},
+				map[string]any{
+					"A": "a4",
+					"B": nil,
+					"C": nil,
+					"D": nil,
+				},
+			},
+			transformXLSXFile,
+		},
+	}
+
+	for _, test := range tests {
+		out := bytes.NewBuffer(nil)
+		err := test.transformer(test.file, out)
+		assert.Nil(t, err)
+
+		var d any
+		err = jsonUnmarshal(out.Bytes(), &d)
+		assert.Nil(t, err)
+
+		assert.Equal(t, test.expectedValue, d)
 	}
 }
 

@@ -43,7 +43,6 @@
   },
   "dependencies": {
     "core-js": "^3.21.1",
-    "react": "17",
     "react-dom": "17"
   }
 }

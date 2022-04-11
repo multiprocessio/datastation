@@ -286,6 +286,8 @@ func TransformReader(r io.Reader, fileName string, cti ContentTypeInfo, out io.W
 		}
 
 		return transformORCFile(w.Name(), out)
+	case AvroMimeType:
+		return transformAvroFile(fileName, out)
 	case RegexpLinesMimeType:
 		// There are probably weird cases this won't work but
 		// let's wait for a bug report to do more intelligent

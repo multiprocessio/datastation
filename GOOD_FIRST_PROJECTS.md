@@ -13,7 +13,7 @@ and dsq for these tasks to make sense.
 ## Easy
 
 * Add a new supported file type
-  * Example: Messagepack, BSON, CBOR, UBJSON, XML, Yaml, Protobuf, Avro? HDF5?
+  * Example: Messagepack, BSON, CBOR, UBJSON, XML, Yaml, Protobuf, HDF5?
 * Test out INT96 support in Parquet, add conversion to timestamp if necessary
 * Build dsq, fakegen for more/every os/arch
 * Preparation for optimized internal representation of data

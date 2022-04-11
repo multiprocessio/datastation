@@ -15,6 +15,7 @@ require (
 	github.com/influxdata/influxdb-client-go/v2 v2.8.1
 	github.com/jmoiron/sqlx v1.3.4
 	github.com/lib/pq v1.10.4
+	github.com/linkedin/goavro/v2 v2.11.1
 	github.com/matoous/go-nanoid/v2 v2.0.0
 	github.com/mattn/go-sqlite3 v1.14.12
 	github.com/multiprocessio/go-json v0.0.0-20220308002443-61d497dd7b9e
