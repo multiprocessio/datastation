@@ -10,13 +10,14 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/multiprocessio/go-json"
+
 	_ "github.com/ClickHouse/clickhouse-go/v2"
 	_ "github.com/denisenkom/go-mssqldb"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
-	jsonutil "github.com/multiprocessio/go-json"
 	_ "github.com/sijms/go-ora/v2"
 	_ "github.com/snowflakedb/gosnowflake"
 )
