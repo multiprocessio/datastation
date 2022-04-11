@@ -1,8 +1,10 @@
 package runner
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"math/rand"
 	"os"
@@ -308,6 +310,57 @@ cdef`,
 		assert.Nil(t, err)
 
 		assert.Equal(t, test, m)
+	}
+}
+
+func Test_regressions(t *testing.T) {
+	tests := []struct {
+		file          string
+		expectedValue any
+		transformer   func(string, io.Writer) error
+	}{
+		{
+			"../testdata/regr/217.xlsx",
+			[]any{
+				map[string]any{
+					"A": "a1",
+					"B": "b1",
+					"C": "c1",
+					"D": "d1",
+				},
+				map[string]any{
+					"A": "a2",
+					"B": "b2",
+					"C": "c2",
+					"D": nil,
+				},
+				map[string]any{
+					"A": "a3",
+					"B": "b3",
+					"C": nil,
+					"D": nil,
+				},
+				map[string]any{
+					"A": "a4",
+					"B": nil,
+					"C": nil,
+					"D": nil,
+				},
+			},
+			transformXLSXFile,
+		},
+	}
+
+	for _, test := range tests {
+		out := bytes.NewBuffer(nil)
+		err := test.transformer(test.file, out)
+		assert.Nil(t, err)
+
+		var d any
+		err = jsonUnmarshal(out.Bytes(), &d)
+		assert.Nil(t, err)
+
+		assert.Equal(t, test.expectedValue, d)
 	}
 }
 

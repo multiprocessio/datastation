@@ -192,8 +192,12 @@ func writeSheet(rows [][]string, w *jsonutil.StreamEncoder) error {
 			continue
 		}
 
-		for i, cell := range r {
-			row[header[i]] = cell
+		for i, name := range header {
+			var cell any = nil
+			if i < len(r) {
+				cell = r[i]
+			}
+			row[name] = cell
 		}
 
 		err := w.EncodeRow(row)
