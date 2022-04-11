@@ -109,6 +109,9 @@ docker run -d -p 8086:8086 -e "DOCKER_INFLUXDB_INIT_MODE=setup" -e "DOCKER_INFLU
 # Start up influx (1 for influxql)
 docker run -d -p 8087:8086 -e "INFLUXDB_HTTP_AUTH_ENABLED=true" -e "INFLUXDB_ADMIN_USER=test" -e "INFLUXDB_ADMIN_PASSWORD=testtest" influxdb:1.7
 
+# Start up neo4j
+neo4j="$(docker run -d -p 7687:7687 -e "NEO4J_AUTH=neo4j/password" neo4j)"
+
 # Start up mongodb and install mongosh (shell)
 #docker run -d -e "MONGO_INITDB_ROOT_USERNAME=test" -e "MONGO_INITDB_DATABASE=test" -e "MONGO_INITDB_ROOT_PASSWORD=test" -p 27017:27017 mongo:5
 #curl -LO https://github.com/mongodb-js/mongosh/releases/download/v1.1.9/mongodb-mongosh_1.1.9_amd64.deb
@@ -121,6 +124,7 @@ sleep 30 # Time for everything to load (influx in particular takes a while)
 # Configure cratedb
 docker exec "$cratecontainer" crash -c "CREATE USER test WITH (password = 'test');"
 docker exec "$cratecontainer" crash -c "GRANT ALL PRIVILEGES ON SCHEMA doc TO test;"
+docker exec "$neo4j" bin/cypher-shell -u neo4j -p password "CREATE (u:User { name : 'test' });"
 
 function retry {
     ok="false"
