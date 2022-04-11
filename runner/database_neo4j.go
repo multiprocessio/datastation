@@ -38,7 +38,7 @@ func (ec EvalContext) evalNeo4j(panel *PanelInfo, dbInfo DatabaseConnectorInfoDa
 		}
 
 		for _, record := range records {
-			var row map[string]any
+			row := make(map[string]any)
 
 			for _, key := range record.Keys {
 				value, ok := record.Get(key)
