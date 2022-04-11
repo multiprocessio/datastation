@@ -115,6 +115,24 @@ func Test_getConnectionString(t *testing.T) {
 			"9001",
 			"",
 		},
+		{
+			DatabaseConnectorInfoDatabase{Type: "neo4j", Password: Encrypt{Encrypted: false, Value: ""}, Database: "test", Address: "localhost:7687"},
+			"neo4j",
+			"neo4j://localhost:7687",
+			nil,
+			"localhost",
+			"7687",
+			"",
+		},
+		{
+			DatabaseConnectorInfoDatabase{Type: "neo4j", Password: Encrypt{Encrypted: false, Value: ""}, Database: "test", Address: "neo4j+s://localhost"},
+			"neo4j",
+			"neo4j+s://localhost:7687",
+			nil,
+			"localhost",
+			"7687",
+			"",
+		},
 	}
 
 	ec, cleanup := makeTestEvalContext()
@@ -126,7 +144,7 @@ func Test_getConnectionString(t *testing.T) {
 		assert.Equal(t, test.expConnStr, connStr)
 		assert.Equal(t, test.expErr, err)
 
-		if test.expVendor == "sqlite" || test.expVendor == "snowflake" {
+		if test.expVendor == "sqlite" || test.expVendor == "snowflake" || test.expVendor == "neo4j" {
 			continue
 		}
 

@@ -8,7 +8,7 @@ import (
 )
 
 func (ec EvalContext) evalNeo4j(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, server *ServerInfo, w io.Writer) error {
-	_, host, port, _, err := getHTTPHostPort(dbInfo.Address)
+	_, conn, err := ec.getConnectionString(dbInfo)
 	if err != nil {
 		return err
 	}
@@ -18,42 +18,40 @@ func (ec EvalContext) evalNeo4j(panel *PanelInfo, dbInfo DatabaseConnectorInfoDa
 		return err
 	}
 
-	return ec.withRemoteConnection(server, host, port, func(proxyHost, proxyPort string) error {
-		driver, err := neo4j.NewDriver(proxyHost+":"+proxyPort, neo4j.BasicAuth(dbInfo.Username, password, ""))
+	driver, err := neo4j.NewDriver(conn, neo4j.BasicAuth(dbInfo.Username, password, ""))
+	if err != nil {
+		return err
+	}
+	defer driver.Close()
+
+	sess := driver.NewSession(neo4j.SessionConfig{})
+
+	result, err := sess.Run(panel.Content, nil)
+	if err != nil {
+		return err
+	}
+
+	return withJSONArrayOutWriterFile(w, func(w *jsonutil.StreamEncoder) error {
+		records, err := result.Collect()
 		if err != nil {
-			return err
-		}
-		defer driver.Close()
-
-		sess := driver.NewSession(neo4j.SessionConfig{})
-
-		result, err := sess.Run(panel.Content, nil)
-		if err != nil {
-			return err
+			return nil
 		}
 
-		return withJSONArrayOutWriterFile(w, func(w *jsonutil.StreamEncoder) error {
-			records, err := result.Collect()
-			if err != nil {
-				return nil
-			}
+		for _, record := range records {
+			var row map[string]any
 
-			for _, record := range records {
-				var row map[string]any
-
-				for _, key := range record.Keys {
-					value, ok := record.Get(key)
-					if ok {
-						row[key] = value
-					}
-				}
-
-				if err := w.EncodeRow(row); err != nil {
-					return err
+			for _, key := range record.Keys {
+				value, ok := record.Get(key)
+				if ok {
+					row[key] = value
 				}
 			}
 
-			return result.Err()
-		})
+			if err := w.EncodeRow(row); err != nil {
+				return err
+			}
+		}
+
+		return result.Err()
 	})
 }

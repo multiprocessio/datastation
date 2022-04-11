@@ -224,6 +224,34 @@ func (ec EvalContext) getConnectionString(dbInfo DatabaseConnectorInfoDatabase) 
 	case SQLiteDatabase:
 		// defined in database_sqlite.go, includes regexp support
 		return "sqlite3_extended", resolvePath(u.database), nil
+	case Neo4jDatabase:
+		addr, err := url.Parse(u.address)
+		if err != nil {
+			return "", "", err
+		}
+
+		// prevent localhost from registerring as a scheme in localhost:7687
+		if addr.Opaque != "" {
+			addr, err = url.Parse("//" + u.address)
+			if err != nil {
+				return "", "", err
+			}
+		}
+
+		if addr.Scheme == "" {
+			addr.Scheme = Neo4jDatabase
+		}
+
+		if addr.Port() == "" {
+			addr.Host += ":" + "7687"
+		}
+
+		_, _, err = net.SplitHostPort(addr.Host)
+		if err != nil {
+			return "", "", err
+		}
+
+		return "neo4j", addr.String(), nil
 	}
 	return "", "", nil
 }
