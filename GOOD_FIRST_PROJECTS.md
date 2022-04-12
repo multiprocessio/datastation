@@ -21,15 +21,13 @@ and dsq for these tasks to make sense.
   * Make sure there’s a library for every language
   * Figure out how to embed the library inside DataStation
 * More databases
-  * IBM DB2, Neo4j, Apache Presto/Trino, Meilisearch, Apache Hive, Apache Druid, Apache Pinot, Quickwit
+  * IBM DB2, Apache Presto/Trino, Meilisearch, Apache Hive, Apache Druid, Apache Pinot, Quickwit
 * Add a new supported log format
   * Example: logfmt
 
 ## Medium
 
 * Add caching to dsq
-* Add dump schema support to dsq
-* Autocomplete support in the UI
 * HTTP Range support for faster downloads
 * Add support for FTP
 * New usql cli (run queries against all DataStation supported databases in a single CLI)
@@ -40,5 +38,4 @@ and dsq for these tasks to make sense.
   * JDBC vs native protocols
   * Regex vs lexer
   * Copying into SQLite vs vtable
-  * Evaluate SQL parser libraries in JavaScript
   * Fastest way to launch a virtual machine (gvisor, firecracker, etc)
