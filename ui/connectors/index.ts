@@ -6,6 +6,7 @@ import { CassandraDetails } from './CassandraDetails';
 import { ElasticsearchDetails } from './ElasticsearchDetails';
 import { FluxDetails } from './FluxDetails';
 import { GenericDetails, GenericNoDatabaseDetails } from './GenericDetails';
+import { Neo4jDetails } from './Neo4jDetails';
 import { SnowflakeDetails } from './SnowflakeDetails';
 import { SQLiteDetails } from './SQLiteDetails';
 
@@ -141,6 +142,11 @@ export const VENDORS: {
     id: 'google-sheets',
     details: BigQueryDetails,
   },
+  neo4j: {
+    name: 'Neo4j',
+    id: 'neo4j',
+    details: Neo4jDetails,
+  },
 };
 
 export const VENDOR_GROUPS: Array<{
@@ -180,6 +186,10 @@ export const VENDOR_GROUPS: Array<{
       'timescale',
       'yugabyte',
     ],
+  },
+  {
+    group: 'Graph',
+    vendors: ['neo4j'],
   },
   {
     group: 'Metrics',

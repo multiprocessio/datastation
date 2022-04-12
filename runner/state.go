@@ -284,6 +284,7 @@ const (
 	AthenaDatabase                                  = "athena"
 	AirtableDatabase                                = "airtable"
 	GoogleSheetsDatabase                            = "google-sheets"
+	Neo4jDatabase                                   = "neo4j"
 )
 
 type DatabaseConnectorInfoDatabase struct {

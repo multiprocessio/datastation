@@ -725,6 +725,47 @@ for (const subprocess of RUNNERS) {
     });
   });
 
+  describe('basic neo4j tests', () => {
+    test('basic test', async () => {
+      if (process.platform !== 'linux') {
+        return;
+      }
+
+      const connectors = [
+        new DatabaseConnectorInfo({
+          type: 'neo4j',
+          database: '',
+          username: 'neo4j',
+          password_encrypt: new Encrypt('password'),
+        }),
+      ];
+      const dp = new DatabasePanelInfo();
+      dp.database.connectorId = connectors[0].id;
+      dp.content = 'MATCH (n) RETURN count(n) AS count';
+
+      let finished = false;
+      const panels = [dp];
+      await withSavedPanels(
+        panels,
+        async (project) => {
+          const panelValueBuffer = fs.readFileSync(
+            getProjectResultsFile(project.projectName) + dp.id
+          );
+
+          const v = JSON.parse(panelValueBuffer.toString());
+          expect(v).toStrictEqual([{ count: 1 }]);
+
+          finished = true;
+        },
+        { evalPanels: true, connectors, subprocessName: subprocess }
+      );
+
+      if (!finished) {
+        throw new Error('Callback did not finish');
+      }
+    });
+  });
+
   describe('basic snowflake tests', () => {
     test('basic test', async () => {
       if (process.platform !== 'linux') {
