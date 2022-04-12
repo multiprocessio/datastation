@@ -124,7 +124,6 @@ sleep 30 # Time for everything to load (influx in particular takes a while)
 # Configure cratedb
 docker exec "$cratecontainer" crash -c "CREATE USER test WITH (password = 'test');"
 docker exec "$cratecontainer" crash -c "GRANT ALL PRIVILEGES ON SCHEMA doc TO test;"
-docker exec "$neo4j" bin/cypher-shell -u neo4j -p password "CREATE (u:User { name : 'test' });"
 
 function retry {
     ok="false"
@@ -164,6 +163,9 @@ docker exec "$scyllacontainer" cqlsh -u cassandra -p cassandra \
        -e "CREATE KEYSPACE test WITH REPLICATION = {'class': 'SimpleStrategy', 'replication_factor': 1};"
 docker exec "$scyllacontainer" cqlsh -u cassandra -p cassandra \
        -e "CREATE ROLE test WITH PASSWORD = 'test' AND LOGIN = true AND SUPERUSER = true;"
+
+# Configure neo4j
+docker exec "$neo4j" bin/cypher-shell -u neo4j -p password "CREATE (u:User { name : 'test' });"
 
 # Load Mongodb documents
 #for t in $(ls testdata/documents/*.json); do
