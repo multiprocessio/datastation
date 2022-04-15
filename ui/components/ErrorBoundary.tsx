@@ -4,7 +4,7 @@ import log from '../../shared/log';
 import { Alert } from './Alert';
 import { Highlight } from './Highlight';
 
-type Props = { children: React.ReactNode; className?: string };
+type Props = { children: any; className?: string };
 type State = { error?: Error };
 
 // SOURCE: https://reactjs.org/docs/error-boundaries.html

@@ -4,10 +4,13 @@ import json
 import subprocess
 
 pinned = {
+    # Can't upgrade to React 18 until we drop Enzyme
     'react': '17',
     'react-dom': '17',
     '@types/react': '17',
     '@types/react-dom': '17',
+    # node-fetch 3 breaks because it requires everything to be jsmodules
+    'node-fetch': '2',
 }
 
 def upgrade_section(items, extra_flag):
