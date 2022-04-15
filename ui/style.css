@@ -211,13 +211,15 @@ label,
   .radio-wrapper .input-label {
     width: initial;
   }
-}
 
-.form .form-row--multi .input:not(:first-of-type) .input-label,
-.form .form-row--multi .select:not(:first-of-type) .select-label,
-.form .form-row--multi .select:not(:first-of-type) .toggle-label,
-.form .form-row--multi .input:not(:first-of-type) .input-label {
-  width: initial;
+  .form-row--multi {
+    .input:not(:first-of-type) .input-label,
+    .select:not(:first-of-type) .select-label,
+    .select:not(:first-of-type) .toggle-label,
+    .input:not(:first-of-type) .input-label {
+      width: initial;
+    }
+  }
 }
 
 input,
@@ -240,21 +242,22 @@ input[type='radio'] {
     color: initial;
     font-size: initial;
   }
-}
 
-/* cssplus broken : parsing */
-.radio--vertical .radio-element:not(:last-of-type) {
-  padding-bottom: calc(2 * var(--margin-base));
-}
+  &.radio--vertical {
+    .radio-element {
+      display: block;
+      padding: 5px;
+      text-align: right;
+    }
 
-.radio--vertical .radio-element {
-  display: block;
-  padding: 5px;
-  text-align: right;
-}
+    &:not(:last-of-type) {
+      padding-bottom: calc(2 * var(--margin-base));
+    }
+  }
 
-.radio:not(.radio--vertical) .radio-element {
-  padding-right: 30px;
+  &:not(.radio--vertical) .radio-element {
+    padding-right: 30px;
+  }
 }
 
 .toggle {
@@ -1217,65 +1220,63 @@ tbody tr {
 
 /* DARK MODE RULES */
 
-/* These rules break cssplus */
-body.dark a,
-body.dark a:visited,
-body.dark a:focus,
-body.dark a:hover {
-  color: var(--color-dark);
-}
-
-body.dark .alert a,
-body.dark .alert a:visited,
-body.dark .alert a:focus,
-body.dark .alert a:hover {
-  color: black;
-}
-
-body.dark .editor-container .input,
-body.dark input.input:not([type='radio']):not([type='file']),
-body.dark label.input input:not([type='radio']):not([type='file']),
-body.dark select.select,
-body.dark label.select select {
-  background: #38384c;
-  border: 1px solid var(--border-dark);
-  box-shadow: 0px 0px 3px var(--border-dark);
-  outline: var(--border-dark);
-  color: var(--color-dark);
-}
-
-body.dark .editor-container .input:focus,
-body.dark input.input:not([type='radio']):not([type='file']):focus,
-body.dark label.input input:not([type='radio']):not([type='file']):focus,
-body.dark select.select:focus,
-body.dark label.select select:focus {
-  box-shadow: 0 0 9px var(--border-dark);
-}
-
-body.dark .server:hover,
-body.dark .connector:hover,
-body.dark .server--expanded,
-body.dark .connector--expanded {
-  background: #484860;
-  border-color: var(--border-dark);
-}
-
-body.dark .tooltip-icon:hover {
-  color: white;
-}
-
-body.dark .button:hover {
-  background: #383852;
-}
-
-body.dark tbody tr {
-  border-top-color: var(--lighter-dark);
-}
-/* End cssplus break */
-
 body.dark {
   background: var(--background-dark);
   color: var(--color-dark);
+
+  a,
+  a:visited,
+  a:focus,
+  a:hover {
+    color: var(--color-dark);
+  }
+
+  .alert a,
+  .alert a:visited,
+  .alert a:focus,
+  .alert a:hover {
+    color: black;
+  }
+
+  .editor-container .input,
+  input.input:not([type='radio']):not([type='file']),
+  label.input input:not([type='radio']):not([type='file']),
+  select.select,
+  label.select select {
+    background: #38384c;
+    border: 1px solid var(--border-dark);
+    box-shadow: 0px 0px 3px var(--border-dark);
+    outline: var(--border-dark);
+    color: var(--color-dark);
+  }
+
+  .editor-container .input:focus,
+  input.input:not([type='radio']):not([type='file']):focus,
+  label.input input:not([type='radio']):not([type='file']):focus,
+  select.select:focus,
+  label.select select:focus {
+    box-shadow: 0 0 9px var(--border-dark);
+  }
+
+  .server:hover,
+  .connector:hover,
+  .server--expanded,
+  .connector--expanded {
+    background: #484860;
+    border-color: var(--border-dark);
+  }
+
+  .tooltip-icon:hover {
+    color: white;
+  }
+
+  .button:hover {
+    background: #383852;
+  }
+
+  tbody tr {
+    border-top-color: var(--lighter-dark);
+  }
 
   .app--desktop,
   .app--server {
