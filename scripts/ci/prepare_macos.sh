@@ -3,10 +3,6 @@
 set -eux
 
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-brew unlink go@1.15
-brew uninstall --force go
-brew cleanup -s go
-brew cleanup --prune-prefix
 brew install cmake jq r julia node@16 npm go-jsonnet
 brew link --overwrite node@16
 
