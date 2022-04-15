@@ -93,7 +93,7 @@
     "eslint-plugin-react-hooks": "^4.4.0",
     "jest": "^27.5.1",
     "license-checker": "^25.0.1",
-    "node-fetch": "^3.2.3",
+    "node-fetch": "2",
     "node-sass": "^7.0.1",
     "prettier": "^2.6.2",
     "prettier-plugin-organize-imports": "^2.3.4",
