@@ -6,6 +6,8 @@ import subprocess
 pinned = {
     'react': '17',
     'react-dom': '17',
+    '@types/react': '17',
+    '@types/react-dom': '17',
 }
 
 def upgrade_section(items, extra_flag):
