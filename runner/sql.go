@@ -336,8 +336,8 @@ func importPanel(
 	}
 
 	tname := quote(panel.tableName, qt.identifier)
-	Logln("Creating temp table " + panel.tableName)
-	createQuery := fmt.Sprintf("CREATE TEMPORARY TABLE %s (%s);",
+	Logln("Creating table " + panel.tableName)
+	createQuery := fmt.Sprintf("CREATE TABLE %s (%s);",
 		tname,
 		strings.Join(ddlColumns, ", "))
 	err := createTable(createQuery)
