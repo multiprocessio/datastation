@@ -22,7 +22,7 @@ type Settings struct {
 	File          string                                  `json:"file"`
 	StdoutMaxSize int                                     `json:"stdoutMaxSize"`
 	Theme         Theme                                   `json:"theme"`
-	CacheMode     bool                                    `json:"cacheMode"` // for dsq at the moment
+	CacheMode     *bool                                   `json:"cacheMode"` // for dsq at the moment
 	CaCerts       []struct {
 		File string `json:"file"`
 	} `json:"caCerts"`
@@ -35,7 +35,6 @@ var DefaultSettings = &Settings{
 	File:          SettingsFileDefaultLocation,
 	StdoutMaxSize: 5000,
 	Theme:         "light",
-	CacheMode:     false,
 }
 
 func LoadSettings(file string) (*Settings, error) {

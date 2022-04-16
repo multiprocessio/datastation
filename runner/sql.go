@@ -329,15 +329,21 @@ func importPanel(
 	panel panelToImport,
 	qt quoteType,
 	panelResultLoader func(string, string) (chan map[string]any, error),
+	cacheMode *bool,
 ) error {
 	var ddlColumns []string
 	for _, c := range panel.columns {
 		ddlColumns = append(ddlColumns, quote(c.name, qt.identifier)+" "+c.kind)
 	}
 
+	tableType := "TEMPORARY TABLE"
+	if cacheMode != nil {
+		tableType = "TABLE"
+	}
 	tname := quote(panel.tableName, qt.identifier)
 	Logln("Creating table " + panel.tableName)
-	createQuery := fmt.Sprintf("CREATE TABLE %s (%s);",
+	createQuery := fmt.Sprintf("CREATE %s %s (%s);",
+		tableType,
 		tname,
 		strings.Join(ddlColumns, ", "))
 	err := createTable(createQuery)
@@ -438,13 +444,13 @@ func importAndRun(
 	qt quoteType,
 	// Postgres uses $1, mysql/sqlite use ?
 	panelResultLoader func(string, string) (chan map[string]any, error),
-	skipImport bool,
+	cacheMode *bool,
 ) ([]map[string]any, error) {
-	if skipImport {
+	if cacheMode != nil && *cacheMode {
 		return makeQuery(query)
 	}
 	for _, panel := range panelsToImport {
-		err := importPanel(createTable, prepare, makeQuery, projectId, query, panel, qt, panelResultLoader)
+		err := importPanel(createTable, prepare, makeQuery, projectId, query, panel, qt, panelResultLoader, cacheMode)
 		if err != nil {
 			return nil, err
 		}

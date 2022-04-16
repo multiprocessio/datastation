@@ -483,7 +483,7 @@ func (ec EvalContext) EvalDatabasePanel(
 			return err
 		}
 
-		if vendor == "sqlite3_extended" && !ec.settings.CacheMode {
+		if vendor == "sqlite3_extended" {
 			for _, pragma := range SQLITE_PRAGMAS {
 				_, err = db.Exec("PRAGMA " + pragma)
 				if err != nil {
