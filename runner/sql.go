@@ -438,7 +438,11 @@ func importAndRun(
 	qt quoteType,
 	// Postgres uses $1, mysql/sqlite use ?
 	panelResultLoader func(string, string) (chan map[string]any, error),
+	skipImport bool,
 ) ([]map[string]any, error) {
+	if skipImport {
+		return makeQuery(query)
+	}
 	for _, panel := range panelsToImport {
 		err := importPanel(createTable, prepare, makeQuery, projectId, query, panel, qt, panelResultLoader)
 		if err != nil {

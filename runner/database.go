@@ -508,26 +508,6 @@ func (ec EvalContext) EvalDatabasePanel(
 
 		wroteFirstRow := false
 		return withJSONArrayOutWriterFile(w, func(w *jsonutil.StreamEncoder) error {
-			if ec.settings.CacheMode {
-				rows, err := db.Queryx(query)
-				if err != nil {
-					return err
-				}
-
-				defer rows.Close()
-
-				for rows.Next() {
-					err := writeRowFromDatabase(dbInfo, w, rows, wroteFirstRow)
-					if err != nil {
-						return err
-					}
-
-					wroteFirstRow = true
-				}
-
-				return rows.Err()
-			}
-
 			_, err := importAndRun(
 				func(createTableStmt string) error {
 					_, err := db.Exec(createTableStmt)
@@ -559,6 +539,7 @@ func (ec EvalContext) EvalDatabasePanel(
 				panelsToImport,
 				qt,
 				panelResultLoader,
+				ec.settings.CacheMode,
 			)
 
 			return err
