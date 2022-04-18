@@ -48,7 +48,7 @@ func Test_transformDM_getPanelCalls(t *testing.T) {
 		quoteType{
 			identifier: "\"",
 		},
-		nil,
+		false,
 	)
 
 	assert.Nil(t, err)
@@ -130,7 +130,7 @@ func Test_transformDM_getPanel_callsWithPaths(t *testing.T) {
 			map[string]string{"0": " a great id 2"},
 			true,
 			quoteType{identifier: "\""},
-			nil,
+			false,
 		)
 
 		assert.Nil(t, err)

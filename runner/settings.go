@@ -22,10 +22,15 @@ type Settings struct {
 	File          string                                  `json:"file"`
 	StdoutMaxSize int                                     `json:"stdoutMaxSize"`
 	Theme         Theme                                   `json:"theme"`
-	CacheMode     *bool                                   `json:"cacheMode"` // for dsq at the moment
+	CacheSettings *CacheSettings                          `json:"cacheSettings"`
 	CaCerts       []struct {
 		File string `json:"file"`
 	} `json:"caCerts"`
+}
+
+type CacheSettings struct {
+	CachePresent bool
+	Enabled      bool
 }
 
 var SettingsFileDefaultLocation = path.Join(CONFIG_FS_BASE, ".settings")
@@ -35,6 +40,10 @@ var DefaultSettings = &Settings{
 	File:          SettingsFileDefaultLocation,
 	StdoutMaxSize: 5000,
 	Theme:         "light",
+	CacheSettings: &CacheSettings{
+		Enabled:      false,
+		CachePresent: false,
+	},
 }
 
 func LoadSettings(file string) (*Settings, error) {

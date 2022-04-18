@@ -118,7 +118,7 @@ func transformDM_getPanelCalls(
 	idMap map[string]string,
 	getPanelCallsAllowed bool,
 	qt quoteType,
-	cacheMode *bool,
+	cachePresent bool,
 ) ([]panelToImport, string, error) {
 	var panelsToImport []panelToImport
 
@@ -161,7 +161,7 @@ func transformDM_getPanelCalls(
 			}
 		}
 
-		if cacheMode != nil && *cacheMode == true {
+		if cachePresent {
 			return quote(tableName, qt.identifier)
 		}
 
@@ -334,7 +334,7 @@ func importPanel(
 	panel panelToImport,
 	qt quoteType,
 	panelResultLoader func(string, string) (chan map[string]any, error),
-	cacheMode *bool,
+	cacheEnabled bool,
 ) error {
 	var ddlColumns []string
 	for _, c := range panel.columns {
@@ -342,9 +342,10 @@ func importPanel(
 	}
 
 	tableType := "TEMPORARY TABLE"
-	if cacheMode != nil {
+	if cacheEnabled { // indicates that the sqlite file is not present.
 		tableType = "TABLE"
 	}
+	fmt.Println(tableType)
 	tname := quote(panel.tableName, qt.identifier)
 	Logln("Creating table " + panel.tableName)
 	createQuery := fmt.Sprintf("CREATE %s %s (%s);",
@@ -449,13 +450,13 @@ func importAndRun(
 	qt quoteType,
 	// Postgres uses $1, mysql/sqlite use ?
 	panelResultLoader func(string, string) (chan map[string]any, error),
-	cacheMode *bool,
+	cacheSettings *CacheSettings,
 ) ([]map[string]any, error) {
-	if cacheMode != nil && *cacheMode {
+	if cacheSettings.CachePresent {
 		return makeQuery(query)
 	}
 	for _, panel := range panelsToImport {
-		err := importPanel(createTable, prepare, makeQuery, projectId, query, panel, qt, panelResultLoader, cacheMode)
+		err := importPanel(createTable, prepare, makeQuery, projectId, query, panel, qt, panelResultLoader, cacheSettings.Enabled)
 		if err != nil {
 			return nil, err
 		}
