@@ -345,7 +345,6 @@ func importPanel(
 	if cacheEnabled { // indicates that the sqlite file is not present.
 		tableType = "TABLE"
 	}
-	fmt.Println(tableType)
 	tname := quote(panel.tableName, qt.identifier)
 	Logln("Creating table " + panel.tableName)
 	createQuery := fmt.Sprintf("CREATE %s %s (%s);",
