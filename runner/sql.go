@@ -118,6 +118,7 @@ func transformDM_getPanelCalls(
 	idMap map[string]string,
 	getPanelCallsAllowed bool,
 	qt quoteType,
+	cacheMode *bool,
 ) ([]panelToImport, string, error) {
 	var panelsToImport []panelToImport
 
@@ -151,6 +152,19 @@ func transformDM_getPanelCalls(
 			}
 		}
 
+		id := idMap[nameOrIndex]
+		tableName := "t_" + nameOrIndex
+		for _, p := range panelsToImport {
+			if p.id == id {
+				// Don't import the same panel twice.
+				return quote(tableName, qt.identifier)
+			}
+		}
+
+		if cacheMode != nil && *cacheMode == true {
+			return quote(tableName, qt.identifier)
+		}
+
 		s, ok := idShapeMap[nameOrIndex]
 		if !ok {
 			insideErr = makeErrNotAnArrayOfObjects(nameOrIndex)
@@ -172,15 +186,6 @@ func transformDM_getPanelCalls(
 		if !ok {
 			insideErr = makeErrNotAnArrayOfObjects(nameOrIndex)
 			return ""
-		}
-
-		id := idMap[nameOrIndex]
-		tableName := "t_" + nameOrIndex
-		for _, p := range panelsToImport {
-			if p.id == id {
-				// Don't import the same panel twice.
-				return quote(tableName, qt.identifier)
-			}
 		}
 
 		rowShape := sp.ArrayShape.Children

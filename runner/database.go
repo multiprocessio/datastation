@@ -10,8 +10,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/multiprocessio/go-json"
-
+		"github.com/multiprocessio/go-json"
 	_ "github.com/ClickHouse/clickhouse-go/v2"
 	_ "github.com/denisenkom/go-mssqldb"
 	_ "github.com/go-sql-driver/mysql"
@@ -438,6 +437,7 @@ func (ec EvalContext) EvalDatabasePanel(
 		idMap,
 		dbInfo.Type == MySQLDatabase || dbInfo.Type == SQLiteDatabase || dbInfo.Type == PostgresDatabase,
 		qt,
+		ec.settings.CacheMode,
 	)
 	if err != nil {
 		return err
