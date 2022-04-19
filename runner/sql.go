@@ -342,7 +342,7 @@ func importPanel(
 	}
 
 	tableType := "TEMPORARY TABLE"
-	if cacheEnabled { // indicates that the sqlite file is not present.
+	if cacheEnabled {
 		tableType = "TABLE"
 	}
 	tname := quote(panel.tableName, qt.identifier)
@@ -449,7 +449,7 @@ func importAndRun(
 	qt quoteType,
 	// Postgres uses $1, mysql/sqlite use ?
 	panelResultLoader func(string, string) (chan map[string]any, error),
-	cacheSettings *CacheSettings,
+	cacheSettings CacheSettings,
 ) ([]map[string]any, error) {
 	if cacheSettings.CachePresent {
 		return makeQuery(query)

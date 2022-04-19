@@ -73,7 +73,7 @@ func (ec EvalContext) evalProgramSQLPanel(project *ProjectState, pageIndex int, 
 				ConnectorId: connector.Id,
 			},
 		},
-	}, nil, DefaultCacheSettings)
+	}, nil, *DefaultCacheSettings)
 }
 
 func (ec EvalContext) evalProgramPanel(project *ProjectState, pageIndex int, panel *PanelInfo) (error, string) {

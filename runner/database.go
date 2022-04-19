@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/multiprocessio/go-json"
+
 	_ "github.com/ClickHouse/clickhouse-go/v2"
 	_ "github.com/denisenkom/go-mssqldb"
 	_ "github.com/go-sql-driver/mysql"
@@ -343,7 +344,7 @@ func (ec EvalContext) EvalDatabasePanel(
 	pageIndex int,
 	panel *PanelInfo,
 	panelResultLoader func(projectId, panelId string) (chan map[string]any, error),
-	cache *CacheSettings,
+	cache CacheSettings,
 ) error {
 	var connector *ConnectorInfo
 	for _, c := range project.Connectors {
