@@ -344,6 +344,7 @@ func (ec EvalContext) EvalDatabasePanel(
 	pageIndex int,
 	panel *PanelInfo,
 	panelResultLoader func(projectId, panelId string) (chan map[string]any, error),
+	cache CacheSettings,
 ) error {
 	var connector *ConnectorInfo
 	for _, c := range project.Connectors {
@@ -438,6 +439,7 @@ func (ec EvalContext) EvalDatabasePanel(
 		idMap,
 		dbInfo.Type == MySQLDatabase || dbInfo.Type == SQLiteDatabase || dbInfo.Type == PostgresDatabase,
 		qt,
+		cache.CachePresent,
 	)
 	if err != nil {
 		return err
@@ -539,6 +541,7 @@ func (ec EvalContext) EvalDatabasePanel(
 				panelsToImport,
 				qt,
 				panelResultLoader,
+				cache,
 			)
 
 			return err

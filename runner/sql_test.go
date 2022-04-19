@@ -48,6 +48,7 @@ func Test_transformDM_getPanelCalls(t *testing.T) {
 		quoteType{
 			identifier: "\"",
 		},
+		false,
 	)
 
 	assert.Nil(t, err)
@@ -129,6 +130,7 @@ func Test_transformDM_getPanel_callsWithPaths(t *testing.T) {
 			map[string]string{"0": " a great id 2"},
 			true,
 			quoteType{identifier: "\""},
+			false,
 		)
 
 		assert.Nil(t, err)
@@ -325,7 +327,7 @@ func Test_sqlIngest_e2e(t *testing.T) {
 
 		err = ec.EvalDatabasePanel(project, 0, panel2, func(projectId, panelId string) (chan map[string]any, error) {
 			return loadJSONArrayFile(readFile.Name())
-		})
+		}, *DefaultCacheSettings)
 		if err != nil {
 			// Otherwise the channel below gets weird to debug
 			panic(err)
@@ -396,6 +398,6 @@ func Test_sqlIngest_BENCHMARK(t *testing.T) {
 	ec := EvalContext{}
 	err = ec.EvalDatabasePanel(project, 0, panel2, func(projectId, panelId string) (chan map[string]any, error) {
 		return loadJSONArrayFile(readFile)
-	})
+	}, *DefaultCacheSettings)
 	assert.Nil(t, err)
 }

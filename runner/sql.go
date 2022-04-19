@@ -118,6 +118,7 @@ func transformDM_getPanelCalls(
 	idMap map[string]string,
 	getPanelCallsAllowed bool,
 	qt quoteType,
+	cachePresent bool,
 ) ([]panelToImport, string, error) {
 	var panelsToImport []panelToImport
 
@@ -151,6 +152,19 @@ func transformDM_getPanelCalls(
 			}
 		}
 
+		id := idMap[nameOrIndex]
+		tableName := "t_" + nameOrIndex
+		for _, p := range panelsToImport {
+			if p.id == id {
+				// Don't import the same panel twice.
+				return quote(tableName, qt.identifier)
+			}
+		}
+
+		if cachePresent {
+			return quote(tableName, qt.identifier)
+		}
+
 		s, ok := idShapeMap[nameOrIndex]
 		if !ok {
 			insideErr = makeErrNotAnArrayOfObjects(nameOrIndex)
@@ -172,15 +186,6 @@ func transformDM_getPanelCalls(
 		if !ok {
 			insideErr = makeErrNotAnArrayOfObjects(nameOrIndex)
 			return ""
-		}
-
-		id := idMap[nameOrIndex]
-		tableName := "t_" + nameOrIndex
-		for _, p := range panelsToImport {
-			if p.id == id {
-				// Don't import the same panel twice.
-				return quote(tableName, qt.identifier)
-			}
 		}
 
 		rowShape := sp.ArrayShape.Children
@@ -329,15 +334,21 @@ func importPanel(
 	panel panelToImport,
 	qt quoteType,
 	panelResultLoader func(string, string) (chan map[string]any, error),
+	cacheEnabled bool,
 ) error {
 	var ddlColumns []string
 	for _, c := range panel.columns {
 		ddlColumns = append(ddlColumns, quote(c.name, qt.identifier)+" "+c.kind)
 	}
 
+	tableType := "TEMPORARY TABLE"
+	if cacheEnabled {
+		tableType = "TABLE"
+	}
 	tname := quote(panel.tableName, qt.identifier)
-	Logln("Creating temp table " + panel.tableName)
-	createQuery := fmt.Sprintf("CREATE TEMPORARY TABLE %s (%s);",
+	Logln("Creating table " + panel.tableName)
+	createQuery := fmt.Sprintf("CREATE %s %s (%s);",
+		tableType,
 		tname,
 		strings.Join(ddlColumns, ", "))
 	err := createTable(createQuery)
@@ -438,9 +449,13 @@ func importAndRun(
 	qt quoteType,
 	// Postgres uses $1, mysql/sqlite use ?
 	panelResultLoader func(string, string) (chan map[string]any, error),
+	cacheSettings CacheSettings,
 ) ([]map[string]any, error) {
+	if cacheSettings.CachePresent {
+		return makeQuery(query)
+	}
 	for _, panel := range panelsToImport {
-		err := importPanel(createTable, prepare, makeQuery, projectId, query, panel, qt, panelResultLoader)
+		err := importPanel(createTable, prepare, makeQuery, projectId, query, panel, qt, panelResultLoader, cacheSettings.Enabled)
 		if err != nil {
 			return nil, err
 		}
