@@ -206,7 +206,7 @@ func (ec EvalContext) Eval(projectId, panelId string) (error, string) {
 		return ec.evalProgramPanel(project, pageIndex, panel)
 	case DatabasePanel:
 		Logln("Evaling database panel")
-		return ec.EvalDatabasePanel(project, pageIndex, panel, nil), ""
+		return ec.EvalDatabasePanel(project, pageIndex, panel, nil, DefaultCacheSettings), ""
 	case FilaggPanel:
 		Logln("Evaling database panel")
 		return ec.evalFilaggPanel(project, pageIndex, panel), ""

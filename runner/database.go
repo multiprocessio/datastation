@@ -11,7 +11,6 @@ import (
 	"strings"
 
 	"github.com/multiprocessio/go-json"
-
 	_ "github.com/ClickHouse/clickhouse-go/v2"
 	_ "github.com/denisenkom/go-mssqldb"
 	_ "github.com/go-sql-driver/mysql"
@@ -344,6 +343,7 @@ func (ec EvalContext) EvalDatabasePanel(
 	pageIndex int,
 	panel *PanelInfo,
 	panelResultLoader func(projectId, panelId string) (chan map[string]any, error),
+	cache *CacheSettings,
 ) error {
 	var connector *ConnectorInfo
 	for _, c := range project.Connectors {
@@ -438,7 +438,7 @@ func (ec EvalContext) EvalDatabasePanel(
 		idMap,
 		dbInfo.Type == MySQLDatabase || dbInfo.Type == SQLiteDatabase || dbInfo.Type == PostgresDatabase,
 		qt,
-		ec.settings.CacheSettings.CachePresent,
+		cache.CachePresent,
 	)
 	if err != nil {
 		return err
@@ -540,7 +540,7 @@ func (ec EvalContext) EvalDatabasePanel(
 				panelsToImport,
 				qt,
 				panelResultLoader,
-				ec.settings.CacheSettings,
+				cache,
 			)
 
 			return err
