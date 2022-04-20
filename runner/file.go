@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"os/user"
+	"path"
 	"path/filepath"
 	"regexp"
 	"runtime"
@@ -705,5 +706,9 @@ func (ec EvalContext) evalFilePanel(project *ProjectState, pageIndex int, panel 
 }
 
 func resolvePath(p string) string {
-	return strings.ReplaceAll(p, "~", HOME)
+	if !strings.HasPrefix(p, "~/") {
+		return p
+	}
+
+	return path.Join(HOME, p[2:])
 }

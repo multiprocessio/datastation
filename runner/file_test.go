@@ -364,6 +364,26 @@ func Test_regressions(t *testing.T) {
 	}
 }
 
+func Test_resolvePath(t *testing.T) {
+	tests := []struct{
+		input string
+		expected string
+	}{
+		{
+			"~/x",
+			HOME + "/x",
+		},
+		{
+			"C:\foo~1\bar",
+			"C:\foo~1\bar",
+		},
+	}
+
+	for _, test := range tests {
+		assert.Equal(t, test.expected, resolvePath(test.input))
+	}
+}
+
 // Benchmarks
 
 func Test_transformCSV_BENCHMARK(t *testing.T) {
