@@ -365,8 +365,8 @@ func Test_regressions(t *testing.T) {
 }
 
 func Test_resolvePath(t *testing.T) {
-	tests := []struct{
-		input string
+	tests := []struct {
+		input    string
 		expected string
 	}{
 		{
