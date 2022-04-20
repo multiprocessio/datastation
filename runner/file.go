@@ -56,7 +56,11 @@ func transformCSV(in io.Reader, out io.Writer, delimiter rune) error {
 			}
 
 			for i, field := range fields {
-				row[field] = record[i]
+				if i < len(record) {
+					row[field] = record[i]
+				} else {
+					row[field] = nil
+				}
 			}
 
 			err = w.EncodeRow(row)
