@@ -103,6 +103,7 @@ func (ec EvalContext) evalElasticsearch(panel *PanelInfo, dbInfo DatabaseConnect
 			return err
 		}
 
+		scrollId := r.ScrollId
 		defer func() {
 			// Clear the scroll context under any condition
 			_, err = makeHTTPRequest(httpRequest{
@@ -125,7 +126,6 @@ func (ec EvalContext) evalElasticsearch(panel *PanelInfo, dbInfo DatabaseConnect
 				}
 			}
 
-			scrollId := r.ScrollId
 			for {
 				rsp, err := makeHTTPRequest(httpRequest{
 					allowInsecure: panel.Database.Extra["allow_insecure"] == "true",
