@@ -10,14 +10,14 @@ import {
   PanelInfo,
   TimeSeriesRange as TimeSeriesRangeT,
 } from '../../shared/state';
-import { Toggle } from '../components/Toggle';
-import { Link } from '../components/Link';
 import { panelRPC } from '../asyncRPC';
 import { CodeEditor } from '../components/CodeEditor';
 import { Input } from '../components/Input';
+import { Link } from '../components/Link';
 import { Select } from '../components/Select';
 import { ServerPicker } from '../components/ServerPicker';
 import { TimeSeriesRange } from '../components/TimeSeriesRange';
+import { Toggle } from '../components/Toggle';
 import { VENDORS } from '../connectors';
 import { ProjectContext } from '../state';
 import {
@@ -186,15 +186,15 @@ export function DatabasePanelDetails({
           {['elasticsearch', 'prometheus'].includes(
             connector.database.type
           ) && (
-              <TimeSeriesRange
-                range={panel.database.range}
-                hideField={['prometheus'].includes(connector.database.type)}
-                updateRange={(r: TimeSeriesRangeT) => {
-                  panel.database.range = r;
-                  updatePanel(panel);
-                }}
-              />
-            )}
+            <TimeSeriesRange
+              range={panel.database.range}
+              hideField={['prometheus'].includes(connector.database.type)}
+              updateRange={(r: TimeSeriesRangeT) => {
+                panel.database.range = r;
+                updatePanel(panel);
+              }}
+            />
+          )}
           {connector.database.type === 'prometheus' && (
             <div className="form-row">
               <Input
@@ -213,10 +213,16 @@ export function DatabasePanelDetails({
             <div className="form-row">
               <Toggle
                 label="Insecure HTTPS"
-                rhsLabel={panel.database.extra.allowInsecure === 'true' ? 'Allowed' : 'Not allowed'}
+                rhsLabel={
+                  panel.database.extra.allowInsecure === 'true'
+                    ? 'Allowed'
+                    : 'Not allowed'
+                }
                 value={panel.database.extra.allowInsecure === 'true'}
                 onChange={function handleLightModeToggle() {
-                  panel.database.extra.allowInsecure = String(panel.database.extra.allowInsecure !== 'true');
+                  panel.database.extra.allowInsecure = String(
+                    panel.database.extra.allowInsecure !== 'true'
+                  );
                   updatePanel(panel);
                 }}
               />
