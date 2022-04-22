@@ -63,7 +63,7 @@ func (ec EvalContext) evalElasticsearch(panel *PanelInfo, dbInfo DatabaseConnect
 		}
 		u += "?"
 		if q != "" {
-			u += "?q=" + url.QueryEscape(q)
+			u += "q=" + url.QueryEscape(q)
 		}
 		u += "&size=10000"
 		// Closes the scroll after 10s of *idling* not 10s of scrolling
