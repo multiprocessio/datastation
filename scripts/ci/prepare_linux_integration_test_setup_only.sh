@@ -146,7 +146,7 @@ function retry {
 docker ps
 
 # Load influx1 data
-retry 3 'curl -XPOST "http://localhost:8087/query?u=test&p=testtest" --data-urlencode "q=CREATE DATABASE test"'
+retry 10 'curl -XPOST "http://localhost:8087/query?u=test&p=testtest" --data-urlencode "q=CREATE DATABASE test"'
 retry 3 "curl -XPOST 'http://localhost:8087/write?db=test&u=test&p=testtest' --data-binary @testdata/influx/noaa-ndbc-data-sample.lp"
 
 # Load influx2 data
