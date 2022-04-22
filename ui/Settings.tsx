@@ -103,7 +103,8 @@ export function Settings() {
         <FormGroup major label="General">
           <div className="form-row">
             <Toggle
-              label={settings.theme !== 'dark' ? 'Light Mode' : 'Dark Mode'}
+              label="Theme"
+              rhsLabel={settings.theme !== 'dark' ? 'Light Mode' : 'Dark Mode'}
               value={settings.theme === 'dark'}
               onChange={function handleLightModeToggle() {
                 settings.theme = settings.theme === 'dark' ? 'light' : 'dark';
@@ -113,11 +114,8 @@ export function Settings() {
           </div>
           <div className="form-row">
             <Toggle
-              label={
-                settings.autocompleteDisabled
-                  ? 'Enable Autocomplete'
-                  : 'Disable Autocomplete'
-              }
+              label="Autocomplete"
+              rhsLabel={settings.autocompleteDisabled ? 'Disabled' : 'Enabled'}
               value={settings.autocompleteDisabled}
               onChange={function handleLightModeToggle() {
                 settings.autocompleteDisabled = !settings.autocompleteDisabled;
@@ -225,9 +223,8 @@ export function Settings() {
 
               <Alert type="info">
                 <div>
-                  DataStation defaults to looking up each program on your&nbsp;
-                  <code>$PATH</code>. You can override that here with a
-                  different program name or an absolute path.
+                  Custom CA certs registered here are checked in every HTTP
+                  panel on every page.
                 </div>
               </Alert>
             </FormGroup>

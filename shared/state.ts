@@ -154,6 +154,7 @@ export class HTTPConnectorInfo extends ConnectorInfo {
     url: string;
     method: HTTPConnectorInfoMethod;
     contentTypeInfo: ContentTypeInfo;
+    allowInsecure: boolean;
   };
 
   constructor(
@@ -161,7 +162,8 @@ export class HTTPConnectorInfo extends ConnectorInfo {
     url?: string,
     headers: Array<{ value: string; name: string; id: string }> = [],
     method?: HTTPConnectorInfoMethod,
-    contentTypeInfo?: ContentTypeInfo
+    contentTypeInfo?: ContentTypeInfo,
+    allowInsecure?: boolean
   ) {
     super('http', name);
     this.http = {
@@ -169,6 +171,7 @@ export class HTTPConnectorInfo extends ConnectorInfo {
       url: url || '',
       method: method || 'GET',
       contentTypeInfo: contentTypeInfo || new ContentTypeInfo(),
+      allowInsecure: Boolean(allowInsecure),
     };
   }
 }

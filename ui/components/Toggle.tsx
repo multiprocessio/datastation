@@ -4,9 +4,11 @@ export function Toggle({
   label,
   className,
   value,
+  rhsLabel,
   onChange,
 }: {
   label: string;
+  rhsLabel: React.ReactNode;
   value: boolean;
   onChange: () => void;
   className?: string;
@@ -18,6 +20,7 @@ export function Toggle({
       <span className="toggle-container">
         <span className="toggle-mover" />
       </span>
+      {rhsLabel ? <label className="pl-1">{rhsLabel}</label> : null}
     </label>
   );
 }

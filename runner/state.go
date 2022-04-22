@@ -310,6 +310,7 @@ type HttpConnectorInfoHttp struct {
 	Method          string                    `json:"method" db:"method"`
 	Url             string                    `json:"url" db:"url"`
 	ContentTypeInfo ContentTypeInfo           `json:"contentTypeInfo" db:"contentTypeInfo"`
+	AllowInsecure   bool                      `json:"allowInsecure" db:"allowInsecure"`
 	Headers         []HttpConnectorInfoHeader `json:"headers" db:"headers"`
 }
 

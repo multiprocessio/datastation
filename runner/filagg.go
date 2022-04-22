@@ -54,9 +54,9 @@ func startOfYear(t time.Time) time.Time {
 	return time.Date(t.Year(), 0, 0, 0, 0, 0, 0, time.Local)
 }
 
-func timestampsFromRange(r TimeSeriesRange) (time.Time, time.Time, error) {
+func timestampsFromRange(r TimeSeriesRange) (time.Time, time.Time, bool, error) {
 	if r.Type == "absolute" {
-		return *r.BeginDate, *r.EndDate, nil
+		return *r.BeginDate, *r.EndDate, false, nil
 	}
 
 	now := time.Now()
@@ -64,72 +64,72 @@ func timestampsFromRange(r TimeSeriesRange) (time.Time, time.Time, error) {
 		end := now
 		switch *r.Relative {
 		case "last-5-minutes":
-			return now.Add(time.Minute * -5), end, nil
+			return now.Add(time.Minute * -5), end, false, nil
 		case "last-15-minutes":
-			return now.Add(time.Minute * -15), end, nil
+			return now.Add(time.Minute * -15), end, false, nil
 		case "last-30-minutes":
-			return now.Add(time.Minute * -30), end, nil
+			return now.Add(time.Minute * -30), end, false, nil
 		case "last-hour":
-			return now.Add(time.Minute * -60), end, nil
+			return now.Add(time.Minute * -60), end, false, nil
 		case "last-3-hours":
-			return now.Add(time.Hour * -3), end, nil
+			return now.Add(time.Hour * -3), end, false, nil
 		case "last-6-hours":
-			return now.Add(time.Hour * -6), end, nil
+			return now.Add(time.Hour * -6), end, false, nil
 		case "last-12-hours":
-			return now.Add(time.Hour * -12), end, nil
+			return now.Add(time.Hour * -12), end, false, nil
 		case "last-day":
-			return now.AddDate(0, 0, -1), end, nil
+			return now.AddDate(0, 0, -1), end, false, nil
 		case "last-3-days":
-			return now.AddDate(0, 0, -3), end, nil
+			return now.AddDate(0, 0, -3), end, false, nil
 		case "last-week":
-			return now.AddDate(0, 0, -7), end, nil
+			return now.AddDate(0, 0, -7), end, false, nil
 		case "last-2-weeks":
-			return now.AddDate(0, 0, -14), end, nil
+			return now.AddDate(0, 0, -14), end, false, nil
 		case "last-month":
-			return now.AddDate(0, -1, 0), end, nil
+			return now.AddDate(0, -1, 0), end, false, nil
 		case "last-2-months":
-			return now.AddDate(0, -2, 0), end, nil
+			return now.AddDate(0, -2, 0), end, false, nil
 		case "last-3-months":
-			return now.AddDate(0, -3, 0), end, nil
+			return now.AddDate(0, -3, 0), end, false, nil
 		case "last-6-months":
-			return now.AddDate(0, -6, 0), end, nil
+			return now.AddDate(0, -6, 0), end, false, nil
 		case "last-year":
-			return now.AddDate(-1, 0, 0), end, nil
+			return now.AddDate(-1, 0, 0), end, false, nil
 		case "last-2-years":
-			return now.AddDate(-2, 0, 0), end, nil
+			return now.AddDate(-2, 0, 0), end, false, nil
 		case "all-time":
-			return now.AddDate(-2000, 0, 0), end, nil
+			return time.Time{}, time.Time{}, true, nil
 		}
 	} else {
 		switch *r.Fixed {
 		case "this-hour":
-			return startOfHour(now), now, nil
+			return startOfHour(now), now, false, nil
 		case "previous-hour":
-			return startOfHour(now).Add(time.Hour * -1), startOfHour(now), nil
+			return startOfHour(now).Add(time.Hour * -1), startOfHour(now), false, nil
 		case "today":
-			return startOfDay(now), now, nil
+			return startOfDay(now), now, false, nil
 		case "yesterday":
-			return startOfDay(now).AddDate(0, 0, -1), startOfDay(now), nil
+			return startOfDay(now).AddDate(0, 0, -1), startOfDay(now), false, nil
 		case "week-to-date":
-			return startOfWeek(now), now, nil
+			return startOfWeek(now), now, false, nil
 		case "previous-week":
-			return startOfWeek(now).AddDate(0, 0, -7), startOfWeek(now), nil
+			return startOfWeek(now).AddDate(0, 0, -7), startOfWeek(now), false, nil
 		case "month-to-date":
-			return startOfMonth(now), now, nil
+			return startOfMonth(now), now, false, nil
 		case "previous-month":
-			return startOfMonth(now).AddDate(0, -1, 0), startOfMonth(now), nil
+			return startOfMonth(now).AddDate(0, -1, 0), startOfMonth(now), false, nil
 		case "quarter-to-date":
-			return startOfQuarter(now), now, nil
+			return startOfQuarter(now), now, false, nil
 		case "previous-quarter":
-			return startOfQuarter(now).AddDate(0, -3, 0), startOfQuarter(now), nil
+			return startOfQuarter(now).AddDate(0, -3, 0), startOfQuarter(now), false, nil
 		case "year-to-date":
-			return startOfYear(now), now, nil
+			return startOfYear(now), now, false, nil
 		case "previous-year":
-			return startOfYear(now).AddDate(-1, 0, 0), startOfYear(now), nil
+			return startOfYear(now).AddDate(-1, 0, 0), startOfYear(now), false, nil
 		}
 	}
 
-	return time.Time{}, time.Time{}, edsef("Unsupported time range, %#v", r)
+	return time.Time{}, time.Time{}, false, edsef("Unsupported time range, %#v", r)
 }
 
 func quoteTime(t time.Time, qt quoteType) string {
@@ -178,20 +178,23 @@ func (ec EvalContext) evalFilaggPanel(project *ProjectState, pageIndex int, pane
 	}
 
 	if fg.Range.Field != "" {
-		begin, end, err := timestampsFromRange(fg.Range)
+		begin, end, allTime, err := timestampsFromRange(fg.Range)
 		if err != nil {
 			return err
 		}
-		timeFilter := fmt.Sprintf("DATETIME(%s) > %s AND DATETIME(%s) < %s",
-			quote(fg.Range.Field, qt.identifier),
-			quoteTime(begin, qt),
-			quote(fg.Range.Field, qt.identifier),
-			quoteTime(end, qt))
 
-		if fg.Filter != "" {
-			whereClause = fmt.Sprintf("WHERE (%s AND %s)", fg.Filter, timeFilter)
-		} else {
-			whereClause = "WHERE " + timeFilter
+		if !allTime {
+			timeFilter := fmt.Sprintf("DATETIME(%s) > %s AND DATETIME(%s) < %s",
+				quote(fg.Range.Field, qt.identifier),
+				quoteTime(begin, qt),
+				quote(fg.Range.Field, qt.identifier),
+				quoteTime(end, qt))
+
+			if fg.Filter != "" {
+				whereClause = fmt.Sprintf("WHERE (%s AND %s)", fg.Filter, timeFilter)
+			} else {
+				whereClause = "WHERE " + timeFilter
+			}
 		}
 	}
 

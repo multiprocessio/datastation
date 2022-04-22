@@ -115,6 +115,7 @@ type httpRequest struct {
 	sendBody      bool
 	method        string
 	customCaCerts []string
+	allowInsecure bool
 }
 
 func getTransport(customCaCerts []string) (*http.Transport, error) {
@@ -167,6 +168,9 @@ func makeHTTPRequest(hr httpRequest) (*http.Response, error) {
 	if err != nil {
 		return nil, err
 	}
+	if hr.allowInsecure {
+		tr.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+	}
 	c := http.Client{Timeout: time.Second * 15, Transport: tr}
 	return c.Do(req)
 }
@@ -204,9 +208,10 @@ func (ec EvalContext) evalHTTPPanel(project *ProjectState, pageIndex int, panel 
 	return ec.withRemoteConnection(server, host, port, func(proxyHost, proxyPort string) error {
 		url := makeHTTPUrl(tls, proxyHost, proxyPort, rest)
 		rsp, err := makeHTTPRequest(httpRequest{
-			url:     url,
-			headers: h.Headers,
-			body:    []byte(panel.Content),
+			allowInsecure: h.AllowInsecure,
+			url:           url,
+			headers:       h.Headers,
+			body:          []byte(panel.Content),
 			sendBody: panel.Content != "" &&
 				(h.Method == http.MethodPut || h.Method == http.MethodPatch || h.Method == http.MethodPost),
 			customCaCerts: customCaCerts,

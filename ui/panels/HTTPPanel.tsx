@@ -16,8 +16,10 @@ import { CodeEditor } from '../components/CodeEditor';
 import { ContentTypePicker } from '../components/ContentTypePicker';
 import { FormGroup } from '../components/FormGroup';
 import { Input } from '../components/Input';
+import { Link } from '../components/Link';
 import { Select } from '../components/Select';
 import { ServerPicker } from '../components/ServerPicker';
+import { Toggle } from '../components/Toggle';
 import { ProjectContext } from '../state';
 import { PanelBodyProps, PanelDetailsProps, PanelUIDetails } from './types';
 
@@ -95,6 +97,25 @@ export function HTTPPanelDetails({
             updatePanel(panel);
           }}
         />
+
+        <div className="form-row">
+          <Toggle
+            label="Insecure HTTPS"
+            rhsLabel={panel.http.http.allowInsecure ? 'Allowed' : 'Not allowed'}
+            value={panel.http.http.allowInsecure}
+            onChange={function handleLightModeToggle() {
+              panel.http.http.allowInsecure = !panel.http.http.allowInsecure;
+              updatePanel(panel);
+            }}
+          />
+          <p>
+            Or add custom CA certificates in{' '}
+            <Link className="logo" args={{ view: 'settings' }}>
+              settings
+            </Link>
+            .
+          </p>
+        </div>
       </FormGroup>
 
       <FormGroup>
