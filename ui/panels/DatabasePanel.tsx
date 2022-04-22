@@ -10,6 +10,8 @@ import {
   PanelInfo,
   TimeSeriesRange as TimeSeriesRangeT,
 } from '../../shared/state';
+import { Toggle } from '../components/Toggle';
+import { Link } from '../components/Link';
 import { panelRPC } from '../asyncRPC';
 import { CodeEditor } from '../components/CodeEditor';
 import { Input } from '../components/Input';
@@ -184,15 +186,15 @@ export function DatabasePanelDetails({
           {['elasticsearch', 'prometheus'].includes(
             connector.database.type
           ) && (
-            <TimeSeriesRange
-              range={panel.database.range}
-              hideField={['prometheus'].includes(connector.database.type)}
-              updateRange={(r: TimeSeriesRangeT) => {
-                panel.database.range = r;
-                updatePanel(panel);
-              }}
-            />
-          )}
+              <TimeSeriesRange
+                range={panel.database.range}
+                hideField={['prometheus'].includes(connector.database.type)}
+                updateRange={(r: TimeSeriesRangeT) => {
+                  panel.database.range = r;
+                  updatePanel(panel);
+                }}
+              />
+            )}
           {connector.database.type === 'prometheus' && (
             <div className="form-row">
               <Input
@@ -206,6 +208,28 @@ export function DatabasePanelDetails({
               />
             </div>
           )}
+
+          {connector.database.type === 'elasticsearch' && (
+            <div className="form-row">
+              <Toggle
+                label="Insecure HTTPS"
+                rhsLabel={panel.database.extra.allowInsecure === 'true' ? 'Allowed' : 'Not allowed'}
+                value={panel.database.extra.allowInsecure === 'true'}
+                onChange={function handleLightModeToggle() {
+                  panel.database.extra.allowInsecure = String(panel.database.extra.allowInsecure !== 'true');
+                  updatePanel(panel);
+                }}
+              />
+              <p>
+                Or add custom CA certificates in{' '}
+                <Link className="logo" args={{ view: 'settings' }}>
+                  settings
+                </Link>
+                .
+              </p>
+            </div>
+          )}
+
           {!connector.serverId && (
             <ServerPicker
               servers={servers}

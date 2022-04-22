@@ -15,7 +15,7 @@ import (
 )
 
 func (ec EvalContext) evalPrometheus(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, server *ServerInfo, w io.Writer) error {
-	begin, end, err := timestampsFromRange(panel.DatabasePanelInfo.Database.Range)
+	begin, end, allTime, err := timestampsFromRange(panel.DatabasePanelInfo.Database.Range)
 	if err != nil {
 		return err
 	}
@@ -63,9 +63,12 @@ func (ec EvalContext) evalPrometheus(panel *PanelInfo, dbInfo DatabaseConnectorI
 
 		v1api := v1.NewAPI(client)
 		r := v1.Range{
-			Start: begin,
-			End:   end,
-			Step:  step,
+			Step: step,
+		}
+		// TODO: This may not actually work to not set Start and End if alltime
+		if !allTime {
+			r.Start = begin
+			r.End = end
 		}
 		result, _, err := v1api.QueryRange(context.Background(), panel.Content, r)
 		if err != nil {

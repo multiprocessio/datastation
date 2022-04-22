@@ -47,21 +47,28 @@ func (ec EvalContext) evalElasticsearch(panel *PanelInfo, dbInfo DatabaseConnect
 		q := panel.Content
 		_range := panel.DatabasePanelInfo.Database.Range
 		if _range.Field != "" {
-			begin, end, err := timestampsFromRange(_range)
-			if err != nil {
-				return err
-			}
+			begin, end, allTime, err := timestampsFromRange(_range)
 
-			if q != "" {
-				q = "(" + q + ") AND "
-			}
+			if !allTime {
+				if err != nil {
+					return err
+				}
 
-			q += _range.Field + ":[" + begin.Format(iso8601Format) + " TO " + end.Format(iso8601Format) + "]"
+				if q != "" {
+					q = "(" + q + ") AND "
+				}
+
+				q += _range.Field + ":[" + begin.Format(iso8601Format) + " TO " + end.Format(iso8601Format) + "]"
+			}
 		}
-		u += "?q=" + url.QueryEscape(q)
+		u += "?"
+		if q != "" {
+			u += "?q=" + url.QueryEscape(q)
+		}
 		u += "&size=10000"
 		// Closes the scroll after 10s of *idling* not 10s of scrolling
-		u += "&scroll=10s"
+		u += "&scroll=5s"
+		Logln("Making Elasticsearch request: %s. With query: (%s)", u, q)
 
 		var headers []HttpConnectorInfoHeader
 		if password != "" {
