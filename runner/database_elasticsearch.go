@@ -1,16 +1,11 @@
 package runner
 
 import (
-	"context"
-	"encoding/json"
+	"encoding/base64"
 	"io"
-	"io/ioutil"
-	"net/http"
-	"strings"
+	"net/url"
 
 	"github.com/multiprocessio/go-json"
-
-	"github.com/elastic/go-elasticsearch/v6"
 )
 
 var iso8601Format = "2006-01-02T15:04:05"
@@ -19,13 +14,16 @@ type elasticsearchResponse struct {
 	Hits struct {
 		Hits []map[string]any `json:"hits"`
 	} `json:"hits"`
+	ScrollId string `json:"_scroll_id"`
 }
 
 func (ec EvalContext) evalElasticsearch(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, server *ServerInfo, w io.Writer) error {
-	indexes := strings.Split(panel.DatabasePanelInfo.Database.Table, ",")
-	for i := range indexes {
-		indexes[i] = strings.TrimSpace(indexes[i])
+	var customCaCerts []string
+	for _, caCert := range ec.settings.CaCerts {
+		customCaCerts = append(customCaCerts, caCert.File)
 	}
+
+	indexes := panel.DatabasePanelInfo.Database.Table
 
 	tls, host, port, rest, err := getHTTPHostPort(dbInfo.Address)
 	if err != nil {
@@ -43,25 +41,8 @@ func (ec EvalContext) evalElasticsearch(panel *PanelInfo, dbInfo DatabaseConnect
 	}
 
 	return ec.withRemoteConnection(server, host, port, func(proxyHost, proxyPort string) error {
-		url := makeHTTPUrl(tls, proxyHost, proxyPort, rest)
-		cfg := elasticsearch.Config{
-			Addresses: []string{url},
-		}
-		if password != "" {
-			cfg.Username = dbInfo.Username
-			cfg.Password = password
-		} else if token != "" {
-			// TODO: Are either of these supposed to base64 encoded?
-			cfg.APIKey = token
-			cfg.Header = http.Header(map[string][]string{
-				"Authorization": {"Bearer " + token},
-			})
-		}
-
-		es, err := elasticsearch.NewClient(cfg)
-		if err != nil {
-			return err
-		}
+		baseUrl := makeHTTPUrl(tls, proxyHost, proxyPort, rest)
+		u := baseUrl + "/" + indexes + "/_search"
 
 		q := panel.Content
 		_range := panel.DatabasePanelInfo.Database.Range
@@ -77,23 +58,41 @@ func (ec EvalContext) evalElasticsearch(panel *PanelInfo, dbInfo DatabaseConnect
 
 			q += _range.Field + ":[" + begin.Format(iso8601Format) + " TO " + end.Format(iso8601Format) + "]"
 		}
+		u += "?q=" + url.QueryEscape(q)
+		u += "&size=10000"
+		// Closes the scroll after 10s of *idling* not 10s of scrolling
+		u += "&scroll=10s"
 
-		res, err := es.Search(
-			es.Search.WithContext(context.Background()),
-			es.Search.WithIndex(indexes...),
-			es.Search.WithQuery(q))
+		var headers []HttpConnectorInfoHeader
+		if password != "" {
+			basic := base64.StdEncoding.EncodeToString([]byte(dbInfo.Username + ":" + password))
+			headers = append(headers, HttpConnectorInfoHeader{
+				Name:  "Authorization",
+				Value: "Basic " + basic,
+			})
+		} else if token != "" {
+			headers = append(headers, HttpConnectorInfoHeader{
+				Name:  "Authorization",
+				Value: "Bearer " + token,
+			})
+		}
+
+		rsp, err := makeHTTPRequest(httpRequest{
+			allowInsecure: panel.Database.Extra["allow_insecure"] == "true",
+			url:           u,
+			method:        "GET",
+			headers:       headers,
+			customCaCerts: customCaCerts,
+		})
 		if err != nil {
 			return err
 		}
-		defer res.Body.Close()
-
-		if res.IsError() {
-			rsp, _ := ioutil.ReadAll(res.Body)
-			return edsef("Error %s: %s", res.Status(), rsp)
-		}
+		defer rsp.Body.Close()
 
 		var r elasticsearchResponse
-		if err := json.NewDecoder(res.Body).Decode(&r); err != nil {
+		dec := jsonNewDecoder(rsp.Body)
+		err = dec.Decode(&r)
+		if err != nil {
 			return err
 		}
 
@@ -103,6 +102,51 @@ func (ec EvalContext) evalElasticsearch(panel *PanelInfo, dbInfo DatabaseConnect
 				if err != nil {
 					return err
 				}
+			}
+
+			scrollId := r.ScrollId
+			for {
+				rsp, err := makeHTTPRequest(httpRequest{
+					allowInsecure: panel.Database.Extra["allow_insecure"] == "true",
+					url:           baseUrl + "/_search/scroll?scroll=10s&scroll_id=" + scrollId,
+					method:        "GET",
+					headers:       headers,
+					customCaCerts: customCaCerts,
+				})
+				if err != nil {
+					return err
+				}
+
+				dec := jsonNewDecoder(rsp.Body)
+				var r elasticsearchResponse
+				err = dec.Decode(&r)
+				if err != nil {
+					return err
+				}
+
+				for _, hit := range r.Hits.Hits {
+					err := w.EncodeRow(hit)
+					if err != nil {
+						return err
+					}
+				}
+				rsp.Body.Close()
+
+				if len(r.Hits.Hits) == 0 {
+					break
+				}
+			}
+
+			// Clear the scroll context
+			_, err = makeHTTPRequest(httpRequest{
+				allowInsecure: panel.Database.Extra["allow_insecure"] == "true",
+				url:           baseUrl + "/_search/scroll?scroll_id=" + scrollId,
+				method:        "DELETE",
+				headers:       headers,
+				customCaCerts: customCaCerts,
+			})
+			if err != nil {
+				Logln("Error while clearing Elasticsearch scroll: %s", err)
 			}
 
 			return nil
