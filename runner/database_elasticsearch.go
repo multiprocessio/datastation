@@ -103,6 +103,20 @@ func (ec EvalContext) evalElasticsearch(panel *PanelInfo, dbInfo DatabaseConnect
 			return err
 		}
 
+		defer func() {
+			// Clear the scroll context under any condition
+			_, err = makeHTTPRequest(httpRequest{
+				allowInsecure: panel.Database.Extra["allow_insecure"] == "true",
+				url:           baseUrl + "/_search/scroll?scroll_id=" + scrollId,
+				method:        "DELETE",
+				headers:       headers,
+				customCaCerts: customCaCerts,
+			})
+			if err != nil {
+				Logln("Error while clearing Elasticsearch scroll: %s", err)
+			}
+		}()
+
 		return withJSONArrayOutWriterFile(w, func(w *jsonutil.StreamEncoder) error {
 			for _, hit := range r.Hits.Hits {
 				err := w.EncodeRow(hit)
@@ -142,18 +156,6 @@ func (ec EvalContext) evalElasticsearch(panel *PanelInfo, dbInfo DatabaseConnect
 				if len(r.Hits.Hits) == 0 {
 					break
 				}
-			}
-
-			// Clear the scroll context
-			_, err = makeHTTPRequest(httpRequest{
-				allowInsecure: panel.Database.Extra["allow_insecure"] == "true",
-				url:           baseUrl + "/_search/scroll?scroll_id=" + scrollId,
-				method:        "DELETE",
-				headers:       headers,
-				customCaCerts: customCaCerts,
-			})
-			if err != nil {
-				Logln("Error while clearing Elasticsearch scroll: %s", err)
 			}
 
 			return nil
