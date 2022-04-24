@@ -345,6 +345,7 @@ func (ec EvalContext) EvalDatabasePanel(
 	panel *PanelInfo,
 	panelResultLoader func(projectId, panelId string) (chan map[string]any, error),
 	cache CacheSettings,
+	indexColumns bool,
 ) error {
 	var connector *ConnectorInfo
 	for _, c := range project.Connectors {
@@ -542,6 +543,7 @@ func (ec EvalContext) EvalDatabasePanel(
 				qt,
 				panelResultLoader,
 				cache,
+				indexColumns,
 			)
 
 			return err

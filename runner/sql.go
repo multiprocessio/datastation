@@ -5,6 +5,7 @@ import (
 	"regexp"
 	"sort"
 	"strings"
+	"sync"
 )
 
 var JSON_SQL_TYPE_MAP = map[string]string{
@@ -450,6 +451,7 @@ func importAndRun(
 	// Postgres uses $1, mysql/sqlite use ?
 	panelResultLoader func(string, string) (chan map[string]any, error),
 	cacheSettings CacheSettings,
+	indexColumns bool,
 ) ([]map[string]any, error) {
 	if cacheSettings.CachePresent {
 		return makeQuery(query)
@@ -459,6 +461,42 @@ func importAndRun(
 		if err != nil {
 			return nil, err
 		}
+	}
+
+	var wg sync.WaitGroup
+	if indexColumns {
+		for _, p := range panelsToImport {
+			for _, f := range p.columns {
+				field := f
+				panel := p
+
+				wg.Add(1)
+
+				go func() {
+					defer wg.Done()
+
+					for {
+						query := "CREATE INDEX " +
+							quote(panel.tableName+"_"+field.name+"_idx", qt.identifier) +
+							fmt.Sprintf(" ON %s(%s)", quote(panel.tableName, qt.identifier), quote(field.name, qt.identifier))
+						Logln("Creating index: %s", query)
+						err := createTable(query)
+						if err != nil {
+							// Keep retrying while it's locked
+							if err.Error() == "database is locked" {
+								continue
+							}
+
+							Logln("Couldn't create index: %s", err)
+						}
+
+						break
+					}
+				}()
+			}
+		}
+
+		wg.Wait()
 	}
 
 	return makeQuery(query)

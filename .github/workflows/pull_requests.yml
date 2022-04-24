@@ -30,7 +30,7 @@ jobs:
     - run: yarn format
     - run: yarn eslint ui
     - run: yarn tsc
-    - run: cd runner && gofmt -w .
+    - run: cd runner && go fmt $(go list ./...)
     - run: yarn build-language-definitions
     - run: ./scripts/fail_on_diff.sh
     - run: yarn test-licenses
