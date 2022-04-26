@@ -459,8 +459,7 @@ export class DatabasePanelInfo extends PanelInfo {
     pageId: string,
     panel: Partial<
       DatabasePanelInfo['database'] & { content: string; name: string }
-    > = {},
-    parallelEncoding?: boolean
+    > = {}
   ) {
     super('database', pageId, panel.name || '', panel.content || '');
     this.database = {
@@ -474,7 +473,7 @@ export class DatabasePanelInfo extends PanelInfo {
       step: panel.step || 60,
       extra: panel.extra || {},
     };
-    this.parallelEncoding = parallelEncoding;
+    this.parallelEncoding = true;
   }
 }
 

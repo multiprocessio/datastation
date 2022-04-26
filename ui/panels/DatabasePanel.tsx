@@ -115,17 +115,6 @@ export function DatabasePanelDetails({
           </React.Fragment>
         )}
       </div>
-      <div className="form-row">
-        <Toggle
-          label="Parallel Encoding"
-          value={panel.parallelEncoding}
-          rhsLabel={panel.parallelEncoding ? 'Enabled' : 'Disabled'}
-          onChange={() => {
-            panel.parallelEncoding = !panel.parallelEncoding;
-            updatePanel(panel);
-          }}
-        />
-      </div>
       {connector && (
         <React.Fragment>
           {connector.database.type === 'airtable' && (
