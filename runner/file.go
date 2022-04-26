@@ -11,6 +11,7 @@ import (
 	"regexp"
 	"runtime"
 	"strings"
+	"sync"
 
 	"github.com/linkedin/goavro/v2"
 	jsonutil "github.com/multiprocessio/go-json"
@@ -25,16 +26,32 @@ import (
 
 var preferredParallelism = runtime.NumCPU() * 2
 
-func transformCSV(in io.Reader, out io.Writer, delimiter rune) error {
+const ParallelEncodingMin = 100 * 1024 * 1024 // 100 MB
+
+func transformCSV(in io.Reader, out io.Writer, delimiter rune, parallelEncoding bool) error {
 	r := csv.NewReader(in)
 	r.Comma = delimiter
-	r.ReuseRecord = true
 	r.FieldsPerRecord = -1
+	if !parallelEncoding {
+		r.ReuseRecord = true // maybe there is a way to do this when using
+	}
 
 	return withJSONArrayOutWriterFile(out, func(w *jsonutil.StreamEncoder) error {
 		isHeader := true
 		var fields []string
 		row := map[string]any{}
+
+		recordChannel := make(chan []string, preferredParallelism)
+		first := true
+		var wg sync.WaitGroup
+		if parallelEncoding {
+			if _, err := out.Write([]byte{'['}); err != nil {
+				return err
+			}
+			for i := 0; i < preferredParallelism; i++ {
+				go encodeCSVSubroutine(&wg, out, &fields, recordChannel)
+			}
+		}
 
 		for {
 			record, err := r.Read()
@@ -55,6 +72,11 @@ func transformCSV(in io.Reader, out io.Writer, delimiter rune) error {
 				continue
 			}
 
+			if parallelEncoding && !first {
+				recordChannel <- record
+				continue
+			}
+
 			for i, field := range fields {
 				if i < len(record) {
 					row[field] = record[i]
@@ -63,8 +85,33 @@ func transformCSV(in io.Reader, out io.Writer, delimiter rune) error {
 				}
 			}
 
+			if parallelEncoding {
+				err = w.SetArray(false).EncodeRow(row) // Encode the first item here so the remaining ones can insert commas freely.
+				if err != nil {
+					return err
+				}
+				w.Close()
+				first = false
+				continue
+			}
+
 			err = w.EncodeRow(row)
 			if err != nil {
+				return err
+			}
+		}
+
+		if parallelEncoding {
+			for {
+				if len(recordChannel) > 0 {
+					continue
+				} else {
+					close(recordChannel)
+					break
+				}
+			}
+			wg.Wait()
+			if _, err := out.Write([]byte{']'}); err != nil {
 				return err
 			}
 		}
@@ -73,14 +120,14 @@ func transformCSV(in io.Reader, out io.Writer, delimiter rune) error {
 	})
 }
 
-func transformCSVFile(in string, out io.Writer, delimiter rune) error {
+func transformCSVFile(in string, out io.Writer, delimiter rune, parallelEncoding bool) error {
 	f, err := os.Open(in)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
 
-	return transformCSV(f, out, delimiter)
+	return transformCSV(f, out, delimiter, parallelEncoding)
 }
 
 func transformJSON(in io.Reader, out io.Writer) error {
@@ -639,7 +686,7 @@ func getServer(project *ProjectState, serverId string) (*ServerInfo, error) {
 	return nil, edsef("Unknown server: %d" + serverId)
 }
 
-func TransformFile(fileName string, cti ContentTypeInfo, out io.Writer) error {
+func TransformFile(fileName string, cti ContentTypeInfo, out io.Writer, parallelEncoding bool) error {
 	assumedType := GetMimeType(fileName, cti)
 
 	Logln("Assumed '%s' from '%s' given '%s' when loading file", assumedType, cti.Type, fileName)
@@ -647,9 +694,9 @@ func TransformFile(fileName string, cti ContentTypeInfo, out io.Writer) error {
 	case JSONMimeType:
 		return transformJSONFile(fileName, out)
 	case CSVMimeType:
-		return transformCSVFile(fileName, out, ',')
+		return transformCSVFile(fileName, out, ',', parallelEncoding)
 	case TSVMimeType:
-		return transformCSVFile(fileName, out, '\t')
+		return transformCSVFile(fileName, out, '\t', parallelEncoding)
 	case ExcelMimeType, ExcelOpenXMLMimeType:
 		return transformXLSXFile(fileName, out)
 	case ParquetMimeType:
@@ -700,13 +747,22 @@ func (ec EvalContext) evalFilePanel(project *ProjectState, pageIndex int, panel 
 		fileName = strings.ReplaceAll(fileName, "~", "/home/"+server.Username)
 
 		return ec.remoteFileReader(*server, fileName, func(r io.Reader) error {
-			return TransformReader(r, fileName, cti, w)
+			return TransformReader(r, fileName, cti, w, panel.ParallelEncoding)
 		})
 	}
 
 	fileName = resolvePath(fileName)
+	if panel.ParallelEncoding {
+		stat, err := os.Stat(fileName)
+		if err != nil {
+			return err
+		}
+		if stat.Size() < ParallelEncodingMin {
+			panel.ParallelEncoding = false
+		}
+	}
 
-	return TransformFile(fileName, cti, w)
+	return TransformFile(fileName, cti, w, panel.ParallelEncoding)
 }
 
 func resolvePath(p string) string {
@@ -715,4 +771,30 @@ func resolvePath(p string) string {
 	}
 
 	return path.Join(HOME, p[2:])
+}
+
+func encodeCSVSubroutine(wg *sync.WaitGroup, out io.Writer, fields *[]string, recordChannel chan []string) {
+	wg.Add(1)
+	defer wg.Done()
+	w := jsonutil.NewGenericStreamEncoder(out, jsonMarshal, false).SetFirst(false)
+	defer w.Close()
+	row := map[string]any{}
+	var record []string
+	for {
+		record = <-recordChannel
+		if record != nil {
+			for i, f := range *fields {
+				if i >= len(record) {
+					row[f] = nil
+				} else {
+					row[f] = record[i]
+				}
+			}
+			if err := w.EncodeRow(row); err != nil {
+				panic(err) // could we use something like err group and just return the error as normal?
+			}
+		} else {
+			break
+		}
+	}
 }

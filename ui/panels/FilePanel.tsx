@@ -9,6 +9,7 @@ import { ContentTypePicker } from '../components/ContentTypePicker';
 import { FileInput } from '../components/FileInput';
 import { FormGroup } from '../components/FormGroup';
 import { ServerPicker } from '../components/ServerPicker';
+import { Toggle } from '../components/Toggle';
 import { ProjectContext } from '../state';
 import { PanelDetailsProps, PanelUIDetails } from './types';
 
@@ -76,6 +77,17 @@ export function FilePanelDetails({
             updatePanel(panel);
           }}
         />
+        <div className="form-row">
+          <Toggle
+            label="Parallel Encoding"
+            value={panel.parallelEncoding}
+            rhsLabel={panel.parallelEncoding ? 'Enabled' : 'Disabled'}
+            onChange={() => {
+              panel.parallelEncoding = !panel.parallelEncoding;
+              updatePanel(panel);
+            }}
+          />
+        </div>
       </FormGroup>
       <ServerPicker
         servers={servers}

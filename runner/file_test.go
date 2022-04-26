@@ -397,7 +397,7 @@ func Test_transformCSV_BENCHMARK(t *testing.T) {
 	assert.Nil(t, err)
 
 	start := time.Now()
-	err = transformCSVFile("taxi.csv", outTmp, ',')
+	err = transformCSVFile("taxi.csv", outTmp, ',', false)
 	assert.Nil(t, err)
 
 	fmt.Printf("transform csv took %s\n", time.Since(start))

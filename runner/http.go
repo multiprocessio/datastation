@@ -207,6 +207,15 @@ func (ec EvalContext) evalHTTPPanel(project *ProjectState, pageIndex int, panel 
 
 	return ec.withRemoteConnection(server, host, port, func(proxyHost, proxyPort string) error {
 		url := makeHTTPUrl(tls, proxyHost, proxyPort, rest)
+		if panel.ParallelEncoding {
+			rsp, err := http.Head(url)
+			if err != nil {
+				return err
+			}
+			if rsp.ContentLength < ParallelEncodingMin {
+				panel.ParallelEncoding = false
+			}
+		}
 		rsp, err := makeHTTPRequest(httpRequest{
 			allowInsecure: h.AllowInsecure,
 			url:           url,
@@ -238,11 +247,11 @@ func (ec EvalContext) evalHTTPPanel(project *ProjectState, pageIndex int, panel 
 			return err
 		}
 		defer w.Close()
-		return TransformReader(rsp.Body, url, h.ContentTypeInfo, w)
+		return TransformReader(rsp.Body, url, h.ContentTypeInfo, w, panel.ParallelEncoding)
 	})
 }
 
-func TransformReader(r io.Reader, fileName string, cti ContentTypeInfo, out io.Writer) error {
+func TransformReader(r io.Reader, fileName string, cti ContentTypeInfo, out io.Writer, parallelImport bool) error {
 	assumedType := GetMimeType(fileName, cti)
 	Logln("Assumed '%s' from '%s' given '%s'", assumedType, cti.Type, fileName)
 
@@ -250,9 +259,9 @@ func TransformReader(r io.Reader, fileName string, cti ContentTypeInfo, out io.W
 	case JSONMimeType:
 		return transformJSON(r, out)
 	case CSVMimeType:
-		return transformCSV(r, out, ',')
+		return transformCSV(r, out, ',', parallelImport)
 	case TSVMimeType:
-		return transformCSV(r, out, '\t')
+		return transformCSV(r, out, '\t', parallelImport)
 	case ExcelMimeType, ExcelOpenXMLMimeType:
 		r, err := excelize.OpenReader(r)
 		if err != nil {
