@@ -18,17 +18,17 @@ import (
 )
 
 func Test_indexToExcelColumn(t *testing.T) {
-	tests := []struct{
-		input int
+	tests := []struct {
+		input  int
 		output string
 	}{
-		{ 26, "Z"},
-		{ 51, "AY"},
-		{ 52, "AZ"},
-		{ 80, "CB"},
-		{ 676, "YZ"},
-		{ 702, "ZZ"},
-		{ 705, "AAC"},
+		{26, "Z"},
+		{51, "AY"},
+		{52, "AZ"},
+		{80, "CB"},
+		{676, "YZ"},
+		{702, "ZZ"},
+		{705, "AAC"},
 	}
 
 	for _, test := range tests {
