@@ -826,6 +826,23 @@ input + input[type='file'] {
   display: none;
 }
 
+.status-bar {
+  border-top: 1px solid var(--border-light);
+  background: #f9f9fd;
+  font-size: 0.9rem;
+  color: #555;
+  padding: 5px;
+
+  .status-bar-element {
+    padding-left: 15px;
+
+    label {
+      color: #777;
+      padding-right: 0;
+    }
+  }
+}
+
 .new-panel {
   display: flex;
   justify-content: center;
@@ -1419,6 +1436,7 @@ body.dark {
 
   .card,
   .sidebar,
+  .status-bar,
   .project-name {
     background: var(--lighter-dark);
     border-color: var(--border-dark);
@@ -1458,6 +1476,10 @@ body.dark {
   }
 
   .navigation-item--active svg {
+    color: var(--color-dark);
+  }
+
+  .status-bar {
     color: var(--color-dark);
   }
 }
