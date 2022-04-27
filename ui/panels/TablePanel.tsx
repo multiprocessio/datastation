@@ -198,7 +198,7 @@ export function TablePanelDetails({
 
 function formatCell(c: any): React.ReactNode | string {
   if (c === undefined || c === null) {
-    return <small className="text-muted">Empty</small>;
+    return <small className="text-muted">(Empty)</small>;
   }
 
   if (typeof c === 'string' || typeof c === 'number') {
