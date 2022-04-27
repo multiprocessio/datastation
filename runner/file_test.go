@@ -17,6 +17,36 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func Test_recordToMap(t *testing.T) {
+	tests := []struct {
+		fields []string
+		record []string
+		expect map[string]any
+	}{
+		{
+			[]string{"a", "b"},
+			[]string{"1"},
+			map[string]any{"a": "1", "b": nil},
+		},
+		{
+			[]string{"a", "b"},
+			[]string{"1", "2", "3"},
+			map[string]any{"a": "1", "b": "2", "anonymous2": "3"},
+		},
+		{
+			[]string{"a", "b"},
+			[]string{},
+			map[string]any{"a": nil, "b": nil},
+		},
+	}
+
+	for _, test := range tests {
+		m := map[string]any{}
+		recordToMap(m, &test.fields, test.record)
+		assert.Equal(t, test.expect, m)
+	}
+}
+
 func Test_transformJSONLines(t *testing.T) {
 	longString := strings.Repeat("Omnis ut ut voluptatem provident eaque necessitatibus quia. Eos veniam qui. ", 1024) // 76kb
 	tests := []struct {
