@@ -259,7 +259,11 @@ export function TablePanel({ panel }: PanelBodyProps<TablePanelInfo>) {
                 column: TableColumn,
                 i: number
               ) {
-                return <td key={column.field + i}>{formatCell(row[column.field])}</td>;
+                return (
+                  <td key={column.field + i}>
+                    {formatCell(row[column.field])}
+                  </td>
+                );
               })}
             </tr>
           );
