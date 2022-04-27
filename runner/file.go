@@ -3,7 +3,6 @@ package runner
 import (
 	"bufio"
 	"encoding/csv"
-	"fmt"
 	"io"
 	"os"
 	"os/user"
@@ -26,12 +25,22 @@ import (
 
 var preferredParallelism = runtime.NumCPU() * 2
 
+func indexToExcelColumn(i int) string {
+	i -= 1
+
+	if i/26 > 0 {
+		return indexToExcelColumn(i/26) + string(rune(i%26+65))
+	}
+
+	return string(rune(i%26 + 65))
+}
+
 func recordToMap[T any](row map[string]any, fields *[]string, record []T) {
 	i := -1 // This is only set to 0 if len(record) > 0
 	var el T
 	for i, el = range record {
 		if i >= len(*fields) {
-			*fields = append(*fields, fmt.Sprintf("anonymous%d", i))
+			*fields = append(*fields, indexToExcelColumn(i+1))
 		}
 
 		(row)[(*fields)[i]] = el

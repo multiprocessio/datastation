@@ -8,6 +8,44 @@ import { Select } from './Select';
 
 export type FieldGroup = { name: string; elements: Array<[string, Shape]> };
 
+export function primaryVariedShapeOrString(s: Shape): Shape {
+  const stack: [Shape] = [s];
+  let primaryShape: Shape = null;
+
+  loop: while (stack.length) {
+    const shape = stack.pop();
+
+    switch (shape.kind) {
+      case 'varied':
+        stack.push(...shape.children);
+        break;
+      case 'scalar':
+        if (shape.name === 'null') {
+          continue;
+        }
+
+        // If two non-null types, fall back to treating it as a string.
+        if (primaryShape) {
+          primaryShape = null;
+          break loop;
+        }
+
+        primaryShape = shape;
+        break;
+      default:
+        // If non-scalar/non-varied, fall back to treating it as a string.
+        primaryShape = null;
+        break loop;
+    }
+  }
+
+  if (!primaryShape) {
+    return { kind: 'scalar', name: 'string' };
+  }
+
+  return primaryShape;
+}
+
 export function flattenObjectFields(o: ObjectShape): Array<[string, Shape]> {
   const stack: [[string[], Shape]] = [[[], o]];
   const flat: Array<[string, Shape]> = [];
@@ -16,6 +54,11 @@ export function flattenObjectFields(o: ObjectShape): Array<[string, Shape]> {
     const [path, shape] = stack.pop();
 
     switch (shape.kind) {
+      case 'varied': {
+        const primaryShape = primaryVariedShapeOrString(shape);
+        flat.push([path.join('.'), primaryShape]);
+        break;
+      }
       case 'scalar':
         flat.push([path.join('.'), shape]);
         break;
