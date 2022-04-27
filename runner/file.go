@@ -37,7 +37,7 @@ func recordToMap[T any](row map[string]any, fields *[]string, record []T) {
 		(row)[(*fields)[i]] = el
 	}
 
-	// If the record has less fields than we've seen already, set all fields to nil
+	// If the record has less fields than we've seen already, set all unseen fields to nil
 	for _, field := range (*fields)[i+1:] {
 		(row)[field] = nil
 	}
