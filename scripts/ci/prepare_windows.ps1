@@ -1,7 +1,16 @@
 iwr -useb 'https://raw.githubusercontent.com/scoopinstaller/install/master/install.ps1' -outfile 'install.ps1'
 .\install.ps1 -RunAsAdmin
 Join-Path (Resolve-Path ~).Path "scoop\shims" >> $Env:GITHUB_PATH
-scoop install nodejs@16 go@1.18 cmake python yarn zip jq curl r julia
+scoop install nodejs@16
+scoop install go@1.18
+scoop install cmake
+scoop install python
+scoop install yarn
+scoop install zip
+scoop install jq
+scoop install curl
+scoop install r
+scoop install julia
 New-Alias zip 7z
 
 # Install JS dependencies
