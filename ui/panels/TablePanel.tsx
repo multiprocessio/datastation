@@ -158,7 +158,6 @@ export function TablePanelDetails({
               key={c.field + i}
             >
               <FieldPicker
-                used={panel.table.columns.map(mapColumnToField)}
                 onDelete={
                   panel.table.columns.length > 1
                     ? function handleColumnDelete() {

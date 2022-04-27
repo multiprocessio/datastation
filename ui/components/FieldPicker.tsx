@@ -188,7 +188,6 @@ export function FieldPicker({
   labelOnChange,
   onDelete,
   preferredDefaultType,
-  used,
   allowNone,
   tooltip,
 }: {
@@ -200,7 +199,6 @@ export function FieldPicker({
   labelOnChange?: (v: string) => void;
   onDelete?: () => void;
   preferredDefaultType?: 'number' | 'string';
-  used?: Array<string>;
   allowNone?: string;
   tooltip?: React.ReactNode;
 }) {
@@ -215,7 +213,6 @@ export function FieldPicker({
         label={label}
         value={value}
         onChange={onChange}
-        used={used}
         allowNone={allowNone}
         tooltip={labelOnChange ? null : tooltip}
       >

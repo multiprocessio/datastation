@@ -10,7 +10,6 @@ export function Select({
   disabled,
   label,
   className,
-  used,
   allowNone,
   tooltip,
   subtext,
@@ -21,7 +20,6 @@ export function Select({
   disabled?: boolean;
   label?: string;
   className?: string;
-  used?: Array<string>;
   allowNone?: string;
   tooltip?: React.ReactNode;
   subtext?: React.ReactNode;
