@@ -8,7 +8,7 @@ import (
 
 // Overridden during build
 var (
-	VERSION = "development"
+	VERSION  = "development"
 	APP_NAME = "DataStation Runner (Go)"
 )
 
