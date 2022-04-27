@@ -204,24 +204,6 @@ export function FieldPicker({
   allowNone?: string;
   tooltip?: React.ReactNode;
 }) {
-  // Default the label to the field name
-  const [labelModified, setLabelModified] = React.useState(false);
-  React.useEffect(() => {
-    if (
-      labelOnChange &&
-      !labelModified &&
-      value &&
-      title(value) !== labelValue
-    ) {
-      labelOnChange(title(value));
-    }
-  }, [value, labelValue, labelModified, labelOnChange]);
-
-  const labelOnChangeWrapper = (v: string) => {
-    setLabelModified(true);
-    return labelOnChange(v);
-  };
-
   let fieldPicker = null;
   if (wellFormedGraphInput(shape)) {
     const fieldGroups = orderedObjectFields(
@@ -264,7 +246,7 @@ export function FieldPicker({
       <Input
         label="Label"
         value={labelValue}
-        onChange={labelOnChangeWrapper}
+        onChange={labelOnChange}
         tooltip={tooltip}
       />
       {onDelete && (

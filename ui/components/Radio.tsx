@@ -13,16 +13,6 @@ export function Radio({
   vertical,
   ...props
 }: RadioProps) {
-  React.useEffect(() => {
-    if (!options.length) {
-      return;
-    }
-
-    if (!options.map((o) => String(o.value)).includes(String(value))) {
-      props.onChange(String(options[0].value));
-    }
-  });
-
   const radioClass = 'radio' + (vertical ? ' radio--vertical' : '');
 
   const radio = (
