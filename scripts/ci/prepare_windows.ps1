@@ -15,9 +15,6 @@ New-Alias zip 7z
 # Install JS dependencies
 yarn
 
-# Install R
-curl -LO https://cran.r-project.org/bin/windows/base/R-4.2.0-win.exe
-
 # Install Go
 # curl -L -O "https://go.dev/dl/go1.18.windows-amd64.zip"
 # unzip go1.18.windows-amd64.zip
