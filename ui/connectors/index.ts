@@ -138,7 +138,7 @@ export const VENDORS: {
     details: AirtableDetails,
   },
   'google-sheets': {
-    name: 'Google Sheets',
+    name: 'Google Sheets (Beta)',
     id: 'google-sheets',
     details: BigQueryDetails,
   },
@@ -170,7 +170,7 @@ export const VENDOR_GROUPS: Array<{
   },
   {
     group: 'Spreadsheets',
-    vendors: ['airtable'],
+    vendors: ['airtable', 'google-sheets'],
   },
   {
     group: 'Document',

@@ -372,6 +372,10 @@ input + input[type='file'] {
   margin-bottom: calc(2 * var(--margin-base));
 }
 
+.mr-1 {
+  margin-right: var(--margin-base);
+}
+
 .flex {
   max-height: 100%;
   display: flex;
@@ -754,6 +758,9 @@ input + input[type='file'] {
   max-width: 100%;
   /* Same for height */
   max-height: 100%;
+
+  /* Defaults to overflowing into .status-bar */
+  overflow: auto;
 }
 
 .panel-order {
@@ -1048,6 +1055,10 @@ canvas {
 .table--large,
 .canvas--large {
   width: 100% !important;
+}
+
+.table-controls {
+  padding: var(--margin-base);
 }
 
 .modal {

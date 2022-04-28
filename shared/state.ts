@@ -254,6 +254,8 @@ export class PanelInfo {
   resultMeta: PanelResult;
   lastEdited: Date;
   pageId: string;
+  page: number;
+  pageSize: number;
 
   constructor(
     type: PanelInfoType,
@@ -294,12 +296,16 @@ export class PanelInfo {
     switch (pit.type) {
       case 'table':
         pit = mergeDeep(new TablePanelInfo(pit.pageId), pit);
+        if (!pit.page) pit.page = 0;
+        if (!pit.pageSize) pit.pageSize = 15;
         break;
       case 'http':
         pit = mergeDeep(new HTTPPanelInfo(pit.pageId), pit);
         break;
       case 'graph':
         pit = mergeDeep(new GraphPanelInfo(pit.pageId), pit);
+        if (!pit.page) pit.page = 0;
+        if (!pit.pageSize) pit.pageSize = 1000;
         break;
       case 'program':
         pit = mergeDeep(new ProgramPanelInfo(pit.pageId), pit);

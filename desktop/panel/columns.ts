@@ -51,7 +51,9 @@ export async function evalColumns(
     value,
     columns,
     // Assumes that position always comes before panel name in the idmap
-    +Object.keys(idMap).find((key) => idMap[key] === panelSource)
+    +Object.keys(idMap).find((key) => idMap[key] === panelSource),
+    panel.page,
+    panel.pageSize
   );
 
   return {
