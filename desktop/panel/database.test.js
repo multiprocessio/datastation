@@ -470,9 +470,6 @@ for (const subprocess of RUNNERS) {
         return;
       }
 
-      // Mongo doesn't work yet.
-      return;
-
       const connectors = [
         new DatabaseConnectorInfo({
           type: 'google-sheets',

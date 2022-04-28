@@ -35,39 +35,44 @@ func (v *Vector[T]) Slice() []T {
 	return v.s
 }
 
-func writeGoogleSheet(sheet *sheets.Sheet, w *jsonutil.StreamEncoder) error {
+func writeGoogleSheet(sheet *sheets.ValueRange, w *jsonutil.StreamEncoder) error {
 	var header []string
-	if len(sheet.Data) != 1 {
-		fmt.Printf("%#v\n", sheet)
-		debugObject(sheet.Properties)
-		return makeErrUser(fmt.Sprintf("Too few or too many data grids (%d), should not be possible.", len(sheet.Data)))
-	}
 
-	var cells Vector[any]
-	var row map[string]any
+	row := map[string]any{}
 
-	for _, r := range sheet.Data[0].RowData {
+	for _, rawRow := range sheet.Values {
 		// Is first row, fill out header.
 		if header == nil {
-			for _, cell := range r.Values {
-				if cell.UserEnteredValue.StringValue == nil {
-					header = append(header, "")
-					continue
-				}
-				
-				header = append(header, *cell.UserEnteredValue.StringValue)
+			for _, cell := range rawRow {
+				header = append(header, fmt.Sprintf("%v", cell))
 			}
 			continue
 		}
 
-		cells.Reset()
-		for _, v := range r.Values {
-			cells.Push(v.UserEnteredValue.StringValue)
+		recordToMap(row, &header, rawRow)
+
+		err := w.EncodeRow(row)
+		if err != nil {
+			return err
 		}
-		recordToMap(row, &header, cells.Slice())
 	}
 
 	return nil
+}
+
+func fetchGoogleSheetValueRange(srv *sheets.Service, sheetId string, sInfo *sheets.Sheet) (*sheets.ValueRange, error) {
+	rows := sInfo.Properties.GridProperties.RowCount
+	columns := sInfo.Properties.GridProperties.ColumnCount
+	title := sInfo.Properties.Title
+
+	readRange := fmt.Sprintf("%s!A1:%s%d", title, indexToExcelColumn(int(columns)), rows+1)
+
+	rsp, err := srv.Spreadsheets.Values.Get(sheetId, readRange).Do()
+	if err != nil {
+		return nil, makeErrUser(err.Error())
+	}
+
+	return rsp, nil
 }
 
 func (ec EvalContext) evalGoogleSheets(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, w io.Writer) error {
@@ -92,13 +97,13 @@ func (ec EvalContext) evalGoogleSheets(panel *PanelInfo, dbInfo DatabaseConnecto
 
 	// Single sheet files get flattened into just an array, not a dict mapping sheet name to sheet contents
 	if len(sheets) == 1 {
-		rows := sheets[0].Properties.GridProperties.RowCount
-		columns := sheets[0].Properties.GridProperties.ColumnCount
+		valueRange, err := fetchGoogleSheetValueRange(srv, panel.Database.Table, sheets[0])
+		if err != nil {
+			return err
+		}
 
-		// TODO: make request based on these ranges
-		
 		return withJSONArrayOutWriterFile(w, func(w *jsonutil.StreamEncoder) error {
-			return writeGoogleSheet(sheets[0], w)
+			return writeGoogleSheet(valueRange, w)
 		})
 	}
 
@@ -110,6 +115,11 @@ func (ec EvalContext) evalGoogleSheets(panel *PanelInfo, dbInfo DatabaseConnecto
 				if err != nil {
 					return err
 				}
+			}
+
+			valueRange, err := fetchGoogleSheetValueRange(srv, panel.Database.Table, sheets[0])
+			if err != nil {
+				return err
 			}
 
 			name := sheet.Properties.Title
@@ -124,13 +134,13 @@ func (ec EvalContext) evalGoogleSheets(panel *PanelInfo, dbInfo DatabaseConnecto
 				name = fmt.Sprintf("%s%d", sheet.Properties.Title, nth)
 			}
 			sheetNameKey := `"` + strings.ReplaceAll(name, `"`, `\\"`) + `":`
-			_, err := w.Write([]byte(sheetNameKey))
+			_, err = w.Write([]byte(sheetNameKey))
 			if err != nil {
 				return err
 			}
 
 			err = withJSONArrayOutWriter(w, func(w *jsonutil.StreamEncoder) error {
-				return writeGoogleSheet(sheet, w)
+				return writeGoogleSheet(valueRange, w)
 			})
 			if err != nil {
 				return err

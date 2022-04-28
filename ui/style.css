@@ -457,23 +457,6 @@ input + input[type='file'] {
   color: #ccc;
 }
 
-.resize {
-  resize: both;
-  overflow: auto;
-}
-
-.resize--horizontal {
-  resize: horizontal;
-}
-
-.resize--left {
-  direction: rtl;
-}
-
-.resize--left * {
-  direction: ltr;
-}
-
 .flex-right {
   margin-left: auto;
 }
