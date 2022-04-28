@@ -14,6 +14,8 @@ New-Alias zip 7z
 
 # Install JS dependencies
 yarn
+# Windows builds fail a lot
+yarn rebuild
 
 # Install Go
 # curl -L -O "https://go.dev/dl/go1.18.windows-amd64.zip"
