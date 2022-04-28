@@ -785,9 +785,12 @@ input + input[type='file'] {
   align-items: center;
 
   svg {
-    color: red;
     height: 15px;
     width: 15px;
+  }
+
+  .warning svg {
+    color: red;
   }
 }
 

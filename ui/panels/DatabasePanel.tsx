@@ -332,6 +332,14 @@ export const databasePanel: PanelUIDetails<DatabasePanelInfo> = {
   label: 'Database',
   details: DatabasePanelDetails,
   body: DatabasePanelBody,
+  hideBody: (panel: DatabasePanelInfo, connectors: Array<ConnectorInfo>) => {
+    const connector = connectors.find(
+      (c) => c.id === panel.database.connectorId
+    ) as DatabaseConnectorInfo;
+
+    // Hide body in google sheets request
+    return connector?.database?.type === 'google-sheets';
+  },
   previewable: true,
   factory: (pageId: string) => new DatabasePanelInfo(pageId),
   hasStdout: false,

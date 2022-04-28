@@ -32,6 +32,7 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { Highlight } from './components/Highlight';
 import { Input } from './components/Input';
 import { PANEL_UI_DETAILS } from './panels';
+import { ProjectContext } from './state';
 import { UrlStateContext } from './urlState';
 
 export const VISUAL_PANELS = ['graph', 'table'];
@@ -250,6 +251,7 @@ export function Panel({
     },
     setState: setUrlState,
   } = React.useContext(UrlStateContext);
+  const { connectors } = React.useContext(ProjectContext).state;
 
   const [panelOutExpanded, setPanelOutExpandedInternal] = React.useState(
     allPanelOutExpanded.includes(panel.id)
@@ -381,16 +383,20 @@ export function Panel({
     }
   }
 
+  const bodyHidden =
+    panelUIDetails.hideBody && panelUIDetails.hideBody(panel, connectors);
+
   return (
     <div
       id={`panel-${panel.id}`}
-      className={`panel ${fullScreen === panel.id ? 'panel--fullscreen' : ''} ${hidden ? 'panel--hidden' : ''
-        } ${(panelUIDetails.body === null ||
-          (panelUIDetails.hideBody && panelUIDetails.hideBody(panel)) || panelOutExpanded) &&
-          !error
+      className={`panel ${fullScreen === panel.id ? 'panel--fullscreen' : ''} ${
+        hidden ? 'panel--hidden' : ''
+      } ${
+        (panelUIDetails.body === null || bodyHidden || panelOutExpanded) &&
+        !error
           ? 'panel--empty'
           : ''
-        } ${loading ? 'panel--loading' : ''}`}
+      } ${loading ? 'panel--loading' : ''}`}
       tabIndex={1001}
       ref={panelRef}
       onKeyDown={keyboardShortcuts}
@@ -413,8 +419,9 @@ export function Panel({
                 fullScreen: fullScreen === panel.id ? null : panel.id,
               });
             }}
-            className={`panel-header ${details ? 'panel-header--open' : ''
-              } vertical-align-center`}
+            className={`panel-header ${
+              details ? 'panel-header--open' : ''
+            } vertical-align-center`}
           >
             <span title="Move Up">
               <Button
@@ -484,7 +491,7 @@ export function Panel({
                             Took{' '}
                             {formatDistanceStrict(
                               results.lastRun.valueOf() -
-                              (results.elapsed || 0),
+                                (results.elapsed || 0),
                               results.lastRun.valueOf()
                             )}
                           </small>
@@ -576,21 +583,18 @@ export function Panel({
             <ErrorBoundary className="panel-body">
               <div className="flex">
                 <div className="panel-body">
-                  {panelUIDetails.body &&
-                    (panelUIDetails.hideBody
-                      ? !panelUIDetails.hideBody(panel)
-                      : true) && (
-                      <panelUIDetails.body
-                        panel={panel}
-                        keyboardShortcuts={keyboardShortcuts}
-                        panels={panels}
-                        updatePanel={updatePanel}
-                      />
-                    )}
+                  {panelUIDetails.body && !bodyHidden && (
+                    <panelUIDetails.body
+                      panel={panel}
+                      keyboardShortcuts={keyboardShortcuts}
+                      panels={panels}
+                      updatePanel={updatePanel}
+                    />
+                  )}
                   {
                     /* Visual panels get run automatically. Don't show the Cancelled alert since this will happen all the time. */ VISUAL_PANELS.includes(
-                    panel.type
-                  ) && error?.name === 'Cancelled' ? null : (
+                      panel.type
+                    ) && error?.name === 'Cancelled' ? null : (
                       <PanelError panels={panels} e={error} />
                     )
                   }
@@ -598,7 +602,7 @@ export function Panel({
                 </div>
                 {panelUIDetails.previewable && (
                   <div className="panel-out">
-                    <div className="panel-out-header">
+                    <div className="panel-out-header vertical-align-center">
                       <Button
                         className={panelOut === 'preview' ? 'selected' : ''}
                         onClick={() => setPanelOut('preview')}
@@ -613,7 +617,10 @@ export function Panel({
                       </Button>
                       {panelUIDetails.hasStdout && (
                         <Button
-                          className={panelOut === 'stdout' ? 'selected' : ''}
+                          className={
+                            (panelOut === 'stdout' ? 'selected' : '') +
+                            ' warning'
+                          }
                           onClick={() => setPanelOut('stdout')}
                         >
                           Stdout/Stderr
@@ -622,17 +629,19 @@ export function Panel({
                           </span>
                         </Button>
                       )}
-                      <Button
-                        icon
-                        className="flex-right"
-                        onClick={() => setPanelOutExpanded(!panelOutExpanded)}
-                      >
-                        {panelOutExpanded ? (
-                          <IconArrowsMinimize />
-                        ) : (
-                          <IconArrowsMaximize />
-                        )}
-                      </Button>
+                      {!bodyHidden && (
+                        <Button
+                          icon
+                          className="flex-right"
+                          onClick={() => setPanelOutExpanded(!panelOutExpanded)}
+                        >
+                          {panelOutExpanded ? (
+                            <IconArrowsMinimize />
+                          ) : (
+                            <IconArrowsMaximize />
+                          )}
+                        </Button>
+                      )}
                     </div>
                     <div className="panel-preview">
                       <div className="panel-preview-results">
@@ -655,11 +664,11 @@ export function Panel({
                     <span className="status-bar-element">
                       <label>Rows (Estimate)</label>{' '}
                       {!panel.resultMeta.arrayCount &&
-                        String(panel.resultMeta.arrayCount) !== '0'
+                      String(panel.resultMeta.arrayCount) !== '0'
                         ? 'Not an array'
                         : parseInt(
-                          String(panel.resultMeta.arrayCount)
-                        ).toLocaleString()}
+                            String(panel.resultMeta.arrayCount)
+                          ).toLocaleString()}
                     </span>
                     <span className="status-bar-element">
                       <label>Size</label> {humanSize(panel.resultMeta.size)}

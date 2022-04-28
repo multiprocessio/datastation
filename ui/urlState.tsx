@@ -44,7 +44,7 @@ export function getUrlState<
     expanded: getQueryParameter('expanded').split(','),
     sidebar: getQueryParameter('sidebar') !== 'false',
     panelOutExpanded: getQueryParameter('panelOutExpanded').split(','),
-    panelOut: JSON.parse(getQueryParameter('panelOutExpanded') || '{}'),
+    panelOut: JSON.parse(getQueryParameter('panelOut') || '{}'),
   };
 }
 
