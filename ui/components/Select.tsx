@@ -1,6 +1,26 @@
 import * as React from 'react';
 import { Tooltip } from './Tooltip';
 
+function getOptionValues(children: React.ReactNode): Array<string> {
+  return React.Children.map(children, (c: React.ReactElement) => {
+    if (!c) {
+      return;
+    }
+
+    if (c.type === 'option') {
+      return (c as React.ReactElement).props.value;
+    }
+
+    if (c.type === 'optgroup') {
+      return getOptionValues(c.props.children);
+    }
+
+    return;
+  })
+    .filter(Boolean)
+    .flat();
+}
+
 export const NONE = '-- None --';
 
 export function Select({
@@ -28,6 +48,16 @@ export function Select({
   if (className) {
     selectClass += ' ' + className;
   }
+
+  const optionValues = getOptionValues(children);
+  const oldValue = value;
+  React.useEffect(() => {
+    const values = [allowNone ? NONE : null, ...optionValues].filter(Boolean);
+
+    if (values.length && !values.includes(value)) {
+      onChange(values[0]);
+    }
+  }, [value, oldValue, allowNone, onChange, optionValues]);
 
   const select = (
     <div className="vertical-align-center">
