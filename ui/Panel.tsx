@@ -272,7 +272,9 @@ export function Panel({
     [setUrlState, allPanelOutExpanded, setPanelOutExpandedInternal, panel.id]
   );
 
-  const [panelOut, setPanelOutInternal] = React.useState(allPanelOut[panel.id] || 'preview');
+  const [panelOut, setPanelOutInternal] = React.useState(
+    allPanelOut[panel.id] || 'preview'
+  );
   const setPanelOut = React.useCallback(
     (v: string) => {
       setPanelOutInternal(v);
@@ -384,7 +386,7 @@ export function Panel({
       id={`panel-${panel.id}`}
       className={`panel ${fullScreen === panel.id ? 'panel--fullscreen' : ''} ${hidden ? 'panel--hidden' : ''
         } ${(panelUIDetails.body === null ||
-          (panelUIDetails.hideBody && panelUIDetails.hideBody(panel))) &&
+          (panelUIDetails.hideBody && panelUIDetails.hideBody(panel)) || panelOutExpanded) &&
           !error
           ? 'panel--empty'
           : ''
