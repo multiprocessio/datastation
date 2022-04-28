@@ -183,6 +183,18 @@ export function DatabasePanelDetails({
               />
             </div>
           )}
+          {connector.database.type === 'google-sheets' && (
+            <div className="form-row">
+              <Input
+                label="Sheet ID"
+                value={panel.database.table}
+                onChange={(i: string) => {
+                  panel.database.table = i;
+                  updatePanel(panel);
+                }}
+              />
+            </div>
+          )}
           {['elasticsearch', 'prometheus'].includes(
             connector.database.type
           ) && (

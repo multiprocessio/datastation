@@ -12,35 +12,59 @@ import (
 	"google.golang.org/api/sheets/v4"
 )
 
-func writeGoogleSheet(sheet *sheets.Sheet, w *jsonutil.StreamEncoder, row *map[string]any) error {
+type Vector[T any] struct {
+	s []T
+	index int
+}
+
+func (v *Vector[T]) Push(el T) {
+	defer func () { v.index++ } ()
+	if v.index < cap(v.s) {
+		v.s[v.index] = el
+		return
+	}
+
+	v.s = append(v.s, el)
+}
+
+func (v *Vector[T]) Reset() {
+	v.index = 0
+}
+
+func (v *Vector[T]) Slice() []T {
+	return v.s
+}
+
+func writeGoogleSheet(sheet *sheets.Sheet, w *jsonutil.StreamEncoder) error {
 	var header []string
 	if len(sheet.Data) != 1 {
 		fmt.Printf("%#v\n", sheet)
-		return edsef("Too few or too many data grids (%d), should not be possible.", len(sheet.Data))
+		debugObject(sheet.Properties)
+		return makeErrUser(fmt.Sprintf("Too few or too many data grids (%d), should not be possible.", len(sheet.Data)))
 	}
+
+	var cells Vector[any]
+	var row map[string]any
 
 	for _, r := range sheet.Data[0].RowData {
 		// Is first row, fill out header.
-		// TODO: let user opt out of headers being required
 		if header == nil {
 			for _, cell := range r.Values {
-				// TODO: if not a real header this might be nil?
+				if cell.UserEnteredValue.StringValue == nil {
+					header = append(header, "")
+					continue
+				}
+				
 				header = append(header, *cell.UserEnteredValue.StringValue)
 			}
 			continue
 		}
 
-		// Otherwise is data row.
-		for i, header := range header {
-			if i < len(r.Values)-1 {
-				(*row)[header] = r.Values[i].UserEnteredValue.StringValue
-			} else {
-				// Need to reset the cell
-				(*row)[header] = nil
-			}
+		cells.Reset()
+		for _, v := range r.Values {
+			cells.Push(v.UserEnteredValue.StringValue)
 		}
-
-		// TODO: could be cells without a header
+		recordToMap(row, &header, cells.Slice())
 	}
 
 	return nil
@@ -66,11 +90,15 @@ func (ec EvalContext) evalGoogleSheets(panel *PanelInfo, dbInfo DatabaseConnecto
 
 	sheets := rsp.Sheets
 
-	sharedRow := map[string]any{}
 	// Single sheet files get flattened into just an array, not a dict mapping sheet name to sheet contents
 	if len(sheets) == 1 {
+		rows := sheets[0].Properties.GridProperties.RowCount
+		columns := sheets[0].Properties.GridProperties.ColumnCount
+
+		// TODO: make request based on these ranges
+		
 		return withJSONArrayOutWriterFile(w, func(w *jsonutil.StreamEncoder) error {
-			return writeGoogleSheet(sheets[0], w, &sharedRow)
+			return writeGoogleSheet(sheets[0], w)
 		})
 	}
 
@@ -102,7 +130,7 @@ func (ec EvalContext) evalGoogleSheets(panel *PanelInfo, dbInfo DatabaseConnecto
 			}
 
 			err = withJSONArrayOutWriter(w, func(w *jsonutil.StreamEncoder) error {
-				return writeGoogleSheet(sheet, w, &sharedRow)
+				return writeGoogleSheet(sheet, w)
 			})
 			if err != nil {
 				return err

@@ -39,8 +39,12 @@ func recordToMap[T any](row map[string]any, fields *[]string, record []T) {
 	i := -1 // This is only set to 0 if len(record) > 0
 	var el T
 	for i, el = range record {
+		// If the column doesn't exist, give it an Excel-style name based on its position
 		if i >= len(*fields) {
 			*fields = append(*fields, indexToExcelColumn(i+1))
+		} else if (*fields)[i] == "" {
+			// If the column exists but has no name, same thing: Excel-style name
+			(*fields)[i] = indexToExcelColumn(i+1)
 		}
 
 		(row)[(*fields)[i]] = el
