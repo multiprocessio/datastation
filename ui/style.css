@@ -430,6 +430,11 @@ input + input[type='file'] {
     height: 18px;
     width: 18px;
   }
+
+  &.button--outline {
+    padding: 2px;
+    border: 1px solid var(--border-light);
+  }
 }
 
 .button:not(.button--icon):disabled,
@@ -1342,6 +1347,10 @@ body.dark {
     background: transparent;
     color: #999;
     padding: 0;
+
+    &.button--outline {
+      border-color: var(--border-dark);
+    }
   }
 
   .button.button--icon.button--primary {

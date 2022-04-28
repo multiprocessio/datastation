@@ -414,13 +414,17 @@ export function Panel({
               invalid={nameIsDuplicate ? 'Names should be unique.' : ''}
             />
 
-            <span title={details ? 'Hide Details' : 'Show Details'}>
+            <span
+              className="ml-2"
+              title={details ? 'Less Options' : 'More Options'}
+            >
               <Button
                 data-testid="show-hide-panel"
+                type="outline"
                 icon
                 onClick={() => setDetails(!details)}
               >
-                {details ? 'Hide Details' : 'Edit Details'}
+                {details ? 'Less Options' : 'More Options'}
               </Button>
             </span>
 
@@ -511,7 +515,7 @@ export function Panel({
                   message="delete this panel"
                   action="Delete"
                   render={(confirm: () => void) => (
-                    <Button icon onClick={confirm} type="outline">
+                    <Button icon onClick={confirm}>
                       <IconTrash />
                     </Button>
                   )}

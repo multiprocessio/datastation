@@ -264,20 +264,21 @@ export function TablePanel({
       </table>
 
       <div className="vertical-align-center table-controls">
-        Page {panel.page + 1}
         <Button
           onClick={() => {
             panel.page--;
             updatePanel(panel);
           }}
-          disabled={panel.page === 0}
           type="outline"
+          icon
+          disabled={panel.page === 0}
           className="mr-1"
         >
           Previous Page
         </Button>
         <Button
           type="outline"
+          icon
           onClick={() => {
             panel.page++;
             console.log(panel.page, 1234);
