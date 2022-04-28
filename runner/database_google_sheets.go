@@ -13,12 +13,12 @@ import (
 )
 
 type Vector[T any] struct {
-	s []T
+	s     []T
 	index int
 }
 
 func (v *Vector[T]) Push(el T) {
-	defer func () { v.index++ } ()
+	defer func() { v.index++ }()
 	if v.index < cap(v.s) {
 		v.s[v.index] = el
 		return

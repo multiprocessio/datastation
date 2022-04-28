@@ -44,7 +44,7 @@ func recordToMap[T any](row map[string]any, fields *[]string, record []T) {
 			*fields = append(*fields, indexToExcelColumn(i+1))
 		} else if (*fields)[i] == "" {
 			// If the column exists but has no name, same thing: Excel-style name
-			(*fields)[i] = indexToExcelColumn(i+1)
+			(*fields)[i] = indexToExcelColumn(i + 1)
 		}
 
 		(row)[(*fields)[i]] = el
