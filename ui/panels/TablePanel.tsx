@@ -158,7 +158,6 @@ export function TablePanelDetails({
               key={c.field + i}
             >
               <FieldPicker
-                used={panel.table.columns.map(mapColumnToField)}
                 onDelete={
                   panel.table.columns.length > 1
                     ? function handleColumnDelete() {
@@ -194,6 +193,18 @@ export function TablePanelDetails({
       </FormGroup>
     </React.Fragment>
   );
+}
+
+function formatCell(c: any): React.ReactNode | string {
+  if (c === undefined || c === null) {
+    return <small className="text-muted">(Empty)</small>;
+  }
+
+  if (typeof c === 'string' || typeof c === 'number') {
+    return String(c);
+  }
+
+  return JSON.stringify(c);
 }
 
 export function TablePanel({ panel }: PanelBodyProps<TablePanelInfo>) {
@@ -247,7 +258,11 @@ export function TablePanel({ panel }: PanelBodyProps<TablePanelInfo>) {
                 column: TableColumn,
                 i: number
               ) {
-                return <td key={column.field + i}>{row[column.field]}</td>;
+                return (
+                  <td key={column.field + i}>
+                    {formatCell(row[column.field])}
+                  </td>
+                );
               })}
             </tr>
           );

@@ -123,7 +123,7 @@ def eval_line(line):
         quote_line(line, show=True)
         return
     if line[0] == 'setenv':
-        os.environ[line[1]] = line[2]
+        os.environ[line[1]] = line[2].format(**BUILTIN_VARIABLES, **os.environ)
         quote_line(line, show=True)
         return
     if line[0] == 'setenv_default':

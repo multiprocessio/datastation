@@ -383,7 +383,6 @@ export function GraphPanelDetails({
                 key={y.field + i}
               >
                 <FieldPicker
-                  used={[...panel.graph.ys.map((y) => y.field), panel.graph.x]}
                   onDelete={
                     panel.graph.ys.length > 1
                       ? () => {

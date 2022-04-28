@@ -25,6 +25,33 @@ import (
 
 var preferredParallelism = runtime.NumCPU() * 2
 
+func indexToExcelColumn(i int) string {
+	i -= 1
+
+	if i/26 > 0 {
+		return indexToExcelColumn(i/26) + string(rune(i%26+65))
+	}
+
+	return string(rune(i%26 + 65))
+}
+
+func recordToMap[T any](row map[string]any, fields *[]string, record []T) {
+	i := -1 // This is only set to 0 if len(record) > 0
+	var el T
+	for i, el = range record {
+		if i >= len(*fields) {
+			*fields = append(*fields, indexToExcelColumn(i+1))
+		}
+
+		(row)[(*fields)[i]] = el
+	}
+
+	// If the record has less fields than we've seen already, set all unseen fields to nil
+	for _, field := range (*fields)[i+1:] {
+		(row)[field] = nil
+	}
+}
+
 func transformCSV(in io.Reader, out io.Writer, delimiter rune) error {
 	r := csv.NewReader(in)
 	r.Comma = delimiter
@@ -55,13 +82,7 @@ func transformCSV(in io.Reader, out io.Writer, delimiter rune) error {
 				continue
 			}
 
-			for i, field := range fields {
-				if i < len(record) {
-					row[field] = record[i]
-				} else {
-					row[field] = nil
-				}
-			}
+			recordToMap(row, &fields, record)
 
 			err = w.EncodeRow(row)
 			if err != nil {
@@ -159,9 +180,8 @@ func transformORC(in *orc.Reader, out io.Writer) error {
 		for c.Stripes() {
 			for c.Next() {
 				r := c.Row()
-				for i, col := range cols {
-					row[col] = r[i]
-				}
+
+				recordToMap(row, &cols, r)
 
 				err := w.EncodeRow(row)
 				if err != nil {
@@ -197,13 +217,7 @@ func writeSheet(rows [][]string, w *jsonutil.StreamEncoder) error {
 			continue
 		}
 
-		for i, name := range header {
-			var cell any = nil
-			if i < len(r) {
-				cell = r[i]
-			}
-			row[name] = cell
-		}
+		recordToMap(row, &header, r)
 
 		err := w.EncodeRow(row)
 		if err != nil {

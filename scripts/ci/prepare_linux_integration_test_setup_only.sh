@@ -146,16 +146,16 @@ function retry {
 docker ps
 
 # Load influx1 data
-retry 3 'curl -XPOST "http://localhost:8087/query?u=test&p=testtest" --data-urlencode "q=CREATE DATABASE test"'
-retry 3 "curl -XPOST 'http://localhost:8087/write?db=test&u=test&p=testtest' --data-binary @testdata/influx/noaa-ndbc-data-sample.lp"
+retry 10 'curl -XPOST "http://localhost:8087/query?u=test&p=testtest" --data-urlencode "q=CREATE DATABASE test"'
+retry 10 "curl -XPOST 'http://localhost:8087/write?db=test&u=test&p=testtest' --data-binary @testdata/influx/noaa-ndbc-data-sample.lp"
 
 # Load influx2 data
-retry 3 "curl -XPOST 'http://localhost:8086/api/v2/write?org=test&bucket=test&precision=ns' --header 'Authorization: Token test' --data-binary @testdata/influx/noaa-ndbc-data-sample.lp"
+retry 10 "curl -XPOST 'http://localhost:8086/api/v2/write?org=test&bucket=test&precision=ns' --header 'Authorization: Token test' --data-binary @testdata/influx/noaa-ndbc-data-sample.lp"
 
 # Load Elasticsearch data
-retry 3 "curl -X PUT http://localhost:9200/test"
+retry 10 "curl -X PUT http://localhost:9200/test"
 for t in $(ls testdata/documents/*.json); do
-    retry 3 "curl -X POST -H 'Content-Type: application/json' -d @$t http://localhost:9200/test/_doc"
+    retry 10 "curl -X POST -H 'Content-Type: application/json' -d @$t http://localhost:9200/test/_doc"
 done
 
 # Configure scylla
