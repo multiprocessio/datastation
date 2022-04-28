@@ -305,7 +305,8 @@ export class PanelInfo {
       case 'graph':
         pit = mergeDeep(new GraphPanelInfo(pit.pageId), pit);
         if (!pit.page) pit.page = 0;
-        if (!pit.pageSize) pit.pageSize = 1000;
+        // TODO: deal with graph number of elements.
+        if (!pit.pageSize) pit.pageSize = 1_000_000;
         break;
       case 'program':
         pit = mergeDeep(new ProgramPanelInfo(pit.pageId), pit);
