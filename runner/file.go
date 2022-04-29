@@ -1,6 +1,7 @@
 package runner
 
 import (
+	"strconv"
 	"bufio"
 	"encoding/csv"
 	"io"
@@ -10,7 +11,6 @@ import (
 	"path/filepath"
 	"regexp"
 	"runtime"
-	"strconv"
 	"strings"
 
 	"github.com/linkedin/goavro/v2"
@@ -36,8 +36,17 @@ func indexToExcelColumn(i int) string {
 	return string(rune(i%26 + 65))
 }
 
+var (
+	openBrace = []byte("{")
+	closeBrace = []byte("}")
+	comma = []byte(", ")
+
+	fieldCache = map[string][]byte{}
+	encoderCache = map[any][]byte{}
+)
+
 func writeFlatJSON[T any](w io.Writer, fields *[]string, record []T) error {
-	_, err := w.Write([]byte("{"))
+	_, err := w.Write(openBrace)
 	if err != nil {
 		return err
 	}
@@ -54,42 +63,53 @@ func writeFlatJSON[T any](w io.Writer, fields *[]string, record []T) error {
 
 	for i, field := range *fields {
 		if i > 0 {
-			_, err = w.Write([]byte(", "))
+			_, err = w.Write(comma)
 			if err != nil {
 				return err
 			}
 		}
 
-		quoted := strconv.QuoteToASCII(field)
-		_, err := w.Write([]byte(quoted))
+		fieldQuotedBytes, ok := fieldCache[field]
+		if !ok {
+			fieldQuotedBytes = []byte(strconv.QuoteToASCII(field) + ": ")
+			fieldCache[field] = fieldQuotedBytes
+		}
+		_, err = w.Write(fieldQuotedBytes)
 		if err != nil {
 			return err
 		}
 
-		_, err = w.Write([]byte(": "))
-		if err != nil {
-			return err
-		}
+		bs, ok := encoderCache[record[i]]
+		if !ok {
+			bs, err = jsonMarshal(record[i])
+			if err != nil {
+				return err
+			}
 
-		bs, err := jsonMarshal(record[i])
-		if err != nil {
-			return err
+			encoderCache[record[i]] = bs
 		}
 
 		_, err = w.Write(bs)
 		if err != nil {
 			return err
 		}
+
+		// Keep this cache manageable
+		if len(encoderCache) > 1000 {
+			// Counts on this being random
+			for k := range encoderCache {
+				delete(encoderCache, k)
+			}
+		}
 	}
 
-	_, err = w.Write([]byte("}"))
+	_, err = w.Write(closeBrace)
 	return err
 }
 
-func recordToMap[T any](row map[string]any, fields *[]string, record []T) {
-	i := -1 // This is only set to 0 if len(record) > 0
-	var el T
-	for i, el = range record {
+func recordToMap[T any](row *map[string]any, fields *[]string, record []T) {
+	// Make sure all field names exist
+	for i := range record {
 		// If the column doesn't exist, give it an Excel-style name based on its position
 		if i >= len(*fields) {
 			*fields = append(*fields, indexToExcelColumn(i+1))
@@ -97,13 +117,23 @@ func recordToMap[T any](row map[string]any, fields *[]string, record []T) {
 			// If the column exists but has no name, same thing: Excel-style name
 			(*fields)[i] = indexToExcelColumn(i + 1)
 		}
-
-		(row)[(*fields)[i]] = el
 	}
 
-	// If the record has less fields than we've seen already, set all unseen fields to nil
-	for _, field := range (*fields)[i+1:] {
-		(row)[field] = nil
+	if len(*fields) > len(*row) {
+		*row = make(map[string]any, len(*fields))
+	}
+	r := *row
+
+	// Then copy all data
+	for i, field := range *fields {
+		// Resetting value to nil if the record doesn't have this field
+		if i >= len(record) {
+			r[field] = nil
+			continue
+		}
+
+		v := record[i]
+		r[field] = v
 	}
 }
 
@@ -113,7 +143,7 @@ func transformCSV(in io.Reader, out io.Writer, delimiter rune) error {
 	r.ReuseRecord = true
 	r.FieldsPerRecord = -1
 
-	return withJSONArrayOutWriter(out, func(w *jsonutil.StreamEncoder) error {
+	return withJSONArrayOutWriter(out,  /* [", "]", */ func( w *jsonutil.StreamEncoder ) error {
 		isHeader := true
 		var fields []string
 
@@ -138,7 +168,7 @@ func transformCSV(in io.Reader, out io.Writer, delimiter rune) error {
 				continue
 			}
 
-			recordToMap(row, &fields, record)
+			recordToMap(&row, &fields, record)
 
 			err = w.EncodeRow(row)
 			if err != nil {
@@ -251,7 +281,7 @@ func transformORC(in *orc.Reader, out io.Writer) error {
 			for c.Next() {
 				r := c.Row()
 
-				recordToMap(row, &cols, r)
+				recordToMap(&row, &cols, r)
 
 				err := w.EncodeRow(row)
 				if err != nil {
@@ -287,7 +317,7 @@ func writeSheet(rows [][]string, w *jsonutil.StreamEncoder) error {
 			continue
 		}
 
-		recordToMap(row, &header, r)
+		recordToMap(&row, &header, r)
 
 		err := w.EncodeRow(row)
 		if err != nil {

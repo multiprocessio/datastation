@@ -2,6 +2,7 @@ package runner
 
 import (
 	"fmt"
+	"bytes"
 	"regexp"
 	"sort"
 	"strings"
@@ -300,22 +301,28 @@ func chunk(c chan map[string]any, size int) chan []map[string]any {
 }
 
 func makePreparedStatement(tname string, nColumns, chunkSize int) string {
-	var values []string
+	var buf bytes.Buffer
+
+	buf.WriteString("INSERT INTO ")
+	buf.WriteString(tname)
+	buf.WriteString(" VALUES ")
 
 	for i := 0; i < chunkSize; i++ {
-		row := "("
+		if i > 0 {
+			buf.WriteString(",")
+		}
+		buf.WriteString("(")
 		for j := 0; j < nColumns; j++ {
 			if j > 0 {
-				row += ","
+				buf.WriteString(",")
 			}
 
-			row += "?"
+			buf.WriteString("?")
 		}
-		row += ")"
-		values = append(values, row)
+		buf.WriteString(")")
 	}
 
-	return fmt.Sprintf("INSERT INTO %s VALUES %s", tname, strings.Join(values, ", "))
+	return buf.String()
 }
 
 func IsScalar(v any) bool {
@@ -337,7 +344,7 @@ func importPanel(
 	query string,
 	panel panelToImport,
 	qt quoteType,
-	panelResultLoader func(string, string, func(map[string]any) error) error,
+	panelResultLoader func(string, string, int, func([]map[string]any) error) error,
 	cacheEnabled bool,
 ) error {
 	var ddlColumns []string
@@ -360,53 +367,90 @@ func importPanel(
 		return err
 	}
 
-	toinsert := make([]any, len(ddlColumns))
+	chunkSize := 10_000
+	toinsert := make([]any, len(ddlColumns)*chunkSize)
 
 	nWritten := 0
-	preparedStatement := makePreparedStatement(tname, len(ddlColumns), 1)
-	inserter, closer, err := prepare(preparedStatement)
-	if err != nil {
-		return err
-	}
 
-	return panelResultLoader(projectId, panel.id, func (row map[string]any) error {
-		nWritten++
-		for j, col := range panel.columns {
-			v := getObjectAtPath(row, col.name)
-			// Non-scalars get JSON
-			// encoded. This can basically
-			// only be arrays because
-			// nested objects are
-			// supported.
-			if v != nil && !IsScalar(v) {
-				if col.kind == "TEXT" {
-					v, _ = jsonMarshal(v)
-				} else {
-					// SQL won't be happy to put a string in a REAL column for example
-					v = nil
-				}
-			}
-			toinsert[j] = v
-		}
-
-		err = inserter(toinsert)
+	//nLeftovers := 0
+	return panelResultLoader(projectId, panel.id, chunkSize, func (rows []map[string]any) error {
+		preparedStatement := makePreparedStatement(tname, len(ddlColumns), len(rows))
+		inserter, closer, err := prepare(preparedStatement)
 		if err != nil {
-			closer()
 			return err
 		}
+		defer closer()
+		nWritten += len(rows)
+		fmt.Println("PHIL HERE", nWritten)
 
-		// Start a new prepared statement every so often
-		if nWritten > 100_000 {
-			closer()
-			preparedStatement = makePreparedStatement(tname, len(ddlColumns), 1)
-			inserter, closer, err = prepare(preparedStatement)
-			if err != nil {
-				return err
+		for i, row := range rows {
+			fmt.Println(row)
+			for j, col := range panel.columns {
+				v := getObjectAtPath(row, col.name)
+				// Non-scalars get JSON
+				// encoded. This can basically
+				// only be arrays because
+				// nested objects are
+				// supported.
+				if v != nil && !IsScalar(v) {
+					if col.kind == "TEXT" {
+						v, _ = jsonMarshal(v)
+					} else {
+						// SQL won't be happy to put a string in a REAL column for example
+						v = nil
+					}
+				}
+				toinsert[i*len(ddlColumns)+j] = v
 			}
 		}
 
-		return nil
+		// This likely only happens at the end where the last chunk won't always be chunkSize.
+		// if len(rows) < chunkSize {
+		// 	nLeftovers = len(rows)
+		// 	return nil
+		// }
+
+		return inserter(toinsert[:len(rows)*len(ddlColumns)])
+		
+		// if err != nil {
+		// 	closer()
+		// 	return err
+		// }
+
+		// // Start a new prepared statement every so often
+		// if nWritten > 100_000 {
+		// 	closer()
+		// 	preparedStatement = makePreparedStatement(tname, len(ddlColumns), chunkSize)
+		// 	inserter, closer, err = prepare(preparedStatement)
+		// 	if err != nil {
+		// 		return err
+		// 	}
+		// }
+
+		// return nil
 	})
+	// if err != nil {
+	// 	return err
+	// }
+	
+	// // Prepared statement must be closed whether or not there are leftovers
+	// // Must be closed before leftovers if there are leftovers
+	// closer()
+
+	// // Handle leftovers that are fewer than chunkSize
+	// if nLeftovers > 0 {
+	// 	stmt := makePreparedStatement(tname, len(ddlColumns), nLeftovers)
+	// 	inserter, closer, err = prepare(stmt)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+
+	// 	defer closer()
+	// 	// Very important to slice since toinsert is preallocated it may have garbage at the end.
+	// 	return inserter(toinsert[:nLeftovers*len(ddlColumns)])
+	// }
+
+	// return nil
 }
 
 func importAndRun(
@@ -418,7 +462,7 @@ func importAndRun(
 	panelsToImport []panelToImport,
 	qt quoteType,
 	// Postgres uses $1, mysql/sqlite use ?
-	panelResultLoader func(string, string, func(map[string]any) error) error,
+	panelResultLoader func(string, string, int, func([]map[string]any) error) error,
 	cacheSettings CacheSettings,
 ) ([]map[string]any, error) {
 	if cacheSettings.CachePresent {

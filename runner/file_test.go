@@ -75,7 +75,7 @@ func Test_recordToMap(t *testing.T) {
 
 	for _, test := range tests {
 		m := map[string]any{}
-		recordToMap(m, &test.fields, test.record)
+		recordToMap(&m, &test.fields, test.record)
 		assert.Equal(t, test.expect, m)
 	}
 }
@@ -470,6 +470,7 @@ michael,10`)
 	bs, err := os.ReadFile(outTmp.Name())
 	assert.Nil(t, err)
 
+	fmt.Println(string(bs))
 	var a []map[string]any
 	err = jsonUnmarshal(bs, &a)
 	assert.Nil(t, err)

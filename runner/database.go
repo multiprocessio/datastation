@@ -334,16 +334,16 @@ func writeRowFromDatabase(dbInfo DatabaseConnectorInfoDatabase, w *jsonutil.Stre
 	return nil
 }
 
-func (ec EvalContext) loadJSONArrayPanel(projectId, panelId string, cb func(map[string]any) error) (error) {
+func (ec EvalContext) loadJSONArrayPanel(projectId, panelId string, chunkSize int, cb func([]map[string]any) error) (error) {
 	f := ec.GetPanelResultsFile(projectId, panelId)
-	return loadJSONArrayFile(f, cb)
+	return loadJSONArrayFile(f, chunkSize, cb)
 }
 
 func (ec EvalContext) EvalDatabasePanel(
 	project *ProjectState,
 	pageIndex int,
 	panel *PanelInfo,
-	panelResultLoader func(projectId, panelId string, cb func(map[string]any) error) error,
+	panelResultLoader func(projectId, panelId string, chunkSize int, cb func([]map[string]any) error) error,
 	cache CacheSettings,
 ) error {
 	var connector *ConnectorInfo
