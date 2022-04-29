@@ -1,14 +1,16 @@
 const { shape } = require('shape');
 const { allFields, orderedObjectFields } = require('./FieldPicker');
 
-const sample1 = shape({
-  a: '1',
-  x: 1,
-  z: '1',
-  c: { t: 100, n: { b: 'Kevin' } },
-  // Non-scalar anything
-  d: {},
-});
+const sample1 = shape([
+  {
+    a: '1',
+    x: 1,
+    z: '1',
+    c: { t: 100, n: { b: 'Kevin' } },
+    // Non-scalar anything
+    d: {},
+  },
+]);
 
 test('orderedObjectFields preferring string', () => {
   expect(orderedObjectFields(sample1)).toStrictEqual([
