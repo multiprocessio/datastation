@@ -341,7 +341,8 @@ export const databasePanel: PanelUIDetails<DatabasePanelInfo> = {
     return connector?.database?.type === 'google-sheets';
   },
   previewable: true,
-  factory: (pageId: string) => new DatabasePanelInfo(pageId),
+  factory: (pageId: string, name: string) =>
+    new DatabasePanelInfo(pageId, { name }),
   hasStdout: false,
   info: DatabaseInfo,
 };
