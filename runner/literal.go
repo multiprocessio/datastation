@@ -1,6 +1,9 @@
 package runner
 
-import "bytes"
+import (
+	"bufio"
+	"bytes"
+)
 
 func (ec EvalContext) evalLiteralPanel(project *ProjectState, pageIndex int, panel *PanelInfo) error {
 	cti := panel.Literal.ContentTypeInfo
@@ -11,5 +14,9 @@ func (ec EvalContext) evalLiteralPanel(project *ProjectState, pageIndex int, pan
 	}
 	defer w.Close()
 	buf := bytes.NewReader([]byte(panel.Content))
-	return TransformReader(buf, "", cti, w)
+
+	b := bufio.NewWriter(w)
+	defer b.Flush()
+
+	return TransformReader(buf, "", cti, b)
 }

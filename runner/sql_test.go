@@ -325,8 +325,8 @@ func Test_sqlIngest_e2e(t *testing.T) {
 			},
 		}
 
-		err = ec.EvalDatabasePanel(project, 0, panel2, func(projectId, panelId string) (chan map[string]any, error) {
-			return loadJSONArrayFile(readFile.Name())
+		err = ec.EvalDatabasePanel(project, 0, panel2, func(projectId, panelId string, cb func(map[string]any) error) error {
+			return loadJSONArrayFile(readFile.Name(), cb)
 		}, *DefaultCacheSettings)
 		if err != nil {
 			// Otherwise the channel below gets weird to debug
@@ -334,13 +334,15 @@ func Test_sqlIngest_e2e(t *testing.T) {
 		}
 
 		f := ec.GetPanelResultsFile(project.Id, panel2.Id)
-		a, err := loadJSONArrayFile(f)
 		var pieces []any
-		for r := range a {
-			pieces = append(pieces, r)
-		}
+		err = loadJSONArrayFile(f, func (m map[string]any) error {
+			pieces = append(pieces, m)
+			return nil
+		})
+
 		assert.Nil(t, err)
-		assert.Equal(t, test.expResult, pieces)
+		assert.Equal(t, test.expResult, pieces)	
+
 	}
 }
 
@@ -396,8 +398,8 @@ func Test_sqlIngest_BENCHMARK(t *testing.T) {
 	}
 
 	ec := EvalContext{}
-	err = ec.EvalDatabasePanel(project, 0, panel2, func(projectId, panelId string) (chan map[string]any, error) {
-		return loadJSONArrayFile(readFile)
+	err = ec.EvalDatabasePanel(project, 0, panel2, func(projectId, panelId string, cb func(map[string]any) error) error {
+		return loadJSONArrayFile(readFile, cb)
 	}, *DefaultCacheSettings)
 	assert.Nil(t, err)
 }

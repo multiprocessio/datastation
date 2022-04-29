@@ -127,19 +127,18 @@ func WriteJSONFile(file string, value any) error {
 	return encoder.Encode(value)
 }
 
-func loadJSONArrayFile(f string) (chan map[string]any, error) {
-	out := make(chan map[string]any, 1000)
-
+func loadJSONArrayFile(f string,  cb func (map[string]any) error) error {
 	fd, err := os.Open(f)
 	if err != nil {
-		return nil, err
+		return err
 	}
+	defer fd.Close()
 
 	bs := make([]byte, 1)
 	for {
 		_, err := fd.Read(bs)
 		if err != nil {
-			return nil, err
+			return err
 		}
 
 		if bs[0] == '[' {
@@ -147,49 +146,45 @@ func loadJSONArrayFile(f string) (chan map[string]any, error) {
 		}
 	}
 
-	go func() {
-		defer fd.Close()
-		defer close(out)
 
-		var r io.Reader = fd
+	var r io.Reader = fd
 
-		// Stream all JSON objects
+	// Stream all JSON objects
+	var rec map[string]any
+	for {
+		// Needs to be recreated each time because of buffered data
+		dec := jsonNewDecoder(r)
+
+		err := dec.Decode(&rec)
+		if err == io.EOF {
+			return err
+		}
+		if err != nil {
+			panic(err)
+		}
+
+		cb(rec)
+
+		// Line up all buffered bytes into a new reader
+		r = io.MultiReader(dec.Buffered(), r)
+
+		// Read comma and array end marker
 		for {
-			// Needs to be recreated each time because of buffered data
-			dec := jsonNewDecoder(r)
-
-			var obj map[string]any
-			err := dec.Decode(&obj)
-			if err == io.EOF {
-				return
-			}
+			_, err := r.Read(bs)
 			if err != nil {
 				panic(err)
 			}
 
-			out <- obj
+			if bs[0] == ',' {
+				break
+			}
 
-			// Line up all buffered bytes into a new reader
-			r = io.MultiReader(dec.Buffered(), r)
-
-			// Read comma and array end marker
-			for {
-				_, err := r.Read(bs)
-				if err != nil {
-					panic(err)
-				}
-
-				if bs[0] == ',' {
-					break
-				}
-
-				// Done processing
-				if bs[0] == ']' {
-					return
-				}
+			// Done processing
+			if bs[0] == ']' {
+				return nil
 			}
 		}
-	}()
+	}
 
-	return out, nil
+	return nil
 }

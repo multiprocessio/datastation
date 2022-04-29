@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"runtime"
+	"strconv"
 	"strings"
 
 	"github.com/linkedin/goavro/v2"
@@ -33,6 +34,56 @@ func indexToExcelColumn(i int) string {
 	}
 
 	return string(rune(i%26 + 65))
+}
+
+func writeFlatJSON[T any](w io.Writer, fields *[]string, record []T) error {
+	_, err := w.Write([]byte("{"))
+	if err != nil {
+		return err
+	}
+
+	for i := len(*fields); i < len(record); i++ {
+		*fields = append(*fields, indexToExcelColumn(i+1))
+	}
+
+	// This should likely only be `any` or string. It can't be an int for example.
+	var t T
+	for i := len(record); i < len(*fields); i++ {
+		record = append(record, t)
+	}
+
+	for i, field := range *fields {
+		if i > 0 {
+			_, err = w.Write([]byte(", "))
+			if err != nil {
+				return err
+			}
+		}
+
+		quoted := strconv.QuoteToASCII(field)
+		_, err := w.Write([]byte(quoted))
+		if err != nil {
+			return err
+		}
+
+		_, err = w.Write([]byte(": "))
+		if err != nil {
+			return err
+		}
+
+		bs, err := jsonMarshal(record[i])
+		if err != nil {
+			return err
+		}
+
+		_, err = w.Write(bs)
+		if err != nil {
+			return err
+		}
+	}
+
+	_, err = w.Write([]byte("}"))
+	return err
 }
 
 func recordToMap[T any](row map[string]any, fields *[]string, record []T) {
@@ -62,11 +113,12 @@ func transformCSV(in io.Reader, out io.Writer, delimiter rune) error {
 	r.ReuseRecord = true
 	r.FieldsPerRecord = -1
 
-	return withJSONArrayOutWriterFile(out, func(w *jsonutil.StreamEncoder) error {
+	return withJSONArrayOutWriter(out, func(w *jsonutil.StreamEncoder) error {
 		isHeader := true
 		var fields []string
-		row := map[string]any{}
 
+		//i := 0
+		row := map[string]any{}
 		for {
 			record, err := r.Read()
 			if err == io.EOF {
@@ -92,6 +144,20 @@ func transformCSV(in io.Reader, out io.Writer, delimiter rune) error {
 			if err != nil {
 				return err
 			}
+
+			// if i > 0 {
+			// 	_, err := out.Write([]byte(", "))
+			// 	if err != nil {
+			// 		return err
+			// 	}
+			// }
+
+			// err = writeFlatJSON(out, &fields, record)
+			// if err != nil {
+			// 	return err
+			// }
+
+			// i++
 		}
 
 		return nil
@@ -336,9 +402,8 @@ func transformOpenOfficeSheetFile(in string, out io.Writer) error {
 	return transformOpenOfficeSheet(f, out)
 }
 
-func transformGeneric(in io.Reader, out io.Writer) error {
+func transformGeneric(in io.Reader, o *bufio.Writer) error {
 	r := bufio.NewReader(in)
-	o := bufio.NewWriter(out)
 
 	err := o.WriteByte('"')
 	if err != nil {
@@ -388,7 +453,7 @@ func transformGeneric(in io.Reader, out io.Writer) error {
 	return o.Flush()
 }
 
-func transformGenericFile(in string, out io.Writer) error {
+func transformGenericFile(in string, out *bufio.Writer) error {
 	r, err := os.Open(in)
 	if err != nil {
 		return edse(err)
@@ -657,7 +722,7 @@ func getServer(project *ProjectState, serverId string) (*ServerInfo, error) {
 	return nil, edsef("Unknown server: %d" + serverId)
 }
 
-func TransformFile(fileName string, cti ContentTypeInfo, out io.Writer) error {
+func TransformFile(fileName string, cti ContentTypeInfo, out *bufio.Writer) error {
 	assumedType := GetMimeType(fileName, cti)
 
 	Logln("Assumed '%s' from '%s' given '%s' when loading file", assumedType, cti.Type, fileName)
@@ -712,19 +777,22 @@ func (ec EvalContext) evalFilePanel(project *ProjectState, pageIndex int, panel 
 	}
 	defer w.Close()
 
+	b := bufio.NewWriter(w)
+	defer b.Flush()
+
 	if server != nil {
 		// Resolve ~ to foreign home path.
 		// Will break if the server is not Linux.
 		fileName = strings.ReplaceAll(fileName, "~", "/home/"+server.Username)
 
 		return ec.remoteFileReader(*server, fileName, func(r io.Reader) error {
-			return TransformReader(r, fileName, cti, w)
+			return TransformReader(r, fileName, cti, b)
 		})
 	}
 
 	fileName = resolvePath(fileName)
 
-	return TransformFile(fileName, cti, w)
+	return TransformFile(fileName, cti, b)
 }
 
 func resolvePath(p string) string {

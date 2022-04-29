@@ -1,6 +1,7 @@
 package runner
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -362,7 +363,9 @@ cdef`,
 		defer os.Remove(outTmp.Name())
 		assert.Nil(t, err)
 
-		err = transformGenericFile(inTmp.Name(), outTmp)
+		b := bufio.NewWriter(outTmp)
+		err = transformGenericFile(inTmp.Name(), b)
+		b.Flush()
 		assert.Nil(t, err)
 
 		var m any
@@ -444,6 +447,47 @@ func Test_resolvePath(t *testing.T) {
 	for _, test := range tests {
 		assert.Equal(t, test.expected, resolvePath(test.input))
 	}
+}
+
+func Test_transformCSV(t *testing.T) {
+	csvTmp, err := ioutil.TempFile("", "")
+	defer os.Remove(csvTmp.Name())
+	assert.Nil(t, err)
+
+	_, err = csvTmp.WriteString(`name,age
+kerry,12
+marge,15
+michael,10`)
+	assert.Nil(t, err)
+
+	outTmp, err := ioutil.TempFile("", "")
+	defer os.Remove(outTmp.Name())
+	assert.Nil(t, err)
+
+	err = transformCSVFile(csvTmp.Name(), outTmp, ',')
+	assert.Nil(t, err)
+
+	bs, err := os.ReadFile(outTmp.Name())
+	assert.Nil(t, err)
+
+	var a []map[string]any
+	err = jsonUnmarshal(bs, &a)
+	assert.Nil(t, err)
+
+	assert.Equal(t, []map[string]any{
+		{
+			"name": "kerry",
+			"age":  "12",
+		},
+		{
+			"name": "marge",
+			"age":  "15",
+		},
+		{
+			"name": "michael",
+			"age":  "10",
+		},
+	}, a)
 }
 
 // Benchmarks
