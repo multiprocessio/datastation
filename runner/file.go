@@ -85,6 +85,15 @@ func writeFlatJSON[T any](w io.Writer, fields *[]string, record []T) error {
 			if err != nil {
 				return err
 			}
+			
+			// Keep this cache manageable
+			if len(encoderCache) > 1000 {
+				// Counts on this being random
+				for k := range encoderCache {
+					delete(encoderCache, k)
+					break // Just deleting one is ok
+				}
+			}
 
 			encoderCache[record[i]] = bs
 		}
@@ -92,14 +101,6 @@ func writeFlatJSON[T any](w io.Writer, fields *[]string, record []T) error {
 		_, err = w.Write(bs)
 		if err != nil {
 			return err
-		}
-
-		// Keep this cache manageable
-		if len(encoderCache) > 1000 {
-			// Counts on this being random
-			for k := range encoderCache {
-				delete(encoderCache, k)
-			}
 		}
 	}
 
@@ -147,8 +148,8 @@ func transformCSV(in io.Reader, out io.Writer, delimiter rune) error {
 		isHeader := true
 		var fields []string
 
-		//i := 0
-		row := map[string]any{}
+		i := 0
+		//row := map[string]any{}
 		for {
 			record, err := r.Read()
 			if err == io.EOF {
@@ -168,26 +169,26 @@ func transformCSV(in io.Reader, out io.Writer, delimiter rune) error {
 				continue
 			}
 
-			recordToMap(&row, &fields, record)
+			// recordToMap(&row, &fields, record)
 
-			err = w.EncodeRow(row)
-			if err != nil {
-				return err
-			}
-
-			// if i > 0 {
-			// 	_, err := out.Write([]byte(", "))
-			// 	if err != nil {
-			// 		return err
-			// 	}
-			// }
-
-			// err = writeFlatJSON(out, &fields, record)
+			// err = w.EncodeRow(row)
 			// if err != nil {
 			// 	return err
 			// }
 
-			// i++
+			if i > 0 {
+				_, err := out.Write([]byte(", "))
+				if err != nil {
+					return err
+				}
+			}
+
+			err = writeFlatJSON(out, &fields, record)
+			if err != nil {
+				return err
+			}
+
+			i++
 		}
 
 		return nil
