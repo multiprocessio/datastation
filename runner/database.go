@@ -1,6 +1,7 @@
 package runner
 
 import (
+	"bufio"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -334,7 +335,7 @@ func writeRowFromDatabase(dbInfo DatabaseConnectorInfoDatabase, w *jsonutil.Stre
 	return nil
 }
 
-func (ec EvalContext) loadJSONArrayPanel(projectId, panelId string, chunkSize int, cb func([]map[string]any) error) (error) {
+func (ec EvalContext) loadJSONArrayPanel(projectId, panelId string, chunkSize int, cb func([]map[string]any) error) error {
 	f := ec.GetPanelResultsFile(projectId, panelId)
 	return loadJSONArrayFile(f, chunkSize, cb)
 }
@@ -454,7 +455,7 @@ func (ec EvalContext) EvalDatabasePanel(
 
 		defer os.Remove(tmp.Name())
 
-		err = ec.remoteFileReader(*server, dbInfo.Database, func(r io.Reader) error {
+		err = ec.remoteFileReader(*server, dbInfo.Database, func(r *bufio.Reader) error {
 			_, err := io.Copy(tmp, r)
 			return err
 		})
@@ -494,18 +495,18 @@ func (ec EvalContext) EvalDatabasePanel(
 			}
 		}
 
-		preparer := func(q string) (func([]any) error, func(), error) {
+		preparer := func(q string) (func([]any) error, func() error, error) {
 			stmt, err := db.Prepare(mangleInsert(q))
 			if err != nil {
 				return nil, nil, err
 			}
 
 			return func(values []any) error {
-					_, err := stmt.Exec(values...)
-					return err
-				}, func() {
-					stmt.Close()
-				}, nil
+				_, err := stmt.Exec(values...)
+				return err
+			}, func() error {
+				return stmt.Close()
+			}, nil
 		}
 
 		wroteFirstRow := false

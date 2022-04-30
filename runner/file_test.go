@@ -464,7 +464,10 @@ michael,10`)
 	defer os.Remove(outTmp.Name())
 	assert.Nil(t, err)
 
-	err = transformCSVFile(csvTmp.Name(), outTmp, ',')
+	ob := bufio.NewWriter(outTmp)
+
+	err = transformCSVFile(csvTmp.Name(), ob, ',')
+	ob.Flush()
 	assert.Nil(t, err)
 
 	bs, err := os.ReadFile(outTmp.Name())
@@ -503,8 +506,11 @@ func Test_transformCSV_BENCHMARK(t *testing.T) {
 	defer os.Remove(outTmp.Name())
 	assert.Nil(t, err)
 
+	ob := bufio.NewWriter(outTmp)
+
 	start := time.Now()
-	err = transformCSVFile("taxi.csv", outTmp, ',')
+	err = transformCSVFile("taxi.csv", ob, ',')
+	ob.Flush()
 	assert.Nil(t, err)
 
 	fmt.Printf("transform csv took %s\n", time.Since(start))

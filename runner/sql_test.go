@@ -335,7 +335,7 @@ func Test_sqlIngest_e2e(t *testing.T) {
 
 		f := ec.GetPanelResultsFile(project.Id, panel2.Id)
 		var pieces []any
-		err = loadJSONArrayFile(f, 5, func (m []map[string]any) error {
+		err = loadJSONArrayFile(f, 5, func(m []map[string]any) error {
 			for _, p := range m {
 				pieces = append(pieces, p)
 			}
@@ -343,7 +343,7 @@ func Test_sqlIngest_e2e(t *testing.T) {
 		})
 
 		assert.Nil(t, err)
-		assert.Equal(t, test.expResult, pieces)	
+		assert.Equal(t, test.expResult, pieces)
 
 	}
 }

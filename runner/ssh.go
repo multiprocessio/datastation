@@ -144,7 +144,7 @@ func (ec EvalContext) getSSHClient(si ServerInfo) (*ssh.Client, error) {
 	return conn, nil
 }
 
-func (ec EvalContext) remoteFileReader(si ServerInfo, remoteFileName string, callback func(r io.Reader) error) error {
+func (ec EvalContext) remoteFileReader(si ServerInfo, remoteFileName string, callback func(r *bufio.Reader) error) error {
 	client, err := ec.getSSHClient(si)
 	if err != nil {
 		return err
@@ -171,14 +171,14 @@ fi`, remoteFileName, remoteFileName)
 	}
 
 	// Clone the stream to peak if it is gzipped
-	buffer := bufio.NewReader(r)
+	buffer := bufio.NewReaderSize(r, 4096*20)
 	magicBytes, err := buffer.Peek(2)
 	if err != nil {
 		return edsef("Could not read magic number from stream: %s", err)
 	}
 
 	// Set default reader to be plain text
-	var reader io.Reader = buffer
+	var reader = buffer
 
 	// If it is gzipped, set the reader to be a gzip reader
 	if magicBytes[0] == 0x1F && magicBytes[1] == 0x8B {
@@ -187,7 +187,7 @@ fi`, remoteFileName, remoteFileName)
 			return edsef("Could not create gzip reader: %s", err)
 		}
 
-		reader = fz
+		reader = bufio.NewReaderSize(fz, 4096*20)
 		defer fz.Close()
 	}
 

@@ -127,7 +127,7 @@ func WriteJSONFile(file string, value any) error {
 	return encoder.Encode(value)
 }
 
-func loadJSONArrayFile(f string, chunkSize int, cb func ([]map[string]any) error) error {
+func loadJSONArrayFile(f string, chunkSize int, cb func([]map[string]any) error) error {
 	fd, err := os.Open(f)
 	if err != nil {
 		return err
@@ -146,11 +146,12 @@ func loadJSONArrayFile(f string, chunkSize int, cb func ([]map[string]any) error
 		}
 	}
 
-
 	var r io.Reader = fd
 
 	chunk := make([]map[string]any, chunkSize)
 	chunkIndex := 0
+
+	i := 0
 
 outer:
 	// Stream all JSON objects
@@ -166,10 +167,16 @@ outer:
 			return err
 		}
 
+		i++
 		chunkIndex++
 
+		// Flush
 		if chunkIndex == chunkSize {
-			cb(chunk)
+			err := cb(chunk)
+			if err != nil {
+				return err
+			}
+
 			chunkIndex = 0
 			for k := range chunk {
 				chunk[k] = nil
@@ -187,7 +194,7 @@ outer:
 			}
 
 			if bs[0] == ',' {
-				break
+				continue outer
 			}
 
 			// Done processing

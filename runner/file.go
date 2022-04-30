@@ -1,8 +1,8 @@
 package runner
 
 import (
-	"strconv"
 	"bufio"
+	"fmt"
 	"encoding/csv"
 	"io"
 	"os"
@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"runtime"
+	"strconv"
 	"strings"
 
 	"github.com/linkedin/goavro/v2"
@@ -37,15 +38,15 @@ func indexToExcelColumn(i int) string {
 }
 
 var (
-	openBrace = []byte("{")
+	openBrace  = []byte("{")
 	closeBrace = []byte("}")
-	comma = []byte(", ")
+	comma      = []byte(", ")
 
-	fieldCache = map[string][]byte{}
+	fieldCache   = map[string][]byte{}
 	encoderCache = map[any][]byte{}
 )
 
-func writeFlatJSON[T any](w io.Writer, fields *[]string, record []T) error {
+func writeFlatJSON[T any](w *bufio.Writer, fields *[]string, record []T) error {
 	_, err := w.Write(openBrace)
 	if err != nil {
 		return err
@@ -81,21 +82,20 @@ func writeFlatJSON[T any](w io.Writer, fields *[]string, record []T) error {
 
 		bs, ok := encoderCache[record[i]]
 		if !ok {
-			bs, err = jsonMarshal(record[i])
-			if err != nil {
-				return err
-			}
-			
-			// Keep this cache manageable
-			if len(encoderCache) > 1000 {
-				// Counts on this being random
-				for k := range encoderCache {
-					delete(encoderCache, k)
-					break // Just deleting one is ok
+			switch t := any(record[i]).(type) {
+			case string:
+				bs = w.AvailableBuffer()
+				bs = strconv.AppendQuoteToASCII(bs, t)
+			default:
+				bs, err = jsonMarshal(t)
+				if err != nil {
+					return err
+				}
+
+				if len(encoderCache) < 10_000 {
+					encoderCache[record[i]] = bs
 				}
 			}
-
-			encoderCache[record[i]] = bs
 		}
 
 		_, err = w.Write(bs)
@@ -138,13 +138,13 @@ func recordToMap[T any](row *map[string]any, fields *[]string, record []T) {
 	}
 }
 
-func transformCSV(in io.Reader, out io.Writer, delimiter rune) error {
+func transformCSV(in *bufio.Reader, out *bufio.Writer, delimiter rune) error {
 	r := csv.NewReader(in)
 	r.Comma = delimiter
 	r.ReuseRecord = true
 	r.FieldsPerRecord = -1
 
-	return withJSONArrayOutWriter(out,  /* [", "]", */ func( w *jsonutil.StreamEncoder ) error {
+	return withJSONOutWriter(out, "[", "]", func( /* w *jsonutil.StreamEncoder */ ) error {
 		isHeader := true
 		var fields []string
 
@@ -191,18 +191,22 @@ func transformCSV(in io.Reader, out io.Writer, delimiter rune) error {
 			i++
 		}
 
+		fmt.Println("n rows: %d", i)
+
 		return nil
 	})
 }
 
-func transformCSVFile(in string, out io.Writer, delimiter rune) error {
+func transformCSVFile(in string, out *bufio.Writer, delimiter rune) error {
 	f, err := os.Open(in)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
 
-	return transformCSV(f, out, delimiter)
+	b := bufio.NewReaderSize(f, 4096*20)
+
+	return transformCSV(b, out, delimiter)
 }
 
 func transformJSON(in io.Reader, out io.Writer) error {
@@ -816,7 +820,7 @@ func (ec EvalContext) evalFilePanel(project *ProjectState, pageIndex int, panel 
 		// Will break if the server is not Linux.
 		fileName = strings.ReplaceAll(fileName, "~", "/home/"+server.Username)
 
-		return ec.remoteFileReader(*server, fileName, func(r io.Reader) error {
+		return ec.remoteFileReader(*server, fileName, func(r *bufio.Reader) error {
 			return TransformReader(r, fileName, cti, b)
 		})
 	}

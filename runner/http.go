@@ -240,14 +240,16 @@ func (ec EvalContext) evalHTTPPanel(project *ProjectState, pageIndex int, panel 
 		}
 		defer w.Close()
 
-		b := bufio.NewWriter(w)
+		b := bufio.NewWriterSize(w, 4096*20)
 		defer b.Flush()
 
-		return TransformReader(rsp.Body, url, h.ContentTypeInfo, b)
+		rb := bufio.NewReaderSize(rsp.Body, 4096*20)
+
+		return TransformReader(rb, url, h.ContentTypeInfo, b)
 	})
 }
 
-func TransformReader(r io.Reader, fileName string, cti ContentTypeInfo, out *bufio.Writer) error {
+func TransformReader(r *bufio.Reader, fileName string, cti ContentTypeInfo, out *bufio.Writer) error {
 	assumedType := GetMimeType(fileName, cti)
 	Logln("Assumed '%s' from '%s' given '%s'", assumedType, cti.Type, fileName)
 

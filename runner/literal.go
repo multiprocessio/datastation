@@ -14,9 +14,10 @@ func (ec EvalContext) evalLiteralPanel(project *ProjectState, pageIndex int, pan
 	}
 	defer w.Close()
 	buf := bytes.NewReader([]byte(panel.Content))
+	bb := bufio.NewReaderSize(buf, 4096*20)
 
-	b := bufio.NewWriter(w)
+	b := bufio.NewWriterSize(w, 4096*20)
 	defer b.Flush()
 
-	return TransformReader(buf, "", cti, b)
+	return TransformReader(bb, "", cti, b)
 }

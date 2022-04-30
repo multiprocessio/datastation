@@ -1,8 +1,8 @@
 package runner
 
 import (
-	"fmt"
 	"bytes"
+	"fmt"
 	"regexp"
 	"sort"
 	"strings"
@@ -309,12 +309,13 @@ func makePreparedStatement(tname string, nColumns, chunkSize int) string {
 
 	for i := 0; i < chunkSize; i++ {
 		if i > 0 {
-			buf.WriteString(",")
+			buf.WriteString(", ")
 		}
+
 		buf.WriteString("(")
 		for j := 0; j < nColumns; j++ {
 			if j > 0 {
-				buf.WriteString(",")
+				buf.WriteString(", ")
 			}
 
 			buf.WriteString("?")
@@ -338,7 +339,7 @@ func IsScalar(v any) bool {
 
 func importPanel(
 	createTable func(string) error,
-	prepare func(string) (func([]any) error, func(), error),
+	prepare func(string) (func([]any) error, func() error, error),
 	makeQuery func(string) ([]map[string]any, error),
 	projectId string,
 	query string,
@@ -367,24 +368,21 @@ func importPanel(
 		return err
 	}
 
-	chunkSize := 10_000
+	chunkSize := 1_000
 	toinsert := make([]any, len(ddlColumns)*chunkSize)
 
 	nWritten := 0
 
 	//nLeftovers := 0
-	return panelResultLoader(projectId, panel.id, chunkSize, func (rows []map[string]any) error {
+	return panelResultLoader(projectId, panel.id, chunkSize, func(rows []map[string]any) error {
 		preparedStatement := makePreparedStatement(tname, len(ddlColumns), len(rows))
 		inserter, closer, err := prepare(preparedStatement)
 		if err != nil {
 			return err
 		}
-		defer closer()
 		nWritten += len(rows)
-		fmt.Println("PHIL HERE", nWritten)
 
 		for i, row := range rows {
-			fmt.Println(row)
 			for j, col := range panel.columns {
 				v := getObjectAtPath(row, col.name)
 				// Non-scalars get JSON
@@ -410,8 +408,13 @@ func importPanel(
 		// 	return nil
 		// }
 
-		return inserter(toinsert[:len(rows)*len(ddlColumns)])
-		
+		err  = inserter(toinsert[:len(rows)*len(ddlColumns)])
+		if err != nil {
+			return err
+		}
+
+		return closer()
+
 		// if err != nil {
 		// 	closer()
 		// 	return err
@@ -432,7 +435,7 @@ func importPanel(
 	// if err != nil {
 	// 	return err
 	// }
-	
+
 	// // Prepared statement must be closed whether or not there are leftovers
 	// // Must be closed before leftovers if there are leftovers
 	// closer()
@@ -455,7 +458,7 @@ func importPanel(
 
 func importAndRun(
 	createTable func(string) error,
-	prepare func(string) (func([]any) error, func(), error),
+	prepare func(string) (func([]any) error, func() error, error),
 	makeQuery func(string) ([]map[string]any, error),
 	projectId string,
 	query string,
