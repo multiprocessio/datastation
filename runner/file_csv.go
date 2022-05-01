@@ -35,7 +35,6 @@ func transformCSV(in io.Reader, out io.Writer, delimiter rune, parallelEncoding 
 		for {
 			record, err := r.Read()
 			if err == io.EOF {
-				err = nil
 				break
 			}
 
@@ -56,13 +55,7 @@ func transformCSV(in io.Reader, out io.Writer, delimiter rune, parallelEncoding 
 				continue
 			}
 
-			for i, field := range fields {
-				if i < len(record) {
-					row[field] = record[i]
-				} else {
-					row[field] = nil
-				}
-			}
+			recordToMap(row, &fields, record)
 
 			if parallelEncoding {
 				err = w.SetArray(false).EncodeRow(row) // Encode the first item here so the remaining ones can insert commas freely.
@@ -119,13 +112,7 @@ func encodeCSVSubroutine(wg *sync.WaitGroup, out io.Writer, fields *[]string, re
 	for {
 		record = <-recordChannel
 		if record != nil {
-			for i, f := range *fields {
-				if i >= len(record) {
-					row[f] = nil
-				} else {
-					row[f] = record[i]
-				}
-			}
+			recordToMap(row, fields, record)
 			if err := w.EncodeRow(row); err != nil {
 				panic(err) // could we use something like err group and just return the error as normal?
 			}

@@ -2,7 +2,6 @@ package runner
 
 import (
 	"bufio"
-	"encoding/csv"
 	"io"
 	"os"
 	"os/user"
@@ -51,58 +50,6 @@ func recordToMap[T any](row map[string]any, fields *[]string, record []T) {
 	for _, field := range (*fields)[i+1:] {
 		(row)[field] = nil
 	}
-}
-
-func transformCSV(in io.Reader, out io.Writer, delimiter rune) error {
-	r := csv.NewReader(in)
-	r.Comma = delimiter
-	r.ReuseRecord = true
-	r.FieldsPerRecord = -1
-
-	return withJSONArrayOutWriterFile(out, func(w *jsonutil.StreamEncoder) error {
-		isHeader := true
-		var fields []string
-		row := map[string]any{}
-
-		for {
-			record, err := r.Read()
-			if err == io.EOF {
-				err = nil
-				break
-			}
-
-			if err != nil {
-				return err
-			}
-
-			if isHeader {
-				for _, field := range record {
-					fields = append(fields, field)
-				}
-				isHeader = false
-				continue
-			}
-
-			recordToMap(row, &fields, record)
-
-			err = w.EncodeRow(row)
-			if err != nil {
-				return err
-			}
-		}
-
-		return nil
-	})
-}
-
-func transformCSVFile(in string, out io.Writer, delimiter rune) error {
-	f, err := os.Open(in)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-
-	return transformCSV(f, out, delimiter)
 }
 
 func transformJSON(in io.Reader, out io.Writer) error {
