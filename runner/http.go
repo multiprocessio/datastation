@@ -234,17 +234,16 @@ func (ec EvalContext) evalHTTPPanel(project *ProjectState, pageIndex int, panel 
 		}
 
 		out := ec.GetPanelResultsFile(project.Id, panel.Id)
-		w, err := openTruncate(out)
+		w, closeFile, err := openTruncateBufio(out)
 		if err != nil {
 			return err
 		}
-		defer w.Close()
+		defer closeFile()
+		defer w.Flush()
 
 		br := newBufferedReader(rsp.Body)
-		bw := newBufferedWriter(w)
-		defer bw.Flush()
 
-		return TransformReader(br, url, h.ContentTypeInfo, bw)
+		return TransformReader(br, url, h.ContentTypeInfo, w)
 	})
 }
 

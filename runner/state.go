@@ -123,10 +123,12 @@ type FilePanelInfo struct {
 	} `json:"file" db:"file"`
 }
 
+type LiteralPanelInfoLiteral struct {
+	ContentTypeInfo ContentTypeInfo `json:"contentTypeInfo" db:"contentTypeInfo"`
+}
+
 type LiteralPanelInfo struct {
-	Literal struct {
-		ContentTypeInfo ContentTypeInfo `json:"contentTypeInfo" db:"contentTypeInfo"`
-	} `json:"literal" db:"literal"`
+	Literal LiteralPanelInfoLiteral `json:"literal" db:"literal"`
 }
 
 type HttpPanelInfo struct {

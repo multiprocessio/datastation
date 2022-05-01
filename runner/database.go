@@ -384,11 +384,12 @@ func (ec EvalContext) EvalDatabasePanel(
 	}
 
 	out := ec.GetPanelResultsFile(project.Id, panel.Id)
-	w, err := openTruncate(out)
+	w, closeFile, err := openTruncateBufio(out)
 	if err != nil {
 		return err
 	}
-	defer w.Close()
+	defer closeFile()
+	defer w.Flush()
 
 	if dbInfo.Address == "" {
 		dbInfo.Address = "localhost:" + defaultPorts[dbInfo.Type]

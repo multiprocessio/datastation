@@ -369,10 +369,7 @@ func transformOpenOfficeSheetFile(in string, out *bufio.Writer) error {
 	return transformOpenOfficeSheet(f, out)
 }
 
-func transformGeneric(in *bufio.Reader, out *bufio.Writer) error {
-	r := bufio.NewReader(in)
-	o := bufio.NewWriter(out)
-
+func transformGeneric(r *bufio.Reader, o *bufio.Writer) error {
 	err := o.WriteByte('"')
 	if err != nil {
 		return err
@@ -413,12 +410,7 @@ func transformGeneric(in *bufio.Reader, out *bufio.Writer) error {
 		}
 	}
 
-	err = o.WriteByte('"')
-	if err != nil {
-		return err
-	}
-
-	return o.Flush()
+	return o.WriteByte('"')
 }
 
 func transformGenericFile(in string, out *bufio.Writer) error {
