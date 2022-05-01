@@ -6,8 +6,11 @@ import (
 	"github.com/multiprocessio/datastation/runner"
 )
 
-const VERSION = "development"
-const APP_NAME = "DataStation Runner (Go)"
+// Overridden during build
+var (
+	VERSION  = "development"
+	APP_NAME = "DataStation Runner (Go)"
+)
 
 func main() {
 	runner.Verbose = true

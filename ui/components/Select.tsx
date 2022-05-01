@@ -30,7 +30,6 @@ export function Select({
   disabled,
   label,
   className,
-  used,
   allowNone,
   tooltip,
   subtext,
@@ -41,7 +40,6 @@ export function Select({
   disabled?: boolean;
   label?: string;
   className?: string;
-  used?: Array<string>;
   allowNone?: string;
   tooltip?: React.ReactNode;
   subtext?: React.ReactNode;
@@ -57,24 +55,9 @@ export function Select({
     const values = [allowNone ? NONE : null, ...optionValues].filter(Boolean);
 
     if (values.length && !values.includes(value)) {
-      let foundUnused = '';
-      for (const value of values) {
-        if ((used && used.includes(value)) || allowNone) {
-          continue;
-        }
-
-        foundUnused = value;
-        break;
-      }
-
-      if (!foundUnused && allowNone) {
-        onChange(NONE);
-        return;
-      }
-
-      onChange(foundUnused);
+      onChange(values[0]);
     }
-  }, [value, oldValue, allowNone, onChange, used, optionValues]);
+  }, [value, oldValue, allowNone, onChange, optionValues]);
 
   const select = (
     <div className="vertical-align-center">

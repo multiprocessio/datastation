@@ -4,7 +4,6 @@ import {
   IconArrowsDiagonalMinimize2,
   IconChevronDown,
   IconChevronUp,
-  IconDotsVertical,
   IconDownload,
   IconEye,
   IconEyeOff,
@@ -102,37 +101,12 @@ async function fetchAndDownloadResults(
 function PreviewResults({
   panelOut,
   results,
-  panelId,
 }: {
-  panelOut: 'preview' | 'stdout' | 'shape' | 'metadata';
-  results: PanelResult & { metadata?: string };
-  panelId: string;
+  panelOut: 'preview' | 'stdout' | 'shape';
+  results: PanelResult;
 }) {
   if (!results.lastRun) {
     return <React.Fragment>Panel not yet run.</React.Fragment>;
-  }
-
-  if (panelOut === 'metadata') {
-    const metadata = [
-      { name: 'Inferred Content-Type', value: results.contentType },
-      { name: 'Size', value: humanSize(results.size) },
-      {
-        name: 'Estimated # of Elements',
-        value:
-          !results.arrayCount && String(results.arrayCount) !== '0'
-            ? 'Not an array'
-            : String(results.arrayCount).toLocaleString(),
-      },
-      {
-        name: 'Panel ID',
-        value: `"${panelId}"`,
-      },
-    ];
-    return (
-      <Highlight language="javascript">
-        {metadata.map((d) => `${d.name}: ${d.value}`).join('\n')}
-      </Highlight>
-    );
   }
 
   if (!results[panelOut]) {
@@ -281,13 +255,14 @@ export function Panel({
     [setUrlState, expanded, setDetailsInternal, panel.id]
   );
   React.useEffect(() => {
-    if (!panel.defaultModified && !details) {
+    // Don't show table details because they can be pretty big
+    if (!panel.defaultModified && !details && panel.type !== 'table') {
       setDetails(true);
     }
-  }, [panel.defaultModified, details, setDetails]);
+  }, [panel.defaultModified, details, setDetails, panel.type]);
 
   const [panelOut, setPanelOut] = React.useState<
-    'preview' | 'stdout' | 'shape' | 'metadata'
+    'preview' | 'stdout' | 'shape'
   >('preview');
   const results = panel.resultMeta || new PanelResult();
 
@@ -445,7 +420,7 @@ export function Panel({
                 icon
                 onClick={() => setDetails(!details)}
               >
-                <IconDotsVertical />
+                {details ? 'Hide Details' : 'Edit Details'}
               </Button>
             </span>
 
@@ -595,12 +570,6 @@ export function Panel({
                       >
                         Schema
                       </Button>
-                      <Button
-                        className={panelOut === 'metadata' ? 'selected' : ''}
-                        onClick={() => setPanelOut('metadata')}
-                      >
-                        Metadata
-                      </Button>
                       {panelUIDetails.hasStdout && (
                         <Button
                           className={panelOut === 'stdout' ? 'selected' : ''}
@@ -615,14 +584,39 @@ export function Panel({
                     </div>
                     <div className="panel-preview">
                       <div className="panel-preview-results">
-                        <PreviewResults
-                          results={results}
-                          panelOut={panelOut}
-                          panelId={panel.id}
-                        />
+                        <PreviewResults results={results} panelOut={panelOut} />
                       </div>
                     </div>
                   </div>
+                )}
+              </div>
+              <div className="status-bar">
+                {!panel.resultMeta ? (
+                  'Panel not yet run.'
+                ) : loading ? (
+                  'Running...'
+                ) : (
+                  <>
+                    <span className="status-bar-element">
+                      <label>{panel.id}</label>
+                    </span>
+                    <span className="status-bar-element">
+                      <label>Rows (Estimate)</label>{' '}
+                      {!panel.resultMeta.arrayCount &&
+                      String(panel.resultMeta.arrayCount) !== '0'
+                        ? 'Not an array'
+                        : parseInt(
+                            String(panel.resultMeta.arrayCount)
+                          ).toLocaleString()}
+                    </span>
+                    <span className="status-bar-element">
+                      <label>Size</label> {humanSize(panel.resultMeta.size)}
+                    </span>
+                    <span className="status-bar-element">
+                      <label>Content-Type (Inferred)</label>{' '}
+                      {panel.resultMeta.contentType}
+                    </span>
+                  </>
                 )}
               </div>
             </ErrorBoundary>
