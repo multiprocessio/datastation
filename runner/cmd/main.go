@@ -12,72 +12,79 @@ var (
 	APP_NAME = "DataStation Runner (Go)"
 )
 
-func main() {
-	runner.Verbose = true
-	runner.Logln(APP_NAME + " " + VERSION)
-	projectId := ""
-	panelId := ""
-	panelMetaOut := ""
-	settingsFile := ""
-	fsBase := runner.DEFAULT_FS_BASE
+type args struct {
+	projectId    string
+	panelId      string
+	panelMetaOut string
+	settingsFile string
+	action       string
+	fsBase       string
+}
+
+func getArgs() args {
+	a := args{}
+	a.action = "eval"
+	a.fsBase = runner.DEFAULT_FS_BASE
 
 	args := os.Args
 	for i := 0; i < len(args)-1; i++ {
+		if args[i] == "--action" {
+			a.action = args[i+1]
+			i++
+			continue
+		}
+
 		if args[i] == "--fsbase" {
-			fsBase = args[i+1]
+			a.fsBase = args[i+1]
 			i++
 			continue
 		}
 
 		if args[i] == "--dsproj" {
-			projectId = args[i+1]
+			a.projectId = args[i+1]
 			i++
 			continue
 		}
 
 		if args[i] == "--evalPanel" {
-			panelId = args[i+1]
+			a.panelId = args[i+1]
 			i++
 			continue
 		}
 
 		if args[i] == "--metaFile" {
-			panelMetaOut = args[i+1]
+			a.panelMetaOut = args[i+1]
 			i++
 			continue
 		}
 
 		if args[i] == "--settingsFile" {
-			settingsFile = args[i+1]
+			a.settingsFile = args[i+1]
 			i++
 			continue
 		}
 	}
 
-	if projectId == "" {
+	if a.projectId == "" {
 		runner.Fatalln("No project id given.")
 	}
 
-	if panelId == "" {
+	if a.panelId == "" {
 		runner.Fatalln("No panel id given.")
 	}
 
-	if panelMetaOut == "" {
+	if a.panelMetaOut == "" {
 		runner.Fatalln("No panel meta out given.")
 	}
 
-	if settingsFile == "" {
-		settingsFile = runner.SettingsFileDefaultLocation
+	if a.settingsFile == "" {
+		a.settingsFile = runner.SettingsFileDefaultLocation
 	}
 
-	settings, err := runner.LoadSettings(settingsFile)
-	if err != nil {
-		runner.Logln("Could not load settings, assuming defaults.")
-		settings = runner.DefaultSettings
-	}
+	return a
+}
 
-	ec := runner.NewEvalContext(*settings, fsBase)
-
+func eval(ec runner.EvalContext, projectId, panelId, panelMetaOut string) {
 	errToWrite, output := ec.Eval(projectId, panelId)
 	if errToWrite != nil {
 		runner.Logln("Failed to eval: %s", errToWrite)
@@ -90,11 +97,35 @@ func main() {
 		// Explicitly don't fail here so that the parent can read the exception from disk
 	}
 
-	err = runner.WriteJSONFile(panelMetaOut, map[string]any{
+	err := runner.WriteJSONFile(panelMetaOut, map[string]any{
 		"exception": errToWrite,
 		"stdout":    output,
 	})
 	if err != nil {
 		runner.Fatalln("Could not write panel meta out: %s", errToWrite)
+	}
+
+}
+
+func main() {
+	runner.Verbose = true
+	runner.Logln(APP_NAME + " " + VERSION)
+
+	args := getArgs()
+
+	settings, err := runner.LoadSettings(args.settingsFile)
+	if err != nil {
+		runner.Logln("Could not load settings, assuming defaults.")
+		settings = runner.DefaultSettings
+	}
+
+	ec := runner.NewEvalContext(*settings, args.fsBase)
+
+	switch action {
+	case "eval":
+		eval(ec, args.projectId, args.panelId, args.panelMetaOut)
+	case "results":
+		fetchResults(ec, args.projectId, args.panelId, args.panelMetaOut)
+	default:
 	}
 }
