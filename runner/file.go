@@ -2,7 +2,6 @@ package runner
 
 import (
 	"bufio"
-	"encoding/csv"
 	"io"
 	"os"
 	"os/user"
@@ -25,6 +24,7 @@ import (
 
 var preferredParallelism = runtime.NumCPU() * 2
 
+const ParallelEncodingMin = 100 * 1024 * 1024 // 100 MB
 func indexToExcelColumn(i int) string {
 	i -= 1
 
@@ -50,58 +50,6 @@ func recordToMap[T any](row map[string]any, fields *[]string, record []T) {
 	for _, field := range (*fields)[i+1:] {
 		(row)[field] = nil
 	}
-}
-
-func transformCSV(in io.Reader, out io.Writer, delimiter rune) error {
-	r := csv.NewReader(in)
-	r.Comma = delimiter
-	r.ReuseRecord = true
-	r.FieldsPerRecord = -1
-
-	return withJSONArrayOutWriterFile(out, func(w *jsonutil.StreamEncoder) error {
-		isHeader := true
-		var fields []string
-		row := map[string]any{}
-
-		for {
-			record, err := r.Read()
-			if err == io.EOF {
-				err = nil
-				break
-			}
-
-			if err != nil {
-				return err
-			}
-
-			if isHeader {
-				for _, field := range record {
-					fields = append(fields, field)
-				}
-				isHeader = false
-				continue
-			}
-
-			recordToMap(row, &fields, record)
-
-			err = w.EncodeRow(row)
-			if err != nil {
-				return err
-			}
-		}
-
-		return nil
-	})
-}
-
-func transformCSVFile(in string, out io.Writer, delimiter rune) error {
-	f, err := os.Open(in)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-
-	return transformCSV(f, out, delimiter)
 }
 
 func transformJSON(in io.Reader, out io.Writer) error {
@@ -653,7 +601,7 @@ func getServer(project *ProjectState, serverId string) (*ServerInfo, error) {
 	return nil, edsef("Unknown server: %d" + serverId)
 }
 
-func TransformFile(fileName string, cti ContentTypeInfo, out io.Writer) error {
+func TransformFile(fileName string, cti ContentTypeInfo, out io.Writer, parallelEncoding bool) error {
 	assumedType := GetMimeType(fileName, cti)
 
 	Logln("Assumed '%s' from '%s' given '%s' when loading file", assumedType, cti.Type, fileName)
@@ -661,9 +609,9 @@ func TransformFile(fileName string, cti ContentTypeInfo, out io.Writer) error {
 	case JSONMimeType:
 		return transformJSONFile(fileName, out)
 	case CSVMimeType:
-		return transformCSVFile(fileName, out, ',')
+		return transformCSVFile(fileName, out, ',', parallelEncoding)
 	case TSVMimeType:
-		return transformCSVFile(fileName, out, '\t')
+		return transformCSVFile(fileName, out, '\t', parallelEncoding)
 	case ExcelMimeType, ExcelOpenXMLMimeType:
 		return transformXLSXFile(fileName, out)
 	case ParquetMimeType:
@@ -714,13 +662,22 @@ func (ec EvalContext) evalFilePanel(project *ProjectState, pageIndex int, panel 
 		fileName = strings.ReplaceAll(fileName, "~", "/home/"+server.Username)
 
 		return ec.remoteFileReader(*server, fileName, func(r io.Reader) error {
-			return TransformReader(r, fileName, cti, w)
+			return TransformReader(r, fileName, cti, w, panel.ParallelEncoding)
 		})
 	}
 
 	fileName = resolvePath(fileName)
+	if panel.ParallelEncoding {
+		stat, err := os.Stat(fileName)
+		if err != nil {
+			return err
+		}
+		if stat.Size() < ParallelEncodingMin {
+			panel.ParallelEncoding = false
+		}
+	}
 
-	return TransformFile(fileName, cti, w)
+	return TransformFile(fileName, cti, w, panel.ParallelEncoding)
 }
 
 func resolvePath(p string) string {

@@ -453,6 +453,7 @@ export class DatabasePanelInfo extends PanelInfo {
     step: number;
     extra: Record<string, string>;
   };
+  parallelEncoding: boolean;
 
   constructor(
     pageId: string,
@@ -472,20 +473,24 @@ export class DatabasePanelInfo extends PanelInfo {
       step: panel.step || 60,
       extra: panel.extra || {},
     };
+    this.parallelEncoding = true;
   }
 }
 
 export class HTTPPanelInfo extends PanelInfo {
   http: HTTPConnectorInfo;
+  parallelEncoding: boolean;
 
   constructor(
     pageId: string,
     name?: string,
     http?: HTTPConnectorInfo,
-    content?: string
+    content?: string,
+    parallelEncoding?: boolean
   ) {
     super('http', pageId, name, content);
     this.http = http || new HTTPConnectorInfo();
+    this.parallelEncoding = parallelEncoding || false;
   }
 }
 
@@ -570,10 +575,12 @@ export class FilePanelInfo extends PanelInfo {
     name: string;
     content: ArrayBuffer;
   };
+  parallelEncoding: boolean;
 
   constructor(
     pageId: string,
-    panel: Partial<FilePanelInfo['file'] & { panelName: string }> = {}
+    panel: Partial<FilePanelInfo['file'] & { panelName: string }> = {},
+    parallelEncoding?: boolean
   ) {
     super('file', pageId, panel.panelName, '');
     this.file = {
@@ -581,6 +588,7 @@ export class FilePanelInfo extends PanelInfo {
       content: panel.content || new ArrayBuffer(0),
       contentTypeInfo: panel.contentTypeInfo || new ContentTypeInfo(),
     };
+    this.parallelEncoding = parallelEncoding || false;
   }
 }
 

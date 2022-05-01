@@ -116,6 +116,17 @@ export function HTTPPanelDetails({
             .
           </p>
         </div>
+        <div className="form-row">
+          <Toggle
+            label="Parallel Encoding"
+            value={panel.parallelEncoding}
+            rhsLabel={panel.parallelEncoding ? 'Enabled' : 'Disabled'}
+            onChange={() => {
+              panel.parallelEncoding = !panel.parallelEncoding;
+              updatePanel(panel);
+            }}
+          />
+        </div>
       </FormGroup>
 
       <FormGroup>

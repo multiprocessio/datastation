@@ -81,13 +81,14 @@ const (
 )
 
 type PanelInfo struct {
-	Content    string        `json:"content" db:"content"`
-	Type       PanelInfoType `json:"type" db:"type"`
-	Name       string        `json:"name" db:"name"`
-	Id         string        `json:"id" db:"id"`
-	ServerId   string        `json:"serverId" db:"serverId"`
-	ResultMeta PanelResult   `json:"resultMeta" db:"resultMeta"`
-	PageId     string        `json:"pageId" db:"pageId"`
+	Content          string        `json:"content" db:"content"`
+	Type             PanelInfoType `json:"type" db:"type"`
+	Name             string        `json:"name" db:"name"`
+	Id               string        `json:"id" db:"id"`
+	ServerId         string        `json:"serverId" db:"serverId"`
+	ResultMeta       PanelResult   `json:"resultMeta" db:"resultMeta"`
+	PageId           string        `json:"pageId" db:"pageId"`
+	ParallelEncoding bool          `json:"parallelEncoding" db:"parallelEncoding"`
 	*ProgramPanelInfo
 	*FilePanelInfo
 	*LiteralPanelInfo

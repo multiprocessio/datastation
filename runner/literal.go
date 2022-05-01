@@ -1,6 +1,8 @@
 package runner
 
-import "bytes"
+import (
+	"bytes"
+)
 
 func (ec EvalContext) evalLiteralPanel(project *ProjectState, pageIndex int, panel *PanelInfo) error {
 	cti := panel.Literal.ContentTypeInfo
@@ -11,5 +13,6 @@ func (ec EvalContext) evalLiteralPanel(project *ProjectState, pageIndex int, pan
 	}
 	defer w.Close()
 	buf := bytes.NewReader([]byte(panel.Content))
-	return TransformReader(buf, "", cti, w)
+
+	return TransformReader(buf, "", cti, w, false) // Assuming literal files are small
 }
