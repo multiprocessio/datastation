@@ -12,29 +12,6 @@ import (
 	"google.golang.org/api/sheets/v4"
 )
 
-type Vector[T any] struct {
-	s     []T
-	index int
-}
-
-func (v *Vector[T]) Push(el T) {
-	defer func() { v.index++ }()
-	if v.index < cap(v.s) {
-		v.s[v.index] = el
-		return
-	}
-
-	v.s = append(v.s, el)
-}
-
-func (v *Vector[T]) Reset() {
-	v.index = 0
-}
-
-func (v *Vector[T]) Slice() []T {
-	return v.s
-}
-
 func writeGoogleSheet(sheet *sheets.ValueRange, w *jsonutil.StreamEncoder) error {
 	var header []string
 

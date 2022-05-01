@@ -11,5 +11,7 @@ func (ec EvalContext) evalLiteralPanel(project *ProjectState, pageIndex int, pan
 	}
 	defer w.Close()
 	buf := bytes.NewReader([]byte(panel.Content))
-	return TransformReader(buf, "", cti, w)
+	br := newBufferedReader(buf)
+	bw := newBufferedWriter(w)
+	return TransformReader(br, "", cti, bw)
 }

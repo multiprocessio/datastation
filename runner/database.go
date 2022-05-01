@@ -1,6 +1,7 @@
 package runner
 
 import (
+	"bufio"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -454,7 +455,7 @@ func (ec EvalContext) EvalDatabasePanel(
 
 		defer os.Remove(tmp.Name())
 
-		err = ec.remoteFileReader(*server, dbInfo.Database, func(r io.Reader) error {
+		err = ec.remoteFileReader(*server, dbInfo.Database, func(r *bufio.Reader) error {
 			_, err := io.Copy(tmp, r)
 			return err
 		})
