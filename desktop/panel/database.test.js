@@ -493,11 +493,11 @@ for (const subprocess of RUNNERS) {
 
           const v = JSON.parse(panelValueBuffer.toString());
           expect(v).toStrictEqual([
-            { age: 52, name: 'Emma' },
-            { age: 50, name: 'Karl' },
             { age: 43, name: 'Garry' },
-            { age: 41, name: 'Nile' },
             { age: 39, name: 'Mina' },
+            { age: 50, name: 'Karl' },
+            { age: 41, name: 'Nile' },
+            { age: 52, name: 'Emma' },
           ]);
 
           finished = true;

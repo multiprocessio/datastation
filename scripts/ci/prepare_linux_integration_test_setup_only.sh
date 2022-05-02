@@ -164,6 +164,9 @@ docker exec "$scyllacontainer" cqlsh -u cassandra -p cassandra \
 docker exec "$scyllacontainer" cqlsh -u cassandra -p cassandra \
        -e "CREATE ROLE test WITH PASSWORD = 'test' AND LOGIN = true AND SUPERUSER = true;"
 
+# Configure neo4j
+docker exec "$neo4j" bin/cypher-shell -u neo4j -p password "CREATE (u:User { name : 'test' });"
+
 # Load Mongodb documents
 #for t in $(ls testdata/documents/*.json); do
 #    mongosh "mongodb://test:test@localhost:27017" --eval "db.test.insertOne($(cat $t))"
