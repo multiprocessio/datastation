@@ -24,6 +24,39 @@ import (
 )
 
 var preferredParallelism = runtime.NumCPU() * 2
+var bufSize int = 1e6 // 1MB
+
+func newBufferedWriter(w io.Writer) *bufio.Writer {
+	return bufio.NewWriterSize(w, bufSize)
+}
+
+func newBufferedReader(w io.Reader) *bufio.Reader {
+	return bufio.NewReaderSize(w, bufSize)
+}
+
+func openBufferedFile(in string) (*bufio.Reader, func() error, error) {
+	r, err := os.Open(in)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return newBufferedReader(r), r.Close, nil
+}
+
+func openTruncate(out string) (*os.File, error) {
+	base := filepath.Dir(out)
+	_ = os.Mkdir(base, os.ModePerm)
+	return os.OpenFile(out, os.O_TRUNC|os.O_WRONLY|os.O_CREATE, os.ModePerm)
+}
+
+func openTruncateBufio(out string) (*bufio.Writer, func() error, error) {
+	o, err := openTruncate(out)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return newBufferedWriter(o), o.Close, nil
+}
 
 func indexToExcelColumn(i int) string {
 	i -= 1
@@ -39,8 +72,12 @@ func recordToMap[T any](row map[string]any, fields *[]string, record []T) {
 	i := -1 // This is only set to 0 if len(record) > 0
 	var el T
 	for i, el = range record {
+		// If the column doesn't exist, give it an Excel-style name based on its position
 		if i >= len(*fields) {
 			*fields = append(*fields, indexToExcelColumn(i+1))
+		} else if (*fields)[i] == "" {
+			// If the column exists but has no name, same thing: Excel-style name
+			(*fields)[i] = indexToExcelColumn(i + 1)
 		}
 
 		(row)[(*fields)[i]] = el
@@ -52,7 +89,7 @@ func recordToMap[T any](row map[string]any, fields *[]string, record []T) {
 	}
 }
 
-func transformCSV(in io.Reader, out io.Writer, delimiter rune) error {
+func transformCSV(in *bufio.Reader, out *bufio.Writer, delimiter rune) error {
 	r := csv.NewReader(in)
 	r.Comma = delimiter
 	r.ReuseRecord = true
@@ -94,17 +131,17 @@ func transformCSV(in io.Reader, out io.Writer, delimiter rune) error {
 	})
 }
 
-func transformCSVFile(in string, out io.Writer, delimiter rune) error {
-	f, err := os.Open(in)
+func transformCSVFile(in string, out *bufio.Writer, delimiter rune) error {
+	r, closeFile, err := openBufferedFile(in)
 	if err != nil {
 		return err
 	}
-	defer f.Close()
+	defer closeFile()
 
-	return transformCSV(f, out, delimiter)
+	return transformCSV(r, out, delimiter)
 }
 
-func transformJSON(in io.Reader, out io.Writer) error {
+func transformJSON(in *bufio.Reader, out *bufio.Writer) error {
 	_, err := io.Copy(out, in)
 	if err == io.EOF {
 		err = nil
@@ -113,17 +150,17 @@ func transformJSON(in io.Reader, out io.Writer) error {
 	return err
 }
 
-func transformJSONFile(in string, out io.Writer) error {
-	r, err := os.Open(in)
+func transformJSONFile(in string, out *bufio.Writer) error {
+	r, closeFile, err := openBufferedFile(in)
 	if err != nil {
 		return err
 	}
-	defer r.Close()
+	defer closeFile()
 
 	return transformJSON(r, out)
 }
 
-func transformParquet(in source.ParquetFile, out io.Writer) error {
+func transformParquet(in source.ParquetFile, out *bufio.Writer) error {
 	r, err := reader.NewParquetReader(in, nil, int64(preferredParallelism))
 	if err != nil {
 		return err
@@ -160,7 +197,7 @@ func transformParquet(in source.ParquetFile, out io.Writer) error {
 	})
 }
 
-func transformParquetFile(in string, out io.Writer) error {
+func transformParquetFile(in string, out *bufio.Writer) error {
 	r, err := local.NewLocalFileReader(in)
 	if err != nil {
 		return err
@@ -170,7 +207,7 @@ func transformParquetFile(in string, out io.Writer) error {
 	return transformParquet(r, out)
 }
 
-func transformORC(in *orc.Reader, out io.Writer) error {
+func transformORC(in *orc.Reader, out *bufio.Writer) error {
 	cols := in.Schema().Columns()
 	c := in.Select(cols...)
 
@@ -195,7 +232,7 @@ func transformORC(in *orc.Reader, out io.Writer) error {
 	})
 }
 
-func transformORCFile(in string, out io.Writer) error {
+func transformORCFile(in string, out *bufio.Writer) error {
 	r, err := orc.Open(in)
 	if err != nil {
 		return err
@@ -228,7 +265,7 @@ func writeSheet(rows [][]string, w *jsonutil.StreamEncoder) error {
 	return nil
 }
 
-func transformXLSX(in *excelize.File, out io.Writer) error {
+func transformXLSX(in *excelize.File, out *bufio.Writer) error {
 	sheets := in.GetSheetList()
 
 	// Single sheet files get flattened into just an array, not a dict mapping sheet name to sheet contents
@@ -274,7 +311,7 @@ func transformXLSX(in *excelize.File, out io.Writer) error {
 	})
 }
 
-func transformXLSXFile(in string, out io.Writer) error {
+func transformXLSXFile(in string, out *bufio.Writer) error {
 	f, err := excelize.OpenFile(in)
 	if err != nil {
 		return err
@@ -283,7 +320,7 @@ func transformXLSXFile(in string, out io.Writer) error {
 	return transformXLSX(f, out)
 }
 
-func transformOpenOfficeSheet(in *openoffice.ODSFile, out io.Writer) error {
+func transformOpenOfficeSheet(in *openoffice.ODSFile, out *bufio.Writer) error {
 	doc, err := in.ParseContent()
 	if err != nil {
 		return edse(err)
@@ -323,7 +360,7 @@ func transformOpenOfficeSheet(in *openoffice.ODSFile, out io.Writer) error {
 	})
 }
 
-func transformOpenOfficeSheetFile(in string, out io.Writer) error {
+func transformOpenOfficeSheetFile(in string, out *bufio.Writer) error {
 	f, err := openoffice.OpenODS(in)
 	if err != nil {
 		return edse(err)
@@ -332,10 +369,7 @@ func transformOpenOfficeSheetFile(in string, out io.Writer) error {
 	return transformOpenOfficeSheet(f, out)
 }
 
-func transformGeneric(in io.Reader, out io.Writer) error {
-	r := bufio.NewReader(in)
-	o := bufio.NewWriter(out)
-
+func transformGeneric(r *bufio.Reader, o *bufio.Writer) error {
 	err := o.WriteByte('"')
 	if err != nil {
 		return err
@@ -376,25 +410,20 @@ func transformGeneric(in io.Reader, out io.Writer) error {
 		}
 	}
 
-	err = o.WriteByte('"')
+	return o.WriteByte('"')
+}
+
+func transformGenericFile(in string, out *bufio.Writer) error {
+	r, closeFile, err := openBufferedFile(in)
 	if err != nil {
 		return err
 	}
-
-	return o.Flush()
-}
-
-func transformGenericFile(in string, out io.Writer) error {
-	r, err := os.Open(in)
-	if err != nil {
-		return edse(err)
-	}
-	defer r.Close()
+	defer closeFile()
 
 	return transformGeneric(r, out)
 }
 
-func transformJSONConcat(in io.Reader, out io.Writer) error {
+func transformJSONConcat(in *bufio.Reader, out *bufio.Writer) error {
 	return withJSONOutWriter(out, "[", "]", func() error {
 		inString := false
 		var last byte = ' '
@@ -451,17 +480,17 @@ func transformJSONConcat(in io.Reader, out io.Writer) error {
 	})
 }
 
-func transformJSONConcatFile(in string, out io.Writer) error {
-	r, err := os.Open(in)
+func transformJSONConcatFile(in string, out *bufio.Writer) error {
+	r, closeFile, err := openBufferedFile(in)
 	if err != nil {
 		return err
 	}
-	defer r.Close()
+	defer closeFile()
 
 	return transformJSONConcat(r, out)
 }
 
-func newLargeLineScanner(in io.Reader) *bufio.Scanner {
+func newLargeLineScanner(in *bufio.Reader) *bufio.Scanner {
 	scanner := bufio.NewScanner(in)
 
 	// Bump line length limit to 1MB (from 64k)
@@ -470,7 +499,7 @@ func newLargeLineScanner(in io.Reader) *bufio.Scanner {
 	return scanner
 }
 
-func transformJSONLines(in io.Reader, out io.Writer) error {
+func transformJSONLines(in *bufio.Reader, out *bufio.Writer) error {
 	first := true
 	return withJSONOutWriter(out, "[", "]", func() error {
 		scanner := newLargeLineScanner(in)
@@ -493,12 +522,12 @@ func transformJSONLines(in io.Reader, out io.Writer) error {
 	})
 }
 
-func transformJSONLinesFile(in string, out io.Writer) error {
-	r, err := os.Open(in)
+func transformJSONLinesFile(in string, out *bufio.Writer) error {
+	r, closeFile, err := openBufferedFile(in)
 	if err != nil {
 		return err
 	}
-	defer r.Close()
+	defer closeFile()
 
 	return transformJSONLines(r, out)
 }
@@ -509,7 +538,7 @@ var BUILTIN_REGEX = map[MimeType]*regexp.Regexp{
 	NginxAccessMimeType:  regexp.MustCompile(`^(?P<remote>[^ ]*) (?P<host>[^ ]*) (?P<user>[^ ]*) \[(?P<time>[^\]]*)\] "(?P<method>\S+)(?: +(?P<path>[^\"]*?)(?: +\S*)?)?" (?P<code>[^ ]*) (?P<size>[^ ]*)(?: "(?P<referer>[^\"]*)" "(?P<agent>[^\"]*)"(?:\s+(?P<http_x_forwarded_for>[^ ]+))?)?$`),
 }
 
-func transformRegexp(in io.Reader, out io.Writer, re *regexp.Regexp) error {
+func transformRegexp(in *bufio.Reader, out *bufio.Writer, re *regexp.Regexp) error {
 	scanner := newLargeLineScanner(in)
 	return withJSONArrayOutWriterFile(out, func(w *jsonutil.StreamEncoder) error {
 		row := map[string]any{}
@@ -535,17 +564,17 @@ func transformRegexp(in io.Reader, out io.Writer, re *regexp.Regexp) error {
 	})
 }
 
-func transformRegexpFile(in string, out io.Writer, re *regexp.Regexp) error {
-	r, err := os.Open(in)
+func transformRegexpFile(in string, out *bufio.Writer, re *regexp.Regexp) error {
+	r, closeFile, err := openBufferedFile(in)
 	if err != nil {
 		return err
 	}
-	defer r.Close()
+	defer closeFile()
 
 	return transformRegexp(r, out, re)
 }
 
-func transformAvro(in io.Reader, out io.Writer) error {
+func transformAvro(in *bufio.Reader, out *bufio.Writer) error {
 	ocfr, err := goavro.NewOCFReader(in)
 	if err != nil {
 		return err
@@ -567,12 +596,12 @@ func transformAvro(in io.Reader, out io.Writer) error {
 	})
 }
 
-func transformAvroFile(in string, out io.Writer) error {
-	r, err := os.Open(in)
+func transformAvroFile(in string, out *bufio.Writer) error {
+	r, closeFile, err := openBufferedFile(in)
 	if err != nil {
 		return err
 	}
-	defer r.Close()
+	defer closeFile()
 
 	return transformAvro(r, out)
 }
@@ -653,7 +682,7 @@ func getServer(project *ProjectState, serverId string) (*ServerInfo, error) {
 	return nil, edsef("Unknown server: %d" + serverId)
 }
 
-func TransformFile(fileName string, cti ContentTypeInfo, out io.Writer) error {
+func TransformFile(fileName string, cti ContentTypeInfo, out *bufio.Writer) error {
 	assumedType := GetMimeType(fileName, cti)
 
 	Logln("Assumed '%s' from '%s' given '%s' when loading file", assumedType, cti.Type, fileName)
@@ -702,18 +731,19 @@ func (ec EvalContext) evalFilePanel(project *ProjectState, pageIndex int, panel 
 	}
 
 	out := ec.GetPanelResultsFile(project.Id, panel.Id)
-	w, err := openTruncate(out)
+	w, closeFile, err := openTruncateBufio(out)
 	if err != nil {
 		return err
 	}
-	defer w.Close()
+	defer closeFile()
+	defer w.Flush()
 
 	if server != nil {
 		// Resolve ~ to foreign home path.
 		// Will break if the server is not Linux.
 		fileName = strings.ReplaceAll(fileName, "~", "/home/"+server.Username)
 
-		return ec.remoteFileReader(*server, fileName, func(r io.Reader) error {
+		return ec.remoteFileReader(*server, fileName, func(r *bufio.Reader) error {
 			return TransformReader(r, fileName, cti, w)
 		})
 	}

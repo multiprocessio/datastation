@@ -3,12 +3,12 @@ import { preview } from 'preview';
 import * as React from 'react';
 import log from '../../shared/log';
 import {
-  GraphField,
   GraphPanelInfo,
   GraphPanelInfoType,
   PanelInfo,
   PanelInfoWidth,
   PanelResult,
+  TableColumn,
 } from '../../shared/state';
 import { Button } from '../components/Button';
 import {
@@ -98,7 +98,7 @@ function fixedColorByLabel(valueLabels: Array<string>) {
 function getPieDatasets(
   panel: GraphPanelInfo,
   value: Array<any>,
-  ys: Array<GraphField>
+  ys: Array<TableColumn>
 ): { labels: string[]; datasets: any[]; legendLabels: any } {
   const labels = value.map((d) => d[panel.graph.x]);
   const datasets = ys.map(({ field, label }) => {
@@ -134,7 +134,7 @@ function getPieDatasets(
 function getLineDatasets(
   panel: GraphPanelInfo,
   value: Array<any>,
-  ys: Array<GraphField>,
+  ys: Array<TableColumn>,
   uniqueBy?: string
 ): { labels: string[]; datasets: any[]; legendLabels: any } {
   if (!uniqueBy || uniqueBy === NONE) {

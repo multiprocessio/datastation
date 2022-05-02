@@ -50,7 +50,7 @@ export function Connector({
               message="delete this data source"
               action="Delete"
               render={(confirm: () => void) => (
-                <Button icon onClick={confirm} type="outline">
+                <Button icon onClick={confirm}>
                   <IconTrash />
                 </Button>
               )}

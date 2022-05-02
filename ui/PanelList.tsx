@@ -155,6 +155,7 @@ export function PanelList({
               page.id,
               `Untitled panel #${page.panels.length + 1}`
             );
+            console.log(panel);
             updatePanel(panel, panelIndex + 1, true);
           }}
         />

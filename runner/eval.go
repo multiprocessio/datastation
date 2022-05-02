@@ -193,23 +193,29 @@ func (ec EvalContext) Eval(projectId, panelId string) (error, string) {
 
 	switch panel.Type {
 	case FilePanel:
-		Logln("Evaling file panel")
+		Logln("Evaling file panel: " + panel.Name)
 		return ec.evalFilePanel(project, pageIndex, panel), ""
 	case HttpPanel:
-		Logln("Evaling http panel")
+		Logln("Evaling http panel: " + panel.Name)
 		return ec.evalHTTPPanel(project, pageIndex, panel), ""
 	case LiteralPanel:
-		Logln("Evaling literal panel")
+		Logln("Evaling literal panel: " + panel.Name)
 		return ec.evalLiteralPanel(project, pageIndex, panel), ""
 	case ProgramPanel:
-		Logln("Evaling program panel")
+		Logln("Evaling program panel: " + panel.Name)
 		return ec.evalProgramPanel(project, pageIndex, panel)
 	case DatabasePanel:
-		Logln("Evaling database panel")
+		Logln("Evaling database panel: " + panel.Name)
 		return ec.EvalDatabasePanel(project, pageIndex, panel, nil, *DefaultCacheSettings), ""
 	case FilaggPanel:
-		Logln("Evaling database panel")
+		Logln("Evaling filagg panel: " + panel.Name)
 		return ec.evalFilaggPanel(project, pageIndex, panel), ""
+	case TablePanel:
+		Logln("Evaling table panel: " + panel.Name)
+		return ec.evalTablePanel(project, pageIndex, panel), ""
+	case GraphPanel:
+		Logln("Evaling graph panel: " + panel.Name)
+		return ec.evalGraphPanel(project, pageIndex, panel), ""
 	}
 
 	return makeErrUnsupported("Unsupported panel type " + string(panel.Type) + " in Go runner"), ""

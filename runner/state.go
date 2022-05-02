@@ -78,9 +78,13 @@ const (
 	FilePanel     = "file"
 	FilaggPanel   = "filagg"
 	DatabasePanel = "database"
+	GraphPanel    = "graph"
+	TablePanel    = "table"
 )
 
 type PanelInfo struct {
+	Page       int           `json:"page" db:"page"`
+	PageSize   int           `json:"pageSize" db:"pageSize"`
 	Content    string        `json:"content" db:"content"`
 	Type       PanelInfoType `json:"type" db:"type"`
 	Name       string        `json:"name" db:"name"`
@@ -94,6 +98,8 @@ type PanelInfo struct {
 	*DatabasePanelInfo
 	*HttpPanelInfo
 	*FilaggPanelInfo
+	*TablePanelInfo
+	*GraphPanelInfo
 }
 
 type SupportedLanguages string
@@ -123,10 +129,12 @@ type FilePanelInfo struct {
 	} `json:"file" db:"file"`
 }
 
+type LiteralPanelInfoLiteral struct {
+	ContentTypeInfo ContentTypeInfo `json:"contentTypeInfo" db:"contentTypeInfo"`
+}
+
 type LiteralPanelInfo struct {
-	Literal struct {
-		ContentTypeInfo ContentTypeInfo `json:"contentTypeInfo" db:"contentTypeInfo"`
-	} `json:"literal" db:"literal"`
+	Literal LiteralPanelInfoLiteral `json:"literal" db:"literal"`
 }
 
 type HttpPanelInfo struct {
@@ -239,6 +247,31 @@ type DatabasePanelInfoDatabase struct {
 
 type DatabasePanelInfo struct {
 	Database DatabasePanelInfoDatabase `json:"database" db:"database"`
+}
+
+type GraphPanelInfoGraph struct {
+	PanelSource string        `json:"panelSource" db:"panelSource"`
+	Ys          []TableColumn `json:"ys" db:"ys"`
+	X           string        `json:"x" db:"x"`
+}
+
+type GraphPanelInfo struct {
+	Graph GraphPanelInfoGraph `json:"graph" db:"graph"`
+}
+
+type TableColumn struct {
+	Field string `json:"field"`
+	Label string `json:"label"`
+}
+
+type TablePanelInfoTable struct {
+	Columns     []TableColumn `json:"columns" db:"columns"`
+	PanelSource string        `json:"panelSource" db:"panelSource"`
+	RowNumbers  bool          `json:"rowNumbers"`
+}
+
+type TablePanelInfo struct {
+	Table TablePanelInfoTable `json:"table" db:"table"`
 }
 
 type ConnectorInfoType string
