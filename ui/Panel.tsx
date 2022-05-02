@@ -383,8 +383,9 @@ export function Panel({
     }
   }
 
-  const bodyHidden =
-    panelUIDetails.hideBody && panelUIDetails.hideBody(panel, connectors);
+  const panelNeverHasBody =
+    panelUIDetails.body === null ||
+    (panelUIDetails.hideBody && panelUIDetails.hideBody(panel, connectors));
 
   return (
     <div
@@ -392,10 +393,7 @@ export function Panel({
       className={`panel ${fullScreen === panel.id ? 'panel--fullscreen' : ''} ${
         hidden ? 'panel--hidden' : ''
       } ${
-        (panelUIDetails.body === null || bodyHidden || panelOutExpanded) &&
-        !error
-          ? 'panel--empty'
-          : ''
+        (panelNeverHasBody || panelOutExpanded) && !error ? 'panel--empty' : ''
       } ${loading ? 'panel--loading' : ''}`}
       tabIndex={1001}
       ref={panelRef}
@@ -583,7 +581,7 @@ export function Panel({
             <ErrorBoundary className="panel-body">
               <div className="flex">
                 <div className="panel-body">
-                  {panelUIDetails.body && !bodyHidden && (
+                  {!panelNeverHasBody && !panelOutExpanded && (
                     <panelUIDetails.body
                       panel={panel}
                       keyboardShortcuts={keyboardShortcuts}
@@ -629,7 +627,7 @@ export function Panel({
                           </span>
                         </Button>
                       )}
-                      {!bodyHidden && (
+                      {!panelNeverHasBody && (
                         <Button
                           icon
                           className="flex-right"
