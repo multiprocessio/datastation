@@ -170,6 +170,14 @@ export async function evalInSubprocess(
         throw e;
       }
     }
+
+    // Table and graph panels get their results passed back to me displayed in the UI
+    if (['table', 'graph'].includes(panel.type)) {
+      const projectResultsFile = getProjectResultsFile(projectName);
+      const bytes = fs.readFileSync(projectResultsFile + panel.id);
+      rm.value = JSON.parse(bytes.toString());
+    }
+
     return [{ ...rm, ...resultMeta }, stderr];
   } finally {
     try {
