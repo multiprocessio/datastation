@@ -42,11 +42,18 @@ outer:
 	defer closeFile()
 	defer out.Flush()
 
-	rowMap := map[string]any{}
 	return withJSONArrayOutWriter(out, func(w *jsonutil.StreamEncoder) error {
+		rawRow := map[string]any{}
+		rowRequestedColumnsOnly := map[string]any{}
+		var ok bool
+
 		for {
-			row := <-rows
-			if row == nil {
+			select {
+			case rawRow, ok = <-rows:
+				break
+			}
+
+			if !ok || rawRow == nil {
 				return nil
 			}
 
@@ -57,9 +64,9 @@ outer:
 				}
 
 				for _, c := range columns {
-					rowMap[c] = getObjectAtPath(row, c)
+					rowRequestedColumnsOnly[c] = getObjectAtPath(rawRow, c)
 				}
-				err := w.EncodeRow(rowMap)
+				err := w.EncodeRow(rowRequestedColumnsOnly)
 				if err != nil {
 					return err
 				}
