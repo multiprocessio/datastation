@@ -1,3 +1,8 @@
+import {
+  IconPlayerSkipBack,
+  IconPlayerTrackNext,
+  IconPlayerTrackPrev,
+} from '@tabler/icons';
 import { preview } from 'preview';
 import * as React from 'react';
 import { shape } from 'shape';
@@ -266,18 +271,29 @@ export function TablePanel({
       <div className="vertical-align-center table-controls">
         <Button
           onClick={() => {
-            panel.page--;
+            panel.page = 0;
             updatePanel(panel);
           }}
-          type="outline"
           icon
           disabled={panel.page === 0}
           className="mr-1"
+          title="Back to first page"
         >
-          Previous Page
+          <IconPlayerSkipBack />
         </Button>
         <Button
-          type="outline"
+          onClick={() => {
+            panel.page--;
+            updatePanel(panel);
+          }}
+          icon
+          disabled={panel.page === 0}
+          className="mr-1"
+          title="Previous Page"
+        >
+          <IconPlayerTrackPrev />
+        </Button>
+        <Button
           icon
           onClick={() => {
             panel.page++;
@@ -285,8 +301,9 @@ export function TablePanel({
             updatePanel(panel);
           }}
           disabled={valueAsArray?.length < panel.pageSize}
+          title="Next Page"
         >
-          Next Page
+          <IconPlayerTrackNext />
         </Button>
         <div className="flex-right">
           <Select

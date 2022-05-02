@@ -74,7 +74,7 @@ export function Server({
               action="Delete"
               render={function renderDelete(confirm: () => void) {
                 return (
-                  <Button icon onClick={confirm} type="outline">
+                  <Button icon onClick={confirm}>
                     <IconTrash />
                   </Button>
                 );
