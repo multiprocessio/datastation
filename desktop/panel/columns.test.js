@@ -32,6 +32,7 @@ for (const runner of RUNNERS) {
     const tp = new TablePanelInfo(null, {
       columns: [{ field: 'a' }],
       panelSource: lp.id,
+      name: 'Table',
     });
 
     let finished = false;
@@ -59,7 +60,7 @@ for (const runner of RUNNERS) {
         expect(result.preview).toStrictEqual(preview(testData));
         expect(result.contentType).toBe('application/json');
 
-        const p = await makeEvalHandler().handler(
+        const p = await makeEvalHandler(runner).handler(
           project.projectName,
           { panelId: tp.id },
           dispatch

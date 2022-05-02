@@ -121,11 +121,10 @@ func main() {
 
 	ec := runner.NewEvalContext(*settings, args.fsBase)
 
-	switch action {
+	switch args.action {
 	case "eval":
 		eval(ec, args.projectId, args.panelId, args.panelMetaOut)
-	case "results":
-		fetchResults(ec, args.projectId, args.panelId, args.panelMetaOut)
 	default:
+		runner.Fatalln("Unknown runner action: " + args.action)
 	}
 }

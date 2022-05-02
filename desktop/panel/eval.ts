@@ -1,28 +1,14 @@
 import { execFile } from 'child_process';
 import fs from 'fs';
-import jsesc from 'jsesc';
 import circularSafeStringify from 'json-stringify-safe';
 import { EOL } from 'os';
 import path from 'path';
-import { preview } from 'preview';
-import { shape, Shape } from 'shape';
 import { file as makeTmpFile } from 'tmp-promise';
-import {
-  Cancelled,
-  EVAL_ERRORS,
-  InvalidDependentPanelError,
-  NoResultError,
-} from '../../shared/errors';
+import { Cancelled, EVAL_ERRORS, NoResultError } from '../../shared/errors';
 import log from '../../shared/log';
 import { newId } from '../../shared/object';
 import { PanelBody } from '../../shared/rpc';
-import {
-  ConnectorInfo,
-  PanelInfo,
-  PanelInfoType,
-  PanelResult,
-  ProjectState,
-} from '../../shared/state';
+import { ConnectorInfo, PanelInfo, PanelResult } from '../../shared/state';
 import {
   CODE_ROOT,
   DISK_ROOT,
@@ -37,31 +23,6 @@ import { parsePartialJSONFile } from '../partial';
 import { Dispatch, RPCHandler } from '../rpc';
 import { getProjectResultsFile } from '../store';
 import { getProjectAndPanel } from './shared';
-import { EvalHandlerExtra, EvalHandlerResponse } from './types';
-
-type EvalHandler = (
-  project: ProjectState,
-  panel: PanelInfo,
-  extra: EvalHandlerExtra,
-  dispatch: Dispatch
-) => Promise<EvalHandlerResponse>;
-
-function unimplementedInJavaScript(): EvalHandler {
-  return function () {
-    throw new Error('There is a bug, this condition should not be possible.');
-  };
-}
-
-const EVAL_HANDLERS: { [k in PanelInfoType]: () => EvalHandler } = {
-  table: () => require('./columns').evalColumns,
-  graph: () => require('./columns').evalColumns,
-  literal: unimplementedInJavaScript,
-  database: unimplementedInJavaScript,
-  file: unimplementedInJavaScript,
-  http: unimplementedInJavaScript,
-  program: unimplementedInJavaScript,
-  filagg: unimplementedInJavaScript,
-};
 
 const runningProcesses: Record<string, Set<number>> = {};
 const cancelledPids = new Set<number>();
@@ -82,10 +43,6 @@ function killAllByPanelId(panelId: string) {
       }
     });
   }
-}
-
-function canUseGoRunner(panel: PanelInfo, connectors: ConnectorInfo[]) {
-  return !['table', 'graph'].includes(panel.type);
 }
 
 export async function evalInSubprocess(
@@ -122,7 +79,7 @@ export async function evalInSubprocess(
       args.push(SETTINGS_FILE_FLAG, subprocess.settingsFileOverride);
     }
 
-    if (subprocess.go && canUseGoRunner(panel, connectors)) {
+    if (subprocess.go) {
       base = subprocess.go;
       args.shift();
     }
@@ -227,30 +184,6 @@ export async function evalInSubprocess(
   }
 }
 
-function assertValidDependentPanels(
-  projectId: string,
-  content: string,
-  idMap: Record<string | number, string>
-) {
-  const projectResultsFile = getProjectResultsFile(projectId);
-  const re =
-    /(DM_getPanel\((?<number>[0-9]+)\))|(DM_getPanel\((?<singlequote>'(?:[^'\\]|\\.)*\')\))|(DM_getPanel\((?<doublequote>"(?:[^"\\]|\\.)*\")\))/g;
-  let match = null;
-  while ((match = re.exec(content)) !== null) {
-    if (match && match.groups) {
-      const { number, singlequote, doublequote } = match.groups;
-      let m = doublequote || singlequote || number;
-      if (["'", '"'].includes(m.charAt(0))) {
-        m = m.slice(1, m.length - 1);
-      }
-
-      if (!fs.existsSync(projectResultsFile + idMap[m])) {
-        throw new InvalidDependentPanelError(m);
-      }
-    }
-  }
-}
-
 async function evalNoUpdate(
   projectId: string,
   body: PanelBody,
@@ -260,7 +193,7 @@ async function evalNoUpdate(
     go?: string;
   }
 ): Promise<[Partial<PanelResult>, string]> {
-  const { project, panel, panelPage } = await getProjectAndPanel(
+  const { project, panel } = await getProjectAndPanel(
     dispatch,
     projectId,
     body.panelId
@@ -273,66 +206,16 @@ async function evalNoUpdate(
     body: { data: new PanelResult(), panelId: panel.id },
   });
 
-  if (subprocessEval) {
-    return evalInSubprocess(
-      subprocessEval,
-      project.projectName,
-      panel,
-      project.connectors
-    );
+  if (!subprocessEval) {
+    throw new Error('Developer error: all eval must use subprocess');
   }
 
-  const idMap: Record<string | number, string> = {};
-  const idShapeMap: Record<string | number, Shape> = {};
-  project.pages[panelPage].panels.forEach((p, i) => {
-    idMap[i] = p.id;
-    idMap[p.name] = p.id;
-    idShapeMap[i] = p.resultMeta.shape;
-    idShapeMap[p.name] = p.resultMeta.shape;
-  });
-
-  assertValidDependentPanels(projectId, panel.content, idMap);
-
-  const evalHandler = EVAL_HANDLERS[panel.type]();
-  const res = await evalHandler(
-    project,
+  return evalInSubprocess(
+    subprocessEval,
+    project.projectName,
     panel,
-    {
-      idMap,
-      idShapeMap,
-    },
-    dispatch
+    project.connectors
   );
-
-  // TODO: is it a problem panels like Program skip this escaping?
-  // This library is important for escaping responses otherwise some
-  // characters can blow up various panel processes.
-  const json = jsesc(res.value, { quotes: 'double', json: true });
-
-  if (!res.skipWrite) {
-    const projectResultsFile = getProjectResultsFile(projectId);
-    fs.writeFileSync(projectResultsFile + panel.id, json);
-  }
-
-  const s = shape(res.value);
-
-  return [
-    {
-      stdout: res.stdout || '',
-      preview: preview(res.value),
-      shape: s,
-      value: res.returnValue ? res.value : null,
-      size: res.size === undefined ? json.length : res.size,
-      arrayCount:
-        res.arrayCount === undefined
-          ? s.kind === 'array'
-            ? (res.value || []).length
-            : null
-          : res.arrayCount,
-      contentType: res.contentType || 'application/json',
-    },
-    '',
-  ];
 }
 
 export const makeEvalHandler = (subprocessEval?: {

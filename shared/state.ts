@@ -306,7 +306,7 @@ export class PanelInfo {
         pit = mergeDeep(new GraphPanelInfo(pit.pageId), pit);
         if (!pit.page) pit.page = 0;
         // TODO: deal with graph number of elements.
-        if (!pit.pageSize) pit.pageSize = 1_000_000;
+        if (!pit.pageSize) pit.pageSize = 10_000;
         break;
       case 'program':
         pit = mergeDeep(new ProgramPanelInfo(pit.pageId), pit);
@@ -355,11 +355,6 @@ export class ProgramPanelInfo extends PanelInfo {
   }
 }
 
-export interface GraphField {
-  field: string;
-  label: string;
-}
-
 export type GraphPanelInfoType = 'bar' | 'pie' | 'line';
 
 export type PanelInfoWidth = 'small' | 'medium' | 'large';
@@ -367,7 +362,7 @@ export type PanelInfoWidth = 'small' | 'medium' | 'large';
 export class GraphPanelInfo extends PanelInfo {
   graph: {
     panelSource: string;
-    ys: Array<GraphField>;
+    ys: Array<TableColumn>;
     x: string;
     uniqueBy: string;
     type: GraphPanelInfoType;
@@ -395,6 +390,9 @@ export class GraphPanelInfo extends PanelInfo {
         unique: false,
       },
     };
+
+    this.page = 0;
+    this.pageSize = 10_000;
   }
 }
 
@@ -522,6 +520,9 @@ export class TablePanelInfo extends PanelInfo {
       width: defaults.width || 'small',
       rowNumbers: defaults.rowNumbers || true,
     };
+
+    this.page = 0;
+    this.pageSize = 15;
   }
 }
 
