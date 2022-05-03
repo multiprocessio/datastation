@@ -1183,6 +1183,8 @@ tbody tr {
   background: var(--background-light);
   width: 300px;
   box-shadow: 0 1px 3px 0 #aaa;
+  max-height: 500px;
+  overflow: auto;
 }
 
 .dropdown-section:not(:last-of-type) {
