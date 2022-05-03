@@ -97,7 +97,7 @@ export function ConnectorList({
           ))}
         </React.Fragment>
       ))}
-      <div className="text-center">
+      <div className="new-panel">
         <NewConnector
           onClick={(type: DatabaseConnectorInfoType) => {
             updateConnector(new DatabaseConnectorInfo({ type }), -1, true);
