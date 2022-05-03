@@ -100,7 +100,16 @@ export function ConnectorList({
       <div className="new-panel">
         <NewConnector
           onClick={(type: DatabaseConnectorInfoType) => {
-            updateConnector(new DatabaseConnectorInfo({ type }), -1, true);
+            updateConnector(
+              new DatabaseConnectorInfo({
+                type,
+                name: `Untitled ${VENDORS[type].name} Data Source ${
+                  state.connectors.length + 1
+                }`,
+              }),
+              -1,
+              true
+            );
           }}
         />
       </div>

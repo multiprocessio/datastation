@@ -437,9 +437,12 @@ input + input[type='file'] {
   }
 }
 
+.input input:disabled,
+.input:disabled,
 .button:not(.button--icon):disabled,
 .button:not(.button--icon):disabled:hover {
-  background: #ccc;
+  background: #ccc !important;
+  box-shadow: none !important;
   color: #999;
   cursor: not-allowed;
   pointer-events: all !important;
