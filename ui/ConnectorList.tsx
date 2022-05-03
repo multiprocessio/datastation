@@ -103,8 +103,8 @@ export function ConnectorList({
             updateConnector(
               new DatabaseConnectorInfo({
                 type,
-                name: `Untitled ${VENDORS[type].name} Data Source ${
-                  state.connectors.length + 1
+                name: `Untitled ${VENDORS[type].name} Data Source #${
+                  state.connectors?.length + 1
                 }`,
               }),
               -1,
