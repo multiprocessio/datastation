@@ -1,11 +1,8 @@
 import * as React from 'react';
-import {
-  DatabaseConnectorInfo,
-  DatabaseConnectorInfoType,
-} from '../shared/state';
+import { DatabaseConnectorInfo } from '../shared/state';
 import { FormGroup } from './components/FormGroup';
-import { Select } from './components/Select';
-import { VENDORS, VENDOR_GROUPS } from './connectors';
+import { Input } from './components/Input';
+import { VENDORS } from './connectors';
 import { ProjectContext } from './state';
 
 export function DatabaseConnector({
@@ -20,28 +17,11 @@ export function DatabaseConnector({
   return (
     <React.Fragment>
       <FormGroup>
-        <div className="form-row">
-          <Select
-            label="Vendor"
-            value={connector.database.type}
-            onChange={(value: string) => {
-              connector.database.type = value as DatabaseConnectorInfoType;
-              updateConnector(connector);
-            }}
-          >
-            {VENDOR_GROUPS.map((group) => (
-              <optgroup
-                key={group.group}
-                label={group.group}
-                children={group.vendors.map((v) => (
-                  <option key={v} value={v}>
-                    {VENDORS[v].name}
-                  </option>
-                ))}
-              />
-            ))}
-          </Select>
-        </div>
+        <Input
+          onChange={null}
+          value={VENDORS[connector.database.type].name}
+          disabled
+        />
       </FormGroup>
       <Details
         connector={connector}

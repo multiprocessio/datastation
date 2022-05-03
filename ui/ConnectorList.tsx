@@ -2,11 +2,57 @@ import * as React from 'react';
 import {
   ConnectorInfo,
   DatabaseConnectorInfo,
+  DatabaseConnectorInfoType,
   ProjectState,
 } from '../shared/state';
 import { Button } from './components/Button';
+import { Dropdown } from './components/Dropdown';
 import { Connector } from './Connector';
-import { VENDORS } from './connectors';
+import { VENDORS, VENDOR_GROUPS } from './connectors';
+
+function NewConnector({
+  onClick,
+}: {
+  onClick: (type: DatabaseConnectorInfoType) => void;
+}) {
+  const groups = VENDOR_GROUPS.map((g) => ({
+    name: g.group,
+    id: g.group,
+    items: g.vendors.map((id) => ({
+      render(close: () => void) {
+        return (
+          <Button
+            onClick={() => {
+              onClick(id);
+              close();
+            }}
+          >
+            {VENDORS[id].name}
+          </Button>
+        );
+      },
+      id,
+    })),
+  }));
+
+  return (
+    <Dropdown
+      className="add-panel"
+      trigger={(open) => (
+        <Button
+          onClick={(e) => {
+            e.preventDefault();
+            open();
+          }}
+        >
+          Add Panel
+        </Button>
+      )}
+      title="Add Panel"
+      groups={groups}
+    />
+  );
+}
 
 export function ConnectorList({
   state,
@@ -52,13 +98,11 @@ export function ConnectorList({
         </React.Fragment>
       ))}
       <div className="text-center">
-        <Button
-          onClick={() => {
-            updateConnector(new DatabaseConnectorInfo(), -1, true);
+        <NewConnector
+          onClick={(type: DatabaseConnectorInfoType) => {
+            updateConnector(new DatabaseConnectorInfo({ type }), -1, true);
           }}
-        >
-          Add Data Source
-        </Button>
+        />
       </div>
     </div>
   );
