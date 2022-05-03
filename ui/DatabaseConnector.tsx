@@ -18,7 +18,10 @@ export function DatabaseConnector({
     <React.Fragment>
       <FormGroup>
         <Input
-          onChange={null}
+          onChange={() => {
+            /* pass */
+          }}
+          label="Vendor"
           value={VENDORS[connector.database.type].name}
           disabled
         />
