@@ -437,9 +437,12 @@ input + input[type='file'] {
   }
 }
 
+.input input:disabled,
+.input:disabled,
 .button:not(.button--icon):disabled,
 .button:not(.button--icon):disabled:hover {
-  background: #ccc;
+  background: #ccc !important;
+  box-shadow: none !important;
   color: #999;
   cursor: not-allowed;
   pointer-events: all !important;
@@ -1183,6 +1186,8 @@ tbody tr {
   background: var(--background-light);
   width: 300px;
   box-shadow: 0 1px 3px 0 #aaa;
+  max-height: 500px;
+  overflow: auto;
 }
 
 .dropdown-section:not(:last-of-type) {
