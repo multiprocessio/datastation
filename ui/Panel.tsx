@@ -656,7 +656,7 @@ export function Panel({
                   'Running...'
                 ) : (
                   <>
-                    <span className="status-bar-element">
+                    <span className="status-bar-element text-muted">
                       <label>{panel.id}</label>
                     </span>
                     <span className="status-bar-element">
@@ -670,10 +670,6 @@ export function Panel({
                     </span>
                     <span className="status-bar-element">
                       <label>Size</label> {humanSize(panel.resultMeta.size)}
-                    </span>
-                    <span className="status-bar-element">
-                      <label>Content-Type (Inferred)</label>{' '}
-                      {panel.resultMeta.contentType}
                     </span>
                   </>
                 )}
