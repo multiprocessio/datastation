@@ -146,7 +146,7 @@ for (const subprocess of RUNNERS) {
           };
 
           if (t.type === 'odbc') {
-            databaseConnectorConfig['extra'] = {
+            databaseConnectorConfig.extra = {
               driver: 'ODBC Driver 18 for SQL Server',
             };
           }
