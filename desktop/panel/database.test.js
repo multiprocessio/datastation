@@ -97,6 +97,12 @@ const vendorOverride = {
     password: '1StrongPwd!!',
     database: 'master',
   },
+  odbc: {
+    address: 'localhost',
+    username: 'sa',
+    password: '1StrongPwd!!',
+    database: 'master',
+  },
   quest: {
     address: '?sslmode=disable',
     database: 'qdb',
