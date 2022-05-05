@@ -7,6 +7,7 @@ prepend "window.DS_CONFIG_VERSION='{arg0}';" build/ui.js
 prepend "window.DS_CONFIG_VERSION='{arg0}';" build/server_runner.js
 prepend "global.DS_CONFIG_VERSION='{arg0}';" build/server.js
 
+cp node_modules/better-sqlite3/build/Release/better_sqlite3.node build
 mv node_modules build
 
 # Copy in install script and default configs
