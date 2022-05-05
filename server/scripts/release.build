@@ -13,9 +13,10 @@ cp -r server/release build/release
 # Need to have a directory with a build directory and a node_modules directory
 rm -rf datastation
 mkdir datastation
-mv build datastation
-mv node_modules datastation
-cp node_modules/better-sqlite3/build/Release/better_sqlite3.node datastation
+mkdir datastation/node_modules
+mv build datastation/
+cp -r node_modules/* datastation/node_modules/
+cp node_modules/better-sqlite3/build/Release/better_sqlite3.node datastation/build/
 
 mkdir -p releases
 zip -9 -r releases/datastation-server-{arch}-{arg0}.zip datastation
