@@ -186,6 +186,8 @@ for (const subprocess of RUNNERS) {
                   { name: 'Kate', age: 9, city: 'San Juan' },
                   { name: 'Bake', age: 10, city: 'Toronto' },
                 ]);
+              } else {
+                throw new Error('Unexpected testing condition');
               }
 
               finished = true;
