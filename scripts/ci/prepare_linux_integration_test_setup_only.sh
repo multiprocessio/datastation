@@ -77,7 +77,7 @@ then
     exit;
 fi
 
-sudo curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
+sudo curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
 
 sudo curl https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/prod.list -o mssql-release.list
 sudo mv mssql-release.list /etc/apt/sources.list.d/mssql-release.list
