@@ -580,7 +580,7 @@ func (ec EvalContext) EvalDatabasePanel(
 				func(query string) ([]map[string]any, error) {
 					rows, err := db.Queryx(query)
 					if err != nil {
-						// odbc driver returns an error for Query
+						// odbc driver returns an error for an empty result
 						if dbInfo.Type == ODBCDatabase && strings.Contains(err.Error(), "did not create a result set") {
 							return nil, nil
 						}
