@@ -187,9 +187,8 @@ for (const subprocess of RUNNERS) {
                   { name: 'Bake', age: 10, city: 'Toronto' },
                 ]);
               } else {
-                throw new Error('Unexpected testing condition');
+                expect(v).toBe('');
               }
-
               finished = true;
             },
             { evalPanels: true, connectors, subprocessName: subprocess }
