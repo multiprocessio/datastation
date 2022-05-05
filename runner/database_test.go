@@ -138,7 +138,7 @@ func Test_getConnectionString(t *testing.T) {
 		{
 			DatabaseConnectorInfoDatabase{Type: "odbc", Password: Encrypt{Encrypted: false, Value: ""}, Database: "master", Address: "localhost:1433", Extra: map[string]string{"driver": "freetds"}},
 			"odbc",
-			"driver=freetds;server=localhost,1433;database=master;pwd=;uid=;trusted_connection=Yes;",
+			"driver=freetds;server=localhost,1433;database=master;pwd=;uid=;TrustServerCertificate=true;",
 			nil,
 			"localhost",
 			"1433",

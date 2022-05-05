@@ -304,7 +304,7 @@ func (ec EvalContext) getConnectionString(dbInfo DatabaseConnectorInfoDatabase) 
 		}
 		params["uid"] = dbInfo.Username
 		if dbInfo.Username == "" {
-			params["trusted_connection"] = "Yes"
+			params["TrustServerCertificate"] = "true" // TODO: configure TLS
 		}
 
 		var conn string
