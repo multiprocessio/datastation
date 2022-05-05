@@ -102,6 +102,9 @@ const vendorOverride = {
     username: 'sa',
     password: '1StrongPwd!!',
     database: 'master',
+    extra: {
+      driver: 'ODBC Driver 18 for SQL Server',
+    },
   },
   quest: {
     address: '?sslmode=disable',
@@ -141,24 +144,17 @@ for (const subprocess of RUNNERS) {
             { age: '20', name: 'Bake', location: { city: 'Toronto' } },
           ]);
 
-          const databaseConnectorConfig = {
-            type: t.type,
-            database: vendorOverride[t.type]?.database || 'test',
-            address: vendorOverride[t.type]?.address || 'localhost',
-            username: vendorOverride[t.type]?.username || 'test',
-            password_encrypt: new Encrypt(
-              vendorOverride[t.type]?.password || 'test'
-            ),
-          };
-
-          if (t.type === 'odbc') {
-            databaseConnectorConfig.extra = {
-              driver: 'ODBC Driver 18 for SQL Server',
-            };
-          }
-
           const connectors = [
-            new DatabaseConnectorInfo(databaseConnectorConfig),
+            new DatabaseConnectorInfo({
+              type: t.type,
+              database: vendorOverride[t.type]?.database || 'test',
+              address: vendorOverride[t.type]?.address || 'localhost',
+              username: vendorOverride[t.type]?.username || 'test',
+              password_encrypt: new Encrypt(
+                vendorOverride[t.type]?.password || 'test'
+              ),
+              extra: vendorOverride[t.type]?.extra || {},
+            }),
           ];
           const dp = new DatabasePanelInfo();
           dp.database.connectorId = connectors[0].id;
