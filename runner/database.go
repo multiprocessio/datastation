@@ -1,6 +1,7 @@
 package runner
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -10,17 +11,37 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/multiprocessio/go-json"
-
 	_ "github.com/ClickHouse/clickhouse-go/v2"
+	_ "github.com/alexbrainman/odbc"
 	_ "github.com/denisenkom/go-mssqldb"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
+	jsonutil "github.com/multiprocessio/go-json"
 	_ "github.com/sijms/go-ora/v2"
 	_ "github.com/snowflakedb/gosnowflake"
 )
+
+type databaseInfo struct {
+	id                 *DatabaseConnectorInfo
+	defaultPort        string
+	driverNameOverride string // like `postgres` for `cockroach`
+	eval               func(project *ProjectState,
+		pageIndex int,
+		panel *PanelInfo,
+		panelResultLoader func(projectId, panelId string) (chan map[string]any, error),
+		cache CacheSettings,
+	) error
+	// make a minimal request to validate connectivityS
+	// return nil on success and fail if context.Context times out
+	testConnection func(context.Context, *DatabaseConnectorInfo) error
+}
+
+func (db *databaseInfo) SetTestConnection(testConn func(context.Context, *DatabaseConnectorInfo) error) *databaseInfo {
+	db.testConnection = testConn
+	return db
+}
 
 func getDatabaseHostPortExtra(raw, defaultPort string) (string, string, string, error) {
 	addressAndArgs := strings.SplitN(raw, "?", 2)
@@ -68,6 +89,7 @@ var defaultPorts = map[DatabaseConnectorInfoType]string{
 	YugabyteDatabase:      "5433",
 	QuestDatabase:         "8812",
 	Neo4jDatabase:         "7687",
+	ODBCDatabase:          "1433",
 }
 
 type urlParts struct {
@@ -253,6 +275,43 @@ func (ec EvalContext) getConnectionString(dbInfo DatabaseConnectorInfoDatabase) 
 		}
 
 		return "neo4j", addr.String(), nil
+	case ODBCDatabase:
+		params := map[string]string{}
+		var err error
+
+		if strings.Contains(u.address, "localhost") {
+			split := strings.Split(u.address, ":")
+			params["server"] = fmt.Sprintf("%s,%s", split[0], split[1])
+		} else {
+			addr, err := url.Parse(u.address)
+			if err != nil {
+				return "", "", err
+			}
+			params["server"] = fmt.Sprintf("%s,%s", addr.Hostname(), addr.Port())
+		}
+		params["database"] = u.database
+
+		var ok bool
+		params["driver"], ok = dbInfo.Extra["driver"]
+		if !ok {
+			return "", "", fmt.Errorf("driver not found")
+		}
+
+		params["pwd"], err = ec.decrypt(&dbInfo.Password)
+		if err != nil {
+			return "", "", err
+		}
+		params["uid"] = dbInfo.Username
+		if dbInfo.Username == "" {
+			params["trusted_connection"] = "Yes"
+		}
+
+		var conn string
+		for k, v := range params {
+			conn += k + "=" + v + ";"
+		}
+
+		return "odbc", conn, nil
 	}
 	return "", "", nil
 }
@@ -519,6 +578,10 @@ func (ec EvalContext) EvalDatabasePanel(
 				func(query string) ([]map[string]any, error) {
 					rows, err := db.Queryx(query)
 					if err != nil {
+						// odbc driver returns an error for Query
+						if dbInfo.Type == ODBCDatabase && strings.Contains(err.Error(), "did not create a result set") {
+							return nil, nil
+						}
 						return nil, err
 					}
 

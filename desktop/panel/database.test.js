@@ -38,6 +38,11 @@ const DATABASES = [
     query: `SELECT 1 AS "1", 2.2 AS "2", 1 AS "true", 'string' AS "string", CAST('2021-01-01' AS DATE) AS "date"`,
   },
   {
+    type: 'odbc',
+    // SQL Server doesn't have true/false literals
+    query: `SELECT 1 AS "1", 2.2 AS "2", 1 AS "true", 'string' AS "string", CAST('2021-01-01' AS DATE) AS "date"`,
+  },
+  {
     type: 'sqlite',
     query: `SELECT 1 AS "1", 2.2 AS "2", true AS "true", 'string' AS "string", DATE('2021-01-01') AS "date"`,
   },
@@ -67,6 +72,10 @@ const DATABASES = [
     type: 'mysql',
     query:
       'SELECT name, CAST(age AS SIGNED) - 10 AS age, `location.city` AS city FROM DM_getPanel(0)',
+  },
+  {
+    type: 'odbc',
+    query: "INSERT INTO DM_getPanel(0) (name) VALUES ('test_name')",
   },
 ];
 
@@ -126,16 +135,24 @@ for (const subprocess of RUNNERS) {
             { age: '20', name: 'Bake', location: { city: 'Toronto' } },
           ]);
 
+          const databaseConnectorConfig = {
+            type: t.type,
+            database: vendorOverride[t.type]?.database || 'test',
+            address: vendorOverride[t.type]?.address || 'localhost',
+            username: vendorOverride[t.type]?.username || 'test',
+            password_encrypt: new Encrypt(
+              vendorOverride[t.type]?.password || 'test'
+            ),
+          };
+
+          if (t.type === 'odbc') {
+            databaseConnectorConfig['extra'] = {
+              driver: 'ODBC Driver 18 for SQL Server',
+            };
+          }
+
           const connectors = [
-            new DatabaseConnectorInfo({
-              type: t.type,
-              database: vendorOverride[t.type]?.database || 'test',
-              address: vendorOverride[t.type]?.address || 'localhost',
-              username: vendorOverride[t.type]?.username || 'test',
-              password_encrypt: new Encrypt(
-                vendorOverride[t.type]?.password || 'test'
-              ),
-            }),
+            new DatabaseConnectorInfo(databaseConnectorConfig),
           ];
           const dp = new DatabasePanelInfo();
           dp.database.connectorId = connectors[0].id;
@@ -162,7 +179,7 @@ for (const subprocess of RUNNERS) {
                 expect(new Date(v[0].date)).toStrictEqual(
                   new Date('2021-01-01')
                 );
-              } else {
+              } else if (!t.query.indexOf('select') === -1) {
                 expect(v).toStrictEqual([
                   { name: 'Kate', age: 9, city: 'San Juan' },
                   { name: 'Bake', age: 10, city: 'Toronto' },
