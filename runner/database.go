@@ -1,6 +1,7 @@
 package runner
 
 import (
+	"bufio"
 	"context"
 	"fmt"
 	"io"
@@ -442,11 +443,12 @@ func (ec EvalContext) EvalDatabasePanel(
 	}
 
 	out := ec.GetPanelResultsFile(project.Id, panel.Id)
-	w, err := openTruncate(out)
+	w, closeFile, err := openTruncateBufio(out)
 	if err != nil {
 		return err
 	}
-	defer w.Close()
+	defer closeFile()
+	defer w.Flush()
 
 	if dbInfo.Address == "" {
 		dbInfo.Address = "localhost:" + defaultPorts[dbInfo.Type]
@@ -513,7 +515,7 @@ func (ec EvalContext) EvalDatabasePanel(
 
 		defer os.Remove(tmp.Name())
 
-		err = ec.remoteFileReader(*server, dbInfo.Database, func(r io.Reader) error {
+		err = ec.remoteFileReader(*server, dbInfo.Database, func(r *bufio.Reader) error {
 			_, err := io.Copy(tmp, r)
 			return err
 		})

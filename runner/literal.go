@@ -5,11 +5,15 @@ import "bytes"
 func (ec EvalContext) evalLiteralPanel(project *ProjectState, pageIndex int, panel *PanelInfo) error {
 	cti := panel.Literal.ContentTypeInfo
 	out := ec.GetPanelResultsFile(project.Id, panel.Id)
-	w, err := openTruncate(out)
+	w, closeFile, err := openTruncateBufio(out)
 	if err != nil {
 		return err
 	}
-	defer w.Close()
+	defer closeFile()
+	defer w.Flush()
+
 	buf := bytes.NewReader([]byte(panel.Content))
-	return TransformReader(buf, "", cti, w)
+	br := newBufferedReader(buf)
+
+	return TransformReader(br, "", cti, w)
 }

@@ -372,6 +372,10 @@ input + input[type='file'] {
   margin-bottom: calc(2 * var(--margin-base));
 }
 
+.mr-1 {
+  margin-right: var(--margin-base);
+}
+
 .flex {
   max-height: 100%;
   display: flex;
@@ -426,11 +430,19 @@ input + input[type='file'] {
     height: 18px;
     width: 18px;
   }
+
+  &.button--outline {
+    padding: 2px;
+    border: 1px solid var(--border-light);
+  }
 }
 
+.input input:disabled,
+.input:disabled,
 .button:not(.button--icon):disabled,
 .button:not(.button--icon):disabled:hover {
-  background: #ccc;
+  background: #ccc !important;
+  box-shadow: none !important;
   color: #999;
   cursor: not-allowed;
   pointer-events: all !important;
@@ -446,23 +458,6 @@ input + input[type='file'] {
   cursor: not-allowed;
   pointer-events: all !important;
   color: #ccc;
-}
-
-.resize {
-  resize: both;
-  overflow: auto;
-}
-
-.resize--horizontal {
-  resize: horizontal;
-}
-
-.resize--left {
-  direction: rtl;
-}
-
-.resize--left * {
-  direction: ltr;
 }
 
 .flex-right {
@@ -754,6 +749,9 @@ input + input[type='file'] {
   max-width: 100%;
   /* Same for height */
   max-height: 100%;
+
+  /* Defaults to overflowing into .status-bar */
+  overflow: auto;
 }
 
 .panel-order {
@@ -790,9 +788,12 @@ input + input[type='file'] {
   align-items: center;
 
   svg {
-    color: red;
     height: 15px;
     width: 15px;
+  }
+
+  .warning svg {
+    color: red;
   }
 }
 
@@ -1050,6 +1051,10 @@ canvas {
   width: 100% !important;
 }
 
+.table-controls {
+  padding: var(--margin-base);
+}
+
 .modal {
   position: absolute;
   top: 0;
@@ -1181,6 +1186,8 @@ tbody tr {
   background: var(--background-light);
   width: 300px;
   box-shadow: 0 1px 3px 0 #aaa;
+  max-height: 500px;
+  overflow: auto;
 }
 
 .dropdown-section:not(:last-of-type) {
@@ -1331,6 +1338,10 @@ body.dark {
     background: transparent;
     color: #999;
     padding: 0;
+
+    &.button--outline {
+      border-color: var(--border-dark);
+    }
   }
 
   .button.button--icon.button--primary {

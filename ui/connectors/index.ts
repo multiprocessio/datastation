@@ -6,6 +6,7 @@ import { CassandraDetails } from './CassandraDetails';
 import { ElasticsearchDetails } from './ElasticsearchDetails';
 import { FluxDetails } from './FluxDetails';
 import { GenericDetails, GenericNoDatabaseDetails } from './GenericDetails';
+import { GoogleSheetsDetails } from './GoogleSheetsDetails';
 import { Neo4jDetails } from './Neo4jDetails';
 import { ODBCDetails } from './ODBCDetails';
 import { SnowflakeDetails } from './SnowflakeDetails';
@@ -139,9 +140,9 @@ export const VENDORS: {
     details: AirtableDetails,
   },
   'google-sheets': {
-    name: 'Google Sheets',
+    name: 'Google Sheets (Beta)',
     id: 'google-sheets',
-    details: BigQueryDetails,
+    details: GoogleSheetsDetails,
   },
   neo4j: {
     name: 'Neo4j',
@@ -177,7 +178,7 @@ export const VENDOR_GROUPS: Array<{
   },
   {
     group: 'Spreadsheets',
-    vendors: ['airtable'],
+    vendors: ['airtable', 'google-sheets'],
   },
   {
     group: 'Document',

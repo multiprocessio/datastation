@@ -74,9 +74,15 @@ export function flattenObjectFields(o: ObjectShape): Array<[string, Shape]> {
 }
 
 export function orderedObjectFields(
-  o: ObjectShape,
+  shape: Shape,
   preferredDefaultType: 'number' | 'string' = 'string'
-) {
+): Array<FieldGroup> {
+  if (!wellFormedGraphInput(shape)) {
+    return [];
+  }
+
+  const o = (shape as ArrayShape).children as ObjectShape;
+
   const fields = flattenObjectFields(o);
   fields.sort(([aName, a], [bName, b]) => {
     if (a.kind === 'scalar' && b.kind === 'scalar') {
@@ -203,11 +209,9 @@ export function FieldPicker({
   tooltip?: React.ReactNode;
 }) {
   let fieldPicker = null;
-  if (wellFormedGraphInput(shape)) {
-    const fieldGroups = orderedObjectFields(
-      (shape as ArrayShape).children as ObjectShape,
-      preferredDefaultType
-    );
+  const fieldGroups = orderedObjectFields(shape, preferredDefaultType);
+
+  if (fieldGroups?.flat().length) {
     fieldPicker = (
       <Select
         label={label}

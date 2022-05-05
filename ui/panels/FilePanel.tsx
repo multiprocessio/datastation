@@ -97,7 +97,8 @@ export const filePanel: PanelUIDetails<FilePanelInfo> = {
   details: FilePanelDetails,
   body: null,
   previewable: true,
-  factory: (pageId: string) => new FilePanelInfo(pageId),
+  factory: (pageId: string, panelName: string) =>
+    new FilePanelInfo(pageId, { panelName }),
   hasStdout: false,
   info: null,
 };

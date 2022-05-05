@@ -2,6 +2,8 @@ import {
   IconAlertTriangle,
   IconArrowsDiagonal,
   IconArrowsDiagonalMinimize2,
+  IconArrowsMaximize,
+  IconArrowsMinimize,
   IconChevronDown,
   IconChevronUp,
   IconDownload,
@@ -30,6 +32,7 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { Highlight } from './components/Highlight';
 import { Input } from './components/Input';
 import { PANEL_UI_DETAILS } from './panels';
+import { ProjectContext } from './state';
 import { UrlStateContext } from './urlState';
 
 export const VISUAL_PANELS = ['graph', 'table'];
@@ -102,14 +105,14 @@ function PreviewResults({
   panelOut,
   results,
 }: {
-  panelOut: 'preview' | 'stdout' | 'shape';
+  panelOut: string;
   results: PanelResult;
 }) {
   if (!results.lastRun) {
     return <React.Fragment>Panel not yet run.</React.Fragment>;
   }
 
-  if (!results[panelOut]) {
+  if (!results[panelOut as keyof PanelResult]) {
     return <React.Fragment>Nothing to show.</React.Fragment>;
   }
 
@@ -119,7 +122,11 @@ function PreviewResults({
     );
   }
 
-  return <Highlight language="json">{results[panelOut]}</Highlight>;
+  return (
+    <Highlight language="json">
+      {results[panelOut as keyof PanelResult]}
+    </Highlight>
+  );
 }
 
 export function getNameOrIdFromNameOrIdOrIndex(
@@ -236,9 +243,47 @@ export function Panel({
     PANEL_UI_DETAILS[panel.type] || PANEL_UI_DETAILS.literal;
 
   const {
-    state: { fullScreen, expanded },
+    state: {
+      fullScreen,
+      expanded,
+      panelOut: allPanelOut,
+      panelOutExpanded: allPanelOutExpanded,
+    },
     setState: setUrlState,
   } = React.useContext(UrlStateContext);
+  const { connectors } = React.useContext(ProjectContext).state;
+
+  const [panelOutExpanded, setPanelOutExpandedInternal] = React.useState(
+    allPanelOutExpanded.includes(panel.id)
+  );
+  const setPanelOutExpanded = React.useCallback(
+    (b: boolean) => {
+      setPanelOutExpandedInternal(b);
+      if (!b) {
+        setUrlState({
+          panelOutExpanded: allPanelOutExpanded.filter((i) => i !== panel.id),
+        });
+      } else {
+        setUrlState({
+          panelOutExpanded: Array.from(
+            new Set([...allPanelOutExpanded, panel.id])
+          ),
+        });
+      }
+    },
+    [setUrlState, allPanelOutExpanded, setPanelOutExpandedInternal, panel.id]
+  );
+
+  const [panelOut, setPanelOutInternal] = React.useState(
+    allPanelOut[panel.id] || 'preview'
+  );
+  const setPanelOut = React.useCallback(
+    (v: string) => {
+      setPanelOutInternal(v);
+      setUrlState({ panelOut: { ...allPanelOut, [panel.id]: v } });
+    },
+    [setUrlState, allPanelOut, setPanelOutInternal, panel.id]
+  );
 
   const [details, setDetailsInternal] = React.useState(
     expanded.includes(panel.id)
@@ -261,9 +306,6 @@ export function Panel({
     }
   }, [panel.defaultModified, details, setDetails, panel.type]);
 
-  const [panelOut, setPanelOut] = React.useState<
-    'preview' | 'stdout' | 'shape'
-  >('preview');
   const results = panel.resultMeta || new PanelResult();
 
   const [loading, setLoading] = React.useState(results.loading);
@@ -341,17 +383,17 @@ export function Panel({
     }
   }
 
+  const panelNeverHasBody =
+    panelUIDetails.body === null ||
+    (panelUIDetails.hideBody && panelUIDetails.hideBody(panel, connectors));
+
   return (
     <div
       id={`panel-${panel.id}`}
       className={`panel ${fullScreen === panel.id ? 'panel--fullscreen' : ''} ${
         hidden ? 'panel--hidden' : ''
       } ${
-        (panelUIDetails.body === null ||
-          (panelUIDetails.hideBody && panelUIDetails.hideBody(panel))) &&
-        !error
-          ? 'panel--empty'
-          : ''
+        (panelNeverHasBody || panelOutExpanded) && !error ? 'panel--empty' : ''
       } ${loading ? 'panel--loading' : ''}`}
       tabIndex={1001}
       ref={panelRef}
@@ -414,13 +456,17 @@ export function Panel({
               invalid={nameIsDuplicate ? 'Names should be unique.' : ''}
             />
 
-            <span title={details ? 'Hide Details' : 'Show Details'}>
+            <span
+              className="ml-2"
+              title={details ? 'Less Options' : 'More Options'}
+            >
               <Button
                 data-testid="show-hide-panel"
+                type="outline"
                 icon
                 onClick={() => setDetails(!details)}
               >
-                {details ? 'Hide Details' : 'Edit Details'}
+                {details ? 'Less Options' : 'More Options'}
               </Button>
             </span>
 
@@ -511,7 +557,7 @@ export function Panel({
                   message="delete this panel"
                   action="Delete"
                   render={(confirm: () => void) => (
-                    <Button icon onClick={confirm} type="outline">
+                    <Button icon onClick={confirm}>
                       <IconTrash />
                     </Button>
                   )}
@@ -535,17 +581,14 @@ export function Panel({
             <ErrorBoundary className="panel-body">
               <div className="flex">
                 <div className="panel-body">
-                  {panelUIDetails.body &&
-                    (panelUIDetails.hideBody
-                      ? !panelUIDetails.hideBody(panel)
-                      : true) && (
-                      <panelUIDetails.body
-                        panel={panel}
-                        keyboardShortcuts={keyboardShortcuts}
-                        panels={panels}
-                        updatePanel={updatePanel}
-                      />
-                    )}
+                  {!panelNeverHasBody && !panelOutExpanded && (
+                    <panelUIDetails.body
+                      panel={panel}
+                      keyboardShortcuts={keyboardShortcuts}
+                      panels={panels}
+                      updatePanel={updatePanel}
+                    />
+                  )}
                   {
                     /* Visual panels get run automatically. Don't show the Cancelled alert since this will happen all the time. */ VISUAL_PANELS.includes(
                       panel.type
@@ -556,8 +599,8 @@ export function Panel({
                   {info}
                 </div>
                 {panelUIDetails.previewable && (
-                  <div className="panel-out resize resize--left resize--horizontal">
-                    <div className="panel-out-header">
+                  <div className="panel-out">
+                    <div className="panel-out-header vertical-align-center">
                       <Button
                         className={panelOut === 'preview' ? 'selected' : ''}
                         onClick={() => setPanelOut('preview')}
@@ -572,13 +615,29 @@ export function Panel({
                       </Button>
                       {panelUIDetails.hasStdout && (
                         <Button
-                          className={panelOut === 'stdout' ? 'selected' : ''}
+                          className={
+                            (panelOut === 'stdout' ? 'selected' : '') +
+                            ' warning'
+                          }
                           onClick={() => setPanelOut('stdout')}
                         >
                           Stdout/Stderr
                           <span className="ml-1">
                             {results.stdout ? <IconAlertTriangle /> : null}
                           </span>
+                        </Button>
+                      )}
+                      {!panelNeverHasBody && (
+                        <Button
+                          icon
+                          className="flex-right"
+                          onClick={() => setPanelOutExpanded(!panelOutExpanded)}
+                        >
+                          {panelOutExpanded ? (
+                            <IconArrowsMinimize />
+                          ) : (
+                            <IconArrowsMaximize />
+                          )}
                         </Button>
                       )}
                     </div>
@@ -597,7 +656,7 @@ export function Panel({
                   'Running...'
                 ) : (
                   <>
-                    <span className="status-bar-element">
+                    <span className="status-bar-element text-muted">
                       <label>{panel.id}</label>
                     </span>
                     <span className="status-bar-element">
@@ -611,10 +670,6 @@ export function Panel({
                     </span>
                     <span className="status-bar-element">
                       <label>Size</label> {humanSize(panel.resultMeta.size)}
-                    </span>
-                    <span className="status-bar-element">
-                      <label>Content-Type (Inferred)</label>{' '}
-                      {panel.resultMeta.contentType}
                     </span>
                   </>
                 )}
