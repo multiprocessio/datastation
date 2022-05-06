@@ -2,7 +2,7 @@
 
 set -ex
 
-ROOT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)/.."
+ROOT_DIR="$(readlink -f $(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)/..)"
 
 sudo mkdir -p /etc/datastation /usr/share
 sudo mv $ROOT_DIR /usr/share/datastation
