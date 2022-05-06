@@ -30,14 +30,14 @@ async function run() {
 
   const applicationPath = {
     darwin:
-      'DataStation Community Edition.app/Contents/MacOS/DataStation Community Edition',
-    win32: 'DataStation Community Edition.exe',
-    linux: 'DataStation Community Edition',
+      'DataStation Desktop CE.app/Contents/MacOS/DataStation Desktop CE',
+    win32: 'DataStation Desktop CE.exe',
+    linux: 'DataStation Desktop CE',
   }[process.platform];
 
   const directory = path.join(
     'releases',
-    `DataStation Community Edition-${process.platform}-${process.arch}`
+    `DataStation Desktop CE-${process.platform}-${process.arch}`
   );
 
   const driver = new webdriver.Builder()
@@ -55,7 +55,7 @@ async function run() {
   try {
     await driver.wait(async () => {
       const title = await driver.getTitle();
-      assert.equal(title, 'DataStation Community Edition');
+      assert.equal(title, 'DataStation Desktop CE');
       reached = true;
       return true;
     }, 10_000);
