@@ -7,7 +7,7 @@ cid=$(docker run -d fedora-systemd:latest)
 
 debug() {
     rv=$?
-    if !$rv; then
+    if ! [[ "$rv" == "0" ]]; then
 	docker ps -a
 	docker logs $cid
     fi
