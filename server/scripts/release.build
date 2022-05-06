@@ -12,12 +12,17 @@ rm -rf datastation
 mkdir datastation
 mkdir datastation/node_modules
 mv build datastation/
+
+# Bring in node_modules
 cp -r node_modules/* datastation/node_modules/
+# Remove all unnecessary devdependencies
+cat package.json | jq -r '.devDependencies | keys[]' | grep -v 'electron$' | xargs -I MOD rm -rf datastation/node_modules/MOD
+
 cp node_modules/better-sqlite3/build/Release/better_sqlite3.node datastation/build/
 # Copy in install script and default configs
 cp -r server/release  datastation/release
 
 mkdir -p releases
-zip -9 -r releases/datastation-server-{arch}-{arg0}.zip datastation
+tar -zcvf releases/datastation-server-{arch}-{arg0}.tar.gz datastation
 
-rm -rf datastation
+# rm -rf datastation

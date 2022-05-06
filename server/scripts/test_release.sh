@@ -22,7 +22,7 @@ function c_run() {
     docker exec $cid bash -c "$1"
 }
 
-c_run "unzip /$1"
+c_run "tar xvzf /$1"
 c_run "/datastation/release/install.sh"
 c_run "truncate --size 0 /etc/datastation/config.yaml"
 c_run "systemctl restart datastation"
