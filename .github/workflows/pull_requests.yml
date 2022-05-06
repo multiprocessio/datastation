@@ -48,7 +48,8 @@ jobs:
     - run: cd runner && go test -race -coverprofile ../coverage/gounit.cov
     - run: ./runner/scripts/test_coverage.sh
     # Test server builds
-    - run: yarn build-server
+    - run: yarn release-server 0.0.0-test
+    - run: ./server/scripts/test_release_zip.sh datastation-server-x64-0.0.0-test.zip
 
   e2e-linux:
     runs-on: ubuntu-latest

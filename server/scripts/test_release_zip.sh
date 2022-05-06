@@ -17,4 +17,29 @@ c_run "/datastation/release/install.sh"
 c_run "truncate --size 0 /etc/datastation/config.yaml"
 c_run "systemctl restart datastation"
 
-curl $addr
+# Wait for server to start
+sleep 10
+
+result="curl $addr"
+
+expected=<<EOF
+<title>DataStation Community Edition</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+
+<link rel="stylesheet" type="text/css" href="/style.css" />
+
+<div id="root">
+  <div class="loading">Loading...</div>
+</div>
+
+<script src="/ui.js"></script>
+EOF
+
+if diff -wB "$expected" "$result"; then
+    echo "Unexpected response body:"
+    echo "$result"
+    exit 1
+fi
