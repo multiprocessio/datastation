@@ -1,0 +1,6 @@
+FROM fedora
+
+RUN dnf install -y systemd zip
+RUN dnf module reset nodejs && dnf module install -y nodejs:16
+
+CMD ["/sbin/init"]
