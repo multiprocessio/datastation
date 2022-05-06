@@ -20,8 +20,7 @@ sleep 10
 
 result="$(c_run 'curl localhost:8080')"
 
-expected=<<EOF
-<title>DataStation Server CE</title>
+expected='<title>DataStation Server CE</title>
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -33,10 +32,9 @@ expected=<<EOF
   <div class="loading">Loading...</div>
 </div>
 
-<script src="/ui.js"></script>
-EOF
+<script src="/ui.js"></script>'
 
-if diff -wB <(echo "$expected") <(echo "$result"); then
+if ! diff -u -wB <(echo "$expected") <(echo "$result"); then
     echo "Unexpected response body:"
     echo "$result"
     exit 1
