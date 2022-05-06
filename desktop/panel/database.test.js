@@ -177,11 +177,13 @@ for (const subprocess of RUNNERS) {
                 expect(new Date(v[0].date)).toStrictEqual(
                   new Date('2021-01-01')
                 );
-              } else {
+              } else if (t.query.startsWith('SELECT')) {
                 expect(v).toStrictEqual([
                   { name: 'Kate', age: 9, city: 'San Juan' },
                   { name: 'Bake', age: 10, city: 'Toronto' },
                 ]);
+              } else {
+                expect(v).toBeFalsy();
               }
               finished = true;
             },
