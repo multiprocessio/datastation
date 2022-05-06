@@ -25,4 +25,4 @@ cp -r server/release  datastation/release
 mkdir -p releases
 tar -zcvf releases/datastation-server-{arch}-{arg0}.tar.gz datastation
 
-# rm -rf datastation
+rm -rf datastation
