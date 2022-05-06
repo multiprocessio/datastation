@@ -1,4 +1,7 @@
-setenv UI_CONFIG_OVERRIDES "window.DS_CONFIG_MODE = 'server';"
+setenv UI_CONFIG_OVERRIDES "window.DS_CONFIG_MODE = 'server'; window.DS_CONFIG_UI_TITLE = 'DataStation Server CE';"
+prepend "global.DS_UI_TITLE='DataStation Server CE';" build/server.js
+
+setenv UI_TITLE "DataStation Server CE"
 setenv UI_ROOT "/"
 yarn build-ui
 

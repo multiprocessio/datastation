@@ -23,7 +23,7 @@ sleep 10
 result="curl $addr"
 
 expected=<<EOF
-<title>DataStation Community Edition</title>
+<title>DataStation Server CE</title>
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
