@@ -47,10 +47,33 @@ jobs:
         SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
     - run: cd runner && go test -race -coverprofile ../coverage/gounit.cov
     - run: ./runner/scripts/test_coverage.sh
-    # Test server builds
+
+
+  test-server:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@master
+      with:
+        ref: ${{ github.ref }}
+
+    # FROM: https://github.com/actions/cache/blob/main/examples.md#node---yarn
+    - name: Get yarn cache directory path
+      id: yarn-cache-dir-path
+      run: echo "::set-output name=dir::$(yarn cache dir)"
+
+    - uses: actions/cache@v2
+      id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+      with:
+        path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+        key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-yarn-
+
+    - run: ./scripts/ci/prepare_linux.sh
     - run: yarn release-server 0.0.0-test
     - run: ./server/scripts/test_release_zip.sh datastation-server-x64-0.0.0-test.zip
-
+      
   e2e-linux:
     runs-on: ubuntu-latest
 
