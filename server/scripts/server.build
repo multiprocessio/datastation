@@ -1,5 +1,4 @@
 setenv UI_CONFIG_OVERRIDES "window.DS_CONFIG_MODE = 'server'; window.DS_CONFIG_UI_TITLE = 'DataStation Server CE';"
-prepend "global.DS_UI_TITLE='DataStation Server CE';" build/server.js
 
 setenv UI_TITLE "DataStation Server CE"
 setenv UI_ROOT "/"
@@ -9,6 +8,8 @@ cd runner && go build -trimpath -buildmode=pie -mod=readonly -modcacherw -ldflag
 
 yarn esbuild server/runner.ts --sourcemap --platform=node --bundle --target=node10.4 --external:sqlite3 --external:react-native-fs --external:react-native-fetch-blob --external:oracledb "--external:@elastic/elasticsearch" "--external:wasm-brotli" --external:prometheus-query --external:snowflake-sdk --external:ssh2 --external:ssh2-promise --external:ssh2-sftp-client --external:cpu-features --external:electron --external:pg-native --outfile=build/server_runner.js
 yarn esbuild server/index.ts --sourcemap --platform=node --bundle --external:sqlite3 --external:react-native-fs --external:react-native-fetch-blob --external:oracledb "--external:@elastic/elasticsearch" "--external:wasm-brotli" --external:prometheus-query --external:snowflake-sdk --external:ssh2 --external:ssh2-promise --external:ssh2-sftp-client --external:cpu-features --external:electron --external:pg-native --outfile=build/server.js
+
+prepend "global.DS_UI_TITLE='DataStation Server CE';" build/server.js
 
 rm -rf build/migrations
 cp -r desktop/migrations build/

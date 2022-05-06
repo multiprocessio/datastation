@@ -2,10 +2,8 @@
 
 set -e
 
-addr="127.0.0.1:8835"
-
 docker build . -f ./server/scripts/test_systemd_dockerfile -t fedora-systemd
-cid=$(docker run -d -p $addr:8080 fedora-systemd:latest)
+cid=$(docker run -d fedora-systemd:latest)
 docker cp ./releases/$1 $cid:/
 
 function c_run() {
@@ -20,7 +18,7 @@ c_run "systemctl restart datastation"
 # Wait for server to start
 sleep 10
 
-result="curl $addr"
+result="$(c_run 'curl localhost:8080')"
 
 expected=<<EOF
 <title>DataStation Server CE</title>
@@ -38,7 +36,7 @@ expected=<<EOF
 <script src="/ui.js"></script>
 EOF
 
-if diff -wB "$expected" "$result"; then
+if diff -wB <(echo "$expected") <(echo "$result"); then
     echo "Unexpected response body:"
     echo "$result"
     exit 1
