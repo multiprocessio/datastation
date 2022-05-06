@@ -4,21 +4,25 @@ set -ex
 
 docker build . -f ./server/scripts/test_systemd_dockerfile -t fedora-systemd
 cid=$(docker run -d fedora-systemd:latest)
-docker ps -a
-docker logs $cid
+
+debug() {
+    rv=$?
+    if !$rv; then
+	docker ps -a
+	docker logs $cid
+    fi
+    exit $rv
+}
+trap "debug" exit
+
+# Copy in zip file
 docker cp ./releases/$1 $cid:/
-docker ps -a
-docker logs $cid
 
 function c_run() {
     docker exec $cid bash -c "$1"
 }
 
-docker ps -a
-docker logs $cid
 c_run "unzip /$1"
-docker ps -a
-docker logs $cid
 c_run "/datastation/release/install.sh"
 c_run "truncate --size 0 /etc/datastation/config.yaml"
 c_run "systemctl restart datastation"
