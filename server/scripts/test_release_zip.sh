@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 
-set -e
+set -ex
 
 docker build . -f ./server/scripts/test_systemd_dockerfile -t fedora-systemd
 cid=$(docker run -d fedora-systemd:latest)
+docker logs $cid
 docker cp ./releases/$1 $cid:/
 
 function c_run() {
