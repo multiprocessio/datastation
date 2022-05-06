@@ -303,7 +303,9 @@ func (ec EvalContext) getConnectionString(dbInfo DatabaseConnectorInfoDatabase) 
 			return "", "", err
 		}
 		params["uid"] = dbInfo.Username
-		params["trusted_connection"] = "yes" // TODO: configure TLS
+		if dbInfo.Username == "" {
+			params["trusted_connection"] = "yes" // TODO: configure TLS
+		}
 
 		var conn string
 		for k, v := range params {
@@ -578,10 +580,11 @@ func (ec EvalContext) EvalDatabasePanel(
 				func(query string) ([]map[string]any, error) {
 					rows, err := db.Queryx(query)
 					if err != nil {
-						// odbc driver returns an error for an empty result
-						if dbInfo.Type == ODBCDatabase && strings.Contains(err.Error(), "did not create a result set") {
+						if vendor == ODBCDatabase && err.Error() == "Stmt did not create a result set" {
 							return nil, nil
 						}
+						// odbc driver returns an error for an empty result
+						// see https://github.com/alexbrainman/odbc/blob/9c9a2e61c5e2c1a257a51ea49169fc9008c51f0e/odbcstmt.go#L134
 						return nil, err
 					}
 
