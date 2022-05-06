@@ -303,7 +303,7 @@ func (ec EvalContext) getConnectionString(dbInfo DatabaseConnectorInfoDatabase) 
 			return "", "", err
 		}
 		params["uid"] = dbInfo.Username
-		params["trust_connection"] = "yes" // TODO: configure TLS
+		params["trusted_connection"] = "yes" // TODO: configure TLS
 
 		var conn string
 		for k, v := range params {
