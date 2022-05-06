@@ -73,10 +73,6 @@ const DATABASES = [
     query:
       'SELECT name, CAST(age AS SIGNED) - 10 AS age, `location.city` AS city FROM DM_getPanel(0)',
   },
-  {
-    type: 'odbc',
-    query: "INSERT INTO DM_getPanel(0) (name) VALUES ('test_name')",
-  },
 ];
 
 ensureSigningKey();
@@ -181,13 +177,11 @@ for (const subprocess of RUNNERS) {
                 expect(new Date(v[0].date)).toStrictEqual(
                   new Date('2021-01-01')
                 );
-              } else if (t.query.startsWith('SELECT')) {
+              } else {
                 expect(v).toStrictEqual([
                   { name: 'Kate', age: 9, city: 'San Juan' },
                   { name: 'Bake', age: 10, city: 'Toronto' },
                 ]);
-              } else {
-                expect(v).toBe('');
               }
               finished = true;
             },
