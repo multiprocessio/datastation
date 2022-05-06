@@ -104,6 +104,7 @@ const vendorOverride = {
     database: 'master',
     extra: {
       driver: 'ODBC Driver 18 for SQL Server',
+      trust_server_certificate: 'Yes',
     },
   },
   quest: {

@@ -28,13 +28,24 @@ export function ODBCDetails(props: {
         />
         <div className="form-row">
           <Input
-            label="ODBC Driver"
-            value={connector.database.extra.driver}
+            label="Driver"
+            value={connector.database.extra.driver || ''}
             onChange={(value: string) => {
               connector.database.extra.driver = value;
               updateConnector(connector);
             }}
             placeholder="Driver specified in DSN"
+          />
+        </div>
+        <div className="form-row">
+          <Input
+            label="Trust Server Certificate"
+            value={connector.database.extra.trust_server_certificate || ''}
+            onChange={(value: string) => {
+              connector.database.extra.trust_server_certificate = value;
+              updateConnector(connector);
+            }}
+            placeholder="Allow self-signed (Yes)"
           />
         </div>
       </FormGroup>
