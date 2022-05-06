@@ -73,6 +73,10 @@ const DATABASES = [
     query:
       'SELECT name, CAST(age AS SIGNED) - 10 AS age, `location.city` AS city FROM DM_getPanel(0)',
   },
+  {
+    type: 'odbc',
+    query: `INSERT INTO DM_getPanel(0) (name) VALUES ('test')`,
+  },
 ];
 
 ensureSigningKey();

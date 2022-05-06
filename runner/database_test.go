@@ -136,9 +136,9 @@ func Test_getConnectionString(t *testing.T) {
 			"",
 		},
 		{
-			DatabaseConnectorInfoDatabase{Type: "odbc", Password: Encrypt{Encrypted: false, Value: ""}, Database: "master", Address: "localhost:1433", Extra: map[string]string{"driver": "freetds"}},
+			DatabaseConnectorInfoDatabase{Type: "odbc", Password: Encrypt{Encrypted: false, Value: ""}, Username: "SA", Database: "master", Address: "localhost:1433", Extra: map[string]string{"driver": "freetds"}},
 			"odbc",
-			"driver=freetds;server=localhost,1433;database=master;pwd=;uid=;TrustServerCertificate=true;",
+			"driver=freetds;server=localhost,1433;database=master;pwd=;uid=SA;trust_connection=yes;",
 			nil,
 			"localhost",
 			"1433",
@@ -153,7 +153,7 @@ func Test_getConnectionString(t *testing.T) {
 		vendor, connStr, err := ec.getConnectionString(test.conn)
 		assert.Equal(t, test.expVendor, vendor)
 		if test.expVendor == ODBCDatabase {
-			assert.Equal(t, odbcAssert(test.expConnStr, connStr), nil)
+			assert.Equal(t, nil, odbcAssert(test.expConnStr, connStr))
 		} else {
 			assert.Equal(t, test.expConnStr, connStr)
 		}
@@ -182,7 +182,6 @@ func odbcAssert(exp, act string) error {
 
 	for _, s := range actSlice {
 		if _, ok := lookUp[s]; !ok {
-			fmt.Println(s)
 			return fmt.Errorf("not equal: %s, %s", exp, act)
 		}
 	}
