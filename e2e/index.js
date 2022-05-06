@@ -29,8 +29,7 @@ async function run() {
   });
 
   const applicationPath = {
-    darwin:
-      'DataStation Desktop CE.app/Contents/MacOS/DataStation Desktop CE',
+    darwin: 'DataStation Desktop CE.app/Contents/MacOS/DataStation Desktop CE',
     win32: 'DataStation Desktop CE.exe',
     linux: 'DataStation Desktop CE',
   }[process.platform];
