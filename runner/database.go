@@ -2,7 +2,6 @@ package runner
 
 import (
 	"bufio"
-	"context"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -23,26 +22,6 @@ import (
 	_ "github.com/sijms/go-ora/v2"
 	_ "github.com/snowflakedb/gosnowflake"
 )
-
-type databaseInfo struct {
-	id                 *DatabaseConnectorInfo
-	defaultPort        string
-	driverNameOverride string // like `postgres` for `cockroach`
-	eval               func(project *ProjectState,
-		pageIndex int,
-		panel *PanelInfo,
-		panelResultLoader func(projectId, panelId string) (chan map[string]any, error),
-		cache CacheSettings,
-	) error
-	// make a minimal request to validate connectivityS
-	// return nil on success and fail if context.Context times out
-	testConnection func(context.Context, *DatabaseConnectorInfo) error
-}
-
-func (db *databaseInfo) SetTestConnection(testConn func(context.Context, *DatabaseConnectorInfo) error) *databaseInfo {
-	db.testConnection = testConn
-	return db
-}
 
 func getDatabaseHostPortExtra(raw, defaultPort string) (string, string, string, error) {
 	addressAndArgs := strings.SplitN(raw, "?", 2)
