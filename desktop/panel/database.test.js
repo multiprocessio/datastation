@@ -75,7 +75,7 @@ const DATABASES = [
   },
   {
     type: 'odbc',
-    query: `INSERT INTO DM_getPanel(0) (name) VALUES ('test')`,
+    query: `INSERT INTO test (id, name) VALUES (1, name)`,
   },
 ];
 

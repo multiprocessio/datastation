@@ -87,7 +87,7 @@ sudo ACCEPT_EULA=Y apt-get install -y msodbcsql18
 ## LAUNCH CONTAINERS
 
 # Start up sqlserver
-docker run -d -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=1StrongPwd!!" -p 1433:1433 mcr.microsoft.com/mssql/server:2019-latest
+docker run -d -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=1StrongPwd!!" --name sqlserver --hostname sqlserver -p 1433:1433 mcr.microsoft.com/mssql/server:2019-latest
 
 # Start up oracle database
 docker run -d -e ORACLE_RANDOM_PASSWORD="y" -e "APP_USER=test" -e "APP_USER_PASSWORD=test" -p 1521:1521 gvenzl/oracle-xe:latest
@@ -134,6 +134,9 @@ neo4j="$(docker run -d -p 7687:7687 -e "NEO4J_AUTH=neo4j/password" neo4j)"
 ## LOAD DATA ##
 
 sleep 30 # Time for everything to load (influx in particular takes a while)
+
+# Configure sqlserver (create table)
+docker exec -it sqlserver /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "1StrongPwd!!" -Q "CREATE TABLE master.[dbo].test (id int PRIMARY KEY, name text);"
 
 # Configure cratedb
 docker exec "$cratecontainer" crash -c "CREATE USER test WITH (password = 'test');"

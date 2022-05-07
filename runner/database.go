@@ -504,7 +504,7 @@ func (ec EvalContext) EvalDatabasePanel(
 		panel.Content,
 		idShapeMap,
 		idMap,
-		dbInfo.Type == MySQLDatabase || dbInfo.Type == SQLiteDatabase || dbInfo.Type == PostgresDatabase || dbInfo.Type == ODBCDatabase,
+		dbInfo.Type == MySQLDatabase || dbInfo.Type == SQLiteDatabase || dbInfo.Type == PostgresDatabase,
 		qt,
 		cache.CachePresent,
 	)
