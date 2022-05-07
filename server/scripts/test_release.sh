@@ -2,6 +2,10 @@
 
 set -ex
 
+function docker() {
+    podman "$@"
+}
+
 docker build . -f ./server/scripts/test_systemd_dockerfile -t fedora-systemd
 cid=$(docker run -d fedora-systemd:latest)
 
