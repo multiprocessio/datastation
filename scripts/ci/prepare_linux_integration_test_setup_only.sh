@@ -136,7 +136,7 @@ neo4j="$(docker run -d -p 7687:7687 -e "NEO4J_AUTH=neo4j/password" neo4j)"
 sleep 30 # Time for everything to load (influx in particular takes a while)
 
 # Configure sqlserver (create table)
-docker exec -it sqlserver /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "1StrongPwd!!" -Q "CREATE TABLE master.[dbo].test (id int PRIMARY KEY, name text);"
+docker exec sqlserver /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "1StrongPwd!!" -Q "CREATE TABLE master.[dbo].test (id int PRIMARY KEY, name text);"
 
 # Configure cratedb
 docker exec "$cratecontainer" crash -c "CREATE USER test WITH (password = 'test');"
