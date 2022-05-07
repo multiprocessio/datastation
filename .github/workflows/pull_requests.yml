@@ -158,4 +158,5 @@ jobs:
 
     - run: ./scripts/ci/prepare_linux.sh
     - run: yarn release-server 0.0.0-test
+    - run: docker --version
     - run: ./server/scripts/test_release.sh datastation-server-x64-0.0.0-test.tar.gz

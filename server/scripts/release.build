@@ -23,7 +23,7 @@ cp node_modules/better-sqlite3/build/Release/better_sqlite3.node datastation/bui
 # Copy in install script and default configs
 cp -r server/release  datastation/release
 
-mkdir -p releases
+mkdir releases
 tar -zcvf releases/datastation-server-{arch}-{arg0}.tar.gz datastation
 
 rm -rf datastation
