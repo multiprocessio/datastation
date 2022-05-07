@@ -75,7 +75,7 @@ const DATABASES = [
   },
   {
     type: 'odbc',
-    query: `INSERT INTO test (id, name) VALUES (1, name)`,
+    query: `INSERT INTO test (id, name) VALUES (1, 'name')`,
   },
 ];
 
