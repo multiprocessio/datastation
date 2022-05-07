@@ -170,6 +170,11 @@ for (const subprocess of RUNNERS) {
                 getProjectResultsFile(project.projectName) + dp.id
               );
 
+              if (t.type == 'odbc' && !t.query.startsWith('SELECT')) {
+                finished = true;
+                return;
+              }
+
               const v = JSON.parse(panelValueBuffer.toString());
               if (t.query.startsWith('SELECT 1')) {
                 expect(v.length).toBe(1);
@@ -182,13 +187,11 @@ for (const subprocess of RUNNERS) {
                 expect(new Date(v[0].date)).toStrictEqual(
                   new Date('2021-01-01')
                 );
-              } else if (t.query.startsWith('SELECT')) {
+              } else {
                 expect(v).toStrictEqual([
                   { name: 'Kate', age: 9, city: 'San Juan' },
                   { name: 'Bake', age: 10, city: 'Toronto' },
                 ]);
-              } else {
-                expect(v).toBeFalsy();
               }
               finished = true;
             },
