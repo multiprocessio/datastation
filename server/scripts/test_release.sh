@@ -1,35 +1,38 @@
 #!/usr/bin/env bash
 
-set -ex
+set -e
 
 function docker() {
     podman "$@"
 }
 
-docker build . -f ./server/scripts/test_systemd_dockerfile -t fedora-systemd
-cid=$(docker run -d fedora-systemd:latest)
+cp ./releases/$1 ./releases/datastation-docker-release-test.tar.gz
+docker build . -q -f ./server/scripts/test_systemd_dockerfile -t datastation-server-test
+cid=$(docker run -d datastation-server-test:latest)
 
 debug() {
     rv=$?
     if ! [[ "$rv" == "0" ]]; then
 	docker ps -a
 	docker logs $cid
+	docker rm -f $cid || echo "Container already exited."
     fi
     exit $rv
 }
 trap "debug" exit
 
-# Copy in zip file
-docker cp ./releases/$1 $cid:/
-
 function c_run() {
     docker exec $cid bash -c "$1"
 }
 
-c_run "tar xvzf /$1"
-c_run "/datastation/release/install.sh"
-c_run "truncate --size 0 /etc/datastation/config.yaml"
-c_run "systemctl restart datastation"
+# TODO: test out systemd settings eventually
+# # Copy in zip file
+# docker cp ./releases/$1 $cid:/
+# 
+# c_run "tar xvzf /$1"
+# c_run "/datastation/release/install.sh"
+# c_run "truncate --size 0 /etc/datastation/config.yaml"
+# c_run "systemctl restart datastation"
 
 # Wait for server to start
 sleep 10
@@ -55,3 +58,7 @@ if ! diff -u -wB <(echo "$expected") <(echo "$result"); then
     echo "$result"
     exit 1
 fi
+
+
+echo "Looks ok!"
+exit 0
