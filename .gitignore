@@ -2,6 +2,7 @@
 node_modules
 ui/build
 build
+datastation
 yarn-error.log
 releases
 coverage

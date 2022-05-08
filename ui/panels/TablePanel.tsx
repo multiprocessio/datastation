@@ -41,7 +41,6 @@ export async function evalColumnPanel(
     const panel = panels[panelIndex];
     const resultMeta = panel?.resultMeta;
     if (!resultMeta || !resultMeta?.value) {
-      console.trace(panelSource, panels, resultMeta, panelId);
       throw new InvalidDependentPanelError(panelSource);
     }
     const { value } = resultMeta;
@@ -297,7 +296,6 @@ export function TablePanel({
           icon
           onClick={() => {
             panel.page++;
-            console.log(panel.page, 1234);
             updatePanel(panel);
           }}
           disabled={valueAsArray?.length < panel.pageSize}

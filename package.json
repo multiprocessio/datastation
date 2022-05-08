@@ -13,7 +13,7 @@
     "build-server": "python3 ./scripts/build.py ./server/scripts/server.build",
     "docker-build-server": "bash ./server/scripts/build_image.sh",
     "build-language-definitions": "python3 ./scripts/build.py ./ui/scripts/languages.build && ./runner/scripts/generate_program_type_info.sh && yarn format",
-    "start-server": "yarn build-server && node ./build/server.js",
+    "start-server": "yarn build-server && cp node_modules/better-sqlite3/build/Release/better_sqlite3.node build && node ./build/server.js",
     "start-desktop": "yarn build-desktop && yarn electron --trace-warning --unhandled-rejection=warn build/desktop.js",
     "start-ui": "./ui/scripts/watch_and_serve.sh",
     "release-desktop": "python3 ./scripts/build.py ./desktop/scripts/release.build",
