@@ -45,10 +45,10 @@ function NewConnector({
             open();
           }}
         >
-          Add Panel
+          Add Data Source
         </Button>
       )}
-      title="Add Panel"
+      title="Add Data Source"
       groups={groups}
     />
   );
