@@ -73,7 +73,7 @@ export function Select({
         {children}
       </select>
       {tooltip && <Tooltip>{tooltip}</Tooltip>}
-      <div>
+      <div className="ml-1">
         <small>{subtext}</small>
       </div>
     </div>
