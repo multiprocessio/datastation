@@ -17,6 +17,7 @@ BUILTIN_VARIABLES = {
         'x86_64': 'x64',
         'amd64': 'x64',
         'aarch64': 'arm64',
+        'arm64': 'arm64',
     }[platform.machine().lower()],
     'os': {
         'darwin': 'darwin',
