@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"regexp"
 
-	"github.com/multiprocessio/go-sqlite-stdlib"
+	"github.com/multiprocessio/go-sqlite3-stdlib"
 )
 
 func init() {
