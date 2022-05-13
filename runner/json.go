@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"io"
 	"os"
-	"path/filepath"
 
 	jsonutil "github.com/multiprocessio/go-json"
 
@@ -77,12 +76,6 @@ func withJSONArrayOutWriter(w io.Writer, cb func(w *jsonutil.StreamEncoder) erro
 	return encoder.Close()
 }
 
-func openTruncate(out string) (*os.File, error) {
-	base := filepath.Dir(out)
-	_ = os.Mkdir(base, os.ModePerm)
-	return os.OpenFile(out, os.O_TRUNC|os.O_WRONLY|os.O_CREATE, os.ModePerm)
-}
-
 func withJSONArrayOutWriterFile(out io.Writer, cb func(w *jsonutil.StreamEncoder) error) error {
 	return withJSONArrayOutWriter(out, cb)
 }
@@ -117,11 +110,12 @@ func writeAll(w io.Writer, bs []byte) error {
 }
 
 func WriteJSONFile(file string, value any) error {
-	f, err := openTruncate(file)
+	f, closeFile, err := openTruncateBufio(file)
 	if err != nil {
 		return err
 	}
-	defer f.Close()
+	defer closeFile()
+	defer f.Flush()
 
 	encoder := jsonNewEncoder(f)
 	return encoder.Encode(value)

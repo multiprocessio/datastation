@@ -1,3 +1,8 @@
+import {
+  IconPlayerSkipBack,
+  IconPlayerTrackNext,
+  IconPlayerTrackPrev,
+} from '@tabler/icons';
 import { preview } from 'preview';
 import * as React from 'react';
 import { shape } from 'shape';
@@ -14,10 +19,11 @@ import { columnsFromObject } from '../../shared/table';
 import { panelRPC } from '../asyncRPC';
 import { Alert } from '../components/Alert';
 import { Button } from '../components/Button';
-import { FieldPicker, unusedFields } from '../components/FieldPicker';
+import { FieldPicker } from '../components/FieldPicker';
 import { FormGroup } from '../components/FormGroup';
 import { PanelSourcePicker } from '../components/PanelSourcePicker';
 import { Radio } from '../components/Radio';
+import { Select } from '../components/Select';
 import { PanelBodyProps, PanelDetailsProps, PanelUIDetails } from './types';
 
 export async function evalColumnPanel(
@@ -32,16 +38,18 @@ export async function evalColumnPanel(
     const panelIndex = (panels || []).findIndex(function findIndex(p) {
       return p.id === panelSource;
     });
-    const resultMeta = (panels[panelIndex] || {}).resultMeta;
-    if (!resultMeta || !resultMeta.value) {
-      console.trace(panelSource, panels, resultMeta, panelId);
+    const panel = panels[panelIndex];
+    const resultMeta = panel?.resultMeta;
+    if (!resultMeta || !resultMeta?.value) {
       throw new InvalidDependentPanelError(panelSource);
     }
     const { value } = resultMeta;
     const valueWithRequestedColumns = columnsFromObject(
       value,
       columns,
-      panelSource
+      panelSource,
+      panel.page,
+      panel.pageSize
     );
     const s = shape(valueWithRequestedColumns);
     return {
@@ -90,21 +98,6 @@ export function TablePanelDetails({
         return p.id === panel.table.panelSource;
       }) || {}
     ).resultMeta || new PanelResult();
-  const shape = data.shape;
-  React.useEffect(
-    function addInitialFields() {
-      const fields = unusedFields(
-        shape,
-        ...panel.table.columns.map(mapColumnToField)
-      );
-
-      if (fields) {
-        panel.table.columns.push({ label: '', field: '' });
-        updatePanel(panel);
-      }
-    },
-    [panel, updatePanel, panel.table.panelSource, shape]
-  );
 
   return (
     <React.Fragment>
@@ -158,7 +151,6 @@ export function TablePanelDetails({
               key={c.field + i}
             >
               <FieldPicker
-                used={panel.table.columns.map(mapColumnToField)}
                 onDelete={
                   panel.table.columns.length > 1
                     ? function handleColumnDelete() {
@@ -196,7 +188,22 @@ export function TablePanelDetails({
   );
 }
 
-export function TablePanel({ panel }: PanelBodyProps<TablePanelInfo>) {
+function formatCell(c: any): React.ReactNode | string {
+  if (c === undefined || c === null) {
+    return <small className="text-muted">(Empty)</small>;
+  }
+
+  if (typeof c === 'string' || typeof c === 'number') {
+    return String(c);
+  }
+
+  return JSON.stringify(c);
+}
+
+export function TablePanel({
+  panel,
+  updatePanel,
+}: PanelBodyProps<TablePanelInfo>) {
   const data = panel.resultMeta || new PanelResult();
 
   let valueAsArray: Array<any> = [];
@@ -215,45 +222,103 @@ export function TablePanel({ panel }: PanelBodyProps<TablePanelInfo>) {
   // column key is (field + i) everywhere because columns can be
   // duplicated. Maybe should assign a uuid to them instead
   return (
-    <table className={`table table--${panel.table.width}`}>
-      <thead>
-        <tr>
-          {panel.table.rowNumbers ? <th></th> : null}
-          {panel.table.columns.map(function mapColumnToHeader(
-            column: TableColumn,
-            i: number
-          ) {
-            return <th key={column.field + i}>{column.label}</th>;
+    <div>
+      <table className={`table table--${panel.table.width}`}>
+        <thead>
+          <tr>
+            {panel.table.rowNumbers ? <th></th> : null}
+            {panel.table.columns.map(function mapColumnToHeader(
+              column: TableColumn,
+              i: number
+            ) {
+              return <th key={column.field + i}>{column.label}</th>;
+            })}
+          </tr>
+        </thead>
+        <tbody>
+          {valueAsArray.map(function mapRows(row: any, i: number) {
+            return (
+              /* probably a better way to do this... */ <tr
+                key={Object.values(row).join(',') + i}
+              >
+                {panel.table.rowNumbers ? (
+                  <td
+                    className="text-muted"
+                    style={{
+                      width: 0 /* magically uses up least amount of space needed */,
+                    }}
+                  >
+                    <small>#{panel.page * panel.pageSize + i + 1}</small>
+                  </td>
+                ) : null}
+                {panel.table.columns.map(function mapColumnToCell(
+                  column: TableColumn,
+                  i: number
+                ) {
+                  return (
+                    <td key={column.field + i}>
+                      {formatCell(row[column.field])}
+                    </td>
+                  );
+                })}
+              </tr>
+            );
           })}
-        </tr>
-      </thead>
-      <tbody>
-        {valueAsArray.map(function mapRows(row: any, i: number) {
-          return (
-            /* probably a better way to do this... */ <tr
-              key={Object.values(row).join(',') + i}
-            >
-              {panel.table.rowNumbers ? (
-                <td
-                  className="text-muted"
-                  style={{
-                    width: 0 /* magically uses up least amount of space needed */,
-                  }}
-                >
-                  <small>#{i + 1}</small>
-                </td>
-              ) : null}
-              {panel.table.columns.map(function mapColumnToCell(
-                column: TableColumn,
-                i: number
-              ) {
-                return <td key={column.field + i}>{row[column.field]}</td>;
-              })}
-            </tr>
-          );
-        })}
-      </tbody>
-    </table>
+        </tbody>
+      </table>
+
+      <div className="vertical-align-center table-controls">
+        <Button
+          onClick={() => {
+            panel.page = 0;
+            updatePanel(panel);
+          }}
+          icon
+          disabled={panel.page === 0}
+          className="mr-1"
+          title="Back to first page"
+        >
+          <IconPlayerSkipBack />
+        </Button>
+        <Button
+          onClick={() => {
+            panel.page--;
+            updatePanel(panel);
+          }}
+          icon
+          disabled={panel.page === 0}
+          className="mr-1"
+          title="Previous Page"
+        >
+          <IconPlayerTrackPrev />
+        </Button>
+        <Button
+          icon
+          onClick={() => {
+            panel.page++;
+            updatePanel(panel);
+          }}
+          disabled={valueAsArray?.length < panel.pageSize}
+          title="Next Page"
+        >
+          <IconPlayerTrackNext />
+        </Button>
+        <div className="flex-right">
+          <Select
+            onChange={(v: string) => {
+              panel.pageSize = +v || 15;
+              updatePanel(panel);
+            }}
+            label="Page Size"
+            value={String(panel.pageSize)}
+          >
+            <option value="15">15</option>
+            <option value="100">100</option>
+            <option value="1000">1000</option>
+          </Select>
+        </div>
+      </div>
+    </div>
   );
 }
 

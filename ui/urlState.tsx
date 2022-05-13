@@ -29,6 +29,8 @@ export interface UrlState<T extends DefaultView = DefaultView> {
   view: T;
   expanded?: Array<string>;
   sidebar?: boolean;
+  panelOut: { [id: string]: string };
+  panelOutExpanded?: Array<string>;
 }
 
 export function getUrlState<
@@ -41,6 +43,8 @@ export function getUrlState<
     view: (getQueryParameter('view') || 'editor') as T,
     expanded: getQueryParameter('expanded').split(','),
     sidebar: getQueryParameter('sidebar') !== 'false',
+    panelOutExpanded: getQueryParameter('panelOutExpanded').split(','),
+    panelOut: JSON.parse(getQueryParameter('panelOut') || '{}'),
   };
 }
 
@@ -59,6 +63,9 @@ export function getDefaultState<
     urlState.page = localStorageState.page || urlState.page;
     urlState.expanded = localStorageState.expanded || urlState.expanded;
     urlState.sidebar = localStorageState.sidebar || urlState.sidebar;
+    urlState.panelOut = localStorageState.panelOut || urlState.panelOut;
+    urlState.panelOutExpanded =
+      localStorageState.panelOutExpanded || urlState.panelOutExpanded;
   } catch (e) {
     localStorage.setItem(key, '{}');
   }
@@ -78,7 +85,9 @@ export function useUrlState<T extends DefaultView = DefaultView>(): [
     if (!deepEquals(currentState, state)) {
       const serialized = Object.keys(state)
         .map(function mapKey(k) {
-          return `${k}=${encodeURIComponent(String(state[k as keyof UrlState]))}`;
+          const c = state[k as keyof UrlState];
+          const s = k === 'panelOut' ? JSON.stringify(c) : String(c);
+          return `${k}=${encodeURIComponent(s)}`;
         })
         .join('&');
       const newUrl = window.location.pathname + '?' + serialized;

@@ -26,7 +26,13 @@ export function ServerList({
       <div className="text-center">
         <Button
           onClick={() => {
-            updateServer(new ServerInfo(), -1, true);
+            updateServer(
+              new ServerInfo({
+                name: `Untitled Server #${state.servers?.length + 1}`,
+              }),
+              -1,
+              true
+            );
           }}
         >
           Add Server

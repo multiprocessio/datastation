@@ -1,6 +1,7 @@
 package runner
 
 import (
+	"bufio"
 	"bytes"
 	"crypto/tls"
 	"crypto/x509"
@@ -233,16 +234,20 @@ func (ec EvalContext) evalHTTPPanel(project *ProjectState, pageIndex int, panel 
 		}
 
 		out := ec.GetPanelResultsFile(project.Id, panel.Id)
-		w, err := openTruncate(out)
+		w, closeFile, err := openTruncateBufio(out)
 		if err != nil {
 			return err
 		}
-		defer w.Close()
-		return TransformReader(rsp.Body, url, h.ContentTypeInfo, w)
+		defer closeFile()
+		defer w.Flush()
+
+		br := newBufferedReader(rsp.Body)
+
+		return TransformReader(br, url, h.ContentTypeInfo, w)
 	})
 }
 
-func TransformReader(r io.Reader, fileName string, cti ContentTypeInfo, out io.Writer) error {
+func TransformReader(r *bufio.Reader, fileName string, cti ContentTypeInfo, out *bufio.Writer) error {
 	assumedType := GetMimeType(fileName, cti)
 	Logln("Assumed '%s' from '%s' given '%s'", assumedType, cti.Type, fileName)
 

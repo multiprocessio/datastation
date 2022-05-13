@@ -1,6 +1,7 @@
 package runner
 
 import (
+	"bytes"
 	"fmt"
 	"regexp"
 	"sort"
@@ -296,22 +297,29 @@ func chunk(c chan map[string]any, size int) chan []map[string]any {
 }
 
 func makePreparedStatement(tname string, nColumns, chunkSize int) string {
-	var values []string
+	var buf bytes.Buffer
+
+	buf.WriteString("INSERT INTO ")
+	buf.WriteString(tname)
+	buf.WriteString(" VALUES ")
 
 	for i := 0; i < chunkSize; i++ {
-		row := "("
+		if i > 0 {
+			buf.WriteString(", ")
+		}
+
+		buf.WriteString("(")
 		for j := 0; j < nColumns; j++ {
 			if j > 0 {
-				row += ","
+				buf.WriteString(", ")
 			}
 
-			row += "?"
+			buf.WriteString("?")
 		}
-		row += ")"
-		values = append(values, row)
+		buf.WriteString(")")
 	}
 
-	return fmt.Sprintf("INSERT INTO %s VALUES %s", tname, strings.Join(values, ", "))
+	return buf.String()
 }
 
 func IsScalar(v any) bool {

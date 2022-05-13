@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { DatabaseConnectorInfo } from '../../shared/state';
+import { FormGroup } from '../components/FormGroup';
 import { ApiKey } from './ApiKey';
 import { Database } from './Database';
 
@@ -12,16 +13,18 @@ export function BigQueryDetails({
 }) {
   return (
     <React.Fragment>
-      <Database
-        label="Project ID"
-        connector={connector}
-        updateConnector={updateConnector}
-      />
-      <ApiKey
-        label="Service Account JSON"
-        connector={connector}
-        updateConnector={updateConnector}
-      />
+      <FormGroup>
+        <Database
+          label="Project ID"
+          connector={connector}
+          updateConnector={updateConnector}
+        />
+        <ApiKey
+          label="Service Account JSON"
+          connector={connector}
+          updateConnector={updateConnector}
+        />
+      </FormGroup>
     </React.Fragment>
   );
 }

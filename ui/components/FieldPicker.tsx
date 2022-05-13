@@ -8,6 +8,44 @@ import { Select } from './Select';
 
 export type FieldGroup = { name: string; elements: Array<[string, Shape]> };
 
+export function primaryVariedShapeOrString(s: Shape): Shape {
+  const stack: [Shape] = [s];
+  let primaryShape: Shape = null;
+
+  loop: while (stack.length) {
+    const shape = stack.pop();
+
+    switch (shape.kind) {
+      case 'varied':
+        stack.push(...shape.children);
+        break;
+      case 'scalar':
+        if (shape.name === 'null') {
+          continue;
+        }
+
+        // If two non-null types, fall back to treating it as a string.
+        if (primaryShape) {
+          primaryShape = null;
+          break loop;
+        }
+
+        primaryShape = shape;
+        break;
+      default:
+        // If non-scalar/non-varied, fall back to treating it as a string.
+        primaryShape = null;
+        break loop;
+    }
+  }
+
+  if (!primaryShape) {
+    return { kind: 'scalar', name: 'string' };
+  }
+
+  return primaryShape;
+}
+
 export function flattenObjectFields(o: ObjectShape): Array<[string, Shape]> {
   const stack: [[string[], Shape]] = [[[], o]];
   const flat: Array<[string, Shape]> = [];
@@ -16,6 +54,11 @@ export function flattenObjectFields(o: ObjectShape): Array<[string, Shape]> {
     const [path, shape] = stack.pop();
 
     switch (shape.kind) {
+      case 'varied': {
+        const primaryShape = primaryVariedShapeOrString(shape);
+        flat.push([path.join('.'), primaryShape]);
+        break;
+      }
       case 'scalar':
         flat.push([path.join('.'), shape]);
         break;
@@ -31,9 +74,15 @@ export function flattenObjectFields(o: ObjectShape): Array<[string, Shape]> {
 }
 
 export function orderedObjectFields(
-  o: ObjectShape,
+  shape: Shape,
   preferredDefaultType: 'number' | 'string' = 'string'
-) {
+): Array<FieldGroup> {
+  if (!wellFormedGraphInput(shape)) {
+    return [];
+  }
+
+  const o = (shape as ArrayShape).children as ObjectShape;
+
   const fields = flattenObjectFields(o);
   fields.sort(([aName, a], [bName, b]) => {
     if (a.kind === 'scalar' && b.kind === 'scalar') {
@@ -145,7 +194,6 @@ export function FieldPicker({
   labelOnChange,
   onDelete,
   preferredDefaultType,
-  used,
   allowNone,
   tooltip,
 }: {
@@ -157,40 +205,18 @@ export function FieldPicker({
   labelOnChange?: (v: string) => void;
   onDelete?: () => void;
   preferredDefaultType?: 'number' | 'string';
-  used?: Array<string>;
   allowNone?: string;
   tooltip?: React.ReactNode;
 }) {
-  // Default the label to the field name
-  const [labelModified, setLabelModified] = React.useState(false);
-  React.useEffect(() => {
-    if (
-      labelOnChange &&
-      !labelModified &&
-      value &&
-      title(value) !== labelValue
-    ) {
-      labelOnChange(title(value));
-    }
-  }, [value, labelValue, labelModified, labelOnChange]);
-
-  const labelOnChangeWrapper = (v: string) => {
-    setLabelModified(true);
-    return labelOnChange(v);
-  };
-
   let fieldPicker = null;
-  if (wellFormedGraphInput(shape)) {
-    const fieldGroups = orderedObjectFields(
-      (shape as ArrayShape).children as ObjectShape,
-      preferredDefaultType
-    );
+  const fieldGroups = orderedObjectFields(shape, preferredDefaultType);
+
+  if (fieldGroups?.flat().length) {
     fieldPicker = (
       <Select
         label={label}
         value={value}
         onChange={onChange}
-        used={used}
         allowNone={allowNone}
         tooltip={labelOnChange ? null : tooltip}
       >
@@ -221,7 +247,7 @@ export function FieldPicker({
       <Input
         label="Label"
         value={labelValue}
-        onChange={labelOnChangeWrapper}
+        onChange={labelOnChange}
         tooltip={tooltip}
       />
       {onDelete && (

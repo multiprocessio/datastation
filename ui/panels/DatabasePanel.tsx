@@ -183,6 +183,18 @@ export function DatabasePanelDetails({
               />
             </div>
           )}
+          {connector.database.type === 'google-sheets' && (
+            <div className="form-row">
+              <Input
+                label="Sheet ID"
+                value={panel.database.table}
+                onChange={(i: string) => {
+                  panel.database.table = i;
+                  updatePanel(panel);
+                }}
+              />
+            </div>
+          )}
           {['elasticsearch', 'prometheus'].includes(
             connector.database.type
           ) && (
@@ -320,8 +332,17 @@ export const databasePanel: PanelUIDetails<DatabasePanelInfo> = {
   label: 'Database',
   details: DatabasePanelDetails,
   body: DatabasePanelBody,
+  hideBody: (panel: DatabasePanelInfo, connectors: Array<ConnectorInfo>) => {
+    const connector = connectors.find(
+      (c) => c.id === panel.database.connectorId
+    ) as DatabaseConnectorInfo;
+
+    // Hide body in google sheets request
+    return connector?.database?.type === 'google-sheets';
+  },
   previewable: true,
-  factory: (pageId: string) => new DatabasePanelInfo(pageId),
+  factory: (pageId: string, name: string) =>
+    new DatabasePanelInfo(pageId, { name }),
   hasStdout: false,
   info: DatabaseInfo,
 };

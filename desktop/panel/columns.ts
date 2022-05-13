@@ -1,65 +1,11 @@
 import fs from 'fs';
 import { PanelBody } from '../../shared/rpc';
-import {
-  GraphPanelInfo,
-  PanelInfo,
-  ProjectState,
-  TablePanelInfo,
-} from '../../shared/state';
-import { columnsFromObject } from '../../shared/table';
 import { Dispatch, RPCHandler } from '../rpc';
 import { getProjectResultsFile } from '../store';
-import { getPanelResult, getProjectAndPanel } from './shared';
-import { EvalHandlerExtra, EvalHandlerResponse, guardPanel } from './types';
+import { getProjectAndPanel } from './shared';
+import { EvalHandlerResponse } from './types';
 
-export async function evalColumns(
-  project: ProjectState,
-  panel: PanelInfo,
-  { idMap }: EvalHandlerExtra,
-  dispatch: Dispatch
-): Promise<EvalHandlerResponse> {
-  let columns: Array<string>;
-  let panelSource: string;
-  if (panel.type === 'graph') {
-    const gp = panel as GraphPanelInfo;
-    columns = [
-      gp.graph.x,
-      gp.graph.uniqueBy,
-      ...gp.graph.ys.map((y) => y.field),
-    ].filter(Boolean);
-    panelSource = gp.graph.panelSource;
-  } else if (panel.type === 'table') {
-    const tp = panel as TablePanelInfo;
-    columns = tp.table.columns.map((c) => c.field);
-    panelSource = tp.table.panelSource;
-  } else {
-    // Let guardPanel throw a nice error.
-    guardPanel<GraphPanelInfo>(panel, 'graph');
-  }
-
-  if (!panelSource) {
-    throw new Error('Panel source not specified, cannot eval.');
-  }
-
-  const { value } = await getPanelResult(
-    dispatch,
-    project.projectName,
-    panelSource
-  );
-
-  const valueWithRequestedColumns = columnsFromObject(
-    value,
-    columns,
-    // Assumes that position always comes before panel name in the idmap
-    +Object.keys(idMap).find((key) => idMap[key] === panelSource)
-  );
-
-  return {
-    value: valueWithRequestedColumns,
-    returnValue: true,
-  };
-}
-
+// TODO: this needs to be ported to go
 export const fetchResultsHandler: RPCHandler<PanelBody, EvalHandlerResponse> = {
   resource: 'fetchResults',
   handler: async function (
@@ -75,6 +21,7 @@ export const fetchResultsHandler: RPCHandler<PanelBody, EvalHandlerResponse> = {
 
     // Maybe the only appropriate place to call this in this package?
     const projectResultsFile = getProjectResultsFile(projectId);
+    // TODO: this is a 4GB file limit!
     const f = fs.readFileSync(projectResultsFile + panel.id);
 
     // Everything gets stored as JSON on disk. Even literals and files get rewritten as JSON.

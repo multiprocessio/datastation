@@ -22,9 +22,9 @@ jobs:
       run: |
         curl --fail \
           -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-          -H "Content-Type: application/zip" \
-          --data-binary @./releases/datastation-server-x64-$GIT_TAG.zip \
-          "https://uploads.github.com/repos/multiprocessio/datastation/releases/$RELEASE_ID/assets?name=datastation-server-x64-$GIT_TAG.zip"
+          -H "Content-Type: application/tar+gzip" \
+          --data-binary @./releases/datastation-server-x64-$GIT_TAG.tar.gz \
+          "https://uploads.github.com/repos/multiprocessio/datastation/releases/$RELEASE_ID/assets?name=datastation-server-x64-$GIT_TAG.tar.gz"
 
   build-linux-desktop:
     runs-on: ubuntu-latest
