@@ -7,7 +7,6 @@ require (
 	github.com/ClickHouse/clickhouse-go/v2 v2.0.12
 	github.com/aws/aws-sdk-go v1.43.40
 	github.com/denisenkom/go-mssqldb v0.12.0
-	github.com/elastic/go-elasticsearch/v6 v6.8.10
 	github.com/flosch/pongo2 v0.0.0-20200913210552-0d938eb266f3
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/goccy/go-json v0.9.6
@@ -17,9 +16,10 @@ require (
 	github.com/lib/pq v1.10.5
 	github.com/linkedin/goavro/v2 v2.11.1
 	github.com/matoous/go-nanoid/v2 v2.0.0
-	github.com/mattn/go-sqlite3 v1.14.12
+	github.com/mattn/go-sqlite3 v1.14.13
 	github.com/multiprocessio/go-json v0.0.0-20220308002443-61d497dd7b9e
 	github.com/multiprocessio/go-openoffice v0.0.0-20220110232726-064f5dda1956
+	github.com/multiprocessio/go-sqlite3-stdlib v0.0.0-20220513170836-f1c26f349467
 	github.com/neo4j/neo4j-go-driver/v4 v4.4.2
 	github.com/prometheus/client_golang v1.12.1
 	github.com/prometheus/common v0.33.0
