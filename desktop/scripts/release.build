@@ -40,5 +40,5 @@ rm -rf releases
 yarn electron-rebuild
 
 # Build and package
-yarn electron-packager --asar --overwrite --icon=build/icon.png --out=releases --build-version={arg0} --app-version={arg0} . "DataStation Community Edition"
-zip -9 -r releases/datastation-{os}-{arch}-{arg0}.zip "releases/DataStation Community Edition-{os}-{arch}"
+yarn electron-packager --asar --overwrite --icon=build/icon.png --out=releases --build-version={arg0} --app-version={arg0} . "DataStation Desktop CE"
+zip -9 -r releases/datastation-{os}-{arch}-{arg0}.zip "releases/DataStation Desktop CE-{os}-{arch}"

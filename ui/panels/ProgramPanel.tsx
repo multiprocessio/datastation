@@ -53,6 +53,7 @@ export function ProgramPanelDetails({
   panelIndex,
 }: PanelDetailsProps<ProgramPanelInfo>) {
   const options = Object.keys(LANGUAGES)
+    .sort()
     .map((k) => {
       const l = LANGUAGES[k];
       if (MODE === 'browser' && !l.inMemoryEval) {
