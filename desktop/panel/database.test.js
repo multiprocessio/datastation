@@ -134,7 +134,7 @@ for (const subprocess of RUNNERS) {
         t.query,
       () => {
         test(`runs ${t.type} query`, async () => {
-          if (process.platform !== 'linux') {
+          if (process.platform !== 'linux' || t.type !== 'odbc') {
             return;
           }
 
