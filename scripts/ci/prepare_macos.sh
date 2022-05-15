@@ -31,6 +31,7 @@ HOMEBREW_NO_ENV_FILTERING=1 ACCEPT_EULA=Y brew install msodbcsql18 mssql-tools18
 
 # Install docker using colima (not present because of licenses)
 brew install colima
+brew install docker
 colima start
 
 # Run SQL server
