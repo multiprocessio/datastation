@@ -21,7 +21,7 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.13
 	github.com/multiprocessio/go-json v0.0.0-20220308002443-61d497dd7b9e
 	github.com/multiprocessio/go-openoffice v0.0.0-20220110232726-064f5dda1956
-	github.com/multiprocessio/go-sqlite3-stdlib v0.0.0-20220515003332-1f33cf4aafe1
+	github.com/multiprocessio/go-sqlite3-stdlib v0.0.0-20220515132214-0499e13b82b2
 	github.com/neo4j/neo4j-go-driver/v4 v4.4.2
 	github.com/prometheus/client_golang v1.12.2
 	github.com/prometheus/common v0.34.0
@@ -44,6 +44,7 @@ require (
 	github.com/Azure/azure-storage-blob-go v0.14.0 // indirect
 	github.com/apache/arrow/go/arrow v0.0.0-20211112161151-bc219186db40 // indirect
 	github.com/apache/thrift v0.14.2 // indirect
+	github.com/araddon/dateparse v0.0.0-20210429162001-6b43995a97de // indirect
 	github.com/aws/aws-sdk-go-v2 v1.11.0 // indirect
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.0.0 // indirect
 	github.com/aws/aws-sdk-go-v2/credentials v1.6.1 // indirect
@@ -102,6 +103,7 @@ require (
 	golang.org/x/sys v0.0.0-20220429233432-b5fbb4746d32 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/xerrors v0.0.0-20220411194840-2f41105eb62f // indirect
+	gonum.org/v1/gonum v0.11.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20220407144326-9054f6ed7bac // indirect
 	google.golang.org/grpc v1.45.0 // indirect
