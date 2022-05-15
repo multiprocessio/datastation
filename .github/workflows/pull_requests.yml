@@ -94,14 +94,8 @@ jobs:
         path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
         key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
         restore-keys: |
-<<<<<<< HEAD
           ${{ runner.os }}-yarn-  
           
-=======
-          ${{ runner.os }}-yarn-
-          
-    - uses: docker-practice/actions-setup-docker@master      
->>>>>>> 3eb1fcf25e92eec5c8670a1a228f8881fd5b01bb
 
     - run: ./scripts/ci/prepare_macos.sh
     # Needed so we can have ./build/desktop_runner.js ready for tests
