@@ -33,4 +33,4 @@ Invoke-WebRequest -Uri "https://go.microsoft.com/fwlink/?linkid=2187028" -OutFil
 Start-Process -Filepath $outpath -ArgumentList "/qr IACCEPTMSODBCSQLLICENSETERMS=YES"
 
 # Start up sqlserver
-docker run -d -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=1StrongPwd!!" -p 1433:1433 tobiasfenster/mssql-server-dev-unsupported
+docker run -d -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=1StrongPwd!!" -p 1433:1433 tobiasfenster/mssql-server-dev-unsupported:2019-latest

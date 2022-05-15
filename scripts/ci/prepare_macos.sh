@@ -31,4 +31,7 @@ HOMEBREW_NO_ENV_FILTERING=1 ACCEPT_EULA=Y brew install msodbcsql18 mssql-tools18
 
 # Start up sqlserver
 brew install docker-machine docker
+docker-machine create --driver virtualbox default
+docker-machine env default
+eval $(docker-machine env default)
 docker run -d -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=1StrongPwd!!" --name sqlserver --hostname sqlserver -p 1433:1433 mcr.microsoft.com/mssql/server:2019-latest
