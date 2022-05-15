@@ -25,7 +25,6 @@ jobs:
         key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
         restore-keys: |
           ${{ runner.os }}-yarn-
-
     - run: ./scripts/ci/prepare_linux.sh --integration-tests
     - run: yarn format
     - run: yarn eslint ui
@@ -47,8 +46,6 @@ jobs:
         SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
     - run: cd runner && go test -race -coverprofile ../coverage/gounit.cov
     - run: ./runner/scripts/test_coverage.sh
-    # Test server builds
-    - run: yarn build-server
 
   e2e-linux:
     runs-on: ubuntu-latest
@@ -70,7 +67,6 @@ jobs:
         key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
         restore-keys: |
           ${{ runner.os }}-yarn-
-
     - run: ./scripts/ci/prepare_linux.sh
     - run: yarn release-desktop 0.0.0-e2etest
     - run: git reset --hard # release blows everything up
@@ -99,7 +95,7 @@ jobs:
         key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
         restore-keys: |
           ${{ runner.os }}-yarn-
-
+          
     - uses: docker-practice/actions-setup-docker@master      
 
     - run: ./scripts/ci/prepare_macos.sh
@@ -132,7 +128,6 @@ jobs:
         key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
         restore-keys: |
           ${{ runner.os }}-yarn-
-
     - run: ./scripts/ci/prepare_windows.ps1
       shell: pwsh
     # Needed so we can have ./build/desktop_runner.js ready for tests
@@ -142,3 +137,29 @@ jobs:
     - run: yarn release-desktop 0.0.0-e2etest
     - run: git reset --hard # release blows everything up
     - run: yarn e2e-test
+
+  test-server:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@master
+      with:
+        ref: ${{ github.ref }}
+
+    # FROM: https://github.com/actions/cache/blob/main/examples.md#node---yarn
+    - name: Get yarn cache directory path
+      id: yarn-cache-dir-path
+      run: echo "::set-output name=dir::$(yarn cache dir)"
+
+    - uses: actions/cache@v2
+      id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+      with:
+        path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+        key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-yarn-
+
+    - run: ./scripts/ci/prepare_linux.sh
+    - run: yarn release-server 0.0.0-test
+    - run: sudo apt-get install -y podman
+    - run: ./server/scripts/test_release.sh datastation-server-x64-0.0.0-test.tar.gz

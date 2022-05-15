@@ -15,6 +15,65 @@ type elasticsearchResponse struct {
 		Hits []map[string]any `json:"hits"`
 	} `json:"hits"`
 	ScrollId string `json:"_scroll_id"`
+	Status   int    `json:"status"`
+	Error    struct {
+		Reason    string           `json:"reason"`
+		Type      string           `json:"type"`
+		RootCause []map[string]any `json:"root_cause"`
+	} `json:"error"`
+}
+
+func makeScrollRequest(baseUrl, scrollId string, req httpRequest) (*elasticsearchResponse, error) {
+	rsp, err := makeHTTPRequest(req)
+	if err != nil {
+		return nil, err
+	}
+	defer rsp.Body.Close()
+
+	var r elasticsearchResponse
+	defer func() {
+		// No cleanup this time if the scrollId remains the same
+		if len(r.Hits.Hits) > 0 && r.ScrollId == scrollId {
+			return
+		}
+
+		bodyBytes, err := jsonMarshal(map[string]any{
+			"scroll_id": scrollId,
+		})
+		if err != nil {
+			Logln("Couldn't marshal clear context JSON body: %s", err)
+			return
+		}
+
+		// Clear the scroll context under any condition
+		_, err = makeHTTPRequest(httpRequest{
+			allowInsecure: req.allowInsecure,
+			url:           baseUrl + "/_search/scroll",
+			method:        "DELETE",
+			headers:       req.headers,
+			customCaCerts: req.customCaCerts,
+			body:          bodyBytes,
+			sendBody:      true,
+		})
+		if err != nil {
+			Logln("Error while clearing Elasticsearch scroll: %s", err)
+			return
+		}
+
+		Logln("Cleared scroll id")
+	}()
+
+	dec := jsonNewDecoder(rsp.Body)
+	err = dec.Decode(&r)
+	if err != nil {
+		return nil, err
+	}
+
+	if r.Status >= 400 {
+		return nil, makeErrUser(r.Error.Reason)
+	}
+
+	return &r, nil
 }
 
 func (ec EvalContext) evalElasticsearch(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, server *ServerInfo, w io.Writer) error {
@@ -66,8 +125,8 @@ func (ec EvalContext) evalElasticsearch(panel *PanelInfo, dbInfo DatabaseConnect
 			u += "q=" + url.QueryEscape(q)
 		}
 		u += "&size=10000"
-		// Closes the scroll after 10s of *idling* not 10s of scrolling
-		u += "&scroll=5s"
+		// Closes the scroll after 1m of *idling* not 1m of scrolling
+		u += "&scroll=1m"
 		Logln("Making Elasticsearch request: %s. With query: (%s)", u, q)
 
 		var headers []HttpConnectorInfoHeader
@@ -84,10 +143,11 @@ func (ec EvalContext) evalElasticsearch(panel *PanelInfo, dbInfo DatabaseConnect
 			})
 		}
 
+		// Set up the scroll context
 		rsp, err := makeHTTPRequest(httpRequest{
 			allowInsecure: panel.Database.Extra["allow_insecure"] == "true",
 			url:           u,
-			method:        "GET",
+			method:        "POST",
 			headers:       headers,
 			customCaCerts: customCaCerts,
 		})
@@ -104,19 +164,6 @@ func (ec EvalContext) evalElasticsearch(panel *PanelInfo, dbInfo DatabaseConnect
 		}
 
 		scrollId := r.ScrollId
-		defer func() {
-			// Clear the scroll context under any condition
-			_, err = makeHTTPRequest(httpRequest{
-				allowInsecure: panel.Database.Extra["allow_insecure"] == "true",
-				url:           baseUrl + "/_search/scroll?scroll_id=" + scrollId,
-				method:        "DELETE",
-				headers:       headers,
-				customCaCerts: customCaCerts,
-			})
-			if err != nil {
-				Logln("Error while clearing Elasticsearch scroll: %s", err)
-			}
-		}()
 
 		return withJSONArrayOutWriterFile(w, func(w *jsonutil.StreamEncoder) error {
 			for _, hit := range r.Hits.Hits {
@@ -127,23 +174,33 @@ func (ec EvalContext) evalElasticsearch(panel *PanelInfo, dbInfo DatabaseConnect
 			}
 
 			for {
-				rsp, err := makeHTTPRequest(httpRequest{
-					allowInsecure: panel.Database.Extra["allow_insecure"] == "true",
-					url:           baseUrl + "/_search/scroll?scroll=10s&scroll_id=" + scrollId,
-					method:        "GET",
-					headers:       headers,
-					customCaCerts: customCaCerts,
+				bodyBytes, err := jsonMarshal(map[string]any{
+					"scroll":    "1m",
+					"scroll_id": scrollId,
 				})
 				if err != nil {
 					return err
 				}
 
-				dec := jsonNewDecoder(rsp.Body)
-				var r elasticsearchResponse
-				err = dec.Decode(&r)
+				Logln("Making new request with scroll id")
+				r, err := makeScrollRequest(baseUrl, scrollId, httpRequest{
+					allowInsecure: panel.Database.Extra["allow_insecure"] == "true",
+					url:           baseUrl + "/_search/scroll",
+					method:        "POST",
+					headers: append(headers, HttpConnectorInfoHeader{
+						Name:  "content-type",
+						Value: "application/json",
+					}),
+					customCaCerts: customCaCerts,
+					body:          bodyBytes,
+					sendBody:      true,
+				})
 				if err != nil {
+					Logln("Error: %#v", err)
 					return err
 				}
+
+				scrollId = r.ScrollId
 
 				for _, hit := range r.Hits.Hits {
 					err := w.EncodeRow(hit)
@@ -151,14 +208,11 @@ func (ec EvalContext) evalElasticsearch(panel *PanelInfo, dbInfo DatabaseConnect
 						return err
 					}
 				}
-				rsp.Body.Close()
 
 				if len(r.Hits.Hits) == 0 {
-					break
+					return nil
 				}
 			}
-
-			return nil
 		})
 	})
 }
