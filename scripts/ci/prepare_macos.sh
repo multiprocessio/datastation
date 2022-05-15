@@ -34,6 +34,7 @@ curl "https://desktop.docker.com/mac/main/amd64/Docker.dmg?utm_source=docker&utm
 sudo hdiutil attach Docker.dmg
 sudo /Volumes/Docker/Docker.app/Contents/MacOS/install --accept-license
 sudo hdiutil detach /Volumes/Docker
-set -x
+echo $PATH
+echo "export PATH=$PATH:/usr/local/bin" >> ~/.bash_profile
 # Run SQL server
 docker run -d -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=1StrongPwd!!" --name sqlserver --hostname sqlserver -p 1433:1433 mcr.microsoft.com/mssql/server:2019-latest
