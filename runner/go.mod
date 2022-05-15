@@ -2,36 +2,38 @@ module github.com/multiprocessio/datastation/runner
 
 go 1.18
 
+replace github.com/mattn/go-sqlite3 v1.14.13 => github.com/multiprocessio/go-sqlite3 v1.14.14-0.20220513213203-12637a65d5d7
+
 require (
-	cloud.google.com/go/bigquery v1.31.0
-	github.com/ClickHouse/clickhouse-go/v2 v2.0.12
 	github.com/alexbrainman/odbc v0.0.0-20211220213544-9c9a2e61c5e2
-	github.com/aws/aws-sdk-go v1.43.40
+	cloud.google.com/go/bigquery v1.8.0
+	github.com/ClickHouse/clickhouse-go/v2 v2.0.14
+	github.com/aws/aws-sdk-go v1.44.14
 	github.com/denisenkom/go-mssqldb v0.12.0
 	github.com/flosch/pongo2 v0.0.0-20200913210552-0d938eb266f3
 	github.com/go-sql-driver/mysql v1.6.0
-	github.com/goccy/go-json v0.9.6
-	github.com/gocql/gocql v1.0.0
-	github.com/influxdata/influxdb-client-go/v2 v2.8.1
-	github.com/jmoiron/sqlx v1.3.4
+	github.com/goccy/go-json v0.9.7
+	github.com/gocql/gocql v1.1.0
+	github.com/influxdata/influxdb-client-go/v2 v2.8.2
+	github.com/jmoiron/sqlx v1.3.5
 	github.com/lib/pq v1.10.5
 	github.com/linkedin/goavro/v2 v2.11.1
 	github.com/matoous/go-nanoid/v2 v2.0.0
 	github.com/mattn/go-sqlite3 v1.14.13
 	github.com/multiprocessio/go-json v0.0.0-20220308002443-61d497dd7b9e
 	github.com/multiprocessio/go-openoffice v0.0.0-20220110232726-064f5dda1956
-	github.com/multiprocessio/go-sqlite3-stdlib v0.0.0-20220513170836-f1c26f349467
+	github.com/multiprocessio/go-sqlite3-stdlib v0.0.0-20220515132214-0499e13b82b2
 	github.com/neo4j/neo4j-go-driver/v4 v4.4.2
-	github.com/prometheus/client_golang v1.12.1
-	github.com/prometheus/common v0.33.0
+	github.com/prometheus/client_golang v1.12.2
+	github.com/prometheus/common v0.34.0
 	github.com/scritchley/orc v0.0.0-20210513144143-06dddf1ad665
-	github.com/sijms/go-ora/v2 v2.4.16
-	github.com/snowflakedb/gosnowflake v1.6.8
+	github.com/sijms/go-ora/v2 v2.4.20
+	github.com/snowflakedb/gosnowflake v1.6.9
 	github.com/stretchr/testify v1.7.1
 	github.com/xitongsys/parquet-go v1.6.2
 	github.com/xitongsys/parquet-go-source v0.0.0-20220315005136-aec0fe3e777c
 	github.com/xuri/excelize/v2 v2.6.0
-	golang.org/x/crypto v0.0.0-20220411220226-7b82a4e95df4
+	golang.org/x/crypto v0.0.0-20220408190544-5352b0902921
 	google.golang.org/api v0.74.0
 )
 
@@ -43,6 +45,7 @@ require (
 	github.com/Azure/azure-storage-blob-go v0.14.0 // indirect
 	github.com/apache/arrow/go/arrow v0.0.0-20211112161151-bc219186db40 // indirect
 	github.com/apache/thrift v0.14.2 // indirect
+	github.com/araddon/dateparse v0.0.0-20210429162001-6b43995a97de // indirect
 	github.com/aws/aws-sdk-go-v2 v1.11.0 // indirect
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.0.0 // indirect
 	github.com/aws/aws-sdk-go-v2/credentials v1.6.1 // indirect
@@ -66,7 +69,6 @@ require (
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/golang/snappy v0.0.3 // indirect
 	github.com/google/flatbuffers v2.0.0+incompatible // indirect
-	github.com/google/go-cmp v0.5.7 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/googleapis/gax-go/v2 v2.3.0 // indirect
 	github.com/hailocab/go-hostpool v0.0.0-20160125115350-e80d13ce29ed // indirect
@@ -81,7 +83,7 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826 // indirect
 	github.com/mwitkow/go-conntrack v0.0.0-20190716064945-2f068394615f // indirect
-	github.com/paulmach/orb v0.4.0 // indirect
+	github.com/paulmach/orb v0.5.0 // indirect
 	github.com/pierrec/lz4/v4 v4.1.14 // indirect
 	github.com/pkg/browser v0.0.0-20210911075715-681adbf594b8 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
@@ -95,13 +97,14 @@ require (
 	github.com/xuri/efp v0.0.0-20220407160117-ad0f7a785be8 // indirect
 	github.com/xuri/nfp v0.0.0-20220409054826-5e722a1d9e22 // indirect
 	go.opencensus.io v0.23.0 // indirect
-	go.opentelemetry.io/otel v1.4.1 // indirect
-	go.opentelemetry.io/otel/trace v1.4.1 // indirect
+	go.opentelemetry.io/otel v1.7.0 // indirect
+	go.opentelemetry.io/otel/trace v1.7.0 // indirect
 	golang.org/x/net v0.0.0-20220407224826-aac1ed45d8e3 // indirect
 	golang.org/x/oauth2 v0.0.0-20220309155454-6242fa91716a // indirect
-	golang.org/x/sys v0.0.0-20220328115105-d36c6a25d886 // indirect
+	golang.org/x/sys v0.0.0-20220429233432-b5fbb4746d32 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/xerrors v0.0.0-20220411194840-2f41105eb62f // indirect
+	gonum.org/v1/gonum v0.11.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20220407144326-9054f6ed7bac // indirect
 	google.golang.org/grpc v1.45.0 // indirect
