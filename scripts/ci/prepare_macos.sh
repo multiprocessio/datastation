@@ -29,12 +29,9 @@ brew tap microsoft/mssql-release https://github.com/Microsoft/homebrew-mssql-rel
 brew update
 HOMEBREW_NO_ENV_FILTERING=1 ACCEPT_EULA=Y brew install msodbcsql18 mssql-tools18
 
-# Install docker using minikube (not present because of licenses)
-brew install hyperkit
-brew install minikube
-brew install docker
-minikube start
-eval $(minikube docker-env)
-echo "`minikube ip` docker.local" | sudo tee -a /etc/hosts > /dev/null
+# Install docker using colima (not present because of licenses)
+brew install colima
+colima start
+
 # Run SQL server
 docker run -d -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=1StrongPwd!!" --name sqlserver --hostname sqlserver -p 1433:1433 mcr.microsoft.com/mssql/server:2019-latest
