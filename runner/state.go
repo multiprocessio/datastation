@@ -318,6 +318,7 @@ const (
 	AirtableDatabase                                = "airtable"
 	GoogleSheetsDatabase                            = "google-sheets"
 	Neo4jDatabase                                   = "neo4j"
+	ODBCDatabase                                    = "odbc"
 )
 
 type DatabaseConnectorInfoDatabase struct {

@@ -5,6 +5,7 @@ go 1.18
 replace github.com/mattn/go-sqlite3 v1.14.13 => github.com/multiprocessio/go-sqlite3 v1.14.14-0.20220513213203-12637a65d5d7
 
 require (
+	github.com/alexbrainman/odbc v0.0.0-20211220213544-9c9a2e61c5e2
 	cloud.google.com/go/bigquery v1.8.0
 	github.com/ClickHouse/clickhouse-go/v2 v2.0.14
 	github.com/aws/aws-sdk-go v1.44.14
