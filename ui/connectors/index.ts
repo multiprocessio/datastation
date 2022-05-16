@@ -8,7 +8,6 @@ import { FluxDetails } from './FluxDetails';
 import { GenericDetails, GenericNoDatabaseDetails } from './GenericDetails';
 import { GoogleSheetsDetails } from './GoogleSheetsDetails';
 import { Neo4jDetails } from './Neo4jDetails';
-import { ODBCDetails } from './ODBCDetails';
 import { SnowflakeDetails } from './SnowflakeDetails';
 import { SQLiteDetails } from './SQLiteDetails';
 
@@ -149,11 +148,6 @@ export const VENDORS: {
     id: 'neo4j',
     details: Neo4jDetails,
   },
-  odbc: {
-    name: 'ODBC',
-    id: 'odbc',
-    details: ODBCDetails,
-  },
 };
 
 export const VENDOR_GROUPS: Array<{
@@ -169,7 +163,6 @@ export const VENDOR_GROUPS: Array<{
       'oracle',
       'sqlite',
       'cockroach',
-      'odbc',
     ],
   },
   {

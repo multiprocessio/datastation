@@ -27,10 +27,3 @@ go install github.com/multiprocessio/httpmirror@latest
 
 # Set up `go install` bin path
 Join-Path (Resolve-Path ~).Path "go\bin" >> $Env:GITHUB_PATH
-
-$outpath = "c:/odbc.msi"
-Invoke-WebRequest -Uri "https://go.microsoft.com/fwlink/?linkid=2187028" -OutFile $outpath
-Start-Process -Filepath $outpath -ArgumentList "/qr IACCEPTMSODBCSQLLICENSETERMS=YES"
-
-# Start up sqlserver
-docker run -d -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=1StrongPwd!!" -p 1433:1433 tobiasfenster/mssql-server-dev-unsupported:2019-latest
