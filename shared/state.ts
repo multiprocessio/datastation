@@ -193,8 +193,7 @@ export type SQLConnectorType =
   | 'bigquery'
   | 'cassandra'
   | 'scylla'
-  | 'athena'
-  | 'odbc';
+  | 'athena';
 
 export type DatabaseConnectorInfoType =
   | SQLConnectorType
