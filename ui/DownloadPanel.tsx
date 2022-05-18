@@ -229,9 +229,7 @@ async function resultsTo(
     dataURL = (value as HTMLCanvasElement).toDataURL(mimeType, 1.0);
     extension = '.png';
   } else {
-    let text;
-    ({ text, mimeType, extension } = dataFormatters[type](value, orderedKeys));
-    dataURL = `data:${mimeType};charset=utf-8,` + encodeURIComponent(text);
+    ({ text: dataURL, mimeType, extension } = dataFormatters[type](value, orderedKeys));
   }
 
   if (output === 'file') {
