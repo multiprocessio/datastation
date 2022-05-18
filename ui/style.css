@@ -727,7 +727,6 @@ input + input[type='file'] {
 
 .panel-body-container {
   overflow: auto;
-  resize: vertical;
 }
 
 .panel-controls .button {

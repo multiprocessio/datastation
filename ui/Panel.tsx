@@ -6,7 +6,6 @@ import {
   IconArrowsMinimize,
   IconChevronDown,
   IconChevronUp,
-  IconDownload,
   IconEye,
   IconEyeOff,
   IconPlayerPause,
@@ -16,10 +15,9 @@ import {
 import formatDistanceStrict from 'date-fns/formatDistanceStrict';
 import formatDistanceToNow from 'date-fns/formatDistanceToNow';
 import circularSafeStringify from 'json-stringify-safe';
-import * as CSV from 'papaparse';
 import * as React from 'react';
 import { toString } from 'shape';
-import { MODE, MODE_FEATURES } from '../shared/constants';
+import { MODE_FEATURES } from '../shared/constants';
 import { EVAL_ERRORS } from '../shared/errors';
 import log from '../shared/log';
 import { PanelInfo, PanelResult } from '../shared/state';
@@ -31,75 +29,12 @@ import { Confirm } from './components/Confirm';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { Highlight } from './components/Highlight';
 import { Input } from './components/Input';
+import { DownloadPanel } from './DownloadPanel';
 import { PANEL_UI_DETAILS } from './panels';
 import { ProjectContext } from './state';
 import { UrlStateContext } from './urlState';
 
 export const VISUAL_PANELS = ['graph', 'table'];
-
-function valueAsString(value: any) {
-  try {
-    if (
-      Array.isArray(value) &&
-      Object.keys(value[0]).every(
-        (k) => value === null || typeof value[0][k] !== 'object'
-      )
-    ) {
-      return [CSV.unparse(value), 'text/csv', '.csv'];
-    } else {
-      return [
-        circularSafeStringify(value, null, 2),
-        'application/json',
-        '.json',
-      ];
-    }
-  } catch (e) {
-    return [String(value), 'text/plain', '.txt'];
-  }
-}
-
-function download(filename: string, value: any, isChart = false) {
-  // SOURCE: https://stackoverflow.com/a/18197341/1507139
-  const element = document.createElement('a');
-  let [dataURL, mimeType, extension] = ['', '', ''];
-  if (isChart) {
-    if (!value) {
-      log.error('Invalid context ref');
-      return;
-    }
-    mimeType = 'image/png';
-    dataURL = (value as HTMLCanvasElement).toDataURL(mimeType, 1.0);
-    extension = '.png';
-  } else {
-    let text;
-    [text, mimeType, extension] = valueAsString(value);
-    dataURL = `data:${mimeType};charset=utf-8,` + encodeURIComponent(text);
-  }
-  element.setAttribute('href', dataURL);
-  element.setAttribute('download', filename + extension);
-  element.style.display = 'none';
-  document.body.appendChild(element);
-  element.click();
-  document.body.removeChild(element);
-}
-
-async function fetchAndDownloadResults(
-  panel: PanelInfo,
-  panelRef: React.RefObject<HTMLCanvasElement>,
-  results: PanelResult
-) {
-  let value = results.value;
-  if (MODE !== 'browser') {
-    const res = await panelRPC('fetchResults', panel.id);
-    value = res.value;
-  }
-
-  download(
-    panel.name,
-    panel.type === 'graph' ? panelRef.current.querySelector('canvas') : value,
-    panel.type === 'graph'
-  );
-}
 
 function PreviewResults({
   panelOut,
@@ -536,15 +471,7 @@ export function Panel({
                   !results.lastRun ? 'Panel not yet run' : 'Download Results'
                 }
               >
-                <Button
-                  icon
-                  disabled={!results.lastRun}
-                  onClick={() =>
-                    fetchAndDownloadResults(panel, panelRef, results)
-                  }
-                >
-                  <IconDownload />
-                </Button>
+                <DownloadPanel panel={panel} panelRef={panelRef} />
               </span>
               <span title="Hide Panel">
                 <Button icon onClick={() => setHidden(!hidden)}>
