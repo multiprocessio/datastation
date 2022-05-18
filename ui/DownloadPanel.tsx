@@ -229,7 +229,15 @@ async function resultsTo(
     dataURL = (value as HTMLCanvasElement).toDataURL(mimeType, 1.0);
     extension = '.png';
   } else {
-    ({ text: dataURL, mimeType, extension } = dataFormatters[type](value, orderedKeys));
+    ({
+      text: dataURL,
+      mimeType,
+      extension,
+    } = dataFormatters[type](value, orderedKeys));
+
+    if (output === 'file') {
+      dataURL = `data:${mimeType};charset=utf-8,` + encodeURIComponent(dataURL);
+    }
   }
 
   if (output === 'file') {
