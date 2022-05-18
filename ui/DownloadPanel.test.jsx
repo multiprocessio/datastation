@@ -1,4 +1,8 @@
-const { htmlTableFormat, csvFormat, markdownTableFormat } = require('./DownloadPanel');
+const {
+  htmlTableFormat,
+  csvFormat,
+  markdownTableFormat,
+} = require('./DownloadPanel');
 
 describe('markdownTableFormat', () => {
   test('basic markdown', () => {
@@ -38,7 +42,7 @@ describe('htmlTableFormat', () => {
         ]
       ).text
     ).toBe(
-	`
+      `
 <table class="table">
   <thead>
     <tr>
@@ -62,7 +66,6 @@ describe('htmlTableFormat', () => {
   });
 });
 
-
 describe('csvTableFormat', () => {
   test('basic csv', () => {
     expect(
@@ -77,7 +80,7 @@ describe('csvTableFormat', () => {
         ]
       ).text
     ).toBe(
-	`
+      `
 Name,Age
 Kimmy,19
 Alex,20
@@ -85,13 +88,13 @@ Alex,20
     );
   });
 
-      test('csv with whitespace and commas', () => {
+  test('csv with whitespace and commas', () => {
     expect(
       csvFormat(
         [
-            { name: 'Kimmy,', age: '19"' },
-            { name: 'Alex', age: ' 20' },
-	    { name: 'Garbage', age: {"x": 12} },
+          { name: 'Kimmy,', age: '19"' },
+          { name: 'Alex', age: ' 20' },
+          { name: 'Garbage', age: { x: 12 } },
         ],
         [
           { label: 'Name', field: 'name' },
@@ -99,7 +102,7 @@ Alex,20
         ]
       ).text
     ).toBe(
-	`
+      `
 Name," Age"
 "Kimmy,","19\\""
 Alex," 20"
