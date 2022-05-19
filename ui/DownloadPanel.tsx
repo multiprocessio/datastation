@@ -302,7 +302,9 @@ export function DownloadPanel({
             >
               {type}
             </Button>
-            {success === type + 'file' ? <IconCheck className="text-success" /> : null}
+            {success === type + 'file' ? (
+              <IconCheck className="text-success" />
+            ) : null}
           </div>
         ))
       ),
@@ -331,7 +333,9 @@ export function DownloadPanel({
             >
               {type}
             </Button>
-            {success === type + 'clipboard' ? <IconCheck className="text-success" /> : null}
+            {success === type + 'clipboard' ? (
+              <IconCheck className="text-success" />
+            ) : null}
           </div>
         ))
       ),

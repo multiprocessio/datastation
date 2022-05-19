@@ -274,7 +274,16 @@ export function ProgramInfo({ panel }: { panel: ProgramPanelInfo }) {
         .
         <br />
         <br />
-        SQL code panels have a wealth of helper functions for best-effort date parsing, URL parsing, math/string helpers, and statistical aggregate functions. Read about them <a target="_blank" href="https://github.com/multiprocessio/go-sqlite3-stdlib">here</a>.
+        SQL code panels have a wealth of helper functions for best-effort date
+        parsing, URL parsing, math/string helpers, and statistical aggregate
+        functions. Read about them{' '}
+        <a
+          target="_blank"
+          href="https://github.com/multiprocessio/go-sqlite3-stdlib"
+        >
+          here
+        </a>
+        .
       </React.Fragment>
     );
   }
