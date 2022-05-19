@@ -43,7 +43,7 @@ Custom Regexp.
 
 ![Script with code](./screens/the-basics-code-panel1.png)
 
-![Script with code 2](./screens/the-basics-group-by.png.png)
+![Script with code 2](./screens/the-basics-group-by.png)
 
 Script in Python, Ruby, Julia, PHP, Deno R, JavaScript or SQL.
 
