@@ -12,7 +12,7 @@ DataStation is an open-source data IDE for developers. It allows you
 to easily build graphs and tables with data pulled from SQL databases,
 logging databases, metrics databases, HTTP servers, and all kinds of
 text and binary files. Need to join or munge data? Write embedded
-scripts as needed in Python, JavaScript, Ruby, R, or Julia. All in one
+scripts as needed in languages like Python, JavaScript, R or SQL. All in one
 application.
 
 ![Remote file demo](./screens/datastation-0.9.0-cockroach-pandas.gif)
@@ -70,7 +70,7 @@ Custom Regexp.
 
 ![Script with code 2](./screens/the-basics-group-by.png)
 
-Script in Python, Ruby, Julia, PHP, Deno, R, JavaScript or SQL.
+Python, Ruby, Julia, PHP, Deno, R, JavaScript or SQL are supported scripting languages.
 
 [Read more about code panels.](https://datastation.multiprocess.io/docs/latest/Panels/Code_Panels.html)
 
