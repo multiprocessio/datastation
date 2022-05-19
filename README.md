@@ -59,15 +59,6 @@ Script in Python, Ruby, Julia, PHP, Deno R, JavaScript or SQL.
 
 Install instructions are available [here](https://datastation.multiprocess.io/docs/).
 
-## Try out the demo
-
-See [here](https://app.datastation.multiprocess.io/) for the free
-online demo.
-
-It uses in-memory evaluation so your data never leaves your
-machine/browser. Because it runs in browser memory it has some
-limitations that the desktop and server versions don't.
-
 ## Learn
 
 Find user guides for all different kinds of databases and scenarios
