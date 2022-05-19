@@ -20,9 +20,40 @@ application.
 ## Features
 
 * Build reports with graphs, charts and tables
-* Script against data in Python, JavaScript, Ruby, PHP, Julia, or R
+* Script against data
 * Cross-platform: Windows, macOS, and Linux
 * Easily fetch your data, wherever it is: 18 SQL and non-SQL databases, files, HTTP servers
+
+### Query databases and files
+
+![Query databases and files](./screens/the-basics-database-panel.png)
+
+Over 20 supported databases out of the box including: PostgreSQL,
+MySQL, MariaDB, SQLite, SQL Server, Oracle, ClickHouse, Influx 1
+(InfluxQL), Influx 2 (Flux), Prometheus, Elasticsearch, AWS Athena,
+Google BigQuery, Snowflake, Cassandra, Scylla, TimescaleDB,
+YugabyteDB, CockroachDB, CrateDB, QuestDB, and Airtable.
+
+Over 13 supported file formats including: Avro, Parquet, JSON, JSON
+Newline, Concatenated JSON, CSV, TSV, Excel (XLSX), ODS, Apache Error
+Logs, Apache Access Logs, Nginx Access Logs, and Newline-delimited
+Custom Regexp.
+
+### Script with code
+
+![Script with code](./screens/the-basics-code-panel1.png)
+
+![Script with code 2](./screens/the-basics-group-by.png.png)
+
+Script in Python, Ruby, Julia, PHP, Deno R, JavaScript or SQL.
+
+### Build graphs
+
+![Build graphs](./screens/the-basics-graph.png)
+
+### And export data
+
+![Export data](./screens/the-basics-post-http.png)
 
 ## Install
 
