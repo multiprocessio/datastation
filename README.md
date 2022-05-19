@@ -55,10 +55,14 @@ TimescaleDB,
 CrateDB, QuestDB, and
 [Airtable](https://datastation.multiprocess.io/docs/tutorials/Query_Airtable_with_DataStation.html).
 
+[Read more about database panels.](https://datastation.multiprocess.io/docs/latest/Panels/Database_Panels.html)
+
 Over 13 supported file formats including: Avro, Parquet, JSON, JSON
 Newline, Concatenated JSON, CSV, TSV, Excel (XLSX), ODS, Apache Error
 Logs, Apache Access Logs, Nginx Access Logs, and Newline-delimited
 Custom Regexp.
+
+[Read more about file panels.](https://datastation.multiprocess.io/docs/latest/Panels/File_Panels.html)
 
 ### Script with code
 
@@ -68,6 +72,8 @@ Custom Regexp.
 
 Script in Python, Ruby, Julia, PHP, Deno, R, JavaScript or SQL.
 
+[Read more about code panels.](https://datastation.multiprocess.io/docs/latest/Panels/Code_Panels.html)
+
 ### Build graphs
 
 ![Build graphs](./screens/the-basics-graph.png)
@@ -75,6 +81,8 @@ Script in Python, Ruby, Julia, PHP, Deno, R, JavaScript or SQL.
 ### And export data
 
 ![Export data](./screens/the-basics-post-http.png)
+
+[Read more about HTTP panels.](https://datastation.multiprocess.io/docs/latest/Panels/HTTP_Panels.html) Or [read more about macros](https://datastation.multiprocess.io/docs/latest/Panels/Macros.html).
 
 ## Install
 
