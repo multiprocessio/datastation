@@ -906,7 +906,7 @@ input + input[type='file'] {
   }
 
   a {
-    padding: 0 5px;
+    padding: 0 2px;
   }
 
   p code {
@@ -1258,13 +1258,6 @@ body.dark {
     color: var(--color-dark);
   }
 
-  .alert a,
-  .alert a:visited,
-  .alert a:focus,
-  .alert a:hover {
-    color: black;
-  }
-
   .editor-container .input,
   input.input:not([type='radio']):not([type='file']),
   label.input input:not([type='radio']):not([type='file']),
@@ -1309,10 +1302,6 @@ body.dark {
   .app--server {
     border: 0;
     height: 100%;
-  }
-
-  .alert {
-    color: black;
   }
 
   header {
@@ -1363,7 +1352,7 @@ body.dark {
 
   .dropdown-body {
     background: var(--background-dark);
-    box-shadow: 0 1px 3px 0 var(--border-dark);
+    box-shadow: 0 1px 3px 0 #5c5c97;
   }
 
   .section-title > .button {
@@ -1372,8 +1361,16 @@ body.dark {
     box-shadow: initial;
   }
 
+  .alert,
   .panel-out {
     background: #181824;
+  }
+
+  .alert-warning,
+  .alert-error,
+  .alert-fatal,
+  .alert-info {
+      border-color: black;
   }
 
   .ace_layer.ace_marker-layer .ace_active-line,

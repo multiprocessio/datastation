@@ -88,7 +88,8 @@ export function PanelList({
         : position;
     await crud.updatePanel(panel, index, !!insert);
 
-    if (VISUAL_PANELS.includes(panel.type)) {
+    // These panels are non-destructive so always re-run on change.
+    if (VISUAL_PANELS.includes(panel.type) || panel.type === 'file') {
       // Give time before re-evaling
       setTimeout(() => reevalPanel(panel.id), 300);
     }

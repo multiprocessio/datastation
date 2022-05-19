@@ -267,12 +267,14 @@ export function ProgramInfo({ panel }: { panel: ProgramPanelInfo }) {
     return (
       <React.Fragment>
         Use <code>DM_getPanel($panel_number_or_name)</code> to reference other
-        panels. Once you have called this once for one panel, use{' '}
-        <code>t_$panel_number_or_name</code> to refer to it again. Read more{' '}
+        panels. Read more{' '}
         <a target="_blank" href={DOCS_ROOT + '/Panels/Code_Panels.html'}>
           here
         </a>
         .
+        <br />
+        <br />
+        SQL code panels have a wealth of helper functions for best-effort date parsing, URL parsing, math/string helpers, and statistical aggregate functions. Read about them <a target="_blank" href="https://github.com/multiprocessio/go-sqlite3-stdlib">here</a>.
       </React.Fragment>
     );
   }

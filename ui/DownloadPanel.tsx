@@ -1,4 +1,4 @@
-import { IconDownload } from '@tabler/icons';
+import { IconCheck, IconDownload } from '@tabler/icons';
 import circularSafeStringify from 'json-stringify-safe';
 import React from 'react';
 import { MODE } from '../shared/constants';
@@ -241,10 +241,10 @@ async function resultsTo(
   }
 
   if (output === 'file') {
-    download(filename + extension, dataURL);
-  } else {
-    navigator.clipboard.writeText(dataURL);
+    return download(filename + extension, dataURL);
   }
+
+  return navigator.clipboard.writeText(dataURL);
 }
 
 export function DownloadPanel({
@@ -266,6 +266,15 @@ export function DownloadPanel({
       .map((p) => ({ field: p, label: p }));
   }
 
+  const [success, setSuccess] = React.useState('');
+  const successTimeout = React.useRef<ReturnType<typeof setTimeout>>();
+  React.useEffect(() => {
+    if (success) {
+      clearTimeout(successTimeout.current);
+      successTimeout.current = setTimeout(() => setSuccess(''), 10_000);
+    }
+  }, [success, setSuccess]);
+
   // TODO: handle downloading/copying image
 
   const groups = [
@@ -276,15 +285,25 @@ export function DownloadPanel({
         ...(tableType ? ['CSV', 'HTML Table', 'Markdown Table'] : []),
         'JSON',
       ].map((type: DataFormat) =>
-        Dropdown.makeItem(type + 'file', (close) => (
-          <Button
-            onClick={() => {
-              resultsTo(panel, panelRef, results, orderedKeys, type, 'file');
-              close();
-            }}
-          >
-            {type}
-          </Button>
+        Dropdown.makeItem(type + 'file', () => (
+          <div className="vertical-align-center">
+            <Button
+              onClick={async () => {
+                await resultsTo(
+                  panel,
+                  panelRef,
+                  results,
+                  orderedKeys,
+                  type,
+                  'file'
+                );
+                setSuccess(type + 'file');
+              }}
+            >
+              {type}
+            </Button>
+            {success === type + 'file' ? <IconCheck className="text-success" /> : null}
+          </div>
         ))
       ),
     },
@@ -295,27 +314,30 @@ export function DownloadPanel({
         ...(tableType ? ['CSV', 'HTML Table', 'Markdown Table'] : []),
         'JSON',
       ].map((type: DataFormat) =>
-        Dropdown.makeItem(type + 'clipboard', (close) => (
-          <Button
-            onClick={() => {
-              resultsTo(
-                panel,
-                panelRef,
-                results,
-                orderedKeys,
-                type,
-                'clipboard'
-              );
-              close();
-            }}
-          >
-            {type}
-          </Button>
+        Dropdown.makeItem(type + 'clipboard', () => (
+          <div className="vertical-align-center">
+            <Button
+              onClick={async () => {
+                await resultsTo(
+                  panel,
+                  panelRef,
+                  results,
+                  orderedKeys,
+                  type,
+                  'clipboard'
+                );
+                setSuccess(type + 'clipboard');
+              }}
+            >
+              {type}
+            </Button>
+            {success === type + 'clipboard' ? <IconCheck className="text-success" /> : null}
+          </div>
         ))
       ),
     },
   ];
-  //           fetchAndDownloadResults(panel, panelRef, results)
+
   return (
     <Dropdown
       className="download-panel"
