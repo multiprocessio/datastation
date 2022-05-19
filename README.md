@@ -28,11 +28,32 @@ application.
 
 ![Query databases and files](./screens/the-basics-database-panel.png)
 
-Over 20 supported databases out of the box including: PostgreSQL,
-MySQL, MariaDB, SQLite, SQL Server, Oracle, ClickHouse, Influx 1
-(InfluxQL), Influx 2 (Flux), Prometheus, Elasticsearch, AWS Athena,
-Google BigQuery, Snowflake, Cassandra, Scylla, TimescaleDB,
-YugabyteDB, CockroachDB, CrateDB, QuestDB, and Airtable.
+Over 20 supported databases out of the box including:
+[PostgreSQL](https://datastation.multiprocess.io/docs/tutorials/Query_PostgreSQL_with_DataStation.html),
+[MySQL](https://datastation.multiprocess.io/docs/tutorials/Query_MySQL_with_DataStation.html),
+MariaDB,
+[SQLite](https://datastation.multiprocess.io/docs/tutorials/Query_SQLite_with_DataStation.html),
+[SQL
+Server](https://datastation.multiprocess.io/docs/tutorials/Query_SQL_Server_with_DataStation.html),
+[Oracle](https://datastation.multiprocess.io/docs/tutorials/Query_Oracle_with_DataStation.html),
+[ClickHouse](https://datastation.multiprocess.io/docs/tutorials/Query_ClickHouse_with_DataStation.html),
+[Influx 1
+(InfluxQL)](https://datastation.multiprocess.io/docs/tutorials/Query_Influx_(1.x)_with_DataStation_(InfluxQL).html),
+[Influx 2
+(Flux)](https://datastation.multiprocess.io/docs/tutorials/Query_Influx_(2.x)_with_DataStation_(Flux).html),
+[Prometheus](https://datastation.multiprocess.io/docs/tutorials/Query_Prometheus_with_DataStation.html),
+[Elasticsearch](https://datastation.multiprocess.io/docs/tutorials/Query_Elasticsearch_with_DataStation.html),
+[AWS
+Athena](https://datastation.multiprocess.io/docs/tutorials/Query_AWS_Athena_with_DataStation.html),
+[Google
+BigQuery](https://datastation.multiprocess.io/docs/tutorials/Query_BigQuery_with_DataStation.html),
+Snowflake, Cassandra,
+[Scylla](https://datastation.multiprocess.io/docs/tutorials/Query_Scylla_with_DataStation.html),
+TimescaleDB,
+[YugabyteDB](https://datastation.multiprocess.io/docs/tutorials/Query_Yugabyte_with_DataStation.html),
+[CockroachDB](https://datastation.multiprocess.io/docs/tutorials/Query_CockroachDB_with_DataStation.html),
+CrateDB, QuestDB, and
+[Airtable](https://datastation.multiprocess.io/docs/tutorials/Query_Airtable_with_DataStation.html).
 
 Over 13 supported file formats including: Avro, Parquet, JSON, JSON
 Newline, Concatenated JSON, CSV, TSV, Excel (XLSX), ODS, Apache Error
@@ -45,7 +66,7 @@ Custom Regexp.
 
 ![Script with code 2](./screens/the-basics-group-by.png)
 
-Script in Python, Ruby, Julia, PHP, Deno R, JavaScript or SQL.
+Script in Python, Ruby, Julia, PHP, Deno, R, JavaScript or SQL.
 
 ### Build graphs
 
