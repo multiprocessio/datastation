@@ -44,5 +44,8 @@
   "dependencies": {
     "core-js": "^3.22.5",
     "react-dom": "17"
-  }
+  },
+    "resolutions": {
+	    "cheerio": "1.0.0-rc.3"
+    }
 }
