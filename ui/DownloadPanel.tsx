@@ -311,7 +311,7 @@ export function DownloadPanel({
     },
     {
       name: 'To clipboard',
-      id: 'file',
+      id: 'clipboard',
       items: [
         ...(tableType ? ['CSV', 'HTML Table', 'Markdown Table'] : []),
         'JSON',

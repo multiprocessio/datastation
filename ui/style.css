@@ -137,6 +137,10 @@ header iframe {
   height: 100% !important;
 }
 
+.ace_editor.ace_autocomplete {
+  width: 500px;
+}
+
 .ace_gutter-layer {
   background: var(--darker-light);
 }
