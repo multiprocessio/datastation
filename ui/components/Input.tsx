@@ -38,6 +38,7 @@ export function Input({
         value={local}
         type={type}
         className={label ? '' : inputClass}
+        onChange={(e) => setLocal(e.target.value)}
         onBlur={() => onChange(String(local))}
         {...props}
         size={autoWidth ? Math.max(20, String(value).length) : undefined}
