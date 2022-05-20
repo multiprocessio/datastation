@@ -110,8 +110,533 @@ export function ProgramPanelDetails({
   );
 }
 
+const builtins: Record<
+  ProgramPanelInfo['program']['type'],
+  Array<{ value: string; meta: string; score: number }>
+> = {
+  sql: [
+    {
+      value: 'cast(a AS text)',
+      meta: 'Convert to type',
+      score: 1000,
+    },
+    {
+      value: 'abs(n)',
+      meta: 'Absolute value',
+      score: 1000,
+    },
+    {
+      value: 'coalesce(a, b[, ...])',
+      meta: 'Convert nulls',
+      score: 1000,
+    },
+    {
+      value: 'format(formatString[, ...])',
+      meta: 'Format values',
+      score: 1000,
+    },
+    {
+      value: 'glob(match, string)',
+      meta: 'Glob match',
+      score: 1000,
+    },
+    {
+      value: 'ifnull(test, then)',
+      meta: 'Coalesce with one case',
+      score: 1000,
+    },
+    {
+      value: 'iif(test, then, else)',
+      meta: '',
+      score: 1000,
+    },
+    {
+      value: 'instr(haystack, needle)',
+      meta: '1-index position in string',
+      score: 1000,
+    },
+    {
+      value: 'length(s)',
+      meta: 'Length of string',
+      score: 1000,
+    },
+    {
+      value: 'like(match, a)',
+      meta: 'SQL LIKE match',
+      score: 1000,
+    },
+    {
+      value: 'lower(s)',
+      meta: 'To lower case',
+      score: 1000,
+    },
+    {
+      value: 'ltrim(s[, characters])',
+      meta: 'Remove characters on left',
+      score: 1000,
+    },
+    {
+      value: 'max(a, b[, ...])',
+      meta: 'Max of n values',
+      score: 1000,
+    },
+    {
+      value: 'min(a, b[, ...])',
+      meta: 'Min of n values',
+      score: 1000,
+    },
+    {
+      value: 'nullif(a, b)',
+      meta: 'a if a != b, else null',
+      score: 1000,
+    },
+    {
+      value: 'printf(formatString[, ...])',
+      meta: 'Format values',
+      score: 1000,
+    },
+    {
+      value: 'random()',
+      meta: 'Generate pseudo-random int',
+      score: 1000,
+    },
+    {
+      value: 'replace(s, what, with)',
+      meta: 'String substitution',
+      score: 1000,
+    },
+    {
+      value: 'round(n[, mDigits])',
+      meta: 'Round to m digits',
+      score: 1000,
+    },
+    {
+      value: 'rtrim(s[, characters])',
+      meta: 'Remove characters on right',
+      score: 1000,
+    },
+    {
+      value: 'sign(n)',
+      meta: 'Sign of number',
+      score: 1000,
+    },
+    {
+      value: 'substr(s, index[, length])',
+      meta: 'Substring from index',
+      score: 1000,
+    },
+    {
+      value: 'substring(s, index[, length])',
+      meta: 'Substring from index',
+      score: 1000,
+    },
+    {
+      value: 'trim(s[, characters])',
+      meta: 'Remove characters',
+      score: 1000,
+    },
+    {
+      value: 'upper(s)',
+      meta: 'To upper case',
+      score: 1000,
+    },
+    // Aggregates
+    {
+      value: 'avg(a)',
+      meta: 'Average of column',
+      score: 1000,
+    },
+    {
+      value: 'count(a)',
+      meta: 'Number in group',
+      score: 1000,
+    },
+    {
+      value: 'group_concat(a[, separator])',
+      meta: 'Column in group concatenated',
+      score: 1000,
+    },
+    {
+      value: 'min(a)',
+      meta: 'Smallest value in group',
+      score: 1000,
+    },
+    {
+      value: 'max(a)',
+      meta: 'Largest value in group',
+      score: 1000,
+    },
+    {
+      value: 'sum(n)',
+      meta: 'Sum of column',
+      score: 1000,
+    },
+    {
+      value: 'total(n)',
+      meta: 'Sum of column',
+      score: 1000,
+    },
+  ]
+    .concat([
+      // These come from go-sqlite3-stdlib
+      {
+        value: 'repeat(s, nTimes)',
+        meta: 'String n times',
+        score: 1000,
+      },
+      {
+        value: 'replicate(s, nTimes)',
+        meta: 'String n times',
+        score: 1000,
+      },
+      {
+        value: 'strpos(s, substring)',
+        meta: '0-index position in string',
+        score: 1000,
+      },
+      {
+        value: 'charindex(s, substring)',
+        meta: '0-index position in string',
+        score: 1000,
+      },
+      {
+        value: 'reverse(s)',
+        meta: 'Reverse string',
+        score: 1000,
+      },
+      {
+        value: 'lpad(s, length[, with])',
+        meta: 'Left pad',
+        score: 1000,
+      },
+      {
+        value: 'rpad(s, length[, with])',
+        meta: 'Right pad',
+        score: 1000,
+      },
+      {
+        value: 'split_part(s, on, index)',
+        meta: 'Split and return part at index',
+        score: 1000,
+      },
+      {
+        value: 'regexp_split_part(s, on, index)',
+        meta: 'Split with regexp and return part at index',
+        score: 1000,
+      },
+      {
+        value: 'regexp_count(s, re)',
+        meta: 'Count regexp matches',
+        score: 1000,
+      },
+      {
+        value: 'url_scheme(s)',
+        meta: 'Scheme from URL',
+        score: 1000,
+      },
+      {
+        value: 'url_host(s)',
+        meta: 'Host from URL',
+        score: 1000,
+      },
+      {
+        value: 'url_port(s)',
+        meta: 'Port from URL',
+        score: 1000,
+      },
+      {
+        value: 'url_path(s)',
+        meta: 'Path from URL',
+        score: 1000,
+      },
+      {
+        value: 'url_param(s, key)',
+        meta: 'Param from URL',
+        score: 1000,
+      },
+      {
+        value: 'url_fragment(s)',
+        meta: 'Fragment from URL',
+        score: 1000,
+      },
+      {
+        value: 'date_year(s)',
+        meta: 'Best-effort year from date',
+        score: 1000,
+      },
+      {
+        value: 'date_month(s)',
+        meta: 'Best-effort month from date',
+        score: 1000,
+      },
+      {
+        value: 'date_day(s)',
+        meta: 'Best-effort day from date',
+        score: 1000,
+      },
+      {
+        value: 'date_yearday(s)',
+        meta: 'Best-effort day in year from date',
+        score: 1000,
+      },
+      {
+        value: 'date_hour(s)',
+        meta: 'Best-effort hour from date',
+        score: 1000,
+      },
+      {
+        value: 'date_minute(s)',
+        meta: 'Best-effort minute from date',
+        score: 1000,
+      },
+      {
+        value: 'date_second(s)',
+        meta: 'Best-effort second from date',
+        score: 1000,
+      },
+      {
+        value: 'date_unix(s)',
+        meta: 'Best-effort date to UNIX timestamp',
+        score: 1000,
+      },
+      {
+        value: 'date_rfc3339(s)',
+        meta: 'Best-effort date to ISO format',
+        score: 1000,
+      },
+      {
+        value: 'base64(s)',
+        meta: 'Base64 encode',
+        score: 1000,
+      },
+      {
+        value: 'from_base64(s)',
+        meta: 'Base64 decode',
+        score: 1000,
+      },
+      {
+        value: 'base32(s)',
+        meta: 'Base32 encode',
+        score: 1000,
+      },
+      {
+        value: 'from_base32(s)',
+        meta: 'Base32 decode',
+        score: 1000,
+      },
+      {
+        value: 'md5(s)',
+        meta: 'Hex md5 sum',
+        score: 1000,
+      },
+      {
+        value: 'sha1(s)',
+        meta: 'Hex sha1 sum',
+        score: 1000,
+      },
+      {
+        value: 'sha256(s)',
+        meta: 'Hex sha1 sum',
+        score: 1000,
+      },
+      {
+        value: 'sha512(s)',
+        meta: 'Hex sha512 sum',
+        score: 1000,
+      },
+      {
+        value: 'sha3_256(s)',
+        meta: 'Hex sha3_256 sum',
+        score: 1000,
+      },
+      {
+        value: 'sha3_512(s)',
+        meta: 'Hex sha3_512 sum',
+        score: 1000,
+      },
+      {
+        value: 'blake2b_256(s)',
+        meta: 'Hex blake2b_256 sum',
+        score: 1000,
+      },
+      {
+        value: 'blake2b_512(s)',
+        meta: 'Hex blake2b_512 sum',
+        score: 1000,
+      },
+      // Aggregate
+      {
+        value: 'stddev(n)',
+        meta: 'Standard deviation',
+        score: 1000,
+      },
+      {
+        value: 'stdev(n)',
+        meta: 'Standard deviation',
+        score: 1000,
+      },
+      {
+        value: 'stddev_pop(n)',
+        meta: 'Standard deviation',
+        score: 1000,
+      },
+      {
+        value: 'mode(a)',
+        meta: 'Most common value',
+        score: 1000,
+      },
+      {
+        value: 'median(a)',
+        meta: 'Value in the middle',
+        score: 1000,
+      },
+      {
+        value: 'percentile(a, perc0to100)',
+        meta: 'Discrete percentile',
+        score: 1000,
+      },
+      {
+        value: 'perc(a, perc0to100)',
+        meta: 'Discrete percentile',
+        score: 1000,
+      },
+      {
+        value: 'percentile_cont(a, perc0to100)',
+        meta: 'Continuous percentile',
+        score: 1000,
+      },
+      {
+        value: 'perc_cont(a, perc0to100)',
+        meta: 'Continuous percentile',
+        score: 1000,
+      },
+      {
+        value: 'perc_25(a)',
+        meta: 'Discrete 25th percentile',
+        score: 1000,
+      },
+      {
+        value: 'percentile_25(a)',
+        meta: 'Discrete 25th percentile',
+        score: 1000,
+      },
+      {
+        value: 'perc_cont_25(a)',
+        meta: 'Continous 25th percentile',
+        score: 1000,
+      },
+      {
+        value: 'percentile_cont_25(a)',
+        meta: 'Continuous 25th percentile',
+        score: 1000,
+      },
+      {
+        value: 'perc_50(a)',
+        meta: 'Discrete 50th percentile',
+        score: 1000,
+      },
+      {
+        value: 'percentile_50(a)',
+        meta: 'Discrete 50th percentile',
+        score: 1000,
+      },
+      {
+        value: 'perc_cont_50(a)',
+        meta: 'Continous 50th percentile',
+        score: 1000,
+      },
+      {
+        value: 'percentile_cont_50(a)',
+        meta: 'Continuous 50th percentile',
+        score: 1000,
+      },
+      {
+        value: 'perc_75(a)',
+        meta: 'Discrete 75th percentile',
+        score: 1000,
+      },
+      {
+        value: 'percentile_75(a)',
+        meta: 'Discrete 75th percentile',
+        score: 1000,
+      },
+      {
+        value: 'perc_cont_75(a)',
+        meta: 'Continuous 75th percentile',
+        score: 1000,
+      },
+      {
+        value: 'percentile_cont_75(a)',
+        meta: 'Continuous 75th percentile',
+        score: 1000,
+      },
+      {
+        value: 'perc_90(a)',
+        meta: 'Discrete 90th percentile',
+        score: 1000,
+      },
+      {
+        value: 'percentile_90(a)',
+        meta: 'Discrete 90th percentile',
+        score: 1000,
+      },
+      {
+        value: 'perc_cont_90(a)',
+        meta: 'Continuous 90th percentile',
+        score: 1000,
+      },
+      {
+        value: 'percentile_cont_90(a)',
+        meta: 'Continuous 90th percentile',
+        score: 1000,
+      },
+      {
+        value: 'perc_95(a)',
+        meta: 'Discrete 95th percentile',
+        score: 1000,
+      },
+      {
+        value: 'percentile_95(a)',
+        meta: 'Discrete 95th percentile',
+        score: 1000,
+      },
+      {
+        value: 'perc_cont_95(a)',
+        meta: 'Continuous 95th percentile',
+        score: 1000,
+      },
+      {
+        value: 'percentile_cont_95(a)',
+        meta: 'Continuous 95th percentile',
+        score: 1000,
+      },
+      {
+        value: 'perc_99(a)',
+        meta: 'Discrete 99th percentile',
+        score: 1000,
+      },
+      {
+        value: 'percentile_99(a)',
+        meta: 'Discrete 99th percentile',
+        score: 1000,
+      },
+      {
+        value: 'perc_cont_99(a)',
+        meta: 'Continuous 99th percentile',
+        score: 1000,
+      },
+      {
+        value: 'percentile_cont_99(a)',
+        meta: 'Continuous 99th percentile',
+        score: 1000,
+      },
+    ])
+    .sort((a, b) => (a.value < b.value ? -1 : 1)),
+};
+
 export function builtinCompletions(
-  tokenIteratorFactory: () => Ace.TokenIterator
+  tokenIteratorFactory: () => Ace.TokenIterator,
+  builtins: Array<{ value: string; score: number; meta: string }> = []
 ) {
   const ti = tokenIteratorFactory();
   const token = ti.getCurrentToken();
@@ -121,14 +646,15 @@ export function builtinCompletions(
   }
 
   return [
+    ...builtins,
     {
-      value: 'DM_getPanel("indexOrName")',
-      meta: 'Builtin',
+      value: 'DM_getPanel("panelName")',
+      meta: 'DataStation Panels',
       score: 1000,
     },
     {
       value: 'DM_setPanel(result)',
-      meta: 'Builtin',
+      meta: 'DataStation Panels',
       score: 1000,
     },
   ];
@@ -225,10 +751,13 @@ export function stringPanelShapeCompletions(
   });
 }
 
-export function makeAutocomplete(panels: Array<PanelInfo>) {
+export function makeAutocomplete(
+  panels: Array<PanelInfo>,
+  builtins: Array<{ value: string; score: number; meta: string }> = []
+) {
   return (tokenIteratorFactory: () => Ace.TokenIterator, prefix: string) => {
     return [
-      ...builtinCompletions(tokenIteratorFactory),
+      ...builtinCompletions(tokenIteratorFactory, builtins),
       ...panelNameCompletions(tokenIteratorFactory, panels),
       ...dotAccessPanelShapeCompletions(tokenIteratorFactory, panels),
       ...stringPanelShapeCompletions(tokenIteratorFactory, panels),
@@ -248,7 +777,10 @@ export function ProgramPanelBody({
 
   return (
     <CodeEditor
-      autocomplete={makeAutocomplete(panels.filter((p) => p.id !== panel.id))}
+      autocomplete={makeAutocomplete(
+        panels.filter((p) => p.id !== panel.id),
+        builtins[language] || []
+      )}
       id={'editor-' + panel.id}
       onKeyDown={keyboardShortcuts}
       value={panel.content}
@@ -267,9 +799,20 @@ export function ProgramInfo({ panel }: { panel: ProgramPanelInfo }) {
     return (
       <React.Fragment>
         Use <code>DM_getPanel($panel_number_or_name)</code> to reference other
-        panels. Once you have called this once for one panel, use{' '}
-        <code>t_$panel_number_or_name</code> to refer to it again. Read more{' '}
+        panels. Read more{' '}
         <a target="_blank" href={DOCS_ROOT + '/Panels/Code_Panels.html'}>
+          here
+        </a>
+        .
+        <br />
+        <br />
+        SQL code panels have a wealth of helper functions for best-effort date
+        parsing, URL parsing, math/string helpers, and statistical aggregate
+        functions. Read about them{' '}
+        <a
+          target="_blank"
+          href="https://github.com/multiprocessio/go-sqlite3-stdlib"
+        >
           here
         </a>
         .

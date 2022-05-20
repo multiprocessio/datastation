@@ -222,7 +222,6 @@ export function CodeEditor({
                 enableLiveAutocompletion: Boolean(
                   autocomplete && !autocompleteDisabled
                 ),
-                enableSnippets: Boolean(autocomplete && !autocompleteDisabled),
               }
         }
       />

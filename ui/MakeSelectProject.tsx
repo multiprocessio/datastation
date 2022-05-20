@@ -70,7 +70,6 @@ export function MakeSelectProject() {
       <p>Pick a name for this project to get started.</p>
       <div className="form-row">
         <Input
-          noDelay
           value={projectNameTmp}
           label="Project name"
           onChange={(v) => setProjectNameTmp(v)}

@@ -1,7 +1,6 @@
 const React = require('react');
 const { act } = require('react-dom/test-utils');
 const { wait } = require('../../shared/promise');
-const { INPUT_SYNC_PERIOD } = require('../components/Input');
 const enzyme = require('enzyme');
 const {
   ProjectState,
@@ -44,6 +43,7 @@ test('shows filagg panel details', async () => {
 
   const sortField = () => component.find('[data-test-id="sort-field"] input');
   await sortField().simulate('change', { target: { value: 'flubberty' } });
+  await sortField().simulate('blur');
   await wait();
   expect(fp.filagg.sortOn).toBe('flubberty');
 });
