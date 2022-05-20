@@ -103,9 +103,7 @@ export function PanelList({
     );
 
     const orderedFields = shapeIsOk
-      ? orderedObjectFields(
-          (panel.resultMeta.shape as ArrayShape).children as ObjectShape
-        )
+      ? orderedObjectFields(panel.resultMeta.shape)
       : [];
     let firstNumber: string;
     let firstString: string;

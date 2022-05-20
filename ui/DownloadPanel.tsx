@@ -254,7 +254,30 @@ export function DownloadPanel({
   panel: PanelInfo;
   panelRef: React.RefObject<HTMLCanvasElement>;
 }) {
+  const [success, setSuccess] = React.useState('');
+  const successTimeout = React.useRef<ReturnType<typeof setTimeout>>();
+  React.useEffect(() => {
+    if (success) {
+      clearTimeout(successTimeout.current);
+      successTimeout.current = setTimeout(() => setSuccess(''), 10_000);
+    }
+  }, [success, setSuccess]);
+
   const results = panel.resultMeta || new PanelResult();
+  if (panel.type === 'graph' || results.size > 1_000_000) {
+    return (
+      <Button
+        icon
+        disabled={!results.lastRun}
+        onClick={() => {
+          resultsTo(panel, panelRef, results, [], 'JSON', 'file');
+        }}
+      >
+        <IconDownload />
+      </Button>
+    );
+  }
+
   const tableType = wellFormedGraphInput(results.shape);
   let orderedKeys: TableColumn[] = [];
   if (panel.type === 'table') {
@@ -265,17 +288,6 @@ export function DownloadPanel({
       .sort()
       .map((p) => ({ field: p, label: p }));
   }
-
-  const [success, setSuccess] = React.useState('');
-  const successTimeout = React.useRef<ReturnType<typeof setTimeout>>();
-  React.useEffect(() => {
-    if (success) {
-      clearTimeout(successTimeout.current);
-      successTimeout.current = setTimeout(() => setSuccess(''), 10_000);
-    }
-  }, [success, setSuccess]);
-
-  // TODO: handle downloading/copying image
 
   const groups = [
     {
