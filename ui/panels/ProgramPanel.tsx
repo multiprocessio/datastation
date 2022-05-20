@@ -315,6 +315,21 @@ const builtins: Record<
         score: 1000,
       },
       {
+        value: 'split_part(s, on, index)',
+        meta: 'Split and return part at index',
+        score: 1000,
+      },
+      {
+        value: 'regexp_split_part(s, on, index)',
+        meta: 'Split with regexp and return part at index',
+        score: 1000,
+      },
+      {
+        value: 'regexp_count(s, re)',
+        meta: 'Count regexp matches',
+        score: 1000,
+      },
+      {
         value: 'url_scheme(s)',
         meta: 'Scheme from URL',
         score: 1000,
@@ -387,6 +402,66 @@ const builtins: Record<
       {
         value: 'date_rfc3339(s)',
         meta: 'Best-effort date to ISO format',
+        score: 1000,
+      },
+      {
+        value: 'base64(s)',
+        meta: 'Base64 encode',
+        score: 1000,
+      },
+      {
+        value: 'from_base64(s)',
+        meta: 'Base64 decode',
+        score: 1000,
+      },
+      {
+        value: 'base32(s)',
+        meta: 'Base32 encode',
+        score: 1000,
+      },
+      {
+        value: 'from_base32(s)',
+        meta: 'Base32 decode',
+        score: 1000,
+      },
+      {
+        value: 'md5(s)',
+        meta: 'Hex md5 sum',
+        score: 1000,
+      },
+      {
+        value: 'sha1(s)',
+        meta: 'Hex sha1 sum',
+        score: 1000,
+      },
+      {
+        value: 'sha256(s)',
+        meta: 'Hex sha1 sum',
+        score: 1000,
+      },
+      {
+        value: 'sha512(s)',
+        meta: 'Hex sha512 sum',
+        score: 1000,
+      },
+      {
+        value: 'sha3_256(s)',
+        meta: 'Hex sha3_256 sum',
+        score: 1000,
+      },
+      {
+        value: 'sha3_512(s)',
+        meta: 'Hex sha3_512 sum',
+        score: 1000,
+      },
+      {
+        value: 'blake2b_256(s)',
+        meta: 'Hex blake2b_256 sum',
+        score: 1000,
+      },
+      {
+        value: 'blake2b_512(s)',
+        meta: 'Hex blake2b_512 sum',
         score: 1000,
       },
       // Aggregate
