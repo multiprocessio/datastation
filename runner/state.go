@@ -369,10 +369,3 @@ type ProjectState struct {
 	OriginalVersion string `json:"originalVersion" db:"originalVersion"`
 	LastVersion     string `json:"lastVersion" db:"lastVersion"`
 }
-
-type CacheSettings struct {
-	CachePresent bool
-	Enabled      bool
-}
-
-var DefaultCacheSettings = &CacheSettings{} // Bools are set to false by default.

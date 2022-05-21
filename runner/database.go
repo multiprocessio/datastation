@@ -41,13 +41,6 @@ func getDatabaseHostPortExtra(raw, defaultPort string) (string, string, string, 
 	return host, port, extra, err
 }
 
-var SQLITE_PRAGMAS = []string{
-	"journal_mode = WAL",
-	"synchronous = normal",
-	"temp_store = memory",
-	"mmap_size = 30000000000",
-}
-
 var defaultPorts = map[DatabaseConnectorInfoType]string{
 	PostgresDatabase:      "5432",
 	MySQLDatabase:         "3306",
@@ -340,6 +333,14 @@ func (ec EvalContext) loadJSONArrayPanel(projectId, panelId string) (chan map[st
 	return loadJSONArrayFile(f)
 }
 
+
+type CacheSettings struct {
+	CachePresent bool
+	Enabled      bool
+}
+
+var DefaultCacheSettings = &CacheSettings{} // Bools are set to false by default.
+
 func (ec EvalContext) EvalDatabasePanel(
 	project *ProjectState,
 	pageIndex int,
@@ -487,13 +488,8 @@ func (ec EvalContext) EvalDatabasePanel(
 			return err
 		}
 
-		if vendor == "sqlite3_extended" {
-			for _, pragma := range SQLITE_PRAGMAS {
-				_, err = db.Exec("PRAGMA " + pragma)
-				if err != nil {
-					return err
-				}
-			}
+		if vendor == "sqlite3_extended" && !cache.CachePresent && !cache.Enabled {
+			return ec.evalSQLite(dbInfo, project.Id, panel.Id, panel.Content, db, idMap, idShapeMap)
 		}
 
 		preparer := func(q string) (func([]any) error, func(), error) {
@@ -536,7 +532,6 @@ func (ec EvalContext) EvalDatabasePanel(
 					}
 
 					return nil, rows.Err()
-
 				},
 				project.Id,
 				query,

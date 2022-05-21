@@ -461,11 +461,12 @@ func importAndRun(
 ) ([]map[string]any, error) {
 	if cacheSettings.CachePresent {
 		return makeQuery(query)
-	}
-	for _, panel := range panelsToImport {
-		err := importPanel(createTable, prepare, makeQuery, projectId, query, panel, qt, panelResultLoader, cacheSettings.Enabled)
-		if err != nil {
-			return nil, err
+	} else if cacheSettings.Enabled {
+		for _, panel := range panelsToImport {
+			err := importPanel(createTable, prepare, makeQuery, projectId, query, panel, qt, panelResultLoader, cacheSettings.Enabled)
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
 

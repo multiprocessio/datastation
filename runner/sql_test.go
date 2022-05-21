@@ -336,11 +336,21 @@ func Test_sqlIngest_e2e(t *testing.T) {
 		f := ec.GetPanelResultsFile(project.Id, panel2.Id)
 		a, err := loadJSONArrayFile(f)
 		var pieces []any
-		for r := range a {
-			pieces = append(pieces, r)
+	outer:
+		for a != nil {
+			select {
+			case r, ok := <- a:
+				if !ok {
+					break outer
+				}
+				pieces = append(pieces, r)
+			}
 		}
 		assert.Nil(t, err)
 		assert.Equal(t, test.expResult, pieces)
+
+		//TODO: delete
+		break
 	}
 }
 
