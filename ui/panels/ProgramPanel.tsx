@@ -110,7 +110,7 @@ export function ProgramPanelDetails({
   );
 }
 
-const builtins: Record<
+export const BUILTINS: Record<
   ProgramPanelInfo['program']['type'],
   Array<{ value: string; meta: string; score: number }>
 > = {
@@ -636,7 +636,8 @@ const builtins: Record<
 
 export function builtinCompletions(
   tokenIteratorFactory: () => Ace.TokenIterator,
-  builtins: Array<{ value: string; score: number; meta: string }> = []
+  builtins: Array<{ value: string; meta: string; score: number }>,
+  language: ProgramPanelInfo['program']['type']
 ) {
   const ti = tokenIteratorFactory();
   const token = ti.getCurrentToken();
@@ -649,14 +650,18 @@ export function builtinCompletions(
     ...builtins,
     {
       value: 'DM_getPanel("panelName")',
-      meta: 'DataStation Panels',
+      meta: 'Fetch results of this DataStation panel',
       score: 1000,
     },
-    {
-      value: 'DM_setPanel(result)',
-      meta: 'DataStation Panels',
-      score: 1000,
-    },
+    ...(language === 'sql'
+      ? []
+      : [
+          {
+            value: 'DM_setPanel(result)',
+            meta: 'Set results of this DataStation panel',
+            score: 1000,
+          },
+        ]),
   ];
 }
 
@@ -753,11 +758,12 @@ export function stringPanelShapeCompletions(
 
 export function makeAutocomplete(
   panels: Array<PanelInfo>,
-  builtins: Array<{ value: string; score: number; meta: string }> = []
+  builtins: Array<{ value: string; meta: string; score: number }>,
+  language: ProgramPanelInfo['program']['type']
 ) {
   return (tokenIteratorFactory: () => Ace.TokenIterator, prefix: string) => {
     return [
-      ...builtinCompletions(tokenIteratorFactory, builtins),
+      ...builtinCompletions(tokenIteratorFactory, builtins, language),
       ...panelNameCompletions(tokenIteratorFactory, panels),
       ...dotAccessPanelShapeCompletions(tokenIteratorFactory, panels),
       ...stringPanelShapeCompletions(tokenIteratorFactory, panels),
@@ -779,7 +785,8 @@ export function ProgramPanelBody({
     <CodeEditor
       autocomplete={makeAutocomplete(
         panels.filter((p) => p.id !== panel.id),
-        builtins[language] || []
+        BUILTINS[language] || [],
+        language
       )}
       id={'editor-' + panel.id}
       onKeyDown={keyboardShortcuts}
