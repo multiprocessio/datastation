@@ -4,6 +4,7 @@ import {
   IconArrowsDiagonalMinimize2,
   IconArrowsMaximize,
   IconArrowsMinimize,
+  IconBraces,
   IconChevronDown,
   IconChevronUp,
   IconEye,
@@ -17,10 +18,11 @@ import formatDistanceToNow from 'date-fns/formatDistanceToNow';
 import circularSafeStringify from 'json-stringify-safe';
 import * as React from 'react';
 import { toString } from 'shape';
+import { format as sqlFormat } from 'sql-formatter';
 import { MODE_FEATURES } from '../shared/constants';
 import { EVAL_ERRORS } from '../shared/errors';
 import log from '../shared/log';
-import { PanelInfo, PanelResult } from '../shared/state';
+import { PanelInfo, PanelResult, ProgramPanelInfo } from '../shared/state';
 import { humanSize } from '../shared/text';
 import { panelRPC } from './asyncRPC';
 import { Alert } from './components/Alert';
@@ -255,6 +257,22 @@ export function Panel({
     setError(results.exception);
   }, [results.exception]);
 
+  function formatThis() {
+    const old = panel.content;
+    try {
+      panel.content = sqlFormat(old);
+      if (panel.content === old) {
+        // Don't update if it hasn't changed
+        return;
+      }
+    } catch (e) {
+      log.error(e);
+      panel.content = old;
+    }
+
+    updatePanel(panel);
+  }
+
   async function evalThis() {
     if (killable) {
       await killProcess();
@@ -449,6 +467,16 @@ export function Panel({
                   {loading ? <IconPlayerPause /> : <IconPlayerPlay />}
                 </Button>
               </span>
+              {panel.type ===
+                'database' /* TODO: this format should become part of the paneldetails object */ ||
+              (panel.type === 'program' &&
+                (panel as ProgramPanelInfo).program.type === 'sql') ? (
+                <span title="Format code">
+                  <Button icon onClick={formatThis}>
+                    <IconBraces />
+                  </Button>
+                </span>
+              ) : null}
               <span title="Full screen mode">
                 <Button
                   icon

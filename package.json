@@ -53,6 +53,7 @@
     "react-syntax-highlighter": "^15.5.0",
     "shape": "npm:@multiprocess/shape",
     "source-map-support": "^0.5.21",
+    "sql-formatter": "^6.1.1",
     "tmp-promise": "^3.0.3",
     "tweetnacl": "^1.0.3",
     "tweetnacl-util": "^0.15.1",
