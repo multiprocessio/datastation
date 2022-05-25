@@ -397,13 +397,18 @@ GROUP BY panel_id
     // NOTE: unlike elsewhere projectId is actually the file name not a uuid.
     handler: async (_: string, request: MakeProjectRequest) => {
       const { projectId } = request;
+
       const newProject = request.project
         ? ProjectState.fromJSON(request.project)
-        : new ProjectState();
+                       : new ProjectState();
+      newProject.projectName = ensureProjectFile(projectId);
+
+      // Sample projects get submitted and written as JSON. They get ported to SQLite on first read.
       if (request.project) {
         this.cleanupSampleProject(newProject);
+        fs.writeFileSync(newProject.projectName, JSON.stringify(newProject));
+        return;
       }
-      newProject.projectName = ensureProjectFile(projectId);
 
       // File already exists, ok and appropriate to do nothing since
       // this merely handles creation not loading.
