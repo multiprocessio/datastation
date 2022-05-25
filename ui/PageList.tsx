@@ -116,7 +116,7 @@ export function PageList({
           </Button>{' '}
           to get started!
         </p>
-        {MODE_FEATURES.useDefaultProject && (
+        {MODE_FEATURES.useDefaultProject ? (
           <p>
             Or,{' '}
             <Button onClick={loadDefaultProject}>
@@ -124,6 +124,32 @@ export function PageList({
             </Button>{' '}
             to get a feel for what DataStation can do.
           </p>
+        ) : (
+          <React.Fragment>
+            <p>
+              Watch a short video demonstrating some of what you can do in
+              DataStation.
+            </p>
+            <iframe
+              width="560"
+              height="315"
+              src="https://www.youtube.com/embed/q_jRBvbwIzU"
+              title="YouTube video player"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            ></iframe>
+            <p>
+              Or follow one of the{' '}
+              <a
+                href="https://datastation.multiprocess.io/docs/#tutorials"
+                target="_blank"
+              >
+                dozens of tutorials
+              </a>{' '}
+              on the DataStation site to set up a local Docker instance and
+              query PostgreSQL, SQLite, MySQL, Elasticsearch, ClickHouse etc.
+            </p>
+          </React.Fragment>
         )}
       </div>
     );
