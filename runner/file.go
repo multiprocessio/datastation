@@ -646,7 +646,7 @@ func GetMimeType(fileName string, ct ContentTypeInfo) MimeType {
 		return JSONLinesMimeType
 	case ".cjson":
 		return JSONConcatMimeType
-	case ".xls", ".xlsx":
+	case ".xls", ".xlsx", ".xlsm":
 		return ExcelMimeType
 	case ".ods":
 		return OpenOfficeSheetMimeType
