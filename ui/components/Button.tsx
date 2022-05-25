@@ -1,7 +1,10 @@
 import * as React from 'react';
 
 export interface ButtonProps
-  extends Omit<Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'type'>, 'style'> {
+  extends Omit<
+    Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'type'>,
+    'style'
+  > {
   type?: 'primary' | 'outline';
   icon?: boolean;
   options?: React.ReactNode;
