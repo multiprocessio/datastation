@@ -326,7 +326,8 @@ label.select select:focus {
 }
 
 input + input[type='file'] {
-  margin-left: var(--margin-base);
+  display: block;
+  margin-top: var(--margin-base);
 }
 
 .input-invalid {
@@ -350,6 +351,11 @@ input + input[type='file'] {
 .vertical-align-center {
   display: flex;
   align-items: center;
+}
+
+.vertical-align-baseline {
+  display: flex;
+  align-items: baseline;
 }
 
 .ml-1 {
@@ -398,6 +404,11 @@ input + input[type='file'] {
 
 .block {
   display: block;
+}
+
+.clickable {
+  cursor: pointer;
+  cursor: hand;
 }
 
 .button {
@@ -552,6 +563,13 @@ input + input[type='file'] {
   margin-top: 30px;
 }
 
+.servers p,
+.connectors p {
+  max-width: 300px;
+  line-height: 1.1rem;
+  font-size: 0.9rem;
+}
+
 .server,
 .connector {
   margin-bottom: calc(2 * var(--margin-base));
@@ -572,10 +590,11 @@ input + input[type='file'] {
     text-align: right;
     width: 100px; /* 200px should be more than enough for anyone */
   }
+}
 
-  .hover-button {
-    visibility: hidden;
-  }
+.server-delete button,
+.connector-delete button {
+  padding: 10px;
 }
 
 .server:hover .hover-button,
@@ -1081,16 +1100,16 @@ canvas {
 
 .project-name {
   width: 500px;
+  margin: 0 auto;
+  margin-top: calc(2 * var(--margin-base));
 }
 
 .card--full {
   width: 100%;
 }
 
-.card--center,
-.app--server .project-name {
+.card--center {
   margin: 0 auto;
-  margin-top: calc(2 * var(--margin-base));
 }
 
 .project-name .input,

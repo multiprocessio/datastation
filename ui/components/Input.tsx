@@ -11,6 +11,7 @@ export interface InputProps
   autoWidth?: boolean;
   tooltip?: React.ReactNode;
   invalid?: React.ReactNode;
+  noBuffer?: boolean;
 }
 
 export function Input({
@@ -21,6 +22,7 @@ export function Input({
   label,
   autoWidth,
   type,
+  noBuffer,
   tooltip,
   ...props
 }: InputProps) {
@@ -32,14 +34,28 @@ export function Input({
     setLocal(value);
   }, [value]);
 
+  const changeProps = noBuffer
+    ? {
+        onChange(e: React.ChangeEvent<HTMLInputElement>) {
+          onChange(String(e.target.value));
+        },
+      }
+    : {
+        onChange(e: React.ChangeEvent<HTMLInputElement>) {
+          setLocal(e.target.value);
+        },
+        onBlur() {
+          onChange(String(local));
+        },
+      };
+
   const input = (
     <React.Fragment>
       <input
         value={local}
         type={type}
         className={label ? '' : inputClass}
-        onChange={(e) => setLocal(e.target.value)}
-        onBlur={() => onChange(String(local))}
+        {...changeProps}
         {...props}
         size={autoWidth ? Math.max(20, String(value).length) : undefined}
       />

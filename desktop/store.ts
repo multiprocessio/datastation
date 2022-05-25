@@ -24,7 +24,7 @@ import {
   ServerInfo,
   TablePanelInfo,
 } from '../shared/state';
-import { DISK_ROOT, PROJECT_EXTENSION } from './constants';
+import { CODE_ROOT, DISK_ROOT, PROJECT_EXTENSION } from './constants';
 import {
   connectorCrud,
   GenericCrud,
@@ -378,12 +378,31 @@ GROUP BY panel_id
     },
   };
 
+  cleanupSampleProject(sampleProject: ProjectState) {
+    for (const page of sampleProject.pages || []) {
+      for (const panel of page.panels || []) {
+        if (panel.type === 'file') {
+          const fp = panel as FilePanelInfo;
+          if (fp.file.name.startsWith('sampledata')) {
+            fp.file.name = path.join(CODE_ROOT, fp.file.name);
+          }
+        }
+      }
+    }
+  }
+
   makeProjectHandler: MakeProjectHandler = {
     resource: 'makeProject',
 
     // NOTE: unlike elsewhere projectId is actually the file name not a uuid.
-    handler: async (_: string, { projectId }: MakeProjectRequest) => {
-      const newProject = new ProjectState();
+    handler: async (_: string, request: MakeProjectRequest) => {
+      const { projectId } = request;
+      const newProject = request.project
+        ? ProjectState.fromJSON(request.project)
+        : new ProjectState();
+      if (request.project) {
+        this.cleanupSampleProject(newProject);
+      }
       newProject.projectName = ensureProjectFile(projectId);
 
       // File already exists, ok and appropriate to do nothing since
