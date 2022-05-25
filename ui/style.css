@@ -491,7 +491,7 @@ input + input[type='file'] {
   margin-top: 100px;
 
   .iframe-wrapper {
-      text-align: center;
+    text-align: center;
     margin: calc(2 * var(--margin-base)) 0;
   }
 
@@ -502,7 +502,7 @@ input + input[type='file'] {
   }
 
   .learn {
-      margin-top: calc(4 * var(--margin-base));
+    margin-top: calc(4 * var(--margin-base));
   }
 }
 
@@ -576,22 +576,23 @@ input + input[type='file'] {
   margin-top: 30px;
 }
 
-.servers, .connectors {
-    .title {
-	margin-bottom: 0;
-	padding-bottom: 0;
-    }
+.servers,
+.connectors {
+  .title {
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
 
-    .subtitle {
-	margin-bottom: calc(2 * var(--margin-base));
-	margin-top: var(--margin-base);
-    }
+  .subtitle {
+    margin-bottom: calc(3 * var(--margin-base));
+    margin-top: var(--margin-base);
+  }
 
-    p {
-	max-width: 300px;
-	line-height: 1.1rem;
-	font-size: 0.9rem;
-    }
+  p {
+    max-width: 300px;
+    line-height: 1.1rem;
+    font-size: 0.9rem;
+  }
 }
 
 .server,
@@ -1067,7 +1068,7 @@ input + input[type='file'] {
   align-items: center;
 }
 
-.version {
+footer {
   text-align: center;
   font-size: 0.9rem;
   color: #aaa;
@@ -1133,7 +1134,8 @@ canvas {
 }
 
 .card--center {
-  margin: 0 auto;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .project-name .input,
@@ -1257,8 +1259,6 @@ tbody tr {
 }
 
 .settings {
-  width: 100%;
-
   .alert {
     max-width: 600px;
   }

@@ -126,15 +126,17 @@ export function PageList({
           </p>
         ) : (
           <div className="learn">
-                        <p className="text-muted">
-              Don't know where to start? There are <a
+            <p className="text-muted">
+              Don't know where to start? There are{' '}
+              <a
                 href="https://datastation.multiprocess.io/docs/#tutorials"
                 target="_blank"
               >
                 dozens of tutorials
-              </a> with screenshots and GIFs on the DataStation site.
-                        </p>
-                        <p className="text-muted">Or watch a short demo.</p>
+              </a>{' '}
+              with screenshots and GIFs on the DataStation site.
+            </p>
+            <p className="text-muted">Or watch a short demo.</p>
             <div className="iframe-wrapper">
               <iframe
                 width="560"

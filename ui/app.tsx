@@ -13,6 +13,7 @@ import '../shared/polyfill';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { Loading } from './components/Loading';
 import { Editor } from './Editor';
+import { Footer } from './Footer';
 import { Header, loadDefaultProject } from './Header';
 import { MakeSelectProject } from './MakeSelectProject';
 import { Navigation } from './Navigation';
@@ -44,9 +45,14 @@ export function defaultRoutes(): Routes {
   function makeServerRequired(title: string) {
     return function ServerRequired() {
       return (
-        <div className="card card--center">
-          <h1>{title}</h1>
-          <p>Must be running the DataStation server to access this feature.</p>
+        <div className="main-body">
+          <div className="card card--center project-name">
+            <h1>{title}</h1>
+            <p>
+              Must be running the DataStation server to access this feature.
+            </p>
+          </div>
+          <Footer />
         </div>
       );
     };
