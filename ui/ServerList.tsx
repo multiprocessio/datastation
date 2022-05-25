@@ -14,15 +14,15 @@ export function ServerList({
 }) {
   return (
     <div className="servers">
-      <h2 className="title">SSH Connections</h2>
+      <h2 className="title">
+        SSH Connections
+      </h2>
+      <p className="subtitle text-muted">
+        Configuration for connecting to remote servers or reading remote
+        files.
+      </p>
       {state.servers?.length === 0 ? (
-        <React.Fragment>
-          <p>
-            Configuration for connecting to remote servers or reading remote
-            files.
-          </p>
           <p>You don't have any connections yet.</p>
-        </React.Fragment>
       ) : null}
       {state.servers?.map((dc: ServerInfo, i: number) => (
         <Server

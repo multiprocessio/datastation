@@ -82,11 +82,9 @@ export function ConnectorList({
   return (
     <div className="connectors">
       <h2 className="title">Data Sources</h2>
+                <p className="subtitle text-muted">Configure database or API credentials.</p>
       {groupedConnectors.length === 0 ? (
-        <React.Fragment>
-          <p>Configure database or API credentials.</p>
           <p>You don't have any data sources yet.</p>
-        </React.Fragment>
       ) : null}
       {groupedConnectors.map((v) => (
         <React.Fragment key={v.name}>

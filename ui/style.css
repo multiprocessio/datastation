@@ -488,9 +488,22 @@ input + input[type='file'] {
 }
 
 .pages--empty {
-  display: block;
-  text-align: center;
-  margin: 100px auto;
+  margin-top: 100px;
+
+  .iframe-wrapper {
+      text-align: center;
+    margin: calc(2 * var(--margin-base)) 0;
+  }
+
+  p {
+    max-width: 500px;
+    line-height: 1.5rem;
+    margin: var(--margin-base) auto;
+  }
+
+  .learn {
+      margin-top: calc(4 * var(--margin-base));
+  }
 }
 
 .pages--empty .button--primary {
@@ -563,11 +576,22 @@ input + input[type='file'] {
   margin-top: 30px;
 }
 
-.servers p,
-.connectors p {
-  max-width: 300px;
-  line-height: 1.1rem;
-  font-size: 0.9rem;
+.servers, .connectors {
+    .title {
+	margin-bottom: 0;
+	padding-bottom: 0;
+    }
+
+    .subtitle {
+	margin-bottom: calc(2 * var(--margin-base));
+	margin-top: var(--margin-base);
+    }
+
+    p {
+	max-width: 300px;
+	line-height: 1.1rem;
+	font-size: 0.9rem;
+    }
 }
 
 .server,

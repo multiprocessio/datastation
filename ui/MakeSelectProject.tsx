@@ -70,7 +70,7 @@ export function MakeSelectProject() {
   }
 
   return (
-    <div className="project-name">
+    <div className="project-name form">
       <h1>New Project</h1>
       <p>Pick a name for this project to get started.</p>
       <div className="form-row">
@@ -88,15 +88,15 @@ export function MakeSelectProject() {
           onChange={(v) => setSample(v === 'null' ? null : v)}
         >
           <option value="null">Blank, no sample</option>
-          {SAMPLES.map((group) => {
+          {SAMPLES.map((group) => (
             <optgroup key={group.name} label={group.name}>
               {group.samples.map((f) => (
                 <option key={f.name} value={f.name}>
                   {f.name}
                 </option>
               ))}
-            </optgroup>;
-          })}
+            </optgroup>
+          ))}
         </Select>
       </div>
       <div className="form-row">

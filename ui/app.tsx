@@ -134,6 +134,7 @@ export function App<T extends DefaultView = DefaultView>({
     }
   }, [urlState.projectId, loadingDefault]);
 
+  let isMakeSelect = false;
   let main = <Loading />;
   if (!state || !settings) {
     if (urlState.projectId || !settings) {
@@ -141,6 +142,7 @@ export function App<T extends DefaultView = DefaultView>({
     }
 
     if (!MODE_FEATURES.useDefaultProject) {
+      isMakeSelect = true;
       main = <MakeSelectProject />;
     }
   } else {
@@ -164,7 +166,7 @@ export function App<T extends DefaultView = DefaultView>({
           value={{ state: settings, setState: setSettings }}
         >
           <div className={`app app--${MODE} app--${settings.theme}`}>
-            {MODE_FEATURES.appHeader && <Header />}
+            {MODE_FEATURES.appHeader && !isMakeSelect && <Header />}
             <main className={'view view-' + (urlState.view || 'editor')}>
               {urlState.projectId && <Navigation pages={routes} />}
               {main}
