@@ -5,7 +5,7 @@ import { Tooltip } from './Tooltip';
 export const INPUT_SYNC_PERIOD = IN_TESTS ? 0 : 3000;
 
 export interface InputProps
-  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'> {
+  extends Omit<Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'>, 'style'> {
   onChange: (value: string) => void;
   label?: string;
   autoWidth?: boolean;
@@ -36,18 +36,18 @@ export function Input({
 
   const changeProps = noBuffer
     ? {
-        onChange(e: React.ChangeEvent<HTMLInputElement>) {
-          onChange(String(e.target.value));
-        },
-      }
+      onChange(e: React.ChangeEvent<HTMLInputElement>) {
+        onChange(String(e.target.value));
+      },
+    }
     : {
-        onChange(e: React.ChangeEvent<HTMLInputElement>) {
-          setLocal(e.target.value);
-        },
-        onBlur() {
-          onChange(String(local));
-        },
-      };
+      onChange(e: React.ChangeEvent<HTMLInputElement>) {
+        setLocal(e.target.value);
+      },
+      onBlur() {
+        onChange(String(local));
+      },
+    };
 
   const input = (
     <React.Fragment>
