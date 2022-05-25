@@ -400,7 +400,7 @@ GROUP BY panel_id
 
       const newProject = request.project
         ? ProjectState.fromJSON(request.project)
-                       : new ProjectState();
+        : new ProjectState();
       newProject.projectName = ensureProjectFile(projectId);
 
       // Sample projects get submitted and written as JSON. They get ported to SQLite on first read.
