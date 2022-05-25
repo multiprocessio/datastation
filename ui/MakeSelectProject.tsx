@@ -86,10 +86,10 @@ export function MakeSelectProject() {
         <div className="form-row">
           <Select
             value={sample ? sample : 'null'}
-            label="Create from sample"
+            label="Create from template with sample data"
             onChange={(v) => setSample(v === 'null' ? null : v)}
           >
-            <option value="null">Blank, no sample</option>
+            <option value="null">Blank, no template</option>
             {SAMPLES.map((group) => (
               <optgroup key={group.name} label={group.name}>
                 {group.samples.map((f) => (
