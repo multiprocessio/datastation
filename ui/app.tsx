@@ -3,6 +3,7 @@ import {
   IconCode,
   IconFiles,
   IconLayoutDashboard,
+  IconLifebuoy,
   IconSettings,
   TablerIcon,
 } from '@tabler/icons';
@@ -15,6 +16,7 @@ import { Loading } from './components/Loading';
 import { Editor } from './Editor';
 import { Footer } from './Footer';
 import { Header, loadDefaultProject } from './Header';
+import { Help } from './Help';
 import { MakeSelectProject } from './MakeSelectProject';
 import { Navigation } from './Navigation';
 import { NotFound } from './NotFound';
@@ -90,6 +92,12 @@ export function defaultRoutes(): Routes {
       view: Settings,
       title: 'Settings',
       icon: IconSettings,
+    },
+    {
+      endpoint: 'help',
+      view: Help,
+      title: 'Help',
+      icon: IconLifebuoy,
     },
   ].filter(Boolean);
 }

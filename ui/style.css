@@ -54,6 +54,10 @@ a:hover {
   margin: 100px auto;
 }
 
+li {
+  padding: 5px 0;
+}
+
 .app--desktop,
 .app--server {
   border-top: 1px solid var(--border-light);
@@ -578,16 +582,6 @@ input + input[type='file'] {
 
 .servers,
 .connectors {
-  .title {
-    margin-bottom: 0;
-    padding-bottom: 0;
-  }
-
-  .subtitle {
-    margin-bottom: calc(3 * var(--margin-base));
-    margin-top: var(--margin-base);
-  }
-
   p {
     max-width: 300px;
     line-height: 1.1rem;
@@ -1490,8 +1484,7 @@ body.dark {
 
   .card,
   .sidebar,
-  .status-bar,
-  .project-name {
+  .status-bar {
     background: var(--lighter-dark);
     border-color: var(--border-dark);
   }

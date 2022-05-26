@@ -15,12 +15,6 @@ export function ServerList({
   return (
     <div className="servers">
       <h2 className="title">SSH Connections</h2>
-      <p className="subtitle text-muted">
-        For connecting to remote servers, reading remote files.
-      </p>
-      {state.servers?.length === 0 ? (
-        <p>You don't have any connections yet.</p>
-      ) : null}
       {state.servers?.map((dc: ServerInfo, i: number) => (
         <Server
           key={dc.id}
