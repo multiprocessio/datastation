@@ -17,6 +17,7 @@
   /* Generic settings */
   --sans-serif: 'San Francisco', 'Gadugi', sans-serif;
   --margin-base: 8px;
+  --label-width: 100px;
 }
 
 * {
@@ -201,7 +202,7 @@ label,
   .select-label {
     display: inline-block;
     text-align: right;
-    width: 100px;
+    width: var(--label-width);
     padding-right: calc(2 * var(--margin-base));
     overflow-wrap: break-word;
   }
@@ -599,6 +600,11 @@ input + input[type='file'] {
   .connector-body,
   .server-body {
     overflow-x: auto;
+
+    input,
+    select {
+      max-width: 250px;
+    }
   }
 
   .radio-label,
@@ -1121,6 +1127,10 @@ canvas {
   width: 500px;
   margin: 0 auto;
   margin-top: calc(2 * var(--margin-base));
+
+  .select select {
+    max-width: 300px !important;
+  }
 }
 
 .card--full {
