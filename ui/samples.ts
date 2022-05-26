@@ -85,7 +85,7 @@ export const SAMPLES = [
           );
 
           const db = new DatabaseConnectorInfo({
-	    name: 'Speedtest database',
+            name: 'Speedtest database',
             type: 'sqlite',
             database: 'sampledata/speedtests.db',
           });
