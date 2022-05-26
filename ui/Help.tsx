@@ -148,7 +148,10 @@ export function Help() {
             Multiprocess Discord
           </a>
           ,{' '}
-          <a href="https://github.com/multiprocessio/datastation/issues" target="_blank">
+          <a
+            href="https://github.com/multiprocessio/datastation/issues"
+            target="_blank"
+          >
             check Github issues
           </a>
           , or{' '}
