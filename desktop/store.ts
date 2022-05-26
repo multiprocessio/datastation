@@ -392,7 +392,7 @@ GROUP BY panel_id
     }
 
     // Since Go reads from the filesystem it doesn't look into the asar that is used in release builds. So we need to extract it if it doesn't exist.
-    const [asarParent, fileName] = file.split(asarName)[0];
+    const [asarParent, fileName] = file.split(asarName);
     const asarFile = asarParent + asarName;
     const newFile = path.join(asarParent, fileName);
     // TODO: if these files change then checksum will be needed
