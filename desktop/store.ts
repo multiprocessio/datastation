@@ -1,3 +1,4 @@
+import asar from 'asar';
 import * as sqlite3 from 'better-sqlite3';
 import { Buffer } from 'buffer';
 import fs from 'fs';
@@ -383,13 +384,37 @@ GROUP BY panel_id
     },
   };
 
+  // Example: /private/var/folders/l0/51ds3d1d2214wb1y0vbtl5qr0000gn/T/AppTranslocation/6AC58880-BE22-4AB7-8006-47D9764BC590/d/DataStation Desktop CE.app/Contents/Resources/app.asar/sampledata/nginx_logs.jsonl
+  unmangleAsar(file: string): string {
+    const asarName = 'app.asar';
+    if (!file.includes(asarName)) {
+      return file;
+    }
+
+    // Since Go reads from the filesystem it doesn't look into the asar that is used in release builds. So we need to extract it if it doesn't exist.
+    const [asarParent, fileName] = file.split(asarName)[0];
+    const asarFile = asarParent + asarName;
+    const newFile = path.join(asarParent, fileName);
+    // TODO: if these files change then checksum will be needed
+    if (!fs.existsSync(newFile)) {
+      fs.writeFileSync(
+        newFile,
+        asar.extractFile(asarFile, fileName.slice(1) /* drop leading / */)
+      );
+    }
+
+    return newFile;
+  }
+
   cleanupSampleProject(sampleProject: ProjectState) {
     for (const page of sampleProject.pages || []) {
       for (const panel of page.panels || []) {
         if (panel.type === 'file') {
           const fp = panel as FilePanelInfo;
           if (fp.file.name.startsWith('sampledata')) {
-            fp.file.name = path.join(CODE_ROOT, fp.file.name);
+            fp.file.name = this.unmangleAsar(
+              path.join(CODE_ROOT, fp.file.name)
+            );
           }
         }
       }
@@ -402,7 +427,9 @@ GROUP BY panel_id
           dc.database.type === 'sqlite' &&
           dc.database.database.startsWith('sampledata')
         ) {
-          dc.database.database = path.join(CODE_ROOT, dc.database.database);
+          dc.database.database = this.unmangleAsar(
+            path.join(CODE_ROOT, dc.database.database)
+          );
         }
       }
     }
