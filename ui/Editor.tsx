@@ -2,8 +2,8 @@ import * as React from 'react';
 import { MODE_FEATURES } from '../shared/constants';
 import '../shared/polyfill';
 import { ErrorBoundary } from './components/ErrorBoundary';
-import { Version } from './components/Version';
 import { ConnectorList } from './ConnectorList';
+import { Footer } from './Footer';
 import { PageList } from './PageList';
 import { ServerList } from './ServerList';
 import { Sidebar } from './Sidebar';
@@ -51,7 +51,7 @@ export function Editor() {
           pageIndex={urlState.page % (state.pages || []).length}
           setPageIndex={(i) => setUrlState({ page: i, view: 'editor' })}
         />
-        <Version />
+        <Footer />
       </div>
     </React.Fragment>
   );

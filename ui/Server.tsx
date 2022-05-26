@@ -1,4 +1,4 @@
-import { IconPencil, IconTrash } from '@tabler/icons';
+import { IconTrash } from '@tabler/icons';
 import * as React from 'react';
 import { MODE } from '../shared/constants';
 import { ServerInfo, ServerInfoType } from '../shared/state';
@@ -40,7 +40,16 @@ export function Server({
   }
 
   return (
-    <div className={`server ${expanded ? 'server--expanded' : ''}`}>
+    <div
+      className={`server ${expanded ? 'server--expanded' : 'clickable'}`}
+      onClick={
+        expanded
+          ? null
+          : function toggleExpanded() {
+              return setExpanded(true);
+            }
+      }
+    >
       <div className="server-header vertical-align-center">
         {expanded ? (
           <Input
@@ -55,26 +64,21 @@ export function Server({
           <span className="server-name">{server.name}</span>
         )}
         <div className="flex-right">
-          {!expanded && (
-            <Button
-              icon
-              className="hover-button"
-              onClick={function toggleExpanded() {
-                return setExpanded(true);
-              }}
-              title="Edit"
-            >
-              <IconPencil />
-            </Button>
-          )}
           <span title="Delete server">
             <Confirm
+              className="server-delete"
               onConfirm={deleteServer}
               message="delete this server"
               action="Delete"
               render={function renderDelete(confirm: () => void) {
                 return (
-                  <Button icon onClick={confirm}>
+                  <Button
+                    icon
+                    onClick={function (e) {
+                      e.stopPropagation();
+                      confirm();
+                    }}
+                  >
                     <IconTrash />
                   </Button>
                 );

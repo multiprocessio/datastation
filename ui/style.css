@@ -54,6 +54,10 @@ a:hover {
   margin: 100px auto;
 }
 
+li {
+  padding: 5px 0;
+}
+
 .app--desktop,
 .app--server {
   border-top: 1px solid var(--border-light);
@@ -326,7 +330,8 @@ label.select select:focus {
 }
 
 input + input[type='file'] {
-  margin-left: var(--margin-base);
+  display: block;
+  margin-top: var(--margin-base);
 }
 
 .input-invalid {
@@ -350,6 +355,11 @@ input + input[type='file'] {
 .vertical-align-center {
   display: flex;
   align-items: center;
+}
+
+.vertical-align-baseline {
+  display: flex;
+  align-items: baseline;
 }
 
 .ml-1 {
@@ -398,6 +408,11 @@ input + input[type='file'] {
 
 .block {
   display: block;
+}
+
+.clickable {
+  cursor: pointer;
+  cursor: hand;
 }
 
 .button {
@@ -477,9 +492,22 @@ input + input[type='file'] {
 }
 
 .pages--empty {
-  display: block;
-  text-align: center;
-  margin: 100px auto;
+  margin-top: 100px;
+
+  .iframe-wrapper {
+    text-align: center;
+    margin: calc(2 * var(--margin-base)) 0;
+  }
+
+  p {
+    max-width: 500px;
+    line-height: 1.5rem;
+    margin: var(--margin-base) auto;
+  }
+
+  .learn {
+    margin-top: calc(4 * var(--margin-base));
+  }
 }
 
 .pages--empty .button--primary {
@@ -552,6 +580,15 @@ input + input[type='file'] {
   margin-top: 30px;
 }
 
+.servers,
+.connectors {
+  p {
+    max-width: 300px;
+    line-height: 1.1rem;
+    font-size: 0.9rem;
+  }
+}
+
 .server,
 .connector {
   margin-bottom: calc(2 * var(--margin-base));
@@ -572,10 +609,11 @@ input + input[type='file'] {
     text-align: right;
     width: 100px; /* 200px should be more than enough for anyone */
   }
+}
 
-  .hover-button {
-    visibility: hidden;
-  }
+.server-delete button,
+.connector-delete button {
+  padding: 10px;
 }
 
 .server:hover .hover-button,
@@ -1024,7 +1062,7 @@ input + input[type='file'] {
   align-items: center;
 }
 
-.version {
+footer {
   text-align: center;
   font-size: 0.9rem;
   color: #aaa;
@@ -1081,16 +1119,17 @@ canvas {
 
 .project-name {
   width: 500px;
+  margin: 0 auto;
+  margin-top: calc(2 * var(--margin-base));
 }
 
 .card--full {
   width: 100%;
 }
 
-.card--center,
-.app--server .project-name {
-  margin: 0 auto;
-  margin-top: calc(2 * var(--margin-base));
+.card--center {
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .project-name .input,
@@ -1214,8 +1253,6 @@ tbody tr {
 }
 
 .settings {
-  width: 100%;
-
   .alert {
     max-width: 600px;
   }
@@ -1447,8 +1484,7 @@ body.dark {
 
   .card,
   .sidebar,
-  .status-bar,
-  .project-name {
+  .status-bar {
     background: var(--lighter-dark);
     border-color: var(--border-dark);
   }

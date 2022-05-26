@@ -769,7 +769,9 @@ export function makeAutocomplete(
       ...stringPanelShapeCompletions(tokenIteratorFactory, panels),
     ]
       .flat()
-      .filter((c) => c && c.value.startsWith(prefix));
+      .filter(
+        (c) => c && c.value.toLowerCase().startsWith(prefix.toLowerCase())
+      );
   };
 }
 

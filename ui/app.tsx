@@ -2,6 +2,7 @@ import {
   IconCalendar,
   IconCode,
   IconFiles,
+  IconHelp,
   IconLayoutDashboard,
   IconSettings,
   TablerIcon,
@@ -13,7 +14,9 @@ import '../shared/polyfill';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { Loading } from './components/Loading';
 import { Editor } from './Editor';
+import { Footer } from './Footer';
 import { Header, loadDefaultProject } from './Header';
+import { Help } from './Help';
 import { MakeSelectProject } from './MakeSelectProject';
 import { Navigation } from './Navigation';
 import { NotFound } from './NotFound';
@@ -44,9 +47,14 @@ export function defaultRoutes(): Routes {
   function makeServerRequired(title: string) {
     return function ServerRequired() {
       return (
-        <div className="card card--center">
-          <h1>{title}</h1>
-          <p>Must be running the DataStation server to access this feature.</p>
+        <div className="main-body">
+          <div className="card card--center project-name">
+            <h1>{title}</h1>
+            <p>
+              Must be running the DataStation server to access this feature.
+            </p>
+          </div>
+          <Footer />
         </div>
       );
     };
@@ -84,6 +92,12 @@ export function defaultRoutes(): Routes {
       view: Settings,
       title: 'Settings',
       icon: IconSettings,
+    },
+    {
+      endpoint: 'help',
+      view: Help,
+      title: 'Help',
+      icon: IconHelp,
     },
   ].filter(Boolean);
 }
@@ -134,6 +148,7 @@ export function App<T extends DefaultView = DefaultView>({
     }
   }, [urlState.projectId, loadingDefault]);
 
+  let isMakeSelect = false;
   let main = <Loading />;
   if (!state || !settings) {
     if (urlState.projectId || !settings) {
@@ -141,6 +156,7 @@ export function App<T extends DefaultView = DefaultView>({
     }
 
     if (!MODE_FEATURES.useDefaultProject) {
+      isMakeSelect = true;
       main = <MakeSelectProject />;
     }
   } else {
@@ -164,7 +180,7 @@ export function App<T extends DefaultView = DefaultView>({
           value={{ state: settings, setState: setSettings }}
         >
           <div className={`app app--${MODE} app--${settings.theme}`}>
-            {MODE_FEATURES.appHeader && <Header />}
+            {MODE_FEATURES.appHeader && !isMakeSelect && <Header />}
             <main className={'view view-' + (urlState.view || 'editor')}>
               {urlState.projectId && <Navigation pages={routes} />}
               {main}

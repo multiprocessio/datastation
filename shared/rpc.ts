@@ -65,7 +65,7 @@ export type DeleteServerResponse = void;
 export type DeleteConnectorRequest = { id: string };
 export type DeleteConnectorResponse = void;
 
-export type MakeProjectRequest = { projectId: string };
+export type MakeProjectRequest = { projectId: string; project?: ProjectState };
 export type MakeProjectResponse = void;
 
 export type OpenProjectRequest = void;

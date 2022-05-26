@@ -29,10 +29,18 @@ export function Confirm({
         >
           <p>Are you sure you want to {message}?</p>
           <div className="text-right">
-            <Button onClick={() => setOpen(false)}>Cancel</Button>
+            <Button
+              onClick={(e) => {
+                e.stopPropagation();
+                setOpen(false);
+              }}
+            >
+              Cancel
+            </Button>
             <Button
               type="primary"
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation();
                 setOpen(false);
                 onConfirm();
               }}

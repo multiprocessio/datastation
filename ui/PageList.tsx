@@ -104,8 +104,8 @@ export function PageList({
   if (!page) {
     return (
       <div className="section pages pages--empty">
-        <p>This is an empty project.</p>
-        <p>
+        <p className="text-center">This is an empty project.</p>
+        <p className="text-center">
           <Button
             type="primary"
             onClick={() => {
@@ -116,14 +116,39 @@ export function PageList({
           </Button>{' '}
           to get started!
         </p>
-        {MODE_FEATURES.useDefaultProject && (
-          <p>
+        {MODE_FEATURES.useDefaultProject ? (
+          <p className="text-center">
             Or,{' '}
             <Button onClick={loadDefaultProject}>
               load the example project
             </Button>{' '}
             to get a feel for what DataStation can do.
           </p>
+        ) : (
+          <div className="learn">
+            <p className="text-muted">
+              Don't know where to start? There are{' '}
+              <a
+                href="https://datastation.multiprocess.io/docs/#tutorials"
+                target="_blank"
+              >
+                dozens of tutorials
+              </a>{' '}
+              with screenshots and GIFs on the DataStation site.
+            </p>
+            <p className="text-muted">Or watch a short demo.</p>
+            <div className="iframe-wrapper">
+              <iframe
+                width="560"
+                height="315"
+                src="https://www.youtube.com/embed/q_jRBvbwIzU"
+                title="YouTube video player"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              ></iframe>
+            </div>
+          </div>
         )}
       </div>
     );
