@@ -397,6 +397,7 @@ GROUP BY panel_id
     const newFile = path.join(asarParent, fileName);
     // TODO: if these files change then checksum will be needed
     if (!fs.existsSync(newFile)) {
+      fs.mkdirSync(path.dirname(newFile), { recursive: true });
       fs.writeFileSync(
         newFile,
         asar.extractFile(asarFile, fileName.slice(1) /* drop leading / */)
