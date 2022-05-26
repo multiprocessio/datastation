@@ -140,6 +140,23 @@ export function Help() {
             <a href="#reference">Reference</a>
           </li>
         </ul>
+        <p>
+          If you still can't find an answer ask in the #datastation channel on
+          the{' '}
+          <a href="https://discord.multiprocess.io" target="_blank">
+            {' '}
+            Multiprocess Discord
+          </a>
+          ,{' '}
+          <a href="https://github.com/multiprocessio/datastation/issues" target="_blank">
+            check Github issues
+          </a>
+          , or{' '}
+          <a href="mailto:hi@multiprocess.io" target="_blank">
+            email Multiprocess
+          </a>
+          .
+        </p>
         <h2 id="tutorials">Tutorials</h2>
         <ul>
           {tutorials.map((t) => (

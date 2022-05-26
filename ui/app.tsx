@@ -2,8 +2,8 @@ import {
   IconCalendar,
   IconCode,
   IconFiles,
+  IconHelp,
   IconLayoutDashboard,
-  IconLifebuoy,
   IconSettings,
   TablerIcon,
 } from '@tabler/icons';
@@ -97,7 +97,7 @@ export function defaultRoutes(): Routes {
       endpoint: 'help',
       view: Help,
       title: 'Help',
-      icon: IconLifebuoy,
+      icon: IconHelp,
     },
   ].filter(Boolean);
 }
