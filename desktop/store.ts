@@ -7,6 +7,7 @@ import { getPath } from '../shared/object';
 import { GetProjectRequest, MakeProjectRequest } from '../shared/rpc';
 import {
   ConnectorInfo,
+  DatabaseConnectorInfo,
   DatabasePanelInfo,
   doOnEncryptFields,
   Encrypt,
@@ -185,7 +186,11 @@ export class Store {
           const name = f.slice(0, f.length - ('.' + PROJECT_EXTENSION).length);
           return { createdAt, name };
         });
-      files.sort();
+      // Sort timestamp DESC
+      files.sort(
+        (a, b) =>
+          new Date(b.createdAt).valueOf() - new Date(a.createdAt).valueOf()
+      );
       return files;
     },
   };
@@ -386,6 +391,18 @@ GROUP BY panel_id
           if (fp.file.name.startsWith('sampledata')) {
             fp.file.name = path.join(CODE_ROOT, fp.file.name);
           }
+        }
+      }
+    }
+
+    for (const con of sampleProject.connectors || []) {
+      if (con.type === 'database') {
+        const dc = con as DatabaseConnectorInfo;
+        if (
+          dc.database.type === 'sqlite' &&
+          dc.database.database.startsWith('sampledata')
+        ) {
+          dc.database.database = path.join(CODE_ROOT, dc.database.database);
         }
       }
     }
