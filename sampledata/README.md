@@ -15,3 +15,11 @@ File: [nginx_json_logs](./nginx_json_logs)
 Source: https://github.com/elastic/examples/tree/master/Common%20Data%20Formats/nginx_json_logs
 
 License: [Apache 2.0](https://github.com/elastic/examples/blob/master/LICENSE)
+
+## Washington Broadband Speed Tests
+
+File: [speedtests.db](./speedtests.db)
+
+Source: https://catalog.data.gov/dataset/broadband-speed-tests
+
+No license.
