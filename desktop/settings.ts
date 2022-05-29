@@ -1,4 +1,6 @@
 import fs from 'fs';
+import { nativeTheme } from 'electron';
+import { SupportedLanguages } from '../shared/languages';
 import log from '../shared/log';
 import { mergeDeep } from '../shared/object';
 import {
@@ -7,11 +9,20 @@ import {
   UpdateSettingsRequest,
   UpdateSettingsResponse,
 } from '../shared/rpc';
-import { Settings } from '../shared/settings';
+import { LanguageSettings, Settings } from '../shared/settings';
 import { ensureFile } from './fs';
 import { RPCHandler } from './rpc';
 
 export class DesktopSettings extends Settings {
+  constructor(
+    file: string,
+    id?: string,
+    lastProject?: string,
+    languages?: Record<SupportedLanguages, LanguageSettings>,
+    stdoutMaxSize?: number
+  ) {
+    super(file, nativeTheme.shouldUseDarkColors ? 'dark' : 'light', id, lastProject, languages, stdoutMaxSize)
+  }
   static fromFile(settingsFile: string) {
     let existingSettingsString: Buffer | null = null;
     try {

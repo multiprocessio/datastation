@@ -21,6 +21,7 @@ export class Settings {
 
   constructor(
     file: string,
+    theme?: 'light' | 'dark',
     id?: string,
     lastProject?: string,
     languages?: Record<SupportedLanguages, LanguageSettings>,
@@ -39,6 +40,7 @@ export class Settings {
         {}
       );
     this.stdoutMaxSize = stdoutMaxSize || 5000;
+    this.theme = theme ?? 'light';
     this.file = file;
     this.caCerts = [];
   }
