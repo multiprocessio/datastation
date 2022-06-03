@@ -204,6 +204,20 @@ func (ec EvalContext) getConnectionString(dbInfo DatabaseConnectorInfoDatabase) 
 		dbInfo.Address = dbInfo.Extra["account"]
 		genericString, _, _ = ec.getGenericConnectionString(dbInfo)
 		dsn := genericString[len("snowflake://"):] // Snowflake library doesn't use this prefix
+
+		extraFields := []string{"role", "schema"}
+		for _, field := range extraFields {
+			if value := dbInfo.Extra["snowflake_"+field]; value != "" {
+				if !strings.Contains(dsn, "?") {
+					dsn += "?"
+				} else {
+					dsn += "&"
+				}
+
+				dsn += field + "="+url.QueryEscape(value)
+			}
+		}
+
 		return "snowflake", dsn, nil
 	case ClickHouseDatabase:
 		query := ""
