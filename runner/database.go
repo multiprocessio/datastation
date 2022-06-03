@@ -214,7 +214,7 @@ func (ec EvalContext) getConnectionString(dbInfo DatabaseConnectorInfoDatabase) 
 					dsn += "&"
 				}
 
-				dsn += field + "="+url.QueryEscape(value)
+				dsn += field + "=" + url.QueryEscape(value)
 			}
 		}
 
