@@ -24,7 +24,7 @@ export function FormGroup({
 
   return (
     <details>
-      <summary>{optional}</summary>
+      <summary className="text-muted clickable">{optional}</summary>
       {body}
     </details>
   );

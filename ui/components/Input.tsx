@@ -48,7 +48,7 @@ export function Input({
           setLocal(e.target.value);
         },
         onBlur() {
-          onChange(String(local));
+          onChange(String(local || ''));
         },
       };
 
