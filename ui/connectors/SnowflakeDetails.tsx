@@ -29,7 +29,7 @@ export function SnowflakeDetails(props: {
         <Username {...props} />
         <Password {...props} />
       </FormGroup>
-      <FormGroup label="optional">
+      <FormGroup optional="Optional Fields">
         <div className="form-row">
           <Input
             label="Role"

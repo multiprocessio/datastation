@@ -45,7 +45,7 @@ export function AthenaDetails(props: {
         </div>
         <Password label="Secret Access Key" {...props} />
       </FormGroup>
-      <FormGroup label="Optional">
+      <FormGroup optional="Optional Fields">
         <div className="form-row">
           <Input
             label="Temporary Security Token"
