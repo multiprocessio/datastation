@@ -45,6 +45,19 @@ export function AthenaDetails(props: {
         </div>
         <Password label="Secret Access Key" {...props} />
       </FormGroup>
+      <FormGroup label="Optional">
+        <div className="form-row">
+          <Input
+            label="Temporary Security Token"
+            value={connector.database.extra.aws_temp_security_token}
+            onChange={(value: string) => {
+              connector.database.extra.aws_temp_security_token = value;
+              updateConnector(connector);
+            }}
+            {...props}
+          />
+        </div>
+      </FormGroup>
     </>
   );
 }

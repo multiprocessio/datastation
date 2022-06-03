@@ -42,9 +42,13 @@ func (ec EvalContext) evalAthena(panel *PanelInfo, dbInfo DatabaseConnectorInfoD
 	}
 
 	cfg := aws.NewConfig().WithRegion(dbInfo.Extra["aws_region"])
-	cfg.Credentials = credentials.NewStaticCredentials(dbInfo.Username, secret, "")
+	cfg.Credentials = credentials.NewStaticCredentials(dbInfo.Username, secret, dbInfo.Extra["aws_temp_security_token"])
 
-	sess := session.Must(session.NewSession(cfg))
+	sess := session.Must(session.NewSession(credentials.NewChainCredentials(
+		[]credentials.Provider{
+			credentials.NewEnvCredentials,
+			cfg,
+		})))
 
 	svc := athena.New(sess, cfg)
 	var s athena.StartQueryExecutionInput
