@@ -22,8 +22,10 @@ export function FormGroup({
     return body;
   }
 
-  return <details>
-    <summary>{optional}</summary>
-    {body}
-  </details>
+  return (
+    <details>
+      <summary>{optional}</summary>
+      {body}
+    </details>
+  );
 }

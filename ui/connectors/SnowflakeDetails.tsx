@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { DatabaseConnectorInfo } from '../../shared/state';
-import { Input } from '../components/Input';
 import { FormGroup } from '../components/FormGroup';
+import { Input } from '../components/Input';
 import { Database } from './Database';
 import { Password } from './Password';
 import { Username } from './Username';
