@@ -25,7 +25,7 @@ and dsq for these tasks to make sense.
   * Migrate all calls reading results directly to an API layer for getting panel results (in both Go and JavaScript)
     * Fix in dsq too
 * More databases
-  * IBM DB2, Apache Presto/Trino, Meilisearch, Apache Hive, Apache Druid, Apache Pinot, Quickwit, Couchbase, fix MongoDB, Redis, fix Google Sheets, Splunk, DataDog, SumoLogic, Loggly, [New Relic](https://docs.newrelic.com/docs/apis/nerdgraph/examples/nerdgraph-nrql-tutorial) 
+  * IBM DB2, Apache Presto/Trino, Meilisearch, Apache Hive, Apache Druid, Apache Pinot, Quickwit, Couchbase, fix MongoDB, Redis, Splunk, DataDog, SumoLogic, Loggly, [New Relic](https://docs.newrelic.com/docs/apis/nerdgraph/examples/nerdgraph-nrql-tutorial), VictoriaMetrics, Impala
   * See https://github.com/multiprocessio/datastation/pull/219 for adding a database in one PR
 * Add a new supported log format
   * Example: logfmt
