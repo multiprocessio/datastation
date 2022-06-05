@@ -8,7 +8,10 @@ const {
   LiteralPanelInfo,
   TablePanelInfo,
 } = require('../../shared/state');
-const { TablePanel, TablePanelDetails } = require('./TablePanel');
+const {
+  TablePanel,
+  TablePanelDetails,
+} = require('./TablePanel');
 
 const project = new ProjectState();
 project.pages = [new ProjectPage()];

@@ -9,16 +9,27 @@ const {
   DatabasePanelInfo,
 } = require('../../shared/state');
 const { ProjectContext } = require('../state');
-const { DatabasePanelDetails, DatabaseInfo } = require('./DatabasePanel');
+const {
+  DatabasePanelDetails,
+  DatabasePanelBody,
+  DatabaseInfo,
+} = require('./DatabasePanel');
 
 test('shows database panel info', async () => {
-  const panel = new DatabasePanelInfo();
+  const connector = new DatabaseConnectorInfo();
+  const connectors = [connector];
+  const panel = new DatabasePanelInfo(null, {
+    connectorId: connector.id,
+  });
+
   const component = enzyme.mount(
-    <DatabasePanelDetails
-      panel={panel}
-      panels={[panel]}
-      updatePanel={() => {}}
-    />
+    <ProjectContext.Provider value={{ state: { connectors, servers: [] } }}>
+      <DatabasePanelDetails
+        panel={panel}
+        panels={[panel]}
+        updatePanel={() => {}}
+      />
+    </ProjectContext.Provider>
   );
   await componentLoad(component);
 });
@@ -32,7 +43,7 @@ for (const vendor of ['postgres', 'mysql', 'sqlite']) {
     connectorId: connector.id,
   });
 
-  test('shows database helper info', async () => {
+  test('shows database helper info for ' + vendor, async () => {
     const component = enzyme.mount(
       <ProjectContext.Provider value={{ state: { connectors } }}>
         <DatabaseInfo panel={panel} />
@@ -45,3 +56,23 @@ for (const vendor of ['postgres', 'mysql', 'sqlite']) {
     );
   });
 }
+
+test('shows database panel body', async () => {
+  const connector = new DatabaseConnectorInfo();
+  const connectors = [connector];
+  const panel = new DatabasePanelInfo(null, {
+    connectorId: connector.id,
+  });
+
+  const component = enzyme.mount(
+    <ProjectContext.Provider value={{ state: { connectors } }}>
+      <DatabasePanelBody
+        panel={panel}
+        panels={[panel]}
+        updatePanel={jest.fn()}
+        keyboardShortcuts={jest.fn()}
+      />
+    </ProjectContext.Provider>
+  );
+  await componentLoad(component);
+});

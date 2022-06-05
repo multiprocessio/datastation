@@ -1,4 +1,5 @@
 const { act } = require('react-dom/test-utils');
+require('jest-canvas-mock');
 const { wait } = require('./shared/promise');
 require('./shared/polyfill');
 

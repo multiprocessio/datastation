@@ -7,7 +7,7 @@ const {
   ProjectPage,
   HTTPPanelInfo,
 } = require('../../shared/state');
-const { HTTPPanelDetails } = require('./HTTPPanel');
+const { HTTPPanelDetails, HTTPPanelBody } = require('./HTTPPanel');
 
 const project = new ProjectState();
 project.pages = [new ProjectPage()];
@@ -19,6 +19,20 @@ test('shows file panel details', async () => {
       panel={project.pages[0].panels[0]}
       panels={project.pages[0].panels[0]}
       updatePanel={() => {}}
+    />
+  );
+  await componentLoad(component);
+});
+
+test('shows http panel body', async () => {
+  const panel = new HTTPPanelInfo();
+
+  const component = enzyme.mount(
+    <HTTPPanelBody
+      panel={panel}
+      panels={[panel]}
+      updatePanel={jest.fn()}
+      keyboardShortcuts={jest.fn()}
     />
   );
   await componentLoad(component);

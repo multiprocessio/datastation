@@ -94,6 +94,7 @@
     "eslint-plugin-react": "^7.30.0",
     "eslint-plugin-react-hooks": "^4.5.0",
     "jest": "^28.1.0",
+    "jest-canvas-mock": "^2.4.0",
     "license-checker": "^25.0.1",
     "node-fetch": "2",
     "node-sass": "^7.0.1",

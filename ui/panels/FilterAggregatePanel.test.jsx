@@ -9,7 +9,10 @@ const {
   LiteralPanelInfo,
   FilterAggregatePanelInfo,
 } = require('../../shared/state');
-const { FilterAggregatePanelDetails } = require('./FilterAggregatePanel');
+const {
+  FilterAggregatePanelDetails,
+  FilterAggregatePanel,
+} = require('./FilterAggregatePanel');
 
 const project = new ProjectState();
 project.pages = [new ProjectPage()];
@@ -46,4 +49,18 @@ test('shows filagg panel details', async () => {
   await sortField().simulate('blur');
   await wait();
   expect(fp.filagg.sortOn).toBe('flubberty');
+});
+
+test('shows filagg panel body', async () => {
+  const panel = new FilterAggregatePanelInfo();
+
+  const component = enzyme.mount(
+    <FilterAggregatePanel
+      panel={panel}
+      panels={[panel]}
+      updatePanel={jest.fn()}
+      keyboardShortcuts={jest.fn()}
+    />
+  );
+  await componentLoad(component);
 });
