@@ -39,10 +39,8 @@ test('shows sql-specific program panel info', async () => {
   const panel = new ProgramPanelInfo(null, {
     type: 'sql',
   });
-  console.log(panel);
   const component = enzyme.mount(<ProgramInfo panel={panel} />);
   await componentLoad(component);
-  console.log(component.text());
   expect(component.text().includes('SQL')).toBe(true);
 });
 
