@@ -19,7 +19,7 @@ import {
 import { InvalidDependentPanelError } from './errors';
 import { FilterAggregatePanelInfo, TimeSeriesRange } from './state';
 
-export function timestampsFromRange(range: TimeSeriesRange) {
+function timestampsFromRange(range: TimeSeriesRange) {
   if (range.rangeType === 'absolute') {
     return { begin: range.begin_date, end: range.end_date };
   }
@@ -109,11 +109,7 @@ export function timestampsFromRange(range: TimeSeriesRange) {
   throw new Error('Unsupported time range: ' + JSON.stringify(range));
 }
 
-export function quote(
-  fieldOrValue: any,
-  quoteString: string,
-  slashEscape = false
-) {
+function quote(fieldOrValue: any, quoteString: string, slashEscape = false) {
   const escape = slashEscape ? '\\' : quoteString;
   return `${quoteString}${String(fieldOrValue).replaceAll(
     quoteString,
@@ -121,19 +117,9 @@ export function quote(
   )}${quoteString}`;
 }
 
-export interface QuoteType {
-  string: string;
-  identifier: string;
-}
-
 export const ANSI_SQL_QUOTE = {
   string: "'",
   identifier: '"',
-};
-
-export const MYSQL_QUOTE = {
-  string: '"',
-  identifier: '`',
 };
 
 export function buildSQLiteQuery(

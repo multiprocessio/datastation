@@ -4,15 +4,28 @@ export function FormGroup({
   label,
   children,
   major,
+  optional,
 }: {
   major?: boolean;
   label?: string;
+  optional?: string;
   children: React.ReactNode;
 }) {
-  return (
+  const body = (
     <div className={`form-group ${major ? 'form-group--major' : ''}`}>
       {label && <label className="form-group-label">{label}</label>}
       <div className="form-group-children">{children}</div>
     </div>
+  );
+
+  if (!optional) {
+    return body;
+  }
+
+  return (
+    <details>
+      <summary className="text-muted clickable">{optional}</summary>
+      {body}
+    </details>
   );
 }

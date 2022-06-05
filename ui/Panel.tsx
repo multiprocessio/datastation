@@ -66,7 +66,7 @@ function PreviewResults({
   );
 }
 
-export function getNameOrIdFromNameOrIdOrIndex(
+function getNameOrIdFromNameOrIdOrIndex(
   panels: Array<PanelInfo>,
   id: string
 ): null | { name: string; id: string } {
@@ -89,7 +89,7 @@ export function getNameOrIdFromNameOrIdOrIndex(
   return null;
 }
 
-export function PanelPlayWarningWithLinks({
+function PanelPlayWarningWithLinks({
   panels,
   msg,
 }: {

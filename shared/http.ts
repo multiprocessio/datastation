@@ -1,6 +1,6 @@
 import { ContentTypeInfoPlusParsers, parseArrayBuffer } from './text';
 
-export type FetchFunction = (
+type FetchFunction = (
   url: string,
   args: {
     headers: { [key: string]: string };

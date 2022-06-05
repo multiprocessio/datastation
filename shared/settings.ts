@@ -1,7 +1,7 @@
 import { LANGUAGES, SupportedLanguages } from './languages';
 import { newId } from './object';
 
-export class LanguageSettings {
+class LanguageSettings {
   path: string;
 
   constructor(path?: string) {

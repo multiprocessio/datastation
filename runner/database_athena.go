@@ -9,6 +9,8 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/credentials/ec2rolecreds"
+	"github.com/aws/aws-sdk-go/aws/ec2metadata"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/athena"
 )
@@ -42,9 +44,22 @@ func (ec EvalContext) evalAthena(panel *PanelInfo, dbInfo DatabaseConnectorInfoD
 	}
 
 	cfg := aws.NewConfig().WithRegion(dbInfo.Extra["aws_region"])
-	cfg.Credentials = credentials.NewStaticCredentials(dbInfo.Username, secret, "")
-
+	// Needed for ec2roleprovider
 	sess := session.Must(session.NewSession(cfg))
+	cfg.Credentials = credentials.NewChainCredentials(
+		[]credentials.Provider{
+			&credentials.StaticProvider{Value: credentials.Value{
+				AccessKeyID:     dbInfo.Username,
+				SecretAccessKey: secret,
+				SessionToken:    dbInfo.Extra["aws_temp_security_token"],
+			}},
+			&credentials.EnvProvider{},
+			&ec2rolecreds.EC2RoleProvider{
+				Client: ec2metadata.New(sess),
+			},
+		})
+
+	sess = session.Must(session.NewSession(cfg))
 
 	svc := athena.New(sess, cfg)
 	var s athena.StartQueryExecutionInput
