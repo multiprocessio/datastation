@@ -28,22 +28,6 @@ import 'ace-builds/src-min-noconflict/theme-dracula';
 // This steals Ctrl-a so this should not be a default
 //import 'ace-builds/src-min-noconflict/keybinding-emacs';
 
-export function skipWhitespaceBackward(it: Ace.TokenIterator) {
-  while (!it.getCurrentToken().value.trim()) {
-    if (!it.stepBackward()) {
-      return;
-    }
-  }
-}
-
-export function skipWhitespaceForward(it: Ace.TokenIterator) {
-  while (!it.getCurrentToken().value.trim()) {
-    if (!it.stepForward()) {
-      return;
-    }
-  }
-}
-
 const AUTOCOMPLETE_MAP: Record<
   string,
   (

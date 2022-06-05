@@ -1,4 +1,4 @@
-import { PanelInfo, PanelResult, ProjectState } from '../../shared/state';
+import { PanelInfo, ProjectState } from '../../shared/state';
 import { Dispatch } from '../rpc';
 
 export async function getProjectAndPanel(
@@ -30,16 +30,4 @@ export async function getProjectAndPanel(
   }
   panelPage--; // Handle last loop ++ overshot
   return { panel, panelPage, project };
-}
-
-export async function getPanelResult(
-  dispatch: Dispatch,
-  projectId: string,
-  panelId: string
-): Promise<PanelResult> {
-  return (await dispatch({
-    resource: 'fetchResults',
-    projectId,
-    body: { panelId },
-  })) as PanelResult;
 }

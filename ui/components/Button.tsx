@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-export interface ButtonProps
+interface ButtonProps
   extends Omit<
     Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'type'>,
     'style'

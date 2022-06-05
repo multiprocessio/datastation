@@ -51,9 +51,7 @@ export function getUrlState<
 const lsPrefix = 'urlstate:';
 
 // TODO: how to clear state if this ever goes bad?
-export function getDefaultState<
-  T extends DefaultView = DefaultView
->(): UrlState<T> {
+function getDefaultState<T extends DefaultView = DefaultView>(): UrlState<T> {
   const urlState = getUrlState<T>();
   const key = lsPrefix + urlState.projectId;
   try {
