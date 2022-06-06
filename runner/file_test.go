@@ -492,7 +492,7 @@ michael,10`)
 
 	ob := newBufferedWriter(outTmp)
 
-	err = transformCSVFile(csvTmp.Name(), ob, ',')
+	err = transformCSVFile(csvTmp.Name(), ob, ',', false)
 	ob.Flush()
 	assert.Nil(t, err)
 
@@ -519,6 +519,50 @@ michael,10`)
 	}, a)
 }
 
+func Test_transformCSV_convertNumbers(t *testing.T) {
+	csvTmp, err := ioutil.TempFile("", "")
+	defer os.Remove(csvTmp.Name())
+	assert.Nil(t, err)
+
+	_, err = csvTmp.WriteString(`name,age
+kerry,12
+marge,15.0
+michael,10.5`)
+	assert.Nil(t, err)
+
+	outTmp, err := ioutil.TempFile("", "")
+	defer os.Remove(outTmp.Name())
+	assert.Nil(t, err)
+
+	ob := newBufferedWriter(outTmp)
+
+	err = transformCSVFile(csvTmp.Name(), ob, ',', true)
+	ob.Flush()
+	assert.Nil(t, err)
+
+	bs, err := os.ReadFile(outTmp.Name())
+	assert.Nil(t, err)
+
+	var a []map[string]any
+	err = jsonUnmarshal(bs, &a)
+	assert.Nil(t, err)
+
+	assert.Equal(t, []map[string]any{
+		{
+			"name": "kerry",
+			"age":  float64(12),
+		},
+		{
+			"name": "marge",
+			"age":  float64(15.0),
+		},
+		{
+			"name": "michael",
+			"age":  float64(10.5),
+		},
+	}, a)
+}
+
 // Benchmarks
 
 func Test_transformCSV_BENCHMARK(t *testing.T) {
@@ -534,7 +578,7 @@ func Test_transformCSV_BENCHMARK(t *testing.T) {
 	start := time.Now()
 	bw := newBufferedWriter(outTmp)
 	defer bw.Flush()
-	err = transformCSVFile("taxi.csv", bw, ',')
+	err = transformCSVFile("taxi.csv", bw, ',', false)
 	assert.Nil(t, err)
 
 	fmt.Printf("transform csv took %s\n", time.Since(start))

@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"runtime"
+	"strconv"
 	"strings"
 
 	"github.com/linkedin/goavro/v2"
@@ -89,7 +90,23 @@ func recordToMap[T any](row map[string]any, fields *[]string, record []T) {
 	}
 }
 
-func transformCSV(in *bufio.Reader, out *bufio.Writer, delimiter rune) error {
+func convertNumbersInRecord(record []string) []any {
+	var result []any
+
+	for _, field := range record {
+		if converted, err := strconv.Atoi(field); err == nil {
+			result = append(result, converted)
+		} else if converted, err := strconv.ParseFloat(field, 64); err == nil {
+			result = append(result, converted)
+		} else {
+			result = append(result, field)
+		}
+	}
+
+	return result
+}
+
+func transformCSV(in *bufio.Reader, out *bufio.Writer, delimiter rune, convertNumbers bool) error {
 	r := csv.NewReader(in)
 	r.Comma = delimiter
 	r.ReuseRecord = true
@@ -119,7 +136,11 @@ func transformCSV(in *bufio.Reader, out *bufio.Writer, delimiter rune) error {
 				continue
 			}
 
-			recordToMap(row, &fields, record)
+			if convertNumbers {
+				recordToMap(row, &fields, convertNumbersInRecord(record))
+			} else {
+				recordToMap(row, &fields, record)
+			}
 
 			err = w.EncodeRow(row)
 			if err != nil {
@@ -131,14 +152,14 @@ func transformCSV(in *bufio.Reader, out *bufio.Writer, delimiter rune) error {
 	})
 }
 
-func transformCSVFile(in string, out *bufio.Writer, delimiter rune) error {
+func transformCSVFile(in string, out *bufio.Writer, delimiter rune, convertNumbers bool) error {
 	r, closeFile, err := openBufferedFile(in)
 	if err != nil {
 		return err
 	}
 	defer closeFile()
 
-	return transformCSV(r, out, delimiter)
+	return transformCSV(r, out, delimiter, convertNumbers)
 }
 
 func transformJSON(in *bufio.Reader, out *bufio.Writer) error {
@@ -690,9 +711,11 @@ func TransformFile(fileName string, cti ContentTypeInfo, out *bufio.Writer) erro
 	case JSONMimeType:
 		return transformJSONFile(fileName, out)
 	case CSVMimeType:
-		return transformCSVFile(fileName, out, ',')
+		// TODO: Use "convert numbers" flag from content type info
+		return transformCSVFile(fileName, out, ',', false)
 	case TSVMimeType:
-		return transformCSVFile(fileName, out, '\t')
+		// TODO: Use "convert numbers" flag from content type info
+		return transformCSVFile(fileName, out, '\t', false)
 	case ExcelMimeType, ExcelOpenXMLMimeType:
 		return transformXLSXFile(fileName, out)
 	case ParquetMimeType:
