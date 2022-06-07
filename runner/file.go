@@ -711,11 +711,9 @@ func TransformFile(fileName string, cti ContentTypeInfo, out *bufio.Writer) erro
 	case JSONMimeType:
 		return transformJSONFile(fileName, out)
 	case CSVMimeType:
-		// TODO: Use "convert numbers" flag from content type info
-		return transformCSVFile(fileName, out, ',', false)
+		return transformCSVFile(fileName, out, ',', cti.ConvertNumbers)
 	case TSVMimeType:
-		// TODO: Use "convert numbers" flag from content type info
-		return transformCSVFile(fileName, out, '\t', false)
+		return transformCSVFile(fileName, out, '\t', cti.ConvertNumbers)
 	case ExcelMimeType, ExcelOpenXMLMimeType:
 		return transformXLSXFile(fileName, out)
 	case ParquetMimeType:
