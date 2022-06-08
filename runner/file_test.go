@@ -74,7 +74,47 @@ func Test_recordToMap(t *testing.T) {
 
 	for _, test := range tests {
 		m := map[string]any{}
-		recordToMap(m, &test.fields, test.record)
+		recordToMap(m, &test.fields, test.record, false)
+		assert.Equal(t, test.expect, m)
+	}
+}
+
+func Test_recordToMap_convertNumbers(t *testing.T) {
+	tests := []struct {
+		fields []string
+		record []string
+		expect map[string]any
+	}{
+		{
+			[]string{"a", "b"},
+			[]string{"foo", "bar"},
+			map[string]any{"a": "foo", "b": "bar"},
+		},
+		{
+			[]string{"a", "b"},
+			[]string{"foo", "1"},
+			map[string]any{"a": "foo", "b": 1},
+		},
+		{
+			[]string{"a", "b"},
+			[]string{"foo", "1.5"},
+			map[string]any{"a": "foo", "b": 1.5},
+		},
+		{
+			[]string{"a", "b"},
+			[]string{"foo"},
+			map[string]any{"a": "foo", "b": nil},
+		},
+		{
+			[]string{"a", "b"},
+			[]string{"1", "2"},
+			map[string]any{"a": 1, "b": 2},
+		},
+	}
+
+	for _, test := range tests {
+		m := map[string]any{}
+		recordToMap(m, &test.fields, test.record, true)
 		assert.Equal(t, test.expect, m)
 	}
 }
@@ -515,50 +555,6 @@ michael,10`)
 		{
 			"name": "michael",
 			"age":  "10",
-		},
-	}, a)
-}
-
-func Test_transformCSV_convertNumbers(t *testing.T) {
-	csvTmp, err := ioutil.TempFile("", "")
-	defer os.Remove(csvTmp.Name())
-	assert.Nil(t, err)
-
-	_, err = csvTmp.WriteString(`name,age
-kerry,12
-marge,15.0
-michael,10.5`)
-	assert.Nil(t, err)
-
-	outTmp, err := ioutil.TempFile("", "")
-	defer os.Remove(outTmp.Name())
-	assert.Nil(t, err)
-
-	ob := newBufferedWriter(outTmp)
-
-	err = transformCSVFile(csvTmp.Name(), ob, ',', true)
-	ob.Flush()
-	assert.Nil(t, err)
-
-	bs, err := os.ReadFile(outTmp.Name())
-	assert.Nil(t, err)
-
-	var a []map[string]any
-	err = jsonUnmarshal(bs, &a)
-	assert.Nil(t, err)
-
-	assert.Equal(t, []map[string]any{
-		{
-			"name": "kerry",
-			"age":  float64(12),
-		},
-		{
-			"name": "marge",
-			"age":  float64(15.0),
-		},
-		{
-			"name": "michael",
-			"age":  float64(10.5),
 		},
 	}, a)
 }
