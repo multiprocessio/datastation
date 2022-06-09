@@ -255,9 +255,9 @@ func TransformReader(r *bufio.Reader, fileName string, cti ContentTypeInfo, out 
 	case JSONMimeType:
 		return transformJSON(r, out)
 	case CSVMimeType:
-		return transformCSV(r, out, ',')
+		return transformCSV(r, out, ',', cti.ConvertNumbers)
 	case TSVMimeType:
-		return transformCSV(r, out, '\t')
+		return transformCSV(r, out, '\t', cti.ConvertNumbers)
 	case ExcelMimeType, ExcelOpenXMLMimeType:
 		r, err := excelize.OpenReader(r)
 		if err != nil {

@@ -26,7 +26,7 @@ func writeGoogleSheet(sheet *sheets.ValueRange, w *jsonutil.StreamEncoder) error
 			continue
 		}
 
-		recordToMap(row, &header, rawRow)
+		recordToMap(row, &header, rawRow, false)
 
 		err := w.EncodeRow(row)
 		if err != nil {

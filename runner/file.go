@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"runtime"
+	"strconv"
 	"strings"
 
 	"github.com/linkedin/goavro/v2"
@@ -68,7 +69,7 @@ func indexToExcelColumn(i int) string {
 	return string(rune(i%26 + 65))
 }
 
-func recordToMap[T any](row map[string]any, fields *[]string, record []T) {
+func recordToMap[T any](row map[string]any, fields *[]string, record []T, convertNumbers bool) {
 	i := -1 // This is only set to 0 if len(record) > 0
 	var el T
 	for i, el = range record {
@@ -80,7 +81,7 @@ func recordToMap[T any](row map[string]any, fields *[]string, record []T) {
 			(*fields)[i] = indexToExcelColumn(i + 1)
 		}
 
-		(row)[(*fields)[i]] = el
+		(row)[(*fields)[i]] = maybeConvertNumber(el, convertNumbers)
 	}
 
 	// If the record has less fields than we've seen already, set all unseen fields to nil
@@ -89,7 +90,30 @@ func recordToMap[T any](row map[string]any, fields *[]string, record []T) {
 	}
 }
 
-func transformCSV(in *bufio.Reader, out *bufio.Writer, delimiter rune) error {
+func maybeConvertNumber(value any, convertNumbers bool) any {
+	if !convertNumbers {
+		return value
+	}
+
+	s, ok := value.(string)
+	if !ok {
+		return value
+	}
+
+	return convertNumber(s)
+}
+
+func convertNumber(value string) any {
+	if converted, err := strconv.Atoi(value); err == nil {
+		return converted
+	} else if converted, err := strconv.ParseFloat(value, 64); err == nil {
+		return converted
+	} else {
+		return value
+	}
+}
+
+func transformCSV(in *bufio.Reader, out *bufio.Writer, delimiter rune, convertNumbers bool) error {
 	r := csv.NewReader(in)
 	r.Comma = delimiter
 	r.ReuseRecord = true
@@ -119,7 +143,7 @@ func transformCSV(in *bufio.Reader, out *bufio.Writer, delimiter rune) error {
 				continue
 			}
 
-			recordToMap(row, &fields, record)
+			recordToMap(row, &fields, record, convertNumbers)
 
 			err = w.EncodeRow(row)
 			if err != nil {
@@ -131,14 +155,14 @@ func transformCSV(in *bufio.Reader, out *bufio.Writer, delimiter rune) error {
 	})
 }
 
-func transformCSVFile(in string, out *bufio.Writer, delimiter rune) error {
+func transformCSVFile(in string, out *bufio.Writer, delimiter rune, convertNumbers bool) error {
 	r, closeFile, err := openBufferedFile(in)
 	if err != nil {
 		return err
 	}
 	defer closeFile()
 
-	return transformCSV(r, out, delimiter)
+	return transformCSV(r, out, delimiter, convertNumbers)
 }
 
 func transformJSON(in *bufio.Reader, out *bufio.Writer) error {
@@ -218,7 +242,7 @@ func transformORC(in *orc.Reader, out *bufio.Writer) error {
 			for c.Next() {
 				r := c.Row()
 
-				recordToMap(row, &cols, r)
+				recordToMap(row, &cols, r, false)
 
 				err := w.EncodeRow(row)
 				if err != nil {
@@ -254,7 +278,7 @@ func writeSheet(rows [][]string, w *jsonutil.StreamEncoder) error {
 			continue
 		}
 
-		recordToMap(row, &header, r)
+		recordToMap(row, &header, r, false)
 
 		err := w.EncodeRow(row)
 		if err != nil {
@@ -690,9 +714,9 @@ func TransformFile(fileName string, cti ContentTypeInfo, out *bufio.Writer) erro
 	case JSONMimeType:
 		return transformJSONFile(fileName, out)
 	case CSVMimeType:
-		return transformCSVFile(fileName, out, ',')
+		return transformCSVFile(fileName, out, ',', cti.ConvertNumbers)
 	case TSVMimeType:
-		return transformCSVFile(fileName, out, '\t')
+		return transformCSVFile(fileName, out, '\t', cti.ConvertNumbers)
 	case ExcelMimeType, ExcelOpenXMLMimeType:
 		return transformXLSXFile(fileName, out)
 	case ParquetMimeType:

@@ -74,7 +74,47 @@ func Test_recordToMap(t *testing.T) {
 
 	for _, test := range tests {
 		m := map[string]any{}
-		recordToMap(m, &test.fields, test.record)
+		recordToMap(m, &test.fields, test.record, false)
+		assert.Equal(t, test.expect, m)
+	}
+}
+
+func Test_recordToMap_convertNumbers(t *testing.T) {
+	tests := []struct {
+		fields []string
+		record []string
+		expect map[string]any
+	}{
+		{
+			[]string{"a", "b"},
+			[]string{"foo", "bar"},
+			map[string]any{"a": "foo", "b": "bar"},
+		},
+		{
+			[]string{"a", "b"},
+			[]string{"foo", "1"},
+			map[string]any{"a": "foo", "b": 1},
+		},
+		{
+			[]string{"a", "b"},
+			[]string{"foo", "1.5"},
+			map[string]any{"a": "foo", "b": 1.5},
+		},
+		{
+			[]string{"a", "b"},
+			[]string{"foo"},
+			map[string]any{"a": "foo", "b": nil},
+		},
+		{
+			[]string{"a", "b"},
+			[]string{"1", "2"},
+			map[string]any{"a": 1, "b": 2},
+		},
+	}
+
+	for _, test := range tests {
+		m := map[string]any{}
+		recordToMap(m, &test.fields, test.record, true)
 		assert.Equal(t, test.expect, m)
 	}
 }
@@ -492,7 +532,7 @@ michael,10`)
 
 	ob := newBufferedWriter(outTmp)
 
-	err = transformCSVFile(csvTmp.Name(), ob, ',')
+	err = transformCSVFile(csvTmp.Name(), ob, ',', false)
 	ob.Flush()
 	assert.Nil(t, err)
 
@@ -534,7 +574,7 @@ func Test_transformCSV_BENCHMARK(t *testing.T) {
 	start := time.Now()
 	bw := newBufferedWriter(outTmp)
 	defer bw.Flush()
-	err = transformCSVFile("taxi.csv", bw, ',')
+	err = transformCSVFile("taxi.csv", bw, ',', false)
 	assert.Nil(t, err)
 
 	fmt.Printf("transform csv took %s\n", time.Since(start))
