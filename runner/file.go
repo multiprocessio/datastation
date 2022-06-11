@@ -58,37 +58,6 @@ func openTruncateBufio(out string) (*bufio.Writer, func() error, error) {
 	return newBufferedWriter(o), o.Close, nil
 }
 
-func indexToExcelColumn(i int) string {
-	i -= 1
-
-	if i/26 > 0 {
-		return indexToExcelColumn(i/26) + string(rune(i%26+65))
-	}
-
-	return string(rune(i%26 + 65))
-}
-
-func recordToMap[T any](row map[string]any, fields *[]string, record []T) {
-	i := -1 // This is only set to 0 if len(record) > 0
-	var el T
-	for i, el = range record {
-		// If the column doesn't exist, give it an Excel-style name based on its position
-		if i >= len(*fields) {
-			*fields = append(*fields, indexToExcelColumn(i+1))
-		} else if (*fields)[i] == "" {
-			// If the column exists but has no name, same thing: Excel-style name
-			(*fields)[i] = indexToExcelColumn(i + 1)
-		}
-
-		(row)[(*fields)[i]] = el
-	}
-
-	// If the record has less fields than we've seen already, set all unseen fields to nil
-	for _, field := range (*fields)[i+1:] {
-		(row)[field] = nil
-	}
-}
-
 func transformCSV(in *bufio.Reader, out *bufio.Writer, delimiter rune) error {
 	r := csv.NewReader(in)
 	r.Comma = delimiter
