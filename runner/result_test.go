@@ -1,19 +1,8 @@
 package runner
 
 import (
-	"bufio"
-	"bytes"
-	"encoding/json"
-	"fmt"
-	"io/ioutil"
-	"math/rand"
-	"os"
-	"strings"
 	"testing"
-	"time"
 
-	"github.com/linkedin/goavro/v2"
-	"github.com/scritchley/orc"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -74,7 +63,47 @@ func Test_recordToMap(t *testing.T) {
 
 	for _, test := range tests {
 		m := map[string]any{}
-		recordToMap(m, &test.fields, test.record)
+		recordToMap(m, &test.fields, test.record, false)
+		assert.Equal(t, test.expect, m)
+	}
+}
+
+func Test_recordToMap_convertNumbers(t *testing.T) {
+	tests := []struct {
+		fields []string
+		record []string
+		expect map[string]any
+	}{
+		{
+			[]string{"a", "b"},
+			[]string{"foo", "bar"},
+			map[string]any{"a": "foo", "b": "bar"},
+		},
+		{
+			[]string{"a", "b"},
+			[]string{"foo", "1"},
+			map[string]any{"a": "foo", "b": 1},
+		},
+		{
+			[]string{"a", "b"},
+			[]string{"foo", "1.5"},
+			map[string]any{"a": "foo", "b": 1.5},
+		},
+		{
+			[]string{"a", "b"},
+			[]string{"foo"},
+			map[string]any{"a": "foo", "b": nil},
+		},
+		{
+			[]string{"a", "b"},
+			[]string{"1", "2"},
+			map[string]any{"a": 1, "b": 2},
+		},
+	}
+
+	for _, test := range tests {
+		m := map[string]any{}
+		recordToMap(m, &test.fields, test.record, true)
 		assert.Equal(t, test.expect, m)
 	}
 }

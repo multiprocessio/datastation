@@ -2,9 +2,9 @@ package runner
 
 import (
 	"bufio"
-	"strings"
 	"os"
 	"strconv"
+	"strings"
 
 	jsonutil "github.com/multiprocessio/go-json"
 )
