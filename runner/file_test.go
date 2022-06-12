@@ -281,7 +281,7 @@ cdef`,
 
 	for _, test := range tests {
 		inTmp, err := ioutil.TempFile("", "")
-		
+
 		assert.Nil(t, err)
 
 		inTmp.WriteString(test)
@@ -352,10 +352,10 @@ func Test_regressions(t *testing.T) {
 	for _, test := range tests {
 		outTmp, err := ioutil.TempFile("", "")
 		assert.Nil(t, err)
-		
+
 		jw, err := openJSONResultItemWriter(outTmp.Name())
 		assert.Nil(t, err)
-		
+
 		w := newResultWriter(jw, nil)
 
 		err = test.transformer(test.file, w)
@@ -413,7 +413,7 @@ michael,10`)
 
 	jw, err := openJSONResultItemWriter(outTmp.Name())
 	assert.Nil(t, err)
-	
+
 	w := newResultWriter(jw, nil)
 
 	err = transformCSVFile(csvTmp.Name(), w, ',', false)
@@ -459,7 +459,7 @@ func Test_transformCSV_BENCHMARK(t *testing.T) {
 
 	jw, err := openJSONResultItemWriter(outTmp.Name())
 	assert.Nil(t, err)
-	
+
 	w := newResultWriter(jw, nil)
 	err = transformCSVFile("taxi.csv", w, ',', false)
 	assert.Nil(t, err)

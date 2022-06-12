@@ -117,7 +117,14 @@ func (rw *ResultWriter) SetNamespace(ns string) error {
 }
 
 func (rw *ResultWriter) SetFields(fs []string) {
-	rw.fields = fs
+	// Make a copy of the fields array
+	if len(rw.fields) != len(fs) {
+		rw.fields = make([]string, len(fs))
+	}
+
+	for i, f := range fs {
+		rw.fields[i] = f
+	}
 }
 
 func (rw *ResultWriter) WriteRecord(r []string, convertNumbers bool) error {
@@ -189,7 +196,12 @@ func (jw *JSONResultItemWriter) Close() error {
 		}
 	}
 
-	err := jw.bfd.Flush()
+	err := jw.encoder.Close()
+	if err != nil {
+		return err
+	}
+
+	err = jw.bfd.Flush()
 	if err != nil {
 		return err
 	}
