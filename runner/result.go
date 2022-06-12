@@ -158,11 +158,14 @@ func openJSONResultItemWriter(f string) (ResultItemWriter, error) {
 	}
 
 	jw.bfd = newBufferedWriter(jw.fd)
-	jw.encoder = jsonutil.NewGenericStreamEncoder(jw.bfd, jsonMarshal, true)
 	return &jw, err
 }
 
 func (jw *JSONResultItemWriter) WriteRow(m any) error {
+	// Lazily initialize because this starts writing JSON immediately.
+	if jw.encoder == nil {
+		jw.encoder = jsonutil.NewGenericStreamEncoder(jw.bfd, jsonMarshal, true)
+	}
 	return jw.encoder.EncodeRow(m)
 }
 
@@ -196,12 +199,14 @@ func (jw *JSONResultItemWriter) Close() error {
 		}
 	}
 
-	err := jw.encoder.Close()
-	if err != nil {
-		return err
+	if jw.encoder != nil {
+		err := jw.encoder.Close()
+		if err != nil {
+			return err
+		}
 	}
-
-	err = jw.bfd.Flush()
+	
+	err := jw.bfd.Flush()
 	if err != nil {
 		return err
 	}

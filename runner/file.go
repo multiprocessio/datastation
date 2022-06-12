@@ -343,6 +343,11 @@ func transformJSONLines(in *bufio.Reader, out *ResultWriter) error {
 		if err != nil {
 			return err
 		}
+
+		err = out.WriteRow(a)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
