@@ -76,7 +76,7 @@ func makeScrollRequest(baseUrl, scrollId string, req httpRequest) (*elasticsearc
 	return &r, nil
 }
 
-func (ec EvalContext) evalElasticsearch(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, server *ServerInfo, w io.Writer) error {
+func (ec EvalContext) evalElasticsearch(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, server *ServerInfo, w *ResultWriter) error {
 	var customCaCerts []string
 	for _, caCert := range ec.settings.CaCerts {
 		customCaCerts = append(customCaCerts, caCert.File)
@@ -165,54 +165,52 @@ func (ec EvalContext) evalElasticsearch(panel *PanelInfo, dbInfo DatabaseConnect
 
 		scrollId := r.ScrollId
 
-		return withJSONArrayOutWriterFile(w, func(w *jsonutil.StreamEncoder) error {
+		for _, hit := range r.Hits.Hits {
+			err := w.WriteRow(hit)
+			if err != nil {
+				return err
+			}
+		}
+
+		for {
+			bodyBytes, err := jsonMarshal(map[string]any{
+				"scroll":    "1m",
+				"scroll_id": scrollId,
+			})
+			if err != nil {
+				return err
+			}
+
+			Logln("Making new request with scroll id")
+			r, err := makeScrollRequest(baseUrl, scrollId, httpRequest{
+				allowInsecure: panel.Database.Extra["allow_insecure"] == "true",
+				url:           baseUrl + "/_search/scroll",
+				method:        "POST",
+				headers: append(headers, HttpConnectorInfoHeader{
+					Name:  "content-type",
+					Value: "application/json",
+				}),
+				customCaCerts: customCaCerts,
+				body:          bodyBytes,
+				sendBody:      true,
+			})
+			if err != nil {
+				Logln("Error: %#v", err)
+				return err
+			}
+
+			scrollId = r.ScrollId
+
 			for _, hit := range r.Hits.Hits {
-				err := w.EncodeRow(hit)
+				err := w.WriteRow(hit)
 				if err != nil {
 					return err
 				}
 			}
 
-			for {
-				bodyBytes, err := jsonMarshal(map[string]any{
-					"scroll":    "1m",
-					"scroll_id": scrollId,
-				})
-				if err != nil {
-					return err
-				}
-
-				Logln("Making new request with scroll id")
-				r, err := makeScrollRequest(baseUrl, scrollId, httpRequest{
-					allowInsecure: panel.Database.Extra["allow_insecure"] == "true",
-					url:           baseUrl + "/_search/scroll",
-					method:        "POST",
-					headers: append(headers, HttpConnectorInfoHeader{
-						Name:  "content-type",
-						Value: "application/json",
-					}),
-					customCaCerts: customCaCerts,
-					body:          bodyBytes,
-					sendBody:      true,
-				})
-				if err != nil {
-					Logln("Error: %#v", err)
-					return err
-				}
-
-				scrollId = r.ScrollId
-
-				for _, hit := range r.Hits.Hits {
-					err := w.EncodeRow(hit)
-					if err != nil {
-						return err
-					}
-				}
-
-				if len(r.Hits.Hits) == 0 {
-					return nil
-				}
+			if len(r.Hits.Hits) == 0 {
+				return nil
 			}
-		})
+		}
 	})
 }

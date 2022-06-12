@@ -1,45 +1,35 @@
 package runner
 
-type ResultWriterOptions struct {
-	sampleBase int
-	sampleFreq int
-	writer func(bufio.Writer, map[string]any) error
+import (
+	"bufio"
+	"encoding/json"
+	"io"
+	"os"
+	"strconv"
+
+	jsonutil "github.com/multiprocessio/go-json"
+)
+
+func maybeConvertNumber(value any, convertNumbers bool) any {
+	if !convertNumbers {
+		return value
+	}
+
+	s, ok := value.(string)
+	if !ok {
+		return value
+	}
+
+	return convertNumber(s)
 }
 
-type ResultWriter struct {
-	written int
-	opts ResultWriterOptions
-	fd *os.File
-	bfd *bufio.Writer
-}
-
-func Open(f string, opts *ResultWriterOptions) (*ResultWriter, error) {
-	var rw ResultWriter{}
-	var err error
-
-	if opts == nil {
-		rw.opts = ResultWriterOptions{
-			sampleBase: 10_000,
-			sampleFreq: 1_000,
-		}
+func convertNumber(value string) any {
+	if converted, err := strconv.Atoi(value); err == nil {
+		return converted
+	} else if converted, err := strconv.ParseFloat(value, 64); err == nil {
+		return converted
 	} else {
-		rw.opts = *opts
-	}
-
-	rw.fd, err = openTruncate(f)
-	if err != nil {
-		return nil, err
-	}
-
-	rw.bfd = newBufferedWriter(rw.fd)
-
-	return &rw, err
-}
-
-func (rw *ResultWriter) WriteMap(m map[string]any) error {
-	rw.written++
-	if rw.written < rw.sampleBase {
-		sample
+		return value
 	}
 }
 
@@ -53,7 +43,7 @@ func indexToExcelColumn(i int) string {
 	return string(rune(i%26 + 65))
 }
 
-func recordToMap[T any](row map[string]any, fields *[]string, record []T) {
+func recordToMap[T any](row map[string]any, fields *[]string, record []T, convertNumbers bool) {
 	i := -1 // This is only set to 0 if len(record) > 0
 	var el T
 	for i, el = range record {
@@ -65,7 +55,7 @@ func recordToMap[T any](row map[string]any, fields *[]string, record []T) {
 			(*fields)[i] = indexToExcelColumn(i + 1)
 		}
 
-		(row)[(*fields)[i]] = el
+		(row)[(*fields)[i]] = maybeConvertNumber(el, convertNumbers)
 	}
 
 	// If the record has less fields than we've seen already, set all unseen fields to nil
@@ -74,16 +64,144 @@ func recordToMap[T any](row map[string]any, fields *[]string, record []T) {
 	}
 }
 
-func (rw *ResultWriter) WriteRecord[T any](r []T) error {
-	m := recordToMap[T](r)
-	return rw.WriteMap(m)
+type ResultItemWriter interface {
+	WriteRow(any) error
+	SetNamespace(ns string) error
+	Close() error
 }
 
-func (rw *ResultWriter) Close() {
-	rw.bfd.Close()
-	rw.fd.Close()
+type ResultWriterOptions struct {
+	sampleMinimum int
+	sampleFreq    int
 }
 
-type ResultReader struct {
-	
+type ResultWriter struct {
+	w    ResultItemWriter
+	opts ResultWriterOptions
+
+	// Internal state
+
+	// Number of rows written
+	written int
+	// Reusable map for converting records to maps
+	rowCache map[string]any
+	// Used only by record
+	fields []string
+}
+
+func newResultWriter(w ResultItemWriter, opts *ResultWriterOptions) *ResultWriter {
+	rw := &ResultWriter{w: w, rowCache: map[string]any{}}
+
+	if opts == nil {
+		rw.opts = ResultWriterOptions{
+			sampleMinimum: 10_000,
+			sampleFreq:    1_000,
+		}
+	} else {
+		rw.opts = *opts
+	}
+
+	return rw
+}
+
+func (rw *ResultWriter) WriteRow(r any) error {
+	rw.written++
+	if rw.written < rw.sampleMinimum {
+		// take sample
+	}
+
+	return rw.w.WriteRow(r)
+}
+
+func (rw *ResultWriter) SetNamespace(ns string) error {
+	return rw.w.SetNamespace(ns)
+}
+
+func (rw *ResultWriter) SetFields(fs []string) {
+	rw.fields = fs
+}
+
+func (rw *ResultWriter) WriteRecord(r []string, convertNumbers bool) error {
+	recordToMap[string](rw.rowCache, &rw.fields, r, convertNumbers)
+	return rw.WriteRow(rw.rowCache)
+}
+
+func (rw *ResultWriter) WriteAnyRecord(r []any, convertNumbers bool) error {
+	recordToMap[any](rw.rowCache, &rw.fields, r, convertNumbers)
+	return rw.WriteRow(rw.rowCache)
+}
+
+func (rw *ResultWriter) Close() error {
+	return rw.w.Close()
+}
+
+type JSONResultItemWriter struct {
+	fd       *os.File
+	bfd      *bufio.Writer
+	encoder  *jsonutil.StreamEncoder
+	isObject bool
+}
+
+func openJSONResultItemWriter(f string) (*ResultItemWriter, error) {
+	var jw JSONResultItemWriter
+
+	jw.fd, err = openTruncate(f)
+	if err != nil {
+		return nil, err
+	}
+
+	jw.bfd = newBufferedWriter(jw.fd)
+	jw.encoder = jsonutil.NewGenericStreamEncoder(jw.bfd, jsonMarshal, true)
+	return &jw, err
+}
+
+func (jw *JSONResultItemWriter) WriteRow(m any) error {
+	return jw.encoder.EncodeRow(m)
+}
+
+func (jw *JSONResultItemWriter) SetNamespace(key string) error {
+	isFirst := !jw.isObject
+	if isFirst {
+		err := jw.bfd.WriteByte('{')
+		if err != nil {
+			return err
+		}
+
+		jw.isObject = true
+	}
+
+	if !isFirst {
+		err := jw.bdf.WriteString("], ")
+		if err != nil {
+			return err
+		}
+	}
+
+	return jw.bfd.WriteString(`"` + strings.ReplaceAll(sheet, `"`, `\\"`) + `": [`)
+}
+
+func (jw *JSONResultItemWriter) Close() error {
+	if jw.isObject {
+		err := jw.bdf.WriteString("]}")
+		if err != nil {
+			return err
+		}
+	}
+
+	err := jw.bfd.Close()
+	if err != nil {
+		return err
+	}
+
+	return jw.fd.Close()
+}
+
+func (ec EvalContext) getResultWriter(projectId, panelId string) (*ResultWriter, error) {
+	out := ec.GetPanelResultsFile(projectId, panelId)
+	jw, err := openJSONResultItemWriter(out)
+	if err != nil {
+		return err
+	}
+
+	return newResultWriter(jw, nil)
 }

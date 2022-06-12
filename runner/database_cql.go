@@ -8,7 +8,7 @@ import (
 	"github.com/gocql/gocql"
 )
 
-func (ec EvalContext) evalCQL(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, server *ServerInfo, w io.Writer) error {
+func (ec EvalContext) evalCQL(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, server *ServerInfo, w *ResultWriter) error {
 	_, host, port, _, err := getHTTPHostPort(dbInfo.Address)
 	if err != nil {
 		return err
@@ -37,19 +37,18 @@ func (ec EvalContext) evalCQL(panel *PanelInfo, dbInfo DatabaseConnectorInfoData
 		defer sess.Close()
 
 		iter := sess.Query(panel.Content).Iter()
-		return withJSONArrayOutWriterFile(w, func(w *jsonutil.StreamEncoder) error {
-			for {
-				row := map[string]any{}
-				if !iter.MapScan(row) {
-					break
-				}
-				err := w.EncodeRow(row)
-				if err != nil {
-					return err
-				}
+		for {
+			// TODO: Can we reuse this map?
+			row := map[string]any{}
+			if !iter.MapScan(row) {
+				break
 			}
+			err := w.WriteRow(row)
+			if err != nil {
+				return err
+			}
+		}
 
-			return iter.Close()
-		})
+		return iter.Close()
 	})
 }

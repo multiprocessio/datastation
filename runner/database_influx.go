@@ -28,7 +28,7 @@ type influxResponse struct {
 
 // InfluxQL is supported in 1 and 2 but requires special setup in 2.
 // See https://docs.influxdata.com/influxdb/v2.1/query-data/influxql/#verify-buckets-have-a-mapping
-func (ec EvalContext) evalInfluxQL(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, server *ServerInfo, w io.Writer) error {
+func (ec EvalContext) evalInfluxQL(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, server *ServerInfo, w *ResultWriter) error {
 	tls, host, port, _, err := getHTTPHostPort(dbInfo.Address)
 	if err != nil {
 		return err
@@ -89,32 +89,30 @@ func (ec EvalContext) evalInfluxQL(panel *PanelInfo, dbInfo DatabaseConnectorInf
 			return err
 		}
 
-		return withJSONArrayOutWriterFile(w, func(w *jsonutil.StreamEncoder) error {
-			for _, result := range r.Results {
-				for _, series := range result.Series {
-					for _, r := range series.Values {
-						row := map[string]any{
-							"__series_name__": series.Name,
-						}
-						for i, cell := range r {
-							row[series.Columns[i]] = cell
-						}
+		for _, result := range r.Results {
+			for _, series := range result.Series {
+				for _, r := range series.Values {
+					row := map[string]any{
+						"__series_name__": series.Name,
+					}
+					for i, cell := range r {
+						row[series.Columns[i]] = cell
+					}
 
-						err := w.EncodeRow(row)
-						if err != nil {
-							return err
-						}
+					err := w.WriteRow(row)
+					if err != nil {
+						return err
 					}
 				}
 			}
+		}
 
-			return nil
-		})
+		return nil
 	})
 }
 
 // Flux language is only supported in influx2.
-func (ec EvalContext) evalFlux(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, server *ServerInfo, w io.Writer) error {
+func (ec EvalContext) evalFlux(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, server *ServerInfo, w *ResultWriter) error {
 	tls, host, port, rest, err := getHTTPHostPort(dbInfo.Address)
 	if err != nil {
 		return err
@@ -141,16 +139,14 @@ func (ec EvalContext) evalFlux(panel *PanelInfo, dbInfo DatabaseConnectorInfoDat
 			return err
 		}
 
-		return withJSONArrayOutWriterFile(w, func(w *jsonutil.StreamEncoder) error {
-			for result.Next() {
-				values := result.Record().Values()
-				err := w.EncodeRow(values)
-				if err != nil {
-					return err
-				}
+		for result.Next() {
+			values := result.Record().Values()
+			err := w.WriteRow(values)
+			if err != nil {
+				return err
 			}
+		}
 
-			return result.Err()
-		})
+		return result.Err()
 	})
 }

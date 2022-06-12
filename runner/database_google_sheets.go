@@ -12,10 +12,8 @@ import (
 	"google.golang.org/api/sheets/v4"
 )
 
-func writeGoogleSheet(sheet *sheets.ValueRange, w *jsonutil.StreamEncoder) error {
+func writeGoogleSheet(sheet *sheets.ValueRange, w *ResultWriter) error {
 	var header []string
-
-	row := map[string]any{}
 
 	for _, rawRow := range sheet.Values {
 		// Is first row, fill out header.
@@ -23,12 +21,11 @@ func writeGoogleSheet(sheet *sheets.ValueRange, w *jsonutil.StreamEncoder) error
 			for _, cell := range rawRow {
 				header = append(header, fmt.Sprintf("%v", cell))
 			}
+			w.SetFields(header)
 			continue
 		}
 
-		recordToMap(row, &header, rawRow)
-
-		err := w.EncodeRow(row)
+		err := w.WriteAnyRecord(rawRow)
 		if err != nil {
 			return err
 		}
@@ -52,7 +49,7 @@ func fetchGoogleSheetValueRange(srv *sheets.Service, sheetId string, sInfo *shee
 	return rsp, nil
 }
 
-func (ec EvalContext) evalGoogleSheets(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, w io.Writer) error {
+func (ec EvalContext) evalGoogleSheets(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, w *ResultWriter) error {
 	ctx := context.Background()
 
 	token, err := ec.decrypt(&dbInfo.ApiKey)
@@ -79,51 +76,38 @@ func (ec EvalContext) evalGoogleSheets(panel *PanelInfo, dbInfo DatabaseConnecto
 			return err
 		}
 
-		return withJSONArrayOutWriterFile(w, func(w *jsonutil.StreamEncoder) error {
-			return writeGoogleSheet(valueRange, w)
-		})
+		return writeGoogleSheet(valueRange, w)
 	}
 
 	sheetNames := map[string]string{}
-	return withJSONOutWriter(w, "{", "}", func() error {
-		for i, sheet := range sheets {
-			if i > 0 {
-				_, err := w.Write([]byte(",\n"))
-				if err != nil {
-					return err
-				}
-			}
-
-			valueRange, err := fetchGoogleSheetValueRange(srv, panel.Database.Table, sheets[0])
-			if err != nil {
-				return err
-			}
-
-			name := sheet.Properties.Title
-			nth := 0
-			for {
-				_, exists := sheetNames[name]
-				if !exists {
-					break
-				}
-
-				nth++
-				name = fmt.Sprintf("%s%d", sheet.Properties.Title, nth)
-			}
-			sheetNameKey := `"` + strings.ReplaceAll(name, `"`, `\\"`) + `":`
-			_, err = w.Write([]byte(sheetNameKey))
-			if err != nil {
-				return err
-			}
-
-			err = withJSONArrayOutWriter(w, func(w *jsonutil.StreamEncoder) error {
-				return writeGoogleSheet(valueRange, w)
-			})
-			if err != nil {
-				return err
-			}
+	for _, sheet := range sheets {
+		err := w.SetNamespace(sheet.Properties.Title)
+		if err != nil {
+			return err
 		}
 
-		return nil
-	})
+		valueRange, err := fetchGoogleSheetValueRange(srv, panel.Database.Table, sheets[0])
+		if err != nil {
+			return err
+		}
+
+		name := sheet.Properties.Title
+		nth := 0
+		for {
+			_, exists := sheetNames[name]
+			if !exists {
+				break
+			}
+
+			nth++
+			name = fmt.Sprintf("%s%d", sheet.Properties.Title, nth)
+		}
+
+		err = writeGoogleSheet(valueRange, w)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
