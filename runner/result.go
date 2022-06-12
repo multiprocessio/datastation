@@ -2,8 +2,7 @@ package runner
 
 import (
 	"bufio"
-	"encoding/json"
-	"io"
+	"strings"
 	"os"
 	"strconv"
 
@@ -106,8 +105,8 @@ func newResultWriter(w ResultItemWriter, opts *ResultWriterOptions) *ResultWrite
 
 func (rw *ResultWriter) WriteRow(r any) error {
 	rw.written++
-	if rw.written < rw.sampleMinimum {
-		// take sample
+	if rw.written < rw.opts.sampleMinimum {
+		// TODO: take sample
 	}
 
 	return rw.w.WriteRow(r)
@@ -142,9 +141,10 @@ type JSONResultItemWriter struct {
 	isObject bool
 }
 
-func openJSONResultItemWriter(f string) (*ResultItemWriter, error) {
+func openJSONResultItemWriter(f string) (ResultItemWriter, error) {
 	var jw JSONResultItemWriter
 
+	var err error
 	jw.fd, err = openTruncate(f)
 	if err != nil {
 		return nil, err
@@ -171,24 +171,25 @@ func (jw *JSONResultItemWriter) SetNamespace(key string) error {
 	}
 
 	if !isFirst {
-		err := jw.bdf.WriteString("], ")
+		_, err := jw.bfd.WriteString("], ")
 		if err != nil {
 			return err
 		}
 	}
 
-	return jw.bfd.WriteString(`"` + strings.ReplaceAll(sheet, `"`, `\\"`) + `": [`)
+	_, err := jw.bfd.WriteString(`"` + strings.ReplaceAll(key, `"`, `\\"`) + `": [`)
+	return err
 }
 
 func (jw *JSONResultItemWriter) Close() error {
 	if jw.isObject {
-		err := jw.bdf.WriteString("]}")
+		_, err := jw.bfd.WriteString("]}")
 		if err != nil {
 			return err
 		}
 	}
 
-	err := jw.bfd.Close()
+	err := jw.bfd.Flush()
 	if err != nil {
 		return err
 	}
@@ -200,8 +201,8 @@ func (ec EvalContext) getResultWriter(projectId, panelId string) (*ResultWriter,
 	out := ec.GetPanelResultsFile(projectId, panelId)
 	jw, err := openJSONResultItemWriter(out)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return newResultWriter(jw, nil)
+	return newResultWriter(jw, nil), nil
 }

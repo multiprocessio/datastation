@@ -3,10 +3,6 @@ package runner
 import (
 	"context"
 	"fmt"
-	"io"
-	"strings"
-
-	"github.com/multiprocessio/go-json"
 
 	"google.golang.org/api/option"
 	"google.golang.org/api/sheets/v4"
@@ -25,7 +21,7 @@ func writeGoogleSheet(sheet *sheets.ValueRange, w *ResultWriter) error {
 			continue
 		}
 
-		err := w.WriteAnyRecord(rawRow)
+		err := w.WriteAnyRecord(rawRow, false)
 		if err != nil {
 			return err
 		}

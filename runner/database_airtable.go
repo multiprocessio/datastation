@@ -6,8 +6,6 @@ import (
 	"io"
 	"net/url"
 	"strings"
-
-	"github.com/multiprocessio/go-json"
 )
 
 type airtableResponse struct {

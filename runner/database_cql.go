@@ -1,10 +1,6 @@
 package runner
 
 import (
-	"io"
-
-	"github.com/multiprocessio/go-json"
-
 	"github.com/gocql/gocql"
 )
 

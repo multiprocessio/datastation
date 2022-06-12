@@ -65,6 +65,7 @@ var defaultServerInfo = ServerInfo{
 type ContentTypeInfo struct {
 	Type             string `json:"type" db:"type"`
 	CustomLineRegexp string `json:"customLineRegexp" db:"customLineRegexp"`
+	ConvertNumbers   bool   `json:"convertNumbers" db:"convertNumbers"`
 }
 
 var defaultContentTypeInfo = ContentTypeInfo{}

@@ -2,10 +2,7 @@ package runner
 
 import (
 	"encoding/base64"
-	"io"
 	"net/url"
-
-	"github.com/multiprocessio/go-json"
 )
 
 var iso8601Format = "2006-01-02T15:04:05"

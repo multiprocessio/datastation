@@ -1,9 +1,5 @@
 package runner
 
-import (
-	jsonutil "github.com/multiprocessio/go-json"
-)
-
 func (ec EvalContext) getResultColumns(project *ProjectState, thisId, panelSourceId string, columns []string, page, pageSize int) error {
 	var panelSource *PanelInfo
 outer:

@@ -2,11 +2,8 @@ package runner
 
 import (
 	"context"
-	"io"
 	"math"
 	"time"
-
-	"github.com/multiprocessio/go-json"
 
 	"github.com/prometheus/client_golang/api"
 	"github.com/prometheus/client_golang/api/prometheus/v1"

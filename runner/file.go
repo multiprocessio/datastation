@@ -12,11 +12,10 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/linkedin/goavro/v2"
-	jsonutil "github.com/multiprocessio/go-json"
 	"github.com/multiprocessio/go-openoffice"
-	"github.com/scritchley/orc"
 
+	"github.com/linkedin/goavro/v2"
+	"github.com/scritchley/orc"
 	"github.com/xitongsys/parquet-go-source/local"
 	"github.com/xitongsys/parquet-go/reader"
 	"github.com/xitongsys/parquet-go/source"
@@ -170,7 +169,7 @@ func transformORC(in *orc.Reader, out *ResultWriter) error {
 		for c.Next() {
 			r := c.Row()
 
-			err := out.WriteAnyRecord(r)
+			err := out.WriteAnyRecord(r, false)
 			if err != nil {
 				return err
 			}

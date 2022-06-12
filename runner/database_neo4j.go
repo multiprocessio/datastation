@@ -1,9 +1,6 @@
 package runner
 
 import (
-	"io"
-
-	jsonutil "github.com/multiprocessio/go-json"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 )
 

@@ -5,8 +5,6 @@ import (
 	"io"
 	"os"
 
-	jsonutil "github.com/multiprocessio/go-json"
-
 	goccy_json "github.com/goccy/go-json"
 )
 
@@ -75,14 +73,16 @@ func writeAll(w io.Writer, bs []byte) error {
 }
 
 func WriteJSONFile(file string, value any) error {
-	f, closeFile, err := openTruncateBufio(file)
+	f, err := openTruncate(file)
 	if err != nil {
 		return err
 	}
-	defer closeFile()
-	defer f.Flush()
+	defer f.Close()
 
-	encoder := jsonNewEncoder(f)
+	r := newBufferedWriter(f)
+	defer r.Flush()
+
+	encoder := jsonNewEncoder(r)
 	return encoder.Encode(value)
 }
 

@@ -2,9 +2,6 @@ package runner
 
 import (
 	"context"
-	"io"
-
-	"github.com/multiprocessio/go-json"
 
 	"cloud.google.com/go/bigquery"
 	"google.golang.org/api/iterator"
@@ -55,7 +52,7 @@ func (ec EvalContext) evalBigQuery(panel *PanelInfo, dbInfo DatabaseConnectorInf
 			valuesAny[i] = values[i]
 		}
 
-		err = w.WriteAnyRecord(valuesAny)
+		err = w.WriteAnyRecord(valuesAny, false)
 		if err != nil {
 			return err
 		}

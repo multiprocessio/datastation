@@ -1,11 +1,8 @@
 package runner
 
 import (
-	"io"
 	"strconv"
 	"time"
-
-	"github.com/multiprocessio/go-json"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"

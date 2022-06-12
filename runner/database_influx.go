@@ -7,8 +7,6 @@ import (
 	"io"
 	"net/url"
 
-	"github.com/multiprocessio/go-json"
-
 	"github.com/influxdata/influxdb-client-go/v2"
 )
 
