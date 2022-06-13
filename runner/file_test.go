@@ -101,10 +101,10 @@ func Test_transformJSONLines(t *testing.T) {
 		outputFile, err := ioutil.TempFile("", "")
 		assert.Nil(t, err)
 
-		jw, err := openJSONResultItemWriter(outputFile.Name())
+		jw, err := openJSONResultItemWriter(outputFile.Name(), nil)
 		assert.Nil(t, err)
 
-		w := newResultWriter(jw, nil)
+		w := newResultWriter(jw)
 		err = transformJSONLinesFile(inputFile.Name(), w)
 		assert.Nil(t, err)
 
@@ -128,10 +128,10 @@ func Test_parquet(t *testing.T) {
 	defer os.Remove(outputFile.Name())
 	assert.Nil(t, err)
 
-	jw, err := openJSONResultItemWriter(outputFile.Name())
+	jw, err := openJSONResultItemWriter(outputFile.Name(), nil)
 	assert.Nil(t, err)
 
-	w := newResultWriter(jw, nil)
+	w := newResultWriter(jw)
 	err = transformParquetFile("../testdata/allformats/userdata.parquet", w)
 	assert.Nil(t, err)
 
@@ -197,10 +197,10 @@ func Test_transformORCFile(t *testing.T) {
 	defer os.Remove(outTmp.Name())
 	assert.Nil(t, err)
 
-	jw, err := openJSONResultItemWriter(outTmp.Name())
+	jw, err := openJSONResultItemWriter(outTmp.Name(), nil)
 	assert.Nil(t, err)
 
-	rw := newResultWriter(jw, nil)
+	rw := newResultWriter(jw)
 	err = transformORCFile(inTmp.Name(), rw)
 	assert.Nil(t, err)
 
@@ -252,10 +252,10 @@ func Test_transformAvroFile(t *testing.T) {
 	defer os.Remove(outTmp.Name())
 	defer outTmp.Close()
 
-	jw, err := openJSONResultItemWriter(outTmp.Name())
+	jw, err := openJSONResultItemWriter(outTmp.Name(), nil)
 	assert.Nil(t, err)
 
-	rw := newResultWriter(jw, nil)
+	rw := newResultWriter(jw)
 	err = transformAvroFile(inTmp.Name(), rw)
 	assert.Nil(t, err)
 
@@ -289,10 +289,10 @@ cdef`,
 		outTmp, err := ioutil.TempFile("", "")
 		assert.Nil(t, err)
 
-		jw, err := openJSONResultItemWriter(outTmp.Name())
+		jw, err := openJSONResultItemWriter(outTmp.Name(), nil)
 		assert.Nil(t, err)
 
-		w := newResultWriter(jw, nil)
+		w := newResultWriter(jw)
 		err = transformGenericFile(inTmp.Name(), w)
 		assert.Nil(t, err)
 
@@ -317,6 +317,20 @@ func Test_regressions(t *testing.T) {
 		expectedValue any
 		transformer   func(string, *ResultWriter) error
 	}{
+		{
+			"../testdata/regr/multiple-sheets.xlsx",
+			map[string]any{
+				"Sheet1": []any{
+					map[string]any{"name": "Kevin", "age": "12"},
+					map[string]any{"name": "Mary", "age": "14"},
+				},
+				"Sheet2": []any{
+					map[string]any{"name": "Ted", "age": "10"},
+					map[string]any{"name": "Gabby", "age": "11"},
+				},
+			},
+			transformXLSXFile,
+		},
 		{
 			"../testdata/regr/217.xlsx",
 			[]any{
@@ -353,10 +367,10 @@ func Test_regressions(t *testing.T) {
 		outTmp, err := ioutil.TempFile("", "")
 		assert.Nil(t, err)
 
-		jw, err := openJSONResultItemWriter(outTmp.Name())
+		jw, err := openJSONResultItemWriter(outTmp.Name(), nil)
 		assert.Nil(t, err)
 
-		w := newResultWriter(jw, nil)
+		w := newResultWriter(jw)
 
 		err = test.transformer(test.file, w)
 		assert.Nil(t, err)
@@ -411,10 +425,10 @@ michael,10`)
 	defer os.Remove(outTmp.Name())
 	assert.Nil(t, err)
 
-	jw, err := openJSONResultItemWriter(outTmp.Name())
+	jw, err := openJSONResultItemWriter(outTmp.Name(), nil)
 	assert.Nil(t, err)
 
-	w := newResultWriter(jw, nil)
+	w := newResultWriter(jw)
 
 	err = transformCSVFile(csvTmp.Name(), w, ',', false)
 	assert.Nil(t, err)
@@ -457,10 +471,10 @@ func Test_transformCSV_BENCHMARK(t *testing.T) {
 
 	start := time.Now()
 
-	jw, err := openJSONResultItemWriter(outTmp.Name())
+	jw, err := openJSONResultItemWriter(outTmp.Name(), nil)
 	assert.Nil(t, err)
 
-	w := newResultWriter(jw, nil)
+	w := newResultWriter(jw)
 	err = transformCSVFile("taxi.csv", w, ',', false)
 	assert.Nil(t, err)
 

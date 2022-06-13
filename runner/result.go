@@ -194,27 +194,39 @@ func (jw *JSONResultItemWriter) SetNamespace(key string) error {
 		jw.isObject = true
 	}
 
-	if !isFirst {
-		_, err := jw.bfd.WriteString("], ")
+	if jw.encoder != nil {
+		err := jw.encoder.Close()
 		if err != nil {
 			return err
 		}
 	}
 
-	_, err := jw.bfd.WriteString(`"` + strings.ReplaceAll(key, `"`, `\\"`) + `": [`)
-	return err
+	if !isFirst {
+		err := jw.bfd.WriteByte(',')
+		if err != nil {
+			return err
+		}
+	}
+
+	_, err := jw.bfd.WriteString(`"` + strings.ReplaceAll(key, `"`, `\\"`) + `": `)
+	if err != nil {
+		return err
+	}
+
+	jw.encoder = jsonutil.NewGenericStreamEncoder(jw.bfd, jsonMarshal, true)
+	return nil
 }
 
 func (jw *JSONResultItemWriter) Close() error {
-	if jw.isObject {
-		_, err := jw.bfd.WriteString("]}")
+	if jw.encoder != nil {
+		err := jw.encoder.Close()
 		if err != nil {
 			return err
 		}
 	}
 
-	if jw.encoder != nil {
-		err := jw.encoder.Close()
+	if jw.isObject {
+		_, err := jw.bfd.WriteString("}")
 		if err != nil {
 			return err
 		}
