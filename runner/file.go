@@ -14,6 +14,7 @@ import (
 
 	"github.com/multiprocessio/go-openoffice"
 
+	// "github.com/vmihailenco/msgpack/v5"
 	"github.com/linkedin/goavro/v2"
 	"github.com/scritchley/orc"
 	"github.com/xitongsys/parquet-go-source/local"
@@ -91,6 +92,23 @@ func transformCSVFile(in string, out *ResultWriter, delimiter rune, convertNumbe
 
 	return transformCSV(r, out, delimiter, convertNumbers)
 }
+
+/* 
+func transformMsgPack(in *bufio.Reader, out *ResultWriter) error {
+	
+	msgpack.Unmarshal(b, &)
+}
+
+func transformMsgPackFile(in string, out *ResultWriter) error {
+	r, closeFile, err := openBufferedFile(in)
+	if err != nil {
+		return err
+	}
+	defer closeFile()
+
+	return transformMsgPack(r, out)
+}
+*/
 
 func transformJSON(in *bufio.Reader, out *ResultWriter) error {
 	o := out.w.(*JSONResultItemWriter).bfd
