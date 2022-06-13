@@ -381,7 +381,7 @@ func newLargeLineScanner(in *bufio.Reader) *bufio.Scanner {
 func transformRegexp(in *bufio.Reader, out *ResultWriter, re *regexp.Regexp) error {
 	scanner := newLargeLineScanner(in)
 
-	var row map[string]any
+	row := map[string]any{}
 	for scanner.Scan() {
 		match := re.FindStringSubmatch(scanner.Text())
 		for i, name := range re.SubexpNames() {
