@@ -84,7 +84,7 @@ type ResultWriter struct {
 	fields []string
 }
 
-func newResultWriter(w ResultItemWriter) *ResultWriter {
+func NewResultWriter(w ResultItemWriter) *ResultWriter {
 	return &ResultWriter{w: w, rowCache: map[string]any{}}
 }
 
@@ -376,5 +376,5 @@ func (ec EvalContext) GetResultWriter(projectId, panelId string) (*ResultWriter,
 		return nil, err
 	}
 
-	return newResultWriter(jw), nil
+	return NewResultWriter(jw), nil
 }

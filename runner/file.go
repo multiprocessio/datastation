@@ -93,9 +93,9 @@ func transformCSVFile(in string, out *ResultWriter, delimiter rune, convertNumbe
 	return transformCSV(r, out, delimiter, convertNumbers)
 }
 
-/* 
+/*
 func transformMsgPack(in *bufio.Reader, out *ResultWriter) error {
-	
+
 	msgpack.Unmarshal(b, &)
 }
 
@@ -469,7 +469,6 @@ const (
 	CSVMimeType                      = "text/csv"
 	JSONMimeType                     = "application/json"
 	JSONLinesMimeType                = "application/jsonlines"
-	JSONConcatMimeType               = "application/jsonconcat"
 	RegexpLinesMimeType              = "text/regexplines"
 	ExcelMimeType                    = "application/vnd.ms-excel"
 	ExcelOpenXMLMimeType             = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
