@@ -230,6 +230,12 @@ func (jw *JSONResultItemWriter) Close() error {
 		if err != nil {
 			return err
 		}
+	} else if jw.encoder == nil {
+		// Nothing has been written so enter an empty object
+		_, err := jw.bfd.WriteString("[]")
+		if err != nil {
+			return err
+		}
 	}
 
 	err := jw.bfd.Flush()
