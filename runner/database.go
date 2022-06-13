@@ -390,7 +390,7 @@ func (ec EvalContext) EvalDatabasePanel(
 		return err
 	}
 
-	w, err := ec.getResultWriter(project.Id, panel.Id)
+	w, err := ec.GetResultWriter(project.Id, panel.Id)
 	if err != nil {
 		return err
 	}

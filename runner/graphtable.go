@@ -29,7 +29,7 @@ outer:
 	}
 	i := 0
 
-	rw, err := ec.getResultWriter(project.Id, thisId)
+	rw, err := ec.GetResultWriter(project.Id, thisId)
 	if err != nil {
 		return err
 	}

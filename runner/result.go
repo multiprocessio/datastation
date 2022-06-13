@@ -2,6 +2,7 @@ package runner
 
 import (
 	"bufio"
+	"math/rand"
 	"os"
 	"strconv"
 	"strings"
@@ -64,19 +65,14 @@ func recordToMap[T any](row map[string]any, fields *[]string, record []T, conver
 }
 
 type ResultItemWriter interface {
-	WriteRow(any) error
+	WriteRow(any, int) error
 	SetNamespace(ns string) error
+	Shape(string, int, int) (*Shape, error)
 	Close() error
 }
 
-type ResultWriterOptions struct {
-	sampleMinimum int
-	sampleFreq    int
-}
-
 type ResultWriter struct {
-	w    ResultItemWriter
-	opts ResultWriterOptions
+	w ResultItemWriter
 
 	// Internal state
 
@@ -88,28 +84,13 @@ type ResultWriter struct {
 	fields []string
 }
 
-func newResultWriter(w ResultItemWriter, opts *ResultWriterOptions) *ResultWriter {
-	rw := &ResultWriter{w: w, rowCache: map[string]any{}}
-
-	if opts == nil {
-		rw.opts = ResultWriterOptions{
-			sampleMinimum: 10_000,
-			sampleFreq:    1_000,
-		}
-	} else {
-		rw.opts = *opts
-	}
-
-	return rw
+func newResultWriter(w ResultItemWriter) *ResultWriter {
+	return &ResultWriter{w: w, rowCache: map[string]any{}}
 }
 
 func (rw *ResultWriter) WriteRow(r any) error {
 	rw.written++
-	if rw.written < rw.opts.sampleMinimum {
-		// TODO: take sample
-	}
-
-	return rw.w.WriteRow(r)
+	return rw.w.WriteRow(r, rw.written-1)
 }
 
 func (rw *ResultWriter) SetNamespace(ns string) error {
@@ -137,19 +118,46 @@ func (rw *ResultWriter) WriteAnyRecord(r []any, convertNumbers bool) error {
 	return rw.WriteRow(rw.rowCache)
 }
 
+func (rw *ResultWriter) Shape(id string, maxBytesToRead, sampleSize int) (*Shape, error) {
+	return rw.w.Shape(id, maxBytesToRead, sampleSize)
+}
+
 func (rw *ResultWriter) Close() error {
 	return rw.w.Close()
 }
 
-type JSONResultItemWriter struct {
-	fd       *os.File
-	bfd      *bufio.Writer
-	encoder  *jsonutil.StreamEncoder
-	isObject bool
+type JSONResultItemWriterOptions struct {
+	sampleMinimum int
+	sampleFreq    int
 }
 
-func openJSONResultItemWriter(f string) (ResultItemWriter, error) {
+type JSONResultItemWriter struct {
+	fileName string
+	fd       *os.File
+	bfd      *bufio.Writer
+	opts     JSONResultItemWriterOptions
+
+	// Internal state
+	encoder  *jsonutil.StreamEncoder
+	isObject bool
+	// Sampled rows
+	sample []any
+	// Counter
+	written int
+}
+
+func openJSONResultItemWriter(f string, opts *JSONResultItemWriterOptions) (ResultItemWriter, error) {
 	var jw JSONResultItemWriter
+	jw.fileName = f
+
+	if opts == nil {
+		jw.opts = JSONResultItemWriterOptions{
+			sampleMinimum: 10_000,
+			sampleFreq:    1_000,
+		}
+	} else {
+		jw.opts = *opts
+	}
 
 	var err error
 	jw.fd, err = openTruncate(f)
@@ -161,7 +169,13 @@ func openJSONResultItemWriter(f string) (ResultItemWriter, error) {
 	return &jw, err
 }
 
-func (jw *JSONResultItemWriter) WriteRow(m any) error {
+func (jw *JSONResultItemWriter) WriteRow(m any, written int) error {
+	if written < jw.opts.sampleMinimum {
+		jw.sample = append(jw.sample, m)
+	} else if rand.Intn(jw.opts.sampleFreq*10) < 10 {
+		jw.sample = append(jw.sample, m)
+	}
+
 	// Lazily initialize because this starts writing JSON immediately.
 	if jw.encoder == nil {
 		jw.encoder = jsonutil.NewGenericStreamEncoder(jw.bfd, jsonMarshal, true)
@@ -205,7 +219,7 @@ func (jw *JSONResultItemWriter) Close() error {
 			return err
 		}
 	}
-	
+
 	err := jw.bfd.Flush()
 	if err != nil {
 		return err
@@ -214,12 +228,21 @@ func (jw *JSONResultItemWriter) Close() error {
 	return jw.fd.Close()
 }
 
-func (ec EvalContext) getResultWriter(projectId, panelId string) (*ResultWriter, error) {
+func (jw *JSONResultItemWriter) Shape(id string, maxBytesToRead, sampleSize int) (*Shape, error) {
+	if len(jw.sample) > 0 {
+		s := GetShape(id, jw.sample, sampleSize)
+		return &s, nil
+	}
+
+	return ShapeFromFile(jw.fileName, id, maxBytesToRead, sampleSize)
+}
+
+func (ec EvalContext) GetResultWriter(projectId, panelId string) (*ResultWriter, error) {
 	out := ec.GetPanelResultsFile(projectId, panelId)
-	jw, err := openJSONResultItemWriter(out)
+	jw, err := openJSONResultItemWriter(out, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	return newResultWriter(jw, nil), nil
+	return newResultWriter(jw), nil
 }

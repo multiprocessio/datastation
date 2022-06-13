@@ -233,7 +233,7 @@ func (ec EvalContext) evalHTTPPanel(project *ProjectState, pageIndex int, panel 
 
 		}
 
-		rw, err := ec.getResultWriter(project.Id, panel.Id)
+		rw, err := ec.GetResultWriter(project.Id, panel.Id)
 		if err != nil {
 			return err
 		}

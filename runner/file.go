@@ -563,7 +563,7 @@ func (ec EvalContext) evalFilePanel(project *ProjectState, pageIndex int, panel 
 		return err
 	}
 
-	rw, err := ec.getResultWriter(project.Id, panel.Id)
+	rw, err := ec.GetResultWriter(project.Id, panel.Id)
 	if err != nil {
 		return err
 	}
