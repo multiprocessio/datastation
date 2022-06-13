@@ -104,7 +104,7 @@ func Test_transformJSONLines(t *testing.T) {
 		jw, err := openJSONResultItemWriter(outputFile.Name(), nil)
 		assert.Nil(t, err)
 
-		w := newResultWriter(jw)
+		w := NewResultWriter(jw)
 		err = transformJSONLinesFile(inputFile.Name(), w)
 		assert.Nil(t, err)
 
@@ -131,7 +131,7 @@ func Test_parquet(t *testing.T) {
 	jw, err := openJSONResultItemWriter(outputFile.Name(), nil)
 	assert.Nil(t, err)
 
-	w := newResultWriter(jw)
+	w := NewResultWriter(jw)
 	err = transformParquetFile("../testdata/allformats/userdata.parquet", w)
 	assert.Nil(t, err)
 
@@ -200,7 +200,7 @@ func Test_transformORCFile(t *testing.T) {
 	jw, err := openJSONResultItemWriter(outTmp.Name(), nil)
 	assert.Nil(t, err)
 
-	rw := newResultWriter(jw)
+	rw := NewResultWriter(jw)
 	err = transformORCFile(inTmp.Name(), rw)
 	assert.Nil(t, err)
 
@@ -255,7 +255,7 @@ func Test_transformAvroFile(t *testing.T) {
 	jw, err := openJSONResultItemWriter(outTmp.Name(), nil)
 	assert.Nil(t, err)
 
-	rw := newResultWriter(jw)
+	rw := NewResultWriter(jw)
 	err = transformAvroFile(inTmp.Name(), rw)
 	assert.Nil(t, err)
 
@@ -292,7 +292,7 @@ cdef`,
 		jw, err := openJSONResultItemWriter(outTmp.Name(), nil)
 		assert.Nil(t, err)
 
-		w := newResultWriter(jw)
+		w := NewResultWriter(jw)
 		err = transformGenericFile(inTmp.Name(), w)
 		assert.Nil(t, err)
 
@@ -370,7 +370,7 @@ func Test_regressions(t *testing.T) {
 		jw, err := openJSONResultItemWriter(outTmp.Name(), nil)
 		assert.Nil(t, err)
 
-		w := newResultWriter(jw)
+		w := NewResultWriter(jw)
 
 		err = test.transformer(test.file, w)
 		assert.Nil(t, err)
@@ -428,7 +428,7 @@ michael,10`)
 	jw, err := openJSONResultItemWriter(outTmp.Name(), nil)
 	assert.Nil(t, err)
 
-	w := newResultWriter(jw)
+	w := NewResultWriter(jw)
 
 	err = transformCSVFile(csvTmp.Name(), w, ',', false)
 	assert.Nil(t, err)
@@ -474,7 +474,7 @@ func Test_transformCSV_BENCHMARK(t *testing.T) {
 	jw, err := openJSONResultItemWriter(outTmp.Name(), nil)
 	assert.Nil(t, err)
 
-	w := newResultWriter(jw)
+	w := NewResultWriter(jw)
 	err = transformCSVFile("taxi.csv", w, ',', false)
 	assert.Nil(t, err)
 
