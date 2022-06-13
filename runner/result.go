@@ -248,6 +248,7 @@ func (jw *JSONResultItemWriter) Shape(id string, maxBytesToRead, sampleSize int)
 
 	return ShapeFromFile(jw.fileName, id, maxBytesToRead, sampleSize)
 }
+
 /*
 type MsgPackResultItemWriter struct {
 	fileName string
@@ -366,7 +367,7 @@ func (mw *MsgPackResultItemWriter) Shape(id string, maxBytesToRead, sampleSize i
 
 	return ShapeFromFile(mw.fileName, id, maxBytesToRead, sampleSize)
 }
-/*
+*/
 
 func (ec EvalContext) GetResultWriter(projectId, panelId string) (*ResultWriter, error) {
 	out := ec.GetPanelResultsFile(projectId, panelId)
