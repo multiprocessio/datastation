@@ -13,7 +13,7 @@ module.exports = {
           },
         }
       : undefined,
-  preset: 'ts-jest/presets/js-with-ts-legacy',
+  preset: 'ts-jest/presets/js-with-ts',
   transformIgnorePatterns: [
     'node_modules/(?!react-syntax-highlighter|refractor|node-fetch|fetch-blob)',
   ],
