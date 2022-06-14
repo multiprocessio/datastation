@@ -11,7 +11,7 @@ module.exports = {
           },
         }
       : undefined,
-  preset: 'ts-jest/presets/js-with-ts',
+  preset: 'ts-jest/presets/js-with-ts-legacy',
   transformIgnorePatterns: [
     'node_modules/(?!react-syntax-highlighter|refractor|node-fetch|fetch-blob)',
   ],
