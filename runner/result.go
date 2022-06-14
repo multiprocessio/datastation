@@ -174,10 +174,12 @@ func openJSONResultItemWriter(f string, opts *JSONResultItemWriterOptions) (Resu
 }
 
 func (jw *JSONResultItemWriter) WriteRow(m any, written int) error {
-	if written < jw.opts.sampleMinimum {
-		jw.sample = append(jw.sample, m)
-	} else if rand.Intn(jw.opts.sampleFreq*10) < 10 {
-		jw.sample = append(jw.sample, m)
+	if !jw.isObject {
+		if written < jw.opts.sampleMinimum {
+			jw.sample = append(jw.sample, m)
+		} else if rand.Intn(jw.opts.sampleFreq*10) < 10 {
+			jw.sample = append(jw.sample, m)
+		}
 	}
 
 	// Lazily initialize because this starts writing JSON immediately.

@@ -135,6 +135,19 @@ func transformParquet(in source.ParquetFile, out *ResultWriter) error {
 		}
 
 		for _, row := range rows {
+			// Structs need to be turned into map[string]any if this is not the JSON writer
+			if _, ok := out.w.(*JSONResultItemWriter); !ok {
+				bs, err := jsonMarshal(row)
+				if err != nil {
+					return err
+				}
+
+				err = jsonUnmarshal(bs, &row)
+				if err != nil {
+					return err
+				}
+			}
+
 			err := out.WriteRow(row)
 			if err != nil {
 				return err
