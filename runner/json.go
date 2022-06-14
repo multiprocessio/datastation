@@ -5,8 +5,6 @@ import (
 	"io"
 	"os"
 
-	jsonutil "github.com/multiprocessio/go-json"
-
 	goccy_json "github.com/goccy/go-json"
 )
 
@@ -45,41 +43,6 @@ func jsonUnmarshal(bs []byte, i any) (err error) {
 var jsonNewEncoder = goccy_json.NewEncoder
 var jsonNewDecoder = goccy_json.NewDecoder
 
-type JSONStreamEncoder jsonutil.StreamEncoder
-
-func withJSONOutWriter(w io.Writer, first, last string, cb func() error) error {
-	_, err := w.Write([]byte(first))
-	if err != nil {
-		return edsef("Failed to write JSON start marker: %s", err)
-	}
-
-	err = cb()
-	if err != nil {
-		return err
-	}
-
-	_, err = w.Write([]byte(last))
-	if err != nil {
-		return edsef("Failed to write JSON end marker: %s", err)
-	}
-
-	return nil
-}
-
-func withJSONArrayOutWriter(w io.Writer, cb func(w *jsonutil.StreamEncoder) error) error {
-	encoder := jsonutil.NewGenericStreamEncoder(w, jsonMarshal, true)
-	err := cb(encoder)
-	if err != nil {
-		return err
-	}
-
-	return encoder.Close()
-}
-
-func withJSONArrayOutWriterFile(out io.Writer, cb func(w *jsonutil.StreamEncoder) error) error {
-	return withJSONArrayOutWriter(out, cb)
-}
-
 func readJSONFileInto(file string, into any) error {
 	f, err := os.Open(file)
 	if err != nil {
@@ -110,14 +73,16 @@ func writeAll(w io.Writer, bs []byte) error {
 }
 
 func WriteJSONFile(file string, value any) error {
-	f, closeFile, err := openTruncateBufio(file)
+	f, err := openTruncate(file)
 	if err != nil {
 		return err
 	}
-	defer closeFile()
-	defer f.Flush()
+	defer f.Close()
 
-	encoder := jsonNewEncoder(f)
+	r := newBufferedWriter(f)
+	defer r.Flush()
+
+	encoder := jsonNewEncoder(r)
 	return encoder.Encode(value)
 }
 

@@ -2,11 +2,8 @@ package runner
 
 import (
 	"context"
-	"io"
 	"math"
 	"time"
-
-	"github.com/multiprocessio/go-json"
 
 	"github.com/prometheus/client_golang/api"
 	"github.com/prometheus/client_golang/api/prometheus/v1"
@@ -14,7 +11,7 @@ import (
 	"github.com/prometheus/common/model"
 )
 
-func (ec EvalContext) evalPrometheus(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, server *ServerInfo, w io.Writer) error {
+func (ec EvalContext) evalPrometheus(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, server *ServerInfo, w *ResultWriter) error {
 	begin, end, allTime, err := timestampsFromRange(panel.DatabasePanelInfo.Database.Range)
 	if err != nil {
 		return err
@@ -75,22 +72,20 @@ func (ec EvalContext) evalPrometheus(panel *PanelInfo, dbInfo DatabaseConnectorI
 			return err
 		}
 
+		row := map[string]any{}
 		m := result.(model.Matrix)
-		return withJSONArrayOutWriterFile(w, func(w *jsonutil.StreamEncoder) error {
-			for _, sample := range m {
-				for _, row := range sample.Values {
-					err := w.EncodeRow(map[string]any{
-						"metric": sample.Metric,
-						"value":  row.Value,
-						"time":   row.Timestamp,
-					})
-					if err != nil {
-						return err
-					}
+		for _, sample := range m {
+			for _, rawRow := range sample.Values {
+				row["metric"] = sample.Metric
+				row["value"] = rawRow.Value
+				row["time"] = rawRow.Timestamp
+				err := w.WriteRow(row)
+				if err != nil {
+					return err
 				}
 			}
+		}
 
-			return nil
-		})
+		return nil
 	})
 }

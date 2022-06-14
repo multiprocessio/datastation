@@ -11,8 +11,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/multiprocessio/go-json"
-
 	_ "github.com/ClickHouse/clickhouse-go/v2"
 	_ "github.com/denisenkom/go-mssqldb"
 	_ "github.com/go-sql-driver/mysql"
@@ -282,7 +280,7 @@ var textTypes = map[string]bool{
 	"DATETIME":  true,
 }
 
-func writeRowFromDatabase(dbInfo DatabaseConnectorInfoDatabase, w *jsonutil.StreamEncoder, rows *sqlx.Rows, wroteFirstRow bool) error {
+func writeRowFromDatabase(dbInfo DatabaseConnectorInfoDatabase, out *ResultWriter, rows *sqlx.Rows, wroteFirstRow bool) error {
 	row := map[string]any{}
 	err := rows.MapScan(row)
 	if err != nil {
@@ -341,12 +339,7 @@ func writeRowFromDatabase(dbInfo DatabaseConnectorInfoDatabase, w *jsonutil.Stre
 		}
 	}
 
-	err = w.EncodeRow(row)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return out.WriteRow(row)
 }
 
 func (ec EvalContext) loadJSONArrayPanel(projectId, panelId string) (chan map[string]any, error) {
@@ -397,13 +390,11 @@ func (ec EvalContext) EvalDatabasePanel(
 		return err
 	}
 
-	out := ec.GetPanelResultsFile(project.Id, panel.Id)
-	w, closeFile, err := openTruncateBufio(out)
+	w, err := ec.GetResultWriter(project.Id, panel.Id)
 	if err != nil {
 		return err
 	}
-	defer closeFile()
-	defer w.Flush()
+	defer w.Close()
 
 	if dbInfo.Address == "" {
 		dbInfo.Address = "localhost:" + defaultPorts[dbInfo.Type]
@@ -422,8 +413,6 @@ func (ec EvalContext) EvalDatabasePanel(
 		return ec.evalBigQuery(panel, dbInfo, w)
 	case SplunkDatabase:
 		return evalSplunk(panel, dbInfo, server, w)
-	case MongoDatabase:
-		return ec.evalMongo(panel, dbInfo, server, w)
 	case CassandraDatabase, ScyllaDatabase:
 		return ec.evalCQL(panel, dbInfo, server, w)
 	case AthenaDatabase:
@@ -525,42 +514,40 @@ func (ec EvalContext) EvalDatabasePanel(
 		}
 
 		wroteFirstRow := false
-		return withJSONArrayOutWriterFile(w, func(w *jsonutil.StreamEncoder) error {
-			_, err := importAndRun(
-				func(createTableStmt string) error {
-					_, err := db.Exec(createTableStmt)
-					return err
-				},
-				preparer,
-				func(query string) ([]map[string]any, error) {
-					rows, err := db.Queryx(query)
+		_, err = importAndRun(
+			func(createTableStmt string) error {
+				_, err := db.Exec(createTableStmt)
+				return err
+			},
+			preparer,
+			func(query string) ([]map[string]any, error) {
+				rows, err := db.Queryx(query)
+				if err != nil {
+					return nil, err
+				}
+
+				defer rows.Close()
+
+				for rows.Next() {
+					err := writeRowFromDatabase(dbInfo, w, rows, wroteFirstRow)
 					if err != nil {
 						return nil, err
 					}
 
-					defer rows.Close()
+					wroteFirstRow = true
+				}
 
-					for rows.Next() {
-						err := writeRowFromDatabase(dbInfo, w, rows, wroteFirstRow)
-						if err != nil {
-							return nil, err
-						}
+				return nil, rows.Err()
 
-						wroteFirstRow = true
-					}
+			},
+			project.Id,
+			query,
+			panelsToImport,
+			qt,
+			panelResultLoader,
+			cache,
+		)
 
-					return nil, rows.Err()
-
-				},
-				project.Id,
-				query,
-				panelsToImport,
-				qt,
-				panelResultLoader,
-				cache,
-			)
-
-			return err
-		})
+		return err
 	})
 }

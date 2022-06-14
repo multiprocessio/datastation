@@ -1,7 +1,9 @@
 package main
 
 import (
+	"math/rand"
 	"os"
+	"time"
 
 	"github.com/multiprocessio/datastation/runner"
 )
@@ -108,6 +110,8 @@ func eval(ec runner.EvalContext, projectId, panelId, panelMetaOut string) {
 }
 
 func main() {
+	rand.Seed(time.Now().UnixNano())
+
 	runner.Verbose = true
 	runner.Logln(APP_NAME + " " + VERSION)
 

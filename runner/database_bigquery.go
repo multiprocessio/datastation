@@ -2,16 +2,13 @@ package runner
 
 import (
 	"context"
-	"io"
-
-	"github.com/multiprocessio/go-json"
 
 	"cloud.google.com/go/bigquery"
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 )
 
-func (ec EvalContext) evalBigQuery(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, w io.Writer) error {
+func (ec EvalContext) evalBigQuery(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, w *ResultWriter) error {
 	ctx := context.Background()
 
 	token, err := ec.decrypt(&dbInfo.ApiKey)
@@ -30,26 +27,34 @@ func (ec EvalContext) evalBigQuery(panel *PanelInfo, dbInfo DatabaseConnectorInf
 		return err
 	}
 
-	return withJSONArrayOutWriterFile(w, func(w *jsonutil.StreamEncoder) error {
-		for {
-			var values []bigquery.Value
-			err := it.Next(&values)
-			if err == iterator.Done {
-				return nil
-			}
-			if err != nil {
-				return err
-			}
+	var fields []string
+	for _, field := range it.Schema {
+		fields = append(fields, field.Name)
+	}
+	w.SetFields(fields)
+	var values []bigquery.Value
+	var valuesAny []any
 
-			row := map[string]any{}
-			for i, field := range it.Schema {
-				row[field.Name] = values[i]
-			}
-
-			err = w.EncodeRow(row)
-			if err != nil {
-				return err
-			}
+	for {
+		err := it.Next(&values)
+		if err == iterator.Done {
+			return nil
 		}
-	})
+		if err != nil {
+			return err
+		}
+
+		if len(valuesAny) != len(values) {
+			valuesAny = make([]any, len(values))
+		}
+
+		for i := range values {
+			valuesAny[i] = values[i]
+		}
+
+		err = w.WriteAnyRecord(valuesAny, false)
+		if err != nil {
+			return err
+		}
+	}
 }
