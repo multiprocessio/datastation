@@ -137,6 +137,10 @@ type JSONResultItemWriter struct {
 	bfd      *bufio.Writer
 	opts     JSONResultItemWriterOptions
 
+	// External state
+	// If writing directly to the bufio, set this to true
+	raw bool
+
 	// Internal state
 	encoder  *jsonutil.StreamEncoder
 	isObject bool
@@ -230,7 +234,7 @@ func (jw *JSONResultItemWriter) Close() error {
 		if err != nil {
 			return err
 		}
-	} else if jw.encoder == nil {
+	} else if jw.encoder == nil && !jw.raw {
 		// Nothing has been written so enter an empty object
 		_, err := jw.bfd.WriteString("[]")
 		if err != nil {
@@ -254,126 +258,6 @@ func (jw *JSONResultItemWriter) Shape(id string, maxBytesToRead, sampleSize int)
 
 	return ShapeFromFile(jw.fileName, id, maxBytesToRead, sampleSize)
 }
-
-/*
-type MsgPackResultItemWriter struct {
-	fileName string
-	fd       *os.File
-	bfd      *bufio.Writer
-	opts     MsgPackResultItemWriterOptions
-
-	// Internal state
-	encoder  *jsonutil.StreamEncoder
-	isObject bool
-	// Sampled rows
-	sample []any
-	// Counter
-	written int
-}
-
-func openMsgPackResultItemWriter(f string, opts *MsgPackResultItemWriterOptions) (ResultItemWriter, error) {
-	var mw MsgPackResultItemWriter
-	mw.fileName = f
-
-	if opts == nil {
-		mw.opts = MsgPackResultItemWriterOptions{
-			sampleMinimum: 10_000,
-			sampleFreq:    1_000,
-		}
-	} else {
-		mw.opts = *opts
-	}
-
-	var err error
-	mw.fd, err = openTruncate(f)
-	if err != nil {
-		return nil, err
-	}
-
-	mw.bfd = newBufferedWriter(mw.fd)
-	return &mw, err
-}
-
-func (mw *MsgPackResultItemWriter) WriteRow(m any, written int) error {
-	if written < mw.opts.sampleMinimum {
-		mw.sample = append(mw.sample, m)
-	} else if rand.Intn(mw.opts.sampleFreq*10) < 10 {
-		mw.sample = append(mw.sample, m)
-	}
-
-	// Lazily initialize because this starts writing MsgPack immediately.
-	if mw.encoder == nil {
-		mw.encoder = jsonutil.NewGenericStreamEncoder(mw.bfd, jsonMarshal, true)
-	}
-	return mw.encoder.EncodeRow(m)
-}
-
-func (mw *MsgPackResultItemWriter) SetNamespace(key string) error {
-	isFirst := !mw.isObject
-	if isFirst {
-		err := mw.bfd.WriteByte('{')
-		if err != nil {
-			return err
-		}
-
-		mw.isObject = true
-	}
-
-	if mw.encoder != nil {
-		err := mw.encoder.Close()
-		if err != nil {
-			return err
-		}
-	}
-
-	if !isFirst {
-		err := mw.bfd.WriteByte(',')
-		if err != nil {
-			return err
-		}
-	}
-
-	_, err := mw.bfd.WriteString(`"` + strings.ReplaceAll(key, `"`, `\\"`) + `": `)
-	if err != nil {
-		return err
-	}
-
-	mw.encoder = jsonutil.NewGenericStreamEncoder(mw.bfd, jsonMarshal, true)
-	return nil
-}
-
-func (mw *MsgPackResultItemWriter) Close() error {
-	if mw.encoder != nil {
-		err := mw.encoder.Close()
-		if err != nil {
-			return err
-		}
-	}
-
-	if mw.isObject {
-		_, err := mw.bfd.WriteString("}")
-		if err != nil {
-			return err
-		}
-	}
-
-	err := mw.bfd.Flush()
-	if err != nil {
-		return err
-	}
-
-	return mw.fd.Close()
-}
-
-func (mw *MsgPackResultItemWriter) Shape(id string, maxBytesToRead, sampleSize int) (*Shape, error) {
-	if len(mw.sample) > 0 {
-		s := GetShape(id, mw.sample, sampleSize)
-		return &s, nil
-	}
-
-	return ShapeFromFile(mw.fileName, id, maxBytesToRead, sampleSize)
-}
-*/
 
 func (ec EvalContext) GetResultWriter(projectId, panelId string) (*ResultWriter, error) {
 	out := ec.GetPanelResultsFile(projectId, panelId)
