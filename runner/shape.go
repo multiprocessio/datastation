@@ -462,6 +462,15 @@ func GetShape(id string, value any, sampleSize int) Shape {
 	case string, []byte:
 		return Shape{Kind: ScalarKind, ScalarShape: &ScalarShape{Name: StringScalar}}
 	default:
+		if reflect.ValueOf(value).Kind() == reflect.Struct {
+			bs, err := jsonMarshal(value)
+			if err == nil {
+				err = jsonUnmarshal(bs, &value)
+				if err == nil {
+					return GetShape(id, value, sampleSize)
+				}
+			}
+		}
 		Logln("Skipping unknown type: %s", t)
 		return UnknownShape
 	}
