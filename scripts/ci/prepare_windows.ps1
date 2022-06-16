@@ -14,6 +14,10 @@ New-Alias zip 7z
 
 # Install JS dependencies
 yarn
+yarn
+yarn
+yarn
+yarn
 # Windows builds fail a lot
 yarn rebuild
 
