@@ -4,7 +4,7 @@ setenv UI_TITLE "DataStation Server CE"
 setenv UI_ROOT "/"
 yarn build-ui
 
-cd runner && go build -trimpath -buildmode=pie -mod=readonly -modcacherw -ldflags="-s -w" -o ../build/go_server_runner{required_ext} ./cmd/main.go
+cd runner && go build -trimpath -buildmode=pie -mod=readonly -modcacherw -ldflags="-s -w -extldflags=-static" -o ../build/go_server_runner{required_ext} ./cmd/main.go
 
 yarn esbuild server/runner.ts --sourcemap --platform=node --bundle --target=node10.4 --external:sqlite3 --external:asar --external:react-native-fs --external:react-native-fetch-blob --external:cpu-features --external:electron --outfile=build/server_runner.js
 yarn esbuild server/index.ts --sourcemap --platform=node --bundle --external:sqlite3 --external:react-native-fs --external:asar --external:react-native-fetch-blob --external:cpu-features --external:electron --outfile=build/server.js
