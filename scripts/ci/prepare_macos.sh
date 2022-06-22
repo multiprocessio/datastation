@@ -24,7 +24,6 @@ npm install --global yarn
 yarn
 
 # Install ODBC Driver
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
 brew tap microsoft/mssql-release https://github.com/Microsoft/homebrew-mssql-release
 brew update
 HOMEBREW_NO_ENV_FILTERING=1 ACCEPT_EULA=Y brew install msodbcsql18 mssql-tools18
@@ -36,3 +35,11 @@ colima start
 
 # Run SQL server
 docker run -d -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=1StrongPwd!!" --name sqlserver --hostname sqlserver -p 1433:1433 mcr.microsoft.com/mssql/server:2019-latest
+
+# Compile unixODBC devel
+curl -LO http://www.unixodbc.org/unixODBC-2.3.11.tar.gz
+tar -xvf unixODBC-2.3.11.tar.gz
+cd unixODBC-2.3.11
+./configure --enable-static --with-included-ltdl
+make
+sudo make install
