@@ -1,7 +1,7 @@
 import React from 'react';
 import { Input, InputProps } from './Input';
 
-export interface RadioProps extends InputProps {
+interface RadioProps extends InputProps {
   options: Array<{ label: string; value: string }>;
   vertical?: boolean;
 }

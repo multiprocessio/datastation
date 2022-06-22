@@ -17,6 +17,7 @@ import { FileInput } from './components/FileInput';
 import { FormGroup } from './components/FormGroup';
 import { Input } from './components/Input';
 import { Toggle } from './components/Toggle';
+import { Footer } from './Footer';
 
 export const SettingsContext = React.createContext<{
   state: SettingsT;
@@ -97,140 +98,149 @@ export function Settings() {
   }
 
   return (
-    <div className="card settings">
-      <h1>Settings</h1>
-      <div className="form">
-        <FormGroup major label="General">
-          <div className="form-row">
-            <Toggle
-              label="Theme"
-              rhsLabel={settings.theme !== 'dark' ? 'Light Mode' : 'Dark Mode'}
-              value={settings.theme === 'dark'}
-              onChange={function handleLightModeToggle() {
-                settings.theme = settings.theme === 'dark' ? 'light' : 'dark';
-                setSettings(settings);
-              }}
-            />
-          </div>
-          <div className="form-row">
-            <Toggle
-              label="Autocomplete"
-              rhsLabel={settings.autocompleteDisabled ? 'Disabled' : 'Enabled'}
-              value={settings.autocompleteDisabled}
-              onChange={function handleLightModeToggle() {
-                settings.autocompleteDisabled = !settings.autocompleteDisabled;
-                setSettings(settings);
-              }}
-            />
-          </div>
-          <div className="form-row form-row--multi">
-            <Input
-              onChange={function handleMaxStdoutSizeChange(newValue: string) {
-                settings.stdoutMaxSize = +newValue || 0;
-                setSettings(settings);
-              }}
-              label="Max Stdout/Stderr Size"
-              type="number"
-              value={settings.stdoutMaxSize}
-            />
-            <Button
-              onClick={function resetMaxStdoutSize() {
-                settings.stdoutMaxSize = 100_000;
-                setSettings(settings);
-              }}
-            >
-              Reset
-            </Button>
-          </div>
-        </FormGroup>
-        {MODE !== 'browser' && (
-          <>
-            <FormGroup major label="Language Path Overrides">
-              {Object.keys(LANGUAGES)
-                .sort()
-                .filter((k) => k !== 'sql')
-                .map((languageId) => (
-                  <div key={languageId} className="form-row form-row--multi">
-                    <Input
-                      onChange={function handleLanguagePathChange(
-                        newValue: string
-                      ) {
-                        settings.languages[languageId].path = newValue;
-                        setSettings(settings);
-                      }}
-                      label={LANGUAGES[languageId].name}
-                      value={
-                        settings.languages[languageId].path ||
-                        LANGUAGES[languageId].defaultPath
-                      }
-                    />
-                    <Button
-                      onClick={function resetLanguagePath() {
-                        settings.languages[languageId].path =
-                          LANGUAGES[languageId].defaultPath;
-                        setSettings(settings);
-                      }}
-                    >
-                      Reset
-                    </Button>
+    <div className="main-body">
+      <div className="card settings">
+        <h1>Settings</h1>
+        <div className="form">
+          <FormGroup major label="General">
+            <div className="form-row">
+              <Toggle
+                label="Theme"
+                rhsLabel={
+                  settings.theme !== 'dark' ? 'Light Mode' : 'Dark Mode'
+                }
+                value={settings.theme === 'dark'}
+                onChange={function handleLightModeToggle() {
+                  settings.theme = settings.theme === 'dark' ? 'light' : 'dark';
+                  setSettings(settings);
+                }}
+              />
+            </div>
+            <div className="form-row">
+              <Toggle
+                label="Autocomplete"
+                rhsLabel={
+                  settings.autocompleteDisabled ? 'Disabled' : 'Enabled'
+                }
+                value={settings.autocompleteDisabled}
+                onChange={function handleLightModeToggle() {
+                  settings.autocompleteDisabled =
+                    !settings.autocompleteDisabled;
+                  setSettings(settings);
+                }}
+              />
+            </div>
+            <div className="form-row form-row--multi">
+              <Input
+                onChange={function handleMaxStdoutSizeChange(newValue: string) {
+                  settings.stdoutMaxSize = +newValue || 0;
+                  setSettings(settings);
+                }}
+                label="Max Stdout/Stderr Size"
+                type="number"
+                value={settings.stdoutMaxSize}
+              />
+              <Button
+                onClick={function resetMaxStdoutSize() {
+                  settings.stdoutMaxSize = 100_000;
+                  setSettings(settings);
+                }}
+              >
+                Reset
+              </Button>
+            </div>
+          </FormGroup>
+          {MODE !== 'browser' && (
+            <>
+              <FormGroup major label="Language Path Overrides">
+                {Object.keys(LANGUAGES)
+                  .sort()
+                  .filter((k) => k !== 'sql')
+                  .map((languageId) => (
+                    <div key={languageId} className="form-row form-row--multi">
+                      <Input
+                        onChange={function handleLanguagePathChange(
+                          newValue: string
+                        ) {
+                          settings.languages[languageId].path = newValue;
+                          setSettings(settings);
+                        }}
+                        label={LANGUAGES[languageId].name}
+                        value={
+                          settings.languages[languageId].path ||
+                          LANGUAGES[languageId].defaultPath
+                        }
+                      />
+                      <Button
+                        onClick={function resetLanguagePath() {
+                          settings.languages[languageId].path =
+                            LANGUAGES[languageId].defaultPath;
+                          setSettings(settings);
+                        }}
+                      >
+                        Reset
+                      </Button>
+                    </div>
+                  ))}
+                <Alert type="info">
+                  <div>
+                    DataStation defaults to looking up each program on
+                    your&nbsp;
+                    <code>$PATH</code>. You can override that here with a
+                    different program name or an absolute path.
                   </div>
-                ))}
-              <Alert type="info">
-                <div>
-                  DataStation defaults to looking up each program on your&nbsp;
-                  <code>$PATH</code>. You can override that here with a
-                  different program name or an absolute path.
-                </div>
-              </Alert>
-            </FormGroup>
+                </Alert>
+              </FormGroup>
 
-            <FormGroup major label="Custom CA Certificates">
-              {settings.caCerts.map((cert, i) => {
-                return (
-                  <div key={cert.id} className="form-row form-row--multi">
-                    <FileInput
-                      onChange={(v) => {
-                        cert.file = v;
-                        setSettings(settings);
-                      }}
-                      allowFilePicker={MODE === 'desktop'}
-                      allowManualEntry={MODE !== 'desktop'}
-                      value={cert.file}
-                      label="Location"
-                    />
-                    <Button
-                      icon
-                      onClick={() => {
-                        settings.caCerts.splice(i, 1);
-                        setSettings(settings);
-                      }}
-                    >
-                      <IconTrash />
-                    </Button>
+              <FormGroup major label="Custom CA Certificates">
+                {settings.caCerts.map((cert, i) => {
+                  return (
+                    <div key={cert.id} className="form-row form-row--multi">
+                      <FileInput
+                        onChange={(v) => {
+                          cert.file = v;
+                          setSettings(settings);
+                        }}
+                        allowFilePicker={MODE === 'desktop'}
+                        allowManualEntry={MODE !== 'desktop'}
+                        value={cert.file}
+                        label="Location"
+                      />
+                      <Button
+                        icon
+                        onClick={() => {
+                          settings.caCerts.splice(i, 1);
+                          setSettings(settings);
+                        }}
+                      >
+                        <IconTrash />
+                      </Button>
+                    </div>
+                  );
+                })}
+                <div className="form-row">
+                  <Button
+                    onClick={() => {
+                      settings.caCerts.push({ file: '', id: newId() });
+                      setSettings(settings);
+                    }}
+                  >
+                    Add CA Cert
+                  </Button>
+                </div>
+
+                <Alert type="info">
+                  <div>
+                    Custom CA certs registered here are checked in every HTTP
+                    panel on every page.
                   </div>
-                );
-              })}
-              <div className="form-row">
-                <Button
-                  onClick={() => {
-                    settings.caCerts.push({ file: '', id: newId() });
-                    setSettings(settings);
-                  }}
-                >
-                  Add CA Cert
-                </Button>
-              </div>
-
-              <Alert type="info">
-                <div>
-                  Custom CA certs registered here are checked in every HTTP
-                  panel on every page.
-                </div>
-              </Alert>
-            </FormGroup>
-          </>
-        )}
+                </Alert>
+              </FormGroup>
+            </>
+          )}
+        </div>
       </div>
+      <Footer />
     </div>
   );
 }

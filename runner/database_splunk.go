@@ -1,9 +1,5 @@
 package runner
 
-import (
-	"io"
-)
-
-func evalSplunk(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, server *ServerInfo, w io.Writer) error {
+func evalSplunk(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, server *ServerInfo, w *ResultWriter) error {
 	panic("Not implemented")
 }

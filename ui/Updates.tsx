@@ -2,8 +2,11 @@ import * as React from 'react';
 import { SITE_ROOT, VERSION } from '../shared/constants';
 import { request } from '../shared/http';
 import log from '../shared/log';
+import { newId } from '../shared/object';
 import { ContentTypeInfo } from '../shared/state';
 import { SettingsContext } from './Settings';
+
+const s = newId();
 
 export function Updates() {
   const { state: settings } = React.useContext(SettingsContext);
@@ -15,7 +18,7 @@ export function Updates() {
           const updates = await request(
             window.fetch,
             'GET',
-            `${SITE_ROOT}/api/updates?version=${VERSION}&i=${settings.id}`,
+            `${SITE_ROOT}/api/updates?version=${VERSION}&i=${settings.id}&s=${s}`,
             new ContentTypeInfo(),
             [],
             '',

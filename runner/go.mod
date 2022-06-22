@@ -2,8 +2,6 @@ module github.com/multiprocessio/datastation/runner
 
 go 1.18
 
-replace github.com/mattn/go-sqlite3 v1.14.13 => github.com/multiprocessio/go-sqlite3 v1.14.14-0.20220513213203-12637a65d5d7
-
 require (
 	github.com/alexbrainman/odbc v0.0.0-20211220213544-9c9a2e61c5e2
 	cloud.google.com/go/bigquery v1.8.0
@@ -19,10 +17,10 @@ require (
 	github.com/lib/pq v1.10.5
 	github.com/linkedin/goavro/v2 v2.11.1
 	github.com/matoous/go-nanoid/v2 v2.0.0
-	github.com/mattn/go-sqlite3 v1.14.13
+	github.com/mattn/go-sqlite3 v1.14.14-0.20220530010643-3ccccfb4c9c6
 	github.com/multiprocessio/go-json v0.0.0-20220308002443-61d497dd7b9e
 	github.com/multiprocessio/go-openoffice v0.0.0-20220110232726-064f5dda1956
-	github.com/multiprocessio/go-sqlite3-stdlib v0.0.0-20220515132214-0499e13b82b2
+	github.com/multiprocessio/go-sqlite3-stdlib v0.0.0-20220601025455-7a933dfc26ed
 	github.com/neo4j/neo4j-go-driver/v4 v4.4.2
 	github.com/prometheus/client_golang v1.12.2
 	github.com/prometheus/common v0.34.0
@@ -33,7 +31,7 @@ require (
 	github.com/xitongsys/parquet-go v1.6.2
 	github.com/xitongsys/parquet-go-source v0.0.0-20220315005136-aec0fe3e777c
 	github.com/xuri/excelize/v2 v2.6.0
-	golang.org/x/crypto v0.0.0-20220408190544-5352b0902921
+	golang.org/x/crypto v0.0.0-20220518034528-6f7dac969898
 	google.golang.org/api v0.74.0
 )
 

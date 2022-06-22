@@ -13,9 +13,14 @@ mkdir datastation
 mkdir datastation/node_modules
 mv build datastation/
 
+# Bring in sampledata
+cp -r sampledata datastation/sampledata
+
 # Bring in node_modules
-cp -r node_modules/electron datastation/node_modules/electron
-cp -r node_modules/better-sqlite3 datastation/node_modules/better-sqlite3
+prepend "{{}}" datastation/package.json
+cd datastation && yarn add asar electron better-sqlite3
+rm datastation/yarn.lock
+rm datastation/package.json
 # Only need stubs not full chrome install
 rm -rf datastation/node_modules/electron/dist
 

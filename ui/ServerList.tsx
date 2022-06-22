@@ -35,7 +35,7 @@ export function ServerList({
             );
           }}
         >
-          Add Server
+          Add SSH Connection
         </Button>
       </div>
     </div>

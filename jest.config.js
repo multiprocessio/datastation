@@ -5,9 +5,9 @@ module.exports = {
       ? {
           global: {
             statements: 54,
-            branches: 40,
-            functions: 35,
-            lines: 54,
+            branches: 43,
+            functions: 37,
+            lines: 55,
           },
         }
       : undefined,

@@ -1,11 +1,13 @@
 import React from 'react';
 import { UrlState, UrlStateContext } from '../urlState';
 
-interface LinkProps extends React.HTMLProps<HTMLAnchorElement> {
+interface LinkProps {
   args: Partial<UrlState>;
+  className?: string;
+  children?: React.ReactNode;
 }
 
-export function Link({ args, ...rest }: LinkProps) {
+export function Link({ args, className }: LinkProps) {
   const url =
     '?' +
     Object.entries(args)
@@ -17,5 +19,5 @@ export function Link({ args, ...rest }: LinkProps) {
     setUrlState(args);
   }
 
-  return <a href={url} onClick={navigate} {...rest} />;
+  return <a href={url} onClick={navigate} className={className} />;
 }

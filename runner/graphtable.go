@@ -1,9 +1,5 @@
 package runner
 
-import (
-	jsonutil "github.com/multiprocessio/go-json"
-)
-
 func (ec EvalContext) getResultColumns(project *ProjectState, thisId, panelSourceId string, columns []string, page, pageSize int) error {
 	var panelSource *PanelInfo
 outer:
@@ -33,50 +29,45 @@ outer:
 	}
 	i := 0
 
-	outFile := ec.GetPanelResultsFile(project.Id, thisId)
-	out, closeFile, err := openTruncateBufio(outFile)
+	rw, err := ec.GetResultWriter(project.Id, thisId)
 	if err != nil {
 		return err
 	}
+	defer rw.Close()
 
-	defer closeFile()
-	defer out.Flush()
+	rawRow := map[string]any{}
+	rowRequestedColumnsOnly := map[string]any{}
+	var ok bool
 
-	return withJSONArrayOutWriter(out, func(w *jsonutil.StreamEncoder) error {
-		rawRow := map[string]any{}
-		rowRequestedColumnsOnly := map[string]any{}
-		var ok bool
+	for {
+		select {
+		case rawRow, ok = <-rows:
+			break
+		}
 
-		for {
-			select {
-			case rawRow, ok = <-rows:
-				break
-			}
+		if !ok || rawRow == nil {
+			return nil
+		}
 
-			if !ok || rawRow == nil {
+		if i >= page*pageSize {
+			if i == (page+1)*pageSize {
+				// Break as soon as possible
 				return nil
 			}
 
-			if i >= page*pageSize {
-				if i == (page+1)*pageSize {
-					// Break as soon as possible
-					return nil
-				}
-
-				for _, c := range columns {
-					rowRequestedColumnsOnly[c] = getObjectAtPath(rawRow, c)
-				}
-				err := w.EncodeRow(rowRequestedColumnsOnly)
-				if err != nil {
-					return err
-				}
+			for _, c := range columns {
+				rowRequestedColumnsOnly[c] = getObjectAtPath(rawRow, c)
 			}
-
-			i++
+			err := rw.WriteRow(rowRequestedColumnsOnly)
+			if err != nil {
+				return err
+			}
 		}
 
-		return nil
-	})
+		i++
+	}
+
+	return nil
 }
 
 func (ec EvalContext) evalTablePanel(project *ProjectState, pageIndex int, panel *PanelInfo) error {

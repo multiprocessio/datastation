@@ -1,4 +1,3 @@
-import { Ace } from 'ace-builds';
 import * as React from 'react';
 import { DOCS_ROOT } from '../../shared/constants';
 import { NoConnectorError } from '../../shared/errors';
@@ -7,7 +6,6 @@ import {
   ConnectorInfo,
   DatabaseConnectorInfo,
   DatabasePanelInfo,
-  PanelInfo,
   TimeSeriesRange as TimeSeriesRangeT,
 } from '../../shared/state';
 import { panelRPC } from '../asyncRPC';
@@ -20,12 +18,7 @@ import { TimeSeriesRange } from '../components/TimeSeriesRange';
 import { Toggle } from '../components/Toggle';
 import { VENDORS } from '../connectors';
 import { ProjectContext } from '../state';
-import {
-  builtinCompletions,
-  dotAccessPanelShapeCompletions,
-  panelNameCompletions,
-  stringPanelShapeCompletions,
-} from './ProgramPanel';
+import { BUILTINS, makeAutocomplete } from './ProgramPanel';
 import { PanelBodyProps, PanelDetailsProps, PanelUIDetails } from './types';
 
 export async function evalDatabasePanel(
@@ -270,9 +263,20 @@ export function DatabasePanelBody({
   panels,
   keyboardShortcuts,
 }: PanelBodyProps<DatabasePanelInfo>) {
+  const { connectors } = React.useContext(ProjectContext).state;
+  const connector = connectors.find(
+    (c) => c.id === panel.database.connectorId
+  ) as DatabaseConnectorInfo;
+
+  const vendor = VENDORS[connector?.database.type]?.id;
+
   return (
     <CodeEditor
-      autocomplete={makeAutocomplete(panels.filter((p) => p.id !== panel.id))}
+      autocomplete={makeAutocomplete(
+        panels.filter((p) => p.id !== panel.id),
+        vendor === 'sqlite' ? BUILTINS.sql : [],
+        'sql'
+      )}
       id={'editor-' + panel.id}
       onKeyDown={keyboardShortcuts}
       value={panel.content}
@@ -284,21 +288,6 @@ export function DatabasePanelBody({
       className="editor"
     />
   );
-}
-
-export function makeAutocomplete(panels: Array<PanelInfo>) {
-  return (tokenIteratorFactory: () => Ace.TokenIterator, prefix: string) => {
-    return [
-      ...builtinCompletions(tokenIteratorFactory).filter(
-        (c) => !c.value.startsWith('DM_setPanel')
-      ),
-      ...panelNameCompletions(tokenIteratorFactory, panels),
-      ...dotAccessPanelShapeCompletions(tokenIteratorFactory, panels),
-      ...stringPanelShapeCompletions(tokenIteratorFactory, panels),
-    ]
-      .flat()
-      .filter((c) => c && c.value.startsWith(prefix));
-  };
 }
 
 export function DatabaseInfo({ panel }: { panel: DatabasePanelInfo }) {

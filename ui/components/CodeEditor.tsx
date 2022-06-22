@@ -28,21 +28,13 @@ import 'ace-builds/src-min-noconflict/theme-dracula';
 // This steals Ctrl-a so this should not be a default
 //import 'ace-builds/src-min-noconflict/keybinding-emacs';
 
-export function skipWhitespaceBackward(it: Ace.TokenIterator) {
-  while (!it.getCurrentToken().value.trim()) {
-    if (!it.stepBackward()) {
-      return;
-    }
-  }
-}
-
-export function skipWhitespaceForward(it: Ace.TokenIterator) {
-  while (!it.getCurrentToken().value.trim()) {
-    if (!it.stepForward()) {
-      return;
-    }
-  }
-}
+const AUTOCOMPLETE_MAP: Record<
+  string,
+  (
+    tokenIteratorFactory: () => Ace.TokenIterator,
+    prefix: string
+  ) => Array<Ace.Completion>
+> = {};
 
 export function CodeEditor({
   value,
@@ -77,6 +69,10 @@ export function CodeEditor({
   const {
     state: { theme, autocompleteDisabled },
   } = React.useContext(SettingsContext);
+
+  if (autocomplete) {
+    AUTOCOMPLETE_MAP[id] = autocomplete;
+  }
 
   const [editorRef, setEditorRef] = React.useState<AceEditor>(null);
   const debounced = useDebouncedCallback(onChange, INPUT_SYNC_PERIOD);
@@ -136,15 +132,10 @@ export function CodeEditor({
         prefix: string,
         callback: Ace.CompleterCallback
       ) => {
-        // This gets registered globally which is kind of weird.  //
-        // So it needs to check again that the currently editing editor
-        // is the one attached to this callback.
-        if (!autocomplete || (editorRef.editor as unknown) !== editor) {
-          return callback(null, []);
-        }
-
+        // This gets set/called in a global context so we need to figure out which panel is actually calling it.
         try {
           const factory = () => new TokenIterator(session, pos.row, pos.column);
+          const autocomplete = AUTOCOMPLETE_MAP[(editor as any).container.id];
           return callback(null, autocomplete(factory, prefix));
         } catch (e) {
           log.error(e);
@@ -222,7 +213,6 @@ export function CodeEditor({
                 enableLiveAutocompletion: Boolean(
                   autocomplete && !autocompleteDisabled
                 ),
-                enableSnippets: Boolean(autocomplete && !autocompleteDisabled),
               }
         }
       />

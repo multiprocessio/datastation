@@ -51,3 +51,8 @@ export function Dropdown({
     </div>
   );
 }
+
+Dropdown.makeItem = (
+  id: string,
+  render: (close: () => void) => React.ReactElement
+) => ({ render, id });

@@ -1,14 +1,13 @@
 package runner
 
 import (
-	"io"
 	"strconv"
 	"time"
 
-	"github.com/multiprocessio/go-json"
-
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/credentials/ec2rolecreds"
+	"github.com/aws/aws-sdk-go/aws/ec2metadata"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/athena"
 )
@@ -35,16 +34,29 @@ func mapAthenaType(value, t string) any {
 	}
 }
 
-func (ec EvalContext) evalAthena(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, w io.Writer) error {
+func (ec EvalContext) evalAthena(panel *PanelInfo, dbInfo DatabaseConnectorInfoDatabase, w *ResultWriter) error {
 	secret, err := ec.decrypt(&dbInfo.Password)
 	if err != nil {
 		return err
 	}
 
 	cfg := aws.NewConfig().WithRegion(dbInfo.Extra["aws_region"])
-	cfg.Credentials = credentials.NewStaticCredentials(dbInfo.Username, secret, "")
-
+	// Needed for ec2roleprovider
 	sess := session.Must(session.NewSession(cfg))
+	cfg.Credentials = credentials.NewChainCredentials(
+		[]credentials.Provider{
+			&credentials.StaticProvider{Value: credentials.Value{
+				AccessKeyID:     dbInfo.Username,
+				SecretAccessKey: secret,
+				SessionToken:    dbInfo.Extra["aws_temp_security_token"],
+			}},
+			&credentials.EnvProvider{},
+			&ec2rolecreds.EC2RoleProvider{
+				Client: ec2metadata.New(sess),
+			},
+		})
+
+	sess = session.Must(session.NewSession(cfg))
 
 	svc := athena.New(sess, cfg)
 	var s athena.StartQueryExecutionInput
@@ -88,53 +100,51 @@ func (ec EvalContext) evalAthena(panel *PanelInfo, dbInfo DatabaseConnectorInfoD
 	ip.SetQueryExecutionId(*result.QueryExecutionId)
 
 	row := map[string]any{}
-	return withJSONArrayOutWriterFile(w, func(w *jsonutil.StreamEncoder) error {
-		first := true
-		var columns []string
-		var types []string
-		errC := make(chan error)
-		err := svc.GetQueryResultsPages(&ip,
-			func(page *athena.GetQueryResultsOutput, lastPage bool) bool {
+	first := true
+	var columns []string
+	var types []string
+	errC := make(chan error)
+	err = svc.GetQueryResultsPages(&ip,
+		func(page *athena.GetQueryResultsOutput, lastPage bool) bool {
+			if first {
+				for _, col := range page.ResultSet.ResultSetMetadata.ColumnInfo {
+					columns = append(columns, *col.Name)
+					types = append(types, *col.Type)
+				}
+			}
+
+			for _, r := range page.ResultSet.Rows {
 				if first {
-					for _, col := range page.ResultSet.ResultSetMetadata.ColumnInfo {
-						columns = append(columns, *col.Name)
-						types = append(types, *col.Type)
-					}
+					first = false
+					continue
 				}
 
-				for _, r := range page.ResultSet.Rows {
-					if first {
-						first = false
+				for i, cell := range r.Data {
+					if cell.VarCharValue == nil {
+						row[columns[i]] = nil
 						continue
 					}
-
-					for i, cell := range r.Data {
-						if cell.VarCharValue == nil {
-							row[columns[i]] = nil
-							continue
-						}
-						row[columns[i]] = mapAthenaType(*cell.VarCharValue, types[i])
-					}
-
-					err = w.EncodeRow(row)
-					if err != nil {
-						errC <- err
-						return false
-					}
+					row[columns[i]] = mapAthenaType(*cell.VarCharValue, types[i])
 				}
 
-				// Continue iterating
-				return true
-			})
-		if err != nil {
-			return err
-		}
+				err = w.WriteRow(row)
+				if err != nil {
+					errC <- err
+					return false
+				}
+			}
 
-		select {
-		case err = <-errC:
-			return err
-		default:
-			return nil
-		}
-	})
+			// Continue iterating
+			return true
+		})
+	if err != nil {
+		return err
+	}
+
+	select {
+	case err = <-errC:
+		return err
+	default:
+		return nil
+	}
 }

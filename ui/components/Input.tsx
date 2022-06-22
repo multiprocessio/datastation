@@ -1,19 +1,20 @@
 import * as React from 'react';
-import { useDebouncedCallback } from 'use-debounce';
 import { IN_TESTS } from '../../shared/constants';
 import { Tooltip } from './Tooltip';
 
 export const INPUT_SYNC_PERIOD = IN_TESTS ? 0 : 3000;
 
 export interface InputProps
-  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'> {
+  extends Omit<
+    Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'>,
+    'style'
+  > {
   onChange: (value: string) => void;
   label?: string;
   autoWidth?: boolean;
-  defaultValue?: string;
   tooltip?: React.ReactNode;
   invalid?: React.ReactNode;
-  noDelay?: boolean;
+  noBuffer?: boolean;
 }
 
 export function Input({
@@ -24,45 +25,40 @@ export function Input({
   label,
   autoWidth,
   type,
-  noDelay,
-  defaultValue,
+  noBuffer,
   tooltip,
   ...props
 }: InputProps) {
   const inputClass = `input ${className ? ' ' + className : ''}`;
 
-  const debounced = useDebouncedCallback(
-    onChange,
-    noDelay ? 0 : INPUT_SYNC_PERIOD
-  );
-  // Flush on unmount
-  React.useEffect(
-    () => () => {
-      debounced.flush();
-    },
-    [debounced]
-  );
-
+  const [local, setLocal] = React.useState(value);
   // Resync value when outer changes
-  const inputRef = React.useRef<HTMLInputElement>();
   React.useEffect(() => {
-    if (inputRef.current) {
-      inputRef.current.value = String(value);
-    }
+    setLocal(value);
   }, [value]);
+
+  const changeProps = noBuffer
+    ? {
+        onChange(e: React.ChangeEvent<HTMLInputElement>) {
+          onChange(String(e.target.value));
+        },
+      }
+    : {
+        onChange(e: React.ChangeEvent<HTMLInputElement>) {
+          setLocal(e.target.value);
+        },
+        onBlur() {
+          onChange(String(local || ''));
+        },
+      };
 
   const input = (
     <React.Fragment>
       <input
-        ref={inputRef}
-        defaultValue={value || defaultValue}
+        value={local}
         type={type}
         className={label ? '' : inputClass}
-        onChange={(e) => debounced(e.target.value)}
-        onBlur={
-          () =>
-            debounced.flush() /* Simplifying this to onBlur={debounced.flush} doesn't work. */
-        }
+        {...changeProps}
         {...props}
         size={autoWidth ? Math.max(20, String(value).length) : undefined}
       />

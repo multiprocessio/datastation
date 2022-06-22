@@ -233,21 +233,19 @@ func (ec EvalContext) evalHTTPPanel(project *ProjectState, pageIndex int, panel 
 
 		}
 
-		out := ec.GetPanelResultsFile(project.Id, panel.Id)
-		w, closeFile, err := openTruncateBufio(out)
+		rw, err := ec.GetResultWriter(project.Id, panel.Id)
 		if err != nil {
 			return err
 		}
-		defer closeFile()
-		defer w.Flush()
+		defer rw.Close()
 
 		br := newBufferedReader(rsp.Body)
 
-		return TransformReader(br, url, h.ContentTypeInfo, w)
+		return TransformReader(br, url, h.ContentTypeInfo, rw)
 	})
 }
 
-func TransformReader(r *bufio.Reader, fileName string, cti ContentTypeInfo, out *bufio.Writer) error {
+func TransformReader(r *bufio.Reader, fileName string, cti ContentTypeInfo, out *ResultWriter) error {
 	assumedType := GetMimeType(fileName, cti)
 	Logln("Assumed '%s' from '%s' given '%s'", assumedType, cti.Type, fileName)
 
@@ -255,9 +253,9 @@ func TransformReader(r *bufio.Reader, fileName string, cti ContentTypeInfo, out 
 	case JSONMimeType:
 		return transformJSON(r, out)
 	case CSVMimeType:
-		return transformCSV(r, out, ',')
+		return transformCSV(r, out, ',', cti.ConvertNumbers)
 	case TSVMimeType:
-		return transformCSV(r, out, '\t')
+		return transformCSV(r, out, '\t', cti.ConvertNumbers)
 	case ExcelMimeType, ExcelOpenXMLMimeType:
 		r, err := excelize.OpenReader(r)
 		if err != nil {
@@ -306,8 +304,6 @@ func TransformReader(r *bufio.Reader, fileName string, cti ContentTypeInfo, out 
 		return transformRegexp(r, out, regexp.MustCompile(goRegexp))
 	case JSONLinesMimeType:
 		return transformJSONLines(r, out)
-	case JSONConcatMimeType:
-		return transformJSONConcat(r, out)
 	case OpenOfficeSheetMimeType:
 		buf := bytes.NewBuffer(nil)
 		size, err := io.Copy(buf, r)

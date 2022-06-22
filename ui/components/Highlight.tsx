@@ -26,7 +26,7 @@ export function Highlight({
   theme = 'dark',
 }: {
   language: string;
-  children: React.ReactNode;
+  children: string;
   theme?: 'dark' | 'light';
 }) {
   const style = {

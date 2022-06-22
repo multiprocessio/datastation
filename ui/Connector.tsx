@@ -1,4 +1,4 @@
-import { IconPencil, IconTrash } from '@tabler/icons';
+import { IconTrash } from '@tabler/icons';
 import * as React from 'react';
 import { ConnectorInfo, DatabaseConnectorInfo } from '../shared/state';
 import { Button } from './components/Button';
@@ -18,7 +18,10 @@ export function Connector({
   const [expanded, setExpanded] = React.useState(!connector.defaultModified);
 
   return (
-    <div className={`connector ${expanded ? 'connector--expanded' : ''}`}>
+    <div
+      className={`connector ${expanded ? 'connector--expanded' : 'clickable'}`}
+      onClick={expanded ? null : () => setExpanded(true)}
+    >
       <div className="connector-header vertical-align-center">
         {expanded ? (
           <Input
@@ -33,24 +36,20 @@ export function Connector({
           <span className="connector-name">{connector.name}</span>
         )}
         <div className="flex-right">
-          {!expanded && (
-            <Button
-              icon
-              data-testid="show-hide-connector"
-              className="flex-right hover-button"
-              onClick={() => setExpanded(true)}
-              title="Edit"
-            >
-              <IconPencil />
-            </Button>
-          )}
           <span title="Delete data source">
             <Confirm
+              className="connector-delete"
               onConfirm={deleteConnector}
               message="delete this data source"
               action="Delete"
               render={(confirm: () => void) => (
-                <Button icon onClick={confirm}>
+                <Button
+                  icon
+                  onClick={function (e) {
+                    e.stopPropagation();
+                    confirm();
+                  }}
+                >
                   <IconTrash />
                 </Button>
               )}
@@ -67,7 +66,12 @@ export function Connector({
             />
           )}
           <div className="text-center">
-            <Button type="outline" onClick={() => setExpanded(false)}>
+            <Button
+              type="outline"
+              onClick={function () {
+                setExpanded(false);
+              }}
+            >
               Close
             </Button>
           </div>

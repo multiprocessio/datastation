@@ -131,6 +131,26 @@ export async function openWindow(
     return { action: 'deny' };
   });
 
+  win.webContents.on('did-navigate', function resizeIfFromCreateView() {
+    if (!win) {
+      return;
+    }
+
+    let proj = '';
+    try {
+      proj = new URL(win.webContents.getURL()).searchParams.get('projectId');
+    } catch (_e) {
+      /* pass */
+    }
+
+    const [width, height] = win.getSize();
+
+    if (proj && width === 600 && height === 600) {
+      win.setSize(1400, 800);
+      win.center();
+    }
+  });
+
   const menu = Menu.buildFromTemplate(
     menuTemplate as MenuItemConstructorOptions[]
   );

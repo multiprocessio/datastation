@@ -3,7 +3,6 @@ const enzyme = require('enzyme');
 const { DatabaseConnectorInfo } = require('../../shared/state');
 const { wait } = require('../../shared/promise');
 const { Host } = require('./Host');
-const { INPUT_SYNC_PERIOD } = require('../components/Input');
 
 test('Host shows input and changes', async () => {
   const connector = new DatabaseConnectorInfo();
@@ -21,6 +20,6 @@ test('Host shows input and changes', async () => {
   await component
     .find('input')
     .simulate('change', { target: { value: changeTo } });
-  await wait(INPUT_SYNC_PERIOD + 100); // Allow local state buffer to propagate
+  await component.find('input').simulate('blur');
   expect(changed).toBe(changeTo);
 });

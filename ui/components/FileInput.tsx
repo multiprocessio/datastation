@@ -39,7 +39,9 @@ export function FileInput({
   allowFilePicker,
   placeholder,
 }: Props) {
-  const inputClass = `input ${className ? ' ' + className : ''}`;
+  const inputClass = `input vertical-align-baseline ${
+    className ? ' ' + className : ''
+  }`;
 
   const manualInput = (
     <Input

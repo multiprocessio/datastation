@@ -1,3 +1,4 @@
+import asar from 'asar';
 import * as sqlite3 from 'better-sqlite3';
 import { Buffer } from 'buffer';
 import fs from 'fs';
@@ -7,6 +8,7 @@ import { getPath } from '../shared/object';
 import { GetProjectRequest, MakeProjectRequest } from '../shared/rpc';
 import {
   ConnectorInfo,
+  DatabaseConnectorInfo,
   DatabasePanelInfo,
   doOnEncryptFields,
   Encrypt,
@@ -24,7 +26,7 @@ import {
   ServerInfo,
   TablePanelInfo,
 } from '../shared/state';
-import { DISK_ROOT, PROJECT_EXTENSION } from './constants';
+import { CODE_ROOT, DISK_ROOT, PROJECT_EXTENSION } from './constants';
 import {
   connectorCrud,
   GenericCrud,
@@ -185,7 +187,11 @@ export class Store {
           const name = f.slice(0, f.length - ('.' + PROJECT_EXTENSION).length);
           return { createdAt, name };
         });
-      files.sort();
+      // Sort timestamp DESC
+      files.sort(
+        (a, b) =>
+          new Date(b.createdAt).valueOf() - new Date(a.createdAt).valueOf()
+      );
       return files;
     },
   };
@@ -378,13 +384,76 @@ GROUP BY panel_id
     },
   };
 
+  // Example: /private/var/folders/l0/51ds3d1d2214wb1y0vbtl5qr0000gn/T/AppTranslocation/6AC58880-BE22-4AB7-8006-47D9764BC590/d/DataStation Desktop CE.app/Contents/Resources/app.asar/sampledata/nginx_logs.jsonl
+  unmangleAsar(file: string): string {
+    const asarName = 'app.asar';
+    if (!file.includes(asarName)) {
+      return file;
+    }
+
+    // Since Go reads from the filesystem it doesn't look into the asar that is used in release builds. So we need to extract it if it doesn't exist.
+    const [asarParent, fileName] = file.split(asarName);
+    const asarFile = asarParent + asarName;
+    const newFile = path.join(asarParent, fileName);
+    // TODO: if these files change then checksum will be needed
+    if (!fs.existsSync(newFile)) {
+      fs.mkdirSync(path.dirname(newFile), { recursive: true });
+      fs.writeFileSync(
+        newFile,
+        asar.extractFile(asarFile, fileName.slice(1) /* drop leading / */)
+      );
+    }
+
+    return newFile;
+  }
+
+  cleanupSampleProject(sampleProject: ProjectState) {
+    for (const page of sampleProject.pages || []) {
+      for (const panel of page.panels || []) {
+        if (panel.type === 'file') {
+          const fp = panel as FilePanelInfo;
+          if (fp.file.name.startsWith('sampledata')) {
+            fp.file.name = this.unmangleAsar(
+              path.join(CODE_ROOT, fp.file.name)
+            );
+          }
+        }
+      }
+    }
+
+    for (const con of sampleProject.connectors || []) {
+      if (con.type === 'database') {
+        const dc = con as DatabaseConnectorInfo;
+        if (
+          dc.database.type === 'sqlite' &&
+          dc.database.database.startsWith('sampledata')
+        ) {
+          dc.database.database = this.unmangleAsar(
+            path.join(CODE_ROOT, dc.database.database)
+          );
+        }
+      }
+    }
+  }
+
   makeProjectHandler: MakeProjectHandler = {
     resource: 'makeProject',
 
     // NOTE: unlike elsewhere projectId is actually the file name not a uuid.
-    handler: async (_: string, { projectId }: MakeProjectRequest) => {
-      const newProject = new ProjectState();
+    handler: async (_: string, request: MakeProjectRequest) => {
+      const { projectId } = request;
+
+      const newProject = request.project
+        ? ProjectState.fromJSON(request.project)
+        : new ProjectState();
       newProject.projectName = ensureProjectFile(projectId);
+
+      // Sample projects get submitted and written as JSON. They get ported to SQLite on first read.
+      if (request.project) {
+        this.cleanupSampleProject(newProject);
+        fs.writeFileSync(newProject.projectName, JSON.stringify(newProject));
+        return;
+      }
 
       // File already exists, ok and appropriate to do nothing since
       // this merely handles creation not loading.
