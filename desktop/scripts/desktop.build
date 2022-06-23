@@ -3,7 +3,7 @@ yarn build-ui
 
 # Flags from various package management guidelines: https://wiki.archlinux.org/title/Go_package_guidelines
 setenv_default VERSION "development"
-cd runner && go build -trimpath -buildmode=pie -mod=readonly -modcacherw -ldflags="-s -w -X main.VERSION={VERSION} -extldflags=-static" -o ../build/go_desktop_runner{required_ext} cmd/main.go
+cd runner && go build -trimpath -buildmode=pie -mod=readonly -modcacherw -ldflags="-s -w -X main.VERSION={VERSION} {static_libodbc_flag}" -o ../build/go_desktop_runner{required_ext} cmd/main.go
 
 yarn esbuild desktop/preload.ts --external:electron --sourcemap --bundle --outfile=build/preload.js
 yarn esbuild desktop/runner.ts --bundle --platform=node --sourcemap --external:better-sqlite3 --external:react-native-fs --external:asar --external:react-native-fetch-blob "--external:@elastic/elasticsearch" "--external:wasm-brotli" --external:prometheus-query --external:snowflake-sdk --external:ssh2 --external:ssh2-promise --external:ssh2-sftp-client --external:cpu-features --external:electron --target=node10.4 --outfile=build/desktop_runner.js
