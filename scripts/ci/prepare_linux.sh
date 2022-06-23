@@ -34,3 +34,4 @@ cd unixODBC-2.3.11
 ./configure --enable-static --with-included-ltdl
 make
 sudo make install
+sudo rm -rf unixODBC-2.3.11
