@@ -36,7 +36,7 @@ BUILTIN_VARIABLES = {
     }[platform.system().lower()],
     'static_libodbc_flag': {
         'linux': '-extldflags=-l:libodbc.a',
-        'darwin': '-extldflags=-L/usr/local/lib -lodbc',
+        'darwin': '-extldflags=-L/usr/local/lib',
         'windows': '',
     }[platform.system().lower()]
 }
