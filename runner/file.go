@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	"github.com/multiprocessio/go-openoffice"
+	"gopkg.in/yaml.v3"
 
 	"github.com/linkedin/goavro/v2"
 	"github.com/scritchley/orc"
@@ -460,6 +461,41 @@ func transformAvroFile(in string, out *ResultWriter) error {
 	return transformAvro(r, out)
 }
 
+func transformYAML(in *bufio.Reader, out *ResultWriter) error {
+	jw := out.w.(*JSONResultItemWriter)
+	jw.raw = true
+	o := jw.bfd
+	enc := jsonNewEncoder(o)
+	dec := yaml.NewDecoder(in)
+
+	for {
+		var a any
+		err := dec.Decode(&a)
+		if err == io.EOF {
+			return nil
+		}
+
+		if err != nil {
+			return err
+		}
+
+		if err := enc.Encode(a); err != nil {
+			return err
+		}
+	}
+}
+
+func transformYAMLFile(in string, out *ResultWriter) error {
+	r, closeFile, err := openBufferedFile(in)
+	if err != nil {
+		return err
+	}
+
+	defer closeFile()
+
+	return transformYAML(r, out)
+}
+
 type MimeType string
 
 const (
@@ -475,6 +511,7 @@ const (
 	ParquetMimeType                  = "parquet"
 	ORCMimeType                      = "orc"
 	AvroMimeType                     = "application/avro"
+	YAMLMimeType                     = "application/yaml"
 	ApacheErrorMimeType              = "text/apache2error"
 	ApacheAccessMimeType             = "text/apache2access"
 	NginxAccessMimeType              = "text/nginxaccess"
@@ -507,6 +544,8 @@ func GetMimeType(fileName string, ct ContentTypeInfo) MimeType {
 		return ORCMimeType
 	case ".avro":
 		return AvroMimeType
+	case ".yaml":
+		return YAMLMimeType
 	}
 
 	return UnknownMimeType
@@ -541,6 +580,8 @@ func TransformFile(fileName string, cti ContentTypeInfo, out *ResultWriter) erro
 		return transformOpenOfficeSheetFile(fileName, out)
 	case AvroMimeType:
 		return transformAvroFile(fileName, out)
+	case YAMLMimeType:
+		return transformYAMLFile(fileName, out)
 	}
 
 	if re, ok := BUILTIN_REGEX[assumedType]; ok {

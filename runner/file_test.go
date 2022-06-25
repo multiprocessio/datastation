@@ -3,6 +3,7 @@ package runner
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"math/rand"
 	"os"
 	"strings"
@@ -481,4 +482,49 @@ func Test_transformCSV_BENCHMARK(t *testing.T) {
 	w.Close()
 
 	fmt.Printf("transform csv took %s\n", time.Since(start))
+}
+
+func Test_transformYAMLFile(t *testing.T) {
+	tests := []struct {
+		in, exp string
+	}{
+		{
+			`
+a: b
+`,
+			`{"a": "b"}`,
+		},
+	}
+
+	for _, test := range tests {
+		inTmp, err := os.CreateTemp("", "")
+		assert.Nil(t, err)
+		defer inTmp.Close()
+
+		inTmp.Write([]byte(test.in))
+
+		outTmp, err := os.CreateTemp("", "")
+		assert.Nil(t, err)
+		defer outTmp.Close()
+
+		jw, err := openJSONResultItemWriter(outTmp.Name(), nil)
+		assert.Nil(t, err)
+		rw := NewResultWriter(jw)
+		err = transformYAMLFile(inTmp.Name(), rw)
+		assert.Nil(t, err)
+
+		rw.Close()
+
+		outTmpBs, err := ioutil.ReadFile(outTmp.Name())
+		assert.Nil(t, err)
+
+		var out, exp any
+		err = jsonUnmarshal(outTmpBs, &out)
+		assert.Nil(t, err)
+		err = jsonUnmarshal([]byte(test.exp), &exp)
+		assert.Nil(t, err)
+
+		log.Println(out, exp)
+		assert.Equal(t, out, exp)
+	}
 }
