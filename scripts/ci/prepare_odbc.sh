@@ -10,4 +10,6 @@ sudo make install
 cd .. && sudo rm -rf unixODBC-2.3.11
 
 # Build Go plugin
-/bin/bash ./runner/plugins/odbc/build.sh
+cd runner/plugins/odbc
+/bin/bash ./build.sh
+cd ../../..
