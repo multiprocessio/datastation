@@ -252,6 +252,8 @@ func TransformReader(r *bufio.Reader, fileName string, cti ContentTypeInfo, out 
 	switch assumedType {
 	case JSONMimeType:
 		return transformJSON(r, out)
+	case YAMLMimeType:
+		return transformYAML(r, out)
 	case CSVMimeType:
 		return transformCSV(r, out, ',', cti.ConvertNumbers)
 	case TSVMimeType:
