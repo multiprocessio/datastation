@@ -12,7 +12,6 @@ import (
 	"strings"
 
 	_ "github.com/ClickHouse/clickhouse-go/v2"
-	_ "github.com/alexbrainman/odbc"
 	_ "github.com/denisenkom/go-mssqldb"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
@@ -530,7 +529,12 @@ func (ec EvalContext) EvalDatabasePanel(
 			return err
 		}
 
-		db, err := sqlx.Open(vendor, connStr)
+		var db *sqlx.DB
+		if vendor == ODBCDatabase {
+			db, err = openODBCDriver(connStr)
+		} else {
+			db, err = sqlx.Open(vendor, connStr)
+		}
 		if err != nil {
 			return err
 		}

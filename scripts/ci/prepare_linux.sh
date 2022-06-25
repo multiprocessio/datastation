@@ -27,11 +27,5 @@ fi
 sudo npm install --global yarn
 yarn
 
-# Compile unixODBC devel
-curl -LO http://www.unixodbc.org/unixODBC-2.3.11.tar.gz
-tar -xvf unixODBC-2.3.11.tar.gz
-cd unixODBC-2.3.11
-./configure --enable-static --with-included-ltdl
-make
-sudo make install
-cd .. && sudo rm -rf unixODBC-2.3.11
+# Install unixODBC
+/bin/bash ./prepare_odbc.sh

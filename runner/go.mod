@@ -3,7 +3,6 @@ module github.com/multiprocessio/datastation/runner
 go 1.18
 
 require (
-	github.com/alexbrainman/odbc v0.0.0-20211220213544-9c9a2e61c5e2
 	cloud.google.com/go/bigquery v1.8.0
 	github.com/ClickHouse/clickhouse-go/v2 v2.0.14
 	github.com/aws/aws-sdk-go v1.44.14

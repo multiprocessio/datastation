@@ -34,11 +34,6 @@ BUILTIN_VARIABLES = {
         'darwin': '',
         'windows': '.exe',
     }[platform.system().lower()],
-    'static_libodbc_flag': {
-        'linux': '-extldflags=-l:libodbc.a',
-        'darwin': '-extldflags=/usr/local/lib/libodbc.a',
-        'windows': '',
-    }[platform.system().lower()]
 }
 for i, arg in enumerate(sys.argv[2:]):
     BUILTIN_VARIABLES['arg'+str(i)] = arg
