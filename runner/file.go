@@ -544,7 +544,7 @@ func GetMimeType(fileName string, ct ContentTypeInfo) MimeType {
 		return ORCMimeType
 	case ".avro":
 		return AvroMimeType
-	case ".yaml":
+	case ".yaml", ".yml":
 		return YAMLMimeType
 	}
 
