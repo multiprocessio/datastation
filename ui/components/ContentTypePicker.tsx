@@ -58,6 +58,9 @@ export function ContentTypePicker({
             <option disabled={inMemoryEval} value="application/avro">
               Avro
             </option>
+            <option disabled={inMemoryEval} value="application/yaml">
+              YAML
+            </option>
             <option value="application/json">JSON</option>
             <option value="application/jsonlines">
               Newline-delimited JSON
