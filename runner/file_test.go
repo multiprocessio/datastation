@@ -3,7 +3,6 @@ package runner
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"math/rand"
 	"os"
 	"strings"
@@ -486,45 +485,108 @@ func Test_transformCSV_BENCHMARK(t *testing.T) {
 
 func Test_transformYAMLFile(t *testing.T) {
 	tests := []struct {
-		in, exp string
+		description, in, exp string
 	}{
 		{
+			"Trivial",
 			`
 a: b
 `,
 			`{"a": "b"}`,
 		},
+		{
+			"Nested values",
+			`
+a:
+  b: c
+`,
+			`{"a": {"b": "c"}}`,
+		},
+		{
+			"Various primitives",
+			`
+a: true
+b: 1
+c: 1.234
+d:
+`,
+			`{"a": true, "b": 1, "c": 1.234, "d": null}`,
+		},
+		{
+			"Lists",
+			`
+a: [a, b, c]
+b:
+  - a
+  - b
+  - c
+`,
+			`{"a": ["a", "b", "c"], "b": ["a", "b", "c"] }`,
+		},
+		{
+			"Folding/including newlines",
+			`
+a: |
+  abc
+  123
+    xyz
+b: >
+  abc
+  123
+    xyz
+`,
+			`{"a": "abc\n123\n  xyz\n", "b": "abc 123\n  xyz\n"}`,
+		},
+		{
+			"Top-level lists",
+			`
+- a: "abc"
+  b: "123"
+- c: "abc"
+- "abc"
+`,
+			`[{"a": "abc", "b": "123"}, {"c": "abc"}, "abc"]`,
+		},
+		{
+			"Comments",
+			`
+# This is a comment
+a: b`,
+			`{"a": "b"}`,
+		},
 	}
 
 	for _, test := range tests {
-		inTmp, err := os.CreateTemp("", "")
-		assert.Nil(t, err)
-		defer inTmp.Close()
+		t.Run(test.description, func(t *testing.T) {
+			inTmp, err := os.CreateTemp("", "")
+			assert.Nil(t, err)
+			defer inTmp.Close()
 
-		inTmp.Write([]byte(test.in))
+			inTmp.Write([]byte(test.in))
 
-		outTmp, err := os.CreateTemp("", "")
-		assert.Nil(t, err)
-		defer outTmp.Close()
+			outTmp, err := os.CreateTemp("", "")
+			assert.Nil(t, err)
+			defer outTmp.Close()
 
-		jw, err := openJSONResultItemWriter(outTmp.Name(), nil)
-		assert.Nil(t, err)
-		rw := NewResultWriter(jw)
-		err = transformYAMLFile(inTmp.Name(), rw)
-		assert.Nil(t, err)
+			jw, err := openJSONResultItemWriter(outTmp.Name(), nil)
+			assert.Nil(t, err)
+			rw := NewResultWriter(jw)
+			err = transformYAMLFile(inTmp.Name(), rw)
+			assert.Nil(t, err)
 
-		rw.Close()
+			rw.Close()
 
-		outTmpBs, err := ioutil.ReadFile(outTmp.Name())
-		assert.Nil(t, err)
+			outTmpBs, err := ioutil.ReadFile(outTmp.Name())
+			assert.Nil(t, err)
 
-		var out, exp any
-		err = jsonUnmarshal(outTmpBs, &out)
-		assert.Nil(t, err)
-		err = jsonUnmarshal([]byte(test.exp), &exp)
-		assert.Nil(t, err)
+			var out, exp any
+			err = jsonUnmarshal(outTmpBs, &out)
+			assert.Nil(t, err)
+			err = jsonUnmarshal([]byte(test.exp), &exp)
+			assert.Nil(t, err)
 
-		log.Println(out, exp)
-		assert.Equal(t, out, exp)
+			assert.Equal(t, out, exp)
+
+		})
 	}
 }
