@@ -12,7 +12,7 @@ iwr -useb 'https://raw.githubusercontent.com/scoopinstaller/install/master/insta
 .\install.ps1 -RunAsAdmin
 Join-Path (Resolve-Path ~).Path "scoop\shims" >> $Env:GITHUB_PATH
 scoop install nodejs-lts
-scoop install go@1.18
+scoop install go@1.18.3
 scoop install cmake
 scoop install python
 scoop install yarn
@@ -20,6 +20,7 @@ scoop install zip
 scoop install jq
 scoop install curl
 scoop install julia
+scoop reset mingw@10.2.0
 New-Alias zip 7z
 
 # Install JS dependencies
