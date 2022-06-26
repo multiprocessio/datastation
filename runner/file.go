@@ -462,19 +462,48 @@ func transformAvroFile(in string, out *ResultWriter) error {
 }
 
 func transformYAML(in *bufio.Reader, out *ResultWriter) error {
-	jw := out.w.(*JSONResultItemWriter)
-	jw.raw = true
-	o := jw.bfd
-	enc := jsonNewEncoder(o)
 	dec := yaml.NewDecoder(in)
 
-	var a any
-	err := dec.Decode(&a)
+	var first, next any
+	err := dec.Decode(&first)
 	if err != nil {
 		return err
 	}
 
-	return enc.Encode(a)
+	// If EOF after first doc, write JSON directly like {"a": "b"}
+	nextErr := dec.Decode(&next)
+	if nextErr == io.EOF {
+		jw := out.w.(*JSONResultItemWriter)
+		jw.raw = true
+		o := jw.bfd
+		enc := jsonNewEncoder(o)
+
+		return enc.Encode(&first)
+	}
+
+	// In the case of multiple docs (separated by ---), write them as rows like [{"a": "b"}, {"c": "d"}]
+	if err := out.WriteRow(first); err != nil {
+		return err
+	}
+	if err := out.WriteRow(next); err != nil {
+		return err
+	}
+
+	for {
+		var a any
+		err := dec.Decode(&a)
+		if err == io.EOF {
+			return nil
+		}
+
+		if err != nil {
+			return err
+		}
+
+		if err := out.WriteRow(a); err != nil {
+			return err
+		}
+	}
 }
 
 func transformYAMLFile(in string, out *ResultWriter) error {

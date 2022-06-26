@@ -554,6 +554,15 @@ b: >
 a: b`,
 			`{"a": "b"}`,
 		},
+		{
+			"Multiple documents",
+			`
+a: b
+---
+c: d
+`,
+			`[{"a": "b"}, {"c": "d"}]`,
+		},
 	}
 
 	for _, test := range tests {
