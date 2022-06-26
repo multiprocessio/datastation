@@ -20,6 +20,7 @@ scoop install zip
 scoop install jq
 scoop install curl
 scoop install julia
+scoop install mingw@10.2.0
 scoop reset mingw@10.2.0
 New-Alias zip 7z
 
