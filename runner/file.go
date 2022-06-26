@@ -468,21 +468,13 @@ func transformYAML(in *bufio.Reader, out *ResultWriter) error {
 	enc := jsonNewEncoder(o)
 	dec := yaml.NewDecoder(in)
 
-	for {
-		var a any
-		err := dec.Decode(&a)
-		if err == io.EOF {
-			return nil
-		}
-
-		if err != nil {
-			return err
-		}
-
-		if err := enc.Encode(a); err != nil {
-			return err
-		}
+	var a any
+	err := dec.Decode(&a)
+	if err != nil {
+		return err
 	}
+
+	return enc.Encode(a)
 }
 
 func transformYAMLFile(in string, out *ResultWriter) error {
