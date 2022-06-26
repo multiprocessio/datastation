@@ -2,24 +2,7 @@ package runner
 
 import (
 	"context"
-	"plugin"
-
-	"github.com/jmoiron/sqlx"
 )
-
-func openODBCDriver(conn string) (*sqlx.DB, error) {
-	pl, err := plugin.Open("./runner/plugins/odbc/odbc.build")
-	if err != nil {
-		return nil, err
-	}
-
-	openDriver, err := pl.Lookup("OpenODBCDriver")
-	if err != nil {
-		return nil, err
-	}
-
-	return openDriver.(func(string) (*sqlx.DB, error))(conn)
-}
 
 func (ec EvalContext) testODBCConnection(ctx context.Context, db *DatabaseConnectorInfo) error {
 	_, conn, err := ec.getConnectionString(db.Database)

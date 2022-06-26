@@ -45,3 +45,5 @@ make
 sudo make install
 cd .. && sudo rm -rf unixODBC-2.3.11
 
+# Compile Go plugin
+cd runner/plugins/odbc && go build -trimpath -buildmode=plugin -mod=readonly -modcacherw -ldflags="-s -w" -o ./odbc.build ./odbc.go && cd ../../..

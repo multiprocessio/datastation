@@ -124,7 +124,7 @@ docker run -d -p 8086:8086 -e "DOCKER_INFLUXDB_INIT_MODE=setup" -e "DOCKER_INFLU
 docker run -d -p 8087:8086 -e "INFLUXDB_HTTP_AUTH_ENABLED=true" -e "INFLUXDB_ADMIN_USER=test" -e "INFLUXDB_ADMIN_PASSWORD=testtest" influxdb:1.7
 
 # Start up neo4j
-neo4j="$(docker run -d -p7687:7687 --env NEO4J_AUTH=neo4j/password neo4j)"
+neo4j="$(docker run -d -p7474:7474 -p7687:7687 --env NEO4J_AUTH=neo4j/password neo4j)"
 
 # Start up mongodb and install mongosh (shell)
 #docker run -d -e "MONGO_INITDB_ROOT_USERNAME=test" -e "MONGO_INITDB_DATABASE=test" -e "MONGO_INITDB_ROOT_PASSWORD=test" -p 27017:27017 mongo:5
@@ -133,7 +133,7 @@ neo4j="$(docker run -d -p7687:7687 --env NEO4J_AUTH=neo4j/password neo4j)"
 
 ## LOAD DATA ##
 
-sleep 30 # Time for everything to load (influx in particular takes a while)
+sleep 60 # Time for everything to load (influx in particular takes a while)
 
 # Configure sqlserver (create table)
 docker exec sqlserver /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "1StrongPwd!!" -Q "CREATE TABLE master.[dbo].test (id int PRIMARY KEY, name text);"
