@@ -1,6 +1,10 @@
 rm -rf build
 yarn
 setenv UI_ESBUILD_ARGS "--minify"
+
+cd runner/plugins/odbc && go build -trimpath -buildmode=plugin -mod=readonly -modcacherw -ldflags="-s -w" -o ./odbc.build ./odbc.go
+cd ../../..
+
 yarn build-server
 prepend "window.DS_CONFIG_MODE='server';" build/ui.js
 prepend "window.DS_CONFIG_VERSION='{arg0}';" build/ui.js

@@ -27,5 +27,11 @@ fi
 sudo npm install --global yarn
 yarn
 
-# Install unixODBC and build Go plugin
-/bin/bash ./scripts/ci/prepare_odbc.sh
+# Download  unixODBC source code and compile
+curl -LO http://www.unixodbc.org/unixODBC-2.3.11.tar.gz
+tar -xvf unixODBC-2.3.11.tar.gz
+cd unixODBC-2.3.11
+./configure
+make
+sudo make install
+cd .. && sudo rm -rf unixODBC-2.3.11

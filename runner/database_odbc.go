@@ -8,7 +8,7 @@ import (
 )
 
 func openODBCDriver(conn string) (*sqlx.DB, error) {
-	pl, err := plugin.Open("./runner/plugins/odbc/odbc.so")
+	pl, err := plugin.Open("./runner/plugins/odbc/odbc.build")
 	if err != nil {
 		return nil, err
 	}

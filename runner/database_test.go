@@ -1,7 +1,6 @@
 package runner
 
 import (
-	"fmt"
 	"strings"
 	"testing"
 
@@ -171,15 +170,6 @@ func Test_getConnectionString(t *testing.T) {
 			"7687",
 			"",
 		},
-		{
-			DatabaseConnectorInfoDatabase{Type: "odbc", Password: Encrypt{Encrypted: false, Value: ""}, Username: "SA", Database: "master", Address: "localhost:1433", Extra: map[string]string{"driver": "freetds"}},
-			"odbc",
-			"driver=freetds;server=localhost,1433;database=master;pwd=;uid=SA;",
-			nil,
-			"localhost",
-			"1433",
-			"",
-		},
 	}
 
 	ec, cleanup := makeTestEvalContext()
@@ -188,11 +178,7 @@ func Test_getConnectionString(t *testing.T) {
 	for _, test := range tests {
 		vendor, connStr, err := ec.getConnectionString(test.conn)
 		assert.Equal(t, test.expVendor, vendor)
-		if test.expVendor == ODBCDatabase {
-			assert.Equal(t, nil, odbcAssert(test.expConnStr, connStr))
-		} else {
-			assert.Equal(t, test.expConnStr, connStr)
-		}
+		assert.Equal(t, test.expConnStr, connStr)
 		assert.Equal(t, test.expErr, err)
 
 		if test.expVendor == "sqlite" || test.expVendor == "snowflake" || test.expVendor == "neo4j" {
@@ -207,20 +193,39 @@ func Test_getConnectionString(t *testing.T) {
 	}
 }
 
-func odbcAssert(exp, act string) error {
-	expSlice := strings.Split(exp, ";")
-	actSlice := strings.Split(act, ";")
-	lookUp := map[string]bool{}
-
-	for _, s := range expSlice {
-		lookUp[s] = true
+func Test_ODBCConnectionString(t *testing.T) {
+	test := struct {
+		conn       DatabaseConnectorInfoDatabase
+		expVendor  string
+		expConnStr string
+		expErr     error
+		expHost    string
+		expPort    string
+		expExtra   string
+	}{
+		DatabaseConnectorInfoDatabase{Type: "odbc", Password: Encrypt{Encrypted: false, Value: ""}, Username: "SA", Database: "master", Address: "localhost:1433", Extra: map[string]string{"driver": "freetds"}},
+		"odbc",
+		"driver=freetds;server=localhost,1433;database=master;pwd=;uid=SA;",
+		nil,
+		"localhost",
+		"1433",
+		"",
 	}
 
-	for _, s := range actSlice {
-		if _, ok := lookUp[s]; !ok {
-			return fmt.Errorf("not equal: %s, %s", exp, act)
-		}
-	}
+	ec, cleanup := makeTestEvalContext()
+	defer cleanup()
 
-	return nil
+	vendor, connStr, err := ec.getConnectionString(test.conn)
+	assert.Equal(t, test.expVendor, vendor)
+	assert.Equal(t, test.expErr, err)
+
+	expSlice := strings.Split(test.expConnStr, ";")
+	actSlice := strings.Split(connStr, ";")
+	assert.ElementsMatch(t, expSlice, actSlice)
+
+	host, port, extra, err := getDatabaseHostPortExtra(test.conn.Address, defaultPorts[DatabaseConnectorInfoType(test.expVendor)])
+	assert.Nil(t, err)
+	assert.Equal(t, test.expHost, host)
+	assert.Equal(t, test.expPort, port)
+	assert.Equal(t, test.expExtra, extra)
 }

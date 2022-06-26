@@ -3,6 +3,11 @@ yarn
 setenv UI_ESBUILD_ARGS "--minify"
 setenv VERSION {arg0}
 yarn build-desktop
+
+# Other than -buildmode and -ldflags, other flags must be exactly the same as for runner.
+cd runner/plugins/odbc && go build -trimpath -buildmode=plugin -mod=readonly -modcacherw -ldflags="-s -w" -o ./odbc.build ./odbc.go
+cd ../../..
+
 prepend "window.DS_CONFIG_MODE='desktop';" build/ui.js
 prepend "window.DS_CONFIG_VERSION='{arg0}';" build/ui.js
 prepend "window.DS_CONFIG_VERSION='{arg0}';" build/desktop_runner.js

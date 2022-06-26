@@ -36,5 +36,12 @@ colima start
 # Run SQL server
 docker run -d -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=1StrongPwd!!" --name sqlserver --hostname sqlserver -p 1433:1433 mcr.microsoft.com/mssql/server:2019-latest
 
-# Install unixODBC and build Go plugin
-/bin/bash ./scripts/ci/prepare_odbc.sh
+# Download  unixODBC source code and compile
+curl -LO http://www.unixodbc.org/unixODBC-2.3.11.tar.gz
+tar -xvf unixODBC-2.3.11.tar.gz
+cd unixODBC-2.3.11
+./configure
+make
+sudo make install
+cd .. && sudo rm -rf unixODBC-2.3.11
+
