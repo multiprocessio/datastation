@@ -1,3 +1,13 @@
+Set-StrictMode -Version Latest
+$ErrorActionPreference = "Stop"
+$PSDefaultParameterValues['*:ErrorAction']='Stop'
+function ThrowOnNativeFailure {
+    if (-not $?)
+    {
+        throw 'Native Failure'
+    }
+}
+
 iwr -useb 'https://raw.githubusercontent.com/scoopinstaller/install/master/install.ps1' -outfile 'install.ps1'
 .\install.ps1 -RunAsAdmin
 Join-Path (Resolve-Path ~).Path "scoop\shims" >> $Env:GITHUB_PATH
