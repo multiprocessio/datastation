@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	"github.com/multiprocessio/go-openoffice"
+	"gopkg.in/yaml.v3"
 
 	"github.com/linkedin/goavro/v2"
 	"github.com/scritchley/orc"
@@ -460,6 +461,62 @@ func transformAvroFile(in string, out *ResultWriter) error {
 	return transformAvro(r, out)
 }
 
+func transformYAML(in *bufio.Reader, out *ResultWriter) error {
+	dec := yaml.NewDecoder(in)
+
+	var first, next any
+	err := dec.Decode(&first)
+	if err != nil {
+		return err
+	}
+
+	// If EOF after first doc, write JSON directly like {"a": "b"}
+	nextErr := dec.Decode(&next)
+	if nextErr == io.EOF {
+		jw := out.w.(*JSONResultItemWriter)
+		jw.raw = true
+		o := jw.bfd
+		enc := jsonNewEncoder(o)
+
+		return enc.Encode(&first)
+	}
+
+	// In the case of multiple docs (separated by ---), write them as rows like [{"a": "b"}, {"c": "d"}]
+	if err := out.WriteRow(first); err != nil {
+		return err
+	}
+	if err := out.WriteRow(next); err != nil {
+		return err
+	}
+
+	for {
+		var a any
+		err := dec.Decode(&a)
+		if err == io.EOF {
+			return nil
+		}
+
+		if err != nil {
+			return err
+		}
+
+		if err := out.WriteRow(a); err != nil {
+			return err
+		}
+	}
+}
+
+func transformYAMLFile(in string, out *ResultWriter) error {
+	r, closeFile, err := openBufferedFile(in)
+	if err != nil {
+		return err
+	}
+
+	defer closeFile()
+
+	return transformYAML(r, out)
+}
+
 type MimeType string
 
 const (
@@ -475,6 +532,7 @@ const (
 	ParquetMimeType                  = "parquet"
 	ORCMimeType                      = "orc"
 	AvroMimeType                     = "application/avro"
+	YAMLMimeType                     = "application/yaml"
 	ApacheErrorMimeType              = "text/apache2error"
 	ApacheAccessMimeType             = "text/apache2access"
 	NginxAccessMimeType              = "text/nginxaccess"
@@ -507,6 +565,8 @@ func GetMimeType(fileName string, ct ContentTypeInfo) MimeType {
 		return ORCMimeType
 	case ".avro":
 		return AvroMimeType
+	case ".yaml", ".yml":
+		return YAMLMimeType
 	}
 
 	return UnknownMimeType
@@ -541,6 +601,8 @@ func TransformFile(fileName string, cti ContentTypeInfo, out *ResultWriter) erro
 		return transformOpenOfficeSheetFile(fileName, out)
 	case AvroMimeType:
 		return transformAvroFile(fileName, out)
+	case YAMLMimeType:
+		return transformYAMLFile(fileName, out)
 	}
 
 	if re, ok := BUILTIN_REGEX[assumedType]; ok {
