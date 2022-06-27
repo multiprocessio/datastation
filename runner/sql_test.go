@@ -150,7 +150,7 @@ func Test_postgresMangleInsert(t *testing.T) {
 		"INSERT INTO x VALUES ($1, $2, $3)")
 }
 
-func Test_getObjectAtPath(t *testing.T) {
+func Test_GetObjectAtPath(t *testing.T) {
 	tests := []struct {
 		input    map[string]any
 		path     string
@@ -202,7 +202,7 @@ func Test_getObjectAtPath(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		res := getObjectAtPath(test.input, test.path)
+		res := GetObjectAtPath(test.input, test.path)
 		assert.Equal(t, test.expected, res)
 	}
 }

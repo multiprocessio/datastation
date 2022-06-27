@@ -211,7 +211,7 @@ func transformDM_getPanelCalls(
 	return panelsToImport, query, nil
 }
 
-func getObjectAtPath(obj map[string]any, path string) any {
+func GetObjectAtPath(obj map[string]any, path string) any {
 	if val, ok := obj[path]; ok {
 		return val
 	}
@@ -389,7 +389,7 @@ newprepare:
 
 			for i, row := range rows {
 				for j, col := range panel.columns {
-					v := getObjectAtPath(row, col.name)
+					v := GetObjectAtPath(row, col.name)
 					// Non-scalars get JSON
 					// encoded. This can basically
 					// only be arrays because

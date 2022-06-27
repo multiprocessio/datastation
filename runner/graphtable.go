@@ -56,7 +56,7 @@ outer:
 			}
 
 			for _, c := range columns {
-				rowRequestedColumnsOnly[c] = getObjectAtPath(rawRow, c)
+				rowRequestedColumnsOnly[c] = GetObjectAtPath(rawRow, c)
 			}
 			err := rw.WriteRow(rowRequestedColumnsOnly)
 			if err != nil {
