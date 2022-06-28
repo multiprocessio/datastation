@@ -22,6 +22,12 @@ scoop install curl
 scoop install julia
 New-Alias zip 7z
 
+# Issue with go race detector 4k allignment instead of 64k.
+# https://github.com/golang/go/issues/46099
+# Temporary fix by downgraeding gcc and friends.
+gcc -v
+choco install mingw --version 10.2.0 --allow-downgrade
+
 # Install JS dependencies
 yarn
 yarn
