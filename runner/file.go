@@ -123,13 +123,7 @@ func transformParquet(in source.ParquetFile, out *ResultWriter) error {
 	defer r.ReadStop()
 
 	size := 1000
-	var offset int64 = 0
 	for {
-		err := r.SkipRows(offset)
-		if err != nil {
-			return err
-		}
-
 		rows, err := r.ReadByNumber(size)
 		if err != nil {
 			return err
@@ -154,8 +148,6 @@ func transformParquet(in source.ParquetFile, out *ResultWriter) error {
 				return err
 			}
 		}
-
-		offset += int64(size)
 
 		if len(rows) < size {
 			return nil

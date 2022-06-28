@@ -606,4 +606,5 @@ func transformTestFile[transformer func(string, *ResultWriter) error](filename s
 	}
 
 	return out, nil
+
 }
