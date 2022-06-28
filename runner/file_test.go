@@ -123,26 +123,19 @@ func Test_transformJSONLines(t *testing.T) {
 	}
 }
 
-func Test_parquet(t *testing.T) {
+func Test_transformParquetFile(t *testing.T) {
+	t.Run("Trivial", func(t *testing.T) {
+		_, err := transformTestFile("../testdata/allformats/userdata.parquet", transformParquetFile)
+		assert.Nil(t, err)
+	})
 
-	outputFile, err := ioutil.TempFile("", "")
-	defer os.Remove(outputFile.Name())
-	assert.Nil(t, err)
+	t.Run("Correct number of rows", func(t *testing.T) {
+		out, err := transformTestFile("../testdata/allformats/large.parquet", transformParquetFile)
+		assert.Nil(t, err)
 
-	jw, err := openJSONResultItemWriter(outputFile.Name(), nil)
-	assert.Nil(t, err)
-
-	w := NewResultWriter(jw)
-	err = transformParquetFile("../testdata/allformats/userdata.parquet", w)
-	assert.Nil(t, err)
-
-	w.Close()
-
-	var m []map[string]any
-	tmp2Bs, err := ioutil.ReadFile(outputFile.Name())
-	assert.Nil(t, err)
-	err = jsonUnmarshal(tmp2Bs, &m)
-	assert.Nil(t, err)
+		m := out.([]any)
+		assert.Equal(t, 40000, len(m))
+	})
 }
 
 func Test_transformORCFile(t *testing.T) {
@@ -581,7 +574,6 @@ c: d
 			assert.Nil(t, err)
 
 			assert.Equal(t, out, exp)
-
 		})
 	}
 }
