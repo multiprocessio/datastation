@@ -70,10 +70,24 @@ sudo service clickhouse-server start
 go install github.com/google/go-jsonnet/cmd/jsonnet@latest
 sudo ln $HOME/go/bin/jsonnet /usr/local/bin/jsonnet
 
+# Install ODBC driver
+if ! [[ "18.04 20.04 21.04" == *"$(lsb_release -rs)"* ]];
+then
+    echo "Ubuntu $(lsb_release -rs) is not currently supported.";
+    exit;
+fi
+
+sudo curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
+
+sudo curl https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/prod.list -o mssql-release.list
+sudo mv mssql-release.list /etc/apt/sources.list.d/mssql-release.list
+
+sudo apt-get update
+sudo ACCEPT_EULA=Y apt-get install -y msodbcsql18
 ## LAUNCH CONTAINERS
 
 # Start up sqlserver
-docker run -d -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=1StrongPwd!!" -p 1433:1433 mcr.microsoft.com/mssql/server:2019-latest
+docker run -d -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=1StrongPwd!!" --name sqlserver --hostname sqlserver -p 1433:1433 mcr.microsoft.com/mssql/server:2019-latest
 
 # Start up oracle database
 docker run -d -e ORACLE_RANDOM_PASSWORD="y" -e "APP_USER=test" -e "APP_USER_PASSWORD=test" -p 1521:1521 gvenzl/oracle-xe:latest
@@ -110,7 +124,7 @@ docker run -d -p 8086:8086 -e "DOCKER_INFLUXDB_INIT_MODE=setup" -e "DOCKER_INFLU
 docker run -d -p 8087:8086 -e "INFLUXDB_HTTP_AUTH_ENABLED=true" -e "INFLUXDB_ADMIN_USER=test" -e "INFLUXDB_ADMIN_PASSWORD=testtest" influxdb:1.7
 
 # Start up neo4j
-neo4j="$(docker run -d -p 7687:7687 -e "NEO4J_AUTH=neo4j/password" neo4j)"
+neo4j="$(docker run -d -p7474:7474 -p7687:7687 --env NEO4J_AUTH=neo4j/password neo4j)"
 
 # Start up mongodb and install mongosh (shell)
 #docker run -d -e "MONGO_INITDB_ROOT_USERNAME=test" -e "MONGO_INITDB_DATABASE=test" -e "MONGO_INITDB_ROOT_PASSWORD=test" -p 27017:27017 mongo:5
@@ -119,7 +133,10 @@ neo4j="$(docker run -d -p 7687:7687 -e "NEO4J_AUTH=neo4j/password" neo4j)"
 
 ## LOAD DATA ##
 
-sleep 30 # Time for everything to load (influx in particular takes a while)
+sleep 60 # Time for everything to load (influx in particular takes a while)
+
+# Configure sqlserver (create table)
+docker exec sqlserver /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "1StrongPwd!!" -Q "CREATE TABLE master.[dbo].test (id int PRIMARY KEY, name text);"
 
 # Configure cratedb
 docker exec "$cratecontainer" crash -c "CREATE USER test WITH (password = 'test');"

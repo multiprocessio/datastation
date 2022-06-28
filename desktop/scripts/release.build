@@ -3,6 +3,7 @@ yarn
 setenv UI_ESBUILD_ARGS "--minify"
 setenv VERSION {arg0}
 yarn build-desktop
+
 prepend "window.DS_CONFIG_MODE='desktop';" build/ui.js
 prepend "window.DS_CONFIG_VERSION='{arg0}';" build/ui.js
 prepend "window.DS_CONFIG_VERSION='{arg0}';" build/desktop_runner.js

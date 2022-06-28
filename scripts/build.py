@@ -33,7 +33,7 @@ BUILTIN_VARIABLES = {
         'linux': '',
         'darwin': '',
         'windows': '.exe',
-    }[platform.system().lower()]
+    }[platform.system().lower()],
 }
 for i, arg in enumerate(sys.argv[2:]):
     BUILTIN_VARIABLES['arg'+str(i)] = arg

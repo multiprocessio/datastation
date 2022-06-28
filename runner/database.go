@@ -67,6 +67,7 @@ var defaultPorts = map[DatabaseConnectorInfoType]string{
 	YugabyteDatabase:      "5433",
 	QuestDatabase:         "8812",
 	Neo4jDatabase:         "7687",
+	ODBCDatabase:          "1433",
 }
 
 type urlParts struct {
@@ -266,6 +267,49 @@ func (ec EvalContext) getConnectionString(dbInfo DatabaseConnectorInfoDatabase) 
 		}
 
 		return "neo4j", addr.String(), nil
+	case ODBCDatabase:
+		params := map[string]string{}
+		var err error
+
+		if strings.Contains(u.address, "localhost") {
+			split := strings.Split(u.address, ":")
+			params["server"] = fmt.Sprintf("%s,%s", split[0], split[1])
+		} else {
+			addr, err := url.Parse(u.address)
+			if err != nil {
+				return "", "", err
+			}
+			params["server"] = fmt.Sprintf("%s,%s", addr.Hostname(), addr.Port())
+		}
+		params["database"] = u.database
+
+		var ok bool
+		params["driver"], ok = dbInfo.Extra["driver"]
+		if !ok {
+			return "", "", fmt.Errorf("driver not found")
+		}
+
+		params["pwd"], err = ec.decrypt(&dbInfo.Password)
+		if err != nil {
+			return "", "", err
+		}
+
+		params["uid"] = dbInfo.Username
+		if dbInfo.Username == "" {
+			params["trusted_connection"] = "yes" // TODO: configure TLS
+		}
+
+		val, ok := dbInfo.Extra["trust_server_certificate"]
+		if ok && val == "Yes" {
+			params["TrustServerCertificate"] = val
+		}
+
+		var conn string
+		for k, v := range params {
+			conn += k + "=" + v + ";"
+		}
+
+		return "odbc", conn, nil
 	}
 	return "", "", nil
 }
@@ -485,7 +529,12 @@ func (ec EvalContext) EvalDatabasePanel(
 			return err
 		}
 
-		db, err := sqlx.Open(vendor, connStr)
+		var db *sqlx.DB
+		if vendor == ODBCDatabase {
+			db, err = openODBCDriver(connStr)
+		} else {
+			db, err = sqlx.Open(vendor, connStr)
+		}
 		if err != nil {
 			return err
 		}
@@ -531,6 +580,11 @@ func (ec EvalContext) EvalDatabasePanel(
 				for rows.Next() {
 					err := writeRowFromDatabase(dbInfo, w, rows, wroteFirstRow)
 					if err != nil {
+						if vendor == ODBCDatabase && err.Error() == "Stmt did not create a result set" {
+							return nil, nil
+						}
+						// odbc driver returns an error for an empty result
+						// see https://github.com/alexbrainman/odbc/blob/9c9a2e61c5e2c1a257a51ea49169fc9008c51f0e/odbcstmt.go#L134
 						return nil, err
 					}
 
