@@ -161,8 +161,6 @@ func transformParquet(in source.ParquetFile, out *ResultWriter) error {
 			return nil
 		}
 	}
-
-	return nil
 }
 
 func transformParquetFile(in string, out *ResultWriter) error {

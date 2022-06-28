@@ -124,6 +124,7 @@ func Test_transformJSONLines(t *testing.T) {
 }
 
 func Test_parquet(t *testing.T) {
+
 	outputFile, err := ioutil.TempFile("", "")
 	defer os.Remove(outputFile.Name())
 	assert.Nil(t, err)
@@ -572,25 +573,10 @@ c: d
 			defer inTmp.Close()
 
 			inTmp.Write([]byte(test.in))
-
-			outTmp, err := os.CreateTemp("", "")
-			assert.Nil(t, err)
-			defer outTmp.Close()
-
-			jw, err := openJSONResultItemWriter(outTmp.Name(), nil)
-			assert.Nil(t, err)
-			rw := NewResultWriter(jw)
-			err = transformYAMLFile(inTmp.Name(), rw)
+			out, err := transformTestFile(inTmp.Name(), transformYAMLFile)
 			assert.Nil(t, err)
 
-			rw.Close()
-
-			outTmpBs, err := ioutil.ReadFile(outTmp.Name())
-			assert.Nil(t, err)
-
-			var out, exp any
-			err = jsonUnmarshal(outTmpBs, &out)
-			assert.Nil(t, err)
+			var exp any
 			err = jsonUnmarshal([]byte(test.exp), &exp)
 			assert.Nil(t, err)
 
@@ -598,4 +584,34 @@ c: d
 
 		})
 	}
+}
+
+func transformTestFile[transformer func(string, *ResultWriter) error](filename string, transformFile transformer) (any, error) {
+	outTmp, err := os.CreateTemp("", "")
+	if err != nil {
+		return nil, err
+	}
+	defer outTmp.Close()
+
+	jw, err := openJSONResultItemWriter(outTmp.Name(), nil)
+	if err != nil {
+		return nil, err
+	}
+	rw := NewResultWriter(jw)
+	err = transformFile(filename, rw)
+
+	rw.Close()
+
+	outTmpBs, err := ioutil.ReadFile(outTmp.Name())
+	if err != nil {
+		return nil, err
+	}
+
+	var out any
+	err = jsonUnmarshal(outTmpBs, &out)
+	if err != nil {
+		return nil, err
+	}
+
+	return out, nil
 }
