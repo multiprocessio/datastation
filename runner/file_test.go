@@ -93,33 +93,24 @@ func Test_transformJSONLines(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		inputFile, err := ioutil.TempFile("", "")
+		inTmp, err := os.CreateTemp("", "")
+		assert.Nil(t, err)
+		defer inTmp.Close()
+		defer os.Remove(inTmp.Name())
+
+		inTmp.WriteString(test.input)
+
+		out, err := transformTestFile(inTmp.Name(), transformJSONLinesFile)
 		assert.Nil(t, err)
 
-		inputFile.WriteString(test.input)
-
-		outputFile, err := ioutil.TempFile("", "")
+		b, err := jsonMarshal(out)
 		assert.Nil(t, err)
 
-		jw, err := openJSONResultItemWriter(outputFile.Name(), nil)
+		var a []map[string]any
+		err = jsonUnmarshal(b, &a)
 		assert.Nil(t, err)
 
-		w := NewResultWriter(jw)
-		err = transformJSONLinesFile(inputFile.Name(), w)
-		assert.Nil(t, err)
-
-		w.Close()
-
-		var m []map[string]any
-		tmp2Bs, err := ioutil.ReadFile(outputFile.Name())
-		assert.Nil(t, err)
-		err = jsonUnmarshal(tmp2Bs, &m)
-		assert.Nil(t, err)
-
-		assert.Equal(t, test.output, m)
-
-		os.Remove(inputFile.Name())
-		os.Remove(outputFile.Name())
+		assert.Equal(t, test.output, a)
 	}
 }
 
@@ -139,9 +130,8 @@ func Test_transformParquetFile(t *testing.T) {
 }
 
 func Test_transformORCFile(t *testing.T) {
-	inTmp, err := ioutil.TempFile("", "")
+	inTmp, err := os.CreateTemp("", "")
 	assert.Nil(t, err)
-	defer os.Remove(inTmp.Name())
 	defer inTmp.Close()
 
 	// define column types for ORC file
@@ -187,24 +177,13 @@ func Test_transformORCFile(t *testing.T) {
 	err = w.Close()
 	assert.Nil(t, err)
 
-	outTmp, err := ioutil.TempFile("", "")
-	defer os.Remove(outTmp.Name())
-	assert.Nil(t, err)
+	out, err := transformTestFile(inTmp.Name(), transformORCFile)
 
-	jw, err := openJSONResultItemWriter(outTmp.Name(), nil)
+	b, err := jsonMarshal(out)
 	assert.Nil(t, err)
-
-	rw := NewResultWriter(jw)
-	err = transformORCFile(inTmp.Name(), rw)
-	assert.Nil(t, err)
-
-	rw.Close()
 
 	var m []map[string]any
-	outTmpBs, err := ioutil.ReadFile(outTmp.Name())
-	assert.Nil(t, err)
-
-	err = jsonUnmarshal(outTmpBs, &m)
+	err = jsonUnmarshal(b, &m)
 	assert.Nil(t, err)
 
 	assert.Equal(t, expJson, m)
@@ -241,25 +220,14 @@ func Test_transformAvroFile(t *testing.T) {
 	err = w.Append(expJson)
 	assert.Nil(t, err)
 
-	outTmp, err := os.CreateTemp("", "")
-	assert.Nil(t, err)
-	defer os.Remove(outTmp.Name())
-	defer outTmp.Close()
-
-	jw, err := openJSONResultItemWriter(outTmp.Name(), nil)
+	out, err := transformTestFile(inTmp.Name(), transformAvroFile)
 	assert.Nil(t, err)
 
-	rw := NewResultWriter(jw)
-	err = transformAvroFile(inTmp.Name(), rw)
-	assert.Nil(t, err)
-
-	rw.Close()
-
-	outTmpBs, err := os.ReadFile(outTmp.Name())
+	b, err := jsonMarshal(out)
 	assert.Nil(t, err)
 
 	var actJson []map[string]any
-	err = jsonUnmarshal(outTmpBs, &actJson)
+	err = jsonUnmarshal(b, &actJson)
 	assert.Nil(t, err)
 
 	assert.Equal(t, expJson, actJson)
@@ -280,28 +248,11 @@ cdef`,
 
 		inTmp.WriteString(test)
 
-		outTmp, err := ioutil.TempFile("", "")
-		assert.Nil(t, err)
+		out, err := transformTestFile(inTmp.Name(), transformGenericFile)
 
-		jw, err := openJSONResultItemWriter(outTmp.Name(), nil)
-		assert.Nil(t, err)
-
-		w := NewResultWriter(jw)
-		err = transformGenericFile(inTmp.Name(), w)
-		assert.Nil(t, err)
-
-		w.Close()
-
-		var m any
-		outTmpBs, err := ioutil.ReadFile(outTmp.Name())
-		assert.Nil(t, err)
-		err = jsonUnmarshal(outTmpBs, &m)
-		assert.Nil(t, err)
-
-		assert.Equal(t, test, m)
+		assert.Equal(t, test, out)
 
 		os.Remove(inTmp.Name())
-		os.Remove(outTmp.Name())
 	}
 }
 
@@ -358,29 +309,10 @@ func Test_regressions(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		outTmp, err := ioutil.TempFile("", "")
+		out, err := transformTestFile(test.file, test.transformer)
 		assert.Nil(t, err)
 
-		jw, err := openJSONResultItemWriter(outTmp.Name(), nil)
-		assert.Nil(t, err)
-
-		w := NewResultWriter(jw)
-
-		err = test.transformer(test.file, w)
-		assert.Nil(t, err)
-
-		w.Close()
-
-		out, err := os.ReadFile(outTmp.Name())
-		assert.Nil(t, err)
-
-		var d any
-		err = jsonUnmarshal(out, &d)
-		assert.Nil(t, err)
-
-		assert.Equal(t, test.expectedValue, d)
-
-		os.Remove(outTmp.Name())
+		assert.Equal(t, test.expectedValue, out)
 	}
 }
 
@@ -405,7 +337,8 @@ func Test_resolvePath(t *testing.T) {
 }
 
 func Test_transformCSV(t *testing.T) {
-	csvTmp, err := ioutil.TempFile("", "")
+	csvTmp, err := os.CreateTemp("", "")
+	defer csvTmp.Close()
 	defer os.Remove(csvTmp.Name())
 	assert.Nil(t, err)
 
@@ -415,40 +348,31 @@ marge,15
 michael,10`)
 	assert.Nil(t, err)
 
-	outTmp, err := ioutil.TempFile("", "")
-	defer os.Remove(outTmp.Name())
+	out, err := transformTestFile(csvTmp.Name(), func(filename string, rw *ResultWriter) error {
+		return transformCSVFile(filename, rw, ',', false)
+	})
 	assert.Nil(t, err)
 
-	jw, err := openJSONResultItemWriter(outTmp.Name(), nil)
-	assert.Nil(t, err)
-
-	w := NewResultWriter(jw)
-
-	err = transformCSVFile(csvTmp.Name(), w, ',', false)
-	assert.Nil(t, err)
-	w.Close()
-
-	bs, err := os.ReadFile(outTmp.Name())
-	assert.Nil(t, err)
-
-	var a []map[string]any
-	err = jsonUnmarshal(bs, &a)
-	assert.Nil(t, err)
-
-	assert.Equal(t, []map[string]any{
+	test :=
+		`[
 		{
 			"name": "kerry",
-			"age":  "12",
+			"age":  "12"
 		},
 		{
 			"name": "marge",
-			"age":  "15",
+			"age":  "15"
 		},
 		{
 			"name": "michael",
-			"age":  "10",
-		},
-	}, a)
+			"age":  "10"
+		}
+	]`
+	var exp any
+	err = jsonUnmarshal([]byte(test), &exp)
+	assert.Nil(t, err)
+
+	assert.Equal(t, out, exp)
 }
 
 // Benchmarks
@@ -459,20 +383,12 @@ func Test_transformCSV_BENCHMARK(t *testing.T) {
 	}
 
 	// curl -LO https://s3.amazonaws.com/nyc-tlc/trip+data/yellow_tripdata_2021-04.csv
-	outTmp, err := ioutil.TempFile("", "")
-	defer os.Remove(outTmp.Name())
-	assert.Nil(t, err)
-
 	start := time.Now()
 
-	jw, err := openJSONResultItemWriter(outTmp.Name(), nil)
+	_, err := transformTestFile("taxi.csv", func(filename string, rw *ResultWriter) error {
+		return transformCSVFile(filename, rw, ',', false)
+	})
 	assert.Nil(t, err)
-
-	w := NewResultWriter(jw)
-	err = transformCSVFile("taxi.csv", w, ',', false)
-	assert.Nil(t, err)
-
-	w.Close()
 
 	fmt.Printf("transform csv took %s\n", time.Since(start))
 }
@@ -564,6 +480,7 @@ c: d
 			inTmp, err := os.CreateTemp("", "")
 			assert.Nil(t, err)
 			defer inTmp.Close()
+			defer os.Remove(inTmp.Name())
 
 			inTmp.Write([]byte(test.in))
 			out, err := transformTestFile(inTmp.Name(), transformYAMLFile)
@@ -584,6 +501,7 @@ func transformTestFile[transformer func(string, *ResultWriter) error](filename s
 		return nil, err
 	}
 	defer outTmp.Close()
+	defer os.Remove(outTmp.Name())
 
 	jw, err := openJSONResultItemWriter(outTmp.Name(), nil)
 	if err != nil {
