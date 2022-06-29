@@ -495,7 +495,7 @@ c: d
 	}
 }
 
-func transformTestFile[transformer func(string, *ResultWriter) error](filename string, transformFile transformer) (any, error) {
+func transformTestFile(filename string, transformFile func(string, *ResultWriter) error) (any, error) {
 	outTmp, err := os.CreateTemp("", "")
 	if err != nil {
 		return nil, err
