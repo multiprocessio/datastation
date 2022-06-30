@@ -314,7 +314,7 @@ const (
 	YugabyteDatabase                                = "yugabyte"
 	QuestDatabase                                   = "quest"
 	BigQueryDatabase                                = "bigquery"
-	MongoDatabase                                   = "mongo"
+	MongoDatabase                                   = "mongodb"
 	AthenaDatabase                                  = "athena"
 	AirtableDatabase                                = "airtable"
 	GoogleSheetsDatabase                            = "google-sheets"

@@ -170,6 +170,24 @@ func Test_getConnectionString(t *testing.T) {
 			"7687",
 			"",
 		},
+		{
+			DatabaseConnectorInfoDatabase{Type: "mongodb", Username: "ben", Password: Encrypt{Encrypted: false, Value: "pw"}, Database: "test", Address: "localhost"},
+			"mongodb",
+			"mongodb://ben:pw@localhost/test",
+			nil,
+			"localhost",
+			"27017",
+			"",
+		},
+		{
+			DatabaseConnectorInfoDatabase{Type: "mongodb", Username: "ben", Password: Encrypt{Encrypted: false, Value: "pw"}, Database: "test", Address: "mongodb0.example.com:8888"},
+			"mongodb",
+			"mongodb://ben:pw@mongodb0.example.com:8888/test",
+			nil,
+			"mongodb0.example.com",
+			"8888",
+			"",
+		},
 	}
 
 	ec, cleanup := makeTestEvalContext()

@@ -68,6 +68,7 @@ var defaultPorts = map[DatabaseConnectorInfoType]string{
 	QuestDatabase:         "8812",
 	Neo4jDatabase:         "7687",
 	ODBCDatabase:          "1433",
+	MongoDatabase:         "27017",
 }
 
 type urlParts struct {
@@ -467,6 +468,8 @@ func (ec EvalContext) EvalDatabasePanel(
 		return ec.evalAirtable(panel, dbInfo, w)
 	case Neo4jDatabase:
 		return ec.evalNeo4j(panel, dbInfo, server, w)
+	case MongoDatabase:
+		return ec.evalMongo(panel, dbInfo, server, w)
 	}
 
 	mangleInsert := defaultMangleInsert
