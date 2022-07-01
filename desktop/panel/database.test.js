@@ -128,10 +128,10 @@ for (const subprocess of RUNNERS) {
   for (const t of DATABASES) {
     describe(
       t.type +
-      ' running via ' +
-      (subprocess ? subprocess.node || subprocess.go : 'process') +
-      ': ' +
-      t.query,
+        ' running via ' +
+        (subprocess ? subprocess.node || subprocess.go : 'process') +
+        ': ' +
+        t.query,
       () => {
         test(`runs ${t.type} query`, async () => {
           if (process.platform !== 'linux' || t.type !== 'odbc') {
@@ -675,16 +675,16 @@ for (const subprocess of RUNNERS) {
             getProjectResultsFile(project.projectName) + dp.id
           );
 
-          const v = Array
-            .from(JSON.parse(panelValueBuffer.toString()))
-            .map(el => { delete el._id; return el })
-
+          const v = Array.from(JSON.parse(panelValueBuffer.toString())).map(
+            (el) => {
+              delete el._id;
+              return el;
+            }
+          );
 
           expect(v).toStrictEqual(
             JSON.parse(
-              fs
-                .readFileSync('testdata/mongo/documents.json')
-                .toString()
+              fs.readFileSync('testdata/mongo/documents.json').toString()
             )
           );
 

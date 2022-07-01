@@ -436,20 +436,20 @@ export type TimeSeriesRange = {
   sortOn?: string;
   sortAsc?: boolean;
 } & (
-    | {
+  | {
       rangeType: 'absolute';
       begin_date: Date;
       end_date: Date;
     }
-    | {
+  | {
       rangeType: 'relative';
       relative: TimeSeriesRelativeTimes;
     }
-    | {
+  | {
       rangeType: 'fixed';
       fixed: TimeSeriesFixedTimes;
     }
-  );
+);
 
 export class DatabasePanelInfo extends PanelInfo {
   database: {
