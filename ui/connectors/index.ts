@@ -160,50 +160,50 @@ export const VENDOR_GROUPS: Array<{
   group: string;
   vendors: Array<DatabaseConnectorInfoType>;
 }> = [
-  {
-    group: 'Traditional',
-    vendors: [
-      'postgres',
-      'mysql',
-      'sqlserver',
-      'oracle',
-      'sqlite',
-      'cockroach',
-      'odbc',
-    ],
-  },
-  {
-    group: 'Warehouse',
-    vendors: ['snowflake', 'bigquery', 'athena'],
-  },
-  {
-    group: 'Spreadsheets',
-    vendors: ['airtable', 'google-sheets'],
-  },
-  {
-    group: 'Document',
-    vendors: ['elasticsearch', 'crate'],
-  },
-  {
-    group: 'Time Series',
-    vendors: [
-      'clickhouse',
-      'cassandra',
-      'scylla',
-      'quest',
-      'timescale',
-      'yugabyte',
-    ],
-  },
-  {
-    group: 'Graph',
-    vendors: ['neo4j'],
-  },
-  {
-    group: 'Metrics',
-    vendors: ['prometheus', 'influx', 'influx-flux'],
-  },
-];
+    {
+      group: 'Traditional',
+      vendors: [
+        'postgres',
+        'mysql',
+        'sqlserver',
+        'oracle',
+        'sqlite',
+        'cockroach',
+        'odbc',
+      ],
+    },
+    {
+      group: 'Warehouse',
+      vendors: ['snowflake', 'bigquery', 'athena'],
+    },
+    {
+      group: 'Spreadsheets',
+      vendors: ['airtable', 'google-sheets'],
+    },
+    {
+      group: 'Document',
+      vendors: ['elasticsearch', 'crate', 'mongo'],
+    },
+    {
+      group: 'Time Series',
+      vendors: [
+        'clickhouse',
+        'cassandra',
+        'scylla',
+        'quest',
+        'timescale',
+        'yugabyte',
+      ],
+    },
+    {
+      group: 'Graph',
+      vendors: ['neo4j'],
+    },
+    {
+      group: 'Metrics',
+      vendors: ['prometheus', 'influx', 'influx-flux'],
+    },
+  ];
 
 VENDOR_GROUPS.forEach((g) => {
   g.vendors.sort();

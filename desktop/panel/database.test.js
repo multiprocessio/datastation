@@ -128,10 +128,10 @@ for (const subprocess of RUNNERS) {
   for (const t of DATABASES) {
     describe(
       t.type +
-        ' running via ' +
-        (subprocess ? subprocess.node || subprocess.go : 'process') +
-        ': ' +
-        t.query,
+      ' running via ' +
+      (subprocess ? subprocess.node || subprocess.go : 'process') +
+      ': ' +
+      t.query,
       () => {
         test(`runs ${t.type} query`, async () => {
           if (process.platform !== 'linux' || t.type !== 'odbc') {
@@ -654,9 +654,6 @@ for (const subprocess of RUNNERS) {
         return;
       }
 
-      // Mongo doesn't work yet.
-      return;
-
       const connectors = [
         new DatabaseConnectorInfo({
           type: 'mongo',
@@ -667,7 +664,7 @@ for (const subprocess of RUNNERS) {
       ];
       const dp = new DatabasePanelInfo();
       dp.database.connectorId = connectors[0].id;
-      dp.content = 'db.test.find({ pageCount: { $gt: 0 } })';
+      dp.content = 'db.test.find({ pageCount: { $gt: 0 } }).toArray()';
 
       let finished = false;
       const panels = [dp];
@@ -678,11 +675,15 @@ for (const subprocess of RUNNERS) {
             getProjectResultsFile(project.projectName) + dp.id
           );
 
-          const v = JSON.parse(panelValueBuffer.toString());
+          const v = Array
+            .from(JSON.parse(panelValueBuffer.toString()))
+            .map(el => { delete el._id; return el })
+
+
           expect(v).toStrictEqual(
             JSON.parse(
               fs
-                .readFileSync('testdata/bigquery/population_result.json')
+                .readFileSync('testdata/mongo/documents.json')
                 .toString()
             )
           );

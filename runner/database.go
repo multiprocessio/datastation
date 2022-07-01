@@ -158,7 +158,7 @@ func (ec EvalContext) getConnectionString(dbInfo DatabaseConnectorInfoDatabase) 
 	case PostgresDatabase, TimescaleDatabase, CockroachDatabase, CrateDatabase, YugabyteDatabase, QuestDatabase:
 		return "postgres", genericString, nil
 	case MongoDatabase:
-		return "mongodb", genericString, nil
+		return "mongo", genericString, nil
 	case MySQLDatabase:
 		dsn := ""
 		if genericUserPass != "" {

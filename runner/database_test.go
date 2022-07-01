@@ -171,8 +171,8 @@ func Test_getConnectionString(t *testing.T) {
 			"",
 		},
 		{
-			DatabaseConnectorInfoDatabase{Type: "mongodb", Username: "ben", Password: Encrypt{Encrypted: false, Value: "pw"}, Database: "test", Address: "localhost"},
-			"mongodb",
+			DatabaseConnectorInfoDatabase{Type: "mongo", Username: "ben", Password: Encrypt{Encrypted: false, Value: "pw"}, Database: "test", Address: "localhost"},
+			"mongo",
 			"mongodb://ben:pw@localhost/test",
 			nil,
 			"localhost",
@@ -180,8 +180,8 @@ func Test_getConnectionString(t *testing.T) {
 			"",
 		},
 		{
-			DatabaseConnectorInfoDatabase{Type: "mongodb", Username: "ben", Password: Encrypt{Encrypted: false, Value: "pw"}, Database: "test", Address: "mongodb0.example.com:8888"},
-			"mongodb",
+			DatabaseConnectorInfoDatabase{Type: "mongo", Username: "ben", Password: Encrypt{Encrypted: false, Value: "pw"}, Database: "test", Address: "mongodb0.example.com:8888"},
+			"mongo",
 			"mongodb://ben:pw@mongodb0.example.com:8888/test",
 			nil,
 			"mongodb0.example.com",

@@ -127,9 +127,9 @@ docker run -d -p 8087:8086 -e "INFLUXDB_HTTP_AUTH_ENABLED=true" -e "INFLUXDB_ADM
 neo4j="$(docker run -d -p7474:7474 -p7687:7687 --env NEO4J_AUTH=neo4j/password neo4j)"
 
 # Start up mongodb and install mongosh (shell)
-#docker run -d -e "MONGO_INITDB_ROOT_USERNAME=test" -e "MONGO_INITDB_DATABASE=test" -e "MONGO_INITDB_ROOT_PASSWORD=test" -p 27017:27017 mongo:5
-#curl -LO https://github.com/mongodb-js/mongosh/releases/download/v1.1.9/mongodb-mongosh_1.1.9_amd64.deb
-#sudo apt-get install -y ./mongodb-mongosh_1.1.9_amd64.deb
+docker run -d -e "MONGO_INITDB_ROOT_USERNAME=test" -e "MONGO_INITDB_DATABASE=test" -e "MONGO_INITDB_ROOT_PASSWORD=test" -p 27017:27017 mongo:5
+curl -LO https://github.com/mongodb-js/mongosh/releases/download/v1.1.9/mongodb-mongosh_1.1.9_amd64.deb
+sudo apt-get install -y ./mongodb-mongosh_1.1.9_amd64.deb
 
 ## LOAD DATA ##
 
@@ -185,8 +185,8 @@ docker exec "$scyllacontainer" cqlsh -u cassandra -p cassandra \
 docker exec "$neo4j" bin/cypher-shell -u neo4j -p password "CREATE (u:User { name : 'test' });"
 
 # Load Mongodb documents
-#for t in $(ls testdata/documents/*.json); do
-#    mongosh "mongodb://test:test@localhost:27017" --eval "db.test.insertOne($(cat $t))"
-#done
+for t in $(ls testdata/documents/*.json); do
+   mongosh "mongodb://test:test@localhost:27017" --eval "db.test.insertOne($(cat $t))"
+done
 
 # TODO: might be worth switching to docker-compose at some point...
