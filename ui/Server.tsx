@@ -99,7 +99,7 @@ export function Server({
                 server.address = value;
                 updateServer(server);
               }}
-            tooltip="Specify the address and, optionally, the port. If no port is specified it defaults to 22."
+              tooltip="Specify the address and, optionally, the port. If no port is specified it defaults to 22."
             />
           </div>
           <div className="form-row">
