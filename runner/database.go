@@ -572,6 +572,12 @@ func (ec EvalContext) EvalDatabasePanel(
 			func(query string) ([]map[string]any, error) {
 				rows, err := db.Queryx(query)
 				if err != nil {
+					// odbc driver returns an error for an empty result
+					// see https://github.com/alexbrainman/odbc/blob/9c9a2e61c5e2c1a257a51ea49169fc9008c51f0e/odbcstmt.go#L134
+					if vendor == ODBCDatabase && err.Error() == "Stmt did not create a result set" {
+						return nil, nil
+					}
+
 					return nil, err
 				}
 
@@ -580,11 +586,6 @@ func (ec EvalContext) EvalDatabasePanel(
 				for rows.Next() {
 					err := writeRowFromDatabase(dbInfo, w, rows, wroteFirstRow)
 					if err != nil {
-						if vendor == ODBCDatabase && err.Error() == "Stmt did not create a result set" {
-							return nil, nil
-						}
-						// odbc driver returns an error for an empty result
-						// see https://github.com/alexbrainman/odbc/blob/9c9a2e61c5e2c1a257a51ea49169fc9008c51f0e/odbcstmt.go#L134
 						return nil, err
 					}
 
