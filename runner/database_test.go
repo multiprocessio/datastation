@@ -180,7 +180,13 @@ func Test_getConnectionString(t *testing.T) {
 			"",
 		},
 		{
-			DatabaseConnectorInfoDatabase{Type: "mongo", Username: "ben", Password: Encrypt{Encrypted: false, Value: "pw"}, Database: "test", Address: "mongodb0.example.com:8888"},
+			DatabaseConnectorInfoDatabase{
+				Type:     "mongo",
+				Username: "ben",
+				Password: Encrypt{Encrypted: false, Value: "pw"},
+				Database: "test", Address: "mongodb0.example.com:8888",
+				Extra: map[string]string{"authenticationDatabase": "admin"},
+			},
 			"mongo",
 			"mongodb://ben:pw@mongodb0.example.com:8888/test",
 			nil,
