@@ -128,10 +128,10 @@ for (const subprocess of RUNNERS) {
   for (const t of DATABASES) {
     describe(
       t.type +
-      ' running via ' +
-      (subprocess ? subprocess.node || subprocess.go : 'process') +
-      ': ' +
-      t.query,
+        ' running via ' +
+        (subprocess ? subprocess.node || subprocess.go : 'process') +
+        ': ' +
+        t.query,
       () => {
         test(`runs ${t.type} query`, async () => {
           if (process.platform !== 'linux' || t.type !== 'odbc') {
@@ -660,7 +660,7 @@ for (const subprocess of RUNNERS) {
           database: 'test',
           username: 'test',
           password_encrypt: new Encrypt('test'),
-          extra: { authenticationDatabase: "admin" }
+          extra: { authenticationDatabase: 'admin' },
         }),
       ];
 
@@ -711,7 +711,7 @@ for (const subprocess of RUNNERS) {
           database: 'test',
           username: 'test',
           password_encrypt: new Encrypt('test'),
-          extra: { authenticationDatabase: "invalid" }
+          extra: { authenticationDatabase: 'invalid' },
         }),
       ];
 
@@ -721,14 +721,14 @@ for (const subprocess of RUNNERS) {
 
       const panels = [dp];
       try {
-        await withSavedPanels(
-          panels,
-          () => { },
-          { evalPanels: true, connectors, subprocessName: subprocess }
-        );
+        await withSavedPanels(panels, () => {}, {
+          evalPanels: true,
+          connectors,
+          subprocessName: subprocess,
+        });
       } catch (e) {
-        expect(e.name).toBe('UserError')
-        expect(e.message).toBe('MongoServerError: Authentication failed.\n')
+        expect(e.name).toBe('UserError');
+        expect(e.message).toBe('MongoServerError: Authentication failed.\n');
       }
     }, 15_000);
 
@@ -752,14 +752,18 @@ for (const subprocess of RUNNERS) {
 
       const panels = [dp];
       try {
-        await withSavedPanels(
-          panels,
-          () => { },
-          { evalPanels: true, connectors, subprocessName: subprocess }
-        );
+        await withSavedPanels(panels, () => {}, {
+          evalPanels: true,
+          connectors,
+          subprocessName: subprocess,
+        });
       } catch (e) {
-        expect(e.name).toBe('UserError')
-        expect(e.message.startsWith('BSONTypeError: Converting circular structure to EJSON:')).toBe(true)
+        expect(e.name).toBe('UserError');
+        expect(
+          e.message.startsWith(
+            'BSONTypeError: Converting circular structure to EJSON:'
+          )
+        ).toBe(true);
       }
     }, 15_000);
   });
