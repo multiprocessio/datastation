@@ -569,8 +569,8 @@ func transformTestFile(filename string, transformFile func(string, *ResultWriter
 		return nil, err
 	}
 	rw := NewResultWriter(jw)
-	defer rw.Close()
 	err = transformFile(filename, rw)
+	rw.Close()
 	if err != nil {
 		return nil, err
 	}
