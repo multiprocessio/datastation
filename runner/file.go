@@ -15,6 +15,7 @@ import (
 	"github.com/multiprocessio/go-openoffice"
 	"gopkg.in/yaml.v3"
 
+	"github.com/go-logfmt/logfmt"
 	"github.com/linkedin/goavro/v2"
 	"github.com/scritchley/orc"
 	"github.com/xitongsys/parquet-go-source/local"
@@ -507,6 +508,40 @@ func transformYAMLFile(in string, out *ResultWriter) error {
 	return transformYAML(r, out)
 }
 
+func transformLogFmt(in *bufio.Reader, out *ResultWriter) error {
+	dec := logfmt.NewDecoder(in)
+
+	for dec.ScanRecord() {
+		o := map[string]any{}
+		for dec.ScanKeyval() {
+			if dec.Key() != nil {
+				o[string(dec.Key())] = string(dec.Value())
+			}
+		}
+
+		err := out.WriteRow(o)
+		if err != nil {
+			return err
+		}
+	}
+	if err := dec.Err(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func transformLogFmtFile(in string, out *ResultWriter) error {
+	r, closeFile, err := openBufferedFile(in)
+	if err != nil {
+		return err
+	}
+
+	defer closeFile()
+
+	return transformLogFmt(r, out)
+}
+
 type MimeType string
 
 const (
@@ -526,6 +561,7 @@ const (
 	ApacheErrorMimeType              = "text/apache2error"
 	ApacheAccessMimeType             = "text/apache2access"
 	NginxAccessMimeType              = "text/nginxaccess"
+	LogFmtMimeType                   = "text/logfmt"
 	UnknownMimeType                  = ""
 )
 
@@ -593,6 +629,8 @@ func TransformFile(fileName string, cti ContentTypeInfo, out *ResultWriter) erro
 		return transformAvroFile(fileName, out)
 	case YAMLMimeType:
 		return transformYAMLFile(fileName, out)
+	case LogFmtMimeType:
+		return transformLogFmtFile(fileName, out)
 	}
 
 	if re, ok := BUILTIN_REGEX[assumedType]; ok {
