@@ -2,6 +2,7 @@ package runner
 
 import (
 	"fmt"
+	"log"
 	"os/exec"
 )
 
@@ -20,13 +21,18 @@ func (ec EvalContext) evalMongo(panel *PanelInfo, dbInfo DatabaseConnectorInfoDa
 	eval := fmt.Sprintf("'EJSON.stringify(%s)'", panel.Content)
 
 	args := []string{conn, "--quiet", "--authenticationDatabase", authDB, "--eval", eval}
-	stdoutStderr, err := exec.Command("mongosh", args...).CombinedOutput()
+	stdout, err := exec.Command("mongosh", args...).Output()
 	if err != nil {
-		return makeErrUser(string(stdoutStderr))
+		log.Println(err)
+		if exitErr, ok := err.(*exec.ExitError); ok {
+			log.Println(exitErr, ok)
+			return makeErrUser(string(exitErr.Stderr))
+		}
+		return err
 	}
 
 	var m any
-	err = jsonUnmarshal(stdoutStderr, &m)
+	err = jsonUnmarshal(stdout, &m)
 	if err != nil {
 		return err
 	}
