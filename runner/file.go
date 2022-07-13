@@ -3,6 +3,7 @@ package runner
 import (
 	"bufio"
 	"encoding/csv"
+	"hash/maphash"
 	"io"
 	"os"
 	"os/user"
@@ -509,13 +510,26 @@ func transformYAMLFile(in string, out *ResultWriter) error {
 }
 
 func transformLogFmt(in *bufio.Reader, out *ResultWriter) error {
-	dec := logfmt.NewDecoder(in)
+	o := map[string]any{}
+	keys := map[uint64]string{}
 
+	var h maphash.Hash
+
+	dec := logfmt.NewDecoder(in)
 	for dec.ScanRecord() {
-		o := map[string]any{}
 		for dec.ScanKeyval() {
 			if dec.Key() != nil {
-				o[string(dec.Key())] = string(dec.Value())
+				h.Write(dec.Key())
+
+				if key, ok := keys[h.Sum64()]; ok {
+					o[key] = string(dec.Value())
+				} else {
+					key := string(dec.Key())
+					keys[h.Sum64()] = key
+					o[key] = string(dec.Value())
+				}
+
+				h.Reset()
 			}
 		}
 
@@ -523,6 +537,8 @@ func transformLogFmt(in *bufio.Reader, out *ResultWriter) error {
 		if err != nil {
 			return err
 		}
+
+		o = make(map[string]any)
 	}
 	if err := dec.Err(); err != nil {
 		return err
