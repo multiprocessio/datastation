@@ -73,6 +73,7 @@ export function ContentTypePicker({
             </option>
             <option value="text/apache2error">Apache2 Error Logs</option>
             <option value="text/nginxaccess">Nginx Access Logs</option>
+            <option value="text/logfmt">LogFmt Logs</option>
             <option value="text/regexplines">Newline-delimited Regex</option>
           </optgroup>
         </Select>
