@@ -3,6 +3,7 @@ import { DatabaseConnectorInfo, ServerInfo } from '../../shared/state';
 import { FormGroup } from '../components/FormGroup';
 import { Input } from '../components/Input';
 import { ServerPicker } from '../components/ServerPicker';
+import { Toggle } from '../components/Toggle';
 import { Database } from './Database';
 import { Host } from './Host';
 import { Password } from './Password';
@@ -28,7 +29,7 @@ export function ODBCDetails(props: {
         />
         <div className="form-row">
           <Input
-            label="Driver"
+            label="Additional parameters"
             value={connector.database.extra.driver || ''}
             onChange={(value: string) => {
               connector.database.extra.driver = value;
@@ -38,14 +39,22 @@ export function ODBCDetails(props: {
           />
         </div>
         <div className="form-row">
-          <Input
-            label="Trust Server Certificate"
-            value={connector.database.extra.trust_server_certificate || ''}
-            onChange={(value: string) => {
-              connector.database.extra.trust_server_certificate = value;
+          <Toggle
+            label="Untrusted certificates"
+            rhsLabel={
+              String(connector.database.extra.odbc_allow_untrusted) === 'true'
+                ? 'Allowed'
+                : 'Not allowed'
+            }
+            value={
+              String(connector.database.extra.odbc_allow_untrusted) === 'true'
+            }
+            onChange={function handleTrustToggle() {
+              connector.database.extra.odbc_allow_untrusted = String(
+                !(connector.database.extra.odbc_allow_untrusted === 'true')
+              );
               updateConnector(connector);
             }}
-            placeholder="Allow self-signed (Yes)"
           />
         </div>
       </FormGroup>

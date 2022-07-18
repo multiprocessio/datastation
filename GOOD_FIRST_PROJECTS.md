@@ -13,7 +13,7 @@ and dsq for these tasks to make sense.
 ## Easy
 
 * Add a new supported file type
-  * Example: Messagepack, BSON, CBOR, UBJSON, XML, Yaml, Protobuf, HDF5?
+  * Example: Messagepack, BSON, CBOR, UBJSON, XML, Yaml, Avro, HDF5?
   * See https://github.com/multiprocessio/datastation/pull/215 for how this can be done in one PR
 * Test out INT96 support in Parquet, add conversion to timestamp if necessary
 * Build dsq, fakegen for more/every os/arch
@@ -27,8 +27,6 @@ and dsq for these tasks to make sense.
 * More databases
   * IBM DB2, Apache Presto/Trino, Meilisearch, Apache Hive, Apache Druid, Apache Pinot, Quickwit, Couchbase, fix MongoDB, Redis, Splunk, DataDog, SumoLogic, Loggly, [New Relic](https://docs.newrelic.com/docs/apis/nerdgraph/examples/nerdgraph-nrql-tutorial), VictoriaMetrics, Impala
   * See https://github.com/multiprocessio/datastation/pull/219 for adding a database in one PR
-* Add a new supported log format
-  * Example: logfmt
 
 ## Medium
 
@@ -36,12 +34,3 @@ and dsq for these tasks to make sense.
 * Support zip, .tar.gz, .gz, .tar, bz2 files
 * HTTP Range support for faster downloads
 * Add support for FTP
-* New usql cli (run queries against all DataStation supported databases in a single CLI)
-* ODBC/JDBC support
-* Research/benchmarks and associated blog posts
-  * SQLite vs Go port of SQLite
-  * SQLite vs DuckDB
-  * JDBC vs native protocols
-  * Regex vs lexer
-  * Copying into SQLite vs vtable
-  * Fastest way to launch a virtual machine (gvisor, firecracker, etc)
