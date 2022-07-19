@@ -300,7 +300,8 @@ func Test_sqlIngest_e2e(t *testing.T) {
 		assert.Nil(t, err)
 		defer os.Remove(readFile.Name())
 
-		readFile.WriteString(test.json)
+		_, err = readFile.WriteString(test.json)
+		assert.Nil(t, err)
 
 		panelId := newId()
 		s, err := ShapeFromFile(readFile.Name(), panelId, 10_000, 100)

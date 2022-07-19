@@ -98,7 +98,8 @@ func Test_transformJSONLines(t *testing.T) {
 		defer inTmp.Close()
 		defer os.Remove(inTmp.Name())
 
-		inTmp.WriteString(test.input)
+		_, err = inTmp.WriteString(test.input)
+		assert.Nil(t, err)
 
 		out, err := transformTestFile(inTmp.Name(), transformJSONLinesFile)
 		assert.Nil(t, err)
@@ -178,6 +179,7 @@ func Test_transformORCFile(t *testing.T) {
 	assert.Nil(t, err)
 
 	out, err := transformTestFile(inTmp.Name(), transformORCFile)
+	assert.Nil(t, err)
 
 	b, err := jsonMarshal(out)
 	assert.Nil(t, err)
@@ -187,7 +189,6 @@ func Test_transformORCFile(t *testing.T) {
 	assert.Nil(t, err)
 
 	assert.Equal(t, expJson, m)
-
 }
 
 func Test_transformAvroFile(t *testing.T) {
@@ -243,16 +244,18 @@ cdef`,
 
 	for _, test := range tests {
 		inTmp, err := ioutil.TempFile("", "")
-
 		assert.Nil(t, err)
 
-		inTmp.WriteString(test)
+		_, err = inTmp.WriteString(test)
+		assert.Nil(t, err)
 
 		out, err := transformTestFile(inTmp.Name(), transformGenericFile)
+		assert.Nil(t, err)
 
 		assert.Equal(t, test, out)
 
-		os.Remove(inTmp.Name())
+		err = os.Remove(inTmp.Name())
+		assert.Nil(t, err)
 	}
 }
 
@@ -338,7 +341,9 @@ func Test_resolvePath(t *testing.T) {
 
 func Test_transformCSV(t *testing.T) {
 	csvTmp, err := os.CreateTemp("", "")
-	defer csvTmp.Close()
+	defer func() {
+		_ = csvTmp.Close()
+	}()
 	defer os.Remove(csvTmp.Name())
 	assert.Nil(t, err)
 
@@ -482,7 +487,9 @@ c: d
 			defer inTmp.Close()
 			defer os.Remove(inTmp.Name())
 
-			inTmp.Write([]byte(test.in))
+			_, err = inTmp.Write([]byte(test.in))
+			assert.Nil(t, err)
+
 			out, err := transformTestFile(inTmp.Name(), transformYAMLFile)
 			assert.Nil(t, err)
 
@@ -541,9 +548,13 @@ time="2015-03-26T01:27:38-04:00" level=warning msg="The group's number increased
 		t.Run(test.description, func(t *testing.T) {
 			inTmp, err := os.CreateTemp("", "")
 			assert.Nil(t, err)
-			defer inTmp.Close()
+			defer func() {
+				inTmp.Close()
+			}()
 
-			inTmp.Write([]byte(test.in))
+			_, err = inTmp.Write([]byte(test.in))
+			assert.Nil(t, err)
+
 			out, err := transformTestFile(inTmp.Name(), transformLogFmtFile)
 			assert.Nil(t, err)
 

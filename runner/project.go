@@ -251,9 +251,8 @@ func (ec EvalContext) getProjectPanel(projectId, panelId string) (*ProjectState,
 func (ec EvalContext) getProjectResultsFile(projectId string) string {
 	project := filepath.Base(projectId)
 	// Drop .dsproj from project id
-	if strings.HasSuffix(project, ".dsproj") {
-		project = project[0 : len(project)-len(".dsproj")]
-	}
+	project = strings.TrimSuffix(project, ".dsproj")
+
 	return strings.ReplaceAll(path.Join(ec.fsBase, "."+project+".results"), "\\", "/")
 }
 
