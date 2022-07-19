@@ -16,10 +16,10 @@ type ShapeKind string
 
 const (
 	ScalarKind  ShapeKind = "scalar"
-	UnknownKind           = "unknown"
-	ObjectKind            = "object"
-	ArrayKind             = "array"
-	VariedKind            = "varied"
+	UnknownKind ShapeKind = "unknown"
+	ObjectKind  ShapeKind = "object"
+	ArrayKind   ShapeKind = "array"
+	VariedKind  ShapeKind = "varied"
 )
 
 type Shape struct {
@@ -232,10 +232,10 @@ type ScalarName string
 
 const (
 	NullScalar    ScalarName = "null"
-	StringScalar             = "string"
-	NumberScalar             = "number"
-	BooleanScalar            = "boolean"
-	BigintScalar             = "bigint"
+	StringScalar  ScalarName = "string"
+	NumberScalar  ScalarName = "number"
+	BooleanScalar ScalarName = "boolean"
+	BigintScalar  ScalarName = "bigint"
 )
 
 type ScalarShape struct {
@@ -256,7 +256,6 @@ type VariedShape struct {
 
 var NullShape = Shape{Kind: ScalarKind, ScalarShape: &ScalarShape{Name: NullScalar}}
 var UnknownShape = Shape{Kind: UnknownKind}
-var defaultShape = UnknownShape
 
 func getNRandomUniqueElements(arraySize int, maxSampleSize int) []int {
 	if maxSampleSize <= 0 || arraySize <= maxSampleSize {
@@ -290,9 +289,7 @@ func walkVaried(varied Shape, cb func(a0 Shape) bool) {
 		top := stack[len(stack)-1]
 		stack = stack[:len(stack)-1]
 		if top.Kind == VariedKind {
-			for _, c := range top.VariedShape.Children {
-				stack = append(stack, c)
-			}
+			stack = append(stack, top.VariedShape.Children...)
 		}
 
 		if cb(top) {
@@ -601,7 +598,6 @@ func ShapeFromFile(file, id string, maxBytesToRead int, sampleSize int) (*Shape,
 
 				// Otherwise, pop it
 				incomplete = incomplete[:len(incomplete)-1]
-				break
 			}
 		}
 

@@ -12,7 +12,7 @@ type Theme string
 
 const (
 	LightTheme Theme = "light"
-	DarkTheme        = "dark"
+	DarkTheme  Theme = "dark"
 )
 
 type Settings struct {
