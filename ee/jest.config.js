@@ -20,7 +20,7 @@ module.exports = {
   setupFiles: ['../shared/polyfill.ts', './testsetup.js'],
   testEnvironment: 'node',
   testEnvironmentOptions: {
-    url: 'http://localhost/'
+    url: 'http://localhost/',
   },
   collectCoverageFrom: [
     'ui/**/*.ts',
