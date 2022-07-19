@@ -3,6 +3,7 @@ package runner
 import (
 	"bufio"
 	"encoding/csv"
+	"hash/maphash"
 	"io"
 	"os"
 	"os/user"
@@ -15,6 +16,7 @@ import (
 	"github.com/multiprocessio/go-openoffice"
 	"gopkg.in/yaml.v3"
 
+	"github.com/go-logfmt/logfmt"
 	"github.com/linkedin/goavro/v2"
 	"github.com/scritchley/orc"
 	"github.com/xitongsys/parquet-go-source/local"
@@ -507,6 +509,55 @@ func transformYAMLFile(in string, out *ResultWriter) error {
 	return transformYAML(r, out)
 }
 
+func transformLogFmt(in *bufio.Reader, out *ResultWriter) error {
+	o := map[string]any{}
+	keys := map[uint64]string{}
+
+	var h maphash.Hash
+
+	dec := logfmt.NewDecoder(in)
+	for dec.ScanRecord() {
+		for dec.ScanKeyval() {
+			if dec.Key() != nil {
+				h.Write(dec.Key())
+
+				if key, ok := keys[h.Sum64()]; ok {
+					o[key] = string(dec.Value())
+				} else {
+					key := string(dec.Key())
+					keys[h.Sum64()] = key
+					o[key] = string(dec.Value())
+				}
+
+				h.Reset()
+			}
+		}
+
+		err := out.WriteRow(o)
+		if err != nil {
+			return err
+		}
+
+		o = make(map[string]any)
+	}
+	if err := dec.Err(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func transformLogFmtFile(in string, out *ResultWriter) error {
+	r, closeFile, err := openBufferedFile(in)
+	if err != nil {
+		return err
+	}
+
+	defer closeFile()
+
+	return transformLogFmt(r, out)
+}
+
 type MimeType string
 
 const (
@@ -526,6 +577,7 @@ const (
 	ApacheErrorMimeType              = "text/apache2error"
 	ApacheAccessMimeType             = "text/apache2access"
 	NginxAccessMimeType              = "text/nginxaccess"
+	LogFmtMimeType                   = "text/logfmt"
 	UnknownMimeType                  = ""
 )
 
@@ -593,6 +645,8 @@ func TransformFile(fileName string, cti ContentTypeInfo, out *ResultWriter) erro
 		return transformAvroFile(fileName, out)
 	case YAMLMimeType:
 		return transformYAMLFile(fileName, out)
+	case LogFmtMimeType:
+		return transformLogFmtFile(fileName, out)
 	}
 
 	if re, ok := BUILTIN_REGEX[assumedType]; ok {

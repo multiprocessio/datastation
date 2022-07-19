@@ -68,6 +68,7 @@ var defaultPorts = map[DatabaseConnectorInfoType]string{
 	QuestDatabase:         "8812",
 	Neo4jDatabase:         "7687",
 	ODBCDatabase:          "1433",
+	MongoDatabase:         "27017",
 }
 
 type urlParts struct {
@@ -157,7 +158,7 @@ func (ec EvalContext) getConnectionString(dbInfo DatabaseConnectorInfoDatabase) 
 	case PostgresDatabase, TimescaleDatabase, CockroachDatabase, CrateDatabase, YugabyteDatabase, QuestDatabase:
 		return "postgres", genericString, nil
 	case MongoDatabase:
-		return "mongodb", genericString, nil
+		return "mongo", genericString, nil
 	case MySQLDatabase:
 		dsn := ""
 		if genericUserPass != "" {
@@ -462,6 +463,8 @@ func (ec EvalContext) EvalDatabasePanel(
 		return ec.evalAirtable(panel, dbInfo, w)
 	case Neo4jDatabase:
 		return ec.evalNeo4j(panel, dbInfo, server, w)
+	case MongoDatabase:
+		return ec.evalMongo(panel, dbInfo, server, w)
 	}
 
 	mangleInsert := defaultMangleInsert

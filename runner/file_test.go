@@ -495,6 +495,67 @@ c: d
 	}
 }
 
+func Test_transformLogFmtFile(t *testing.T) {
+	tests := []struct {
+		description,
+		in,
+		expected string
+	}{
+		{
+			"Trivial",
+			"level=info tag=stopping_fetchers id=ConsumerFetcherManager-1382721708341 module=kafka.consumer.ConsumerFetcherManager",
+			`[{"id":"ConsumerFetcherManager-1382721708341","level":"info","module":"kafka.consumer.ConsumerFetcherManager","tag":"stopping_fetchers"}]`,
+		},
+		{
+			description: "Multiline",
+			in: `time="2015-03-26T01:27:38-04:00" level=debug msg="Started observing beach" animal=walrus number=8
+time="2015-03-26T01:27:38-04:00" level=info msg="A group of walrus emerges from the ocean" animal=walrus size=10
+time="2015-03-26T01:27:38-04:00" level=warning msg="The group's number increased tremendously!" number=122 omg=true`,
+			expected: `[
+   {
+      "animal":"walrus",
+      "level":"debug",
+      "msg":"Started observing beach",
+      "number":"8",
+      "time":"2015-03-26T01:27:38-04:00"
+   },
+   {
+      "animal":"walrus",
+      "level":"info",
+      "msg":"A group of walrus emerges from the ocean",
+      "size":"10",
+      "time":"2015-03-26T01:27:38-04:00"
+   },
+   {
+      "level":"warning",
+      "msg":"The group's number increased tremendously!",
+      "number":"122",
+      "omg":"true",
+      "time":"2015-03-26T01:27:38-04:00"
+   }
+]`,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.description, func(t *testing.T) {
+			inTmp, err := os.CreateTemp("", "")
+			assert.Nil(t, err)
+			defer inTmp.Close()
+
+			inTmp.Write([]byte(test.in))
+			out, err := transformTestFile(inTmp.Name(), transformLogFmtFile)
+			assert.Nil(t, err)
+
+			var exp any
+			err = jsonUnmarshal([]byte(test.expected), &exp)
+			assert.Nil(t, err)
+
+			assert.Equal(t, exp, out)
+		})
+	}
+}
+
 func transformTestFile(filename string, transformFile func(string, *ResultWriter) error) (any, error) {
 	outTmp, err := os.CreateTemp("", "")
 	if err != nil {
@@ -509,8 +570,10 @@ func transformTestFile(filename string, transformFile func(string, *ResultWriter
 	}
 	rw := NewResultWriter(jw)
 	err = transformFile(filename, rw)
-
 	rw.Close()
+	if err != nil {
+		return nil, err
+	}
 
 	outTmpBs, err := ioutil.ReadFile(outTmp.Name())
 	if err != nil {

@@ -654,20 +654,19 @@ for (const subprocess of RUNNERS) {
         return;
       }
 
-      // Mongo doesn't work yet.
-      return;
-
       const connectors = [
         new DatabaseConnectorInfo({
           type: 'mongo',
           database: 'test',
           username: 'test',
           password_encrypt: new Encrypt('test'),
+          extra: { authenticationDatabase: 'admin' },
         }),
       ];
+
       const dp = new DatabasePanelInfo();
       dp.database.connectorId = connectors[0].id;
-      dp.content = 'db.test.find({ pageCount: { $gt: 0 } })';
+      dp.content = 'db.test.find({ pageCount: { $gt: 0 } }).toArray()';
 
       let finished = false;
       const panels = [dp];
@@ -678,12 +677,16 @@ for (const subprocess of RUNNERS) {
             getProjectResultsFile(project.projectName) + dp.id
           );
 
-          const v = JSON.parse(panelValueBuffer.toString());
+          const v = Array.from(JSON.parse(panelValueBuffer.toString())).map(
+            (el) => {
+              delete el._id;
+              return el;
+            }
+          );
+
           expect(v).toStrictEqual(
             JSON.parse(
-              fs
-                .readFileSync('testdata/bigquery/population_result.json')
-                .toString()
+              fs.readFileSync('testdata/mongo/documents.json').toString()
             )
           );
 
@@ -694,6 +697,73 @@ for (const subprocess of RUNNERS) {
 
       if (!finished) {
         throw new Error('Callback did not finish');
+      }
+    }, 15_000);
+
+    test('errors with invalid authenticationDatabase', async () => {
+      if (process.platform !== 'linux') {
+        return;
+      }
+
+      const connectors = [
+        new DatabaseConnectorInfo({
+          type: 'mongo',
+          database: 'test',
+          username: 'test',
+          password_encrypt: new Encrypt('test'),
+          extra: { authenticationDatabase: 'invalid' },
+        }),
+      ];
+
+      const dp = new DatabasePanelInfo();
+      dp.database.connectorId = connectors[0].id;
+      dp.content = 'db.test.find({})';
+
+      const panels = [dp];
+      try {
+        await withSavedPanels(panels, () => {}, {
+          evalPanels: true,
+          connectors,
+          subprocessName: subprocess,
+        });
+      } catch (e) {
+        expect(e.name).toBe('UserError');
+        expect(e.message).toBe('MongoServerError: Authentication failed.\n');
+      }
+    }, 15_000);
+
+    test('errors when not using .toArray() on queries returning multiple objects', async () => {
+      if (process.platform !== 'linux') {
+        return;
+      }
+
+      const connectors = [
+        new DatabaseConnectorInfo({
+          type: 'mongo',
+          database: 'test',
+          username: 'test',
+          password_encrypt: new Encrypt('test'),
+        }),
+      ];
+
+      const dp = new DatabasePanelInfo();
+      dp.database.connectorId = connectors[0].id;
+      dp.content = 'db.test.find({ pageCount: { $gt: 0 } })';
+
+      const panels = [dp];
+      try {
+        await withSavedPanels(panels, () => {}, {
+          evalPanels: true,
+          connectors,
+          subprocessName: subprocess,
+        });
+      } catch (e) {
+        expect(e.name).toBe('UserError');
+        expect(
+          e.message.startsWith(
+            'BSONTypeError: Converting circular structure to EJSON:'
+          )
+        ).toBe(true);
       }
     }, 15_000);
   });
