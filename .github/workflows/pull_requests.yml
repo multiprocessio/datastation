@@ -5,7 +5,8 @@ on:
     branches: [main]
 
 jobs:
-  "Static Checks":
+  static_checks:
+    name: Static Checks
     runs-on: ubuntu-latest
 
     steps:
@@ -34,7 +35,8 @@ jobs:
     - run: ./scripts/fail_on_diff.sh
     - run: yarn test-licenses
 
-  Linux Node/UI Tests:
+  linux_node_ui_tests:
+    name: Linux Node/UI Tests
     runs-on: ubuntu-latest
 
     steps:
@@ -67,7 +69,8 @@ jobs:
         SNOWFLAKE_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}
         SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
 
-  Linux Go Tests:
+  linux_go_tests:
+    name: Linux Go Tests
     runs-on: ubuntu-latest
 
     steps:
@@ -79,7 +82,8 @@ jobs:
     - run: cd runner && go test -race -coverprofile ../coverage/gounit.cov
     - run: ./runner/scripts/test_coverage.sh
 
-  End-to-end Linux Tests:
+  e2e_linux_tests:
+    name: End-to-end Linux Tests
     runs-on: ubuntu-latest
 
     steps:
@@ -107,7 +111,8 @@ jobs:
       # https://github.com/juliangruber/browser-run/issues/147
     - run: xvfb-run --auto-servernum yarn e2e-test
 
-  End-to-end macOS Tests:
+  e2e_macos_tests:
+    name: End-to-end macOS Tests
     runs-on: macos-latest
 
     steps:
@@ -137,7 +142,8 @@ jobs:
     - run: git reset --hard # release blows everything up
     - run: yarn e2e-test
 
-  End-to-end Windows Tests:
+  e2e_windows_tests:
+    name: End-to-end Windows Tests
     runs-on: windows-latest
 
     steps:
@@ -155,7 +161,8 @@ jobs:
     - run: git reset --hard # release blows everything up
     - run: yarn e2e-test
 
-  Server Tests:
+  server_tests:
+    name: Server Tests
     runs-on: ubuntu-latest
 
     steps:

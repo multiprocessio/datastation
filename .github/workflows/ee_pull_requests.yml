@@ -5,7 +5,8 @@ on:
     branches: [main]
 
 jobs:
-  "[EE] Linux Tests":
+  ee_linux_tests:
+    name: "[EE] Linux Tests"
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -38,7 +39,8 @@ jobs:
     - run: ./scripts/require_copyright.sh
     - run: yarn test
 
-  "[EE] macOS Tests":
+  ee_macos_tests:
+    name: "[EE] macOS Tests"
     runs-on: macos-latest
 
     steps:
@@ -65,7 +67,8 @@ jobs:
     - run: yarn test
       working-directory: ee
 
-  "[EE] Windows Tests":
+  ee_windows_tests:
+    name: "[EE] Windows Tests"
     runs-on: windows-latest
 
     steps:
