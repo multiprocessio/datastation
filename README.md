@@ -1,5 +1,7 @@
 # DataStation Community Edition
 
+[Help us out by taking a brief user survey!](https://docs.google.com/forms/d/e/1FAIpQLSdNhU5k3FsIkcea_CTPVrmJ45k0czRz60XqLmBVUE5TjaT_jg/viewform)
+
 ## Stay in the loop
 
 Since Github doesn't provide a great way for you to learn about new

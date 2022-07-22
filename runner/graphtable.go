@@ -35,16 +35,10 @@ outer:
 	}
 	defer rw.Close()
 
-	rawRow := map[string]any{}
 	rowRequestedColumnsOnly := map[string]any{}
-	var ok bool
 
 	for {
-		select {
-		case rawRow, ok = <-rows:
-			break
-		}
-
+		rawRow, ok := <-rows
 		if !ok || rawRow == nil {
 			return nil
 		}
@@ -66,8 +60,6 @@ outer:
 
 		i++
 	}
-
-	return nil
 }
 
 func (ec EvalContext) evalTablePanel(project *ProjectState, pageIndex int, panel *PanelInfo) error {

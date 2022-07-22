@@ -255,7 +255,7 @@ func (ec EvalContext) getConnectionString(dbInfo DatabaseConnectorInfoDatabase) 
 		}
 
 		if addr.Scheme == "" {
-			addr.Scheme = Neo4jDatabase
+			addr.Scheme = string(Neo4jDatabase)
 		}
 
 		if addr.Port() == "" {
@@ -528,7 +528,7 @@ func (ec EvalContext) EvalDatabasePanel(
 		}
 
 		var db *sqlx.DB
-		if vendor == ODBCDatabase {
+		if vendor == string(ODBCDatabase) {
 			db, err = openODBCDriver(connStr)
 		} else {
 			db, err = sqlx.Open(vendor, connStr)
@@ -572,7 +572,7 @@ func (ec EvalContext) EvalDatabasePanel(
 				if err != nil {
 					// odbc driver returns an error for an empty result
 					// see https://github.com/alexbrainman/odbc/blob/9c9a2e61c5e2c1a257a51ea49169fc9008c51f0e/odbcstmt.go#L134
-					if vendor == ODBCDatabase && err.Error() == "Stmt did not create a result set" {
+					if vendor == string(ODBCDatabase) && err.Error() == "Stmt did not create a result set" {
 						return nil, nil
 					}
 

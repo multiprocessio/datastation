@@ -103,9 +103,7 @@ func (rw *ResultWriter) SetFields(fs []string) {
 		rw.fields = make([]string, len(fs))
 	}
 
-	for i, f := range fs {
-		rw.fields[i] = f
-	}
+	copy(rw.fields, fs)
 }
 
 func (rw *ResultWriter) WriteRecord(r []string, convertNumbers bool) error {
@@ -146,8 +144,6 @@ type JSONResultItemWriter struct {
 	isObject bool
 	// Sampled rows
 	sample []any
-	// Counter
-	written int
 }
 
 func openJSONResultItemWriter(f string, opts *JSONResultItemWriterOptions) (ResultItemWriter, error) {

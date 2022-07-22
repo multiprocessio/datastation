@@ -308,7 +308,8 @@ func TestShapeFromFile(t *testing.T) {
 			defer os.Remove(tmp.Name())
 			assert.Nil(t, err)
 
-			tmp.WriteString(test.json)
+			_, err = tmp.WriteString(test.json)
+			assert.Nil(t, err)
 
 			s, err := ShapeFromFile(tmp.Name(), "x", test.bytesToRead, 50)
 			assert.Equal(t, test.expErr, err)

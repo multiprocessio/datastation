@@ -115,13 +115,20 @@ jobs:
         ref: ${{ github.ref }}
 
     - run: ./scripts/ci/prepare_linux.sh
+
+    # Run golangci-lint
+    - name: Run golangci-lint
+      uses: golangci/golangci-lint-action@v3
+      with:
+        working-directory: runner
       
     # Set up coverage tools
     - run: go install github.com/axw/gocov/gocov@v1.0.0
     - run: go install github.com/wadey/gocovmerge@b5bfa59
     - run: sudo ln -s $HOME/go/bin/* /usr/local/bin/
-
     - run: mkdir coverage
+
+    # Run tests and coverage
     - run: cd runner && go test -race -coverprofile ../coverage/gounit.cov
     - run: ./runner/scripts/test_coverage.sh
 
