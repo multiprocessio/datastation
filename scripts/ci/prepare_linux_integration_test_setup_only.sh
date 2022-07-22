@@ -12,11 +12,6 @@ sudo apt-get install -y jq julia openssh-server php
 # Set up http helper
 go install github.com/multiprocessio/httpmirror@latest
 
-# Set up coverage tools
-go install github.com/axw/gocov/gocov@v1.0.0
-go install github.com/wadey/gocovmerge@b5bfa59
-sudo ln -s $HOME/go/bin/* /usr/local/bin/
-
 # Set up SSH keys
 ssh-keygen -q -t rsa -N '' -f ~/.ssh/id_rsa <<<y >/dev/null 2>&1
 cp ~/.ssh/id_rsa.pub ~/.ssh/known_hosts
