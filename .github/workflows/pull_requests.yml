@@ -56,10 +56,38 @@ jobs:
         key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
         restore-keys: |
           ${{ runner.os }}-yarn-
+
     - run: ./scripts/ci/prepare_linux.sh --integration-tests
     # Needed so we can have ./build/desktop_runner.js and ./build/go_desktop_runner ready for tests
     - run: yarn build-test-runner
-    - run: yarn test --detectOpenHandles --forceExit --verbose
+    - run: SKIP_CREDENTIALED=true yarn test --detectOpenHandles --forceExit --verbose
+
+  credentialed_integration_tests:
+    name: Credentialed Database Integration Tests that Require Special Permissions to Succeed
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@master
+      with:
+        ref: ${{ github.ref }}
+
+    # FROM: https://github.com/actions/cache/blob/main/examples.md#node---yarn
+    - name: Get yarn cache directory path
+      id: yarn-cache-dir-path
+      run: echo "::set-output name=dir::$(yarn cache dir)"
+
+    - uses: actions/cache@v2
+      id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+      with:
+        path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+        key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-yarn-
+
+    - run: ./scripts/ci/prepare_linux.sh --integration-tests
+    # Needed so we can have ./build/desktop_runner.js and ./build/go_desktop_runner ready for tests
+    - run: yarn build-test-runner
+    - run: yarn test --detectOpenHandles --forceExit --verbose desktop/panel/credential_database.test.js
       env:
         AIRTABLE_TOKEN: ${{ secrets.AIRTABLE_TOKEN }}
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
