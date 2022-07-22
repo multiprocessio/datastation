@@ -1,11 +1,11 @@
-name: Run ee tests
+name: Run EE tests
 
 on:
   pull_request:
     branches: [main]
 
 jobs:
-  test:
+  "[EE] Linux Tests"":
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -38,7 +38,7 @@ jobs:
     - run: ./scripts/require_copyright.sh
     - run: yarn test
 
-  macos:
+  "[EE] macOS Tests":
     runs-on: macos-latest
 
     steps:
@@ -65,7 +65,7 @@ jobs:
     - run: yarn test
       working-directory: ee
 
-  windows:
+  "[EE] Windows Tests":
     runs-on: windows-latest
 
     steps:
