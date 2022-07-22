@@ -18,7 +18,7 @@ const {
 } = require('../../shared/state');
 const { withSavedPanels, RUNNERS } = require('./testutil');
 
-if (process.ENV.SKIP_CREDENTIALED != "true") {
+if (process.env.SKIP_CREDENTIALED != "true") {
   describe('basic bigquery tests', () => {
     test(`runs query against public dataset`, async () => {
       if (process.platform !== 'linux') {

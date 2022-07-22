@@ -33,8 +33,14 @@ jobs:
     - run: yarn eslint ui
     - run: yarn tsc
     - run: cd runner && gofmt -w .
+
+    # Install jsonnet for language definitions
+    - run: go install github.com/google/go-jsonnet/cmd/jsonnet@latest
+    - run: sudo ln $HOME/go/bin/jsonnet /usr/local/bin/jsonnet
     - run: yarn build-language-definitions
+
     - run: ./scripts/fail_on_diff.sh
+
     - run: yarn test-licenses
 
   linux_node_ui_tests:
@@ -109,6 +115,7 @@ jobs:
         ref: ${{ github.ref }}
 
     - run: ./scripts/ci/prepare_linux.sh
+    - run: mkdir coverage
     - run: cd runner && go test -race -coverprofile ../coverage/gounit.cov
     - run: ./runner/scripts/test_coverage.sh
 
