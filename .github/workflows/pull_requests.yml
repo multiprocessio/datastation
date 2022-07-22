@@ -5,13 +5,13 @@ on:
     branches: [main]
 
 jobs:
-  Static Checks:
+  "Static Checks":
     runs-on: ubuntu-latest
 
-   steps:
-   - uses: actions/checkout@master
-     with:
-       ref: ${{ github.ref }}
+    steps:
+    - uses: actions/checkout@master
+      with:
+      ref: ${{ github.ref }}
 
     # FROM: https://github.com/actions/cache/blob/main/examples.md#node---yarn
     - name: Get yarn cache directory path
@@ -81,11 +81,11 @@ jobs:
 
   End-to-end Linux Tests:
     runs-on: ubuntu-latest
+
     steps:
     - uses: actions/checkout@master
       with:
         ref: ${{ github.ref }}
-    runs-on: ubuntu-latest
 
     # FROM: https://github.com/actions/cache/blob/main/examples.md#node---yarn
     - name: Get yarn cache directory path

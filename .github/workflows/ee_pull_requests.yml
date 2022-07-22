@@ -5,7 +5,7 @@ on:
     branches: [main]
 
 jobs:
-  "[EE] Linux Tests"":
+  "[EE] Linux Tests":
     runs-on: ubuntu-latest
     defaults:
       run:
