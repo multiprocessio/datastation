@@ -59,19 +59,6 @@ func readJSONFileInto(file string, into any) error {
 	return err
 }
 
-func writeAll(w io.Writer, bs []byte) error {
-	for len(bs) > 0 {
-		n, err := w.Write(bs)
-		if err != nil {
-			return err
-		}
-
-		bs = bs[n:]
-	}
-
-	return nil
-}
-
 func WriteJSONFile(file string, value any) error {
 	f, err := openTruncate(file)
 	if err != nil {

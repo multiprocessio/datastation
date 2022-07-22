@@ -108,7 +108,6 @@ type panelToImport struct {
 	id        string
 	columns   []column
 	tableName string
-	path      string
 }
 
 var dmGetPanelRe = regexp.MustCompile(`(DM_getPanel\((?P<number>[0-9]+)(((,\s*(?P<numbersinglepath>"(?:[^"\\]|\\.)*\"))?)|(,\s*(?P<numberdoublepath>'(?:[^'\\]|\\.)*\'))?)\))|(DM_getPanel\((?P<singlequote>'(?:[^'\\]|\\.)*\'(,\s*(?P<singlepath>'(?:[^'\\]|\\.)*\'))?)\))|(DM_getPanel\((?P<doublequote>"(?:[^"\\]|\\.)*\"(,\s*(?P<doublepath>"(?:[^"\\]|\\.)*\"))?)\))`)
@@ -252,7 +251,7 @@ func GetObjectAtPath(obj map[string]any, path string) any {
 }
 
 func postgresMangleInsert(stmt string) string {
-	r := regexp.MustCompile("\\?")
+	r := regexp.MustCompile(`\?`)
 	counter := 0
 	return r.ReplaceAllStringFunc(stmt, func(m string) string {
 		counter += 1
@@ -274,13 +273,11 @@ func chunk(c chan map[string]any, size int) chan []map[string]any {
 
 	outer:
 		for {
-			select {
-			case next, ok := <-c:
-				if !ok {
-					break outer
-				}
-				chunk = append(chunk, next)
+			next, ok := <-c
+			if !ok {
+				break outer
 			}
+			chunk = append(chunk, next)
 
 			if len(chunk) == size {
 				out <- chunk

@@ -62,7 +62,6 @@ func transformCSV(in *bufio.Reader, out *ResultWriter, delimiter rune, convertNu
 	for {
 		record, err := r.Read()
 		if err == io.EOF {
-			err = nil
 			break
 		}
 
@@ -90,7 +89,9 @@ func transformCSVFile(in string, out *ResultWriter, delimiter rune, convertNumbe
 	if err != nil {
 		return err
 	}
-	defer closeFile()
+	defer func() {
+		_ = closeFile()
+	}()
 
 	return transformCSV(r, out, delimiter, convertNumbers)
 }
@@ -112,7 +113,9 @@ func transformJSONFile(in string, out *ResultWriter) error {
 	if err != nil {
 		return err
 	}
-	defer closeFile()
+	defer func() {
+		_ = closeFile()
+	}()
 
 	return transformJSON(r, out)
 }
@@ -234,7 +237,11 @@ func transformXLSX(in *excelize.File, out *ResultWriter) error {
 			return err
 		}
 
-		out.SetNamespace(sheet)
+		err = out.SetNamespace(sheet)
+		if err != nil {
+			return err
+		}
+
 		err = writeSheet(rows, out)
 		if err != nil {
 			return err
@@ -265,7 +272,11 @@ func transformOpenOfficeSheet(in *openoffice.ODSFile, out *ResultWriter) error {
 	}
 
 	for _, sheet := range doc.Sheets {
-		out.SetNamespace(sheet.Name)
+		err = out.SetNamespace(sheet.Name)
+		if err != nil {
+			return err
+		}
+
 		err = writeSheet(sheet.Strings(), out)
 		if err != nil {
 			return err
@@ -336,7 +347,9 @@ func transformGenericFile(in string, out *ResultWriter) error {
 	if err != nil {
 		return err
 	}
-	defer closeFile()
+	defer func() {
+		_ = closeFile()
+	}()
 
 	return transformGeneric(r, out)
 }
@@ -368,7 +381,9 @@ func transformJSONLinesFile(in string, out *ResultWriter) error {
 	if err != nil {
 		return err
 	}
-	defer closeFile()
+	defer func() {
+		_ = closeFile()
+	}()
 
 	return transformJSONLines(r, out)
 }
@@ -418,7 +433,9 @@ func transformRegexpFile(in string, out *ResultWriter, re *regexp.Regexp) error 
 	if err != nil {
 		return err
 	}
-	defer closeFile()
+	defer func() {
+		_ = closeFile()
+	}()
 
 	return transformRegexp(r, out, re)
 }
@@ -448,7 +465,9 @@ func transformAvroFile(in string, out *ResultWriter) error {
 	if err != nil {
 		return err
 	}
-	defer closeFile()
+	defer func() {
+		_ = closeFile()
+	}()
 
 	return transformAvro(r, out)
 }
@@ -503,8 +522,9 @@ func transformYAMLFile(in string, out *ResultWriter) error {
 	if err != nil {
 		return err
 	}
-
-	defer closeFile()
+	defer func() {
+		_ = closeFile()
+	}()
 
 	return transformYAML(r, out)
 }
@@ -519,7 +539,7 @@ func transformLogFmt(in *bufio.Reader, out *ResultWriter) error {
 	for dec.ScanRecord() {
 		for dec.ScanKeyval() {
 			if dec.Key() != nil {
-				h.Write(dec.Key())
+				_, _ = h.Write(dec.Key())
 
 				if key, ok := keys[h.Sum64()]; ok {
 					o[key] = string(dec.Value())
@@ -553,7 +573,9 @@ func transformLogFmtFile(in string, out *ResultWriter) error {
 		return err
 	}
 
-	defer closeFile()
+	defer func() {
+		_ = closeFile()
+	}()
 
 	return transformLogFmt(r, out)
 }
@@ -562,23 +584,23 @@ type MimeType string
 
 const (
 	TSVMimeType             MimeType = "text/tab-separated-values"
-	PlainTextMimeType                = "text/plain"
-	CSVMimeType                      = "text/csv"
-	JSONMimeType                     = "application/json"
-	JSONLinesMimeType                = "application/jsonlines"
-	RegexpLinesMimeType              = "text/regexplines"
-	ExcelMimeType                    = "application/vnd.ms-excel"
-	ExcelOpenXMLMimeType             = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-	OpenOfficeSheetMimeType          = "application/vnd.oasis.opendocument.spreadsheet"
-	ParquetMimeType                  = "parquet"
-	ORCMimeType                      = "orc"
-	AvroMimeType                     = "application/avro"
-	YAMLMimeType                     = "application/yaml"
-	ApacheErrorMimeType              = "text/apache2error"
-	ApacheAccessMimeType             = "text/apache2access"
-	NginxAccessMimeType              = "text/nginxaccess"
-	LogFmtMimeType                   = "text/logfmt"
-	UnknownMimeType                  = ""
+	PlainTextMimeType       MimeType = "text/plain"
+	CSVMimeType             MimeType = "text/csv"
+	JSONMimeType            MimeType = "application/json"
+	JSONLinesMimeType       MimeType = "application/jsonlines"
+	RegexpLinesMimeType     MimeType = "text/regexplines"
+	ExcelMimeType           MimeType = "application/vnd.ms-excel"
+	ExcelOpenXMLMimeType    MimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+	OpenOfficeSheetMimeType MimeType = "application/vnd.oasis.opendocument.spreadsheet"
+	ParquetMimeType         MimeType = "parquet"
+	ORCMimeType             MimeType = "orc"
+	AvroMimeType            MimeType = "application/avro"
+	YAMLMimeType            MimeType = "application/yaml"
+	ApacheErrorMimeType     MimeType = "text/apache2error"
+	ApacheAccessMimeType    MimeType = "text/apache2access"
+	NginxAccessMimeType     MimeType = "text/nginxaccess"
+	LogFmtMimeType          MimeType = "text/logfmt"
+	UnknownMimeType         MimeType = ""
 )
 
 func GetMimeType(fileName string, ct ContentTypeInfo) MimeType {
