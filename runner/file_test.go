@@ -254,8 +254,7 @@ cdef`,
 
 		assert.Equal(t, test, out)
 
-		err = os.Remove(inTmp.Name())
-		assert.Nil(t, err)
+		os.Remove(inTmp.Name())
 	}
 }
 
