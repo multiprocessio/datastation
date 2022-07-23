@@ -24,11 +24,33 @@ describe('basic prometheus tests', () => {
         port: '9090',
         args: ['-v', `${__dirname}/../testdata/prometheus:/etc/prometheus`],
         wait: async () => {
+          let first = true;
           while (true) {
+            if (!first) {
+              await new Promise((r) => setTimeout(r, 3000));
+            }
+            first = false;
+
             try {
-              await fetch('localhost:9090');
+              console.log('Awaiting successful curl');
+              const r = await fetch('http://localhost:9090/api/v1/targets');
+              if (r.status !== 200) {
+                continue;
+              }
+
+              const rsp = await r.json();
+              if (rsp.data.activeTargets.length === 0) {
+                continue;
+              }
+
+              // Wait 2x the scrape interval
+              const interval =
+                parseInt(rsp.data.activeTargets[0].scrapeInterval.slice()) *
+                2000;
+              await new Promise((r) => setTimeout(r, interval));
               break;
             } catch (e) {
+              console.error(e);
               /* pass */
             }
           }
@@ -55,7 +77,8 @@ describe('basic prometheus tests', () => {
             );
 
             const v = JSON.parse(panelValueBuffer.toString());
-            expect(v.length).toBeGreaterThan(1);
+            expect(v.length).toBeGreaterThan(0);
+
             expect(v[0]).toStrictEqual({
               metric: {
                 __name__: 'up',
