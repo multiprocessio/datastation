@@ -1,3 +1,8 @@
+const fs = require('fs');
+
+const { getProjectResultsFile } = require('../desktop/store');
+const { DatabasePanelInfo, DatabaseConnectorInfo } = require('../shared/state');
+const { withSavedPanels, RUNNERS } = require('../desktop/panel/testutil');
 const { withDocker } = require('./testutil');
 
 describe('basic cassandra/scylladb tests', () => {
