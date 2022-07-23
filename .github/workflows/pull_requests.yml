@@ -121,6 +121,7 @@ jobs:
       uses: golangci/golangci-lint-action@v3
       with:
         working-directory: runner
+        args: --timeout 3m --verbose
       
     # Set up coverage tools
     - run: go install github.com/axw/gocov/gocov@v1.0.0
