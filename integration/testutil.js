@@ -16,6 +16,10 @@ module.exports.withDocker = async function (opts, cb) {
     }
   }
 
+  if (opts.args) {
+    args.push(...opts.args);
+  }
+
   args.push(opts.image);
 
   console.log(`[DEBUG withDocker] ${cmd} ${args.join(' ')}`);
