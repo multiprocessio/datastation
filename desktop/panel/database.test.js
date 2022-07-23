@@ -14,14 +14,6 @@ const { basicDatabaseTest, withSavedPanels, RUNNERS } = require('./testutil');
 
 const DATABASES = [
   {
-    type: 'quest',
-    query: `SELECT 1 AS "1", 2.2 AS "2", true AS "true", 'string' AS "string", CAST('2021-01-01' AS TIMESTAMP) AS "date"`,
-  },
-  {
-    type: 'crate',
-    query: `SELECT 1 AS "1", 2.2 AS "2", true AS "true", 'string' AS "string", CAST('2021-01-01' AS DATE) AS "date"`,
-  },
-  {
     type: 'cockroach',
     query: `SELECT 1 AS "1", 2.2 AS "2", true AS "true", 'string' AS "string", CAST('2021-01-01' AS DATE) AS "date"`,
   },
@@ -85,16 +77,6 @@ const vendorOverride = {
       driver: 'ODBC Driver 18 for SQL Server',
       allow_untrusted: true,
     },
-  },
-  quest: {
-    address: '?sslmode=disable',
-    database: 'qdb',
-    username: 'admin',
-    password: 'quest',
-  },
-  crate: {
-    address: 'localhost:5434?sslmode=disable',
-    database: 'doc',
   },
 };
 

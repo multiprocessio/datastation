@@ -4,10 +4,12 @@ module.exports.withDocker = async function (opts, cb) {
   const cmd = 'docker';
   const args = ['run', '-d'];
   if (opts.port) {
-    if (!opts.port.includes(':')) {
-      const port = `${opts.port}:${opts.port}`;
-      args.push('-p', port);
+    let port = opts.port;
+    if (!port.includes(':')) {
+      port = `${port}:${port}`;
     }
+
+    args.push('-p', port);
   }
 
   if (opts.env) {
@@ -21,6 +23,14 @@ module.exports.withDocker = async function (opts, cb) {
   }
 
   args.push(opts.image);
+
+  if (opts.program) {
+    if (Array.isArray(opts.program)) {
+      args.push(...opts.program);
+    } else {
+      args.push(opts.program);
+    }
+  }
 
   console.log(`[DEBUG withDocker] ${cmd} ${args.join(' ')}`);
 
@@ -63,6 +73,25 @@ module.exports.withDocker = async function (opts, cb) {
   try {
     if (opts.wait) {
       await opts.wait(containerId);
+    } else if (opts.cmds) {
+      let first = true;
+      while (true) {
+        if (!first) {
+          await new Promise((r) => setTimeout(r, 1500));
+        }
+        first = false;
+
+        try {
+          cp.execSync('docker exec ' + containerId + ' ' + opts.cmds[0], {
+            stdio: 'inherit',
+          });
+          break;
+        } catch (e) {
+          /* pass */
+        }
+      }
+
+      opts.cmds = opts.cmds.slice(1);
     }
 
     if (opts.cmds) {

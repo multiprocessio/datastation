@@ -28,32 +28,6 @@ describe('basic mysql tests', () => {
             env: {
               MYSQL_ROOT_PASSWORD: 'root',
             },
-            wait: async (cid) => {
-              while (true) {
-                try {
-                  cp.execSync(
-                    'docker exec ' +
-                      cid +
-                      ' mysql -h localhost -u root -proot --execute="SELECT 1"'
-                  );
-                  return;
-                } catch (e) {
-                  if (
-                    String(e).includes(
-                      `ERROR 2002 (HY000): Can't connect to local MySQL server through socket '/var/run/mysqld/mysqld.sock' (2)`
-                    ) ||
-                    String(e).includes(
-                      `ERROR 1045 (28000): Access denied for user 'root'@'localhost' (using password: YES)`
-                    )
-                  ) {
-                    await new Promise((r) => setTimeout(r, 300));
-                    continue;
-                  }
-
-                  throw e;
-                }
-              }
-            },
             cmds: [
               `mysql -h localhost -uroot -proot --execute="CREATE USER 'test'@'%' IDENTIFIED BY 'test';"`,
               `mysql -h localhost -uroot -proot --execute="CREATE DATABASE test;"`,
