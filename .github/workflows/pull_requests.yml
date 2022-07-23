@@ -70,6 +70,12 @@ jobs:
     - run: yarn build-test-runner
     - run: SKIP_CREDENTIALED=true yarn test --detectOpenHandles --forceExit --verbose
 
+    - name: Upload non-credential coverage
+      uses: actions/upload-artifact@v3
+      with:
+        name: non-credential-coverage
+        path: coverage/*.cov
+
   credentialed_integration_tests:
     name: Credentialed Database Integration Tests that Require Special Permissions to Succeed
     runs-on: ubuntu-latest
@@ -105,9 +111,18 @@ jobs:
         SNOWFLAKE_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}
         SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
 
+    - name: Upload credential coverage
+      uses: actions/upload-artifact@v3
+      with:
+        name: credential-coverage
+        path: coverage/*.cov
+
   linux_go_tests:
     name: Linux Go Tests
     runs-on: ubuntu-latest
+    needs:
+      - credentialed_integration_tests
+      - linux_node_ui_tests
 
     steps:
     - uses: actions/checkout@master
@@ -127,7 +142,17 @@ jobs:
     - run: go install github.com/axw/gocov/gocov@v1.0.0
     - run: go install github.com/wadey/gocovmerge@b5bfa59
     - run: sudo ln -s $HOME/go/bin/* /usr/local/bin/
+
+    # Grab coverage files from other tests
     - run: mkdir coverage
+    - name: Download credential coverage
+      uses: actions/download-artifact@v3
+      with:
+        name: credential-coverage
+    - name: Download non-credential coverage
+      uses: actions/download-artifact@v3
+      with:
+        name: non-credential-coverage
 
     # Run tests and coverage
     - run: cd runner && go test -race -coverprofile ../coverage/gounit.cov
