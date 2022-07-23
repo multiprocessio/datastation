@@ -2,7 +2,7 @@ module.exports = {
   // Only on linux do all tests run
   coverageThreshold:
     process.platform === 'linux'
-      ? process.argv.includes('desktop/panel/credential_database.test.js')
+      ? process.argv.includes('integration/credential_database.test.js')
         ? {
             global: {
               statements: 15,
