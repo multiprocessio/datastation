@@ -1,6 +1,6 @@
 const cp = require('child_process');
 
-module.exports.withDocker = async function(opts, cb) {
+module.exports.withDocker = async function (opts, cb) {
   const cmd = 'docker';
   const args = ['run', '-d'];
   if (opts.port) {
@@ -22,15 +22,19 @@ module.exports.withDocker = async function(opts, cb) {
 
   const proc = cp.spawn(cmd, args);
   let stdout = '';
-  proc.stdout.on('data', m => { stdout += m.toString() });
+  proc.stdout.on('data', (m) => {
+    stdout += m.toString();
+  });
   let stderr = '';
-  proc.stderr.on('data', m => { stderr += m.toString() });
+  proc.stderr.on('data', (m) => {
+    stderr += m.toString();
+  });
   proc.on('exit', (s) => {
     if (s == '0') {
       return;
     }
 
-    console.log({stdout, stderr});
+    console.log({ stdout, stderr });
     process.exit(s);
   });
 
@@ -47,7 +51,7 @@ module.exports.withDocker = async function(opts, cb) {
       }
     }
 
-    await new Promise(r => setTimeout(r, 1500));
+    await new Promise((r) => setTimeout(r, 1500));
   }
 
   const containerId = stdout.slice(0, 12);
@@ -59,7 +63,9 @@ module.exports.withDocker = async function(opts, cb) {
 
     if (opts.cmds) {
       for (const cmd of opts.cmds) {
-        cp.execSync('docker exec ' + containerId + ' ' + cmd, {stdio: 'inherit'});
+        cp.execSync('docker exec ' + containerId + ' ' + cmd, {
+          stdio: 'inherit',
+        });
       }
     }
 
@@ -67,4 +73,4 @@ module.exports.withDocker = async function(opts, cb) {
   } finally {
     cp.execSync('docker kill ' + containerId);
   }
-}
+};

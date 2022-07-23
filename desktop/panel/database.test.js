@@ -106,10 +106,10 @@ for (const subprocess of RUNNERS) {
   for (const t of DATABASES) {
     describe(
       t.type +
-      ' running via ' +
-          (subprocess ? subprocess.node || subprocess.go : 'process') +
-      ': ' +
-      t.query,
+        ' running via ' +
+        (subprocess ? subprocess.node || subprocess.go : 'process') +
+        ': ' +
+        t.query,
       () => {
         test(`runs ${t.type} query`, async () => {
           if (process.platform !== 'linux') {
@@ -118,8 +118,9 @@ for (const subprocess of RUNNERS) {
 
           await basicDatabaseTest(t, vendorOverride, subprocess);
           // sqlserver takes a while
-        }, 30_000)
-    })
+        }, 30_000);
+      }
+    );
   }
 
   describe('elasticsearch testdata/documents tests', () => {

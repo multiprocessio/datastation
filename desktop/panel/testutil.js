@@ -252,8 +252,8 @@ module.exports.translateBaselineForType = function (baseline, fileType) {
     Object.keys(row).forEach((k) => {
       // All non-json, non-parquet get the column header trimmed
       const columnHeader = ['json', 'parquet'].includes(fileType)
-                         ? k
-                         : k.trim();
+        ? k
+        : k.trim();
       translatedRow[columnHeader] = row[k];
 
       // CSVs are just strings
@@ -433,9 +433,13 @@ module.exports.RUNNERS = [
 
 module.exports.VERBOSE = process.argv.includes('--dsverbose=true');
 
-module.exports.basicDatabaseTest = async function(t, vendorOverride = {}, subprocess = null) {
+module.exports.basicDatabaseTest = async function (
+  t,
+  vendorOverride = {},
+  subprocess = null
+) {
   if (!subprocess) {
-    subprocess = module.exports.RUNNERS.filter(r => r?.go)[0];
+    subprocess = module.exports.RUNNERS.filter((r) => r?.go)[0];
   }
 
   const lp = new LiteralPanelInfo();
@@ -451,9 +455,7 @@ module.exports.basicDatabaseTest = async function(t, vendorOverride = {}, subpro
       database: vendorOverride[t.type]?.database || 'test',
       address: vendorOverride[t.type]?.address || 'localhost',
       username: vendorOverride[t.type]?.username || 'test',
-      password_encrypt: new Encrypt(
-        vendorOverride[t.type]?.password || 'test'
-      ),
+      password_encrypt: new Encrypt(vendorOverride[t.type]?.password || 'test'),
       extra: vendorOverride[t.type]?.extra || {},
     }),
   ];
@@ -484,9 +486,7 @@ module.exports.basicDatabaseTest = async function(t, vendorOverride = {}, subpro
         expect(String(v[0]['2'])).toBe('2.2');
         expect(v[0]['true'] == '1').toBe(true);
         expect(v[0].string).toBe('string');
-        expect(new Date(v[0].date)).toStrictEqual(
-          new Date('2021-01-01')
-        );
+        expect(new Date(v[0].date)).toStrictEqual(new Date('2021-01-01'));
       } else {
         expect(v).toStrictEqual([
           { name: 'Kate', age: 9, city: 'San Juan' },
@@ -501,4 +501,4 @@ module.exports.basicDatabaseTest = async function(t, vendorOverride = {}, subpro
   if (!finished) {
     throw new Error('Callback did not finish');
   }
-}
+};
