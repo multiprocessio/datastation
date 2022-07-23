@@ -74,9 +74,6 @@ cockroach cert create-client root --certs-dir=certs --ca-key=cockroach-safe/ca.k
 cockroach start-single-node --certs-dir=certs --accept-sql-without-tls --background
 cockroach sql --certs-dir=certs --host=localhost:26257 --execute "CREATE DATABASE test; CREATE USER test WITH PASSWORD 'test'; GRANT ALL ON DATABASE test TO test;"
 
-# Start up elasticsearch
-docker run -d -p 9200:9200 -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:7.16.3
-
 # Start up influx (2 for fluxql)
 docker run -d -p 8086:8086 -e "DOCKER_INFLUXDB_INIT_MODE=setup" -e "DOCKER_INFLUXDB_INIT_USERNAME=test" -e "DOCKER_INFLUXDB_INIT_PASSWORD=testtest" -e "DOCKER_INFLUXDB_INIT_ORG=test" -e "DOCKER_INFLUXDB_INIT_BUCKET=test" -e "DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=test" influxdb:2.0
 
@@ -118,12 +115,6 @@ retry 10 "curl -XPOST 'http://localhost:8087/write?db=test&u=test&p=testtest' --
 
 # Load influx2 data
 retry 10 "curl -XPOST 'http://localhost:8086/api/v2/write?org=test&bucket=test&precision=ns' --header 'Authorization: Token test' --data-binary @testdata/influx/noaa-ndbc-data-sample.lp"
-
-# Load Elasticsearch data
-retry 10 "curl -X PUT http://localhost:9200/test"
-for t in $(ls testdata/documents/*.json); do
-    retry 10 "curl -X POST -H 'Content-Type: application/json' -d @$t http://localhost:9200/test/_doc"
-done
 
 # Load Mongodb documents
 for t in $(ls testdata/documents/*.json); do

@@ -66,7 +66,7 @@ jobs:
     - run: yarn build-test-runner
     # Now set up databases
     - run: ./scripts/ci/prepare_linux_integration_test_setup_only.sh
-    - run: SKIP_CREDENTIALED=true yarn test --detectOpenHandles --forceExit --verbose
+    - run: yarn test --detectOpenHandles --forceExit --verbose
 
     - name: Upload non-credential coverage
       uses: actions/upload-artifact@v3
@@ -97,7 +97,7 @@ jobs:
     - run: ./scripts/ci/prepare_linux.sh --race
     # Needed so we can have ./build/desktop_runner.js and ./build/go_desktop_runner ready for tests
     - run: yarn build-test-runner
-    - run: yarn test --detectOpenHandles --forceExit --verbose desktop/panel/credential_database.test.js
+    - run: RUN_CREDENTIAL_TESTS=true yarn test --detectOpenHandles --forceExit --verbose integration/credential_database.test.js
       env:
         AIRTABLE_TOKEN: ${{ secrets.AIRTABLE_TOKEN }}
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}

@@ -5,23 +5,24 @@
 // database in Docker should not be put into this file.
 //
 
-const path = require('path');
-const { CODE_ROOT } = require('../constants');
-const { getProjectResultsFile } = require('../store');
-const { ensureSigningKey } = require('../secret');
 const fs = require('fs');
+const path = require('path');
+
+const { CODE_ROOT } = require('../desktop/constants');
+const { getProjectResultsFile } = require('../desktop/store');
+const { ensureSigningKey } = require('../desktop/secret');
 const {
   LiteralPanelInfo,
   Encrypt,
   DatabasePanelInfo,
   DatabaseConnectorInfo,
-} = require('../../shared/state');
-const { withSavedPanels, RUNNERS } = require('./testutil');
+} = require('../shared/state');
+const { withSavedPanels, RUNNERS } = require('../desktop/panel/testutil');
 
 // File only runs when SKIP_CREDENTIALED=true is not set. This is
 // because these tests will always fail when an outside contributor pull
 // request runs.
-if (process.env.SKIP_CREDENTIALED != 'true') {
+if (process.env.RUN_CREDENTIAL_TESTS == 'true') {
   for (const subprocess of RUNNERS) {
     // Most databases now only work with the Go runner.
     if (!subprocess?.go) {
@@ -30,10 +31,6 @@ if (process.env.SKIP_CREDENTIALED != 'true') {
 
     describe('basic bigquery tests', () => {
       test(`runs query against public dataset`, async () => {
-        if (process.platform !== 'linux') {
-          return;
-        }
-
         const connectors = [
           new DatabaseConnectorInfo({
             type: 'bigquery',
@@ -77,10 +74,6 @@ if (process.env.SKIP_CREDENTIALED != 'true') {
 
     describe('basic athena tests', () => {
       test(`runs query against s3://datastation-tests/basic/`, async () => {
-        if (process.platform !== 'linux') {
-          return;
-        }
-
         const connectors = [
           new DatabaseConnectorInfo({
             type: 'athena',
@@ -128,10 +121,6 @@ if (process.env.SKIP_CREDENTIALED != 'true') {
 
     describe('basic google sheets tests', () => {
       test(`returns all results`, async () => {
-        if (process.platform !== 'linux') {
-          return;
-        }
-
         const connectors = [
           new DatabaseConnectorInfo({
             type: 'google-sheets',
@@ -193,10 +182,6 @@ if (process.env.SKIP_CREDENTIALED != 'true') {
       };
 
       test(`returns all results`, async () => {
-        if (process.platform !== 'linux') {
-          return;
-        }
-
         const connectors = [
           new DatabaseConnectorInfo({
             type: 'airtable',
@@ -240,10 +225,6 @@ if (process.env.SKIP_CREDENTIALED != 'true') {
       }, 15_000);
 
       test(`returns filtered results`, async () => {
-        if (process.platform !== 'linux') {
-          return;
-        }
-
         const connectors = [
           new DatabaseConnectorInfo({
             type: 'airtable',
@@ -290,10 +271,6 @@ if (process.env.SKIP_CREDENTIALED != 'true') {
 
     describe('basic snowflake tests', () => {
       test('basic test', async () => {
-        if (process.platform !== 'linux') {
-          return;
-        }
-
         const connectors = [
           new DatabaseConnectorInfo({
             type: 'snowflake',
@@ -330,7 +307,7 @@ if (process.env.SKIP_CREDENTIALED != 'true') {
         if (!finished) {
           throw new Error('Callback did not finish');
         }
-      });
+      }, 30_000);
     });
   }
 }
