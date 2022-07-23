@@ -1,7 +1,11 @@
 const fs = require('fs');
 
 const { getProjectResultsFile } = require('../desktop/store');
-const { DatabasePanelInfo, DatabaseConnectorInfo } = require('../shared/state');
+const {
+  DatabasePanelInfo,
+  Encrypt,
+  DatabaseConnectorInfo,
+} = require('../shared/state');
 const { withSavedPanels, RUNNERS } = require('../desktop/panel/testutil');
 const { withDocker } = require('./testutil');
 
@@ -55,7 +59,11 @@ describe('basic cassandra/scylladb tests', () => {
 
             finished = true;
           },
-          { evalPanels: true, connectors, subprocessName: subprocess }
+          {
+            evalPanels: true,
+            connectors,
+            subprocessName: RUNNERS.find((r) => r?.go),
+          }
         );
 
         if (!finished) {
