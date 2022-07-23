@@ -36,58 +36,72 @@ describe('elasticsearch testdata/documents tests', () => {
     },
   ];
 
+  let first = true;
   for (const testcase of tests) {
-    test(`runs ${JSON.stringify(testcase)} query`, async () => {
-      await withDocker(
-        {
-          port: 9200,
-          env: {
-            'discovery.type': 'single-node',
-          },
-          image: 'docker.elastic.co/elasticsearch/elasticsearch:7.16.3',
-          cmdsExternal: true,
-          cmds: Array.from(new Array(4)).map((_el, i) => 
-            `curl -X POST -H 'Content-Type: application/json' -d @testdata/documents/${i+1}.json http://localhost:9200/test/_doc`,
-          ),
-        },
-        async () => {
-          const connectors = [
-            new DatabaseConnectorInfo({
-              type: 'elasticsearch',
-            }),
-          ];
-          const dp = new DatabasePanelInfo();
-          dp.database.connectorId = connectors[0].id;
-          dp.database.table = 'test';
-          dp.database.range = testcase.range;
-          dp.content = testcase.query;
-
-          let finished = false;
-          const panels = [dp];
-          await withSavedPanels(
-            panels,
-            async (project) => {
-              const panelValueBuffer = fs.readFileSync(
-                getProjectResultsFile(project.projectName) + dp.id
-              );
-
-              const v = JSON.parse(panelValueBuffer.toString());
-              expect(v.length).toBe(testcase.results);
-
-              finished = true;
-            },
-            {
-              evalPanels: true,
-              connectors,
-              subprocessName: RUNNERS.find((r) => r?.go),
-            }
-          );
-
-          if (!finished) {
-            throw new Error('Callback did not finish');
-          }
+    test(
+      testcase.query,
+      async () => {
+        // It seems to take elasticsearch a while to shut down
+        if (!first) {
+          await new Promise((r) => setTimeout(r, 5000));
         }
-      );
-    }, 30_000);
+        first = false;
+
+        await withDocker(
+          {
+            port: 9200,
+            env: {
+              'discovery.type': 'single-node',
+            },
+            image: 'docker.elastic.co/elasticsearch/elasticsearch:7.16.3',
+            cmdsExternal: true,
+            cmds: Array.from(new Array(4)).map(
+              (_el, i) =>
+                `curl -X POST -H 'Content-Type: application/json' -d @testdata/documents/${
+                  i + 1
+                }.json http://localhost:9200/test/_doc`
+            ),
+          },
+          async () => {
+            const connectors = [
+              new DatabaseConnectorInfo({
+                type: 'elasticsearch',
+              }),
+            ];
+            const dp = new DatabasePanelInfo();
+            dp.database.connectorId = connectors[0].id;
+            dp.database.table = 'test';
+            dp.database.range = testcase.range;
+            dp.content = testcase.query;
+
+            let finished = false;
+            const panels = [dp];
+            await withSavedPanels(
+              panels,
+              async (project) => {
+                const panelValueBuffer = fs.readFileSync(
+                  getProjectResultsFile(project.projectName) + dp.id
+                );
+
+                const v = JSON.parse(panelValueBuffer.toString());
+                expect(v.length).toBe(testcase.results);
+
+                finished = true;
+              },
+              {
+                evalPanels: true,
+                connectors,
+                subprocessName: RUNNERS.find((r) => r?.go),
+              }
+            );
+
+            if (!finished) {
+              throw new Error('Callback did not finish');
+            }
+          }
+        );
+      },
+      30_000
+    );
   }
 });

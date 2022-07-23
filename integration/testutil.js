@@ -81,7 +81,9 @@ module.exports.withDocker = async function (opts, cb) {
         }
         first = false;
 
-        const cmdPrefix = opts.cmdsExternal ? '' : 'docker exec ' + containerId + ' ';
+        const cmdPrefix = opts.cmdsExternal
+          ? ''
+          : 'docker exec ' + containerId + ' ';
 
         try {
           cp.execSync(cmdPrefix + opts.cmds[0], {
@@ -98,7 +100,9 @@ module.exports.withDocker = async function (opts, cb) {
 
     if (opts.cmds) {
       for (const cmd of opts.cmds) {
-        const cmdPrefix = opts.cmdsExternal ? '' : 'docker exec ' + containerId + ' ';
+        const cmdPrefix = opts.cmdsExternal
+          ? ''
+          : 'docker exec ' + containerId + ' ';
         cp.execSync(cmdPrefix + cmd, {
           stdio: 'inherit',
         });
@@ -109,6 +113,6 @@ module.exports.withDocker = async function (opts, cb) {
   } finally {
     console.log('Killing container');
     cp.execSync('docker kill ' + containerId, { stdio: 'inherit' });
-    console.log('Killed container');l
+    console.log('Killed container');
   }
 };
