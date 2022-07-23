@@ -310,4 +310,6 @@ if (process.env.RUN_CREDENTIAL_TESTS == 'true') {
       }, 360_000);
     });
   }
+} else {
+  test('stub', () => {});
 }
