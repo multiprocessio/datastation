@@ -83,9 +83,16 @@ func (ec EvalContext) evalMacros(content string, project *ProjectState, pageInde
 		return pongo2.AsSafeValue(string(bs)), nil
 	}
 
-	err := pongo2.RegisterFilter("json", pongoJsonify)
-	if err != nil {
-		return "", err
+	if pongo2.FilterExists("json") {
+		err := pongo2.ReplaceFilter("json", pongoJsonify)
+		if err != nil {
+			return "", err
+		}
+	} else {
+		err := pongo2.RegisterFilter("json", pongoJsonify)
+		if err != nil {
+			return "", err
+		}
 	}
 
 	tpl, err := pongo2.FromString(content)
