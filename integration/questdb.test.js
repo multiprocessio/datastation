@@ -19,14 +19,18 @@ const vendorOverride = {
 
 describe('basic questdb tests', () => {
   for (const t of BASIC_TESTS) {
-    test(t.query, async () => {
-      await withDocker(
-        {
-          image: 'docker.io/questdb/questdb:latest',
-          port: '8812',
-        },
-        () => basicDatabaseTest(t, vendorOverride)
-      );
-    });
+    test(
+      t.query,
+      async () => {
+        await withDocker(
+          {
+            image: 'docker.io/questdb/questdb:latest',
+            port: '8812',
+          },
+          () => basicDatabaseTest(t, vendorOverride)
+        );
+      },
+      360_000
+    );
   }
 });

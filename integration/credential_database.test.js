@@ -307,7 +307,7 @@ if (process.env.RUN_CREDENTIAL_TESTS == 'true') {
         if (!finished) {
           throw new Error('Callback did not finish');
         }
-      }, 30_000);
+      }, 360_000);
     });
   }
 }

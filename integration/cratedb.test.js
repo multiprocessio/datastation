@@ -33,7 +33,7 @@ describe('basic cratedb tests', () => {
           () => basicDatabaseTest(t, vendorOverride)
         );
       },
-      30_000
+      360_000
     );
   }
 });

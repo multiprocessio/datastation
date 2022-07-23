@@ -98,5 +98,5 @@ describe('basic prometheus tests', () => {
         }
       }
     );
-  }, 30_000);
+  }, 360_000);
 });

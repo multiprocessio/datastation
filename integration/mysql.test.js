@@ -37,7 +37,7 @@ describe('basic mysql tests', () => {
           () => basicDatabaseTest(t)
         );
       },
-      30_000
+      360_000
     );
   }
 });

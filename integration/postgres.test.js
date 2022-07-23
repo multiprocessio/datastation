@@ -21,19 +21,23 @@ const vendorOverride = {
 
 describe('basic postgres tests', () => {
   for (const t of BASIC_TESTS) {
-    test(t.query, async () => {
-      await withDocker(
-        {
-          image: 'docker.io/library/postgres:latest',
-          port: '5432',
-          env: {
-            POSTGRES_USER: 'test',
-            POSTGRES_DB: 'test',
-            POSTGRES_PASSWORD: 'test',
+    test(
+      t.query,
+      async () => {
+        await withDocker(
+          {
+            image: 'docker.io/library/postgres:latest',
+            port: '5432',
+            env: {
+              POSTGRES_USER: 'test',
+              POSTGRES_DB: 'test',
+              POSTGRES_PASSWORD: 'test',
+            },
           },
-        },
-        () => basicDatabaseTest(t, vendorOverride)
-      );
-    });
+          () => basicDatabaseTest(t, vendorOverride)
+        );
+      },
+      360_000
+    );
   }
 });

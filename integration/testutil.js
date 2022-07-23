@@ -1,5 +1,13 @@
 const cp = require('child_process');
 
+function runCmd(opts, cmd) {
+  console.log('[DEBUG withDocker] docker exec ' + containerId + ' ' + cmd);
+  cp.execSync('docker exec ' + containerId + ' ' + cmd, {
+    stdio: 'inherit',
+  });
+  process.stdout.write('\n');
+}
+
 module.exports.withDocker = async function (opts, cb) {
   const cmd = 'docker';
   const args = ['run', '-d'];
@@ -82,10 +90,7 @@ module.exports.withDocker = async function (opts, cb) {
         first = false;
 
         try {
-          cp.execSync('docker exec ' + containerId + ' ' + cmd, {
-            stdio: 'inherit',
-          });
-          process.stdout.write('\n');
+          runCmd(opts, opts.cmds[0]);
           break;
         } catch (e) {
           /* pass */
@@ -96,11 +101,8 @@ module.exports.withDocker = async function (opts, cb) {
     }
 
     if (opts.cmds) {
-      for (const cmd of opts.cmds) {
-        cp.execSync('docker exec ' + containerId + ' ' + cmd, {
-          stdio: 'inherit',
-        });
-        process.stdout.write('\n');
+      for (const c of opts.cmds) {
+        runCmd(opts, c);
       }
     }
 
