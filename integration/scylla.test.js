@@ -58,5 +58,5 @@ describe('basic cassandra/scylladb tests', () => {
         }
       }
     );
-  }, 30_000);
+  }, 360_000);
 });
