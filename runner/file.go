@@ -609,6 +609,8 @@ func GetMimeType(fileName string, ct ContentTypeInfo) MimeType {
 		return AvroMimeType
 	case ".yaml", ".yml":
 		return YAMLMimeType
+	case ".logfmt":
+		return LogFmtMimeType
 	}
 
 	return UnknownMimeType
