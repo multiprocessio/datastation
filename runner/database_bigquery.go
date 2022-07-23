@@ -28,12 +28,7 @@ func (ec EvalContext) evalBigQuery(panel *PanelInfo, dbInfo DatabaseConnectorInf
 	}
 
 	var fields []string
-	for _, field := range it.Schema {
-		fields = append(fields, field.Name)
-	}
-	w.SetFields(fields)
 	var values []bigquery.Value
-	var valuesAny []any
 
 	for {
 		err := it.Next(&values)
@@ -44,17 +39,23 @@ func (ec EvalContext) evalBigQuery(panel *PanelInfo, dbInfo DatabaseConnectorInf
 			return err
 		}
 
-		if len(valuesAny) != len(values) {
-			valuesAny = make([]any, len(values))
+		if len(fields) == 0 {
+			// it.Schema is only populated after the first call to it.Next()
+			for _, field := range it.Schema {
+				fields = append(fields, field.Name)
+			}
+			w.SetFields(fields)
 		}
 
-		for i := range values {
-			valuesAny[i] = values[i]
-		}
+		// bigquery seems to return more values than fields
+		values = values[:len(fields)]
 
-		err = w.WriteAnyRecord(valuesAny, false)
+		err = w.WriteBigQueryRecord(values, false)
 		if err != nil {
 			return err
 		}
+
+		// Zeroes out "values" while preserving its capacity
+		values = values[:0]
 	}
 }
