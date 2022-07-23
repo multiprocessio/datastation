@@ -4,7 +4,7 @@ module.exports.withDocker = async function (opts, cb) {
   const cmd = 'docker';
   const args = ['run', '-d'];
   if (opts.port) {
-    let port = opts.port;
+    let port = String(opts.port);
     if (!port.includes(':')) {
       port = `${port}:${port}`;
     }

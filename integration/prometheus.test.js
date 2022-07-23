@@ -3,12 +3,7 @@ const fs = require('fs');
 const fetch = require('node-fetch');
 
 const { getProjectResultsFile } = require('../desktop/store');
-const {
-  LiteralPanelInfo,
-  Encrypt,
-  DatabasePanelInfo,
-  DatabaseConnectorInfo,
-} = require('../shared/state');
+const { DatabasePanelInfo, DatabaseConnectorInfo } = require('../shared/state');
 const { withSavedPanels, RUNNERS } = require('../desktop/panel/testutil');
 const { withDocker } = require('./testutil');
 
