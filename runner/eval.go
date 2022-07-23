@@ -27,9 +27,6 @@ func _logln(level, msg string, args ...any) {
 		logPrefixSet = true
 	}
 	baseMsg := "[" + level + "] " + time.Now().Format(iso8601Format) + " " + msg
-	if msg[len(msg)-1] != '\n' {
-		msg += "\n"
-	}
 	log.Printf(baseMsg, args...)
 }
 
@@ -85,7 +82,11 @@ func (ec EvalContext) evalMacros(content string, project *ProjectState, pageInde
 
 		return pongo2.AsSafeValue(string(bs)), nil
 	}
-	pongo2.RegisterFilter("json", pongoJsonify)
+
+	err := pongo2.RegisterFilter("json", pongoJsonify)
+	if err != nil {
+		return "", err
+	}
 
 	tpl, err := pongo2.FromString(content)
 	if err != nil {

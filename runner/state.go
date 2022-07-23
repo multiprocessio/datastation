@@ -16,16 +16,6 @@ type PanelResult struct {
 	Elapsed     *float64 `json:"elapsed" db:"elapsed"`
 }
 
-var defaultPanelResult = PanelResult{
-	Stdout:      "",
-	Shape:       defaultShape,
-	Preview:     "",
-	Size:        nil,
-	ContentType: "unknown",
-	Exception:   nil,
-	ArrayCount:  nil,
-}
-
 type Encrypt struct {
 	Value     string `json:"value" db:"value"`
 	Encrypted bool   `json:"encrypted" db:"encrypted"`
@@ -51,24 +41,11 @@ type ServerInfo struct {
 	Id             string         `json:"id" db:"id"`
 }
 
-var defaultServerInfo = ServerInfo{
-	Type:           SSHPrivateKey,
-	Name:           "Untitled Server",
-	Address:        "",
-	Port:           22,
-	Username:       "",
-	Password:       Encrypt{},
-	PrivateKeyFile: "~/.ssh/id_rsa",
-	Passphrase:     Encrypt{},
-}
-
 type ContentTypeInfo struct {
 	Type             string `json:"type" db:"type"`
 	CustomLineRegexp string `json:"customLineRegexp" db:"customLineRegexp"`
 	ConvertNumbers   bool   `json:"convertNumbers" db:"convertNumbers"`
 }
-
-var defaultContentTypeInfo = ContentTypeInfo{}
 
 type PanelInfoType string
 
@@ -107,13 +84,13 @@ type SupportedLanguages string
 
 const (
 	Python        SupportedLanguages = "python"
-	JavaScript                       = "javascript"
-	Deno                             = "deno"
-	Ruby                             = "ruby"
-	R                                = "r"
-	Julia                            = "julia"
-	SQL                              = "sql"
-	CustomProgram                    = "custom"
+	JavaScript    SupportedLanguages = "javascript"
+	Deno          SupportedLanguages = "deno"
+	Ruby          SupportedLanguages = "ruby"
+	R             SupportedLanguages = "r"
+	Julia         SupportedLanguages = "julia"
+	SQL           SupportedLanguages = "sql"
+	CustomProgram SupportedLanguages = "custom"
 )
 
 type ProgramPanelInfo struct {
@@ -146,23 +123,23 @@ type TimeSeriesRelativeTimes string
 
 const (
 	Last5Minutes  TimeSeriesRelativeTimes = "last-5-minutes"
-	Last15Minutes                         = "last-15-minutes"
-	Last30Minutes                         = "last-30-minutes"
-	LastHour                              = "last-hour"
-	Last3Hours                            = "last-3-hours"
-	Last6Hours                            = "last-6-hours"
-	Last12Hours                           = "last-12-hours"
-	LastDay                               = "last-day"
-	Last3Days                             = "last-3-days"
-	LastWeek                              = "last-week"
-	Last2Weeks                            = "last-2-weeks"
-	LastMonth                             = "last-month"
-	Last2Months                           = "last-2-months"
-	Last3Months                           = "last-3-months"
-	Last6Months                           = "last-6-months"
-	LastYear                              = "last-year"
-	Last2Years                            = "last-2-years"
-	AllTime                               = "all-time"
+	Last15Minutes TimeSeriesRelativeTimes = "last-15-minutes"
+	Last30Minutes TimeSeriesRelativeTimes = "last-30-minutes"
+	LastHour      TimeSeriesRelativeTimes = "last-hour"
+	Last3Hours    TimeSeriesRelativeTimes = "last-3-hours"
+	Last6Hours    TimeSeriesRelativeTimes = "last-6-hours"
+	Last12Hours   TimeSeriesRelativeTimes = "last-12-hours"
+	LastDay       TimeSeriesRelativeTimes = "last-day"
+	Last3Days     TimeSeriesRelativeTimes = "last-3-days"
+	LastWeek      TimeSeriesRelativeTimes = "last-week"
+	Last2Weeks    TimeSeriesRelativeTimes = "last-2-weeks"
+	LastMonth     TimeSeriesRelativeTimes = "last-month"
+	Last2Months   TimeSeriesRelativeTimes = "last-2-months"
+	Last3Months   TimeSeriesRelativeTimes = "last-3-months"
+	Last6Months   TimeSeriesRelativeTimes = "last-6-months"
+	LastYear      TimeSeriesRelativeTimes = "last-year"
+	Last2Years    TimeSeriesRelativeTimes = "last-2-years"
+	AllTime       TimeSeriesRelativeTimes = "all-time"
 )
 
 type TimeSeriesFixedTimes string
@@ -186,9 +163,9 @@ type TimeSeriesRangeType string
 
 const (
 	AbsoluteRange TimeSeriesRangeType = "absolute"
-	RelativeRange                     = "relative"
-	FixedRange                        = "fixed"
-	None                              = "none"
+	RelativeRange TimeSeriesRangeType = "relative"
+	FixedRange    TimeSeriesRangeType = "fixed"
+	None          TimeSeriesRangeType = "none"
 )
 
 type TimeSeriesRange struct {
@@ -206,11 +183,11 @@ type AggregateType string
 
 const (
 	NoneAggregate    AggregateType = "none"
-	CountAggregate                 = "count"
-	SumAggregate                   = "sum"
-	AverageAggregate               = "average"
-	MinAggregate                   = "min"
-	MaxAggregate                   = "max"
+	CountAggregate   AggregateType = "count"
+	SumAggregate     AggregateType = "sum"
+	AverageAggregate AggregateType = "average"
+	MinAggregate     AggregateType = "min"
+	MaxAggregate     AggregateType = "max"
 )
 
 type FilaggPanelInfoFilagg struct {
@@ -279,7 +256,7 @@ type ConnectorInfoType string
 
 const (
 	DatabaseConnector ConnectorInfoType = "database"
-	HTTPConnector                       = "http"
+	HTTPConnector     ConnectorInfoType = "http"
 )
 
 type ConnectorInfo struct {
@@ -294,32 +271,32 @@ type DatabaseConnectorInfoType string
 
 const (
 	PostgresDatabase      DatabaseConnectorInfoType = "postgres"
-	MySQLDatabase                                   = "mysql"
-	SQLiteDatabase                                  = "sqlite"
-	OracleDatabase                                  = "oracle"
-	SQLServerDatabase                               = "sqlserver"
-	PrestoDatabase                                  = "presto"
-	ClickHouseDatabase                              = "clickhouse"
-	SnowflakeDatabase                               = "snowflake"
-	CassandraDatabase                               = "cassandra"
-	ScyllaDatabase                                  = "scylla"
-	ElasticsearchDatabase                           = "elasticsearch"
-	SplunkDatabase                                  = "splunk"
-	PrometheusDatabase                              = "prometheus"
-	InfluxDatabase                                  = "influx"
-	InfluxFluxDatabase                              = "influx-flux"
-	CockroachDatabase                               = "cockroach"
-	TimescaleDatabase                               = "timescale"
-	CrateDatabase                                   = "crate"
-	YugabyteDatabase                                = "yugabyte"
-	QuestDatabase                                   = "quest"
-	BigQueryDatabase                                = "bigquery"
-	MongoDatabase                                   = "mongo"
-	AthenaDatabase                                  = "athena"
-	AirtableDatabase                                = "airtable"
-	GoogleSheetsDatabase                            = "google-sheets"
-	Neo4jDatabase                                   = "neo4j"
-	ODBCDatabase                                    = "odbc"
+	MySQLDatabase         DatabaseConnectorInfoType = "mysql"
+	SQLiteDatabase        DatabaseConnectorInfoType = "sqlite"
+	OracleDatabase        DatabaseConnectorInfoType = "oracle"
+	SQLServerDatabase     DatabaseConnectorInfoType = "sqlserver"
+	PrestoDatabase        DatabaseConnectorInfoType = "presto"
+	ClickHouseDatabase    DatabaseConnectorInfoType = "clickhouse"
+	SnowflakeDatabase     DatabaseConnectorInfoType = "snowflake"
+	CassandraDatabase     DatabaseConnectorInfoType = "cassandra"
+	ScyllaDatabase        DatabaseConnectorInfoType = "scylla"
+	ElasticsearchDatabase DatabaseConnectorInfoType = "elasticsearch"
+	SplunkDatabase        DatabaseConnectorInfoType = "splunk"
+	PrometheusDatabase    DatabaseConnectorInfoType = "prometheus"
+	InfluxDatabase        DatabaseConnectorInfoType = "influx"
+	InfluxFluxDatabase    DatabaseConnectorInfoType = "influx-flux"
+	CockroachDatabase     DatabaseConnectorInfoType = "cockroach"
+	TimescaleDatabase     DatabaseConnectorInfoType = "timescale"
+	CrateDatabase         DatabaseConnectorInfoType = "crate"
+	YugabyteDatabase      DatabaseConnectorInfoType = "yugabyte"
+	QuestDatabase         DatabaseConnectorInfoType = "quest"
+	BigQueryDatabase      DatabaseConnectorInfoType = "bigquery"
+	MongoDatabase         DatabaseConnectorInfoType = "mongo"
+	AthenaDatabase        DatabaseConnectorInfoType = "athena"
+	AirtableDatabase      DatabaseConnectorInfoType = "airtable"
+	GoogleSheetsDatabase  DatabaseConnectorInfoType = "google-sheets"
+	Neo4jDatabase         DatabaseConnectorInfoType = "neo4j"
+	ODBCDatabase          DatabaseConnectorInfoType = "odbc"
 )
 
 type DatabaseConnectorInfoDatabase struct {
