@@ -8,6 +8,10 @@ const {
   ProjectState,
   ProjectPage,
   ContentTypeInfo,
+  LiteralPanelInfo,
+  Encrypt,
+  DatabasePanelInfo,
+  DatabaseConnectorInfo,
 } = require('../../shared/state');
 const { Store } = require('../store');
 const { makeDispatch } = require('../rpc');
@@ -248,8 +252,8 @@ module.exports.translateBaselineForType = function (baseline, fileType) {
     Object.keys(row).forEach((k) => {
       // All non-json, non-parquet get the column header trimmed
       const columnHeader = ['json', 'parquet'].includes(fileType)
-        ? k
-        : k.trim();
+                         ? k
+                         : k.trim();
       translatedRow[columnHeader] = row[k];
 
       // CSVs are just strings
@@ -428,3 +432,73 @@ module.exports.RUNNERS = [
 });
 
 module.exports.VERBOSE = process.argv.includes('--dsverbose=true');
+
+module.exports.basicDatabaseTest = async function(t, vendorOverride = {}, subprocess = null) {
+  if (!subprocess) {
+    subprocess = module.exports.RUNNERS.filter(r => r?.go)[0];
+  }
+
+  const lp = new LiteralPanelInfo();
+  lp.literal.contentTypeInfo = { type: 'application/json' };
+  lp.content = JSON.stringify([
+    { age: '19', name: 'Kate', location: { city: 'San Juan' } },
+    { age: '20', name: 'Bake', location: { city: 'Toronto' } },
+  ]);
+
+  const connectors = [
+    new DatabaseConnectorInfo({
+      type: t.type,
+      database: vendorOverride[t.type]?.database || 'test',
+      address: vendorOverride[t.type]?.address || 'localhost',
+      username: vendorOverride[t.type]?.username || 'test',
+      password_encrypt: new Encrypt(
+        vendorOverride[t.type]?.password || 'test'
+      ),
+      extra: vendorOverride[t.type]?.extra || {},
+    }),
+  ];
+  const dp = new DatabasePanelInfo();
+  dp.database.connectorId = connectors[0].id;
+  dp.content = t.query;
+
+  let finished = false;
+  const panels = [lp, dp];
+  await module.exports.withSavedPanels(
+    panels,
+    async (project) => {
+      const panelValueBuffer = fs.readFileSync(
+        getProjectResultsFile(project.projectName) + dp.id
+      );
+
+      if (t.type == 'odbc' && !t.query.startsWith('SELECT')) {
+        finished = true;
+        return;
+      }
+
+      const v = JSON.parse(panelValueBuffer.toString());
+      if (t.query.startsWith('SELECT 1')) {
+        expect(v.length).toBe(1);
+        // These database drivers are all over the place between Node and Go.
+        // Close enough is fine I guess.
+        expect(v[0]['1']).toBe(1);
+        expect(String(v[0]['2'])).toBe('2.2');
+        expect(v[0]['true'] == '1').toBe(true);
+        expect(v[0].string).toBe('string');
+        expect(new Date(v[0].date)).toStrictEqual(
+          new Date('2021-01-01')
+        );
+      } else {
+        expect(v).toStrictEqual([
+          { name: 'Kate', age: 9, city: 'San Juan' },
+          { name: 'Bake', age: 10, city: 'Toronto' },
+        ]);
+      }
+      finished = true;
+    },
+    { evalPanels: true, connectors, subprocessName: subprocess }
+  );
+
+  if (!finished) {
+    throw new Error('Callback did not finish');
+  }
+}

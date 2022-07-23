@@ -34,23 +34,6 @@ sudo mv deno /usr/bin/deno
 sudo mkdir -p /usr/local/lib/R/site-library
 sudo chown -R $USER /usr/local/lib/R/
 
-# # Set up MySQL
-sudo service mysql start
-sudo mysql -u root -proot --execute="CREATE USER 'test'@'localhost' IDENTIFIED BY 'test'";
-sudo mysql -u root -proot --execute="CREATE DATABASE test";
-sudo mysql -u root -proot --execute="GRANT ALL PRIVILEGES ON test.* TO 'test'@'localhost'";
-
-# # Set up PostgreSQL
-sudo apt-get install postgresql postgresql-contrib
-echo "
-local  test            test                md5
-host   test            test   localhost    md5
-local  all             all                 peer" | sudo tee /etc/postgresql/12/main/pg_hba.conf
-sudo service postgresql restart
-sudo -u postgres psql -c "CREATE USER test WITH PASSWORD 'test'"
-sudo -u postgres psql -c "CREATE DATABASE test"
-sudo -u postgres psql -c "GRANT ALL ON DATABASE test TO test"
-
 # # Set up ClickHouse
 sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv E0C56BD4
 echo "deb https://repo.clickhouse.tech/deb/stable/ main/" | sudo tee /etc/apt/sources.list.d/clickhouse.list

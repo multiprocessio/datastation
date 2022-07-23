@@ -9,13 +9,9 @@ const {
   DatabasePanelInfo,
   DatabaseConnectorInfo,
 } = require('../../shared/state');
-const { withSavedPanels, RUNNERS } = require('./testutil');
+const { basicDatabaseTest, withSavedPanels, RUNNERS } = require('./testutil');
 
 const DATABASES = [
-  {
-    type: 'postgres',
-    query: `SELECT 1 AS "1", 2.2 AS "2", true AS "true", 'string' AS "string", CAST('2021-01-01' AS DATE) AS "date"`,
-  },
   {
     type: 'quest',
     query: `SELECT 1 AS "1", 2.2 AS "2", true AS "true", 'string' AS "string", CAST('2021-01-01' AS TIMESTAMP) AS "date"`,
@@ -47,11 +43,6 @@ const DATABASES = [
     query: `SELECT 1 AS "1", 2.2 AS "2", true AS "true", 'string' AS "string", DATE('2021-01-01') AS "date"`,
   },
   {
-    type: 'mysql',
-    query:
-      'SELECT 1 AS `1`, 2.2 AS `2`, true AS `true`, "string" AS `string`, CAST("2021-01-01" AS DATE) AS `date`',
-  },
-  {
     type: 'oracle',
     query:
       // Oracle does not have true/false literals
@@ -59,19 +50,9 @@ const DATABASES = [
       `SELECT 1 AS "1", 2.2 AS "2", 1 AS "true", 'string' AS "string", TO_DATE('2021-01-01','YYYY-MM-DD') AS "date" FROM dual`,
   },
   {
-    type: 'postgres',
-    query:
-      'SELECT name, CAST(age AS INT) - 10 AS age, "location.city" AS city FROM DM_getPanel(0)',
-  },
-  {
     type: 'sqlite',
     query:
       'SELECT name, CAST(age AS INT) - 10 AS age, "location.city" AS city FROM DM_getPanel(0)',
-  },
-  {
-    type: 'mysql',
-    query:
-      'SELECT name, CAST(age AS SIGNED) - 10 AS age, `location.city` AS city FROM DM_getPanel(0)',
   },
   {
     type: 'odbc',
@@ -82,9 +63,6 @@ const DATABASES = [
 ensureSigningKey();
 
 const vendorOverride = {
-  postgres: {
-    address: 'localhost?sslmode=disable',
-  },
   clickhouse: {
     database: 'default',
   },
@@ -128,83 +106,20 @@ for (const subprocess of RUNNERS) {
   for (const t of DATABASES) {
     describe(
       t.type +
-        ' running via ' +
-        (subprocess ? subprocess.node || subprocess.go : 'process') +
-        ': ' +
-        t.query,
+      ' running via ' +
+          (subprocess ? subprocess.node || subprocess.go : 'process') +
+      ': ' +
+      t.query,
       () => {
         test(`runs ${t.type} query`, async () => {
           if (process.platform !== 'linux') {
             return;
           }
 
-          const lp = new LiteralPanelInfo();
-          lp.literal.contentTypeInfo = { type: 'application/json' };
-          lp.content = JSON.stringify([
-            { age: '19', name: 'Kate', location: { city: 'San Juan' } },
-            { age: '20', name: 'Bake', location: { city: 'Toronto' } },
-          ]);
-
-          const connectors = [
-            new DatabaseConnectorInfo({
-              type: t.type,
-              database: vendorOverride[t.type]?.database || 'test',
-              address: vendorOverride[t.type]?.address || 'localhost',
-              username: vendorOverride[t.type]?.username || 'test',
-              password_encrypt: new Encrypt(
-                vendorOverride[t.type]?.password || 'test'
-              ),
-              extra: vendorOverride[t.type]?.extra || {},
-            }),
-          ];
-          const dp = new DatabasePanelInfo();
-          dp.database.connectorId = connectors[0].id;
-          dp.content = t.query;
-
-          let finished = false;
-          const panels = [lp, dp];
-          await withSavedPanels(
-            panels,
-            async (project) => {
-              const panelValueBuffer = fs.readFileSync(
-                getProjectResultsFile(project.projectName) + dp.id
-              );
-
-              if (t.type == 'odbc' && !t.query.startsWith('SELECT')) {
-                finished = true;
-                return;
-              }
-
-              const v = JSON.parse(panelValueBuffer.toString());
-              if (t.query.startsWith('SELECT 1')) {
-                expect(v.length).toBe(1);
-                // These database drivers are all over the place between Node and Go.
-                // Close enough is fine I guess.
-                expect(v[0]['1']).toBe(1);
-                expect(String(v[0]['2'])).toBe('2.2');
-                expect(v[0]['true'] == '1').toBe(true);
-                expect(v[0].string).toBe('string');
-                expect(new Date(v[0].date)).toStrictEqual(
-                  new Date('2021-01-01')
-                );
-              } else {
-                expect(v).toStrictEqual([
-                  { name: 'Kate', age: 9, city: 'San Juan' },
-                  { name: 'Bake', age: 10, city: 'Toronto' },
-                ]);
-              }
-              finished = true;
-            },
-            { evalPanels: true, connectors, subprocessName: subprocess }
-          );
-
-          if (!finished) {
-            throw new Error('Callback did not finish');
-          }
-          // sqlserver at least can take longer than 5s to fail
-        }, 30_000);
-      }
-    );
+          await basicDatabaseTest(t, vendorOverride, subprocess);
+          // sqlserver takes a while
+        }, 30_000)
+    })
   }
 
   describe('elasticsearch testdata/documents tests', () => {
