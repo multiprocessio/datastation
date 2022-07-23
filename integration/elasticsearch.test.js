@@ -1,3 +1,4 @@
+const cp = require('child_process');
 const fs = require('fs');
 
 const fetch = require('node-fetch');
@@ -54,13 +55,45 @@ describe('elasticsearch testdata/documents tests', () => {
               'discovery.type': 'single-node',
             },
             image: 'docker.elastic.co/elasticsearch/elasticsearch:7.16.3',
-            cmdsExternal: true,
-            cmds: Array.from(new Array(4)).map(
-              (_el, i) =>
-                `curl -X POST -H 'Content-Type: application/json' -d @testdata/documents/${
-                  i + 1
-                }.json http://localhost:9200/test/_doc`
-            ),
+            wait: async () => {
+              console.log('Awaiting container');
+              while (true) {
+                try {
+                  const r = await fetch('http://localhost:9200');
+                  break;
+                } catch (e) {
+                  await new Promise((r) => setTimeout(r, 2000));
+                }
+              }
+
+              // Setting up test docs
+              const nDocs = 4;
+              for (let i = 0; i < nDocs; i++) {
+                cp.execSync(
+                  `curl -X POST -H 'Content-Type: application/json' -d @testdata/documents/${
+                    i + 1
+                  }.json http://localhost:9200/test/_doc`,
+                  { stdio: 'inherit' }
+                );
+              }
+
+              // Wait until all docs have been ingested
+              while (true) {
+                console.log('Waiting for all docs to be ready');
+                try {
+                  const r = await fetch('http://localhost:9200/test/_search');
+                  const j = await r.json();
+                  console.log(j);
+                  if (j.hits.hits.length === nDocs) {
+                    break;
+                  }
+                } catch (e) {
+                  /* pass */
+                }
+
+                await new Promise((r) => setTimeout(r, 2000));
+              }
+            },
           },
           async () => {
             const connectors = [
@@ -101,7 +134,7 @@ describe('elasticsearch testdata/documents tests', () => {
           }
         );
       },
-      30_000
+      360_000
     );
   }
 });

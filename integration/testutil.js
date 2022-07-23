@@ -81,14 +81,11 @@ module.exports.withDocker = async function (opts, cb) {
         }
         first = false;
 
-        const cmdPrefix = opts.cmdsExternal
-          ? ''
-          : 'docker exec ' + containerId + ' ';
-
         try {
-          cp.execSync(cmdPrefix + opts.cmds[0], {
+          cp.execSync('docker exec ' + containerId + ' ' + cmd, {
             stdio: 'inherit',
           });
+          process.stdout.write('\n');
           break;
         } catch (e) {
           /* pass */
@@ -100,12 +97,10 @@ module.exports.withDocker = async function (opts, cb) {
 
     if (opts.cmds) {
       for (const cmd of opts.cmds) {
-        const cmdPrefix = opts.cmdsExternal
-          ? ''
-          : 'docker exec ' + containerId + ' ';
-        cp.execSync(cmdPrefix + cmd, {
+        cp.execSync('docker exec ' + containerId + ' ' + cmd, {
           stdio: 'inherit',
         });
+        process.stdout.write('\n');
       }
     }
 
