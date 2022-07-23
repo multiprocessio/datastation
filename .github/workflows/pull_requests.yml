@@ -98,7 +98,7 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-yarn-
 
-    - run: ./scripts/ci/prepare_linux.sh
+    - run: ./scripts/ci/prepare_linux.sh --race
     # Needed so we can have ./build/desktop_runner.js and ./build/go_desktop_runner ready for tests
     - run: yarn build-test-runner
     - run: yarn test --detectOpenHandles --forceExit --verbose desktop/panel/credential_database.test.js
@@ -129,7 +129,7 @@ jobs:
       with:
         ref: ${{ github.ref }}
 
-    - run: ./scripts/ci/prepare_linux.sh
+    - run: ./scripts/ci/prepare_linux.sh --race
 
     # Run golangci-lint
     - name: Run golangci-lint

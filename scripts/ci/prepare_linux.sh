@@ -26,3 +26,11 @@ fi
 # Set up project
 sudo npm install --global yarn
 yarn
+
+race=""
+if [[ "$1" == "--integration-tests" ]] || [[ "$1" == "--race" ]]; then
+    race="-race"
+fi
+
+# Install ODBC
+./runner/plugins/odbc/build.sh $race
