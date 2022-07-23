@@ -21,9 +21,9 @@ jobs:
         path: |
           ~/.cache/go-build
           ~/go/pkg/mod
-          key: ${{ runner.os }}-golang-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-golang-
+        key: ${{ runner.os }}-golang-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-golang-
 
     - run: ./scripts/ci/prepare_linux.sh
 
@@ -57,9 +57,9 @@ jobs:
         path: |
           ~/.cache/go-build
           ~/go/pkg/mod
-          key: ${{ runner.os }}-golang-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-golang-
+        key: ${{ runner.os }}-golang-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-golang-
 
     - run: ./scripts/ci/prepare_linux.sh --race
     # Needed so we can have ./build/desktop_runner.js and ./build/go_desktop_runner ready for tests
@@ -90,9 +90,9 @@ jobs:
         path: |
           ~/.cache/go-build
           ~/go/pkg/mod
-          key: ${{ runner.os }}-golang-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-golang-
+        key: ${{ runner.os }}-golang-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-golang-
 
     - run: ./scripts/ci/prepare_linux.sh --race
     # Needed so we can have ./build/desktop_runner.js and ./build/go_desktop_runner ready for tests
@@ -133,7 +133,7 @@ jobs:
       with:
         working-directory: runner
         args: --timeout 3m --verbose
-      
+
     # Set up coverage tools
     - run: go install github.com/axw/gocov/gocov@v1.0.0
     - run: go install github.com/wadey/gocovmerge@b5bfa59
@@ -170,9 +170,9 @@ jobs:
         path: |
           ~/.cache/go-build
           ~/go/pkg/mod
-          key: ${{ runner.os }}-golang-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-golang-
+        key: ${{ runner.os }}-golang-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-golang-
 
     - run: ./scripts/ci/prepare_linux.sh
     - run: yarn release-desktop 0.0.0-e2etest
@@ -198,9 +198,9 @@ jobs:
         path: |
           ~/.cache/go-build
           ~/go/pkg/mod
-          key: ${{ runner.os }}-golang-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-golang-
+        key: ${{ runner.os }}-golang-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-golang-
 
     - run: ./scripts/ci/prepare_macos.sh
     # Needed so we can have ./build/desktop_runner.js ready for tests
@@ -228,9 +228,9 @@ jobs:
         path: |
           ~/.cache/go-build
           ~/go/pkg/mod
-          key: ${{ runner.os }}-golang-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-golang-
+        key: ${{ runner.os }}-golang-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-golang-
 
     - run: ./scripts/ci/prepare_windows.ps1
       shell: pwsh
@@ -258,9 +258,9 @@ jobs:
         path: |
           ~/.cache/go-build
           ~/go/pkg/mod
-          key: ${{ runner.os }}-golang-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-golang-
+        key: ${{ runner.os }}-golang-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-golang-
 
     - run: ./scripts/ci/prepare_linux.sh
     - run: yarn release-server 0.0.0-test
