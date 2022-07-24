@@ -34,16 +34,6 @@ sudo mv deno /usr/bin/deno
 sudo mkdir -p /usr/local/lib/R/site-library
 sudo chown -R $USER /usr/local/lib/R/
 
-# # Set up ClickHouse
-sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv E0C56BD4
-echo "deb https://repo.clickhouse.tech/deb/stable/ main/" | sudo tee /etc/apt/sources.list.d/clickhouse.list
-sudo apt-get update -y
-sudo apt-get install -y clickhouse-server clickhouse-client
-sudo cp ./scripts/ci/clickhouse_users.xml /etc/clickhouse-server/users.d/test.xml
-# See: https://community.atlassian.com/t5/Bitbucket-Pipelines-discussions/Broken-starting-clickhouse-in-a-docker-because-of-wrong/td-p/1689466
-sudo setcap -r `which clickhouse` && echo "Cleaning caps success" || echo "Cleaning caps error"
-sudo service clickhouse-server start
-
 # Install jsonnet
 go install github.com/google/go-jsonnet/cmd/jsonnet@latest
 sudo ln $HOME/go/bin/jsonnet /usr/local/bin/jsonnet
@@ -63,16 +53,6 @@ sudo mv mssql-release.list /etc/apt/sources.list.d/mssql-release.list
 sudo apt-get update
 sudo ACCEPT_EULA=Y apt-get install -y msodbcsql18
 ## LAUNCH CONTAINERS
-
-# Start up cockroach database
-curl https://binaries.cockroachdb.com/cockroach-v21.2.4.linux-amd64.tgz | tar -xz && sudo cp -i cockroach-v21.2.4.linux-amd64/cockroach /usr/local/bin/
-## Set up certs (see: https://www.cockroachlabs.com/docs/stable/secure-a-cluster.html)
-mkdir certs cockroach-safe
-cockroach cert create-ca --certs-dir=certs --ca-key=cockroach-safe/ca.key
-cockroach cert create-node localhost $(hostname) --certs-dir=certs --ca-key=cockroach-safe/ca.key
-cockroach cert create-client root --certs-dir=certs --ca-key=cockroach-safe/ca.key
-cockroach start-single-node --certs-dir=certs --accept-sql-without-tls --background
-cockroach sql --certs-dir=certs --host=localhost:26257 --execute "CREATE DATABASE test; CREATE USER test WITH PASSWORD 'test'; GRANT ALL ON DATABASE test TO test;"
 
 # Start up influx (2 for fluxql)
 docker run -d -p 8086:8086 -e "DOCKER_INFLUXDB_INIT_MODE=setup" -e "DOCKER_INFLUXDB_INIT_USERNAME=test" -e "DOCKER_INFLUXDB_INIT_PASSWORD=testtest" -e "DOCKER_INFLUXDB_INIT_ORG=test" -e "DOCKER_INFLUXDB_INIT_BUCKET=test" -e "DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=test" influxdb:2.0

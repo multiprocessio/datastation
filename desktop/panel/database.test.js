@@ -14,14 +14,6 @@ const { basicDatabaseTest, withSavedPanels, RUNNERS } = require('./testutil');
 
 const DATABASES = [
   {
-    type: 'cockroach',
-    query: `SELECT 1 AS "1", 2.2 AS "2", true AS "true", 'string' AS "string", CAST('2021-01-01' AS DATE) AS "date"`,
-  },
-  {
-    type: 'clickhouse',
-    query: `SELECT 1 AS "1", 2.2 AS "2", true AS "true", 'string' AS "string", parseDateTimeBestEffortOrNull('2021-01-01') AS "date"`,
-  },
-  {
     type: 'odbc',
     // SQL Server doesn't have true/false literals
     query: `SELECT 1 AS "1", 2.2 AS "2", 1 AS "true", 'string' AS "string", CAST('2021-01-01' AS DATE) AS "date"`,
@@ -44,9 +36,6 @@ const DATABASES = [
 ensureSigningKey();
 
 const vendorOverride = {
-  clickhouse: {
-    database: 'default',
-  },
   odbc: {
     address: 'localhost',
     username: 'sa',
