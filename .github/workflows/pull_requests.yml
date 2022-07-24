@@ -204,6 +204,7 @@ jobs:
 
     # Run tests and coverage
     - run: cd runner && go test -race -coverprofile ../coverage/gounit.cov
+    - run: ls coverage
     - run: ./runner/scripts/test_coverage.sh
 
   macos_go_tests:
