@@ -201,6 +201,8 @@ jobs:
       uses: actions/download-artifact@v3
       with:
         name: non-credential-coverage
+    # Artifacts get downloaded into this directory
+    - run: mv gorunner*.cov coverage/
 
     # Run tests and coverage
     - run: cd runner && go test -race -coverprofile ../coverage/gounit.cov
