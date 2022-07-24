@@ -227,7 +227,7 @@ jobs:
 
     - run: ./scripts/ci/prepare_macos.sh
 
-    - run: cd runner && go test -race
+    - run: cd runner && go test
 
   windows_go_tests:
     name: windows Go Tests
@@ -251,7 +251,7 @@ jobs:
     - run: ./scripts/ci/prepare_windows.ps1
       shell: pwsh
 
-    - run: cd runner && go test -race
+    - run: cd runner && go test
 
   e2e_linux_tests:
     name: End-to-end Linux Tests
