@@ -38,6 +38,11 @@ sudo chown -R $USER /usr/local/lib/R/
 go install github.com/google/go-jsonnet/cmd/jsonnet@latest
 sudo ln $HOME/go/bin/jsonnet /usr/local/bin/jsonnet
 
+# Set up coverage tools
+go install github.com/axw/gocov/gocov@v1.0.0
+go install github.com/wadey/gocovmerge@b5bfa59
+sudo ln -s $HOME/go/bin/* /usr/local/bin/
+
 # Install ODBC driver
 if ! [[ "18.04 20.04 21.04" == *"$(lsb_release -rs)"* ]];
 then

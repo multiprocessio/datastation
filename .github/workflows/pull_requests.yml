@@ -25,16 +25,13 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-golang-
 
-    - run: ./scripts/ci/prepare_linux.sh
+    - run: ./scripts/ci/prepare_linux.sh --integration-tests
 
     - run: yarn format
     - run: yarn eslint ui
     - run: yarn tsc
     - run: cd runner && gofmt -w .
 
-    # Install jsonnet for language definitions
-    - run: go install github.com/google/go-jsonnet/cmd/jsonnet@latest
-    - run: sudo ln $HOME/go/bin/jsonnet /usr/local/bin/jsonnet
     - run: yarn build-language-definitions
 
     - run: ./scripts/fail_on_diff.sh
@@ -61,11 +58,9 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-golang-
 
-    - run: ./scripts/ci/prepare_linux.sh --race
+    - run: ./scripts/ci/prepare_linux.sh --integration-tests
     # Needed so we can have ./build/desktop_runner.js and ./build/go_desktop_runner ready for tests
     - run: yarn build-test-runner
-    # Now set up databases
-    - run: ./scripts/ci/prepare_linux_integration_test_setup_only.sh
     - run: yarn test --detectOpenHandles --forceExit --verbose
 
     - name: Upload non-credential coverage
@@ -146,7 +141,7 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-golang-
 
-    - run: ./scripts/ci/prepare_linux.sh --race
+    - run: ./scripts/ci/prepare_linux.sh --integration-tests
     # Needed so we can have ./build/desktop_runner.js and ./build/go_desktop_runner ready for tests
     - run: yarn build-test-runner
     - run: RUN_CREDENTIAL_TESTS=true yarn test --detectOpenHandles --forceExit --verbose integration/credential_database.test.js
@@ -187,7 +182,7 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-golang-
 
-    - run: ./scripts/ci/prepare_linux.sh --race
+    - run: ./scripts/ci/prepare_linux.sh --integration-tests
 
     # Run golangci-lint
     - name: Run golangci-lint
@@ -195,11 +190,6 @@ jobs:
       with:
         working-directory: runner
         args: --timeout 3m --verbose
-
-    # Set up coverage tools
-    - run: go install github.com/axw/gocov/gocov@v1.0.0
-    - run: go install github.com/wadey/gocovmerge@b5bfa59
-    - run: sudo ln -s $HOME/go/bin/* /usr/local/bin/
 
     # Grab coverage files from other tests
     - run: mkdir coverage

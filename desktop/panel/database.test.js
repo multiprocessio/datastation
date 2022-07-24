@@ -14,11 +14,6 @@ const { basicDatabaseTest, withSavedPanels, RUNNERS } = require('./testutil');
 
 const DATABASES = [
   {
-    type: 'odbc',
-    // SQL Server doesn't have true/false literals
-    query: `SELECT 1 AS "1", 2.2 AS "2", 1 AS "true", 'string' AS "string", CAST('2021-01-01' AS DATE) AS "date"`,
-  },
-  {
     type: 'sqlite',
     query: `SELECT 1 AS "1", 2.2 AS "2", true AS "true", 'string' AS "string", DATE('2021-01-01') AS "date"`,
   },
@@ -27,26 +22,11 @@ const DATABASES = [
     query:
       'SELECT name, CAST(age AS INT) - 10 AS age, "location.city" AS city FROM DM_getPanel(0)',
   },
-  {
-    type: 'odbc',
-    query: `INSERT INTO test (id, name) VALUES (1, 'name')`,
-  },
 ];
 
 ensureSigningKey();
 
-const vendorOverride = {
-  odbc: {
-    address: 'localhost',
-    username: 'sa',
-    password: '1StrongPwd!!',
-    database: 'master',
-    extra: {
-      driver: 'ODBC Driver 18 for SQL Server',
-      allow_untrusted: true,
-    },
-  },
-};
+const vendorOverride = {};
 
 for (const subprocess of RUNNERS) {
   // Most databases now only work with the Go runner.

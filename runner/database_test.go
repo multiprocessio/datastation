@@ -1,7 +1,6 @@
 package runner
 
 import (
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -194,6 +193,15 @@ func Test_getConnectionString(t *testing.T) {
 			"8888",
 			"",
 		},
+		{
+			DatabaseConnectorInfoDatabase{Type: "odbc", Password: Encrypt{Encrypted: false, Value: ""}, Username: "SA", Database: "master", Address: "localhost:1433", Extra: map[string]string{"driver": "freetds", "params": "A=B"}},
+			"odbc",
+			"server=localhost,1433;database=master;driver=freetds;pwd=;uid=SA;A=B",
+			nil,
+			"localhost",
+			"1433",
+			"",
+		},
 	}
 
 	ec, cleanup := makeTestEvalContext()
@@ -215,41 +223,4 @@ func Test_getConnectionString(t *testing.T) {
 		assert.Equal(t, test.expPort, port)
 		assert.Equal(t, test.expExtra, extra)
 	}
-}
-
-func Test_ODBCConnectionString(t *testing.T) {
-	test := struct {
-		conn       DatabaseConnectorInfoDatabase
-		expVendor  string
-		expConnStr string
-		expErr     error
-		expHost    string
-		expPort    string
-		expExtra   string
-	}{
-		DatabaseConnectorInfoDatabase{Type: "odbc", Password: Encrypt{Encrypted: false, Value: ""}, Username: "SA", Database: "master", Address: "localhost:1433", Extra: map[string]string{"driver": "freetds"}},
-		"odbc",
-		"driver=freetds;server=localhost,1433;database=master;pwd=;uid=SA;",
-		nil,
-		"localhost",
-		"1433",
-		"",
-	}
-
-	ec, cleanup := makeTestEvalContext()
-	defer cleanup()
-
-	vendor, connStr, err := ec.getConnectionString(test.conn)
-	assert.Equal(t, test.expVendor, vendor)
-	assert.Equal(t, test.expErr, err)
-
-	expSlice := strings.Split(test.expConnStr, ";")
-	actSlice := strings.Split(connStr, ";")
-	assert.ElementsMatch(t, expSlice, actSlice)
-
-	host, port, extra, err := getDatabaseHostPortExtra(test.conn.Address, defaultPorts[DatabaseConnectorInfoType(test.expVendor)])
-	assert.Nil(t, err)
-	assert.Equal(t, test.expHost, host)
-	assert.Equal(t, test.expPort, port)
-	assert.Equal(t, test.expExtra, extra)
 }

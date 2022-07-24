@@ -7,6 +7,15 @@ const BASIC_TESTS = [
     // SQL Server doesn't have true/false literals
     query: `SELECT 1 AS "1", 2.2 AS "2", 1 AS "true", 'string' AS "string", CAST('2021-01-01' AS DATE) AS "date"`,
   },
+  {
+    type: 'odbc',
+    // SQL Server doesn't have true/false literals
+    query: `SELECT 1 AS "1", 2.2 AS "2", 1 AS "true", 'string' AS "string", CAST('2021-01-01' AS DATE) AS "date"`,
+  },
+  {
+    type: 'odbc',
+    query: `INSERT INTO test (id, name) VALUES (1, 'name')`,
+  },
 ];
 
 const vendorOverride = {
@@ -15,6 +24,16 @@ const vendorOverride = {
     username: 'sa',
     password: '1StrongPwd!!',
     database: 'master',
+  },
+  odbc: {
+    address: 'localhost',
+    username: 'sa',
+    password: '1StrongPwd!!',
+    database: 'master',
+    extra: {
+      driver: 'ODBC Driver 18 for SQL Server',
+      params: 'allow_untrusted=true',
+    },
   },
 };
 

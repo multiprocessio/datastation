@@ -30,7 +30,7 @@ func (v *Vector[T]) Append(item T) {
 }
 
 func (v *Vector[T]) List() []T {
-	return v.data
+	return v.data[:v.index]
 }
 
 func (v *Vector[T]) Index() int {

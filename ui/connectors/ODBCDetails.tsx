@@ -1,9 +1,9 @@
 import * as React from 'react';
 import { DatabaseConnectorInfo, ServerInfo } from '../../shared/state';
+import { FileInput } from '../components/FileInput';
 import { FormGroup } from '../components/FormGroup';
 import { Input } from '../components/Input';
 import { ServerPicker } from '../components/ServerPicker';
-import { Toggle } from '../components/Toggle';
 import { Database } from './Database';
 import { Host } from './Host';
 import { Password } from './Password';
@@ -28,33 +28,25 @@ export function ODBCDetails(props: {
           updateConnector={updateConnector}
         />
         <div className="form-row">
-          <Input
-            label="Additional parameters"
+          <FileInput
+            allowFilePicker
+            label="Driver"
             value={connector.database.extra.driver || ''}
             onChange={(value: string) => {
               connector.database.extra.driver = value;
               updateConnector(connector);
             }}
-            placeholder="Driver specified in DSN"
           />
         </div>
         <div className="form-row">
-          <Toggle
-            label="Untrusted certificates"
-            rhsLabel={
-              String(connector.database.extra.odbc_allow_untrusted) === 'true'
-                ? 'Allowed'
-                : 'Not allowed'
-            }
-            value={
-              String(connector.database.extra.odbc_allow_untrusted) === 'true'
-            }
-            onChange={function handleTrustToggle() {
-              connector.database.extra.odbc_allow_untrusted = String(
-                !(connector.database.extra.odbc_allow_untrusted === 'true')
-              );
+          <Input
+            label="Additional parameters"
+            value={connector.database.extra.params || ''}
+            onChange={(value: string) => {
+              connector.database.extra.params = value;
               updateConnector(connector);
             }}
+            placeholder="A=Yes;B=somethingelse"
           />
         </div>
       </FormGroup>
