@@ -46,7 +46,7 @@ describe('elasticsearch testdata/documents tests', () => {
         // exist so while the client should work on Windows there's not
         // an easy way in GA to test on Windows against a Linux
         // container.
-        if (process.platform === 'windows') {
+        if (process.platform === 'win32') {
           return;
         }
 
