@@ -74,6 +74,58 @@ jobs:
         name: non-credential-coverage
         path: coverage/*.cov
 
+  macos_node_ui_tests:
+    name: macOS Node/UI Tests
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@master
+      with:
+        ref: ${{ github.ref }}
+
+    - uses: c-hive/gha-yarn-cache@v2
+    - name: Setup Golang caches
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cache/go-build
+          ~/go/pkg/mod
+        key: ${{ runner.os }}-golang-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-golang-
+
+    - run: ./scripts/ci/prepare_macos.sh
+    # Needed so we can have ./build/desktop_runner.js and ./build/go_desktop_runner ready for tests
+    - run: yarn build-test-runner
+    - run: yarn test --detectOpenHandles --forceExit --verbose
+
+  windows_node_ui_tests:
+    name: Windows Node/UI Tests
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@master
+      with:
+        ref: ${{ github.ref }}
+
+    - uses: c-hive/gha-yarn-cache@v2
+    - name: Setup Golang caches
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cache/go-build
+          ~/go/pkg/mod
+        key: ${{ runner.os }}-golang-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-golang-
+
+    - run: ./scripts/ci/prepare_windows.ps1
+      shell: pwsh
+
+    # Needed so we can have ./build/desktop_runner.js and ./build/go_desktop_runner ready for tests
+    - run: yarn build-test-runner
+    - run: yarn test --detectOpenHandles --forceExit --verbose
+
   credentialed_integration_tests:
     name: Credentialed Database Integration Tests that Require Special Permissions to Succeed
     runs-on: ubuntu-latest
@@ -125,6 +177,16 @@ jobs:
       with:
         ref: ${{ github.ref }}
 
+    - name: Setup Golang caches
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cache/go-build
+          ~/go/pkg/mod
+        key: ${{ runner.os }}-golang-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-golang-
+
     - run: ./scripts/ci/prepare_linux.sh --race
 
     # Run golangci-lint
@@ -153,6 +215,53 @@ jobs:
     # Run tests and coverage
     - run: cd runner && go test -race -coverprofile ../coverage/gounit.cov
     - run: ./runner/scripts/test_coverage.sh
+
+  macos_go_tests:
+    name: macOS Go Tests
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@master
+      with:
+        ref: ${{ github.ref }}
+
+    - name: Setup Golang caches
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cache/go-build
+          ~/go/pkg/mod
+        key: ${{ runner.os }}-golang-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-golang-
+
+    - run: ./scripts/ci/prepare_macos.sh
+
+    - run: cd runner && go test -race
+
+  windows_go_tests:
+    name: windows Go Tests
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@master
+      with:
+        ref: ${{ github.ref }}
+
+    - name: Setup Golang caches
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cache/go-build
+          ~/go/pkg/mod
+        key: ${{ runner.os }}-golang-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-golang-
+
+    - run: ./scripts/ci/prepare_windows.ps1
+      shell: pwsh
+
+    - run: cd runner && go test -race
 
   e2e_linux_tests:
     name: End-to-end Linux Tests
