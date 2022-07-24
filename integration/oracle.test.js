@@ -1,5 +1,5 @@
 const { basicDatabaseTest } = require('../desktop/panel/testutil');
-const { withDocker } = require('./testutil');
+const { withDocker, DEFAULT_TIMEOUT } = require('./testutil');
 
 const BASIC_TESTS = [
   {
@@ -37,7 +37,35 @@ describe('basic oracle tests', () => {
           () => basicDatabaseTest(t, vendorOverride)
         );
       },
-      360_000
+      DEFAULT_TIMEOUT
     );
   }
+
+  test(
+    'alternative port regression test',
+    async () => {
+      await withDocker(
+        {
+          image: 'docker.io/gvenzl/oracle-xe:latest',
+          port: '1520:1521',
+          env: {
+            ORACLE_RANDOM_PASSWORD: 'y',
+            APP_USER: 'test',
+            APP_USER_PASSWORD: 'test',
+          },
+          // TODO: find a better way to wait for oracle to come up
+          wait: () => new Promise((r) => setTimeout(r, 60_000)),
+        },
+        () =>
+          basicDatabaseTest(BASIC_TESTS[0], {
+            ...vendorOverride,
+            oracle: {
+              ...vendorOverride.oracle,
+              address: 'localhost:1520',
+            },
+          })
+      );
+    },
+    DEFAULT_TIMEOUT
+  );
 });
