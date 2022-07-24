@@ -32,7 +32,7 @@ const vendorOverride = {
     database: 'master',
     extra: {
       driver: 'ODBC Driver 18 for SQL Server',
-      params: 'allow_untrusted=true',
+      params: 'TrustServerCertificate=yes;',
     },
   },
 };
