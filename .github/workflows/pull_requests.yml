@@ -97,10 +97,10 @@ jobs:
     - run: ./scripts/ci/prepare_macos.sh
     # Needed so we can have ./build/desktop_runner.js and ./build/go_desktop_runner ready for tests
     - run: yarn build-test-runner
-    - run: yarn test --detectOpenHandles --forceExit --verbose
+    - run: yarn test ui desktop shared --detectOpenHandles --forceExit --verbose
 
-  windows_node_ui_tests:
-    name: Windows Node/UI Tests
+  windows_ui_tests:
+    name: Windows UI Tests
     runs-on: windows-latest
 
     steps:
@@ -124,7 +124,7 @@ jobs:
 
     # Needed so we can have ./build/desktop_runner.js and ./build/go_desktop_runner ready for tests
     - run: yarn build-test-runner
-    - run: yarn test --detectOpenHandles --forceExit --verbose
+    - run: yarn test ui --detectOpenHandles --forceExit --verbose
 
   credentialed_integration_tests:
     name: Credentialed Database Integration Tests that Require Special Permissions to Succeed
