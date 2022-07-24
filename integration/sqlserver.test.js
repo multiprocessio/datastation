@@ -27,7 +27,6 @@ describe('basic sqlserver tests', () => {
           {
             image: 'mcr.microsoft.com/mssql/server:2019-latest',
             port: '1433',
-            args: ['--name', 'sqlserver', '--hostname', 'sqlserver'],
             env: {
               ACCEPT_EULA: 'Y',
               MSSQL_SA_PASSWORD: '1StrongPwd!!',

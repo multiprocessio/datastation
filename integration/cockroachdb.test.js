@@ -19,9 +19,10 @@ describe('basic cockroachdb tests', () => {
           {
             image: 'docker.io/cockroachdb/cockroach:latest',
             port: 26257,
-            args: [],
+            args: ['--entrypoint', 'tail'],
+            program: ['-f', '/dev/null'],
             cmds: [
-              `mkdir certs cockroach-safe`,
+              `mkdir -p certs cockroach-safe`,
               `cockroach cert create-ca --certs-dir=certs --ca-key=cockroach-safe/ca.key`,
               `cockroach cert create-node localhost $(hostname) --certs-dir=certs --ca-key=cockroach-safe/ca.key`,
               `cockroach cert create-client root --certs-dir=certs --ca-key=cockroach-safe/ca.key`,

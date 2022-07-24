@@ -100,7 +100,7 @@ jobs:
     - run: yarn test --detectOpenHandles --forceExit --verbose
 
   windows_node_ui_tests:
-    name: Windows Node/UI Tests
+    name: Windows UI Tests
     runs-on: windows-latest
 
     steps:

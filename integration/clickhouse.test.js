@@ -26,7 +26,7 @@ describe('basic clickhouse tests', () => {
               '--ulimit',
               'nofile=262144:262144',
             ],
-            cmds: [`clickhouse client -n 'CREATE DATABASE test'`],
+            cmds: [`clickhouse-client -q 'CREATE DATABASE test'`],
           },
           () => basicDatabaseTest(t)
         );
