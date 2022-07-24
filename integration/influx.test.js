@@ -56,7 +56,7 @@ async function testBasicInflux(testcase) {
 
 describe('influx 1 tests', () => {
   const basicTest = {
-    address: 'localhost:8087',
+    address: 'localhost:8086',
     query: 'SELECT MEAN(avg_wave_period_sec) FROM ndbc',
     version: 'influx',
   };
@@ -71,16 +71,16 @@ describe('influx 1 tests', () => {
       return withDocker(
         {
           image: 'docker.io/library/influxdb:1.7',
-          port: '8087:8086',
+          port: '8086',
           env: {
+            INFLUXDB_DB: 'test',
             INFLUXDB_HTTP_AUTH_ENABLED: 'true',
             INFLUXDB_ADMIN_USER: 'test',
             INFLUXDB_ADMIN_PASSWORD: 'testtest',
           },
           args: ['-v', __dirname + '/../testdata/influx:/testdata'],
           cmds: [
-            `curl -XPOST "http://localhost:8086/query?u=test&p=testtest" --data-urlencode "q=CREATE DATABASE test"`,
-            `curl -XPOST 'http://localhost:8086/write?db=test&u=test&p=testtest' --data-binary @/testdata/noaa-ndbc-data-sample.lp`,
+            `curl --fail -XPOST 'http://localhost:8086/write?db=test&u=test&p=testtest' --data-binary @/testdata/noaa-ndbc-data-sample.lp`,
           ],
         },
         () => testBasicInflux(basicTest)

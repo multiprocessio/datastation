@@ -71,7 +71,7 @@ describe('elasticsearch testdata/documents tests', () => {
               const nDocs = 4;
               for (let i = 0; i < nDocs; i++) {
                 cp.execSync(
-                  `curl -X POST -H 'Content-Type: application/json' -d @testdata/documents/${
+                  `curl --fail -X POST -H 'Content-Type: application/json' -d @testdata/documents/${
                     i + 1
                   }.json http://localhost:9200/test/_doc`,
                   { stdio: 'inherit' }
