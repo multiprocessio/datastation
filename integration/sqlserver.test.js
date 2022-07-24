@@ -7,6 +7,15 @@ const BASIC_TESTS = [
     // SQL Server doesn't have true/false literals
     query: `SELECT 1 AS "1", 2.2 AS "2", 1 AS "true", 'string' AS "string", CAST('2021-01-01' AS DATE) AS "date"`,
   },
+  /*
+     NOTES ON RUNNING ODBC TESTS LOCALLY:
+     * Install the odbc driver for SQL Server here: https://docs.microsoft.com/en-us/sql/connect/odbc/linux-mac/installing-the-microsoft-odbc-driver-for-sql-server?view=sql-server-ver16
+     * Run: ./runner/plugin/odbc/build.sh -race
+     * Build the test runner: yarn build-test-runner
+     * Run: yarn test-local integration/sqlserver.test.js -t odbc
+     
+     Easy peasy.
+   */
   {
     type: 'odbc',
     // SQL Server doesn't have true/false literals
@@ -40,7 +49,7 @@ const vendorOverride = {
 describe('basic sqlserver tests', () => {
   for (const t of BASIC_TESTS) {
     test(
-      t.query,
+      t.type + ':' + t.query,
       async () => {
         await withDocker(
           {

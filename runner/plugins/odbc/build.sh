@@ -17,4 +17,4 @@ if [[ "$1" == "-race" ]]; then
 fi
 
 # Compile Go plugin
-cd runner/plugins/odbc && go build -trimpath -buildmode=plugin -mod=readonly -modcacherw -ldflags="-s -w" $race -o ./odbc.build ./odbc.go && cd ../../..
+cd runner/plugins/odbc && go build -trimpath -buildmode=plugin -mod=readonly -modcacherw -ldflags="-s -w" $race -o ./odbc.plugin ./odbc.go && cd ../../..
