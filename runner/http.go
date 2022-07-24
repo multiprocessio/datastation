@@ -318,6 +318,8 @@ func TransformReader(r *bufio.Reader, fileName string, cti ContentTypeInfo, out 
 			return edse(err)
 		}
 		return transformOpenOfficeSheet(oor, out)
+	case LogFmtMimeType:
+		return transformLogFmtFile(fileName, out)
 	}
 
 	if re, ok := BUILTIN_REGEX[assumedType]; ok {
