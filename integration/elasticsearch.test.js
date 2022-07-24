@@ -37,7 +37,6 @@ describe('elasticsearch testdata/documents tests', () => {
     },
   ];
 
-  let first = true;
   for (const testcase of tests) {
     test(
       testcase.query,
@@ -49,12 +48,6 @@ describe('elasticsearch testdata/documents tests', () => {
         if (process.platform === 'win32') {
           return;
         }
-
-        // It seems to take elasticsearch a while to shut down
-        if (!first) {
-          await new Promise((r) => setTimeout(r, 5000));
-        }
-        first = false;
 
         await withDocker(
           {

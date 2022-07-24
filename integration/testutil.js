@@ -8,7 +8,28 @@ function runCmd(opts, containerId, cmd) {
   process.stdout.write('\n');
 }
 
+const CONTAINERS = {};
+
+function getContainers() {
+  console.log('Waiting for container to come up...');
+  const res = cp.execSync('docker ps');
+  return res.toString().split('\n').slice(1);
+}
+
 module.exports.withDocker = async function (opts, cb) {
+  outer: while (true) {
+    for (const container of getContainers()) {
+      const id = container.split(' ')[0];
+      if (CONTAINERS[opts.image] && CONTAINERS[opts.image].includes(id)) {
+        console.log('Waiting for existing container from this image to die.');
+        await new Promise((r) => setTimeout(r, 3000));
+        continue outer;
+      }
+    }
+
+    break;
+  }
+
   const cmd = 'docker';
   const args = ['run', '-d'];
   if (opts.port) {
@@ -63,9 +84,7 @@ module.exports.withDocker = async function (opts, cb) {
   let running = false;
   while (!running) {
     const containerId = stdout.slice(0, 12);
-    console.log('Waiting for container to come up...');
-    const res = cp.execSync('docker ps');
-    const containers = res.toString().split('\n').slice(1);
+    const containers = getContainers();
     for (const container of containers) {
       const id = container.split(' ')[0];
       if (id && id == containerId) {
@@ -77,6 +96,10 @@ module.exports.withDocker = async function (opts, cb) {
   }
 
   const containerId = stdout.slice(0, 12);
+  if (!CONTAINERS[opts.image]) {
+    CONTAINERS[opts.image] = [];
+  }
+  CONTAINERS[opts.image].push(containerId);
 
   try {
     if (opts.wait) {
@@ -111,5 +134,11 @@ module.exports.withDocker = async function (opts, cb) {
     console.log('Killing container');
     cp.execSync('docker kill ' + containerId, { stdio: 'inherit' });
     console.log('Killed container');
+
+    CONTAINERS[opts.image] = CONTAINERS[opts.image].filter(
+      (c) => c === containerId
+    );
   }
 };
+
+module.exports.DEFAULT_TIMEOUT = 360_000;
