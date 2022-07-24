@@ -39,7 +39,7 @@ describe('elasticsearch testdata/documents tests', () => {
 
   for (const testcase of tests) {
     test(
-      testcase.query,
+      'query: "' + testcase.query + '"',
       async () => {
         // GA tries to run a Windows container for ES which doesn't
         // exist so while the client should work on Windows there's not
