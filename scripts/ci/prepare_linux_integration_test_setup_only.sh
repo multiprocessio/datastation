@@ -61,8 +61,6 @@ docker run -d -p 8086:8086 -e "DOCKER_INFLUXDB_INIT_MODE=setup" -e "DOCKER_INFLU
 docker run -d -p 8087:8086 -e "INFLUXDB_HTTP_AUTH_ENABLED=true" -e "INFLUXDB_ADMIN_USER=test" -e "INFLUXDB_ADMIN_PASSWORD=testtest" influxdb:1.7
 
 # Start up mongodb and install mongosh (shell)
-docker run -d -e "MONGO_INITDB_ROOT_USERNAME=test" -e "MONGO_INITDB_DATABASE=test" -e "MONGO_INITDB_ROOT_PASSWORD=test" -p 27017:27017 mongo:5
-# curl -LO https://github.com/mongodb-js/mongosh/releases/download/v1.5.0/mongodb-mongosh_1.5.0_amd64.deb
 sudo apt-get install -y mongodb-mongosh
 
 ## LOAD DATA ##
@@ -95,10 +93,3 @@ retry 10 "curl -XPOST 'http://localhost:8087/write?db=test&u=test&p=testtest' --
 
 # Load influx2 data
 retry 10 "curl -XPOST 'http://localhost:8086/api/v2/write?org=test&bucket=test&precision=ns' --header 'Authorization: Token test' --data-binary @testdata/influx/noaa-ndbc-data-sample.lp"
-
-# Load Mongodb documents
-for t in $(ls testdata/documents/*.json); do
-   mongosh "mongodb://test:test@localhost:27017" --eval "db.test.insertOne($(cat $t))"
-done
-
-# TODO: might be worth switching to docker-compose at some point...
