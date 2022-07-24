@@ -52,44 +52,6 @@ sudo mv mssql-release.list /etc/apt/sources.list.d/mssql-release.list
 
 sudo apt-get update
 sudo ACCEPT_EULA=Y apt-get install -y msodbcsql18
-## LAUNCH CONTAINERS
-
-# Start up influx (2 for fluxql)
-docker run -d -p 8086:8086 -e "DOCKER_INFLUXDB_INIT_MODE=setup" -e "DOCKER_INFLUXDB_INIT_USERNAME=test" -e "DOCKER_INFLUXDB_INIT_PASSWORD=testtest" -e "DOCKER_INFLUXDB_INIT_ORG=test" -e "DOCKER_INFLUXDB_INIT_BUCKET=test" -e "DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=test" influxdb:2.0
-
-# Start up influx (1 for influxql)
-docker run -d -p 8087:8086 -e "INFLUXDB_HTTP_AUTH_ENABLED=true" -e "INFLUXDB_ADMIN_USER=test" -e "INFLUXDB_ADMIN_PASSWORD=testtest" influxdb:1.7
 
 # Start up mongodb and install mongosh (shell)
 sudo apt-get install -y mongodb-mongosh
-
-## LOAD DATA ##
-
-sleep 60 # Time for everything to load (influx in particular takes a while)
-
-function retry {
-    ok="false"
-    for i in $(seq $1); do
-	if bash -c "$2" ; then
-	    ok="true"
-	    break
-	fi
-
-	echo "Retrying... $2"
-	sleep 5s
-    done
-
-    if [[ "$ok" == "false" ]]; then
-	echo "Failed after retries... $2"
-	exit 1
-    fi
-}
-
-docker ps
-
-# Load influx1 data
-retry 10 'curl -XPOST "http://localhost:8087/query?u=test&p=testtest" --data-urlencode "q=CREATE DATABASE test"'
-retry 10 "curl -XPOST 'http://localhost:8087/write?db=test&u=test&p=testtest' --data-binary @testdata/influx/noaa-ndbc-data-sample.lp"
-
-# Load influx2 data
-retry 10 "curl -XPOST 'http://localhost:8086/api/v2/write?org=test&bucket=test&precision=ns' --header 'Authorization: Token test' --data-binary @testdata/influx/noaa-ndbc-data-sample.lp"
