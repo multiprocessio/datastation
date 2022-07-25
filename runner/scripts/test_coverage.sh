@@ -1,6 +1,6 @@
 set -eu
 
-gocovmerge coverage/gorunner*.cov > runner/all.out
+gocovmerge coverage/go*.cov > runner/all.out
 cd runner
 gocov convert all.out | gocov report | tee report
 perc="$(tail report -n1 | cut -d ' ' -f 3 | cut -d '.' -f 1)"

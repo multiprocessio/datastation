@@ -30,9 +30,34 @@ func (v *Vector[T]) Append(item T) {
 }
 
 func (v *Vector[T]) List() []T {
-	return v.data
+	return v.data[:v.index]
 }
 
 func (v *Vector[T]) Index() int {
 	return v.index
+}
+
+func (v *Vector[T]) Pop() *T {
+	if v.index == 0 {
+		return nil
+	}
+
+	v.index--
+	return &v.data[v.index]
+}
+
+func (v *Vector[T]) At(i int) *T {
+	for i < 0 && v.index != 0 {
+		i += v.index
+	}
+
+	if i < 0 {
+		return nil
+	}
+
+	if i >= v.index {
+		return nil
+	}
+
+	return &v.data[i]
 }

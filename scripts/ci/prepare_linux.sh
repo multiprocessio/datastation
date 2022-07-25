@@ -19,15 +19,18 @@ sudo apt-get install -y nodejs cmake
 #
 # IMPORTANT: Only run in Github CI.
 #
-race=""
 if [[ "$1" == "--integration-tests" ]]; then
     ./scripts/ci/prepare_linux_integration_test_setup_only.sh
-    race="-race"
 fi
 
 # Set up project
 sudo npm install --global yarn
 yarn
+
+race=""
+if [[ "$1" == "--integration-tests" ]] || [[ "$1" == "--race" ]]; then
+    race="-race"
+fi
 
 # Install ODBC
 ./runner/plugins/odbc/build.sh $race

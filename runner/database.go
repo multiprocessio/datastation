@@ -269,46 +269,49 @@ func (ec EvalContext) getConnectionString(dbInfo DatabaseConnectorInfoDatabase) 
 
 		return "neo4j", addr.String(), nil
 	case ODBCDatabase:
-		params := map[string]string{}
+		type kv struct {
+			key   string
+			value string
+		}
+		var params Vector[kv]
 		var err error
 
 		if strings.Contains(u.address, "localhost") {
 			split := strings.Split(u.address, ":")
-			params["server"] = fmt.Sprintf("%s,%s", split[0], split[1])
+			params.Append(kv{"server", fmt.Sprintf("%s,%s", split[0], split[1])})
 		} else {
 			addr, err := url.Parse(u.address)
 			if err != nil {
 				return "", "", err
 			}
-			params["server"] = fmt.Sprintf("%s,%s", addr.Hostname(), addr.Port())
+			params.Append(kv{"server", fmt.Sprintf("%s,%s", addr.Hostname(), addr.Port())})
 		}
-		params["database"] = u.database
+		params.Append(kv{"database", u.database})
 
 		var ok bool
-		params["driver"], ok = dbInfo.Extra["driver"]
+		driver, ok := dbInfo.Extra["driver"]
 		if !ok {
-			return "", "", fmt.Errorf("driver not found")
+			return "", "", fmt.Errorf("Must specify driver")
 		}
+		params.Append(kv{"driver", driver})
 
-		params["pwd"], err = ec.decrypt(&dbInfo.Password)
+		pwd, err := ec.decrypt(&dbInfo.Password)
 		if err != nil {
 			return "", "", err
 		}
+		params.Append(kv{"pwd", pwd})
 
-		params["uid"] = dbInfo.Username
+		params.Append(kv{"uid", dbInfo.Username})
 		if dbInfo.Username == "" {
-			params["trusted_connection"] = "yes" // TODO: configure TLS
-		}
-
-		val, ok := dbInfo.Extra["trust_server_certificate"]
-		if ok && val == "Yes" {
-			params["TrustServerCertificate"] = val
+			params.Append(kv{"trusted_connection", "yes"}) // TODO: configure TLS
 		}
 
 		var conn string
-		for k, v := range params {
-			conn += k + "=" + v + ";"
+		for _, kv := range params.List() {
+			conn += kv.key + "=" + kv.value + ";"
 		}
+
+		conn += dbInfo.Extra["params"]
 
 		return "odbc", conn, nil
 	}

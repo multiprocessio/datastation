@@ -11,6 +11,8 @@ pinned = {
     '@types/react-dom': '17',
     # node-fetch 3 breaks because it requires everything to be jsmodules
     'node-fetch': '2',
+    # nanoid 4 breaks because it requires esm
+    'nanoid': '3',
 }
 
 def upgrade_section(items, extra_flag):

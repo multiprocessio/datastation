@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { DatabaseConnectorInfo, ServerInfo } from '../../shared/state';
+import { FileInput } from '../components/FileInput';
 import { FormGroup } from '../components/FormGroup';
 import { Input } from '../components/Input';
 import { ServerPicker } from '../components/ServerPicker';
@@ -27,25 +28,25 @@ export function ODBCDetails(props: {
           updateConnector={updateConnector}
         />
         <div className="form-row">
-          <Input
+          <FileInput
+            allowFilePicker
             label="Driver"
             value={connector.database.extra.driver || ''}
             onChange={(value: string) => {
               connector.database.extra.driver = value;
               updateConnector(connector);
             }}
-            placeholder="Driver specified in DSN"
           />
         </div>
         <div className="form-row">
           <Input
-            label="Trust Server Certificate"
-            value={connector.database.extra.trust_server_certificate || ''}
+            label="Additional parameters"
+            value={connector.database.extra.params || ''}
             onChange={(value: string) => {
-              connector.database.extra.trust_server_certificate = value;
+              connector.database.extra.params = value;
               updateConnector(connector);
             }}
-            placeholder="Allow self-signed (Yes)"
+            placeholder="A=Yes;B=somethingelse"
           />
         </div>
       </FormGroup>

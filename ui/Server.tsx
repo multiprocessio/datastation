@@ -94,21 +94,12 @@ export function Server({
               label="Address"
               value={server.address}
               type="url"
+              placeholder="localhost:9090"
               onChange={function handleAddressChange(value: string) {
                 server.address = value;
                 updateServer(server);
               }}
-            />
-          </div>
-          <div className="form-row">
-            <Input
-              label="Port"
-              value={String(server.port)}
-              type="number"
-              onChange={function handlePortChange(value: string) {
-                server.port = +value;
-                updateServer(server);
-              }}
+              tooltip="Specify the address and, optionally, the port. If no port is specified it defaults to 22."
             />
           </div>
           <div className="form-row">

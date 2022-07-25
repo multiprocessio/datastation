@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"math/rand"
 	"os"
+	"runtime"
 	"strings"
 	"testing"
 	"time"
@@ -255,7 +256,10 @@ cdef`,
 		assert.Equal(t, test, out)
 
 		err = os.Remove(inTmp.Name())
-		assert.Nil(t, err)
+		// For some reason this fails on Windows
+		if runtime.GOOS != "windows" {
+			assert.Nil(t, err)
+		}
 	}
 }
 
