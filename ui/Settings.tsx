@@ -34,7 +34,10 @@ export function useSettings(): [SettingsT, (s: SettingsT) => Promise<void>] {
 
   function loadBrowserSettings() {
     if (MODE === 'browser') {
-      let settings = new SettingsT('');
+      let settings = new SettingsT(
+        '',
+        window.matchMedia && window.matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light'
+      );
       try {
         settings = mergeDeep(
           settings,
