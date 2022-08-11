@@ -44,4 +44,7 @@ yarn electron-rebuild
 
 # Build and package
 yarn electron-packager --asar --overwrite --icon=build/icon.png --out=releases --build-version={VERSION} --app-version={VERSION} . "DataStation Desktop CE"
-zip -9 -r releases/datastation-{os}-{arch}-{VERSION}.zip "releases/DataStation Desktop CE-{os}-{arch}"
+
+# This reference to arg0 is correct because the upload script uses the
+# real tag name, not our stripped version here.
+zip -9 -r releases/datastation-{os}-{arch}-{arg0}.zip "releases/DataStation Desktop CE-{os}-{arch}"
