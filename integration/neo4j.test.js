@@ -7,7 +7,7 @@ const {
   DatabaseConnectorInfo,
 } = require('../shared/state');
 const { withSavedPanels, RUNNERS } = require('../desktop/panel/testutil');
-const { withDocker } = require('./testutil');
+const { withDocker } = require('./docker');
 
 describe('basic neo4j tests', () => {
   test('basic test', async () => {

@@ -7,7 +7,7 @@ const {
   DatabaseConnectorInfo,
 } = require('../shared/state');
 const { withSavedPanels, RUNNERS } = require('../desktop/panel/testutil');
-const { withDocker } = require('./testutil');
+const { withDocker } = require('./docker');
 
 describe('basic cassandra/scylladb tests', () => {
   test(`runs basic cql query`, async () => {

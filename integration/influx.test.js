@@ -9,7 +9,7 @@ const {
   DatabaseConnectorInfo,
 } = require('../shared/state');
 const { withSavedPanels, RUNNERS } = require('../desktop/panel/testutil');
-const { withDocker, DEFAULT_TIMEOUT } = require('./testutil');
+const { withDocker, DEFAULT_TIMEOUT } = require('./docker');
 
 async function testBasicInflux(testcase) {
   const connectors = [

@@ -6,7 +6,7 @@ const fetch = require('node-fetch');
 const { getProjectResultsFile } = require('../desktop/store');
 const { DatabasePanelInfo, DatabaseConnectorInfo } = require('../shared/state');
 const { withSavedPanels, RUNNERS } = require('../desktop/panel/testutil');
-const { withDocker } = require('./testutil');
+const { withDocker } = require('./docker');
 
 describe('elasticsearch testdata/documents tests', () => {
   const tests = [

@@ -2,12 +2,14 @@ rm -rf build
 yarn
 setenv UI_ESBUILD_ARGS "--minify"
 setenv VERSION {arg0}
+# Remove v prefix from version. v12 -> 12
+stripleft VERSION "v"
 yarn build-desktop
 
 prepend "window.DS_CONFIG_MODE='desktop';" build/ui.js
-prepend "window.DS_CONFIG_VERSION='{arg0}';" build/ui.js
-prepend "window.DS_CONFIG_VERSION='{arg0}';" build/desktop_runner.js
-prepend "global.DS_CONFIG_VERSION='{arg0}';" build/desktop.js
+prepend "window.DS_CONFIG_VERSION='{VERSION}';" build/ui.js
+prepend "window.DS_CONFIG_VERSION='{VERSION}';" build/desktop_runner.js
+prepend "global.DS_CONFIG_VERSION='{VERSION}';" build/desktop.js
 cp icon.png build/icon.png
 cp icon.ico build/icon.ico
 cp icon.icns build/icon.icns
@@ -41,5 +43,5 @@ rm -rf releases
 yarn electron-rebuild
 
 # Build and package
-yarn electron-packager --asar --overwrite --icon=build/icon.png --out=releases --build-version={arg0} --app-version={arg0} . "DataStation Desktop CE"
-zip -9 -r releases/datastation-{os}-{arch}-{arg0}.zip "releases/DataStation Desktop CE-{os}-{arch}"
+yarn electron-packager --asar --overwrite --icon=build/icon.png --out=releases --build-version={VERSION} --app-version={VERSION} . "DataStation Desktop CE"
+zip -9 -r releases/datastation-{os}-{arch}-{VERSION}.zip "releases/DataStation Desktop CE-{os}-{arch}"

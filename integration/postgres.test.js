@@ -1,5 +1,5 @@
 const { basicDatabaseTest } = require('../desktop/panel/testutil');
-const { withDocker } = require('./testutil');
+const { withDocker } = require('./docker');
 
 const BASIC_TESTS = [
   {
