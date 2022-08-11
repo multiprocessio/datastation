@@ -166,6 +166,7 @@ def eval_line(line):
         var = line[1]
         what = line[2]
         os.environ[var] = os.environ[var].lstrip(what)
+        return
     elif line[0] == 'prepend':
         what = line[1]
         to = line[2]
