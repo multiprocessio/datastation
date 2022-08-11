@@ -2,6 +2,8 @@ rm -rf build
 yarn
 setenv UI_ESBUILD_ARGS "--minify"
 setenv VERSION {arg0}
+# Remove v prefix from version. v12 -> 12
+stripleft VERSION "v"
 yarn build-desktop
 
 prepend "window.DS_CONFIG_MODE='desktop';" build/ui.js

@@ -162,6 +162,10 @@ def eval_line(line):
         with open(to, 'a') as to:
             to.write('\n'+what)
         return
+    elif line[0] == 'stripleft':
+        var = line[1]
+        what = line[2]
+        os.environ[var] = os.environ[var].lstrip(what)
     elif line[0] == 'prepend':
         what = line[1]
         to = line[2]
