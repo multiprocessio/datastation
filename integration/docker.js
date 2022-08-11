@@ -138,6 +138,12 @@ module.exports.withDocker = async function (opts, cb) {
     CONTAINERS[opts.image] = CONTAINERS[opts.image].filter(
       (c) => c === containerId
     );
+
+    if (process.env.CI == 'true') {
+      // Clear up disk space if possible since Github Actions doesn't
+      // have a massive disk.
+      cp.execSync('docker image prune -a', { stdio: 'inherit' });
+    }
   }
 };
 

@@ -1,5 +1,5 @@
 const { basicDatabaseTest } = require('../desktop/panel/testutil');
-const { withDocker, DEFAULT_TIMEOUT } = require('./testutil');
+const { withDocker, DEFAULT_TIMEOUT } = require('./docker');
 
 const BASIC_TESTS = [
   {
