@@ -403,7 +403,7 @@ func (ec EvalContext) EvalDatabasePanelWithWriter(
 	cache CacheSettings,
 	w *ResultWriter,
 ) error {
-	
+
 	var connector *ConnectorInfo
 	for _, c := range project.Connectors {
 		cc := c
