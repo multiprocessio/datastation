@@ -94,6 +94,24 @@ li {
   height: calc(100% - 39px);
 }
 
+.banner {
+  padding: 3px 15px;
+  color: white;
+  background: black;
+  font-size: 0.9rem;
+
+  a {
+    color: white;
+    padding-left: 3px;
+  }
+
+  .button {
+    background: transparent;
+    margin-right: 10px;
+    color: white;
+  }
+}
+
 .main-body {
   flex: 1;
   overflow-y: auto;
@@ -425,8 +443,14 @@ input + input[type='file'] {
   box-shadow: 0px 0px 3px var(--border-light);
 }
 
-.button:hover {
+.button:not(.button--icon):hover {
   background: #f0f0f0;
+}
+
+.button--icon:hover {
+  svg {
+    stroke-width: 3;
+  }
 }
 
 .button--primary {
@@ -706,7 +730,7 @@ input + input[type='file'] {
   position: absolute;
   left: 0;
   top: 0;
-  z-index: 999;
+  z-index: 16;
   height: 100%;
   width: 100%;
   margin: 0;
