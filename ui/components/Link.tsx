@@ -7,7 +7,7 @@ interface LinkProps {
   children?: React.ReactNode;
 }
 
-export function Link({ args, className }: LinkProps) {
+export function Link({ args, className, children }: LinkProps) {
   const url =
     '?' +
     Object.entries(args)
@@ -19,5 +19,9 @@ export function Link({ args, className }: LinkProps) {
     setUrlState(args);
   }
 
-  return <a href={url} onClick={navigate} className={className} />;
+  return (
+    <a href={url} onClick={navigate} className={className}>
+      {children}
+    </a>
+  );
 }

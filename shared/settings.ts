@@ -18,6 +18,7 @@ export class Settings {
   autocompleteDisabled: boolean;
   theme: 'light' | 'dark';
   caCerts: Array<{ file: string; id: string }>;
+  surveyAug2022: boolean;
 
   constructor(
     file: string,
@@ -41,5 +42,7 @@ export class Settings {
     this.stdoutMaxSize = stdoutMaxSize || 5000;
     this.file = file;
     this.caCerts = [];
+
+    this.surveyAug2022 = true;
   }
 }

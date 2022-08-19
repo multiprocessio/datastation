@@ -181,6 +181,25 @@ export function App<T extends DefaultView = DefaultView>({
         >
           <div className={`app app--${MODE} app--${settings.theme}`}>
             {MODE_FEATURES.appHeader && !isMakeSelect && <Header />}
+            {settings.surveyAug2022 ? (
+              <div className="banner">
+                Help us out: take a quick{' '}
+                <a
+                  target="_blank"
+                  href="https://docs.google.com/forms/d/e/1FAIpQLSdNhU5k3FsIkcea_CTPVrmJ45k0czRz60XqLmBVUE5TjaT_jg/viewform"
+                >
+                  user survey
+                </a>
+                !{' '}
+                <button
+                  onClick={() =>
+                    setSettings({ ...settings, surveyAug2022: false })
+                  }
+                >
+                  Hide this
+                </button>
+              </div>
+            ) : null}
             <main className={'view view-' + (urlState.view || 'editor')}>
               {urlState.projectId && <Navigation pages={routes} />}
               {main}
