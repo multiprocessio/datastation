@@ -395,13 +395,15 @@ func (ec EvalContext) loadJSONArrayPanel(projectId, panelId string) (chan map[st
 	return loadJSONArrayFile(f)
 }
 
-func (ec EvalContext) EvalDatabasePanel(
+func (ec EvalContext) EvalDatabasePanelWithWriter(
 	project *ProjectState,
 	pageIndex int,
 	panel *PanelInfo,
 	panelResultLoader func(projectId, panelId string) (chan map[string]any, error),
 	cache CacheSettings,
+	w *ResultWriter,
 ) error {
+	
 	var connector *ConnectorInfo
 	for _, c := range project.Connectors {
 		cc := c
@@ -437,12 +439,6 @@ func (ec EvalContext) EvalDatabasePanel(
 	if err != nil {
 		return err
 	}
-
-	w, err := ec.GetResultWriter(project.Id, panel.Id)
-	if err != nil {
-		return err
-	}
-	defer w.Close()
 
 	if dbInfo.Address == "" {
 		dbInfo.Address = "localhost:" + defaultPorts[dbInfo.Type]
@@ -611,4 +607,20 @@ func (ec EvalContext) EvalDatabasePanel(
 
 		return err
 	})
+}
+
+func (ec EvalContext) EvalDatabasePanel(
+	project *ProjectState,
+	pageIndex int,
+	panel *PanelInfo,
+	panelResultLoader func(projectId, panelId string) (chan map[string]any, error),
+	cache CacheSettings,
+) error {
+	w, err := ec.GetResultWriter(project.Id, panel.Id)
+	if err != nil {
+		return err
+	}
+	defer w.Close()
+
+	return ec.EvalDatabasePanelWithWriter(project, pageIndex, panel, panelResultLoader, cache, w)
 }
