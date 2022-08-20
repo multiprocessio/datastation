@@ -1,5 +1,6 @@
 import {
   IconCalendar,
+  IconCircleX,
   IconCode,
   IconFiles,
   IconHelp,
@@ -11,6 +12,8 @@ import * as React from 'react';
 import { MODE, MODE_FEATURES } from '../shared/constants';
 import { LANGUAGES } from '../shared/languages';
 import '../shared/polyfill';
+import { Settings as SettingsT } from '../shared/settings';
+import { Button } from './components/Button';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { Loading } from './components/Loading';
 import { Editor } from './Editor';
@@ -102,6 +105,37 @@ export function defaultRoutes(): Routes {
   ].filter(Boolean);
 }
 
+function Aug2022Survey({
+  settings,
+  setSettings,
+}: {
+  settings: SettingsT;
+  setSettings: (s: Partial<SettingsT>) => void;
+}) {
+  if (!settings.surveyAug2022) {
+    return null;
+  }
+
+  return (
+    <div className="banner vertical-align-center">
+      <Button
+        icon
+        onClick={() => setSettings({ ...settings, surveyAug2022: false })}
+      >
+        <IconCircleX />
+      </Button>
+      Help us out: take a quick
+      <a
+        target="_blank"
+        href="https://docs.google.com/forms/d/e/1FAIpQLSdNhU5k3FsIkcea_CTPVrmJ45k0czRz60XqLmBVUE5TjaT_jg/viewform"
+      >
+        user survey
+      </a>
+      !
+    </div>
+  );
+}
+
 export function App<T extends DefaultView = DefaultView>({
   routes,
 }: {
@@ -179,6 +213,7 @@ export function App<T extends DefaultView = DefaultView>({
         <SettingsContext.Provider
           value={{ state: settings, setState: setSettings }}
         >
+          <Aug2022Survey settings={settings} setSettings={setSettings} />
           <div className={`app app--${MODE} app--${settings.theme}`}>
             {MODE_FEATURES.appHeader && !isMakeSelect && <Header />}
             <main className={'view view-' + (urlState.view || 'editor')}>
