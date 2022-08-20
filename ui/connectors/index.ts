@@ -125,7 +125,7 @@ export const VENDORS: {
     details: CassandraDetails,
   },
   mongo: {
-    name: 'MongoDB',
+    name: 'MongoDB (Beta)',
     id: 'mongo',
     details: GenericDetails,
   },
@@ -140,7 +140,7 @@ export const VENDORS: {
     details: AirtableDetails,
   },
   'google-sheets': {
-    name: 'Google Sheets (Beta)',
+    name: 'Google Sheets',
     id: 'google-sheets',
     details: GoogleSheetsDetails,
   },
@@ -150,7 +150,7 @@ export const VENDORS: {
     details: Neo4jDetails,
   },
   odbc: {
-    name: 'ODBC',
+    name: 'ODBC (Beta)',
     id: 'odbc',
     details: ODBCDetails,
   },
