@@ -224,7 +224,7 @@ func (ec EvalContext) getConnectionString(dbInfo DatabaseConnectorInfoDatabase) 
 		if genericUserPass != "" {
 			// Already proven to be ok
 			pass, _ := ec.decrypt(&dbInfo.Password)
-			query = fmt.Sprintf("username=%s&password=%s&", u.username, pass)
+			query = fmt.Sprintf("username=%s&password=%s", u.username, pass)
 		}
 
 		if !strings.Contains(u.address, ":") {
