@@ -1,6 +1,7 @@
-Set-StrictMode -Version Latest
+Set-StrictMode -Version 3
 $ErrorActionPreference = "Stop"
 $PSDefaultParameterValues['*:ErrorAction']='Stop'
+$LASTEXITCODE = 0
 
 # Windows things in Github Actions (at least) fail all the time. So
 # every network-related command should be wrapped in this Retry
