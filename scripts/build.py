@@ -11,7 +11,11 @@ import subprocess
 import sys
 
 # ASSERT correct GO version
-assert subprocess.check_output(['go', 'version']).decode().startswith('go version go1.19 ')
+ACTIVE_GO_VERSION = subprocess.check_output(['go', 'version']).decode().strip().split(' ')[2][len('go'):]
+DESIRED_GO_VERSION = '1.19'
+if ACTIVE_GO_VERSION != DESIRED_GO_VERSION:
+    print(f'GO VERSION MISMATCH: Wanted Go version "{DESIRED_GO_VERSION}" got "{ACTIVE_GO_VERSION}"')
+    exit(1)
 
 IS_WINDOWS = os.name == 'nt'
 
