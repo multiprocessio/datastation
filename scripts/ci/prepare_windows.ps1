@@ -1,52 +1,28 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 $PSDefaultParameterValues['*:ErrorAction']='Stop'
-function ThrowOnNativeFailure {
-    if (-not $?)
-    {
-        throw 'Native Failure'
-    }
-}
 
 # Windows things in Github Actions (at least) fail all the time. So
 # every network-related command should be wrapped in this Retry
 # helper.
-# Source: https://stackoverflow.com/a/41554667/1507139
 function Retry {
-  [CmdletBinding()]
-  Param(
-    [Parameter(Mandatory=$true)]
-    [scriptblock]$Cmd,
-
-    [Parameter(Mandatory=$false)]
-    [int]$Count = 5
-  )
-
-  Begin {
-    $attempt = $Count
-    $success = $false
-  }
-  Process {
-    while ($attempt -gt 0 -and -not $success) {
-      try {
-        $res = Invoke-Command -ScriptBlock $Cmd -ErrorAction Stop
-        $success = $true
-      } catch {
-        $ex = $_    # remember error information
-        $attempt--
-      }
+    Param([scriptblock] $Cmd)
+    $retries = 5
+    $retrycount = 0
+    while ($retrycount++ -lt $retries) {
+	Invoke-Command -ScriptBlock $cmd
+	if ($LASTEXITCODE -ne 0) {
+	    $retries = $retries + 1
+	    echo "Retrying after sleep"
+	    Start-Sleep -Seconds 2
+	    continue
+	}
+	return
     }
-  }
-  End {
-    if ($success) {
-      return ,$res
-    } else {
-      throw $ex
-    }
-  }
+    throw "Max retries reached"
 }
 
-iwr -useb 'https://raw.githubusercontent.com/scoopinstaller/install/master/install.ps1' -outfile 'install.ps1'
+Retry -Cmd { Invoke-WebRequest -useb 'https://raw.githubusercontent.com/scoopinstaller/install/master/install.ps1' -outfile 'install.ps1' }
 .\install.ps1 -RunAsAdmin
 Join-Path (Resolve-Path ~).Path "scoop\shims" >> $Env:GITHUB_PATH
 Retry -Cmd { scoop install nodejs-lts go@1.18.3 cmake python yarn zip jq curl julia }
