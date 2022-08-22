@@ -142,7 +142,8 @@ module.exports.withDocker = async function (opts, cb) {
     if (process.env.CI == 'true') {
       // Clear up disk space if possible since Github Actions doesn't
       // have a massive disk.
-      cp.execSync('docker image prune -a', { stdio: 'inherit' });
+      // --force just doesn't prompt for confirmation
+      cp.execSync('docker image prune --all --force', { stdio: 'inherit' });
     }
   }
 };
