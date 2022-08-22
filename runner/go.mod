@@ -1,6 +1,6 @@
 module github.com/multiprocessio/datastation/runner
 
-go 1.18
+go 1.19
 
 require (
 	cloud.google.com/go/bigquery v1.38.0

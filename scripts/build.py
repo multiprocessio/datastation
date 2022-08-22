@@ -10,6 +10,9 @@ import shutil
 import subprocess
 import sys
 
+# ASSERT correct GO version
+assert subprocess.check_output(['go', 'version']).decode().startswith('go version go1.19 ')
+
 IS_WINDOWS = os.name == 'nt'
 
 BUILTIN_VARIABLES = {

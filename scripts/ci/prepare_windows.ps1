@@ -34,8 +34,8 @@ Retry -Cmd { yarn }
 Retry -Cmd { yarn rebuild }
 
 # Install Go
-# curl -L -O "https://go.dev/dl/go1.18.windows-amd64.zip"
-# unzip go1.18.windows-amd64.zip
+# curl -L -O "https://go.dev/dl/go1.19.windows-amd64.zip"
+# unzip go1.19.windows-amd64.zip
 # Join-Path $pwd "go\bin" >> $Env:GITHUB_PATH
 
 Retry -Cmd { go install github.com/google/go-jsonnet/cmd/jsonnet@latest }
