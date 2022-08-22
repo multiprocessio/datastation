@@ -227,16 +227,12 @@ func (ec EvalContext) getConnectionString(dbInfo DatabaseConnectorInfoDatabase) 
 			query = fmt.Sprintf("username=%s&password=%s&", u.username, pass)
 		}
 
-		if u.database != "" {
-			query += "database=" + u.database
-		}
-
 		if !strings.Contains(u.address, ":") {
 			u.address += ":" + defaultPorts["clickhouse"]
 		}
 
 		query += u.extraArgs
-		return "clickhouse", fmt.Sprintf("tcp://%s?%s", u.address, query), nil
+		return "clickhouse", fmt.Sprintf("tcp://%s/%s?%s", u.address, u.database, query), nil
 	case SQLiteDatabase:
 		// defined in database_sqlite.go, includes regexp support
 		return "sqlite3_extended", resolvePath(u.database), nil

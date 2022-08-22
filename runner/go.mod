@@ -6,7 +6,7 @@ require (
 	cloud.google.com/go/bigquery v1.38.0
 	github.com/ClickHouse/clickhouse-go/v2 v2.3.0
 	github.com/alexbrainman/odbc v0.0.0-20211220213544-9c9a2e61c5e2
-	github.com/aws/aws-sdk-go v1.44.81
+	github.com/aws/aws-sdk-go v1.44.82
 	github.com/denisenkom/go-mssqldb v0.12.2
 	github.com/flosch/pongo2 v0.0.0-20200913210552-0d938eb266f3
 	github.com/go-logfmt/logfmt v0.5.1
