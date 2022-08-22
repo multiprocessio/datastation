@@ -26,7 +26,15 @@ function Retry {
 Retry -Cmd { Invoke-WebRequest -useb 'https://raw.githubusercontent.com/scoopinstaller/install/master/install.ps1' -outfile 'install.ps1' }
 .\install.ps1 -RunAsAdmin
 Join-Path (Resolve-Path ~).Path "scoop\shims" >> $Env:GITHUB_PATH
-Retry -Cmd { scoop install nodejs-lts go@1.19 cmake python yarn zip jq curl julia }
+Retry -Cmd { scoop install nodejs-lts }
+Retry -Cmd { scoop install go@1.19 }
+Retry -Cmd { scoop install cmake }
+Retry -Cmd { scoop install python }
+Retry -Cmd { scoop install yarn }
+Retry -Cmd { scoop install zip }
+Retry -Cmd { scoop install jq }
+Retry -Cmd { scoop install curl }
+Retry -Cmd { scoop install julia }
 New-Alias zip 7z
 
 # Install JS dependencies
