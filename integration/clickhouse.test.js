@@ -17,7 +17,7 @@ describe('basic clickhouse tests', () => {
       async () => {
         await withDocker(
           {
-            image: 'docker.io/yandex/clickhouse-server:latest',
+            image: 'docker.io/yandex/clickhouse-server:c739327b5607',
             port: 9000,
             args: [
               '-v',
