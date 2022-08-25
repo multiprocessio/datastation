@@ -28,14 +28,10 @@ describe('basic clickhouse tests', () => {
             ],
             cmds: [`clickhouse-client -q 'CREATE DATABASE test'`],
           },
-          async () => {
-            // Try weird stuff
-            await new Promise((r) => setTimeout(r, 5000));
-            return basicDatabaseTest(t);
-          }
+          () => basicDatabaseTest(t)
         );
       },
-      360_000 * 10
+      360_000
     );
   }
 });
