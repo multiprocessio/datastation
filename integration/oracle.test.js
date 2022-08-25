@@ -46,7 +46,7 @@ describe('basic oracle tests', () => {
     async () => {
       await withDocker(
         {
-          image: 'docker.io/gvenzl/oracle-xe:11-slim',
+          image: 'docker.io/gvenzl/oracle-xe:21-slim',
           port: '1520:1521',
           env: {
             ORACLE_RANDOM_PASSWORD: 'y',
@@ -66,6 +66,6 @@ describe('basic oracle tests', () => {
           })
       );
     },
-    DEFAULT_TIMEOUT
+    DEFAULT_TIMEOUT * 10
   );
 });
