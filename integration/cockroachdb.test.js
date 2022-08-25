@@ -17,7 +17,7 @@ describe('basic cockroachdb tests', () => {
       async () => {
         await withDocker(
           {
-            image: 'docker.io/cockroachdb/cockroach:latest',
+            image: 'docker.io/cockroachdb/cockroach:v22.1.6',
             port: 26257,
             args: ['--entrypoint', 'tail'],
             program: ['-f', '/dev/null'],

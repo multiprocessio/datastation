@@ -13,7 +13,7 @@ describe('basic neo4j tests', () => {
   test('basic test', async () => {
     await withDocker(
       {
-        image: 'docker.io/library/neo4j:latest',
+        image: 'docker.io/library/neo4j:4.4.10',
         port: 7687,
         env: {
           NEO4J_AUTH: 'neo4j/password',

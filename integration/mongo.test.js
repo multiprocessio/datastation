@@ -21,7 +21,7 @@ function testWithDocker(name, cb) {
       return withDocker(
         {
           port: 27017,
-          image: 'docker.io/library/mongo:latest',
+          image: 'docker.io/library/mongo:6.0.1',
           env: {
             MONGO_INITDB_ROOT_USERNAME: 'test',
             MONGO_INITDB_DATABASE: 'test',

@@ -24,7 +24,7 @@ describe('basic questdb tests', () => {
       async () => {
         await withDocker(
           {
-            image: 'docker.io/questdb/questdb:latest',
+            image: 'docker.io/questdb/questdb:6.5',
             port: '8812',
           },
           () => basicDatabaseTest(t, vendorOverride)

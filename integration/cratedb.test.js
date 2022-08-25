@@ -22,7 +22,7 @@ describe('basic cratedb tests', () => {
       async () => {
         await withDocker(
           {
-            image: 'docker.io/library/crate:latest',
+            image: 'docker.io/library/crate:5.0.0',
             port: '5439:5432',
             program: ['crate', '-Cdiscovery.type=single-node'],
             cmds: [
