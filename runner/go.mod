@@ -3,17 +3,17 @@ module github.com/multiprocessio/datastation/runner
 go 1.19
 
 require (
-	cloud.google.com/go/bigquery v1.38.0
+	cloud.google.com/go/bigquery v1.39.0
 	github.com/ClickHouse/clickhouse-go/v2 v2.3.0
 	github.com/alexbrainman/odbc v0.0.0-20211220213544-9c9a2e61c5e2
-	github.com/aws/aws-sdk-go v1.44.82
+	github.com/aws/aws-sdk-go v1.44.86
 	github.com/denisenkom/go-mssqldb v0.12.2
 	github.com/flosch/pongo2 v0.0.0-20200913210552-0d938eb266f3
 	github.com/go-logfmt/logfmt v0.5.1
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/goccy/go-json v0.9.11
 	github.com/gocql/gocql v1.2.0
-	github.com/influxdata/influxdb-client-go/v2 v2.9.2
+	github.com/influxdata/influxdb-client-go/v2 v2.10.0
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/lib/pq v1.10.6
 	github.com/linkedin/goavro/v2 v2.11.1
@@ -26,14 +26,14 @@ require (
 	github.com/prometheus/client_golang v1.13.0
 	github.com/prometheus/common v0.37.0
 	github.com/scritchley/orc v0.0.0-20210513144143-06dddf1ad665
-	github.com/sijms/go-ora/v2 v2.5.2
-	github.com/snowflakedb/gosnowflake v1.6.12
+	github.com/sijms/go-ora/v2 v2.5.3
+	github.com/snowflakedb/gosnowflake v1.6.13
 	github.com/stretchr/testify v1.8.0
 	github.com/xitongsys/parquet-go v1.6.2
 	github.com/xitongsys/parquet-go-source v0.0.0-20220723234337-052319f3f36b
 	github.com/xuri/excelize/v2 v2.6.1
-	golang.org/x/crypto v0.0.0-20220817201139-bc19a97f63c8
-	google.golang.org/api v0.93.0
+	golang.org/x/crypto v0.0.0-20220826181053-bd7e27e6170d
+	google.golang.org/api v0.94.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
@@ -107,13 +107,13 @@ require (
 	go.opentelemetry.io/otel v1.9.0 // indirect
 	go.opentelemetry.io/otel/trace v1.9.0 // indirect
 	golang.org/x/net v0.0.0-20220812174116-3211cb980234 // indirect
-	golang.org/x/oauth2 v0.0.0-20220622183110-fd043fe589d2 // indirect
+	golang.org/x/oauth2 v0.0.0-20220822191816-0ebed06d0094 // indirect
 	golang.org/x/sys v0.0.0-20220811171246-fbc7d0a398ab // indirect
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/xerrors v0.0.0-20220609144429-65e65417b02f // indirect
 	gonum.org/v1/gonum v0.11.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/genproto v0.0.0-20220812140447-cec7f5303424 // indirect
+	google.golang.org/genproto v0.0.0-20220819153447-c7cd466b0e09 // indirect
 	google.golang.org/grpc v1.48.0 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
