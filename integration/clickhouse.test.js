@@ -35,7 +35,15 @@ describe('basic clickhouse tests', () => {
               `cat /etc/clickhouse-server/users.d/test.xml`,
             ],
           },
-          () => basicDatabaseTest(t)
+          () =>
+            basicDatabaseTest(t, {
+              clickhouse: {
+                database: 'test',
+                username: 'test',
+                password: 'test',
+                address: 'localhost',
+              },
+            })
         );
       },
       360_000
