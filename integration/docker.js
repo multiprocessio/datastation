@@ -135,16 +135,16 @@ module.exports.withDocker = async function (opts, cb) {
     cp.execSync('docker kill ' + containerId, { stdio: 'inherit' });
     console.log('Killed container');
 
+    //if (process.env.CI == 'true') {
+    // Clear up disk space if possible since Github Actions doesn't
+    // have a massive disk.
+    // --force just doesn't prompt for confirmation
+    cp.execSync('docker rmi --force ' + opts.image, { stdio: 'inherit' });
+    //}
+
     CONTAINERS[opts.image] = CONTAINERS[opts.image].filter(
       (c) => c === containerId
     );
-
-    if (process.env.CI == 'true') {
-      // Clear up disk space if possible since Github Actions doesn't
-      // have a massive disk.
-      // --force just doesn't prompt for confirmation
-      cp.execSync('docker image prune --all --force', { stdio: 'inherit' });
-    }
   }
 };
 
