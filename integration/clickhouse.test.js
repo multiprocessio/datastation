@@ -18,21 +18,18 @@ describe('basic clickhouse tests', () => {
       async () => {
         await withDocker(
           {
-            image: 'docker.io/yandex/clickhouse-server:21',
+            image: 'docker.io/yandex/clickhouse-server:22',
             port: 9000,
             args: [
               '-v',
               path.join(
                 __dirname,
                 '..',
-                'scripts/ci/clickhouse_users.xml:/etc/clickhouse-server/users.d/test.xml'
+                'scripts/ci/:/etc/clickhouse-server/users.d/'
               ),
-              '--ulimit',
-              'nofile=262144:262144',
             ],
             cmds: [
               `clickhouse-client -q 'CREATE DATABASE test'`,
-              `cat /etc/clickhouse-server/users.d/test.xml`,
             ],
           },
           () =>
