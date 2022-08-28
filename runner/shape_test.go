@@ -3,7 +3,6 @@ package runner
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"strings"
 	"testing"
@@ -304,7 +303,7 @@ func TestShapeFromFile(t *testing.T) {
 	for _, test := range tests {
 		// Wrap in an instant function so that `defer remove` gets called
 		func() {
-			tmp, err := ioutil.TempFile("", "")
+			tmp, err := os.CreateTemp("", "")
 			defer os.Remove(tmp.Name())
 			assert.Nil(t, err)
 

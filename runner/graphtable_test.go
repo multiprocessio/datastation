@@ -1,7 +1,6 @@
 package runner
 
 import (
-	"io/ioutil"
 	"os"
 	"testing"
 
@@ -102,7 +101,7 @@ elsa,12`,
 	ec, cleanup := makeTestEvalContext()
 	defer cleanup()
 
-	projectTmp, err := ioutil.TempFile("", "dsq-project")
+	projectTmp, err := os.CreateTemp("", "dsq-project")
 	assert.Nil(t, err)
 	defer os.Remove(projectTmp.Name())
 
@@ -167,7 +166,7 @@ elsa,12`,
 
 		var m []map[string]any
 		out := ec.GetPanelResultsFile(project.Id, project.Pages[0].Panels[1].Id)
-		outTmpBs, err := ioutil.ReadFile(out)
+		outTmpBs, err := os.ReadFile(out)
 		assert.Nil(t, err)
 		err = jsonUnmarshal(outTmpBs, &m)
 		assert.Nil(t, err)

@@ -7,7 +7,6 @@ import (
 	"encoding/pem"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net"
 	"os"
 	"strings"
@@ -17,7 +16,7 @@ import (
 
 // ADAPTED: https://gist.github.com/stefanprodan/2d20d0c6fdab6f14ce8219464e8b4b9a
 func getSSHPrivateKeySigner(privateKeyFile, passphrase string) (ssh.AuthMethod, error) {
-	pemBytes, err := ioutil.ReadFile(resolvePath(privateKeyFile))
+	pemBytes, err := os.ReadFile(resolvePath(privateKeyFile))
 	if err != nil {
 		return nil, edsef("Unable to read private key: %s", err)
 	}

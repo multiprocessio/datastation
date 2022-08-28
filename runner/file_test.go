@@ -2,7 +2,6 @@ package runner
 
 import (
 	"fmt"
-	"io/ioutil"
 	"math/rand"
 	"os"
 	"runtime"
@@ -244,7 +243,7 @@ cdef`,
 	}
 
 	for _, test := range tests {
-		inTmp, err := ioutil.TempFile("", "")
+		inTmp, err := os.CreateTemp("", "")
 		assert.Nil(t, err)
 
 		_, err = inTmp.WriteString(test)
@@ -590,7 +589,7 @@ func transformTestFile(filename string, transformFile func(string, *ResultWriter
 		return nil, err
 	}
 
-	outTmpBs, err := ioutil.ReadFile(outTmp.Name())
+	outTmpBs, err := os.ReadFile(outTmp.Name())
 	if err != nil {
 		return nil, err
 	}

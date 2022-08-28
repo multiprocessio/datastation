@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net"
 	"net/url"
 	"os"
@@ -494,7 +493,7 @@ func (ec EvalContext) EvalDatabasePanelWithWriter(
 
 	// Copy remote sqlite database to tmp file if remote
 	if dbInfo.Type == SQLiteDatabase && server != nil {
-		tmp, err := ioutil.TempFile("", "sqlite-copy")
+		tmp, err := os.CreateTemp("", "sqlite-copy")
 		if err != nil {
 			return err
 		}

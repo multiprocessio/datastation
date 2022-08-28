@@ -6,7 +6,6 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"io"
-	"io/ioutil"
 	"net"
 	"net/http"
 	"net/url"
@@ -133,7 +132,7 @@ func getTransport(customCaCerts []string) (*http.Transport, error) {
 			continue
 		}
 
-		cert, err := ioutil.ReadFile(f)
+		cert, err := os.ReadFile(f)
 		if err != nil {
 			return nil, edsef("Could not add custom CA cert: %s", err)
 		}
@@ -265,7 +264,7 @@ func TransformReader(r *bufio.Reader, fileName string, cti ContentTypeInfo, out 
 		}
 		return transformXLSX(r, out)
 	case ParquetMimeType:
-		w, err := ioutil.TempFile("", "http-parquet-temp")
+		w, err := os.CreateTemp("", "http-parquet-temp")
 		if err != nil {
 			return err
 		}
@@ -281,7 +280,7 @@ func TransformReader(r *bufio.Reader, fileName string, cti ContentTypeInfo, out 
 
 		return transformParquetFile(w.Name(), out)
 	case ORCMimeType:
-		w, err := ioutil.TempFile("", "http-orc-temp")
+		w, err := os.CreateTemp("", "http-orc-temp")
 		if err != nil {
 			return err
 		}
