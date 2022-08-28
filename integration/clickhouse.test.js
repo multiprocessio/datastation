@@ -28,9 +28,7 @@ describe('basic clickhouse tests', () => {
                 'scripts/ci/:/etc/clickhouse-server/users.d/'
               ),
             ],
-            cmds: [
-              `clickhouse-client -q 'CREATE DATABASE test'`,
-            ],
+            cmds: [`clickhouse-client -q 'CREATE DATABASE test'`],
           },
           () =>
             basicDatabaseTest(t, {
