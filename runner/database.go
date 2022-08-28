@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net"
 	"net/url"
 	"os"
@@ -224,11 +223,7 @@ func (ec EvalContext) getConnectionString(dbInfo DatabaseConnectorInfoDatabase) 
 		if genericUserPass != "" {
 			// Already proven to be ok
 			pass, _ := ec.decrypt(&dbInfo.Password)
-			query = fmt.Sprintf("username=%s&password=%s&", u.username, pass)
-		}
-
-		if u.database != "" {
-			query += "database=" + u.database
+			query = fmt.Sprintf("username=%s&password=%s", u.username, pass)
 		}
 
 		if !strings.Contains(u.address, ":") {
@@ -236,7 +231,7 @@ func (ec EvalContext) getConnectionString(dbInfo DatabaseConnectorInfoDatabase) 
 		}
 
 		query += u.extraArgs
-		return "clickhouse", fmt.Sprintf("tcp://%s?%s", u.address, query), nil
+		return "clickhouse", fmt.Sprintf("tcp://%s/%s?%s", u.address, u.database, query), nil
 	case SQLiteDatabase:
 		// defined in database_sqlite.go, includes regexp support
 		return "sqlite3_extended", resolvePath(u.database), nil
@@ -498,7 +493,7 @@ func (ec EvalContext) EvalDatabasePanelWithWriter(
 
 	// Copy remote sqlite database to tmp file if remote
 	if dbInfo.Type == SQLiteDatabase && server != nil {
-		tmp, err := ioutil.TempFile("", "sqlite-copy")
+		tmp, err := os.CreateTemp("", "sqlite-copy")
 		if err != nil {
 			return err
 		}

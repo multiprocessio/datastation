@@ -39,46 +39,50 @@ jobs:
     - run: ./scripts/require_copyright.sh
     - run: yarn test
 
-  ee_macos_tests:
-    name: "[EE] macOS Tests"
-    runs-on: macos-latest
+#
+# WHILE THIS CODE ISNT UNDER ACTIVE DEVELOPMENT LETS DO A MINIMUM OF TESTS ON IT.
+#
 
-    steps:
-    - uses: actions/checkout@master
-      with:
-        ref: ${{ github.ref }}
+  # ee_macos_tests:
+  #   name: "[EE] macOS Tests"
+  #   runs-on: macos-latest
 
-    # FROM: https://github.com/actions/cache/blob/main/examples.md#node---yarn
-    - name: Get yarn cache directory path
-      id: yarn-cache-dir-path
-      run: echo "::set-output name=dir::$(yarn cache dir)"
+  #   steps:
+  #   - uses: actions/checkout@master
+  #     with:
+  #       ref: ${{ github.ref }}
 
-    - uses: actions/cache@v2
-      id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
-      with:
-        path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-        key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-yarn-
+  #   # FROM: https://github.com/actions/cache/blob/main/examples.md#node---yarn
+  #   - name: Get yarn cache directory path
+  #     id: yarn-cache-dir-path
+  #     run: echo "::set-output name=dir::$(yarn cache dir)"
 
-    - run: ./scripts/ci/prepare_macos.sh
-    - run: yarn
-      working-directory: ee
-    - run: yarn test
-      working-directory: ee
+  #   - uses: actions/cache@v2
+  #     id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+  #     with:
+  #       path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+  #       key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+  #       restore-keys: |
+  #         ${{ runner.os }}-yarn-
 
-  ee_windows_tests:
-    name: "[EE] Windows Tests"
-    runs-on: windows-latest
+  #   - run: ./scripts/ci/prepare_macos.sh
+  #   - run: yarn
+  #     working-directory: ee
+  #   - run: yarn test
+  #     working-directory: ee
 
-    steps:
-    - uses: actions/checkout@master
-      with:
-        ref: ${{ github.ref }}
+  # ee_windows_tests:
+  #   name: "[EE] Windows Tests"
+  #   runs-on: windows-latest
 
-    - run: ./scripts/ci/prepare_windows.ps1
-      shell: pwsh
-    - run: yarn
-      working-directory: ee
-    - run: yarn test
-      working-directory: ee
+  #   steps:
+  #   - uses: actions/checkout@master
+  #     with:
+  #       ref: ${{ github.ref }}
+
+  #   - run: ./scripts/ci/prepare_windows.ps1
+  #     shell: pwsh
+  #   - run: yarn
+  #     working-directory: ee
+  #   - run: yarn test
+  #     working-directory: ee

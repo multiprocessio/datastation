@@ -136,7 +136,7 @@ func Test_getConnectionString(t *testing.T) {
 		{
 			DatabaseConnectorInfoDatabase{Type: "clickhouse", Username: "jim", Password: Encrypt{Encrypted: false, Value: "pw"}, Database: "test", Address: "localhost"},
 			"clickhouse",
-			"tcp://localhost:9000?username=jim&password=pw&database=test",
+			"tcp://localhost:9000/test?username=jim&password=pw",
 			nil,
 			"localhost",
 			"9000",
@@ -145,7 +145,7 @@ func Test_getConnectionString(t *testing.T) {
 		{
 			DatabaseConnectorInfoDatabase{Type: "clickhouse", Password: Encrypt{Encrypted: false, Value: ""}, Database: "test", Address: "localhost:9001"},
 			"clickhouse",
-			"tcp://localhost:9001?database=test",
+			"tcp://localhost:9001/test?",
 			nil,
 			"localhost",
 			"9001",

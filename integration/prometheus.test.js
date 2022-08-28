@@ -15,7 +15,7 @@ describe('basic prometheus tests', () => {
 
     await withDocker(
       {
-        image: 'docker.io/prom/prometheus:latest',
+        image: 'docker.io/prom/prometheus:v2.38.0',
         port: '9090',
         args: ['-v', `${__dirname}/../testdata/prometheus:/etc/prometheus`],
         wait: async () => {

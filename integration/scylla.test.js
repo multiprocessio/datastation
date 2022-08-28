@@ -13,7 +13,7 @@ describe('basic cassandra/scylladb tests', () => {
   test(`runs basic cql query`, async () => {
     await withDocker(
       {
-        image: 'docker.io/scylladb/scylla:latest',
+        image: 'docker.io/scylladb/scylla:5.1',
         port: '9042',
         program: [
           '--smp',

@@ -26,7 +26,7 @@ describe('basic postgres tests', () => {
       async () => {
         await withDocker(
           {
-            image: 'docker.io/library/postgres:latest',
+            image: 'docker.io/library/postgres:14',
             port: '5432',
             env: {
               POSTGRES_USER: 'test',

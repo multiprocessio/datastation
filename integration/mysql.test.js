@@ -23,7 +23,7 @@ describe('basic mysql tests', () => {
       async () => {
         await withDocker(
           {
-            image: 'docker.io/library/mysql:latest',
+            image: 'docker.io/library/mysql:8.0.30',
             port: '3306',
             env: {
               MYSQL_ROOT_PASSWORD: 'root',

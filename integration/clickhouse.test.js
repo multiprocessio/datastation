@@ -1,3 +1,4 @@
+const path = require('path');
 const cp = require('child_process');
 
 const { basicDatabaseTest } = require('../desktop/panel/testutil');
@@ -17,18 +18,26 @@ describe('basic clickhouse tests', () => {
       async () => {
         await withDocker(
           {
-            image: 'docker.io/yandex/clickhouse-server:latest',
+            image: 'docker.io/yandex/clickhouse-server:22',
             port: 9000,
-            args: [
-              '-v',
-              __dirname +
-                '/../scripts/ci/clickhouse_users.xml:/etc/clickhouse-server/users.d/test.xml',
-              '--ulimit',
-              'nofile=262144:262144',
+            env: {
+              CLICKHOUSE_DB: 'test',
+              CLICKHOUSE_USER: 'test',
+              CLICKHOUSE_PASSWORD: 'test',
+            },
+            cmds: [
+              `clickhouse-client -d test -u test --password test -q 'SELECT 1'`,
             ],
-            cmds: [`clickhouse-client -q 'CREATE DATABASE test'`],
           },
-          () => basicDatabaseTest(t)
+          () =>
+            basicDatabaseTest(t, {
+              clickhouse: {
+                database: 'test',
+                username: 'test',
+                password: 'test',
+                address: 'localhost',
+              },
+            })
         );
       },
       360_000

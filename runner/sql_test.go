@@ -2,7 +2,6 @@ package runner
 
 import (
 	"encoding/json"
-	"io/ioutil"
 	"os"
 	"testing"
 
@@ -208,7 +207,7 @@ func Test_GetObjectAtPath(t *testing.T) {
 }
 
 func makeTestEvalContext() (EvalContext, func()) {
-	f, _ := ioutil.TempDir("", "datastation-unittest-space")
+	f, _ := os.MkdirTemp("", "datastation-unittest-space")
 
 	ec := NewEvalContext(*DefaultSettings, f)
 	return ec, func() {
@@ -275,7 +274,7 @@ func Test_sqlIngest_e2e(t *testing.T) {
 		},
 	}
 
-	projectTmp, err := ioutil.TempFile("", "dsq-project")
+	projectTmp, err := os.CreateTemp("", "dsq-project")
 	assert.Nil(t, err)
 	defer os.Remove(projectTmp.Name())
 
@@ -296,7 +295,7 @@ func Test_sqlIngest_e2e(t *testing.T) {
 		assert.Nil(t, err)
 		project.Connectors = append(project.Connectors, *connector)
 
-		readFile, err := ioutil.TempFile("", "infile")
+		readFile, err := os.CreateTemp("", "infile")
 		assert.Nil(t, err)
 		defer os.Remove(readFile.Name())
 
@@ -352,7 +351,7 @@ func Test_sqlIngest_BENCHMARK(t *testing.T) {
 		return
 	}
 
-	projectTmp, err := ioutil.TempFile("", "dsq-project")
+	projectTmp, err := os.CreateTemp("", "dsq-project")
 	assert.Nil(t, err)
 	defer os.Remove(projectTmp.Name())
 
