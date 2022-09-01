@@ -22,7 +22,7 @@ require (
 	github.com/multiprocessio/go-json v0.0.0-20220308002443-61d497dd7b9e
 	github.com/multiprocessio/go-openoffice v0.0.0-20220110232726-064f5dda1956
 	github.com/multiprocessio/go-sqlite3-stdlib v0.0.0-20220822170115-9f6825a1cd25
-	github.com/neo4j/neo4j-go-driver/v4 v4.4.4
+	github.com/neo4j/neo4j-go-driver/v5 v5.0.0-alpha1
 	github.com/prometheus/client_golang v1.13.0
 	github.com/prometheus/common v0.37.0
 	github.com/scritchley/orc v0.0.0-20210513144143-06dddf1ad665
