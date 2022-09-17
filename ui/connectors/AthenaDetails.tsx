@@ -57,6 +57,17 @@ export function AthenaDetails(props: {
             {...props}
           />
         </div>
+        <div className="form-row">
+          <Input
+            label="Workgroup"
+            value={connector.database.extra.workgroup}
+            onChange={(value: string) => {
+              connector.database.extra.workgroup = value;
+              updateConnector(connector);
+            }}
+            {...props}
+          />
+        </div>
       </FormGroup>
     </>
   );
