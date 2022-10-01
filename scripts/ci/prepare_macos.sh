@@ -26,7 +26,7 @@ yarn
 # Install ODBC Driver
 brew tap microsoft/mssql-release https://github.com/Microsoft/homebrew-mssql-release
 brew update
-HOMEBREW_NO_ENV_FILTERING=1 ACCEPT_EULA=Y brew install msodbcsql18 mssql-tools18
+HOMEBREW_ACCEPT_EULA=Y brew install msodbcsql18 mssql-tools18
 
 # Install docker using colima (not present because of licenses)
 brew install colima

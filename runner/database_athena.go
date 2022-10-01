@@ -61,6 +61,9 @@ func (ec EvalContext) evalAthena(panel *PanelInfo, dbInfo DatabaseConnectorInfoD
 	svc := athena.New(sess, cfg)
 	var s athena.StartQueryExecutionInput
 	s.SetQueryString(panel.Content)
+	if workgroup, ok := dbInfo.Extra["workgroup"]; ok && len(workgroup) > 0 {
+		s.SetWorkGroup(workgroup)
+	}
 
 	var q athena.QueryExecutionContext
 	q.SetDatabase(dbInfo.Database)
