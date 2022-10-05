@@ -33,7 +33,7 @@ func Test_transformDM_getPanelCalls(t *testing.T) {
 			},
 		},
 	}
-	panels, query, err := transformDM_getPanelCalls(
+	panels, query, path, err := transformDM_getPanelCalls(
 		"SELECT * FROM DM_getPanel(0) p0, DM_getPanel('my great panel')",
 		map[string]Shape{
 			"0":              shape,
@@ -53,6 +53,7 @@ func Test_transformDM_getPanelCalls(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, query, `SELECT * FROM "t_0" p0, "t_my great panel"`)
 	assert.Equal(t, len(panels), 2)
+	assert.Equal(t, path, "")
 	assert.Equal(t, panels[0], panelToImport{
 		tableName: "t_0",
 		columns: []column{
@@ -88,6 +89,7 @@ func Test_transformDM_getPanel_callsWithPaths(t *testing.T) {
 		data       string
 		query      string
 		expColumns []column
+		expPath    string
 	}{
 
 		{
@@ -97,6 +99,7 @@ func Test_transformDM_getPanel_callsWithPaths(t *testing.T) {
 				{name: "b", kind: "REAL"},
 				{name: "c", kind: "REAL"},
 			},
+			"a",
 		},
 		{
 			`{"a": [{"b": 2}, {"c": 3}]}`,
@@ -105,6 +108,7 @@ func Test_transformDM_getPanel_callsWithPaths(t *testing.T) {
 				{name: "b", kind: "REAL"},
 				{name: "c", kind: "REAL"},
 			},
+			"a",
 		},
 		{
 			`[{"b": 2}, {"c": 3}]`,
@@ -113,6 +117,7 @@ func Test_transformDM_getPanel_callsWithPaths(t *testing.T) {
 				{name: "b", kind: "REAL"},
 				{name: "c", kind: "REAL"},
 			},
+			"",
 		},
 	}
 
@@ -123,7 +128,7 @@ func Test_transformDM_getPanel_callsWithPaths(t *testing.T) {
 		s := GetShape("", j, len(test.data))
 		assert.Nil(t, err)
 
-		panels, query, err := transformDM_getPanelCalls(
+		panels, query, path, err := transformDM_getPanelCalls(
 			test.query,
 			map[string]Shape{"0": s},
 			map[string]string{"0": " a great id 2"},
@@ -135,6 +140,7 @@ func Test_transformDM_getPanel_callsWithPaths(t *testing.T) {
 		assert.Nil(t, err)
 		assert.Equal(t, query, `SELECT * FROM "t_0"`)
 		assert.Equal(t, len(panels), 1)
+		assert.Equal(t, test.expPath, path)
 		assert.Equal(t, panels[0], panelToImport{
 			tableName: "t_0",
 			columns:   test.expColumns,

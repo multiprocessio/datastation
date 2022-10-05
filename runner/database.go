@@ -385,12 +385,12 @@ func writeRowFromDatabase(dbInfo DatabaseConnectorInfoDatabase, out *ResultWrite
 	return out.WriteRow(row)
 }
 
-func (ec EvalContext) loadJSONArrayPanel(projectId, panelId string) (chan map[string]any, error) {
+func (ec *EvalContext) loadJSONArrayPanel(projectId, panelId string) (chan map[string]any, error) {
 	f := ec.GetPanelResultsFile(projectId, panelId)
-	return loadJSONArrayFile(f)
+	return loadJSONArrayFileWithPath(f, ec.path)
 }
 
-func (ec EvalContext) EvalDatabasePanelWithWriter(
+func (ec *EvalContext) EvalDatabasePanelWithWriter(
 	project *ProjectState,
 	pageIndex int,
 	panel *PanelInfo,
@@ -479,7 +479,7 @@ func (ec EvalContext) EvalDatabasePanelWithWriter(
 	idMap := getIdMap(project.Pages[pageIndex])
 	idShapeMap := getIdShapeMap(project.Pages[pageIndex])
 
-	panelsToImport, query, err := transformDM_getPanelCalls(
+	panelsToImport, query, path, err := transformDM_getPanelCalls(
 		panel.Content,
 		idShapeMap,
 		idMap,
@@ -490,6 +490,7 @@ func (ec EvalContext) EvalDatabasePanelWithWriter(
 	if err != nil {
 		return err
 	}
+	ec.path = path
 
 	// Copy remote sqlite database to tmp file if remote
 	if dbInfo.Type == SQLiteDatabase && server != nil {

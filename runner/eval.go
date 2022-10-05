@@ -138,6 +138,7 @@ func (ec EvalContext) evalMacros(content string, project *ProjectState, pageInde
 type EvalContext struct {
 	settings Settings
 	fsBase   string
+	path     string
 }
 
 func (ec EvalContext) decrypt(e *Encrypt) (string, error) {
@@ -180,7 +181,7 @@ func (ec EvalContext) decrypt(e *Encrypt) (string, error) {
 }
 
 func NewEvalContext(s Settings, fsBase string) EvalContext {
-	return EvalContext{s, fsBase}
+	return EvalContext{s, fsBase, ""}
 }
 
 func (ec EvalContext) Eval(projectId, panelId string) (error, string) {
