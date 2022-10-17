@@ -224,10 +224,12 @@ func makeTestEvalContext() (EvalContext, func()) {
 func Test_sqlIngest_e2e(t *testing.T) {
 	tests := []struct {
 		json      string
+		sql       string
 		expResult []any
 	}{
 		{
 			`[{"a": 1},{"b": 2}]`,
+			"SELECT * FROM DM_getPanel(0) ORDER BY a DESC",
 			[]any{
 				map[string]any{"a": float64(1), "b": nil},
 				map[string]any{"a": nil, "b": float64(2)},
@@ -235,6 +237,7 @@ func Test_sqlIngest_e2e(t *testing.T) {
 		},
 		{
 			`[{"a": 1},{"b": 2}, {"a": 1},{"b": 2}, {"a": 1},{"b": 2}, {"a": 1},{"b": 2}, {"a": 1},{"b": 2}]`,
+			"SELECT * FROM DM_getPanel(0) ORDER BY a DESC",
 			[]any{
 				map[string]any{"a": float64(1), "b": nil},
 				map[string]any{"a": float64(1), "b": nil},
@@ -250,6 +253,7 @@ func Test_sqlIngest_e2e(t *testing.T) {
 		},
 		{
 			`[{"a": 1},{"b": 2}, {"a": 1},{"b": 2}, {"a": 1},{"b": 2}, {"a": 1},{"b": 2}, {"a": 1},{"b": 2},{"b": 2}]`,
+			"SELECT * FROM DM_getPanel(0) ORDER BY a DESC",
 			[]any{
 				map[string]any{"a": float64(1), "b": nil},
 				map[string]any{"a": float64(1), "b": nil},
@@ -266,6 +270,7 @@ func Test_sqlIngest_e2e(t *testing.T) {
 		},
 		{
 			`[{"a": 1},{"b": 2},{"c": [1]}]`,
+			"SELECT * FROM DM_getPanel(0) ORDER BY a DESC",
 			[]any{
 				map[string]any{"a": float64(1), "b": nil, "c": nil},
 				map[string]any{"a": nil, "b": float64(2), "c": nil},
@@ -274,8 +279,17 @@ func Test_sqlIngest_e2e(t *testing.T) {
 		},
 		{
 			`[{"a": 1,"b": 2,"c": [1]}]`,
+			"SELECT * FROM DM_getPanel(0) ORDER BY a DESC",
 			[]any{
 				map[string]any{"a": float64(1), "b": float64(2), "c": "[1]"},
+			},
+		},
+		{
+			`{"data":{"data1":[{"id":1,"name":"Corah"},{"id":3,"name":"Minh"}],"data2":[{"id":2,"name":"Corah"},{"id":4,"name":"Minh"}]},"total":2}`,
+			"SELECT * FROM DM_getPanel(0, 'data.data2') ORDER BY id DESC",
+			[]any{
+				map[string]any{"id": float64(4), "name": "Minh"},
+				map[string]any{"id": float64(2), "name": "Corah"},
 			},
 		},
 	}
@@ -321,7 +335,7 @@ func Test_sqlIngest_e2e(t *testing.T) {
 
 		panel2 := &PanelInfo{
 			Type:    DatabasePanel,
-			Content: "SELECT * FROM DM_getPanel(0) ORDER BY a DESC",
+			Content: test.sql,
 			Id:      newId(),
 			Name:    newId(),
 			DatabasePanelInfo: &DatabasePanelInfo{
@@ -332,7 +346,7 @@ func Test_sqlIngest_e2e(t *testing.T) {
 		}
 
 		err = ec.EvalDatabasePanel(project, 0, panel2, func(projectId, panelId string) (chan map[string]any, error) {
-			return loadJSONArrayFile(readFile.Name())
+			return loadJSONArrayFileWithPath(readFile.Name(), ec.path)
 		}, *DefaultCacheSettings)
 		if err != nil {
 			// Otherwise the channel below gets weird to debug
@@ -403,7 +417,7 @@ func Test_sqlIngest_BENCHMARK(t *testing.T) {
 
 	ec := EvalContext{}
 	err = ec.EvalDatabasePanel(project, 0, panel2, func(projectId, panelId string) (chan map[string]any, error) {
-		return loadJSONArrayFile(readFile)
+		return loadJSONArrayFileWithPath(readFile, ec.path)
 	}, *DefaultCacheSettings)
 	assert.Nil(t, err)
 }

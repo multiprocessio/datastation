@@ -605,7 +605,7 @@ func (ec *EvalContext) EvalDatabasePanelWithWriter(
 	})
 }
 
-func (ec EvalContext) EvalDatabasePanel(
+func (ec *EvalContext) EvalDatabasePanel(
 	project *ProjectState,
 	pageIndex int,
 	panel *PanelInfo,
