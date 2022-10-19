@@ -119,14 +119,14 @@ func transformDM_getPanelCalls(
 	getPanelCallsAllowed bool,
 	qt quoteType,
 	cachePresent bool,
-) ([]panelToImport, string, error) {
+) ([]panelToImport, string, string, error) {
 	var panelsToImport []panelToImport
 
 	var insideErr error
+	path := ""
 	query = dmGetPanelRe.ReplaceAllStringFunc(query, func(m string) string {
 		matchForSubexps := dmGetPanelRe.FindStringSubmatch(m)
 		nameOrIndex := ""
-		path := ""
 		for i, name := range dmGetPanelRe.SubexpNames() {
 			if matchForSubexps[i] == "" {
 				continue
@@ -200,14 +200,14 @@ func transformDM_getPanelCalls(
 	})
 
 	if insideErr != nil {
-		return nil, "", insideErr
+		return nil, "", "", insideErr
 	}
 
 	if len(panelsToImport) > 0 && !getPanelCallsAllowed {
-		return nil, "", makeErrUnsupported("DM_getPanel() is not yet supported by this connector.")
+		return nil, "", "", makeErrUnsupported("DM_getPanel() is not yet supported by this connector.")
 	}
 
-	return panelsToImport, query, nil
+	return panelsToImport, query, path, nil
 }
 
 func GetObjectAtPath(obj map[string]any, path string) any {

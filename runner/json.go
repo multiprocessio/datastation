@@ -3,9 +3,12 @@ package runner
 import (
 	"encoding/json"
 	"io"
+	"io/ioutil"
 	"os"
+	"strings"
 
 	goccy_json "github.com/goccy/go-json"
+	"github.com/tidwall/gjson"
 )
 
 // goccy/go-json is the fastest library benchmarked in
@@ -73,7 +76,7 @@ func WriteJSONFile(file string, value any) error {
 	return encoder.Encode(value)
 }
 
-func loadJSONArrayFile(f string) (chan map[string]any, error) {
+func loadJSONArrayFileWithPath(f, path string) (chan map[string]any, error) {
 	out := make(chan map[string]any, 1000)
 
 	fd, err := os.Open(f)
@@ -81,9 +84,19 @@ func loadJSONArrayFile(f string) (chan map[string]any, error) {
 		return nil, err
 	}
 
+	var reader io.Reader = fd
+	if path != "" {
+		data, err := ioutil.ReadAll(fd)
+		if err != nil {
+			return nil, err
+		}
+		value := gjson.GetBytes(data, path)
+		reader = strings.NewReader(value.String())
+	}
+
 	bs := make([]byte, 1)
 	for {
-		_, err := fd.Read(bs)
+		_, err := reader.Read(bs)
 		if err != nil {
 			return nil, err
 		}
@@ -97,7 +110,7 @@ func loadJSONArrayFile(f string) (chan map[string]any, error) {
 		defer fd.Close()
 		defer close(out)
 
-		var r io.Reader = fd
+		var r io.Reader = reader
 
 		// Stream all JSON objects
 		for {
@@ -138,4 +151,8 @@ func loadJSONArrayFile(f string) (chan map[string]any, error) {
 	}()
 
 	return out, nil
+}
+
+func loadJSONArrayFile(f string) (chan map[string]any, error) {
+	return loadJSONArrayFileWithPath(f, "")
 }
