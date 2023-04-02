@@ -6,8 +6,8 @@
 
 set -ex
 
-# Set up Julia, SSH, etc.
-sudo apt-get install -y jq julia openssh-server php
+# Set up SSH, etc.
+sudo apt-get install -y jq openssh-server php
 
 # Set up http helper
 go install github.com/multiprocessio/httpmirror@latest
@@ -33,6 +33,11 @@ sudo mv deno /usr/bin/deno
 # Allow R programs to install packages
 sudo mkdir -p /usr/local/lib/R/site-library
 sudo chown -R $USER /usr/local/lib/R/
+
+# Install julia
+wget https://julialang-s3.julialang.org/bin/linux/x64/1.8/julia-1.8.5-linux-x86_64.tar.gz
+tar zxvf julia-1.8.5-linux-x86_64.tar.gz
+sudo ln -s $(pwd)/julia-1.8.5/bin /usr/local/bin/
 
 # Install jsonnet
 go install github.com/google/go-jsonnet/cmd/jsonnet@latest
