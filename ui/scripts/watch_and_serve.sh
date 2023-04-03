@@ -11,7 +11,7 @@ yarn build-ui
 # Now watch for changes in the background and rebuild
 function watch() {
     for dir in $(find "$1" -type d); do
-	fswatch -x --event Created --event Removed --event Renamed --event Updated "$dir" | grep --line-buffered -E "\.(tsx|css|ts|js|jsx)" | xargs -n1 bash -c 'yarn esbuild ui/index.tsx --loader:.ts=tsx --loader:.js=jsx "--external:fs" --bundle --sourcemap --outfile=build/ui.js && node-sass ./ui/style.css ./build/style.css' &
+	fswatch -x --event Created --event Removed --event Renamed --event Updated "$dir" | grep --line-buffered -E "\.(tsx|css|ts|js|jsx)" | xargs -n1 bash -c 'yarn esbuild ui/index.tsx --loader:.ts=tsx --loader:.js=jsx "--external:fs" --bundle --sourcemap --outfile=build/ui.js && yarn sass ./ui/style.scss ./build/style.css' &
     done
 }
 
