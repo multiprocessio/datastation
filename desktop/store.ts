@@ -102,6 +102,10 @@ function minSemver(real: string, min: string) {
   const realParts = real.split('.');
   const minParts = min.split('.');
   for (let i = 0; i < realParts.length; i++) {
+    if (+realParts[i] > +minParts[i]) {
+      return true;
+    }
+
     if (+realParts[i] < +minParts[i]) {
       return false;
     }

@@ -27,7 +27,7 @@ Retry -Cmd { Invoke-WebRequest -useb 'https://raw.githubusercontent.com/scoopins
 .\install.ps1 -RunAsAdmin
 Join-Path (Resolve-Path ~).Path "scoop\shims" >> $Env:GITHUB_PATH
 Retry -Cmd { scoop install nodejs-lts }
-Retry -Cmd { scoop install go@1.19 }
+Retry -Cmd { scoop install go@1.20.2 }
 Retry -Cmd { scoop install cmake }
 Retry -Cmd { scoop install python }
 Retry -Cmd { scoop install yarn }
@@ -42,8 +42,8 @@ Retry -Cmd { yarn }
 Retry -Cmd { yarn rebuild }
 
 # Install Go
-# curl -L -O "https://go.dev/dl/go1.19.windows-amd64.zip"
-# unzip go1.19.windows-amd64.zip
+# curl -L -O "https://go.dev/dl/go1.20.2.windows-amd64.zip"
+# unzip go1.20.2.windows-amd64.zip
 # Join-Path $pwd "go\bin" >> $Env:GITHUB_PATH
 
 Retry -Cmd { go install github.com/google/go-jsonnet/cmd/jsonnet@latest }
