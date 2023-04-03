@@ -34,7 +34,8 @@ const USERDATA_FILES = ['json', 'xlsx', 'csv', 'parquet', 'jsonl', 'cjson'];
 const PORT = '9799';
 const PORT2 = '9798';
 
-let server, server2;
+let server = {},
+  server2 = {};
 // Kill the existing server if it wasn't killed correctly already.
 beforeAll(async () => {
   // TODO: port this logic to other platforms...
@@ -51,8 +52,22 @@ beforeAll(async () => {
   }
 
   // Start a new server for all tests
-  server = spawn('python3', ['-m', 'http.server', PORT]);
-  server2 = spawn('httpmirror', [PORT2]);
+  while (true) {
+    server = spawn('python3', ['-m', 'http.server', PORT]);
+    if (server.pid !== undefined) {
+      break;
+    }
+
+    await new Promise((r) => setTimeout(r, 1000));
+  }
+  while (true) {
+    server2 = spawn('httpmirror', [PORT2]);
+    if (server2.pid !== undefined) {
+      break;
+    }
+
+    await new Promise((r) => setTimeout(r, 1000));
+  }
 
   [server, server2].forEach((server) => {
     server.stdout.on('data', (data) => {
