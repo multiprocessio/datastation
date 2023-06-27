@@ -10,6 +10,7 @@ import {
   UpdateSettingsResponse,
 } from '../shared/rpc';
 import { Settings as SettingsT } from '../shared/settings';
+import { Footer } from './Footer';
 import { asyncRPC } from './asyncRPC';
 import { Alert } from './components/Alert';
 import { Button } from './components/Button';
@@ -17,7 +18,6 @@ import { FileInput } from './components/FileInput';
 import { FormGroup } from './components/FormGroup';
 import { Input } from './components/Input';
 import { Toggle } from './components/Toggle';
-import { Footer } from './Footer';
 
 export const SettingsContext = React.createContext<{
   state: SettingsT;

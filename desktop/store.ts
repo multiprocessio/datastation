@@ -10,7 +10,6 @@ import {
   ConnectorInfo,
   DatabaseConnectorInfo,
   DatabasePanelInfo,
-  doOnEncryptFields,
   Encrypt,
   FilePanelInfo,
   FilterAggregatePanelInfo,
@@ -25,11 +24,12 @@ import {
   ProjectState,
   ServerInfo,
   TablePanelInfo,
+  doOnEncryptFields,
 } from '../shared/state';
 import { CODE_ROOT, DISK_ROOT, PROJECT_EXTENSION } from './constants';
 import {
-  connectorCrud,
   GenericCrud,
+  connectorCrud,
   metadataCrud,
   pageCrud,
   panelCrud,
@@ -147,7 +147,7 @@ export class Store {
   validateSQLiteDriver() {
     const memdb = new sqlite3.default(':memory:');
     const stmt = memdb.prepare('SELECT sqlite_version() AS version');
-    const row = stmt.get();
+    const row = stmt.get() as {version: string};
     if (!minSemver(row.version, '3.38.1')) {
       throw new Error(
         'Unsupported SQLite driver version: ' + JSON.stringify(row)
@@ -361,7 +361,7 @@ SELECT
 FROM ds_result o
 GROUP BY panel_id
 `);
-      const results = stmt.all();
+      const results = stmt.all() as Array<{panel_id: string; data_json: string}>;
 
       const resultPanelMap: Record<string, PanelResult> = {};
       for (const result of results) {
@@ -587,7 +587,7 @@ GROUP BY panel_id
         const getStmt = db.prepare(
           `SELECT id FROM ${panelCrud.entity} WHERE page_id = ?`
         );
-        const allExisting: Array<{ id: string }> = getStmt.all(data.pageId);
+        const allExisting = getStmt.all(data.pageId) as Array<{ id: string }>;
 
         // Then sort the existing ones based on the positions passed in
         allExisting.sort((a, b) => {

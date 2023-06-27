@@ -167,8 +167,8 @@ export const VENDOR_GROUPS: Array<{
     vendors: [
       'postgres',
       'mysql',
-      'sqlserver',
-      'oracle',
+      //'sqlserver',
+      //'oracle',
       'sqlite',
       'cockroach',
       'odbc',
@@ -184,7 +184,7 @@ export const VENDOR_GROUPS: Array<{
   },
   {
     group: 'Document',
-    vendors: ['elasticsearch', 'crate', 'mongo'],
+    vendors: ['elasticsearch', 'crate' /* , 'mongo' */],
   },
   {
     group: 'Time Series',

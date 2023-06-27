@@ -1,4 +1,4 @@
-import { TablerIcon } from '@tabler/icons';
+import { Icon as TablerIcon } from '@tabler/icons';
 import React from 'react';
 import { Button } from './components/Button';
 import { DefaultView, UrlStateContext } from './urlState';
@@ -18,9 +18,8 @@ export function Navigation<View extends string = DefaultView>({
       {pages.map((page) => (
         <div
           key={page.title}
-          className={`navigation-item ${
-            view === page.endpoint ? 'navigation-item--active' : ''
-          }`}
+          className={`navigation-item ${view === page.endpoint ? 'navigation-item--active' : ''
+            }`}
           title={page.title}
         >
           <Button
