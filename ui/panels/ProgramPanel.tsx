@@ -656,12 +656,12 @@ export function builtinCompletions(
     ...(language === 'sql'
       ? []
       : [
-          {
-            value: 'DM_setPanel(result)',
-            meta: 'Set results of this DataStation panel',
-            score: 1000,
-          },
-        ]),
+        {
+          value: 'DM_setPanel(result)',
+          meta: 'Set results of this DataStation panel',
+          score: 1000,
+        },
+      ]),
   ];
 }
 
@@ -683,11 +683,11 @@ export function panelNameCompletions(
   ) {
     return panels.map(
       (panel) =>
-        ({
-          value: panel.name,
-          meta: 'Panel',
-          score: 1000,
-        } as Ace.Completion)
+      ({
+        value: panel.name,
+        meta: 'Panel',
+        score: 1000,
+      } as Ace.Completion)
     );
   }
 
@@ -770,7 +770,8 @@ export function makeAutocomplete(
     ]
       .flat()
       .filter(
-        (c) => c && c.value.toLowerCase().startsWith(prefix.toLowerCase())
+        // TODO: Make sure autocomplete is still working.
+        (c) => c && (c as any).value && (c as any).value.toLowerCase().startsWith(prefix.toLowerCase())
       );
   };
 }
