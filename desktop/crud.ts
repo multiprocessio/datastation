@@ -62,7 +62,7 @@ export class GenericCrud<T extends { id: string }> {
         this.entity
       }" WHERE id = ${stubMaker()}`
     );
-    const row = stmt.get(id) as { data_json: string, position: number };
+    const row = stmt.get(id) as { data_json: string; position: number };
     if (!row) {
       return [null, -1];
     }
@@ -130,7 +130,7 @@ export const exportDestination = {};
 export const metadataCrud = {
   get(db: sqlite3.Database) {
     const stmt = db.prepare('SELECT * FROM ds_metadata');
-    const rows = stmt.all() as Array<{key: string; value: string}>;
+    const rows = stmt.all() as Array<{ key: string; value: string }>;
     const metadata: Record<string, string> = {};
     for (const row of rows) {
       metadata[row.key] = row.value;

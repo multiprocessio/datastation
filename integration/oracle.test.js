@@ -70,4 +70,6 @@ if (false) {
       DEFAULT_TIMEOUT * 10
     );
   });
+} else {
+  test('ok', function() {});
 }

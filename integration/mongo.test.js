@@ -184,4 +184,6 @@ if (false) {
       }
     );
   });
+} else {
+  test('ok', function() {});
 }

@@ -32,7 +32,7 @@ if (MODE === 'browser') {
   Object.values(LANGUAGES).map(function processLanguageInit(l) {
     if (l.inMemoryInit) {
       // These can be really big, so run it out of band
-      setTimeout(function() {
+      setTimeout(function () {
         l.inMemoryInit();
       });
     }
@@ -84,11 +84,11 @@ export function defaultRoutes(): Routes {
     },
     MODE === 'server'
       ? {
-        endpoint: 'projects',
-        view: MakeSelectProject,
-        title: 'Switch project',
-        icon: IconFiles,
-      }
+          endpoint: 'projects',
+          view: MakeSelectProject,
+          title: 'Switch project',
+          icon: IconFiles,
+        }
       : null,
     {
       endpoint: 'settings',

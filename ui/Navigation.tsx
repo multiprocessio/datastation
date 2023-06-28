@@ -18,8 +18,9 @@ export function Navigation<View extends string = DefaultView>({
       {pages.map((page) => (
         <div
           key={page.title}
-          className={`navigation-item ${view === page.endpoint ? 'navigation-item--active' : ''
-            }`}
+          className={`navigation-item ${
+            view === page.endpoint ? 'navigation-item--active' : ''
+          }`}
           title={page.title}
         >
           <Button

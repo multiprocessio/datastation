@@ -147,7 +147,7 @@ export class Store {
   validateSQLiteDriver() {
     const memdb = new sqlite3.default(':memory:');
     const stmt = memdb.prepare('SELECT sqlite_version() AS version');
-    const row = stmt.get() as {version: string};
+    const row = stmt.get() as { version: string };
     if (!minSemver(row.version, '3.38.1')) {
       throw new Error(
         'Unsupported SQLite driver version: ' + JSON.stringify(row)
@@ -361,7 +361,10 @@ SELECT
 FROM ds_result o
 GROUP BY panel_id
 `);
-      const results = stmt.all() as Array<{panel_id: string; data_json: string}>;
+      const results = stmt.all() as Array<{
+        panel_id: string;
+        data_json: string;
+      }>;
 
       const resultPanelMap: Record<string, PanelResult> = {};
       for (const result of results) {
