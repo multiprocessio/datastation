@@ -32,7 +32,7 @@ if (MODE === 'browser') {
   Object.values(LANGUAGES).map(function processLanguageInit(l) {
     if (l.inMemoryInit) {
       // These can be really big, so run it out of band
-      setTimeout(function () {
+      setTimeout(function() {
         l.inMemoryInit();
       });
     }
@@ -84,11 +84,11 @@ export function defaultRoutes(): Routes {
     },
     MODE === 'server'
       ? {
-          endpoint: 'projects',
-          view: MakeSelectProject,
-          title: 'Switch project',
-          icon: IconFiles,
-        }
+        endpoint: 'projects',
+        view: MakeSelectProject,
+        title: 'Switch project',
+        icon: IconFiles,
+      }
       : null,
     {
       endpoint: 'settings',
@@ -105,37 +105,37 @@ export function defaultRoutes(): Routes {
   ].filter(Boolean);
 }
 
-function Aug2022Survey({
-  settings,
-  setSettings,
-}: {
-  settings: SettingsT;
-  setSettings: (s: Partial<SettingsT>) => void;
-}) {
-  if (!settings.surveyAug2022) {
-    return null;
-  }
-
-  return (
-    <div className="banner vertical-align-center">
-      <Button
-        icon
-        onClick={() => setSettings({ ...settings, surveyAug2022: false })}
-      >
-        <IconCircleX />
-      </Button>
-      Help us out: take a quick
-      <a
-        target="_blank"
-        href="https://docs.google.com/forms/d/e/1FAIpQLSdNhU5k3FsIkcea_CTPVrmJ45k0czRz60XqLmBVUE5TjaT_jg/viewform"
-      >
-        user survey
-      </a>
-      !
-    </div>
-  );
-}
-
+/* function Aug2022Survey({
+ *   settings,
+ *   setSettings,
+ * }: {
+ *   settings: SettingsT;
+ *   setSettings: (s: Partial<SettingsT>) => void;
+ * }) {
+ *   if (!settings.surveyAug2022) {
+ *     return null;
+ *   }
+ * 
+ *   return (
+ *     <div className="banner vertical-align-center">
+ *       <Button
+ *         icon
+ *         onClick={() => setSettings({ ...settings, surveyAug2022: false })}
+ *       >
+ *         <IconCircleX />
+ *       </Button>
+ *       Help us out: take a quick
+ *       <a
+ *         target="_blank"
+ *         href="https://docs.google.com/forms/d/e/1FAIpQLSdNhU5k3FsIkcea_CTPVrmJ45k0czRz60XqLmBVUE5TjaT_jg/viewform"
+ *       >
+ *         user survey
+ *       </a>
+ *       !
+ *     </div>
+ *   );
+ * }
+ *  */
 export function App<T extends DefaultView = DefaultView>({
   routes,
 }: {
@@ -213,7 +213,6 @@ export function App<T extends DefaultView = DefaultView>({
         <SettingsContext.Provider
           value={{ state: settings, setState: setSettings }}
         >
-          <Aug2022Survey settings={settings} setSettings={setSettings} />
           <div className={`app app--${MODE} app--${settings.theme}`}>
             {MODE_FEATURES.appHeader && !isMakeSelect && <Header />}
             <main className={'view view-' + (urlState.view || 'editor')}>
