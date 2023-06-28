@@ -85,7 +85,7 @@
     "@wojtekmaj/enzyme-adapter-react-17": "^0.8.0",
     "cross-env": "^7.0.3",
     "electron": "^25.2.0",
-    "electron-chromedriver": "^24.6.0",
+    "electron-chromedriver": "^25.1.1",
     "electron-packager": "^17.1.1",
     "electron-rebuild": "^3.2.9",
     "enzyme": "^3.11.0",
