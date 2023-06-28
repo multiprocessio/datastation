@@ -208,6 +208,11 @@ for command in script:
         if i == 0:
             continue
         # Do basic variable substitition
-        line[i] = token.format(**BUILTIN_VARIABLES, **os.environ)
+        try:
+            line[i] = token.format(**BUILTIN_VARIABLES, **os.environ)
+        except KeyError as e:
+            key = e.args[0]
+            print(f"Missing {key}.")
+            os.exit(1)
 
     eval_line(line)
