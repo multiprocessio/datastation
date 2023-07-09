@@ -48,6 +48,11 @@ go install github.com/wadey/gocovmerge@b5bfa59
 
 # Make all go tools global
 sudo ln -s $HOME/go/bin/* /usr/local/bin/
+file /usr/local/bin/httpmirror
+which httpmirror
+echo $PATH
+
+exit 1
 
 # Install ODBC driver
 if ! [[ "18.04 20.04 21.04" == *"$(lsb_release -rs)"* ]];
