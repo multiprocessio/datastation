@@ -8,6 +8,7 @@ import {
   ProjectPage,
   TablePanelInfo,
 } from '../shared/state';
+import { Panel, VISUAL_PANELS } from './Panel';
 import { Button } from './components/Button';
 import { Dropdown } from './components/Dropdown';
 import { ErrorBoundary } from './components/ErrorBoundary';
@@ -16,7 +17,6 @@ import {
   orderedObjectFields,
   wellFormedGraphInput,
 } from './components/FieldPicker';
-import { Panel, VISUAL_PANELS } from './Panel';
 import { PANEL_GROUPS, PANEL_UI_DETAILS } from './panels';
 import { ProjectContext } from './state';
 import { UrlStateContext } from './urlState';

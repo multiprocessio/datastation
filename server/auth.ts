@@ -1,10 +1,10 @@
 import express from 'express';
 import session from 'express-session';
 import {
-  Client as OpenIDClient,
-  generators,
   Issuer,
+  Client as OpenIDClient,
   TokenSet,
+  generators,
 } from 'openid-client';
 import passport from 'passport';
 import { App } from './app';

@@ -1,18 +1,16 @@
 import {
-  Icon as TablerIcon,
   IconCalendar,
   IconCode,
   IconFiles,
   IconHelp,
   IconLayoutDashboard,
   IconSettings,
+  Icon as TablerIcon,
 } from '@tabler/icons';
 import * as React from 'react';
 import { MODE, MODE_FEATURES } from '../shared/constants';
 import { LANGUAGES } from '../shared/languages';
 import '../shared/polyfill';
-import { ErrorBoundary } from './components/ErrorBoundary';
-import { Loading } from './components/Loading';
 import { Editor } from './Editor';
 import { Footer } from './Footer';
 import { Header, loadDefaultProject } from './Header';
@@ -21,6 +19,8 @@ import { MakeSelectProject } from './MakeSelectProject';
 import { Navigation } from './Navigation';
 import { NotFound } from './NotFound';
 import { Settings, SettingsContext, useSettings } from './Settings';
+import { ErrorBoundary } from './components/ErrorBoundary';
+import { Loading } from './components/Loading';
 import { useShortcuts } from './shortcuts';
 import { ProjectContext, useProjectState } from './state';
 import { DefaultView, UrlStateContext, useUrlState } from './urlState';
