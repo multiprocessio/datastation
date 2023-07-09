@@ -21,6 +21,7 @@ const {
   replaceBigInt,
   REGEXP_TESTS,
   RUNNERS,
+  inPath,
 } = require('./testutil');
 
 ensureSigningKey();
@@ -33,6 +34,12 @@ const baseline = JSON.parse(
 const USERDATA_FILES = ['json', 'xlsx', 'csv', 'parquet', 'jsonl', 'cjson'];
 const PORT = '9799';
 const PORT2 = '9798';
+
+if (!inPath('httpmirror')) {
+  throw new Error(
+    'httpmirror not in PATH. See https://github.com/multiprocessio/httpmirror.'
+  );
+}
 
 let server = {},
   server2 = {};
