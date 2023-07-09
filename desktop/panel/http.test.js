@@ -87,6 +87,10 @@ beforeAll(async () => {
     server.stderr.on('data', (data) => {
       console.warn(data.toString());
     });
+
+    server.on('close', function(code) {
+      console.log(`Server exited with ${code}.`);
+    });
   });
 
   // Keep trying to connect to the server until it's ready
