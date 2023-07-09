@@ -27,7 +27,10 @@ exports.inPath = function (program) {
     darwin: 'which',
     win32: 'whereis',
   }[process.platform];
+  console.log(`Looking up ${program} in path.`);
   const proc = spawnSync(where, [program]);
+  console.log('stderr', proc.stderr.toString());
+  console.log('stdout', proc.stdout.toString());
   return proc.status === 0;
 };
 
