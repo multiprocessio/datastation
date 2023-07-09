@@ -53,6 +53,7 @@ beforeAll(async () => {
 
   // Start a new server for all tests
   while (true) {
+    console.log("Waiting for http.server to start.");
     server = spawn('python3', ['-m', 'http.server', PORT]);
     if (server.pid !== undefined) {
       break;
@@ -60,7 +61,9 @@ beforeAll(async () => {
 
     await new Promise((r) => setTimeout(r, 1000));
   }
+
   while (true) {
+    console.log("Waiting for httpmirror to start.");
     server2 = spawn('httpmirror', [PORT2]);
     if (server2.pid !== undefined) {
       break;
@@ -93,7 +96,7 @@ beforeAll(async () => {
       await new Promise((resolve) => setTimeout(resolve, 1000));
     }
   });
-});
+}, 30_000);
 
 for (const subprocessName of RUNNERS) {
   if (!subprocessName?.go) {
