@@ -23,8 +23,8 @@ ensureSigningKey();
 
 exports.inPath = function (program) {
   const where = {
-    linux: 'where',
-    darwin: 'where',
+    linux: 'which',
+    darwin: 'which',
     win32: 'whereis',
   }[process.platform];
   const proc = spawnSync(where, [program]);
