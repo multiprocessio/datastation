@@ -53,7 +53,7 @@ beforeAll(async () => {
 
   // Start a new server for all tests
   while (true) {
-    console.log("Waiting for http.server to start.");
+    console.log('Waiting for http.server to start.');
     server = spawn('python3', ['-m', 'http.server', PORT]);
     if (server.pid !== undefined) {
       break;
@@ -63,7 +63,7 @@ beforeAll(async () => {
   }
 
   while (true) {
-    console.log("Waiting for httpmirror to start.");
+    console.log('Waiting for httpmirror to start.');
     server2 = spawn('httpmirror', [PORT2]);
     if (server2.pid !== undefined) {
       break;
