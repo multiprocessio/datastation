@@ -71,5 +71,5 @@ if (false) {
     );
   });
 } else {
-  test('ok', function() {});
+  test('ok', function () {});
 }

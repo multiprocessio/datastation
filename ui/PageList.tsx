@@ -9,14 +9,14 @@ import {
   ProjectState,
   TablePanelInfo,
 } from '../shared/state';
-import { loadDefaultProject } from './Header';
-import { VISUAL_PANELS } from './Panel';
-import { PanelList } from './PanelList';
-import { LocalStorageStore } from './ProjectStore';
 import { Button } from './components/Button';
 import { Confirm } from './components/Confirm';
 import { Input } from './components/Input';
+import { loadDefaultProject } from './Header';
+import { VISUAL_PANELS } from './Panel';
+import { PanelList } from './PanelList';
 import { PANEL_UI_DETAILS } from './panels';
+import { LocalStorageStore } from './ProjectStore';
 
 export function makeReevalPanel(
   state: ProjectState,

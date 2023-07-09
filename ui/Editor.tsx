@@ -1,14 +1,14 @@
 import * as React from 'react';
 import { MODE_FEATURES } from '../shared/constants';
 import '../shared/polyfill';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { ConnectorList } from './ConnectorList';
 import { Footer } from './Footer';
 import { PageList } from './PageList';
 import { ServerList } from './ServerList';
 import { Sidebar } from './Sidebar';
-import { Updates } from './Updates';
-import { ErrorBoundary } from './components/ErrorBoundary';
 import { ProjectContext } from './state';
+import { Updates } from './Updates';
 import { UrlStateContext } from './urlState';
 
 export function Editor() {

@@ -6,7 +6,7 @@ import {
   encodeBase64,
   encodeUTF8,
 } from 'tweetnacl-util';
-import { Encrypt, doOnEncryptFields } from '../shared/state';
+import { doOnEncryptFields, Encrypt } from '../shared/state';
 import { ensureFile } from './fs';
 
 function getSigningKeyPath(signingKeyPath?: string) {

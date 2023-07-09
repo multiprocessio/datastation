@@ -8,13 +8,13 @@ import {
   MakeProjectResponse,
 } from '../shared/rpc';
 import { ProjectState } from '../shared/state';
-import { Footer } from './Footer';
 import { asyncRPC } from './asyncRPC';
 import { Alert } from './components/Alert';
 import { Button } from './components/Button';
 import { Input } from './components/Input';
 import { Loading } from './components/Loading';
 import { Select } from './components/Select';
+import { Footer } from './Footer';
 import { SAMPLES } from './samples';
 
 export function MakeSelectProject() {

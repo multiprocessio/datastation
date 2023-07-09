@@ -2,8 +2,8 @@ import * as React from 'react';
 import { APP_NAME, MODE } from '../shared/constants';
 import '../shared/polyfill';
 import { DEFAULT_PROJECT } from '../shared/state';
-import { LocalStorageStore } from './ProjectStore';
 import { Link } from './components/Link';
+import { LocalStorageStore } from './ProjectStore';
 import { UrlStateContext } from './urlState';
 
 export function loadDefaultProject() {

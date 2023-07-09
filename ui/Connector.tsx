@@ -1,10 +1,10 @@
 import { IconTrash } from '@tabler/icons';
 import * as React from 'react';
 import { ConnectorInfo, DatabaseConnectorInfo } from '../shared/state';
-import { DatabaseConnector } from './DatabaseConnector';
 import { Button } from './components/Button';
 import { Confirm } from './components/Confirm';
 import { Input } from './components/Input';
+import { DatabaseConnector } from './DatabaseConnector';
 
 export function Connector({
   connector,

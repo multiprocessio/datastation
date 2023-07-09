@@ -10,6 +10,7 @@ import {
   ConnectorInfo,
   DatabaseConnectorInfo,
   DatabasePanelInfo,
+  doOnEncryptFields,
   Encrypt,
   FilePanelInfo,
   FilterAggregatePanelInfo,
@@ -24,12 +25,11 @@ import {
   ProjectState,
   ServerInfo,
   TablePanelInfo,
-  doOnEncryptFields,
 } from '../shared/state';
 import { CODE_ROOT, DISK_ROOT, PROJECT_EXTENSION } from './constants';
 import {
-  GenericCrud,
   connectorCrud,
+  GenericCrud,
   metadataCrud,
   pageCrud,
   panelCrud,

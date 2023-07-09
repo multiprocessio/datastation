@@ -5,9 +5,9 @@ import {
   DatabaseConnectorInfoType,
   ProjectState,
 } from '../shared/state';
-import { Connector } from './Connector';
 import { Button } from './components/Button';
 import { Dropdown } from './components/Dropdown';
+import { Connector } from './Connector';
 import { VENDORS, VENDOR_GROUPS } from './connectors';
 
 function NewConnector({
