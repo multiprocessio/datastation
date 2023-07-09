@@ -49,9 +49,6 @@ go install github.com/wadey/gocovmerge@b5bfa59
 # Make all go tools global
 sudo ln -s $HOME/go/bin/* /usr/local/bin/
 
-# Start up mongodb and install mongosh (shell)
-sudo apt-get install -y mongodb-mongosh
-
 # Install ODBC driver
 if ! [[ "18.04 20.04 21.04" == *"$(lsb_release -rs)"* ]];
 then
