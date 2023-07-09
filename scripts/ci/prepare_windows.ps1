@@ -26,7 +26,7 @@ function Retry {
 Retry -Cmd { Invoke-WebRequest -useb 'https://raw.githubusercontent.com/scoopinstaller/install/master/install.ps1' -outfile 'install.ps1' }
 .\install.ps1 -RunAsAdmin
 Join-Path (Resolve-Path ~).Path "scoop\shims" >> $Env:GITHUB_PATH
-Retry -Cmd { scoop install nodejs@20.4.0 }
+Retry -Cmd { scoop install nodejs-lts }
 Retry -Cmd { scoop install go@1.20.2 }
 Retry -Cmd { scoop install cmake }
 Retry -Cmd { scoop install python }
