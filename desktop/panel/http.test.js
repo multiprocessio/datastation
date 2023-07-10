@@ -61,7 +61,9 @@ beforeAll(async () => {
   // Start a new server for all tests
   while (true) {
     console.log('Waiting for http.server to start.');
-    server = spawn('python3', ['-m', 'http.server', PORT]);
+    server = spawn('python3', ['-m', 'http.server', PORT], {
+      stdio: 'inherit',
+    });
     if (server.pid !== undefined) {
       break;
     }
@@ -71,7 +73,7 @@ beforeAll(async () => {
 
   while (true) {
     console.log('Waiting for httpmirror to start.');
-    server2 = spawn('httpmirror', [PORT2]);
+    server2 = spawn('httpmirror', [PORT2], { stdio: 'inherit' });
     if (server2.pid !== undefined) {
       break;
     }
@@ -80,15 +82,7 @@ beforeAll(async () => {
   }
 
   [server, server2].forEach((s) => {
-    s.stdout.on('data', (data) => {
-      console.log(data.toString());
-    });
-
-    s.stderr.on('data', (data) => {
-      console.warn(data.toString());
-    });
-
-    s.on('close', function(code) {
+    s.on('close', function (code) {
       process.stderr.write(`Server exited with ${code}.\n`);
     });
   });
@@ -124,7 +118,7 @@ for (const subprocessName of RUNNERS) {
           '',
           new HTTPConnectorInfo(
             '',
-            'http://localhost:'+PORT+'/testdata/allformats/unknown'
+            'http://localhost:' + PORT + '/testdata/allformats/unknown'
           )
         );
 
@@ -161,7 +155,10 @@ for (const subprocessName of RUNNERS) {
       '',
       new HTTPConnectorInfo(
         '',
-        'http://localhost:'+PORT+'/testdata/allformats/userdata.' + userdataFileType
+        'http://localhost:' +
+          PORT +
+          '/testdata/allformats/userdata.' +
+          userdataFileType
       )
     );
 
@@ -212,7 +209,7 @@ for (const subprocessName of RUNNERS) {
       '',
       new HTTPConnectorInfo(
         '',
-        'http://localhost:'+PORT+'/testdata/logs/' + t.filename
+        'http://localhost:' + PORT + '/testdata/logs/' + t.filename
       )
     );
     hp.http.http.contentTypeInfo = t.contentTypeInfo;
@@ -254,7 +251,7 @@ for (const subprocessName of RUNNERS) {
         '',
         new HTTPConnectorInfo(
           '',
-          'http://localhost:'+PORT+'/testdata/allformats/unknown',
+          'http://localhost:' + PORT + '/testdata/allformats/unknown',
           [{ name: 'X-Test', value: 'OK' }]
         )
       );
@@ -289,7 +286,10 @@ for (const subprocessName of RUNNERS) {
       const hp = new HTTPPanelInfo(
         null,
         '',
-        new HTTPConnectorInfo('', 'http://localhost:'+PORT+'{{DM_getPanel("0")}}')
+        new HTTPConnectorInfo(
+          '',
+          'http://localhost:' + PORT + '{{DM_getPanel("0")}}'
+        )
       );
 
       const panels = [lp, hp];
@@ -358,7 +358,7 @@ for (const subprocessName of RUNNERS) {
           '',
           new HTTPConnectorInfo(
             '',
-            'http://localhost:'+PORT+'/testdata/allformats/unknown'
+            'http://localhost:' + PORT + '/testdata/allformats/unknown'
           )
         );
         hp.serverId = server.id;
