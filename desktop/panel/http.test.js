@@ -89,7 +89,7 @@ beforeAll(async () => {
     });
 
     s.on('close', function(code) {
-      console.log(`Server exited with ${code}.`);
+      process.stderr.write(`Server exited with ${code}.\n`);
     });
   });
 
