@@ -89,7 +89,7 @@ beforeAll(async () => {
     s.stderr.on('data', (data) => {
       console.error(`[ERR server:${ports[i]}]: ${data.toString()}`);
     });
-    
+
     s.on('close', function (code) {
       process.stderr.write(`[server:${ports[i]}]: exited with ${code}.\n`);
     });
