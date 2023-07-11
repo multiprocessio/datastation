@@ -4429,6 +4429,11 @@ jest-runtime@^29.5.0:
     slash "^3.0.0"
     strip-bom "^4.0.0"
 
+jest-slow-test-reporter@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/jest-slow-test-reporter/-/jest-slow-test-reporter-1.0.0.tgz#cb8b4fa3212c1bf9fd3794c79faf0c863807d59e"
+  integrity sha512-5FG8hlaO7Wdgdo6oQxGiFAKwd1HW51+8/KmQJgUV3bsW3cCXx9TukaoGnHhBl+hwLkCYENynWL1PQnG8DwOV6w==
+
 jest-snapshot@^29.5.0:
   version "29.5.0"
   resolved "https://registry.yarnpkg.com/jest-snapshot/-/jest-snapshot-29.5.0.tgz#c9c1ce0331e5b63cd444e2f95a55a73b84b1e8ce"

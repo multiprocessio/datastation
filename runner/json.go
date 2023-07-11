@@ -3,7 +3,6 @@ package runner
 import (
 	"encoding/json"
 	"io"
-	"io/ioutil"
 	"os"
 	"strings"
 
@@ -86,7 +85,7 @@ func loadJSONArrayFileWithPath(f, path string) (chan map[string]any, error) {
 
 	var reader io.Reader = fd
 	if path != "" {
-		data, err := ioutil.ReadAll(fd)
+		data, err := io.ReadAll(fd)
 		if err != nil {
 			return nil, err
 		}

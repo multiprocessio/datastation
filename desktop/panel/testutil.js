@@ -28,9 +28,7 @@ exports.inPath = function (program) {
     win32: 'whereis',
   }[process.platform];
   console.log(`Looking up ${program} in path.`);
-  const proc = spawnSync(where, [program]);
-  console.log('stderr', proc.stderr.toString());
-  console.log('stdout', proc.stdout.toString());
+  const proc = spawnSync(where, [program], { shell: true, stdio: 'inherit' });
   return proc.status === 0;
 };
 

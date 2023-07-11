@@ -96,6 +96,7 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "jest": "^29.5.0",
     "jest-canvas-mock": "^2.5.1",
+    "jest-slow-test-reporter": "^1.0.0",
     "node-fetch": "2",
     "prettier": "^2.8.8",
     "prettier-plugin-organize-imports": "^3.2.2",
