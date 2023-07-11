@@ -1,7 +1,7 @@
 require('../../shared/polyfill');
 
 const { ensureSigningKey } = require('../secret');
-const { spawn } = require('child_process');
+const { spawn, spawnSync } = require('child_process');
 const { CODE_ROOT } = require('../constants');
 const fetch = require('node-fetch');
 const path = require('path');
@@ -32,7 +32,7 @@ const baseline = JSON.parse(
 );
 
 const USERDATA_FILES = ['json', 'xlsx', 'csv', 'parquet', 'jsonl', 'cjson'];
-const PORT = '9802';
+const PORT = '9799';
 const PORT2 = '9798';
 
 if (!inPath('httpmirror')) {
@@ -61,9 +61,8 @@ beforeAll(async () => {
   // Start a new server for all tests
   while (true) {
     console.log('Waiting for http.server to start.');
-    server = spawn('python3', ['-m', 'http.server', PORT], {
-      stdio: 'inherit',
-    });
+    spawnSync('go', ['build', 'scripts/fileserver.go']);
+    server = spawn('./fileserver', [PORT]);
     if (server.pid !== undefined) {
       break;
     }
@@ -73,7 +72,7 @@ beforeAll(async () => {
 
   while (true) {
     console.log('Waiting for httpmirror to start.');
-    server2 = spawn('httpmirror', [PORT2], { stdio: 'inherit' });
+    server2 = spawn('httpmirror', [PORT2]);
     if (server2.pid !== undefined) {
       break;
     }
@@ -81,9 +80,18 @@ beforeAll(async () => {
     await new Promise((r) => setTimeout(r, 1000));
   }
 
-  [server, server2].forEach((s) => {
+  [server, server2].forEach((s, i) => {
+    const ports = [PORT, PORT2];
+    s.stdout.on('data', (data) => {
+      console.log(`[LOG server:${ports[i]}]: ${data.toString()}`);
+    });
+
+    s.stderr.on('data', (data) => {
+      console.error(`[ERR server:${ports[i]}]: ${data.toString()}`);
+    });
+    
     s.on('close', function (code) {
-      process.stderr.write(`Server exited with ${code}.\n`);
+      process.stderr.write(`[server:${ports[i]}]: exited with ${code}.\n`);
     });
   });
 
