@@ -28,7 +28,7 @@ jobs:
     - run: ./scripts/ci/prepare_linux.sh --integration-tests
     # Needed so we can have ./build/desktop_runner.js and ./build/go_desktop_runner ready for tests
     - run: yarn build-test-runner
-    - run: yarn test --detectOpenHandles --forceExit --verbose desktop/panel/http.test.js -t 'eval generic file via'
+    - run: yarn test --detectOpenHandles --forceExit --verbose desktop/panel/http.test.js
 
     - name: Upload non-credential coverage
       uses: actions/upload-artifact@v3
