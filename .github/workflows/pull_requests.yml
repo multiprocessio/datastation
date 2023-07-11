@@ -5,6 +5,39 @@ on:
     branches: [main]
 
 jobs:
+  static_checks:
+    name: Static Checks
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@master
+      with:
+        ref: ${{ github.ref }}
+
+    - uses: c-hive/gha-yarn-cache@v2
+    - name: Setup Golang caches
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cache/go-build
+          ~/go/pkg/mod
+        key: ${{ runner.os }}-golang-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-golang-
+
+    - run: ./scripts/ci/prepare_linux.sh --integration-tests
+
+    - run: yarn format
+    - run: yarn eslint ui
+    - run: yarn tsc
+    - run: cd runner && gofmt -w .
+
+    - run: yarn build-language-definitions
+
+    - run: ./scripts/fail_on_diff.sh
+
+    - run: yarn test-licenses
+
   linux_node_ui_tests:
     name: Linux Node/UI Tests
     runs-on: ubuntu-latest
@@ -35,3 +68,303 @@ jobs:
       with:
         name: non-credential-coverage
         path: coverage/*.cov
+
+  macos_node_ui_tests:
+    name: macOS Node/UI Tests
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@master
+      with:
+        ref: ${{ github.ref }}
+
+    - uses: c-hive/gha-yarn-cache@v2
+    - name: Setup Golang caches
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cache/go-build
+          ~/go/pkg/mod
+        key: ${{ runner.os }}-golang-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-golang-
+
+    - run: ./scripts/ci/prepare_macos.sh
+    # Needed so we can have ./build/desktop_runner.js and ./build/go_desktop_runner ready for tests
+    - run: yarn build-test-runner
+    - run: yarn test ui desktop shared --detectOpenHandles --forceExit --verbose
+
+  windows_ui_tests:
+    name: Windows UI Tests
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@master
+      with:
+        ref: ${{ github.ref }}
+
+    - uses: c-hive/gha-yarn-cache@v2
+    - name: Setup Golang caches
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cache/go-build
+          ~/go/pkg/mod
+        key: ${{ runner.os }}-golang-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-golang-
+
+    - run: ./scripts/ci/prepare_windows.ps1
+      shell: pwsh
+
+    # Needed so we can have ./build/desktop_runner.js and ./build/go_desktop_runner ready for tests
+    - run: yarn build-test-runner
+    - run: yarn test ui --detectOpenHandles --forceExit --verbose
+
+  credentialed_integration_tests:
+    name: Credentialed Database Integration Tests that Require Special Permissions to Succeed
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@master
+      with:
+        ref: ${{ github.ref }}
+
+    - uses: c-hive/gha-yarn-cache@v2
+    - name: Setup Golang caches
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cache/go-build
+          ~/go/pkg/mod
+        key: ${{ runner.os }}-golang-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-golang-
+
+    - run: ./scripts/ci/prepare_linux.sh --integration-tests
+    # Needed so we can have ./build/desktop_runner.js and ./build/go_desktop_runner ready for tests
+    - run: yarn build-test-runner
+    - run: RUN_CREDENTIAL_TESTS=true yarn test --detectOpenHandles --forceExit --verbose integration/credential_database.test.js
+      env:
+        AIRTABLE_TOKEN: ${{ secrets.AIRTABLE_TOKEN }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        BIGQUERY_TOKEN: ${{ secrets.BIGQUERY_TOKEN }}
+        SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER }}
+        SNOWFLAKE_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}
+        SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+
+    - name: Upload credential coverage
+      uses: actions/upload-artifact@v3
+      with:
+        name: credential-coverage
+        path: coverage/*.cov
+
+  linux_go_tests:
+    name: Linux Go Tests
+    runs-on: ubuntu-latest
+    needs:
+      - credentialed_integration_tests
+      - linux_node_ui_tests
+
+    steps:
+    - uses: actions/checkout@master
+      with:
+        ref: ${{ github.ref }}
+
+    - name: Setup Golang caches
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cache/go-build
+          ~/go/pkg/mod
+        key: ${{ runner.os }}-golang-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-golang-
+
+    - run: ./scripts/ci/prepare_linux.sh --integration-tests
+
+    # Run golangci-lint
+    - name: Run golangci-lint
+      uses: golangci/golangci-lint-action@v3
+      with:
+        working-directory: runner
+        args: --timeout 3m --verbose
+
+    # Grab coverage files from other tests
+    - run: mkdir coverage
+    - name: Download credential coverage
+      uses: actions/download-artifact@v3
+      with:
+        name: credential-coverage
+    - name: Download non-credential coverage
+      uses: actions/download-artifact@v3
+      with:
+        name: non-credential-coverage
+    # Artifacts get downloaded into this directory
+    - run: mv gorunner*.cov coverage/
+
+    # Run tests and coverage
+    - run: cd runner && go test -race -coverprofile ../coverage/gounit.cov
+    - run: ls coverage
+    - run: ./runner/scripts/test_coverage.sh
+
+  macos_go_tests:
+    name: macOS Go Tests
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@master
+      with:
+        ref: ${{ github.ref }}
+
+    - name: Setup Golang caches
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cache/go-build
+          ~/go/pkg/mod
+        key: ${{ runner.os }}-golang-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-golang-
+
+    - run: ./scripts/ci/prepare_macos.sh
+
+    - run: cd runner && go test
+
+  windows_go_tests:
+    name: windows Go Tests
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@master
+      with:
+        ref: ${{ github.ref }}
+
+    - name: Setup Golang caches
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cache/go-build
+          ~/go/pkg/mod
+        key: ${{ runner.os }}-golang-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-golang-
+
+    - run: ./scripts/ci/prepare_windows.ps1
+      shell: pwsh
+
+    - run: cd runner && go test
+
+  e2e_linux_tests:
+    name: End-to-end Linux Tests
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@master
+      with:
+        ref: ${{ github.ref }}
+
+    - uses: c-hive/gha-yarn-cache@v2
+    - name: Setup Golang caches
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cache/go-build
+          ~/go/pkg/mod
+        key: ${{ runner.os }}-golang-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-golang-
+
+    - run: ./scripts/ci/prepare_linux.sh
+    - run: yarn release-desktop 0.0.0-e2etest
+    - run: git reset --hard # release blows everything up
+      # Set up a virtual framebuffer so Chrome will start
+      # https://www.electronjs.org/docs/tutorial/testing-on-headless-ci
+      # https://github.com/juliangruber/browser-run/issues/147
+    - run: xvfb-run --auto-servernum yarn e2e-test
+
+  e2e_macos_tests:
+    name: End-to-end macOS Tests
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@master
+      with:
+        ref: ${{ github.ref }}
+
+    - uses: c-hive/gha-yarn-cache@v2
+    - name: Setup Golang caches
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cache/go-build
+          ~/go/pkg/mod
+        key: ${{ runner.os }}-golang-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-golang-
+
+    - run: ./scripts/ci/prepare_macos.sh
+    # Needed so we can have ./build/desktop_runner.js ready for tests
+    - run: yarn build-test-runner
+    # https://github.com/golang/go/issues/49138 bug in macos -race detector
+    - run: MallocNanoZone=0 yarn test --detectOpenHandles --forceExit --verbose shared ui desktop
+    - run: cd runner && MallocNanoZone=0 go test -race -cover
+    - run: yarn release-desktop 0.0.0-e2etest
+    - run: git reset --hard # release blows everything up
+    - run: yarn e2e-test
+
+  e2e_windows_tests:
+    name: End-to-end Windows Tests
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@master
+      with:
+        ref: ${{ github.ref }}
+
+    - uses: c-hive/gha-yarn-cache@v2
+    - name: Setup Golang caches
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cache/go-build
+          ~/go/pkg/mod
+        key: ${{ runner.os }}-golang-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-golang-
+
+    - run: ./scripts/ci/prepare_windows.ps1
+      shell: pwsh
+    # Needed so we can have ./build/desktop_runner.js ready for tests
+    - run: yarn build-test-runner
+    - run: yarn test --detectOpenHandles --forceExit --verbose shared ui desktop
+    - run: cd runner && go test -race -cover
+    - run: yarn release-desktop 0.0.0-e2etest
+    - run: git reset --hard # release blows everything up
+    - run: yarn e2e-test
+
+  server_tests:
+    name: Server Tests
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@master
+      with:
+        ref: ${{ github.ref }}
+
+    - uses: c-hive/gha-yarn-cache@v2
+    - name: Setup Golang caches
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cache/go-build
+          ~/go/pkg/mod
+        key: ${{ runner.os }}-golang-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-golang-
+
+    - run: ./scripts/ci/prepare_linux.sh
+    - run: yarn release-server 0.0.0-test
+    - run: sudo apt-get install -y podman
+    - run: ./server/scripts/test_release.sh datastation-server-x64-0.0.0-test.tar.gz
