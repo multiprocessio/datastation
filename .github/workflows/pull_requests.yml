@@ -118,7 +118,6 @@ jobs:
       shell: pwsh
 
     # Needed so we can have ./build/desktop_runner.js and ./build/go_desktop_runner ready for tests
-    - run: yarn
     - run: yarn build-test-runner
     - run: yarn test ui --detectOpenHandles --forceExit --verbose
 
