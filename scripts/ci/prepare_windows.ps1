@@ -38,7 +38,11 @@ Retry -Cmd { scoop install julia }
 New-Alias zip 7z
 
 # Install JS dependencies
-Retry -Cmd { yarn }
+yarn
+yarn
+yarn
+yarn
+yarn
 Retry -Cmd { yarn rebuild }
 
 # Install Go
