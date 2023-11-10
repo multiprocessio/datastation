@@ -1,6 +1,0 @@
-{
-  "defaultPath": "node",
-  "id": "javascript",
-  "name": "JavaScript",
-  "preamble": "\nfunction DM_getPanelFile(i) {\n  return '$$RESULTS_FILE$$'+$$JSON_ID_MAP$$[i];\n}\n\nfunction DM_getPanel(i) {\n  const fs = require('fs');\n  return JSON.parse(fs.readFileSync('$$RESULTS_FILE$$'+$$JSON_ID_MAP$$[i]));\n}\n\nfunction DM_setPanel(v) {\n  const fs = require('fs');\n  const fd = fs.openSync('$$PANEL_RESULTS_FILE$$', 'w');\n  if (Array.isArray(v)) {\n    fs.writeSync(fd, '[');\n    for (let i = 0; i < v.length; i++) {\n      const row = v[i];\n      let rowJSON = JSON.stringify(row);\n      if (i < v.length - 1) {\n        rowJSON += ',';\n      }\n      fs.writeSync(fd, rowJSON);\n    }\n    fs.writeSync(fd, ']');\n  } else {\n    fs.writeSync(fd, JSON.stringify(v));\n  }\n}"
-}

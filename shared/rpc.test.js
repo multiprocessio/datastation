@@ -1,3 +1,0 @@
-require('./rpc');
-
-test('stub', () => {});

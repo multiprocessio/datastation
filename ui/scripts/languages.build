@@ -1,7 +1,0 @@
-jsonnet ./shared/languages/ruby.jsonnet -o ./shared/languages/ruby.json
-jsonnet ./shared/languages/r.jsonnet -o ./shared/languages/r.json
-jsonnet ./shared/languages/javascript.jsonnet -o ./shared/languages/javascript.json
-jsonnet ./shared/languages/python.jsonnet -o ./shared/languages/python.json
-jsonnet ./shared/languages/julia.jsonnet -o ./shared/languages/julia.json
-jsonnet ./shared/languages/php.jsonnet -o ./shared/languages/php.json
-jsonnet ./shared/languages/deno.jsonnet -o ./shared/languages/deno.json

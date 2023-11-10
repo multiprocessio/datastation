@@ -1,3 +1,0 @@
-GET /path2 www.google.com 8.8.8.10
-POST /mypath old.misc.org 99.10.10.1
-DELETE /path?x=y nine.org 10.0.0.1

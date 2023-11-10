@@ -1,3 +1,0 @@
-require('./log');
-
-test('stub', () => {});

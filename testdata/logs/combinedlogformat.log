@@ -1,3 +1,0 @@
-127.0.0.1 - frank [10/Oct/2000:13:55:36 -0700] "GET /apache_pb.gif HTTP/1.0" 200 2326 "http://www.example.com/start.html" "Mozilla/4.08 [en] (Win98; I ;Nav)"
-216.67.1.91 - leon [01/Jul/2002:12:11:52 +0000] "GET /index.html HTTP/1.1" 200 431"http://www.loganalyzer.net/" "Mozilla/4.05 [en] (WinNT; I)" "USERID=CustomerA;IMPID=01234"
-203.93.245.97 - oracleuser [28/Sep/2000:23:59:07 -0700] "GET /files/search/search.jsp?s=driver&a=10 HTTP/1.0" 200 2374 "http://datawarehouse.us.oracle.com/datamining/contents.htm" "Mozilla/4.7 [en] (WinNT; I)
