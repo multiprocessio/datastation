@@ -38,4 +38,10 @@ module.exports = {
     'server/**/*.tsx',
   ],
   modulePathIgnorePatterns: ['<rootDir>/releases/', '<rootDir>/build/', 'ee/'],
+  reporters: [
+    [
+      'jest-slow-test-reporter',
+      { numTests: 8, warnOnSlowerThan: 300, color: true },
+    ],
+  ],
 };

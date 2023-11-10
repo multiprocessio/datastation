@@ -10,4 +10,4 @@ setenv_default UI_TITLE "DataStation Desktop CE"
 setenv_default UI_CSP ""
 setenv_default UI_ROOT ""
 render ui/index.html build/index.html
-node-sass ./ui/style.css ./build/style.css
+yarn sass ./ui/style.scss ./build/style.css

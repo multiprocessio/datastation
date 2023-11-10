@@ -5,27 +5,6 @@ on:
     types: [published]
 
 jobs:
-  build-server:
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@master
-      with:
-        ref: ${{ github.ref }}
-
-    - run: ./scripts/ci/prepare_linux.sh
-    - run: echo "GIT_TAG=`git tag --points-at HEAD`" >> $GITHUB_ENV
-    - run: |
-        echo "RELEASE_ID=`curl -H 'Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' https://api.github.com/repos/multiprocessio/datastation/releases/tags/$GIT_TAG | jq '.id'`" >> $GITHUB_ENV
-    - run: yarn release-server $GIT_TAG
-    - name: Upload on release
-      run: |
-        curl --fail \
-          -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-          -H "Content-Type: application/tar+gzip" \
-          --data-binary @./releases/datastation-server-x64-$GIT_TAG.tar.gz \
-          "https://uploads.github.com/repos/multiprocessio/datastation/releases/$RELEASE_ID/assets?name=datastation-server-x64-$GIT_TAG.tar.gz"
-
   build-linux-desktop:
     runs-on: ubuntu-latest
 

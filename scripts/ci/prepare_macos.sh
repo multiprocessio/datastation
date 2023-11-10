@@ -3,13 +3,13 @@
 set -eux
 
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-brew install cmake jq r julia node@16 npm go-jsonnet
-brew link --overwrite node@16
+brew install cmake jq r julia node@18 npm go-jsonnet
+brew link --overwrite node@18
 
 # Install go
-sudo curl -LO https://go.dev/dl/go1.19.darwin-amd64.tar.gz
+sudo curl -LO https://go.dev/dl/go1.20.2.darwin-amd64.tar.gz
 sudo rm -rf /usr/local/go
-sudo tar -C /usr/local -xzf go1.19.darwin-amd64.tar.gz
+sudo tar -C /usr/local -xzf go1.20.2.darwin-amd64.tar.gz
 sudo mv /usr/local/go/bin/go /usr/local/bin/go
 sudo mv /usr/local/go/bin/gofmt /usr/local/bin/gofmt
 

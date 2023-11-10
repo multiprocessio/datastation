@@ -1,4 +1,4 @@
-import { TablerIcon } from '@tabler/icons';
+import { Icon as TablerIcon } from '@tabler/icons';
 import React from 'react';
 import { Button } from './components/Button';
 import { DefaultView, UrlStateContext } from './urlState';

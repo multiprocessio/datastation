@@ -6,8 +6,8 @@
 
 set -ex
 
-# Set up Julia, SSH, etc.
-sudo apt-get install -y jq julia openssh-server php
+# Set up SSH, etc.
+sudo apt-get install -y jq openssh-server php
 
 # Set up http helper
 go install github.com/multiprocessio/httpmirror@latest
@@ -34,6 +34,11 @@ sudo mv deno /usr/bin/deno
 sudo mkdir -p /usr/local/lib/R/site-library
 sudo chown -R $USER /usr/local/lib/R/
 
+# Install julia
+wget https://julialang-s3.julialang.org/bin/linux/x64/1.8/julia-1.8.5-linux-x86_64.tar.gz
+tar zxvf julia-1.8.5-linux-x86_64.tar.gz
+sudo ln -s $(pwd)/julia-1.8.5/bin /usr/local/bin/
+
 # Install jsonnet
 go install github.com/google/go-jsonnet/cmd/jsonnet@latest
 
@@ -42,7 +47,7 @@ go install github.com/axw/gocov/gocov@v1.0.0
 go install github.com/wadey/gocovmerge@b5bfa59
 
 # Make all go tools global
-sudo ln -s $HOME/go/bin/* /usr/local/bin/
+sudo cp $HOME/go/bin/* /usr/local/bin/
 
 # Install ODBC driver
 if ! [[ "18.04 20.04 21.04" == *"$(lsb_release -rs)"* ]];
@@ -58,6 +63,3 @@ sudo mv mssql-release.list /etc/apt/sources.list.d/mssql-release.list
 
 sudo apt-get update
 sudo ACCEPT_EULA=Y apt-get install -y msodbcsql18
-
-# Start up mongodb and install mongosh (shell)
-sudo apt-get install -y mongodb-mongosh

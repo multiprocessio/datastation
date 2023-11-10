@@ -54,16 +54,17 @@ export const VENDORS: {
     id: 'mysql',
     details: GenericDetails,
   },
-  sqlserver: {
-    name: 'SQL Server',
-    id: 'sqlserver',
-    details: GenericDetails,
-  },
-  oracle: {
-    name: 'Oracle',
-    id: 'oracle',
-    details: GenericDetails,
-  },
+  // TODO: Tests not working at the moment.
+  /* sqlserver: {
+   *   name: 'SQL Server',
+   *   id: 'sqlserver',
+   *   details: GenericDetails,
+   * },
+   * oracle: {
+   *   name: 'Oracle',
+   *   id: 'oracle',
+   *   details: GenericDetails,
+   * }, */
   sqlite: {
     name: 'SQLite',
     id: 'sqlite',
@@ -124,11 +125,12 @@ export const VENDORS: {
     id: 'scylla',
     details: CassandraDetails,
   },
-  mongo: {
-    name: 'MongoDB (Beta)',
-    id: 'mongo',
-    details: GenericDetails,
-  },
+  // TODO: tests not working at the moment.
+  /* mongo: {
+   *   name: 'MongoDB (Beta)',
+   *   id: 'mongo',
+   *   details: GenericDetails,
+   * }, */
   athena: {
     name: 'AWS Athena',
     id: 'athena',
@@ -165,8 +167,8 @@ export const VENDOR_GROUPS: Array<{
     vendors: [
       'postgres',
       'mysql',
-      'sqlserver',
-      'oracle',
+      //'sqlserver',
+      //'oracle',
       'sqlite',
       'cockroach',
       'odbc',
@@ -182,7 +184,7 @@ export const VENDOR_GROUPS: Array<{
   },
   {
     group: 'Document',
-    vendors: ['elasticsearch', 'crate', 'mongo'],
+    vendors: ['elasticsearch', 'crate' /* , 'mongo' */],
   },
   {
     group: 'Time Series',

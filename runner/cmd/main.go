@@ -110,7 +110,7 @@ func eval(ec runner.EvalContext, projectId, panelId, panelMetaOut string) {
 }
 
 func main() {
-	rand.Seed(time.Now().UnixNano())
+	rand.New(rand.NewSource(time.Now().UnixNano()))
 
 	runner.Verbose = true
 	runner.Logln(APP_NAME + " " + VERSION)

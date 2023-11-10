@@ -1,7 +1,7 @@
 require('../../shared/polyfill');
 
 const { ensureSigningKey } = require('../secret');
-const { spawn } = require('child_process');
+const { spawn, spawnSync } = require('child_process');
 const { CODE_ROOT } = require('../constants');
 const fetch = require('node-fetch');
 const path = require('path');
@@ -21,6 +21,7 @@ const {
   replaceBigInt,
   REGEXP_TESTS,
   RUNNERS,
+  inPath,
 } = require('./testutil');
 
 ensureSigningKey();
@@ -34,7 +35,14 @@ const USERDATA_FILES = ['json', 'xlsx', 'csv', 'parquet', 'jsonl', 'cjson'];
 const PORT = '9799';
 const PORT2 = '9798';
 
-let server, server2;
+if (!inPath('httpmirror')) {
+  throw new Error(
+    'httpmirror not in PATH. See https://github.com/multiprocessio/httpmirror.'
+  );
+}
+
+let server = {},
+  server2 = {};
 // Kill the existing server if it wasn't killed correctly already.
 beforeAll(async () => {
   // TODO: port this logic to other platforms...
@@ -51,16 +59,39 @@ beforeAll(async () => {
   }
 
   // Start a new server for all tests
-  server = spawn('python3', ['-m', 'http.server', PORT]);
-  server2 = spawn('httpmirror', [PORT2]);
+  while (true) {
+    console.log('Waiting for http.server to start.');
+    spawnSync('go', ['build', 'scripts/fileserver.go']);
+    server = spawn('./fileserver', [PORT]);
+    if (server.pid !== undefined) {
+      break;
+    }
 
-  [server, server2].forEach((server) => {
-    server.stdout.on('data', (data) => {
-      console.log(data.toString());
+    await new Promise((r) => setTimeout(r, 1000));
+  }
+
+  while (true) {
+    console.log('Waiting for httpmirror to start.');
+    server2 = spawn('httpmirror', [PORT2]);
+    if (server2.pid !== undefined) {
+      break;
+    }
+
+    await new Promise((r) => setTimeout(r, 1000));
+  }
+
+  [server, server2].forEach((s, i) => {
+    const ports = [PORT, PORT2];
+    s.stdout.on('data', (data) => {
+      console.log(`[LOG server:${ports[i]}]: ${data.toString()}`);
     });
 
-    server.stderr.on('data', (data) => {
-      console.warn(data.toString());
+    s.stderr.on('data', (data) => {
+      console.error(`[ERR server:${ports[i]}]: ${data.toString()}`);
+    });
+
+    s.on('close', function (code) {
+      process.stderr.write(`[server:${ports[i]}]: exited with ${code}.\n`);
     });
   });
 
@@ -78,7 +109,7 @@ beforeAll(async () => {
       await new Promise((resolve) => setTimeout(resolve, 1000));
     }
   });
-});
+}, 30_000);
 
 for (const subprocessName of RUNNERS) {
   if (!subprocessName?.go) {
@@ -95,7 +126,7 @@ for (const subprocessName of RUNNERS) {
           '',
           new HTTPConnectorInfo(
             '',
-            'http://localhost:9799/testdata/allformats/unknown'
+            'http://localhost:' + PORT + '/testdata/allformats/unknown'
           )
         );
 
@@ -132,7 +163,10 @@ for (const subprocessName of RUNNERS) {
       '',
       new HTTPConnectorInfo(
         '',
-        'http://localhost:9799/testdata/allformats/userdata.' + userdataFileType
+        'http://localhost:' +
+          PORT +
+          '/testdata/allformats/userdata.' +
+          userdataFileType
       )
     );
 
@@ -183,7 +217,7 @@ for (const subprocessName of RUNNERS) {
       '',
       new HTTPConnectorInfo(
         '',
-        'http://localhost:9799/testdata/logs/' + t.filename
+        'http://localhost:' + PORT + '/testdata/logs/' + t.filename
       )
     );
     hp.http.http.contentTypeInfo = t.contentTypeInfo;
@@ -225,7 +259,7 @@ for (const subprocessName of RUNNERS) {
         '',
         new HTTPConnectorInfo(
           '',
-          'http://localhost:9799/testdata/allformats/unknown',
+          'http://localhost:' + PORT + '/testdata/allformats/unknown',
           [{ name: 'X-Test', value: 'OK' }]
         )
       );
@@ -260,7 +294,10 @@ for (const subprocessName of RUNNERS) {
       const hp = new HTTPPanelInfo(
         null,
         '',
-        new HTTPConnectorInfo('', 'http://localhost:9799{{DM_getPanel("0")}}')
+        new HTTPConnectorInfo(
+          '',
+          'http://localhost:' + PORT + '{{DM_getPanel("0")}}'
+        )
       );
 
       const panels = [lp, hp];
@@ -329,7 +366,7 @@ for (const subprocessName of RUNNERS) {
           '',
           new HTTPConnectorInfo(
             '',
-            'http://localhost:9799/testdata/allformats/unknown'
+            'http://localhost:' + PORT + '/testdata/allformats/unknown'
           )
         );
         hp.serverId = server.id;

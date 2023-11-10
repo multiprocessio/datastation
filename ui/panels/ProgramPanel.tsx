@@ -770,7 +770,11 @@ export function makeAutocomplete(
     ]
       .flat()
       .filter(
-        (c) => c && c.value.toLowerCase().startsWith(prefix.toLowerCase())
+        // TODO: Make sure autocomplete is still working.
+        (c) =>
+          c &&
+          (c as any).value &&
+          (c as any).value.toLowerCase().startsWith(prefix.toLowerCase())
       );
   };
 }

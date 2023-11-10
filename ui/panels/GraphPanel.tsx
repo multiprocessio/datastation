@@ -10,17 +10,17 @@ import {
   PanelResult,
   TableColumn,
 } from '../../shared/state';
+import { SettingsContext } from '../Settings';
 import { Button } from '../components/Button';
 import {
-  allFields,
   FieldPicker,
+  allFields,
   unusedFields,
 } from '../components/FieldPicker';
 import { FormGroup } from '../components/FormGroup';
 import { PanelSourcePicker } from '../components/PanelSourcePicker';
 import { Radio } from '../components/Radio';
 import { NONE, Select } from '../components/Select';
-import { SettingsContext } from '../Settings';
 import { evalColumnPanel } from './TablePanel';
 import { PanelBodyProps, PanelDetailsProps, PanelUIDetails } from './types';
 

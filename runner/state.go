@@ -1,7 +1,6 @@
 package runner
 
 import (
-	"fmt"
 	"time"
 )
 
@@ -54,7 +53,6 @@ const (
 	ProgramPanel  = "program"
 	LiteralPanel  = "literal"
 	FilePanel     = "file"
-	FilaggPanel   = "filagg"
 	DatabasePanel = "database"
 	GraphPanel    = "graph"
 	TablePanel    = "table"
@@ -75,7 +73,6 @@ type PanelInfo struct {
 	*LiteralPanelInfo
 	*DatabasePanelInfo
 	*HttpPanelInfo
-	*FilaggPanelInfo
 	*TablePanelInfo
 	*GraphPanelInfo
 }
@@ -189,31 +186,6 @@ const (
 	MinAggregate     AggregateType = "min"
 	MaxAggregate     AggregateType = "max"
 )
-
-type FilaggPanelInfoFilagg struct {
-	PanelSource    any             `json:"panelSource"`
-	Filter         string          `json:"filter"`
-	Range          TimeSeriesRange `json:"range"`
-	AggregateType  AggregateType   `json:"aggregateType"`
-	GroupBy        string          `json:"groupBy"`
-	AggregateOn    string          `json:"aggregateOn"`
-	SortOn         string          `json:"sortOn"`
-	SortAsc        bool            `json:"sortAsc"`
-	WindowInterval string          `json:"windowInterval"`
-	Limit          int             `json:"limit"`
-}
-
-func (fpif FilaggPanelInfoFilagg) GetPanelSource() string {
-	if s, ok := fpif.PanelSource.(string); ok {
-		return s
-	}
-
-	return fmt.Sprintf("%v", fpif.PanelSource)
-}
-
-type FilaggPanelInfo struct {
-	Filagg FilaggPanelInfoFilagg `json:"filagg"`
-}
 
 type DatabasePanelInfoDatabase struct {
 	ConnectorId string            `json:"connectorId" db:"connectorId"`

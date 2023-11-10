@@ -12,8 +12,8 @@ import sys
 
 # ASSERT correct GO version
 ACTIVE_GO_VERSION = subprocess.check_output(['go', 'version']).decode().strip().split(' ')[2][len('go'):]
-DESIRED_GO_VERSION = '1.19'
-if ACTIVE_GO_VERSION != DESIRED_GO_VERSION:
+DESIRED_GO_VERSION = '1.20'
+if ACTIVE_GO_VERSION != DESIRED_GO_VERSION and not ACTIVE_GO_VERSION.startswith(DESIRED_GO_VERSION + "."):
     print(f'GO VERSION MISMATCH: Wanted Go version "{DESIRED_GO_VERSION}" got "{ACTIVE_GO_VERSION}"')
     exit(1)
 
@@ -208,6 +208,11 @@ for command in script:
         if i == 0:
             continue
         # Do basic variable substitition
-        line[i] = token.format(**BUILTIN_VARIABLES, **os.environ)
+        try:
+            line[i] = token.format(**BUILTIN_VARIABLES, **os.environ)
+        except KeyError as e:
+            key = e.args[0]
+            print(f"Missing {key}.")
+            os.exit(1)
 
     eval_line(line)
