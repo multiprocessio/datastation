@@ -12,7 +12,6 @@ import {
   DatabasePanelInfo,
   Encrypt,
   FilePanelInfo,
-  FilterAggregatePanelInfo,
   GraphPanelInfo,
   HTTPPanelInfo,
   LiteralPanelInfo,
@@ -122,7 +121,6 @@ const FACTORIES: Record<PanelInfoType, (pageId: string) => PanelInfo> = {
   literal: (pageId: string) => new LiteralPanelInfo(pageId),
   database: (pageId: string) => new DatabasePanelInfo(pageId),
   file: (pageId: string) => new FilePanelInfo(pageId),
-  filagg: (pageId: string) => new FilterAggregatePanelInfo(pageId),
 };
 
 // SOURCE: https://www.sqlite.org/fileformat.html

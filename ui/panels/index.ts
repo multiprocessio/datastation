@@ -2,7 +2,6 @@ import { MODE } from '../../shared/constants';
 import { PanelInfoType } from '../../shared/state';
 import { databasePanel } from './DatabasePanel';
 import { filePanel } from './FilePanel';
-import { filaggPanel } from './FilterAggregatePanel';
 import { graphPanel } from './GraphPanel';
 import { httpPanel } from './HTTPPanel';
 import { literalPanel } from './LiteralPanel';
@@ -20,7 +19,6 @@ export const PANEL_UI_DETAILS: {
   literal: literalPanel,
   database: databasePanel,
   file: filePanel,
-  filagg: filaggPanel,
 };
 
 export const PANEL_GROUPS: Array<{
@@ -42,7 +40,7 @@ export const PANEL_GROUPS: Array<{
   },
   {
     label: 'Operate with',
-    panels: ['program', 'filagg'],
+    panels: ['program'],
   },
   {
     label: 'Visualize with',

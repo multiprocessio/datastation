@@ -1,26 +1,8 @@
 package runner
 
 import (
-	"fmt"
-	"strconv"
-	"strings"
 	"time"
 )
-
-func getDependentPanel(page ProjectPage, panelId string) (*PanelInfo, int, error) {
-	for i, panel := range page.Panels {
-		if panel.Name == panelId || panel.Id == panelId {
-			cp := panel
-			return &cp, i, nil
-		}
-	}
-
-	if i, err := strconv.Atoi(panelId); err == nil && i < len(page.Panels) {
-		return &page.Panels[i], i, nil
-	}
-
-	return nil, 0, makeErrInvalidDependentPanel(panelId)
-}
 
 func startOfHour(t time.Time) time.Time {
 	return time.Date(t.Year(), t.Month(), t.Day(), t.Hour(), 0, 0, 0, time.Local)
@@ -134,105 +116,4 @@ func timestampsFromRange(r TimeSeriesRange) (time.Time, time.Time, bool, error) 
 
 func quoteTime(t time.Time, qt quoteType) string {
 	return quote(t.Format("2006-01-02 15:04:05"), qt.string)
-}
-
-func (ec EvalContext) evalFilaggPanel(project *ProjectState, pageIndex int, panel *PanelInfo) error {
-	qt := ansiSQLQuote
-	fg := panel.Filagg
-
-	_, panelIndex, err := getDependentPanel(project.Pages[pageIndex], fg.GetPanelSource())
-	if err != nil {
-		return err
-	}
-
-	aggType := string(fg.AggregateType)
-
-	columns := "*"
-	groupByClause := ""
-	if aggType != "none" {
-		groupColumn := quote(fg.GroupBy, qt.identifier)
-
-		groupExpression := quote(fg.GroupBy, qt.identifier)
-		if interval, err := strconv.Atoi(fg.WindowInterval); err == nil && interval > 0 {
-			intervalSeconds := fmt.Sprintf("%d", interval*60)
-			groupExpression = `DATETIME(STRFTIME("%s", ` + fg.GroupBy + `) - STRFTIME("%s", ` + fg.GroupBy + `) % ` + intervalSeconds + `, "unixepoch")`
-			groupColumn = groupExpression + " " + fg.GroupBy
-		}
-
-		on := "1"
-		if fg.AggregateOn != "" {
-			on = quote(fg.AggregateOn, qt.identifier)
-		}
-		columns = fmt.Sprintf("%s, %s(%s) AS %s",
-			groupColumn,
-			strings.ToUpper(aggType),
-			on,
-			quote(aggType, qt.identifier))
-
-		groupByClause = "GROUP BY " + groupExpression
-	}
-
-	whereClause := ""
-	if fg.Filter != "" {
-		whereClause = "WHERE " + fg.Filter
-	}
-
-	if fg.Range.Field != "" {
-		begin, end, allTime, err := timestampsFromRange(fg.Range)
-		if err != nil {
-			return err
-		}
-
-		if !allTime {
-			timeFilter := fmt.Sprintf("DATETIME(%s) > %s AND DATETIME(%s) < %s",
-				quote(fg.Range.Field, qt.identifier),
-				quoteTime(begin, qt),
-				quote(fg.Range.Field, qt.identifier),
-				quoteTime(end, qt))
-
-			if fg.Filter != "" {
-				whereClause = fmt.Sprintf("WHERE (%s AND %s)", fg.Filter, timeFilter)
-			} else {
-				whereClause = "WHERE " + timeFilter
-			}
-		}
-	}
-
-	orderByClause := ""
-	if fg.SortOn != "" {
-		sortQuoteTime := quote(fg.SortOn, qt.identifier)
-		sortField := sortQuoteTime
-
-		if strings.HasPrefix(fg.SortOn, "Aggregate: ") {
-			aggregateOn := "1"
-			if fg.AggregateOn != "" {
-				aggregateOn = quote(fg.AggregateOn, qt.identifier)
-			}
-			sortField = fmt.Sprintf("%s(%s)", strings.ToUpper(aggType), aggregateOn)
-		}
-
-		ascDesc := "DESC"
-		if fg.SortAsc {
-			ascDesc = "ASC"
-		}
-		orderByClause = fmt.Sprintf("ORDER BY %s %s", sortField, ascDesc)
-	}
-
-	query := fmt.Sprintf("SELECT %s FROM DM_getPanel(%d) %s %s %s LIMIT %d",
-		columns,
-		panelIndex,
-		whereClause,
-		groupByClause,
-		orderByClause,
-		fg.Limit)
-
-	Logln("filagg query: %s", query)
-
-	fakepanel := &PanelInfo{
-		Content: query,
-		Type:    ProgramPanel,
-		Id:      panel.Id,
-	}
-
-	return ec.evalProgramSQLPanel(project, pageIndex, fakepanel)
 }

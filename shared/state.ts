@@ -242,8 +242,7 @@ export type PanelInfoType =
   | 'program'
   | 'literal'
   | 'database'
-  | 'file'
-  | 'filagg';
+  | 'file';
 
 export class PanelInfo {
   defaultModified: boolean;
@@ -320,9 +319,6 @@ export class PanelInfo {
         break;
       case 'file':
         pit = mergeDeep(new FilePanelInfo(pit.pageId), pit);
-        break;
-      case 'filagg':
-        pit = mergeDeep(new FilterAggregatePanelInfo(pit.pageId), pit);
         break;
     }
 
@@ -534,44 +530,6 @@ export type AggregateType =
   | 'average'
   | 'min'
   | 'max';
-
-export class FilterAggregatePanelInfo extends PanelInfo {
-  filagg: {
-    panelSource: string;
-    filter: string;
-    range: TimeSeriesRange;
-    aggregateType: AggregateType;
-    groupBy: string;
-    aggregateOn: string;
-    sortOn: string;
-    sortAsc: boolean;
-    windowInterval: string;
-    limit: number;
-  };
-
-  constructor(
-    pageId: string,
-    panel: Partial<FilterAggregatePanelInfo['filagg'] & { name: string }> = {}
-  ) {
-    super('filagg', pageId, panel.name || '', '');
-    this.filagg = {
-      panelSource: panel.panelSource || '',
-      filter: panel.filter || '',
-      aggregateType: panel.aggregateType || 'none',
-      groupBy: panel.groupBy || '',
-      aggregateOn: panel.aggregateOn || '',
-      sortOn: panel.sortOn || '',
-      sortAsc: panel.sortAsc || false,
-      limit: panel.limit || 100,
-      windowInterval: panel.windowInterval || '',
-      range: panel.range || {
-        field: '',
-        rangeType: 'relative',
-        relative: 'last-hour',
-      },
-    };
-  }
-}
 
 export class FilePanelInfo extends PanelInfo {
   file: {

@@ -1,3 +1,4 @@
+// TODO: Support Oracle
 if (false) {
   const { basicDatabaseTest } = require('../desktop/panel/testutil');
   const { withDocker, DEFAULT_TIMEOUT } = require('./docker');

@@ -1,3 +1,4 @@
+// TODO: Support SQL Server
 if (false) {
   const { basicDatabaseTest } = require('../desktop/panel/testutil');
   const { withDocker } = require('./docker');
