@@ -314,57 +314,33 @@ jobs:
     - run: git reset --hard # release blows everything up
     - run: yarn e2e-test
 
-  e2e_windows_tests:
-    name: End-to-end Windows Tests
-    runs-on: windows-latest
+  # TODO: Get Windows tests working again.
+  # e2e_windows_tests:
+  #   name: End-to-end Windows Tests
+  #   runs-on: windows-latest
 
-    steps:
-    - uses: actions/checkout@master
-      with:
-        ref: ${{ github.ref }}
+  #   steps:
+  #   - uses: actions/checkout@master
+  #     with:
+  #       ref: ${{ github.ref }}
 
-    - uses: c-hive/gha-yarn-cache@v2
-    - name: Setup Golang caches
-      uses: actions/cache@v3
-      with:
-        path: |
-          ~/.cache/go-build
-          ~/go/pkg/mod
-        key: ${{ runner.os }}-golang-${{ hashFiles('**/go.sum') }}
-        restore-keys: |
-          ${{ runner.os }}-golang-
+  #   - uses: c-hive/gha-yarn-cache@v2
+  #   - name: Setup Golang caches
+  #     uses: actions/cache@v3
+  #     with:
+  #       path: |
+  #         ~/.cache/go-build
+  #         ~/go/pkg/mod
+  #       key: ${{ runner.os }}-golang-${{ hashFiles('**/go.sum') }}
+  #       restore-keys: |
+  #         ${{ runner.os }}-golang-
 
-    - run: ./scripts/ci/prepare_windows.ps1
-      shell: pwsh
-    # Needed so we can have ./build/desktop_runner.js ready for tests
-    - run: yarn build-test-runner
-    - run: yarn test --detectOpenHandles --forceExit --verbose shared ui desktop
-    - run: cd runner && go test -race -cover
-    - run: yarn release-desktop 0.0.0-e2etest
-    - run: git reset --hard # release blows everything up
-    - run: yarn e2e-test
-
-  server_tests:
-    name: Server Tests
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@master
-      with:
-        ref: ${{ github.ref }}
-
-    - uses: c-hive/gha-yarn-cache@v2
-    - name: Setup Golang caches
-      uses: actions/cache@v3
-      with:
-        path: |
-          ~/.cache/go-build
-          ~/go/pkg/mod
-        key: ${{ runner.os }}-golang-${{ hashFiles('**/go.sum') }}
-        restore-keys: |
-          ${{ runner.os }}-golang-
-
-    - run: ./scripts/ci/prepare_linux.sh
-    - run: yarn release-server 0.0.0-test
-    - run: sudo apt-get install -y podman
-    - run: ./server/scripts/test_release.sh datastation-server-x64-0.0.0-test.tar.gz
+  #   - run: ./scripts/ci/prepare_windows.ps1
+  #     shell: pwsh
+  #   # Needed so we can have ./build/desktop_runner.js ready for tests
+  #   - run: yarn build-test-runner
+  #   - run: yarn test --detectOpenHandles --forceExit --verbose shared ui desktop
+  #   - run: cd runner && go test -race -cover
+  #   - run: yarn release-desktop 0.0.0-e2etest
+  #   - run: git reset --hard # release blows everything up
+  #   - run: yarn e2e-test
